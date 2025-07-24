@@ -1,0 +1,30 @@
+<form>
+    <div class="row form-group">
+        <label class="col-6 col-form-label semibold" for="startYear">Start Year</label>
+        <div class="col-6">
+            <select name="startYear" [(ngModel)]="reportSettings.startYear" class="form-select" (change)="save()"
+                [required]="true">
+                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-6 col-form-label semibold" for="endYear">End Year</label>
+        <div class="col-6">
+            <select name="endYear" [(ngModel)]="reportSettings.endYear" class="form-select" (change)="save()"
+                [required]="true">
+                <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row justify-content-end" *ngIf="errorMessage">
+        <span class="col-6 alert alert-danger small mt-2">
+            {{errorMessage}}
+        </span>
+    </div>
+
+    <hr>
+</form>

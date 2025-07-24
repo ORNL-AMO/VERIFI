@@ -88,6 +88,9 @@ export class FacilityReportsTabsComponent {
     else if (this.selectedReport.facilityReportType == 'overview') {
       this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/overview');
     }
+    else if (this.selectedReport.facilityReportType == 'emissionFactors') {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/emission-factors');
+    }
   }
 
   setSetupValid() {
@@ -100,6 +103,11 @@ export class FacilityReportsTabsComponent {
           this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
           this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
           this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
+          this.errorMessage == undefined)
+      } else if (this.selectedReport.facilityReportType == 'emissionFactors') {
+        this.setupValid = (this.selectedReport.name != '' &&
+          this.selectedReport.emissionFactorsReportSettings.endYear != undefined &&
+          this.selectedReport.emissionFactorsReportSettings.startYear != undefined &&
           this.errorMessage == undefined)
       } else {
         this.setupValid = false;

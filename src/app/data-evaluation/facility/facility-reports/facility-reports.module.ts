@@ -20,6 +20,9 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
 import { FacilityReportsDashboardTabsComponent } from './facility-reports-dashboard/facility-reports-dashboard-tabs/facility-reports-dashboard-tabs.component';
 import { FacilityAnalysisReportsDashboardComponent } from './facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component';
 import { FacilityOverviewReportsDashboardComponent } from './facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component';
+import { FacilityEmissionsFactorsReportsDashboardComponent } from './facility-reports-dashboard/facility-emissions-factors-reports-dashboard/facility-emissions-factors-reports-dashboard.component';
+import { FacilityEmissionFactorsReportResultsComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
+import { FacilityEmissionFactorsReportSetupComponent } from './facility-report-setup/facility-emission-factors-report-setup/facility-emission-factors-report-setup.component';
 
 
 
@@ -38,7 +41,10 @@ import { FacilityOverviewReportsDashboardComponent } from './facility-reports-da
     FacilityOverviewReportResultsComponent,
     FacilityReportsDashboardTabsComponent,
     FacilityAnalysisReportsDashboardComponent,
-    FacilityOverviewReportsDashboardComponent
+    FacilityOverviewReportsDashboardComponent,
+    FacilityEmissionsFactorsReportsDashboardComponent,
+    FacilityEmissionFactorsReportResultsComponent,
+    FacilityEmissionFactorsReportSetupComponent
   ],
   imports: [
     CommonModule,

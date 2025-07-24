@@ -27,6 +27,8 @@ export class FacilityReportItemCardComponent {
   displayDeleteModal: boolean = false;
   reportStartDate: Date;
   reportEndDate: Date;
+  reportStartYear: number;
+  reportEndYear: number;
   constructor(private facilityDbReportsService: FacilityReportsDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
@@ -41,6 +43,10 @@ export class FacilityReportItemCardComponent {
     if(this.report.facilityReportType == 'overview'){
       this.reportStartDate = new Date(this.report.dataOverviewReportSettings.startYear, this.report.dataOverviewReportSettings.startMonth, 1);
       this.reportEndDate = new Date(this.report.dataOverviewReportSettings.endYear, this.report.dataOverviewReportSettings.endMonth, 1);
+    }
+    if(this.report.facilityReportType == 'emissionFactors') {
+      this.reportStartYear = this.report.emissionFactorsReportSettings.startYear;
+      this.reportEndYear = this.report.emissionFactorsReportSettings.endYear;
     }
   }
 
