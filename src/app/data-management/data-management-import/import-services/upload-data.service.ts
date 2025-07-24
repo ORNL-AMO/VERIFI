@@ -166,7 +166,6 @@ export class UploadDataService {
   }
 
   checkSheetNamesForTemplate(sheetNames: Array<string>): TemplateVersion {
-    console.log(sheetNames);
     if (sheetNames[0] == "V2" && sheetNames[1] == "Help" && sheetNames[2] == "HIDE_Lists" && sheetNames[3] == "HIDE_Meter_Lists" &&
       sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
       && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
@@ -233,8 +232,8 @@ export class UploadDataService {
     } else if (isTemplate == "V2") {
       return this.uploadDataV2Service.getUtilityMeterData(workbook, importMeters);
     } else if (isTemplate == "V3") {
-      // return this.uploadDataV3Service.getUtilityMeterData(workbook, importMeters);
-
+      console.log('here..')
+      return this.uploadDataV3Service.getUtilityMeterData(workbook, importMeters);
     }
     return [];
   }

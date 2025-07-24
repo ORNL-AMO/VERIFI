@@ -21,6 +21,8 @@ import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { ChargeCostUnit, MeterChargeType } from 'src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { getMeterDataCopy } from 'src/app/calculations/conversions/convertMeterData';
 @Injectable({
   providedIn: 'root'
 })
@@ -31,7 +33,8 @@ export class UploadDataV3Service {
     private eGridService: EGridService,
     private utilityMeterDbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService
+    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
@@ -43,16 +46,14 @@ export class UploadDataV3Service {
       let meters: Array<IdbUtilityMeter> = [];
       let newGroups: Array<IdbUtilityMeterGroup> = [];
       ({ meters, newGroups } = this.getElectricityMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
-      // let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
-      // let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
+      let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, meters);
+
       // let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
       // let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
-      let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = { meters: meters, newGroups: newGroups };
-      let importMeterData: Array<IdbUtilityMeterData> = [];
       let importPredictors: Array<IdbPredictor> = [];
       let importPredictorData: Array<IdbPredictorData> = [];
 
-      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
+      return { importFacilities: importFacilities, importMeters: meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups }
     }
   }
 
@@ -184,55 +185,71 @@ export class UploadDataV3Service {
     return { meters: meters, newGroups: newGroups };
   }
 
+  getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
+    let importMeterData: Array<IdbUtilityMeterData> = new Array();
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
+    importMeterData = this.getElectricityData(workbook, importMeters, importMeterData, utilityMeterData);
+    return importMeterData;
+  }
+
   getElectricityData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
     //electricity readings
-    let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
+    let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity'], { range: 1 });
 
     electricityData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
-      let readDate: Date = new Date(dataPoint['Read Date']);
-      let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
-      if (meter) {
-        let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
-        if (!dbDataPoint) {
-          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
-        }
-        dbDataPoint.readDate = readDate;
-        dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Usage']);
-        dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Actual Demand']);
-        dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
-        dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
-        dbDataPoint.powerFactor = checkImportCellNumber(dataPoint['Power Factor']);
-
-        meter.charges.forEach(charge => {
-          if (dataPoint[charge.name]) {
-            let dbCharge: MeterDataCharge = dbDataPoint.charges.find(dataCharge => {
-              return dataCharge.chargeGuid == charge.guid
-            });
-            if (dbCharge) {
-
-            } else {
-              dbDataPoint.charges.push({
-                chargeGuid: charge.guid,
-                chargeAmount: checkImportCellNumber(dataPoint[charge.name]),
-                chargeUsage: checkImportCellNumber(dataPoint[charge.name + ' Usage'])
-              })
-            }
+      let readDateStr: string = dataPoint['Read Date'];
+      let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
+      if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
+        let readDate: Date = new Date(readDateStr);
+        let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+        if (meter) {
+          let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
+          if (!dbDataPoint) {
+            dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-        })
-
-
-
-        importMeterData.push(dbDataPoint);
-      } else {
-        console.log('no meter');
+          dbDataPoint.readDate = readDate;
+          dbDataPoint.totalEnergyUse = totalUsage;
+          dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Actual Demand']);
+          dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
+          dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
+          dbDataPoint.powerFactor = checkImportCellNumber(dataPoint['Power Factor']);
+          this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
+          importMeterData.push(dbDataPoint);
+        } else {
+          console.log('no meter');
+        }
       }
     });
     return importMeterData;
   }
 
-  addMeterDataCharges() {
+  addMeterDataCharges(dataPoint, dbDataPoint: IdbUtilityMeterData, meter: IdbUtilityMeter) {
+    for (let i = 0; i < 16; i++) {
+      if (dataPoint['Charge ' + i + ' Name']) {
+        let chargeName: string = dataPoint['Charge ' + i + ' Name'];
+        let meterCharge: MeterCharge = meter.charges.find(charge => {
+          return charge.name == chargeName
+        });
+        if (meterCharge) {
+          let meterDataCharge: MeterDataCharge = dbDataPoint.charges.find(charge => {
+            return charge.chargeGuid == meterCharge.guid
+          });
+          if (meterDataCharge) {
+            meterDataCharge.chargeAmount = checkImportCellNumber(dataPoint['Charge ' + i + ' Cost']);
+            meterDataCharge.chargeUsage = checkImportCellNumber(dataPoint['Charge ' + i + ' Reading']);
+          } else {
+            dbDataPoint.charges.push({
+              chargeGuid: meterCharge.guid,
+              chargeAmount: checkImportCellNumber(dataPoint['Charge ' + i + ' Cost']),
+              chargeUsage: checkImportCellNumber(dataPoint['Charge ' + i + ' Reading'])
 
+            })
+          }
+        }
+      }
+    }
   }
 
 
