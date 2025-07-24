@@ -10,13 +10,13 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { getGUID, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
+import { getGUID, getHeatingCapacity, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
@@ -46,8 +46,8 @@ export class UploadDataV3Service {
       let meters: Array<IdbUtilityMeter> = [];
       let newGroups: Array<IdbUtilityMeterGroup> = [];
       ({ meters, newGroups } = this.getElectricityMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
+      ({ meters, newGroups } = this.getStationaryFuelMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, meters);
-
       // let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
       // let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
       let importPredictors: Array<IdbPredictor> = [];
@@ -185,6 +185,69 @@ export class UploadDataV3Service {
     return { meters: meters, newGroups: newGroups };
   }
 
+  getStationaryFuelMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
+    let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Stationary Fuel Meters'], { range: 1 });
+    console.log(excelMeters);
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    excelMeters.forEach(excelMeter => {
+      let facilityName: string = excelMeter['Facility Name'];
+      if (facilityName) {
+        let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
+        if (facility) {
+          let meterNumber: string = excelMeter['Meter Number (UNIQUE)'];
+          let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
+          if (!meter || !facility.id || facility.guid != meter.facilityId) {
+            meter = getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
+          }
+
+          meter.meterNumber = meterNumber;
+          meter.accountNumber = excelMeter['Account #'];
+
+          meter.scope = 1;
+          let fuel: string = excelMeter['Fuel'];
+          if (fuel == 'Natural Gas') {
+            meter.source = 'Natural Gas';
+          } else {
+            meter.source = 'Other Fuels';
+          }
+          meter.phase = excelMeter['Phase']
+          meter.fuel = getFuelEnum(fuel, meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType)
+
+          meter.startingUnit = checkImportStartingUnit(excelMeter['Unit (COLLECTION)'], meter.source, meter.phase, meter.fuel, meter.scope);
+          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
+          if (isEnergyUnit) {
+            meter.energyUnit = meter.startingUnit;
+          } else if (excelMeter['Unit (ENERGY)']) {
+            meter.energyUnit = excelMeter['Unit (ENERGY)'];
+          } else {
+            meter.energyUnit = facility.energyUnit;
+          }
+          meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
+          meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
+
+          meter.name = excelMeter['Meter Name (DISPLAY)'];
+          if (!meter.name) {
+            meter.name = 'Meter ' + meterNumber;
+          }
+          meter.supplier = excelMeter['Supplier'];
+          meter.notes = excelMeter['Notes'];
+          meter.location = excelMeter['Location'];
+          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group (ANALYSIS)'], facility.guid, newGroups, selectedAccount, meter.source);
+          newGroups = groupData.newGroups;
+          if (groupData.group) {
+            meter.groupId = groupData.group.guid;
+          }
+
+          meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
+          meter = this.editMeterFormService.setMultipliers(meter);
+          this.addCharges(excelMeter, meter);
+          meters.push(meter);
+        }
+      }
+    });
+    return { meters: meters, newGroups: newGroups };
+  }
+
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -254,6 +317,7 @@ export class UploadDataV3Service {
 
 
   addCharges(excelMeter, meter: IdbUtilityMeter) {
+    //TODO: Need charge types and units for stationary fuels
     for (let i = 1; i < 16; i++) {
       if (excelMeter['Cost ' + i + ' Name']) {
         let chargeName: string = excelMeter['Cost ' + i + ' Name'];
@@ -380,5 +444,20 @@ export class UploadDataV3Service {
         return false;
       }
     })
+  }
+
+  parseHeatCapacity(excelMeter: any, meter: IdbUtilityMeter, isEnergyUnit: boolean): number {
+    let heatCapacity: number = excelMeter['Energy Factor'];
+    if ((!heatCapacity && !isEnergyUnit) || meter.scope == 2) {
+      let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, [], meter.scope, meter.vehicleCategory, meter.vehicleType);
+      if (meter.scope != 2) {
+        let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
+        heatCapacity = getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
+      } else {
+        let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.vehicleFuel });
+        heatCapacity = getHeatingCapacity(meter.source, meter.vehicleCollectionUnit, meter.energyUnit, fuel);
+      }
+    }
+    return heatCapacity
   }
 }
