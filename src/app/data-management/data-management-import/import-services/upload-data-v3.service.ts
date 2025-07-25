@@ -187,7 +187,6 @@ export class UploadDataV3Service {
 
   getStationaryFuelMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Stationary Fuel Meters'], { range: 1 });
-    console.log(excelMeters);
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
@@ -253,6 +252,7 @@ export class UploadDataV3Service {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
     importMeterData = this.getElectricityData(workbook, importMeters, importMeterData, utilityMeterData);
+    importMeterData = this.getStationaryFuelData(workbook, importMeters, importMeterData, utilityMeterData);
     return importMeterData;
   }
 
@@ -280,13 +280,39 @@ export class UploadDataV3Service {
           dbDataPoint.powerFactor = checkImportCellNumber(dataPoint['Power Factor']);
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
           importMeterData.push(dbDataPoint);
-        } else {
-          console.log('no meter');
+        } 
+      }
+    });
+    return importMeterData;
+  }
+
+  getStationaryFuelData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
+    //stationary readings
+    let stationaryData = XLSX.utils.sheet_to_json(workbook.Sheets['Stationary Fuel'], { range: 1 });
+    stationaryData.forEach(dataPoint => {
+      let meterNumber: string = dataPoint['Meter Number'];
+      let readDateStr: string = dataPoint['Read Date'];
+      let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
+      if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
+        let readDate: Date = new Date(readDateStr);
+        let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+        if (meter) {
+          let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
+          if (!dbDataPoint) {
+            dbDataPoint = getNewIdbUtilityMeterData(meter, []);
+          }
+          dbDataPoint.readDate = readDate;
+          dbDataPoint.totalEnergyUse = totalUsage;
+          dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
+          dbDataPoint.heatCapacity = checkImportCellNumber(dataPoint['Higher Heating Value']);
+          this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
+          importMeterData.push(dbDataPoint);
         }
       }
     });
     return importMeterData;
   }
+
 
   addMeterDataCharges(dataPoint, dbDataPoint: IdbUtilityMeterData, meter: IdbUtilityMeter) {
     for (let i = 0; i < 16; i++) {
@@ -319,21 +345,19 @@ export class UploadDataV3Service {
   addCharges(excelMeter, meter: IdbUtilityMeter) {
     //TODO: Need charge types and units for stationary fuels
     for (let i = 1; i < 16; i++) {
-      if (excelMeter['Cost ' + i + ' Name']) {
+      if (excelMeter['Charge ' + i + ' Name']) {
         let chargeName: string = excelMeter['Cost ' + i + ' Name'];
         let charge: MeterCharge = meter.charges.find(charge => {
           return charge.name == chargeName
         });
         if (charge) {
-          charge.name = excelMeter['Cost ' + i + ' Name'];
+          charge.name = excelMeter['Charge ' + i + ' Name'];
           charge.chargeType = this.getChargeType(excelMeter['Cost ' + i + ' Type']);
-          charge.chargeUnit = this.getChargeUnit(excelMeter['Cost ' + i + ' Unit']);
         } else {
           charge = {
             guid: getGUID(),
-            name: excelMeter['Cost ' + i + ' Name'],
-            chargeType: this.getChargeType(excelMeter['Cost ' + i + ' Type']),
-            chargeUnit: this.getChargeUnit(excelMeter['Cost ' + i + ' Unit']),
+            name: excelMeter['Charge ' + i + ' Name'],
+            chargeType: this.getChargeType(excelMeter['Charge ' + i + ' Type']),
             displayChargeInTable: true,
             displayUsageInTable: true
           }
@@ -361,43 +385,6 @@ export class UploadDataV3Service {
         return 'usage';
       } else if(excelChargeType == 'Demand/MDQ'){
         return 'demandMDQ';
-      }
-    }
-    return undefined;
-  }
-
-  getChargeUnit(excelChargeUnit: string): ChargeCostUnit {
-    if (excelChargeUnit) {
-      if (excelChargeUnit == '$/kW') {
-        return 'dollarsPerKilowatt';
-      } else if (excelChargeUnit == '$/kVA') {
-        return 'dollarsPerKVa';
-      } else if (excelChargeUnit == '$/MW') {
-        return 'dollarsPerMW';
-      } else if (excelChargeUnit == '$/MVA') {
-        return 'dollarsPerMVA';
-      } else if (excelChargeUnit == '%') {
-        return 'percent';
-      } else if (excelChargeUnit == '$') {
-        return 'dollars';
-      } else if (excelChargeUnit == '$/kWh') {
-        return 'dollarsPerKilowattHour';
-      } else if (excelChargeUnit == '$/MWh') {
-        return 'dollarsPerMWh';
-      } else if (excelChargeUnit == '$/MMBtu') {
-        return 'dollarsPerMMBtu';
-      } else if (excelChargeUnit == '$/GJ') {
-        return 'dollarsPerGJ';
-      } else if (excelChargeUnit == '$/MJ') {
-        return 'dollarsPerMJ';
-      } else if (excelChargeUnit == '$/kJ') {
-        return 'dollarsPerkJ';
-      } else if (excelChargeUnit == '$/Therms') {
-        return 'dollarsPerTherms';
-      } else if (excelChargeUnit == '$/DTherms') {
-        return 'dollarsPerDTherms';
-      } else if (excelChargeUnit == '$/kcal') {
-        return 'dollarsPerKcal';
       }
     }
     return undefined;

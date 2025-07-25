@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { EditMeterFormService } from '../edit-meter-form.service';
-import { getChargeTypes, MeterChargeType } from './meterChargesOptions';
-import { getChargeTypeUnitOptions } from './charges-unit-options.pipe';
+import { getChargeTypes } from './meterChargesOptions';
 
 @Component({
   selector: 'app-meter-charges-form',
@@ -32,14 +31,5 @@ export class MeterChargesFormComponent {
   removeCharge(index: number) {
     this.chargesArray.removeAt(index);
     this.meterForm.markAsDirty();
-  }
-
-  updateChargeUnit(index: number) {
-    let chargeGroup: FormGroup = this.chargesArray.at(index) as FormGroup;
-    let chargeType: MeterChargeType = chargeGroup.get('chargeType').value;
-    let unitOptions = getChargeTypeUnitOptions(chargeType);
-    if (unitOptions.find(option => option.value === chargeGroup.get('chargeUnit').value) === undefined) {
-      chargeGroup.get('chargeUnit').setValue(unitOptions[0].value);
-    }
   }
 }
