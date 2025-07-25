@@ -16,7 +16,7 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { getGUID, getHeatingCapacity, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
+import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
@@ -47,6 +47,7 @@ export class UploadDataV3Service {
       let newGroups: Array<IdbUtilityMeterGroup> = [];
       ({ meters, newGroups } = this.getElectricityMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       ({ meters, newGroups } = this.getStationaryFuelMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
+      ({ meters, newGroups } = this.getMobileMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, meters);
       // let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
       // let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
@@ -236,7 +237,12 @@ export class UploadDataV3Service {
           if (groupData.group) {
             meter.groupId = groupData.group.guid;
           }
-
+          if (excelMeter['Energy Unit']) {
+            meter.energyUnit = excelMeter['Energy Unit'];
+          } else {
+            meter.energyUnit = facility.energyUnit;
+          }
+          meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, false);
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
           meter = this.editMeterFormService.setMultipliers(meter);
           this.addCharges(excelMeter, meter);
@@ -247,12 +253,72 @@ export class UploadDataV3Service {
     return { meters: meters, newGroups: newGroups };
   }
 
+  getMobileMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
+    let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Mobile Fuel Meters'], { range: 1 });
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    excelMeters.forEach(excelMeter => {
+      let facilityName: string = excelMeter['Facility Name'];
+      if (facilityName) {
+        let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
+        if (facility) {
+          let meterNumber: string = excelMeter['Meter Number (UNIQUE)'];
+          let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
+          if (!meter || !facility.id || facility.guid != meter.facilityId) {
+            meter = getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
+          }
+          meter.source = 'Other Fuels';
+          meter.scope = 2;
+          meter.meterNumber = meterNumber;
+          meter.accountNumber = excelMeter['Account #'];
+          meter.name = excelMeter['Meter Name (DISPLAY)'];
+          if (!meter.name) {
+            meter.name = 'Meter ' + meterNumber;
+          }
+          meter.supplier = excelMeter['Supplier'];
+          meter.notes = excelMeter['Notes'];
+          meter.location = excelMeter['Location'];
+
+          let parseVehicle: {
+            vehicleCategory: number, vehicleType: number,
+            vehicleCollectionType: number, vehicleCollectionUnit: string, vehicleDistanceUnit: string
+          } = this.getVehicleTypeAndCategory(excelMeter);
+          meter.vehicleCategory = parseVehicle.vehicleCategory;
+          meter.vehicleType = parseVehicle.vehicleType;
+          meter.vehicleCollectionType = parseVehicle.vehicleCollectionType;
+          meter.vehicleCollectionUnit = parseVehicle.vehicleCollectionUnit;
+          meter.vehicleDistanceUnit = parseVehicle.vehicleDistanceUnit;
+
+          meter.vehicleFuel = getFuelEnum(excelMeter['Fuel Type'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
+
+          meter.vehicleFuelEfficiency = excelMeter['Average Fuel Efficiency'];
+          meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
+          meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, false);
+          meter.includeInEnergy = getYesNoBool(excelMeter['Include with Energy?']);
+
+          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group (ANALYSIS)'], facility.guid, newGroups, selectedAccount, meter.source);
+          newGroups = groupData.newGroups;
+          if (groupData.group) {
+            meter.groupId = groupData.group.guid;
+          }
+          meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
+          meter = this.editMeterFormService.setMultipliers(meter);
+          this.addCharges(excelMeter, meter);
+          meters.push(meter);
+        }
+      }
+    })
+    return { meters: meters, newGroups: newGroups };
+  }
+
+
+
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
     importMeterData = this.getElectricityData(workbook, importMeters, importMeterData, utilityMeterData);
     importMeterData = this.getStationaryFuelData(workbook, importMeters, importMeterData, utilityMeterData);
+    importMeterData = this.getMobileData(workbook, importMeters, importMeterData, utilityMeterData);
     return importMeterData;
   }
 
@@ -280,7 +346,7 @@ export class UploadDataV3Service {
           dbDataPoint.powerFactor = checkImportCellNumber(dataPoint['Power Factor']);
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
           importMeterData.push(dbDataPoint);
-        } 
+        }
       }
     });
     return importMeterData;
@@ -290,6 +356,7 @@ export class UploadDataV3Service {
     //stationary readings
     let stationaryData = XLSX.utils.sheet_to_json(workbook.Sheets['Stationary Fuel'], { range: 1 });
     stationaryData.forEach(dataPoint => {
+
       let meterNumber: string = dataPoint['Meter Number'];
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
@@ -302,9 +369,27 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
           dbDataPoint.readDate = readDate;
-          dbDataPoint.totalEnergyUse = totalUsage;
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
-          dbDataPoint.heatCapacity = checkImportCellNumber(dataPoint['Higher Heating Value']);
+          let hhv: number = checkImportCellNumber(dataPoint['Higher Heating Value']);
+          let totalVolume: number = 0;
+          let energyUse: number = 0;
+          if (hhv) {
+            dbDataPoint.heatCapacity = hhv;
+          } else {
+            dbDataPoint.heatCapacity = meter.heatCapacity;
+          }
+          let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+          let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
+          if (!displayVolumeInput) {
+            energyUse = totalUsage;
+          } else {
+            totalVolume = totalUsage;
+            if (displayEnergyUse && totalVolume) {
+              energyUse = totalVolume * dbDataPoint.heatCapacity;
+            }
+          }
+          dbDataPoint.totalVolume = totalVolume;
+          dbDataPoint.totalEnergyUse = energyUse;
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
           importMeterData.push(dbDataPoint);
         }
@@ -312,6 +397,46 @@ export class UploadDataV3Service {
     });
     return importMeterData;
   }
+
+  getMobileData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
+    //stationary readings
+    let stationaryData = XLSX.utils.sheet_to_json(workbook.Sheets['Mobile Fuel'], { range: 1 });
+    stationaryData.forEach(dataPoint => {
+      let meterNumber: string = dataPoint['Meter Number'];
+      let readDateStr: string = dataPoint['Read Date'];
+      let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage or Distance']);
+      if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
+        let readDate: Date = new Date(readDateStr);
+        let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+        if (meter) {
+          let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
+          if (!dbDataPoint) {
+            dbDataPoint = getNewIdbUtilityMeterData(meter, []);
+          }
+          dbDataPoint.readDate = readDate;
+          let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
+          if (fuelEff) {
+            dbDataPoint.vehicleFuelEfficiency = fuelEff;
+          } else {
+            dbDataPoint.vehicleFuelEfficiency = meter.vehicleFuelEfficiency;
+          }
+          dbDataPoint.totalVolume = totalUsage;
+          //1: Fuel Usage, 2: Mileage
+          if (meter.vehicleCollectionType == 1) {
+            dbDataPoint.totalEnergyUse = dbDataPoint.totalVolume * meter.heatCapacity
+          } else {
+            let fuelConsumption: number = dbDataPoint.totalVolume / dbDataPoint.vehicleFuelEfficiency;
+            dbDataPoint.totalEnergyUse = fuelConsumption * meter.heatCapacity;
+          }
+          dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
+          this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
+          importMeterData.push(dbDataPoint);
+        }
+      }
+    });
+    return importMeterData;
+  }
+
 
 
   addMeterDataCharges(dataPoint, dbDataPoint: IdbUtilityMeterData, meter: IdbUtilityMeter) {
@@ -381,9 +506,9 @@ export class UploadDataV3Service {
         return 'flatFee';
       } else if (excelChargeType == 'Other') {
         return 'other';
-      } else if(excelChargeType == 'Usage'){
+      } else if (excelChargeType == 'Usage') {
         return 'usage';
-      } else if(excelChargeType == 'Demand/MDQ'){
+      } else if (excelChargeType == 'Demand/MDQ') {
         return 'demandMDQ';
       }
     }
@@ -450,5 +575,76 @@ export class UploadDataV3Service {
       }
     }
     return heatCapacity
+  }
+
+  getVehicleTypeAndCategory(excelMeter): {
+    vehicleCategory: number, vehicleType: number,
+    vehicleCollectionType: number, vehicleCollectionUnit: string, vehicleDistanceUnit: string
+  } {
+    let vehicle = excelMeter['Vehicle Type']
+    let vehicleCategory: number;
+    let vehicleType: number;
+    let vehicleCollectionType: number;
+    let vehicleCollectionUnit: string;
+    let vehicleDistanceUnit: string;
+
+    if (vehicle == 'Material Transport Onsite') {
+      vehicleCategory = 1;
+    } else if (vehicle == 'On-Road Vehicle, Passenger Cars') {
+      vehicleCategory = 2;
+      vehicleType = 1;
+    } else if (vehicle == 'On-Road Vehicle, Light-Duty Trucks') {
+      vehicleCategory = 2;
+      vehicleType = 2;
+    } else if (vehicle == 'On-Road Vehicle, Bus') {
+      vehicleCategory = 2;
+      vehicleType = 3;
+    } else if (vehicle == 'On-Road Vehicle, Heavy-Duty Trucks') {
+      vehicleCategory = 2;
+      vehicleType = 4;
+    } else if (vehicle == 'On-Road Vehicle, Motorcycles') {
+      vehicleCategory = 2;
+      vehicleType = 5;
+    } else if (vehicle == 'Off-Road Vehicle, Ag. Equipment & Trucks') {
+      vehicleCategory = 3;
+      vehicleType = 6;
+    } else if (vehicle == 'Off-Road Vehicle, Construction/Mine Equipment & Trucks') {
+      vehicleCategory = 3;
+      vehicleType = 7;
+    } else if (vehicle == 'Non-Road Vehicle, Aircraft') {
+      vehicleCategory = 4;
+      vehicleType = 8;
+    } else if (vehicle == 'Non-Road Vehicle, Rail') {
+      vehicleCategory = 4;
+      vehicleType = 9;
+    } else if (vehicle == 'Non-Road Vehicle, Water Transport') {
+      vehicleCategory = 4;
+      vehicleType = 10;
+    }
+    //on-road
+    if (vehicleCategory == 2) {
+      vehicleCollectionType = this.getVehicleCollectionType(excelMeter['Estimation Method']);
+    } else {
+      vehicleCollectionType = 1;
+    }
+
+    vehicleDistanceUnit = excelMeter['Unit (DISTANCE)'];
+    vehicleCollectionUnit = excelMeter['Unit (USAGE)'];
+    return {
+      vehicleCategory: vehicleCategory,
+      vehicleType: vehicleType,
+      vehicleCollectionType: vehicleCollectionType,
+      vehicleCollectionUnit: vehicleCollectionUnit,
+      vehicleDistanceUnit: vehicleDistanceUnit
+    }
+  }
+
+  getVehicleCollectionType(collectionLabel: string): number {
+    if (collectionLabel == 'Fuel') {
+      return 1;
+    } else if (collectionLabel == 'Mileage') {
+      return 2;
+    }
+    return 1;
   }
 }
