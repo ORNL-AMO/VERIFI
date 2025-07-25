@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { AccountReportsService } from '../../account-reports.service';
 import { DataOverviewFacility } from '../data-overview-report.component';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
     selector: 'app-data-overview-facility-report',
@@ -18,10 +18,10 @@ export class DataOverviewFacilityReportComponent {
 
   printSub: Subscription;
   print: boolean;
-  constructor(private accountReportsService: AccountReportsService) { }
+  constructor(private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
   }

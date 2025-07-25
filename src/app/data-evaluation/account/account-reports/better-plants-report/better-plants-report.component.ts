@@ -23,12 +23,13 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
-    selector: 'app-better-plants-report',
-    templateUrl: './better-plants-report.component.html',
-    styleUrls: ['./better-plants-report.component.css'],
-    standalone: false
+  selector: 'app-better-plants-report',
+  templateUrl: './better-plants-report.component.html',
+  styleUrls: ['./better-plants-report.component.css'],
+  standalone: false
 })
 export class BetterPlantsReportComponent implements OnInit {
 
@@ -51,10 +52,11 @@ export class BetterPlantsReportComponent implements OnInit {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private betterPlantsExcelWriterService: BetterPlantsExcelWriterService) { }
+    private betterPlantsExcelWriterService: BetterPlantsExcelWriterService,
+    private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
     this.generateExcelSub = this.accountReportsService.generateExcel.subscribe(generateExcel => {

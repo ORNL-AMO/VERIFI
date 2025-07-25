@@ -18,6 +18,7 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
   selector: 'app-facility-overview-report-results',
@@ -45,13 +46,13 @@ export class FacilityOverviewReportResultsComponent {
   worker: Worker;
   calculating: boolean | 'error' = true;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private facilityReportsService: FacilityReportsService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private customFuelDbService: CustomFuelDbService,
     private eGridService: EGridService,
-    private accountDbService: AccountdbService
+    private accountDbService: AccountdbService,
+    private dataEvaluationService: DataEvaluationService
   ) {
 
   }
@@ -62,7 +63,7 @@ export class FacilityOverviewReportResultsComponent {
       this.overviewReportSettings = this.facilityReport.dataOverviewReportSettings;
       this.calculateFacilitiesSummary();
     });
-    this.printSub = this.facilityReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     })
   }

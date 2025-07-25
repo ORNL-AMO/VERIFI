@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountReportsService } from './account-reports/account-reports.service';
+import { DataEvaluationService } from '../data-evaluation.service';
 
 @Component({
     selector: 'app-account',
@@ -12,10 +12,10 @@ export class AccountComponent implements OnInit {
 
   print: boolean = false;
   printSub: Subscription;
-  constructor(private accountReportsService: AccountReportsService) { }
+  constructor(private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
   }

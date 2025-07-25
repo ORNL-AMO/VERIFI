@@ -8,11 +8,9 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 })
 export class FacilityReportsService {
 
-  print: BehaviorSubject<boolean>;
 
   errorMessage: BehaviorSubject<string>;
   constructor(private facilityReportDbService: FacilityReportsDbService) {
-    this.print = new BehaviorSubject<boolean>(false);
     this.errorMessage = new BehaviorSubject<string>(undefined);
 
     this.facilityReportDbService.selectedReport.subscribe(report => {
