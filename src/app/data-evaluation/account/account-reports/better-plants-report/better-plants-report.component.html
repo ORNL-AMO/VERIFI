@@ -1,5 +1,5 @@
 <ng-container *ngIf="selectedReport && calculating == false">
-    <div class="report" [ngClass]="{'print': print}" *ngFor="let betterPlantsSummary of betterPlantsSummaries">
+    <div class="report" *ngFor="let betterPlantsSummary of betterPlantsSummaries; let index = index" [ngClass]="{'print': print, 'print-break-before': index > 0}">
         <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
         <div class="row justify-content-center pt-3">
             <div class="col-12">

@@ -20,12 +20,13 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
-    selector: 'app-better-climate-report',
-    templateUrl: './better-climate-report.component.html',
-    styleUrls: ['./better-climate-report.component.css'],
-    standalone: false
+  selector: 'app-better-climate-report',
+  templateUrl: './better-climate-report.component.html',
+  styleUrls: ['./better-climate-report.component.css'],
+  standalone: false
 })
 export class BetterClimateReportComponent {
 
@@ -51,10 +52,11 @@ export class BetterClimateReportComponent {
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService,
     private betterClimateExcelWriterService: BetterClimateExcelWriterService,
-    private loadingService: LoadingService) { }
+    private loadingService: LoadingService,
+    private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();

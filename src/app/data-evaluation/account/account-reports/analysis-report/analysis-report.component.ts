@@ -4,7 +4,6 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountReportsService } from '../account-reports.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -12,6 +11,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
   selector: 'app-analysis-report',
@@ -32,14 +32,14 @@ export class AnalysisReportComponent {
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
 
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
