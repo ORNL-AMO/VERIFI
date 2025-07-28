@@ -232,7 +232,6 @@ export class UploadDataService {
     } else if (isTemplate == "V2") {
       return this.uploadDataV2Service.getUtilityMeterData(workbook, importMeters);
     } else if (isTemplate == "V3") {
-      console.log('here..')
       return this.uploadDataV3Service.getUtilityMeterData(workbook, importMeters);
     }
     return [];
