@@ -43,14 +43,13 @@ export class MeterEnergyTimeseriesGraphComponent {
   }
 
   getDataAndUnit() {
+    this.meterData = this.meterData.slice().sort((a, b) => new Date(a.readDate).getTime() - new Date(b.readDate).getTime());
     this.unit = getUnitFromMeter(this.selectedMeter, this.meterData);
     this.meterDataToPlot = getConsumptionData(this.meterData, this.selectedMeter);
   }
 
   drawChart() {
     this.getDataAndUnit();
-
-
 
     let markers: Array<{
       color: string,
@@ -115,7 +114,7 @@ export class MeterEnergyTimeseriesGraphComponent {
   }
 
   getMarker(energyUse: number) {
-    if (energyUse > this.energyStats.medianminus2_5MAD && energyUse < this.energyStats.medianplus2_5MAD) {
+    if (energyUse >= this.energyStats.medianminus2_5MAD && energyUse <= this.energyStats.medianplus2_5MAD) {
       return {
         size: 8,
         color: '#43a047',
