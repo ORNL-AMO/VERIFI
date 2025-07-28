@@ -24,6 +24,7 @@ import { ChargeCostUnit, MeterChargeType } from 'src/app/shared/shared-meter-con
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getMeterDataCopy } from 'src/app/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
+import { WaterDischargeTypes, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 @Injectable({
   providedIn: 'root'
 })
@@ -51,6 +52,7 @@ export class UploadDataV3Service {
       ({ meters, newGroups } = this.getMobileMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       ({ meters, newGroups } = this.getOtherEnergyMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       ({ meters, newGroups } = this.getOtherEmissionsMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
+      ({ meters, newGroups } = this.getWaterMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, meters);
       // let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
       // let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
@@ -395,7 +397,7 @@ export class UploadDataV3Service {
           if (!meter.name) {
             meter.name = 'Meter ' + meterNumber;
           }
-          meter.supplier = excelMeter['Supplier'];
+
           meter.notes = excelMeter['Notes'];
           meter.location = excelMeter['Location'];
 
@@ -426,6 +428,60 @@ export class UploadDataV3Service {
     return { meters: meters, newGroups: newGroups };
   }
 
+  getWaterMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
+    let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Water Meters'], { range: 1 });
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    excelMeters.forEach(excelMeter => {
+      let facilityName: string = excelMeter['Facility Name'];
+      if (facilityName) {
+        let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
+        if (facility) {
+          let meterNumber: string = excelMeter['Meter Number (UNIQUE)'];
+          let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
+          if (!meter || !facility.id || facility.guid != meter.facilityId) {
+            meter = getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
+          }
+
+          let fuel: string = excelMeter['Meter Type'];
+          if (excelMeter['Flow Type'] == 'Discharge') {
+            meter.source = 'Water Discharge';
+            meter.waterDischargeType = WaterDischargeTypes.find(type => {
+              return type == fuel
+            });
+          } else {
+            meter.source = 'Water Intake';
+            meter.waterIntakeType = WaterIntakeTypes.find(type => {
+              return type == fuel;
+            });
+          }
+          meter.scope = undefined;
+          meter.meterNumber = meterNumber;
+          meter.accountNumber = excelMeter['Account #'];
+          meter.name = excelMeter['Meter Name (DISPLAY)'];
+          if (!meter.name) {
+            meter.name = 'Meter ' + meterNumber;
+          }
+          meter.supplier = excelMeter['Supplier'];
+          meter.notes = excelMeter['Notes'];
+          meter.location = excelMeter['Location'];
+          meter.startingUnit = checkImportStartingUnit(excelMeter['Unit (USAGE)'], meter.source, meter.phase, meter.fuel, meter.scope);
+          meter.energyUnit = facility.energyUnit;
+
+          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group (ANALYSIS)'], facility.guid, newGroups, selectedAccount, meter.source);
+          newGroups = groupData.newGroups;
+          if (groupData.group) {
+            meter.groupId = groupData.group.guid;
+          }
+          meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
+          meter = this.editMeterFormService.setMultipliers(meter);
+          this.addCharges(excelMeter, meter);
+          meters.push(meter);
+        }
+      }
+    })
+    return { meters: meters, newGroups: newGroups };
+  }
+
 
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
@@ -436,6 +492,7 @@ export class UploadDataV3Service {
     importMeterData = this.getMobileData(workbook, importMeters, importMeterData, utilityMeterData);
     importMeterData = this.getOtherEnergyData(workbook, importMeters, importMeterData, utilityMeterData);
     importMeterData = this.getOtherEmissionsData(workbook, importMeters, importMeterData, utilityMeterData);
+    importMeterData = this.getWaterData(workbook, importMeters, importMeterData, utilityMeterData);
     return importMeterData;
   }
 
@@ -516,9 +573,9 @@ export class UploadDataV3Service {
   }
 
   getMobileData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-    //stationary readings
-    let stationaryData = XLSX.utils.sheet_to_json(workbook.Sheets['Mobile Fuel'], { range: 1 });
-    stationaryData.forEach(dataPoint => {
+    //mobile readings
+    let mobileData = XLSX.utils.sheet_to_json(workbook.Sheets['Mobile Fuel'], { range: 1 });
+    mobileData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage or Distance']);
@@ -555,9 +612,9 @@ export class UploadDataV3Service {
   }
 
   getOtherEnergyData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-    //stationary readings
-    let stationaryData = XLSX.utils.sheet_to_json(workbook.Sheets['Other Energy'], { range: 1 });
-    stationaryData.forEach(dataPoint => {
+    //other energy readings
+    let otherEnergyData = XLSX.utils.sheet_to_json(workbook.Sheets['Other Energy'], { range: 1 });
+    otherEnergyData.forEach(dataPoint => {
 
       let meterNumber: string = dataPoint['Meter Number'];
       let readDateStr: string = dataPoint['Read Date'];
@@ -602,12 +659,39 @@ export class UploadDataV3Service {
 
   getOtherEmissionsData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
     //stationary readings
-    let stationaryData = XLSX.utils.sheet_to_json(workbook.Sheets['Other Emissions'], { range: 1 });
-    stationaryData.forEach(dataPoint => {
+    let otherEmissionsData = XLSX.utils.sheet_to_json(workbook.Sheets['Other Emissions'], { range: 1 });
+    otherEmissionsData.forEach(dataPoint => {
 
       let meterNumber: string = dataPoint['Meter Number'];
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage or Emission']);
+      if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
+        let readDate: Date = new Date(readDateStr);
+        let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+        if (meter) {
+          let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
+          if (!dbDataPoint) {
+            dbDataPoint = getNewIdbUtilityMeterData(meter, []);
+          }
+          dbDataPoint.readDate = readDate;
+          dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
+          dbDataPoint.totalVolume = totalUsage;
+          this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
+          importMeterData.push(dbDataPoint);
+        }
+      }
+    });
+    return importMeterData;
+  }
+
+  getWaterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
+    //stationary readings
+    let waterData = XLSX.utils.sheet_to_json(workbook.Sheets['Water'], { range: 1 });
+    waterData.forEach(dataPoint => {
+
+      let meterNumber: string = dataPoint['Meter Number'];
+      let readDateStr: string = dataPoint['Read Date'];
+      let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
         let readDate: Date = new Date(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
@@ -700,6 +784,8 @@ export class UploadDataV3Service {
         return 'usage';
       } else if (excelChargeType == 'Demand/MDQ') {
         return 'demandMDQ';
+      } else if (excelChargeType == 'Sewer') {
+        return 'sewer';
       }
     }
     return undefined;

@@ -39,17 +39,19 @@ export const ChargesTypes: Array<{ value: MeterChargeType, label: string, source
     //Demand
     { label: 'Demand', value: 'demand', sourceType: ['Electricity'] },
     //Tax
-    { label: 'Tax', value: 'tax', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy'] },
+    { label: 'Tax', value: 'tax', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy', 'Water Intake', 'Water Discharge', 'Other'] },
     //Late Fee
-    { label: 'Late Fee', value: 'lateFee', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy'] },
+    { label: 'Late Fee', value: 'lateFee', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy', 'Water Intake', 'Water Discharge', 'Other'] },
     //Flat Fee
-    { label: 'Flat Fee', value: 'flatFee', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy'] },
+    { label: 'Flat Fee', value: 'flatFee', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy', 'Water Intake', 'Water Discharge', 'Other'] },
     //Other
-    { label: 'Other', value: 'other', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy'] },
+    { label: 'Other', value: 'other', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy', 'Water Intake', 'Water Discharge', 'Other'] },
     //Demand/MDQ
     { label: 'Demand/MDQ', value: 'demandMDQ', sourceType: ['Natural Gas', 'Other Fuels'] },
-    //Demand/MDQ
-    { label: 'Usage', value: 'usage', sourceType: ['Natural Gas', 'Other Fuels', 'Other Energy'] }
+    //Usage
+    { label: 'Usage', value: 'usage', sourceType: ['Natural Gas', 'Other Fuels', 'Other Energy', 'Water Intake', 'Water Discharge', 'Other'] },
+    //Sewer
+    { label: 'Sewer', value: 'sewer', sourceType: ['Water Intake', 'Water Discharge'] }
 ]
 
-export type MeterChargeType = 'consumption' | 'demand' | 'tax' | 'lateFee' | 'flatFee' | 'other' | 'demandMDQ' | 'usage';
+export type MeterChargeType = 'consumption' | 'demand' | 'tax' | 'lateFee' | 'flatFee' | 'other' | 'demandMDQ' | 'usage' | 'sewer';
