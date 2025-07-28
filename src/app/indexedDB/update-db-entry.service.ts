@@ -203,6 +203,9 @@ export class UpdateDbEntryService {
 
 
     if (!utilityMeter.charges) {
+      if(!utilityMeter.demandUnit){
+        utilityMeter.demandUnit = 'kW';
+      }
       utilityMeter.charges = [];
       isChanged = true;
       meterDataChanged = true;

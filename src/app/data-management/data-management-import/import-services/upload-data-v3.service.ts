@@ -141,6 +141,7 @@ export class UploadDataV3Service {
             meter.startingUnit = facility.energyUnit;
             meter.energyUnit = facility.energyUnit;
           }
+          meter.demandUnit = excelMeter['Unit (DEMAND)'];
 
           meter.agreementType = getAgreementType(excelMeter['Agreement Type']);
           if (meter.agreementType == undefined) {
@@ -713,8 +714,7 @@ export class UploadDataV3Service {
     return importMeterData;
   }
 
-
-
+  //===== METER DATA CHARGES ====== //
   addMeterDataCharges(dataPoint, dbDataPoint: IdbUtilityMeterData, meter: IdbUtilityMeter) {
     for (let i = 0; i < 16; i++) {
       if (dataPoint['Charge ' + i + ' Name']) {
@@ -741,7 +741,6 @@ export class UploadDataV3Service {
       }
     }
   }
-
 
   addCharges(excelMeter, meter: IdbUtilityMeter) {
     for (let i = 1; i < 16; i++) {
@@ -792,6 +791,7 @@ export class UploadDataV3Service {
     return undefined;
   }
 
+  //====== PARSING UTILITY FUNCTIONS ====== //
   setMeterUnits(excelMeter, meter: IdbUtilityMeter, facility: IdbFacility) {
     meter.startingUnit = checkImportStartingUnit(excelMeter['Unit (USAGE)'], meter.source, meter.phase, meter.fuel, meter.scope);
     let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);

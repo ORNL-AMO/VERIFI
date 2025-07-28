@@ -239,9 +239,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let detailedChargesCount: number = 0;
     if (this.selectedMeter.charges) {
       this.selectedMeter.charges.forEach(charge => {
-        if ((charge.chargeType == 'demand' || charge.chargeType == 'consumption') && charge.displayUsageInTable) {
-          detailedChargesCount++;
-        }
         if (charge.displayChargeInTable) {
           detailedChargesCount++;
         }

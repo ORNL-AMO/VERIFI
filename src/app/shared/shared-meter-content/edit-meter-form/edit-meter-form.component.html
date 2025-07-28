@@ -85,6 +85,22 @@
                             Units selected differ from the facility settings.
                         </div>
                     </div>
+
+                    <div class="col-6" *ngIf="meterForm.controls.source.value == 'Electricity'">
+                        <label for="demandUnit">Demand Unit </label>
+                        <!-- <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'"
+                            [labelId]="'startingUnit'" [isRequired]="true" [isFloatRight]="true">
+                        </app-label-with-tooltip> -->
+                        <div class="mb-3">
+                            <select class="form-select" id="demandUnit" type="text" formControlName="demandUnit"
+                                (change)="changeCollectionUnit()">
+                                <option *ngFor="let demandUnitOption of demandUnitOptions"
+                                    [ngValue]="demandUnitOption.value">
+                                    <span [innerHTML]="demandUnitOption.display"></span>
+                                </option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="col-6" *ngIf="displaySiteToSource">
                         <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'"
                             [labelId]="'siteToSource'" [isRequired]="true"

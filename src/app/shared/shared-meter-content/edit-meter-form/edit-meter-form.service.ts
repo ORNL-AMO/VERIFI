@@ -64,6 +64,7 @@ export class EditMeterFormService {
       vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation],
       globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, globalWarmingPotentialValidation],
       globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation],
+      demandUnit: [meter.demandUnit],
       chargesArray: chargesArray
     });
     // if(form.controls.source.value == 'Electricity'){
@@ -105,6 +106,7 @@ export class EditMeterFormService {
     meter.vehicleDistanceUnit = form.controls.vehicleDistanceUnit.value;
     meter.globalWarmingPotentialOption = form.controls.globalWarmingPotentialOption.value;
     meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
+    meter.demandUnit = form.controls.demandUnit.value;
     //set multipliers
     meter = this.setMultipliers(meter);
 

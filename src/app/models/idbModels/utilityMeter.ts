@@ -26,6 +26,7 @@ export interface IdbUtilityMeter {
 
     startingUnit: string,
     energyUnit: string,
+    demandUnit?: string,
     fuel?: string
     visible?: boolean
     importWizardName?: string
@@ -90,6 +91,7 @@ export function getNewIdbUtilityMeter(facilityId: string, accountId: string, set
         group: undefined,
         startingUnit: startingUnit,
         energyUnit: energyUnit,
+        demandUnit: 'kW',
         fuel: undefined,
         scope: 3,
         agreementType: 1,
