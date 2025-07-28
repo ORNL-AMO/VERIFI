@@ -7,7 +7,6 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -21,6 +20,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
     selector: 'app-performance-report',
@@ -38,7 +38,6 @@ export class PerformanceReportComponent {
   selectedAnalysisItem: IdbAccountAnalysisItem;
   performanceReport: PerformanceReport;
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private analysisDbService: AnalysisDbService,
@@ -46,10 +45,11 @@ export class PerformanceReportComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private predictorDataDbService: PredictorDataDbService,
+    private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();

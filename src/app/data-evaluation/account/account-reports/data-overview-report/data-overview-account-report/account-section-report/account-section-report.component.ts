@@ -10,6 +10,7 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { AccountReportsService } from '../../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
     selector: 'app-account-section-report',
@@ -51,7 +52,8 @@ export class AccountSectionReportComponent {
   print: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountDbService: AccountdbService,
-    private accountReportsService: AccountReportsService) {
+    private accountReportsService: AccountReportsService,
+    private dataEvaluationService: DataEvaluationService) {
   }
 
   ngOnInit() {
@@ -61,7 +63,7 @@ export class AccountSectionReportComponent {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
 
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
   }

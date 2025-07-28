@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { FacilityReportsService } from '../facility-reports.service';
 import { Subscription } from 'rxjs';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
     selector: 'app-facility-print-report-button',
@@ -12,12 +12,12 @@ export class FacilityPrintReportButtonComponent {
 
   print: boolean;
   printSub: Subscription;
-  constructor(private facilityReportsService: FacilityReportsService) {
+  constructor(private dataEvaluationService: DataEvaluationService) {
 
   }
 
   ngOnInit() {
-    this.printSub = this.facilityReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
       if (this.print) {
         this.printReport();
@@ -31,7 +31,7 @@ export class FacilityPrintReportButtonComponent {
 
 
   togglePrint() {
-    this.facilityReportsService.print.next(true);
+    this.dataEvaluationService.print.next(true);
   }
 
   printReport() {
@@ -39,7 +39,7 @@ export class FacilityPrintReportButtonComponent {
       window.dispatchEvent(new Event("resize"));
       setTimeout(() => {
         window.print();
-        this.facilityReportsService.print.next(false)
+        this.dataEvaluationService.print.next(false)
       }, 1000)
     }, 100)
   }

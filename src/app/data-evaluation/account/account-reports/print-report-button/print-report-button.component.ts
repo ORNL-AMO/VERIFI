@@ -27,7 +27,7 @@ export class PrintReportButtonComponent {
 
   ngOnInit() {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
       if (this.print) {
         this.printReport();
@@ -45,7 +45,7 @@ export class PrintReportButtonComponent {
 
 
   togglePrint() {
-    this.accountReportsService.print.next(true);
+    this.dataEvaluationService.print.next(true);
   }
 
   printReport() {
@@ -53,7 +53,7 @@ export class PrintReportButtonComponent {
       window.dispatchEvent(new Event("resize"));
       setTimeout(() => {
         window.print();
-        this.accountReportsService.print.next(false)
+        this.dataEvaluationService.print.next(false)
       }, 1000)
     }, 100)
   }

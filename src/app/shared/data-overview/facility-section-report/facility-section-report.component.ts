@@ -8,9 +8,9 @@ import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountReportsService } from 'src/app/data-evaluation/account/account-reports/account-reports.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
     selector: 'app-facility-section-report',
@@ -54,7 +54,7 @@ export class FacilitySectionReportComponent {
   printSub: Subscription;
   print: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService,
+    private dataEvaluationService: DataEvaluationService,
     private facilityReportDbService: FacilityReportsDbService) {
   }
 
@@ -69,7 +69,7 @@ export class FacilitySectionReportComponent {
     this.waterUnit = this.facility.volumeLiquidUnit;
     this.energyUnit = this.facility.energyUnit;
 
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
   }
