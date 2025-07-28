@@ -42,6 +42,7 @@ export class MeterCostTimeseriesGraphComponent {
 
   drawChart() {
 
+    this.meterData = this.meterData.slice().sort((a, b) => new Date(a.readDate).getTime() - new Date(b.readDate).getTime());
     let markers: Array<{
       color: string,
       symbol: string,
@@ -104,7 +105,7 @@ export class MeterCostTimeseriesGraphComponent {
 
 
   getMarker(cost: number) {
-    if (cost > this.costStats.medianminus2_5MAD && cost < this.costStats.medianplus2_5MAD) {
+    if (cost >= this.costStats.medianminus2_5MAD && cost <= this.costStats.medianplus2_5MAD) {
       return {
         size: 8,
         color: '#43a047',
