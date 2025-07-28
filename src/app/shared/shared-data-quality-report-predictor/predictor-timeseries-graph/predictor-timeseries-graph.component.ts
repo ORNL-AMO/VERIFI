@@ -62,7 +62,7 @@ export class PredictorTimeseriesGraphComponent {
       unit = '';
     }
 
-
+    this.predictorData = this.predictorData.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     let markers: Array<{
       color: string,
       symbol: string,
@@ -126,7 +126,7 @@ export class PredictorTimeseriesGraphComponent {
 
 
   getMarker(dataValue: number) {
-    if (dataValue > this.stats.medianminus2_5MAD && dataValue < this.stats.medianplus2_5MAD) {
+    if (dataValue >= this.stats.medianminus2_5MAD && dataValue <= this.stats.medianplus2_5MAD) {
       return {
         size: 8,
         color: '#43a047',
