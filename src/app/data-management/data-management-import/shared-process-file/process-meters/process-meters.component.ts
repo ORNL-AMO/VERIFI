@@ -54,12 +54,6 @@ export class ProcessMetersComponent {
         this.setFacilityMeterGroups();
         this.fileReference.meters.forEach(meter => {
           let form: FormGroup = this.editMeterFormService.getFormFromMeter(meter);
-          console.log(form);
-          for(let control in form.controls){
-            if(form.controls[control].invalid){
-              console.log(control);
-            }
-          }
           meter.isValid = form.valid;
         });
         this.setValidMeters();

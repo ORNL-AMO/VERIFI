@@ -2,15 +2,15 @@ import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterCharge, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
@@ -20,11 +20,13 @@ import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSite
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
-import { ChargeCostUnit, MeterChargeType } from 'src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { MeterChargeType } from 'src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getMeterDataCopy } from 'src/app/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { WaterDischargeTypes, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -36,7 +38,9 @@ export class UploadDataV3Service {
     private utilityMeterDbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
     private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService
   ) { }
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
@@ -54,11 +58,9 @@ export class UploadDataV3Service {
       ({ meters, newGroups } = this.getOtherEmissionsMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       ({ meters, newGroups } = this.getWaterMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, meters);
-      // let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
-      // let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
-      let importPredictors: Array<IdbPredictor> = [];
-      let importPredictorData: Array<IdbPredictorData> = [];
-
+      let importPredictors: Array<IdbPredictor> = this.getPredictors(workbook, importFacilities, selectedAccount);
+      let importPredictorData: Array<IdbPredictorData> = this.getPredictorData(workbook, importFacilities, importPredictors);
+      console.log(importPredictorData);
       return { importFacilities: importFacilities, importMeters: meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups }
     }
   }
@@ -99,7 +101,7 @@ export class UploadDataV3Service {
     return importFacilities;
   }
 
-
+  //======= Parsing Meters =====//
   getElectricityMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity Meters'], { range: 1 });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
@@ -482,7 +484,7 @@ export class UploadDataV3Service {
     return { meters: meters, newGroups: newGroups };
   }
 
-
+  //===== Parsing Utility Data ======//
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -742,7 +744,6 @@ export class UploadDataV3Service {
 
 
   addCharges(excelMeter, meter: IdbUtilityMeter) {
-    //TODO: Need charge types and units for stationary fuels
     for (let i = 1; i < 16; i++) {
       if (excelMeter['Charge ' + i + ' Name']) {
         let chargeName: string = excelMeter['Cost ' + i + ' Name'];
@@ -922,5 +923,80 @@ export class UploadDataV3Service {
       return 2;
     }
     return 1;
+  }
+
+
+  //===== Parsing Predictors ======//
+  getPredictors(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount): Array<IdbPredictor> {
+    let predictors: Array<IdbPredictor> = [];
+    let excelPredictors = XLSX.utils.sheet_to_json(workbook.Sheets['Predictor Setup'], { range: 1 });
+    excelPredictors.forEach(excelPredictor => {
+      let facilityName: string = excelPredictor['Facility Name'];
+      if (facilityName) {
+        let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
+        if (facility) {
+          let predictorName: string = excelPredictor['Predictor Name'];
+          let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.getFacilityPredictorsCopy(facility.guid);
+          let predictor: IdbPredictor = facilityPredictors.find(aMeter => { return aMeter.name == predictorName });
+          if (!predictor || !facility.id || facility.guid != predictor.facilityId) {
+            predictor = getNewIdbPredictor(selectedAccount.guid, facility.guid);
+            predictor.name = predictorName;
+          }
+
+          predictor.production = getYesNoBool(excelPredictor['Is Production?']);
+          predictor.unit = excelPredictor['Units']
+          predictor.description = excelPredictor['Notes'];
+          console.log(predictor);
+          predictors.push(predictor);
+        }
+      }
+    });
+    return predictors;
+  }
+
+  getPredictorData(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, importPredictors: Array<IdbPredictor>): Array<IdbPredictorData> {
+    let excelPredictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors'], { range: 1 });
+    let importPredictorData: Array<IdbPredictorData> = new Array();
+    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    excelPredictorsData.forEach(excelPredictorData => {
+      let facilityName: string = excelPredictorData['Facility Name'];
+      let readDateStr: string = excelPredictorData['Date'];
+      if (facilityName && readDateStr) {
+        let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
+        if (facility) {
+          let readDate: Date = new Date(readDateStr);
+          for (let i = 1; i < 16; i++) {
+            let predictorName: string = excelPredictorData['Predictor ' + i + ' Name'];
+            console.log(predictorName);
+            if (predictorName) {
+              let facilityPredictor: IdbPredictor = importPredictors.find(predictor => {
+                return predictor.facilityId == facility.guid && predictor.name == predictorName
+              });
+              if (facilityPredictor) {
+                let facilityPredictorData: Array<IdbPredictorData> = accountPredictorData.filter(pData => {
+                  return pData.facilityId == facility.guid
+                });
+                let predictorValue: number = excelPredictorData['Predictor ' + i + ' Value'];
+                if (isNaN(predictorValue) == false) {
+                  let existingPredictorData: IdbPredictorData = facilityPredictorData.find(pData => {
+                    return facilityPredictor.guid == pData.predictorId && checkSameMonth(new Date(pData.date), readDate)
+                  });
+                  if (existingPredictorData) {
+                    existingPredictorData.amount = predictorValue;
+                    importPredictorData.push(existingPredictorData);
+                  } else {
+                    let newPredictorData: IdbPredictorData = getNewIdbPredictorData(facilityPredictor);
+                    newPredictorData.date = readDate;
+                    newPredictorData.amount = predictorValue;
+                    importPredictorData.push(newPredictorData);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    return importPredictorData;
   }
 }
