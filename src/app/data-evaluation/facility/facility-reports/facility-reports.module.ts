@@ -23,6 +23,7 @@ import { FacilityOverviewReportsDashboardComponent } from './facility-reports-da
 import { FacilityEmissionsFactorsReportsDashboardComponent } from './facility-reports-dashboard/facility-emissions-factors-reports-dashboard/facility-emissions-factors-reports-dashboard.component';
 import { FacilityEmissionFactorsReportResultsComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { FacilityEmissionFactorsReportSetupComponent } from './facility-report-setup/facility-emission-factors-report-setup/facility-emission-factors-report-setup.component';
+import { FacilityEmissionFactorsReportTableComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-table/facility-emission-factors-report-table.component';
 
 
 
@@ -44,7 +45,8 @@ import { FacilityEmissionFactorsReportSetupComponent } from './facility-report-s
     FacilityOverviewReportsDashboardComponent,
     FacilityEmissionsFactorsReportsDashboardComponent,
     FacilityEmissionFactorsReportResultsComponent,
-    FacilityEmissionFactorsReportSetupComponent
+    FacilityEmissionFactorsReportSetupComponent,
+    FacilityEmissionFactorsReportTableComponent
   ],
   imports: [
     CommonModule,

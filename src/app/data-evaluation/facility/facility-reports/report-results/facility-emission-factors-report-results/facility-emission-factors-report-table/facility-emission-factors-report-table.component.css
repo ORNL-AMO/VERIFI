@@ -1,0 +1,20 @@
+.header {
+    background-color: #2e517f;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2rem; 
+}
+
+.table thead td {
+  text-align: center;
+  font-weight: bold;
+}
+
+.table tbody td {
+  text-align: center;
+}
+
+.text {
+  font-size: 16px;
+}
+
