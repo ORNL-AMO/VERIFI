@@ -9,7 +9,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter.pipe';
-import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
+import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -35,7 +35,7 @@ export class UtilityBannerComponent implements OnInit {
   meterDataTimer: any;
   meterData: Array<IdbUtilityMeterData>;
   constructor(private sharedDataService: SharedDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService, private facilityDbService: FacilitydbService,
+    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service, private facilityDbService: FacilitydbService,
     private predictorDataHelperService: PredictorDataHelperService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -68,7 +68,7 @@ export class UtilityBannerComponent implements OnInit {
   }
 
   exportData() {
-    this.exportToExcelTemplateService.exportFacilityData(this.facility.guid);
+    this.exportToExcelTemplateV3Service.exportFacilityData(this.facility.guid);
   }
 
   setPredictorsNeedUpdate() {
