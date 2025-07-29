@@ -78,19 +78,37 @@ export class ExportToExcelTemplateV3Service {
 
   fillWorkbook(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Workbook {
     this.utilityMeterDbService.setTemporaryMeterNumbersForExport();
+    this.loadingService.setLoadingMessage('Adding Facility Details...')
     this.setFacilityWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Electricity Meters...')
     this.setElectricityMetersWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Electricity Data...')
     this.setElectricityDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Stationary Meters...')
     this.setStationaryMetersWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Stationary Data...')
     this.setStationaryDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Mobile Meters...')
     this.setMobileMetersWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Mobile Data...')
     this.setMobileDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Other Energy Meters...')
     this.setOtherEnergyMetersWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Other Energy Data...')
     this.setOtherEnergyDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Other Emissions Meters...')
     this.setOtherEmissionsWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Other Emissions Data...')
     this.setOtherEmissionsDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Water Meters...')
     this.setWaterMetersWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Water Data...')
     this.setWaterDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Predictors...')
+    this.setPredictorsWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Adding Predictor Data...')
+    this.setPredictorDataWorksheet(workbook, facilityId);
+    this.loadingService.setLoadingMessage('Finishing up...');
     return workbook;
   }
 
@@ -713,6 +731,90 @@ export class ExportToExcelTemplateV3Service {
   }
 
   //===== Predictors =====//
+  setPredictorsWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictor Setup');
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    if (facilityId) {
+      facilities = facilities.filter(facility => { return facility.guid == facilityId });
+    }
+    let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    if (facilityId) {
+      predictors = predictors.filter(predictor => { return predictor.facilityId == facilityId });
+    }
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+
+    let index: number = 3;
+    predictors.forEach(predictor => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == predictor.facilityId }).name;
+      //A: Facility name
+      worksheet.getCell('A' + index).value = facilityName;
+      //B: predictor name
+      worksheet.getCell('B' + index).value = predictor.name;
+      //C: calanderize readings?
+      worksheet.getCell('C' + index).value = 'No';
+      //D: is Production?
+      worksheet.getCell('D' + index).value = predictor.production ? 'Yes' : 'No';
+      //E: Units
+      worksheet.getCell('E' + index).value = predictor.unit;
+      //F: notes
+      worksheet.getCell('F' + index).value = predictor.description;
+      index++;
+    });
+    return worksheet;
+  }
+
+  setPredictorDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictors');
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    if (facilityId) {
+      facilities = facilities.filter(facility => { return facility.guid == facilityId });
+    }
+    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let rowIndex: number = 3;
+    facilities.forEach(facility => {
+      let facilityPredictorData: Array<IdbPredictorData> = accountPredictorData.filter(pData => { return pData.facilityId == facility.guid });
+      let predictorDates: Array<{
+        month: number,
+        year: number
+      }> = facilityPredictorData.flatMap(pData => {
+        let pDate: Date = new Date(pData.date);
+        return {
+          month: pDate.getMonth(),
+          year: pDate.getFullYear()
+        }
+      });
+      predictorDates = _.uniqBy(predictorDates, (pDate: { month: number, year: number }) => {
+        return pDate.month + '-' + pDate.year
+      });
+      predictorDates = _.orderBy(predictorDates, ['year', 'month']);
+      let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
+        return predictor.facilityId == facility.guid;
+      });
+
+      predictorDates.forEach(pDate => {
+        worksheet.getCell('A' + rowIndex).value = facility.name;
+        let date: Date = new Date(pDate.year, pDate.month, 1);
+        worksheet.getCell('B' + rowIndex).value = this.getFormatedDate(date);
+        let alpha: string = 'C';
+        facilityPredictors.forEach(predictor => {
+          worksheet.getCell(alpha + rowIndex).value = predictor.name;
+          alpha = this.getNextAlpha(alpha);
+          let reading: IdbPredictorData = facilityPredictorData.find(pData => {
+            return checkSameMonth(new Date(pData.date), new Date(pDate.year, pDate.month, 1)) && pData.predictorId == predictor.guid;
+          });
+          if (reading) {
+            worksheet.getCell(alpha + rowIndex).value = reading.amount;
+          }
+          alpha = this.getNextAlpha(alpha);
+        });
+        rowIndex++;
+      });
+    })
+
+    return worksheet;
+  }
+
 
   //===== Helper functions =====//
   getGroupName(groupId: string): string {
