@@ -81,6 +81,10 @@ export class ExportToExcelTemplateV3Service {
     this.setFacilityWorksheet(workbook, facilityId);
     this.setElectricityMetersWorksheet(workbook, facilityId);
     this.setElectricityDataWorksheet(workbook, facilityId);
+    this.setStationaryMetersWorksheet(workbook, facilityId);
+    this.setStationaryDataWorksheet(workbook, facilityId);
+    this.setMobileMetersWorksheet(workbook, facilityId);
+    this.setMobileDataWorksheet(workbook, facilityId);
     return workbook;
   }
 
@@ -147,8 +151,9 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Electricity' });
     let index: number = 3;
-    facilityMeters.forEach(meter => {
+    electricityMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
       //A: Facility name
       worksheet.getCell('A' + index).value = facilityName;
@@ -220,11 +225,213 @@ export class ExportToExcelTemplateV3Service {
     return worksheet;
   }
 
-
   //===== Stationary Meters =====//
+  setStationaryMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Stationary Fuel Meters');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let stationaryMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Natural Gas' || (meter.source == 'Other Fuels' && meter.scope != 2) });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let index: number = 3;
+    stationaryMeters.forEach(meter => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      //A: Facility name
+      worksheet.getCell('A' + index).value = facilityName;
+      //B: Metter Number (unique)
+      worksheet.getCell('B' + index).value = meter.meterNumber;
+      //C: Meter Name
+      worksheet.getCell('C' + index).value = meter.name;
+      //D: Meter Group
+      worksheet.getCell('D' + index).value = this.getGroupName(meter.groupId);
+      //E: Calendarize Readings?
+      worksheet.getCell('E' + index).value = this.getCalanderizeDataOption(meter.meterReadingDataApplication);
+      //F: Phase
+      worksheet.getCell('F' + index).value = meter.phase;
+      //G: Fuel
+      if (meter.source == 'Natural Gas') {
+        worksheet.getCell('G' + index).value = 'Natural Gas';
+      } else {
+        worksheet.getCell('G' + index).value = meter.fuel;
+      }
+      //H: collection unit
+      worksheet.getCell('H' + index).value = meter.startingUnit;
+      //I: site to source
+      worksheet.getCell('I' + index).value = meter.siteToSource;
+      //J: energy factor
+      worksheet.getCell('J' + index).value = meter.heatCapacity;
+      //K: energy unit
+      worksheet.getCell('K' + index).value = meter.energyUnit;
+      //L: account number
+      worksheet.getCell('L' + index).value = meter.accountNumber;
+      //M: Supplier
+      worksheet.getCell('M' + index).value = meter.supplier;
+      //N: Location
+      worksheet.getCell('N' + index).value = meter.location;
+      //O: Notes
+      worksheet.getCell('O' + index).value = meter.notes;
+      //Charges
+      this.addChargesToWorksheet(worksheet, 'P', index, meter);
+      index++;
+    });
+    return worksheet;
+  }
 
+  setStationaryDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Stationary Fuel');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Natural Gas' || (meter.source == 'Other Fuels' && meter.scope != 2) });
+    let index: number = 3;
+    electricityMeters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
+      meterData = _.orderBy(meterData, 'readDate');
+      meterData.forEach(dataReading => {
+        //A: Meter Number
+        worksheet.getCell('A' + index).value = meter.meterNumber;
+        //B: Read Date
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        //C: Total Consumption
+        if (getIsEnergyUnit(meter.startingUnit)) {
+          worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
+        } else {
+          worksheet.getCell('C' + index).value = dataReading.totalVolume;
+        }
+        //D: Total Cost
+        worksheet.getCell('D' + index).value = dataReading.totalCost;
+        //E: Higher Heating Value
+        worksheet.getCell('E' + index).value = dataReading.heatCapacity;
+        //add charges
+        this.addChargeReadingsToWorksheet(worksheet, 'F', index, meter, dataReading);
+        index++;
+      })
+    })
+    return worksheet;
+  }
 
   //===== Mobile Meters =====//
+  setMobileMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Mobile Fuel Meters');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let mobileMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Fuels' && meter.scope == 2 });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let index: number = 3;
+    mobileMeters.forEach(meter => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      //A: Facility name
+      worksheet.getCell('A' + index).value = facilityName;
+      //B: Metter Number (unique)
+      worksheet.getCell('B' + index).value = meter.meterNumber;
+      //C: Meter Name
+      worksheet.getCell('C' + index).value = meter.name;
+      //D: Meter Group
+      worksheet.getCell('D' + index).value = this.getGroupName(meter.groupId);
+      //E: Calendarize Readings?
+      worksheet.getCell('E' + index).value = this.getCalanderizeDataOption(meter.meterReadingDataApplication);
+      //F: Vehicle Type
+      worksheet.getCell('F' + index).value = this.getVehicleType(meter);
+      //G: Fuel
+      worksheet.getCell('G' + index).value = meter.vehicleFuel;
+      //H: collection unit
+      worksheet.getCell('H' + index).value = meter.vehicleCollectionUnit;
+      //I: unit distance
+      worksheet.getCell('I' + index).value = meter.vehicleDistanceUnit;
+      //J: fuel efficiency
+      worksheet.getCell('J' + index).value = meter.vehicleFuelEfficiency;
+      //K: energy unit
+      worksheet.getCell('K' + index).value = meter.vehicleCollectionType == 1 ? 'Fuel' : 'Mileage';
+      //L: site to source
+      worksheet.getCell('L' + index).value = meter.siteToSource;
+      //M: include with energy
+      worksheet.getCell('M' + index).value = meter.includeInEnergy ? 'Yes' : 'No';
+      //N: account #
+      worksheet.getCell('N' + index).value = meter.accountNumber;
+      //O: supplier
+      worksheet.getCell('O' + index).value = meter.supplier;
+      //P: Location
+      worksheet.getCell('P' + index).value = meter.location;
+      //Q: Notes
+      worksheet.getCell('Q' + index).value = meter.notes;
+      //Charges
+      this.addChargesToWorksheet(worksheet, 'R', index, meter);
+      index++;
+    });
+    return worksheet;
+  }
+
+  setMobileDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Mobile Fuel');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let mobileMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Fuels' && meter.scope == 2 });
+    let index: number = 3;
+    mobileMeters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
+      meterData = _.orderBy(meterData, 'readDate');
+      meterData.forEach(dataReading => {
+        //A: Meter Number
+        worksheet.getCell('A' + index).value = meter.meterNumber;
+        //B: Read Date
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        //C: Total Consumption
+        worksheet.getCell('C' + index).value = dataReading.totalVolume;
+        //D: Higher Heating Value
+        worksheet.getCell('D' + index).value = dataReading.vehicleFuelEfficiency;
+        //E: Total Cost
+        worksheet.getCell('F' + index).value = dataReading.totalCost;
+        //add charges
+        this.addChargeReadingsToWorksheet(worksheet, 'G', index, meter, dataReading);
+        index++;
+      })
+    })
+    return worksheet;
+  }
+
+  getVehicleType(meter: IdbUtilityMeter): string {
+    let vehicleType = VehicleTypes.find(vType => {
+      return vType.value == meter.vehicleType
+    });
+    if (vehicleType) {
+      if (meter.vehicleCategory == 2) {
+        if (vehicleType.label == 'Passenger Cars') {
+          return 'On-Road Vehicle, Passenger Cars';
+        } else if (vehicleType.label == "Light-Duty Trucks (Vans, Pickups, SUV's)") {
+          return 'On-Road Vehicle, Light-Duty Trucks';
+        } else if (vehicleType.label == 'Bus') {
+          return 'On-Road Vehicle, Bus';
+        } else if (vehicleType.label == 'Heavy-Duty Vehicles') {
+          return 'On-Road Vehicle, Heavy-Duty Trucks';
+        } else if (vehicleType.label == 'Motorcycles') {
+          return 'On-Road Vehicle, Motorcycles';
+        }
+      } else if (meter.vehicleCategory == 3) {
+        if (vehicleType.label == 'Agricultural Equipment & Trucks') {
+          return 'Off-Road Vehicle, Ag. Equipment & Trucks';
+        } else if (vehicleType.label == "Construction/Mining Equipment & Trucks") {
+          return 'Off-Road Vehicle, Construction/Mine Equipment & Trucks';
+        } else if (vehicleType.label == "Construction/Mining Equipment & Trucks") {
+          return 'Off-Road Vehicle, Construction/Mine Equipment & Trucks';
+        }
+      } else if (meter.vehicleCategory == 4) {
+        if (vehicleType.label == 'Aircraft') {
+          return 'Non-Road Vehicle, Aircraft';
+        } else if (vehicleType.label == "Rail") {
+          return 'Non-Road Vehicle, Rail';
+        } else if (vehicleType.label == "Water Transport") {
+          return ' Non-Road Vehicle, Water Transport';
+        }
+      }
+    }
+    return;
+  }
 
   //===== Other Energy Meters =====//
 
