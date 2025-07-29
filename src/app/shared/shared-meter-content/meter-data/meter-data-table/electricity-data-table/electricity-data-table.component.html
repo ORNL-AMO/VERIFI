@@ -52,7 +52,7 @@
                     *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
                     <th (click)="setOrderDataField(charge.guid, 'usage')"
                         [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
-                        {{charge.name}} <br>(???)
+                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
                     </th>
                 </ng-container>
                 <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"

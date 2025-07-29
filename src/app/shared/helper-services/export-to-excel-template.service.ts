@@ -23,6 +23,7 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { ExportToExcelTemplateV3Service } from './export-to-excel-template-v3.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,41 +37,42 @@ export class ExportToExcelTemplateService {
     private loadingService: LoadingService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private predictorDataDbService: PredictorDataDbService,
+    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service) { }
 
 
   exportFacilityData(facilityId?: string) {
-
-    let workbook = new ExcelJS.Workbook();
-    var request = new XMLHttpRequest();
-    request.open('GET', 'assets/csv_templates/VERIFI-Import-Data.xlsx', true);
-    request.responseType = 'blob';
-    request.onload = () => {
-      workbook.xlsx.load(request.response).then(() => {
-        this.fillWorkbook(workbook, facilityId);
-        workbook.xlsx.writeBuffer().then(excelData => {
-          let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          let a = document.createElement("a");
-          let url = window.URL.createObjectURL(blob);
-          a.href = url;
-          let date = new Date();
-          let datePipe = new DatePipe('en-us');
-          let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-          let accountName: string = account.name;
-          accountName = accountName.replaceAll(' ', '-');
-          accountName = accountName.replaceAll('.', '_');
-          a.download = accountName + "-" + datePipe.transform(date, 'MM-dd-yyyy');
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          this.loadingService.setLoadingStatus(false);
-        });
-      })
-    };
-    this.loadingService.setLoadingMessage('Exporting to .xlsx template');
-    this.loadingService.setLoadingStatus(true);
-    request.send();
+    this.exportToExcelTemplateV3Service.exportFacilityData(facilityId);
+    // let workbook = new ExcelJS.Workbook();
+    // var request = new XMLHttpRequest();
+    // request.open('GET', 'assets/csv_templates/VERIFI-Import-Data.xlsx', true);
+    // request.responseType = 'blob';
+    // request.onload = () => {
+    //   workbook.xlsx.load(request.response).then(() => {
+    //     this.fillWorkbook(workbook, facilityId);
+    //     workbook.xlsx.writeBuffer().then(excelData => {
+    //       let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    //       let a = document.createElement("a");
+    //       let url = window.URL.createObjectURL(blob);
+    //       a.href = url;
+    //       let date = new Date();
+    //       let datePipe = new DatePipe('en-us');
+    //       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    //       let accountName: string = account.name;
+    //       accountName = accountName.replaceAll(' ', '-');
+    //       accountName = accountName.replaceAll('.', '_');
+    //       a.download = accountName + "-" + datePipe.transform(date, 'MM-dd-yyyy');
+    //       document.body.appendChild(a);
+    //       a.click();
+    //       window.URL.revokeObjectURL(url);
+    //       document.body.removeChild(a);
+    //       this.loadingService.setLoadingStatus(false);
+    //     });
+    //   })
+    // };
+    // this.loadingService.setLoadingMessage('Exporting to .xlsx template');
+    // this.loadingService.setLoadingStatus(true);
+    // request.send();
   }
   fillWorkbook(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Workbook {
     this.utilityMeterDbService.setTemporaryMeterNumbersForExport();
