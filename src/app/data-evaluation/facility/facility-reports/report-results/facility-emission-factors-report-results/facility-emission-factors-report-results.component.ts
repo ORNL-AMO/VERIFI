@@ -36,8 +36,9 @@ export class FacilityEmissionFactorsReportResultsComponent {
   facility: IdbFacility;
   facilityMeters: Array<IdbUtilityMeter>;
   customFuels: Array<IdbCustomFuel>;
+  electricityMeters: Array<string> = [];
   emissionDataElectricity: Array<{ source: string, year: number, marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean }> = [];
-  emissionData: Array<{ source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
+  emissionData: Array<{ meterName: string, source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private facilityReportsService: FacilityReportsService,
@@ -55,7 +56,6 @@ export class FacilityEmissionFactorsReportResultsComponent {
       this.emissionFactorsReportSettings = this.facilityReport.emissionFactorsReportSettings;
       this.calculateFacilitiesSummary();
     });
-    console.log('meters', this.facilityMeters);
     this.printSub = this.facilityReportsService.print.subscribe(print => {
       this.print = print;
     });
@@ -71,6 +71,9 @@ export class FacilityEmissionFactorsReportResultsComponent {
     let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
 
     this.facilityMeters.forEach(meter => {
+      if (meter.source === 'Electricity') {
+        this.electricityMeters.push(meter.name);
+      }
       if (meter.source === 'Electricity' && this.emissionDataElectricity.length === 0) {
         for (let year = this.emissionFactorsReportSettings.startYear; year <= this.emissionFactorsReportSettings.endYear; year++) {
           let emissionsRate = getEmissionsRate(this.facility.eGridSubregion, year, co2EmissionsRates);
@@ -95,6 +98,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
           selectedUnit = meter.energyUnit;
         }
         this.emissionData.push({
+          meterName: meter.name,
           source: meter.source,
           fuelValue: meter.fuel ? meter.fuel : '',
           CO2: emissionsOutputRate.CO2,
@@ -118,6 +122,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
         }
 
         this.emissionData.push({
+          meterName: meter.name,
           source: meter.source,
           fuelValue: meterFuel.value,
           CO2: meterFuel.CO2,
@@ -126,9 +131,6 @@ export class FacilityEmissionFactorsReportResultsComponent {
           unit: selectedUnit
         });
       }
-      if (meter.source == 'Other') {
-      }
-      console.log('emissiondata', this.emissionData);
     });
   }
 

@@ -12,8 +12,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6" *ngIf="setupForm.controls.reportType.value != 'dataOverview'">
-                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis'">
+                <div class="col-6"
+                    *ngIf="setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountEmissionFactors'">
+                    <div class="row form-group"
+                        *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis'">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
                         <div class="col-7">
@@ -31,6 +33,27 @@
                                 required (change)="save()">
                                 <option *ngFor="let year of reportYears" [ngValue]="year">{{year | yearDisplay:
                                     account.fiscalYear}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'accountEmissionFactors'">
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="startDate">Start Year</label>
+                        <div class="col-6">
+                            <select name="startYear" formControlName="startYear" class="form-select" (change)="save()">
+                                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="endYear">End Year</label>
+                        <div class="col-6">
+                            <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
+                                <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
+                                </option>
                             </select>
                         </div>
                     </div>

@@ -59,6 +59,9 @@ import { AnalysisReportSetupComponent } from './account-report-setup/analysis-re
 import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
 import { AnalysisProblemsInformationComponent } from './analysis-report/analysis-problems-information/analysis-problems-information.component';
 import { AnalysisDataValidationTablesComponent } from './analysis-report/analysis-data-validation-tables/analysis-data-validation-tables.component';
+import { AccountEmissionFactorsReportDashboardComponent } from './account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component';
+import { AccountEmissionFactorsReportComponent } from './account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
+import { AccountEmissionFactorsReportTableComponent } from './account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
 
 @NgModule({
   declarations: [
@@ -115,7 +118,10 @@ import { AnalysisDataValidationTablesComponent } from './analysis-report/analysi
     AnalysisReportSetupComponent,
     AnalysisFacilityReportComponent,
     AnalysisProblemsInformationComponent,
-    AnalysisDataValidationTablesComponent
+    AnalysisDataValidationTablesComponent,
+    AccountEmissionFactorsReportDashboardComponent,
+    AccountEmissionFactorsReportComponent,
+    AccountEmissionFactorsReportTableComponent
   ],
   imports: [
     CommonModule,

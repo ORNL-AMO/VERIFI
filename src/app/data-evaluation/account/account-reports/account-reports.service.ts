@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
+import { AccountEmissionFactorsReportSetup, AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -30,7 +30,7 @@ export class AccountReportsService {
   validateReport(report: IdbAccountReport) {
     let errorMessage: string = '';
     //write validation for report
-    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0  && report.endYear > 0) {
+    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0 && report.endYear > 0) {
       let startDate: Date = new Date(report.startYear, report.startMonth, 1);
       let endDate: Date = new Date(report.endYear, report.endMonth, 1);
       // compare start and end date
@@ -47,7 +47,7 @@ export class AccountReportsService {
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
     let dateValidators: Array<ValidatorFn> = [];
-    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis') {
+    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis' || report.reportType == 'accountEmissionFactors') {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview') {
       dateValidators = [Validators.required];
@@ -76,6 +76,19 @@ export class AccountReportsService {
         startYear: [report.startYear, dateValidators],
         endMonth: [report.endMonth, dateValidators],
         endYear: [report.endYear, dateValidators]
+      });
+      return form;
+    }
+    else if (report.reportType == 'accountEmissionFactors') {
+      let form: FormGroup = this.formBuilder.group({
+        reportName: [report.name, Validators.required],
+        reportType: [report.reportType, Validators.required],
+        reportYear: [report.reportYear, ''],
+        baselineYear: [report.baselineYear, ''],
+        startMonth: [report.startMonth, ''],
+        startYear: [report.startYear, yearValidators],
+        endMonth: [report.endMonth, ''],
+        endYear: [report.endYear, yearValidators]
       });
       return form;
     }
@@ -284,9 +297,27 @@ export class AccountReportsService {
     }
     analysisReportSetup.analysisItemId = form.controls.analysisItemId.value;
     analysisReportSetup.includeProblemsInformation = form.controls.includeProblemsInformation.value;
-    analysisReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;  
+    analysisReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;
     analysisReportSetup.includeDataValidationTables = form.controls.includeDataValidationTables.value;
     return analysisReportSetup;
+  }
+
+  getAccountEmissionFactorsFormFromReport(accountEmissionFactorsReportSetup: AccountEmissionFactorsReportSetup): FormGroup {
+    if (!accountEmissionFactorsReportSetup) {
+      accountEmissionFactorsReportSetup = {
+      };
+    }
+    let form: FormGroup = this.formBuilder.group({
+    });
+    return form;
+  }
+
+  updateAccountEmissionFactorsReportFromForm(accountEmissionFactorsReportSetup: AccountEmissionFactorsReportSetup, form: FormGroup): AccountEmissionFactorsReportSetup {
+    if (!accountEmissionFactorsReportSetup) {
+      accountEmissionFactorsReportSetup = {
+      };
+    }
+    return accountEmissionFactorsReportSetup;
   }
 
   isReportValid(report: IdbAccountReport): boolean {
@@ -309,6 +340,9 @@ export class AccountReportsService {
     } else if (report.reportType == 'analysis') {
       let analysisForm: FormGroup = this.getAnalysisFormFromReport(report.analysisReportSetup);
       return analysisForm.valid;
+    } else if (report.reportType == 'accountEmissionFactors') {
+      let accountEmissionFactorsForm: FormGroup = this.getAccountEmissionFactorsFormFromReport(report.accountEmissionFactorsReportSetup);
+      return accountEmissionFactorsForm.valid;
     }
   }
 }

@@ -172,3 +172,6 @@ export interface AnalysisReportSetup {
   includeExecutiveSummary: boolean,
   includeDataValidationTables: boolean
 }
+
+export interface AccountEmissionFactorsReportSetup {
+}

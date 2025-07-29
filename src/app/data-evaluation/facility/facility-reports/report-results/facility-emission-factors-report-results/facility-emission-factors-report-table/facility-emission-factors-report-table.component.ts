@@ -12,9 +12,11 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class FacilityEmissionFactorsReportTableComponent {
 
   @Input()
+  electricityMeters: Array<string> = [];
+  @Input()
   emissionDataElectricity: Array<{ year: number, marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean }> = [];
   @Input()
-  emissionData: Array<{ source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
+  emissionData: Array<{ meterName: string, source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
   @Input()
   facility: IdbFacility;
 

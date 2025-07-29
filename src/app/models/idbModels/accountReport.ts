@@ -2,7 +2,7 @@ import { IdbAccount } from "./account";
 import { IdbFacility } from "./facility";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbUtilityMeterGroup } from "./utilityMeterGroup";
-import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from '../overview-report';
+import { AccountEmissionFactorsReportSetup, AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from '../overview-report';
 import { ReportType } from "../constantsAndTypes";
 
 export interface IdbAccountReport extends IdbEntry {
@@ -22,7 +22,8 @@ export interface IdbAccountReport extends IdbEntry {
     dataOverviewReportSetup: DataOverviewReportSetup,
     performanceReportSetup: PerformanceReportSetup,
     betterClimateReportSetup: BetterClimateReportSetup,
-    analysisReportSetup: AnalysisReportSetup
+    analysisReportSetup: AnalysisReportSetup,
+    accountEmissionFactorsReportSetup: AccountEmissionFactorsReportSetup
 }
 
 export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<IdbFacility>, groups: Array<IdbUtilityMeterGroup>): IdbAccountReport {
@@ -117,6 +118,8 @@ export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<Id
             includeProblemsInformation: true,
             includeExecutiveSummary: true,
             includeDataValidationTables: true
+        },
+        accountEmissionFactorsReportSetup: {
         }
     }
 }
