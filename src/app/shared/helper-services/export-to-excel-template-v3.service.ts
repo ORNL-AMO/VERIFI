@@ -7,8 +7,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { checkShowHeatCapacity, getIsEnergyUnit } from '../sharedHelperFuntions';
-import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
+import { getIsEnergyUnit } from '../sharedHelperFuntions';
 import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { VehicleTypes } from '../vehicle-data/vehicleType';
@@ -46,7 +45,7 @@ export class ExportToExcelTemplateV3Service {
     this.setAlphabet();
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
-    request.open('GET', 'assets/csv_templates/VERIFI-Import-Data-New.xlsx', true);
+    request.open('GET', 'assets/csv_templates/VERIFI-Import-Data.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
