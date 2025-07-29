@@ -73,7 +73,8 @@ export class UtilityMeterDataService {
       showSection: true,
       totalCost: true,
       realDemand: true,
-      billedDemand: true
+      billedDemand: true,
+      powerFactor: true
     }
   }
 
@@ -136,6 +137,7 @@ export class UtilityMeterDataService {
       totalBilledDemand: [meterData.totalBilledDemand, [Validators.min(0)]],
       isEstimated: [meterData.isEstimated || false],
       chargesArray: chargesArray,
+      powerFactor: [meterData.powerFactor, [Validators.min(0), Validators.max(1)]]
     })
   }
 
@@ -170,7 +172,7 @@ export class UtilityMeterDataService {
         chargeUsage: chargeGroup.get('chargeUsage').value
       };
     });
-
+    meterData.powerFactor = form.controls.powerFactor.value;
     return meterData;
   }
 

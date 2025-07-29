@@ -17,6 +17,7 @@ export interface GeneralInformationFilters {
   totalCost: boolean,
   realDemand: boolean,
   billedDemand: boolean
+  powerFactor: boolean
 }
 
 

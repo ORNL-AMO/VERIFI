@@ -23,6 +23,7 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     //electricity
     totalRealDemand?: number,
     totalBilledDemand?: number,
+    powerFactor?: number,
 
     //TODO: Check emissions usage for meters...
     isEstimated?: boolean,
@@ -54,7 +55,6 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     offPeakAmount?: number,
     offPeakCharge?: number,
     transmissionAndDeliveryCharge?: number,
-    powerFactor?: number,
     powerFactorCharge?: number,
     localSalesTax?: number,
     stateSalesTax?: number,
