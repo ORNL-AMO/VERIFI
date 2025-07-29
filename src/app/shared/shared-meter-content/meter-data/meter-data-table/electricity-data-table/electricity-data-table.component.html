@@ -36,6 +36,10 @@
             <th *ngIf="generalInformationFilters.billedDemand" (click)="setOrderDataField('totalBilledDemand')"
                 [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
                 Billed<br> Demand (kW)</th>
+            <!-- totalBilledDemand -->
+            <th *ngIf="generalInformationFilters.powerFactor" (click)="setOrderDataField('powerFactor')"
+                [ngClass]="{'active': orderDataField == 'powerFactor'}">
+                Power Factor</th>
             <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
                 (tonne
@@ -86,6 +90,7 @@
             <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
             <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
             <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.powerFactor">{{meterData.powerFactor | customNumber}}</td>
 
             <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalWithMarketEmissions | customNumber}}</td>
             <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalWithLocationEmissions | customNumber}}</td>
