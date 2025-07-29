@@ -838,6 +838,8 @@ export class ExportToExcelTemplateV3Service {
 
   getFormatedDate(dateReading: Date): string {
     let readingDate: Date = new Date(dateReading)
-    return readingDate.getFullYear() + '-' + (readingDate.getMonth() + 1) + '-' + readingDate.getDate();
+    let month: string = (readingDate.getMonth() + 1).toString().padStart(2, '0');
+    let day: string = (readingDate.getDate()).toString().padStart(2, '0');
+    return readingDate.getFullYear() + '-' + month + '-' + day;
   }
 }

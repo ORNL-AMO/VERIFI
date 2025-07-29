@@ -925,7 +925,6 @@ export class UploadDataV3Service {
     return 1;
   }
 
-
   //===== Parsing Predictors ======//
   getPredictors(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount): Array<IdbPredictor> {
     let predictors: Array<IdbPredictor> = [];
@@ -946,7 +945,6 @@ export class UploadDataV3Service {
           predictor.production = getYesNoBool(excelPredictor['Is Production?']);
           predictor.unit = excelPredictor['Units']
           predictor.description = excelPredictor['Notes'];
-          console.log(predictor);
           predictors.push(predictor);
         }
       }
@@ -967,7 +965,6 @@ export class UploadDataV3Service {
           let readDate: Date = new Date(readDateStr);
           for (let i = 1; i < 16; i++) {
             let predictorName: string = excelPredictorData['Predictor ' + i + ' Name'];
-            console.log(predictorName);
             if (predictorName) {
               let facilityPredictor: IdbPredictor = importPredictors.find(predictor => {
                 return predictor.facilityId == facility.guid && predictor.name == predictorName
