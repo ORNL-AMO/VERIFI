@@ -85,6 +85,12 @@ export class ExportToExcelTemplateV3Service {
     this.setStationaryDataWorksheet(workbook, facilityId);
     this.setMobileMetersWorksheet(workbook, facilityId);
     this.setMobileDataWorksheet(workbook, facilityId);
+    this.setOtherEnergyMetersWorksheet(workbook, facilityId);
+    this.setOtherEnergyDataWorksheet(workbook, facilityId);
+    this.setOtherEmissionsWorksheet(workbook, facilityId);
+    this.setOtherEmissionsDataWorksheet(workbook, facilityId);
+    this.setWaterMetersWorksheet(workbook, facilityId);
+    this.setWaterDataWorksheet(workbook, facilityId);
     return workbook;
   }
 
@@ -344,7 +350,7 @@ export class ExportToExcelTemplateV3Service {
       worksheet.getCell('I' + index).value = meter.vehicleDistanceUnit;
       //J: fuel efficiency
       worksheet.getCell('J' + index).value = meter.vehicleFuelEfficiency;
-      //K: energy unit
+      //K: vehicle collection type
       worksheet.getCell('K' + index).value = meter.vehicleCollectionType == 1 ? 'Fuel' : 'Mileage';
       //L: site to source
       worksheet.getCell('L' + index).value = meter.siteToSource;
@@ -434,8 +440,238 @@ export class ExportToExcelTemplateV3Service {
   }
 
   //===== Other Energy Meters =====//
+  setOtherEnergyMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Other Energy Meters');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let otherEnergyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Energy' });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let index: number = 3;
+    otherEnergyMeters.forEach(meter => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      //A: Facility name
+      worksheet.getCell('A' + index).value = facilityName;
+      //B: Metter Number (unique)
+      worksheet.getCell('B' + index).value = meter.meterNumber;
+      //C: Meter Name
+      worksheet.getCell('C' + index).value = meter.name;
+      //D: Meter Group
+      worksheet.getCell('D' + index).value = this.getGroupName(meter.groupId);
+      //E: Calendarize Readings?
+      worksheet.getCell('E' + index).value = this.getCalanderizeDataOption(meter.meterReadingDataApplication);
+      //F: Type
+      worksheet.getCell('F' + index).value = meter.fuel;
+      //G: Unit collection
+      worksheet.getCell('G' + index).value = meter.startingUnit;
+      //H: site to source
+      worksheet.getCell('H' + index).value = meter.siteToSource;
+      //I: energy factor
+      worksheet.getCell('I' + index).value = meter.heatCapacity;
+      //J: energy unit
+      worksheet.getCell('J' + index).value = meter.energyUnit;
+      //K: account #
+      worksheet.getCell('K' + index).value = meter.accountNumber;
+      //L: supplier
+      worksheet.getCell('L' + index).value = meter.supplier;
+      //M: Location
+      worksheet.getCell('M' + index).value = meter.location;
+      //N: Notes
+      worksheet.getCell('N' + index).value = meter.notes;
+      //Charges
+      this.addChargesToWorksheet(worksheet, 'O', index, meter);
+      index++;
+    });
+    return worksheet;
+  }
+
+  setOtherEnergyDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Other Energy');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let otherEnergyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Energy' });
+    let index: number = 3;
+    otherEnergyMeters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
+      meterData = _.orderBy(meterData, 'readDate');
+      meterData.forEach(dataReading => {
+        //A: Meter Number
+        worksheet.getCell('A' + index).value = meter.meterNumber;
+        //B: Read Date
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        //C: Total Consumption
+        worksheet.getCell('C' + index).value = dataReading.totalVolume;
+        //D: Energy factor
+        worksheet.getCell('D' + index).value = dataReading.heatCapacity;
+        //E: Total Cost
+        worksheet.getCell('E' + index).value = dataReading.totalCost;
+        //add charges
+        this.addChargeReadingsToWorksheet(worksheet, 'F', index, meter, dataReading);
+        index++;
+      })
+    })
+    return worksheet;
+  }
+
+  //===== Other Emissions Meters =====//
+  setOtherEmissionsWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Other Emission Meters');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let otherMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other' });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let index: number = 3;
+    otherMeters.forEach(meter => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      //A: Facility name
+      worksheet.getCell('A' + index).value = facilityName;
+      //B: Metter Number (unique)
+      worksheet.getCell('B' + index).value = meter.meterNumber;
+      //C: Meter Name
+      worksheet.getCell('C' + index).value = meter.name;
+      //D: Meter Group
+      worksheet.getCell('D' + index).value = this.getGroupName(meter.groupId);
+      //E: Calendarize Readings?
+      worksheet.getCell('E' + index).value = this.getCalanderizeDataOption(meter.meterReadingDataApplication);
+      //F: Type
+      if (meter.scope == 5) {
+        worksheet.getCell('F' + index).value = 'Scope 1: Fugitive';
+      } else if (meter.scope == 6) {
+        worksheet.getCell('F' + index).value = 'Scope 1: Process';
+      } else {
+        worksheet.getCell('F' + index).value = 'Other';
+      }
+      //G: greenhoue gas
+      let gwpOption: GlobalWarmingPotential = GlobalWarmingPotentials.find(gwpOption => {
+        return gwpOption.value == meter.globalWarmingPotentialOption;
+      });
+      worksheet.getCell('G' + index).value = gwpOption?.label;
+      //H: Unit collection
+      worksheet.getCell('H' + index).value = meter.startingUnit;
+      //I: Location
+      worksheet.getCell('I' + index).value = meter.location;
+      //J: Notes
+      worksheet.getCell('J' + index).value = meter.notes;
+      //Charges
+      this.addChargesToWorksheet(worksheet, 'K', index, meter);
+      index++;
+    });
+    return worksheet;
+  }
+
+  setOtherEmissionsDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Other Emissions');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let otherMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other' });
+    let index: number = 3;
+    otherMeters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
+      meterData = _.orderBy(meterData, 'readDate');
+      meterData.forEach(dataReading => {
+        //A: Meter Number
+        worksheet.getCell('A' + index).value = meter.meterNumber;
+        //B: Read Date
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        //C: Total Consumption
+        worksheet.getCell('C' + index).value = dataReading.totalVolume;
+        //D: Total Cost
+        worksheet.getCell('D' + index).value = dataReading.totalCost;
+        //add charges
+        this.addChargeReadingsToWorksheet(worksheet, 'E', index, meter, dataReading);
+        index++;
+      })
+    })
+    return worksheet;
+  }
+
 
   //===== Water Meters =====//
+  setWaterMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Water Meters');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let waterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let index: number = 3;
+    waterMeters.forEach(meter => {
+      let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      //A: Facility name
+      worksheet.getCell('A' + index).value = facilityName;
+      //B: Metter Number (unique)
+      worksheet.getCell('B' + index).value = meter.meterNumber;
+      //C: Meter Name
+      worksheet.getCell('C' + index).value = meter.name;
+      //D: Meter Group
+      worksheet.getCell('D' + index).value = this.getGroupName(meter.groupId);
+      //E: Calendarize Readings?
+      worksheet.getCell('E' + index).value = this.getCalanderizeDataOption(meter.meterReadingDataApplication);
+
+      if (meter.source == 'Water Discharge') {
+        //F: Flow Type
+        worksheet.getCell('F' + index).value = 'Discharge'
+        //G: Type
+        worksheet.getCell('G' + index).value = meter.waterDischargeType;
+      } else {
+        //F: Flow Type
+        worksheet.getCell('F' + index).value = 'Intake'
+        //G: Type
+        worksheet.getCell('G' + index).value = meter.waterIntakeType;
+      }
+
+      //H: Unit collection
+      worksheet.getCell('H' + index).value = meter.startingUnit;
+      //I: account #
+      worksheet.getCell('I' + index).value = meter.accountNumber;
+      //J: supplier
+      worksheet.getCell('J' + index).value = meter.supplier;
+      //K: Location
+      worksheet.getCell('K' + index).value = meter.location;
+      //L: Notes
+      worksheet.getCell('L' + index).value = meter.notes;
+      //Charges
+      this.addChargesToWorksheet(worksheet, 'M', index, meter);
+      index++;
+    });
+    return worksheet;
+  }
+
+  setWaterDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Water');
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if (facilityId) {
+      facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
+    }
+    let waterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
+    let index: number = 3;
+    waterMeters.forEach(meter => {
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
+      meterData = _.orderBy(meterData, 'readDate');
+      meterData.forEach(dataReading => {
+        //A: Meter Number
+        worksheet.getCell('A' + index).value = meter.meterNumber;
+        //B: Read Date
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        //C: Total Consumption
+        worksheet.getCell('C' + index).value = dataReading.totalVolume;
+        //D: Total Cost
+        worksheet.getCell('D' + index).value = dataReading.totalCost;
+        //add charges
+        this.addChargeReadingsToWorksheet(worksheet, 'E', index, meter, dataReading);
+        index++;
+      })
+    })
+    return worksheet;
+  }
 
   //===== Charges =====//
   addChargesToWorksheet(worksheet: ExcelJS.Worksheet, alpha: string, rowIndex: number, meter: IdbUtilityMeter) {
