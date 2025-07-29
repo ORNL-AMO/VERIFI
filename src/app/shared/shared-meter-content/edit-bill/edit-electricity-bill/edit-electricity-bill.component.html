@@ -81,7 +81,9 @@
         <div class="input-group mb-3">
           <input id="totalRealDemand" class="form-control" type="number" formControlName="totalRealDemand"
             [class.warning]="meterDataForm.controls.totalRealDemand.value === 0" onfocus="this.select();" min="0">
-          <span class="input-group-text">kW</span>
+          <span class="input-group-text">
+            {{editMeter.demandUnit}}
+          </span>
         </div>
         <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand
           is
@@ -101,7 +103,9 @@
         <div class="input-group mb-3">
           <input id="totalBilledDemand" class="form-control" type="number" formControlName="totalBilledDemand"
             [class.warning]="meterDataForm.controls.totalBilledDemand.value === 0" onfocus="this.select();" min="0">
-          <span class="input-group-text">kW</span>
+          <span class="input-group-text">
+            {{editMeter.demandUnit}}
+          </span>
         </div>
         <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand
           is

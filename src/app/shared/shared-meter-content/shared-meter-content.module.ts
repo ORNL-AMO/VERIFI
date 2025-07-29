@@ -40,7 +40,6 @@ import { MeterChargesFormComponent } from './edit-meter-form/meter-charges-form/
 import { ChargesUnitOptionsPipe } from './edit-meter-form/meter-charges-form/charges-unit-options.pipe';
 import { EditBillChargesComponent } from './edit-bill/edit-bill-charges/edit-bill-charges.component';
 import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe';
-import { ChargeUnitDisplayPipe } from './edit-bill/edit-bill-charges/charge-unit-display.pipe';
 import { MeterChargeValuePipe } from './meter-data/meter-charge-value.pipe';
 import { SharedDataQualityReportMetersModule } from '../shared-data-quality-report-meters/shared-data-quality-report-meters.module';
 import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-data-by.pipe';
@@ -83,7 +82,6 @@ import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-
     ChargesUnitOptionsPipe,
     EditBillChargesComponent,
     MeterChargePipe,
-    ChargeUnitDisplayPipe,
     MeterChargeValuePipe,
     OrderMeterDataByPipe
   ],

@@ -203,6 +203,9 @@ export class UpdateDbEntryService {
 
 
     if (!utilityMeter.charges) {
+      if(!utilityMeter.demandUnit){
+        utilityMeter.demandUnit = 'kW';
+      }
       utilityMeter.charges = [];
       isChanged = true;
       meterDataChanged = true;
@@ -212,61 +215,61 @@ export class UpdateDbEntryService {
           dataItem.charges = [];
         }
         if (dataItem.commodityCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.commodityCharge, 0, 'consumption', 'Commodity Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.commodityCharge, 0, 'consumption', 'Commodity Charge');
         }
         if (dataItem.deliveryCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.deliveryCharge, 0, 'consumption', 'Delivery Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.deliveryCharge, 0, 'consumption', 'Delivery Charge');
         }
         //electricity
         if (dataItem.nonEnergyCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.nonEnergyCharge, 0, 'other', 'Non-Energy Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.nonEnergyCharge, 0, 'other', 'Non-Energy Charge');
         }
         if (dataItem.block1Consumption || dataItem.block1ConsumptionCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.block1ConsumptionCharge, dataItem.block1Consumption, 'consumption', 'Block 1 Consumption Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.block1ConsumptionCharge, dataItem.block1Consumption, 'consumption', 'Block 1 Consumption Charge');
         }
         if (dataItem.block2Consumption || dataItem.block2ConsumptionCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.block2ConsumptionCharge, dataItem.block2Consumption, 'consumption', 'Block 2 Consumption Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.block2ConsumptionCharge, dataItem.block2Consumption, 'consumption', 'Block 2 Consumption Charge');
         }
         if (dataItem.block3Consumption || dataItem.block3ConsumptionCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.block3ConsumptionCharge, dataItem.block3Consumption, 'consumption', 'Block 3 Consumption Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.block3ConsumptionCharge, dataItem.block3Consumption, 'consumption', 'Block 3 Consumption Charge');
         }
         if (dataItem.otherConsumption || dataItem.otherConsumptionCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.otherConsumptionCharge, dataItem.otherConsumption, 'consumption', 'Other Consumption Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.otherConsumptionCharge, dataItem.otherConsumption, 'consumption', 'Other Consumption Charge');
         }
         if (dataItem.onPeakAmount || dataItem.onPeakCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.onPeakCharge, dataItem.onPeakAmount, 'consumption', 'On-Peak Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.onPeakCharge, dataItem.onPeakAmount, 'consumption', 'On-Peak Charge');
         }
         if (dataItem.offPeakAmount || dataItem.offPeakCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.offPeakCharge, dataItem.offPeakAmount, 'consumption', 'Off-Peak Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.offPeakCharge, dataItem.offPeakAmount, 'consumption', 'Off-Peak Charge');
         }
         if (dataItem.transmissionAndDeliveryCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.transmissionAndDeliveryCharge, 0, 'consumption', 'Transmission and Delivery Charge', 'dollarsPerKilowattHour');
+          this.addCharge(utilityMeter, dataItem, dataItem.transmissionAndDeliveryCharge, 0, 'consumption', 'Transmission and Delivery Charge');
         }
         if (dataItem.powerFactor || dataItem.powerFactorCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.powerFactorCharge, 0, 'other', 'Power Factor Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.powerFactorCharge, 0, 'other', 'Power Factor Charge');
         }
         if (dataItem.localSalesTax) {
-          this.addCharge(utilityMeter, dataItem, dataItem.localSalesTax, 0, 'tax', 'Local Sales Tax', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.localSalesTax, 0, 'tax', 'Local Sales Tax');
         }
         if (dataItem.stateSalesTax) {
-          this.addCharge(utilityMeter, dataItem, dataItem.stateSalesTax, 0, 'tax', 'State Sales Tax', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.stateSalesTax, 0, 'tax', 'State Sales Tax');
         }
         if (dataItem.latePayment) {
-          this.addCharge(utilityMeter, dataItem, dataItem.latePayment, 0, 'lateFee', 'Late Payment', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.latePayment, 0, 'lateFee', 'Late Payment');
         }
         if (dataItem.otherCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.otherCharge, 0, 'other', 'Other Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.otherCharge, 0, 'other', 'Other Charge');
         }
         //non-electricity
         if (dataItem.demandUsage || dataItem.demandCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.demandCharge, dataItem.demandUsage, 'demand', 'Demand Charge', 'dollarsPerKilowatt');
+          this.addCharge(utilityMeter, dataItem, dataItem.demandCharge, dataItem.demandUsage, 'demand', 'Demand Charge');
         }
       })
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged, utilityMeterData: meterData, meterDataChanged: meterDataChanged };
   }
 
-  addCharge(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, chargeAmount: number, chargeUsage: number, chargeType: MeterChargeType, chargeName: string, chargeUnit: ChargeCostUnit): void {
+  addCharge(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, chargeAmount: number, chargeUsage: number, chargeType: MeterChargeType, chargeName: string): void {
     let chargeExists: MeterCharge = meter.charges.find(charge => charge.name == chargeName);
     if (chargeExists) {
       meterData.charges.push({
@@ -280,7 +283,6 @@ export class UpdateDbEntryService {
         guid: guid,
         name: chargeName,
         chargeType: chargeType,
-        chargeUnit: chargeUnit,
         displayUsageInTable: true,
         displayChargeInTable: true
       })
