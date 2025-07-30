@@ -41,6 +41,8 @@ import { CustomGwpDashboardComponent } from "src/app/shared/custom-database/cust
 import { CustomGwpFormComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 import { AnalysisReportDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/analysis-report-dashboard/analysis-report-dashboard.component";
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
+import { AccountEmissionFactorsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component";
+import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -85,7 +87,8 @@ export const AccountRoutes: Route = {
                         { path: 'overview', component: OverviewReportDashboardComponent },
                         { path: 'performance', component: PerformanceReportDashboardComponent },
                         { path: 'better-climate', component: BetterClimateReportDashboardComponent },
-                        { path: 'analysis', component: AnalysisReportDashboardComponent }
+                        { path: 'analysis', component: AnalysisReportDashboardComponent },
+                        { path: 'account-emission-factors', component: AccountEmissionFactorsReportDashboardComponent }
                     ]
                 },
                 { path: 'setup', component: AccountReportSetupComponent },
@@ -93,7 +96,8 @@ export const AccountRoutes: Route = {
                 { path: 'data-overview-report', component: DataOverviewReportComponent },
                 { path: 'performance-report', component: PerformanceReportComponent },
                 { path: 'better-climate-report', component: BetterClimateReportComponent },
-                { path: 'analysis-report', component: AnalysisReportComponent }
+                { path: 'analysis-report', component: AnalysisReportComponent },
+                { path: 'account-emission-factors-report', component: AccountEmissionFactorsReportComponent }
             ]
         },
         {

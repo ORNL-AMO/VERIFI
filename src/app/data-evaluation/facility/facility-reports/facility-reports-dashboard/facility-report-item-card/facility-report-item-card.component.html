@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-between">
             <a class="item-name click-link" (click)="selectReport()">
                 <span class="fa pe-2"
-                    [ngClass]="{'fa-microscope': report.facilityReportType == 'analysis', 'fa-file': report.facilityReportType == 'overview'}"></span>
+                    [ngClass]="{'fa-microscope': report.facilityReportType == 'analysis', 'fa-file': report.facilityReportType == 'overview', 'fa-smog': report.facilityReportType == 'emissionFactors'}"></span>
                 {{report.name}}
             </a>
             <div class="d-flex">
@@ -26,14 +26,32 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     Report Start:
-                    <ng-container *ngIf="report.dataOverviewReportSettings.startMonth != undefined && report.dataOverviewReportSettings.startYear != undefined">
+                    <ng-container
+                        *ngIf="report.dataOverviewReportSettings.startMonth != undefined && report.dataOverviewReportSettings.startYear != undefined">
                         {{reportStartDate| date: 'MMM. y'}}
                     </ng-container>
                 </li>
                 <li class="list-group-item">
                     Report End:
-                    <ng-container *ngIf="report.dataOverviewReportSettings.endMonth != undefined && report.dataOverviewReportSettings.endYear != undefined">
+                    <ng-container
+                        *ngIf="report.dataOverviewReportSettings.endMonth != undefined && report.dataOverviewReportSettings.endYear != undefined">
                         {{reportEndDate| date: 'MMM. y'}}
+                    </ng-container>
+                </li>
+            </ul>
+        </ng-template>
+        <ng-template [ngIf]="report.facilityReportType == 'emissionFactors'">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    Report Start:
+                    <ng-container *ngIf="report.emissionFactorsReportSettings.startYear != undefined">
+                        {{reportStartYear}}
+                    </ng-container>
+                </li>
+                <li class="list-group-item">
+                    Report End:
+                    <ng-container *ngIf="report.emissionFactorsReportSettings.endYear != undefined">
+                        {{reportEndYear}}
                     </ng-container>
                 </li>
             </ul>
@@ -47,6 +65,9 @@
                 </ng-container>
                 <ng-container *ngIf="report.facilityReportType == 'overview'">
                     Overview Report
+                </ng-container>
+                <ng-container *ngIf="report.facilityReportType == 'emissionFactors'">
+                    Emission Factors Report
                 </ng-container>
             </div>
             <div class="d-flex">

@@ -20,6 +20,12 @@
                     <i class="fa fa-file"></i>
                     Data Overview Report</a>
             </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'emissionFactors'">
+                <a class="nav-link" routerLink="emission-factors-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Emission Factors Report</a>
+            </li>
         </ul>
     </div>
     <div>
