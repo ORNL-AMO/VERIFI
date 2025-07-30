@@ -14,9 +14,10 @@ export class DataEvaluationService {
   helpWidth: number = 200;
   sidebarWidth: number = 200;
   helpWidthBs: BehaviorSubject<number>;
+  print: BehaviorSubject<boolean>;
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
-
+    this.print = new BehaviorSubject<boolean>(false);
     this.helpWidth = this.localStorageService.retrieve("dataEvalHelpWidth");
     if (!this.helpWidth) {
       this.helpWidth = 200;

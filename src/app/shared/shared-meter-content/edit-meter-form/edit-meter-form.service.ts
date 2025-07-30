@@ -27,7 +27,6 @@ export class EditMeterFormService {
         guid: [charge.guid],
         name: [charge.name, Validators.required],
         chargeType: [charge.chargeType, Validators.required],
-        chargeUnit: [charge.chargeUnit, Validators.required],
         displayUsageInTable: [charge.displayUsageInTable],
         displayChargeInTable: [charge.displayChargeInTable]
       });
@@ -65,6 +64,7 @@ export class EditMeterFormService {
       vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation],
       globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, globalWarmingPotentialValidation],
       globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation],
+      demandUnit: [meter.demandUnit],
       chargesArray: chargesArray
     });
     // if(form.controls.source.value == 'Electricity'){
@@ -106,6 +106,7 @@ export class EditMeterFormService {
     meter.vehicleDistanceUnit = form.controls.vehicleDistanceUnit.value;
     meter.globalWarmingPotentialOption = form.controls.globalWarmingPotentialOption.value;
     meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
+    meter.demandUnit = form.controls.demandUnit.value;
     //set multipliers
     meter = this.setMultipliers(meter);
 
@@ -118,7 +119,6 @@ export class EditMeterFormService {
         guid: chargeGroup.get('guid').value,
         name: chargeGroup.get('name').value,
         chargeType: chargeGroup.get('chargeType').value,
-        chargeUnit: chargeGroup.get('chargeUnit').value,
         displayUsageInTable: chargeGroup.get('displayUsageInTable').value,
         displayChargeInTable: chargeGroup.get('displayChargeInTable').value
       };
@@ -295,7 +295,6 @@ export class EditMeterFormService {
       guid: [getGUID()],
       name: ['New Charge', Validators.required],
       chargeType: ['consumption', Validators.required],
-      chargeUnit: ['dollarsPerKilowattHour', Validators.required],
       displayChargeInTable: [true],
       displayUsageInTable: [true]
     });

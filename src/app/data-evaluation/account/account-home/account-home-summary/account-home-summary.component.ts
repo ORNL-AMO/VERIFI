@@ -5,10 +5,10 @@ import { AccountHomeService } from '../account-home.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 
 @Component({
     selector: 'app-account-home-summary',
@@ -28,7 +28,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService
+    private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service
     ) { }
 
   ngOnInit(): void {
@@ -53,7 +53,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
   exportData() {
-    this.exportToExcelTemplateService.exportFacilityData();
+    this.exportToExcelV3TemplateService.exportFacilityData();
   }
 
 

@@ -6,8 +6,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
-import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -29,7 +29,7 @@ export class ManageAccountsComponent {
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService
+    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service
   ) {
   }
 
@@ -82,7 +82,7 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingStatus(true);
     try {
       await this.dbChangesService.selectAccount(account, true);
-      this.exportToExcelTemplateService.exportFacilityData();
+      this.exportToExcelTemplateV3Service.exportFacilityData();
       this.toastNotificationService.showToast(account.name + 'Backup Exported To Excel', undefined, undefined, false, 'alert-success');
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to backup ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');

@@ -34,13 +34,6 @@
                 [ngClass]="{'active': orderDataField == 'processEmissions'}">Total Process <br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
             <ng-container *ngFor="let charge of selectedMeter.charges">
-                <ng-container
-                    *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
-                    <th (click)="setOrderDataField(charge.guid, 'usage')"
-                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
-                        {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
-                    </th>
-                </ng-container>
                 <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
                     [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
                     {{ charge.name }} <br>(&dollar;)
@@ -65,12 +58,6 @@
             <td *ngIf="selectedMeter.scope == 6">{{meterData.processEmissions | customNumber}}</td>
 
             <ng-container *ngFor="let meterCharge of selectedMeter.charges">
-                <ng-container
-                    *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
-                    <td>
-                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
-                    </td>
-                </ng-container>
                 <td *ngIf="meterCharge.displayChargeInTable">
                     {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
                 </td>

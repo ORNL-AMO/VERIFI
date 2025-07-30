@@ -1,5 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { DataEvaluationService } from './data-evaluation.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-data-evaluation',
@@ -16,6 +17,8 @@ export class DataEvaluationComponent {
   isDraggingSidebar: boolean = false;
   isDraggingHelp: boolean = false;
   sidebarCollapsed: boolean = false;
+  print: boolean = false;
+  printSub: Subscription;
   constructor(
     private dataEvaluationService: DataEvaluationService
   ) {
@@ -26,12 +29,16 @@ export class DataEvaluationComponent {
     this.sidebarWidth = this.dataEvaluationService.sidebarWidth;
     this.helpWidth = this.dataEvaluationService.helpWidth;
     this.setContentWidth();
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
+      this.print = print;
+    });
   }
 
   ngOnDestroy() {
     this.dataEvaluationService.sidebarWidth = this.sidebarWidth;
     this.dataEvaluationService.helpWidth = this.helpWidth;
     this.dataEvaluationService.fileReferences.next([]);
+    this.printSub.unsubscribe();
   }
 
   startResizingSidebar(event: MouseEvent): void {

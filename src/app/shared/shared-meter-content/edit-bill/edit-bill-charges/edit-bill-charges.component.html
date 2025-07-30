@@ -12,7 +12,7 @@
                             <input id="{{charge.name + '_' + charge.guid}}" class="form-control" type="number"
                                 formControlName="chargeUsage" onfocus="this.select();" min="0">
                             <span class="input-group-text">
-                                {{charge.chargeUnit | chargeUnitDisplay}}
+                                {{editMeter.demandUnit}}
                             </span>
                         </ng-container>
                         <input id="chargeAmount" class="form-control" type="number" formControlName="chargeAmount"

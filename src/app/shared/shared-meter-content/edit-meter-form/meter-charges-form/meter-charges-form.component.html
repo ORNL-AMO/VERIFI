@@ -21,16 +21,8 @@
                     </div>
                     <div class="col">
                         <label *ngIf="index == 0">Charge Type</label>
-                        <select class="form-select" formControlName="chargeType" aria-label="Charge Type"
-                            (change)="updateChargeUnit(index)">
+                        <select class="form-select" formControlName="chargeType" aria-label="Charge Type">
                             <option *ngFor="let type of chargeTypes" [value]="type.value">{{ type.label }}</option>
-                        </select>
-                    </div>
-                    <div class="col">
-                        <label *ngIf="index == 0">Charge Unit</label>
-                        <select class="form-select" formControlName="chargeUnit" placeholder="Charge Unit">
-                            <option *ngFor="let unitOption of chargeGroup.get('chargeType').value | chargesUnitOptions"
-                                [value]="unitOption.value">{{ unitOption.label }}</option>
                         </select>
                     </div>
                     <div class="col-auto mt-auto">

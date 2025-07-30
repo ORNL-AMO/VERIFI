@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from 'src/app/shared/sharedHelperFuntions';
-import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
+import { DemandUnitOptions, EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AllSources, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -49,6 +49,7 @@ export class EditMeterFormComponent implements OnInit {
   sourceOptions: Array<string> = AllSources;
   changingUnits: boolean = false;
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  demandUnitOptions: Array<UnitOption> = DemandUnitOptions;
   isEnergyMeter: boolean;
   collectionUnitIsEnergy: boolean;
 

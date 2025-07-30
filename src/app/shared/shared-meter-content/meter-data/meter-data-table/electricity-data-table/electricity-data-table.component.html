@@ -36,6 +36,10 @@
             <th *ngIf="generalInformationFilters.billedDemand" (click)="setOrderDataField('totalBilledDemand')"
                 [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
                 Billed<br> Demand (kW)</th>
+            <!-- totalBilledDemand -->
+            <th *ngIf="generalInformationFilters.powerFactor" (click)="setOrderDataField('powerFactor')"
+                [ngClass]="{'active': orderDataField == 'powerFactor'}">
+                Power Factor</th>
             <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
                 [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
                 (tonne
@@ -52,7 +56,7 @@
                     *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
                     <th (click)="setOrderDataField(charge.guid, 'usage')"
                         [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
-                        {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
+                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
                     </th>
                 </ng-container>
                 <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
@@ -86,6 +90,7 @@
             <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
             <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
             <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.powerFactor">{{meterData.powerFactor | customNumber}}</td>
 
             <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalWithMarketEmissions | customNumber}}</td>
             <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalWithLocationEmissions | customNumber}}</td>
@@ -161,7 +166,7 @@
                     *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
                     <th (click)="setOrderDataField(charge.guid, 'usage')"
                         [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
-                        {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
+                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
                     </th>
                 </ng-container>
                 <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"

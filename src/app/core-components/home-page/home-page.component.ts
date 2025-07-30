@@ -18,6 +18,7 @@ export class HomePageComponent {
   backupFile: any;
   showTestDataModal: boolean = false;
   accounts: Array<IdbAccount>;
+  currentPageNumber: number = 1;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService, private router: Router,

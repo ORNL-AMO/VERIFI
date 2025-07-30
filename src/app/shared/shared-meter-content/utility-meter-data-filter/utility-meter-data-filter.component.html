@@ -24,6 +24,11 @@
                             [(ngModel)]="generalInformationFilters.billedDemand" (change)="save()">
                         <label for="billedDemand" class="form-check-label">Billed Demand</label>
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="powerFactor" id="powerFactor"
+                            [(ngModel)]="generalInformationFilters.powerFactor" (change)="save()">
+                        <label for="powerFactor" class="form-check-label">Power Factor</label>
+                    </div>
                 </ng-container>
             </div>
             <div class="col">
@@ -167,7 +172,7 @@
                         id="{{'displayUsageInTable' + charge.guid}}" [(ngModel)]="charge.displayUsageInTable"
                         (change)="changeCharge()">
                     <label for="{{'displayUsageInTable' + charge.guid}}" class="form-check-label">{{charge.name}}
-                        ({{charge.chargeUnit | chargeUnitDisplay}})</label>
+                        (???)</label>
                 </div>
             </ng-container>
             <div class="form-check">

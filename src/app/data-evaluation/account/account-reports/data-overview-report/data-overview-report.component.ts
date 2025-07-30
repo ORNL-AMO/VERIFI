@@ -6,7 +6,6 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { AccountReportsService } from '../account-reports.service';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
@@ -22,12 +21,13 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
-    selector: 'app-data-overview-report',
-    templateUrl: './data-overview-report.component.html',
-    styleUrls: ['./data-overview-report.component.css'],
-    standalone: false
+  selector: 'app-data-overview-report',
+  templateUrl: './data-overview-report.component.html',
+  styleUrls: ['./data-overview-report.component.css'],
+  standalone: false
 })
 export class DataOverviewReportComponent {
 
@@ -53,15 +53,15 @@ export class DataOverviewReportComponent {
     private facilityDbService: FacilitydbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private accountReportsService: AccountReportsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) {
+    private customFuelDbService: CustomFuelDbService,
+    private dataEvaluationService: DataEvaluationService) {
 
   }
 
   ngOnInit() {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
     this.account = this.accountDbService.selectedAccount.getValue();

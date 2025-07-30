@@ -8,8 +8,8 @@ export function getPredictorStatistics(data: number[]): PredictorStatistics {
 
     const median = calculateMedian(data);
     const medianAbsDev = calculateMAD(data, median);
-    const medianminus2_5MAD = median - 2.5 * medianAbsDev;
-    const medianplus2_5MAD = median + 2.5 * medianAbsDev;
+    const medianminus2_5MAD = median - 5.0 * medianAbsDev;
+    const medianplus2_5MAD = median + 5.0 * medianAbsDev;
     const outliers = calculateOutliers(data, median, medianAbsDev);
     return { min, max, average, median, medianAbsDev, medianminus2_5MAD, medianplus2_5MAD, outliers };
 }
@@ -38,8 +38,8 @@ function calculateOutliers(data: number[], median: number, mad: number): number 
         return 0;
     }
 
-    const lowerBound = median - 2.5 * mad;
-    const upperBound = median + 2.5 * mad;
+    const lowerBound = median - 5.0 * mad;
+    const upperBound = median + 5.0 * mad;
 
     return data.filter(value => value < lowerBound || value > upperBound).length;
 }

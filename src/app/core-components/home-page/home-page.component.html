@@ -21,20 +21,20 @@
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-3">
+        <div class="col-md-4 col-lg-3">
             <div class="card h-100">
                 <div class="card-header">
                     Create New Account
                 </div>
                 <div class="card-body">
-                    Fill out the account, facility, meter, and predictor data details using the account data managements portion of VERIFI. Once data has
-                    been added to the account, access your portfolio to conduct analysis and generate performance
-                    reports.
+                    Fill out the account, facility, meter, and predictor data details. Once data has been added, users
+                    can conduct an analysis on the performance of their facilities.
                 </div>
                 <div class="card-footer justify-content-end">
                     <div class="d-flex w-100 justify-content-end">
                         <div>
                             <button class="btn nav-btn" (click)="createNewAccount();">
+                                <span class="fa fa-plus"></span>
                                 Get Started
                             </button>
                         </div>
@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-3">
+        <div class="col-md-4 col-lg-3">
             <div class="card h-100">
                 <div class="card-header">
                     Upload Account Backup
@@ -54,6 +54,7 @@
                     <div class="d-flex w-100 justify-content-end">
                         <div>
                             <button class="btn btn-primary" (click)="openImportBackup();">
+                                <span class="fa fa-upload"></span>
                                 Upload Backup
                             </button>
                         </div>
@@ -61,7 +62,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-3">
+        <div class="col-md-4 col-lg-3">
             <div class="card h-100">
                 <div class="card-header">
                     Load Example Account
@@ -74,6 +75,7 @@
                     <div class="d-flex w-100 justify-content-end">
                         <div>
                             <button class="btn btn-success" (click)="openLoadTestData();">
+                                <span class="fa fa-file-circle-plus"></span>
                                 Load Example
                             </button>
                         </div>
@@ -82,37 +84,66 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-12 text-end">
-            <p class="mb-0">
-                If you need help along the way, click or hover the <span class="fa fa-question-circle"></span> icon and
-                help text will appear.
-            </p>
-        </div>
-    </div>
     <div class="row justify-content-center" *ngIf="accounts.length > 0">
-        <div class="col-9">
+        <div class="col-md-12 col-lg-9">
+            <hr>
             <h5>VERIFI Accounts</h5>
             <div class="list-group">
-                <div class="list-group-item" *ngFor="let account of accounts">
+                <div class="list-group-item"
+                    *ngFor="let account of accounts|  slice: ((currentPageNumber-1) * 5): currentPageNumber * 5">
                     <div class="d-flex justify-content-between">
                         <div class="list-item-label mt-auto mb-auto">
                             {{account.name}}
                         </div>
                         <div>
-                            <button class="btn nav-btn me-2" (click)="goToDataWizard(account)">
+                            <button class="btn nav-btn me-2 btn-sm" (click)="goToDataWizard(account)">
                                 <span class="fa fa-database"></span> Data Management
                             </button>
-                            <button class="btn nav-btn" (click)="goToAccountHome(account)">
+                            <button class="btn nav-btn btn-sm" (click)="goToAccountHome(account)">
                                 <span class="fa fa-chart-simple"></span> Data Evaluation
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="d-flex w-100 justify-content-end" *ngIf="accounts.length > 4">
+                <div class="mt-2">
+                    <ngb-pagination [collectionSize]="accounts.length" [(page)]="currentPageNumber" [pageSize]="5"
+                        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+                    </ngb-pagination>
+                </div>
+            </div>
         </div>
     </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-9">
+            <hr>
+            <h5>About VERIFI and ORNL's Industrial Resources</h5>
+            <p>
+                For more information about VERIFI, as well as information about similar resources developed by ORNL
+                please
+                visit <a href="https://www.industrialresources.ornl.gov/VERIFI" target="_blank">ORNL's Industrial
+                    Resources</a>. Here you will find a collection of guidance
+                and user support documents.</p>
+            <p>
+                Dynamic help text is provided throughout VERIFI. If you need help at any time within the tool, click or
+                hover the <span class="fa fa-question-circle"></span> icon and
+                help text will appear.
+            </p>
 
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-9">
+            <hr>
+            <h5>Contact and Feedback</h5>
+            <p>
+                If you have any feedback or would like to contact the team behind VERIFI, please reach out to us at
+                <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.
+            </p>
+
+        </div>
+    </div>
 </div>
 
 

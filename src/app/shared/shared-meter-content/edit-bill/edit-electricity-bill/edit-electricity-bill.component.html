@@ -81,11 +81,10 @@
         <div class="input-group mb-3">
           <input id="totalRealDemand" class="form-control" type="number" formControlName="totalRealDemand"
             [class.warning]="meterDataForm.controls.totalRealDemand.value === 0" onfocus="this.select();" min="0">
-          <span class="input-group-text">kW</span>
+          <span class="input-group-text">
+            {{editMeter.demandUnit}}
+          </span>
         </div>
-        <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand
-          is
-          required</div>
         <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('min')">Can't be less than
           0
         </div>
@@ -101,15 +100,36 @@
         <div class="input-group mb-3">
           <input id="totalBilledDemand" class="form-control" type="number" formControlName="totalBilledDemand"
             [class.warning]="meterDataForm.controls.totalBilledDemand.value === 0" onfocus="this.select();" min="0">
-          <span class="input-group-text">kW</span>
+          <span class="input-group-text">
+            {{editMeter.demandUnit}}
+          </span>
         </div>
-        <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand
-          is
-          required</div>
         <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('min')">Can't be less
           than
           0</div>
         <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalBilledDemand.value === 0">Total demand
+          should
+          be
+          greater
+          than 0</div>
+        <!--Power Factor-->
+
+
+        <!--billed demand-->
+        <label for="powerFactor">
+          Power Factor
+        </label>
+        <div class="input-group mb-3">
+          <input id="powerFactor" class="form-control" type="number" formControlName="powerFactor"
+            [class.warning]="meterDataForm.controls.powerFactor.value === 0" onfocus="this.select();" min="0" max="1">
+        </div>
+        <div class="alert alert-danger" *ngIf="meterDataForm.get('powerFactor').hasError('min')">Can't be less
+          than
+          0</div>
+        <div class="alert alert-danger" *ngIf="meterDataForm.get('powerFactor').hasError('max')">Can't be more
+          than
+          1</div>
+        <div class="alert alert-warning" *ngIf="meterDataForm.controls.powerFactor.value === 0">Power factor
           should
           be
           greater

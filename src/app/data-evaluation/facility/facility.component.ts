@@ -4,13 +4,13 @@ import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FacilityReportsService } from './facility-reports/facility-reports.service';
+import { DataEvaluationService } from '../data-evaluation.service';
 
 @Component({
-    selector: 'app-facility',
-    templateUrl: './facility.component.html',
-    styleUrls: ['./facility.component.css'],
-    standalone: false
+  selector: 'app-facility',
+  templateUrl: './facility.component.html',
+  styleUrls: ['./facility.component.css'],
+  standalone: false
 })
 export class FacilityComponent implements OnInit {
 
@@ -21,7 +21,7 @@ export class FacilityComponent implements OnInit {
   printSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private router: Router,
     private dbChangesService: DbChangesService,
-  private facilityReportService: FacilityReportsService) { }
+    private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -33,17 +33,17 @@ export class FacilityComponent implements OnInit {
       let selectedFacility: IdbFacility = facilities.find(facility => { return facility.id == facilityId });
       if (selectedFacility) {
         this.dbChangesService.selectFacility(selectedFacility);
-      }else{
+      } else {
         this.router.navigateByUrl('/data-evaluation/account')
       }
     });
 
-    this.printSub = this.facilityReportService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.printSub.unsubscribe();
   }

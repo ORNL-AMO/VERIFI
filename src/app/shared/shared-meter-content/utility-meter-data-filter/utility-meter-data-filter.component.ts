@@ -92,7 +92,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         showSection: true,
         totalCost: true,
         realDemand: true,
-        billedDemand: true
+        billedDemand: true,
+        powerFactor: true
 
       }
     } else if (this.meter.scope != 2) {
@@ -137,7 +138,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         showSection: false,
         totalCost: false,
         realDemand: false,
-        billedDemand: false
+        billedDemand: false,
+        powerFactor: false
 
       }
     } else if (this.meter.scope != 2) {
@@ -168,7 +170,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   checkShowSection() {
     this.generalInformationFilters.showSection = (
-      this.generalInformationFilters.totalCost || this.generalInformationFilters.realDemand || this.generalInformationFilters.billedDemand);
+      this.generalInformationFilters.totalCost || this.generalInformationFilters.realDemand || this.generalInformationFilters.billedDemand || this.generalInformationFilters.powerFactor);
 
     this.emissionsFilters.showSection = (
       this.emissionsFilters.marketEmissions || this.emissionsFilters.locationEmissions || this.emissionsFilters.recs

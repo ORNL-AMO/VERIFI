@@ -196,6 +196,7 @@
                         </app-edit-meter-form>
 
                         <ng-container *ngIf="editMeter.id == undefined">
+                            <hr>
                             <div class="d-flex w-100 alert alert-warning" *ngIf="!showExisting">
                                 If this is showing up as a new meter and you would like the data to be applied to an
                                 existing meter.
@@ -238,4 +239,4 @@
 </div>
 <!--TODO: disable next-->
 <app-data-management-import-footer [fileReference]="fileReference"
-    [navOption]="'confirm-meters'"></app-data-management-import-footer>
+    [navOption]="'confirm-meters'" [disableNext]="editMeterForm != undefined"></app-data-management-import-footer>

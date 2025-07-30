@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
@@ -10,7 +10,6 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 })
 export class AccountReportsService {
 
-  print: BehaviorSubject<boolean>;
   generateExcel: BehaviorSubject<boolean>;
 
   errorMessage: BehaviorSubject<string>;
@@ -18,7 +17,6 @@ export class AccountReportsService {
   constructor(private accountReportDbService: AccountReportDbService,
     private formBuilder: FormBuilder
   ) {
-    this.print = new BehaviorSubject<boolean>(false);
     this.generateExcel = new BehaviorSubject<boolean>(false);
     this.errorMessage = new BehaviorSubject<string>(undefined);
 
