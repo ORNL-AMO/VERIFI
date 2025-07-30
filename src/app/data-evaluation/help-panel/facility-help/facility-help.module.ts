@@ -11,6 +11,11 @@ import { GroupAnalysisHelpComponent } from './facility-analysis-help/group-analy
 import { FacilityAnalysisResultsHelpComponent } from './facility-analysis-help/facility-analysis-results-help/facility-analysis-results-help.component';
 import { AccountAnalysisInFacilityHelpComponent } from './facility-analysis-help/account-analysis-in-facility-help/account-analysis-in-facility-help.component';
 import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shared-help-content.module';
+import { FacilityReportsHelpComponent } from './facility-reports-help/facility-reports-help.component';
+import { FacilityReportSetupHelpComponent } from './facility-reports-help/facility-report-setup-help/facility-report-setup-help.component';
+import { FacilityDataOverviewReportHelpComponent } from './facility-reports-help/facility-data-overview-report-help/facility-data-overview-report-help.component';
+import { FacilityAnalysisReportHelpComponent } from './facility-reports-help/facility-analysis-report-help/facility-analysis-report-help.component';
+import { FacilityReportDashboardHelpComponent } from './facility-reports-help/facility-report-dashboard-help/facility-report-dashboard-help.component';
 
 
 
@@ -25,7 +30,12 @@ import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shar
     FacilityAnalysisSetupHelpComponent,
     GroupAnalysisHelpComponent,
     FacilityAnalysisResultsHelpComponent,
-    AccountAnalysisInFacilityHelpComponent
+    AccountAnalysisInFacilityHelpComponent,
+    FacilityReportsHelpComponent,
+    FacilityReportSetupHelpComponent,
+    FacilityDataOverviewReportHelpComponent,
+    FacilityAnalysisReportHelpComponent,
+    FacilityReportDashboardHelpComponent
   ],
   imports: [
     CommonModule,

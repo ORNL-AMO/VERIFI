@@ -12,6 +12,8 @@ export class FacilityPrintReportButtonComponent {
 
   print: boolean;
   printSub: Subscription;
+  helpWidth: number;
+  helpWidthSub: Subscription;
   constructor(private dataEvaluationService: DataEvaluationService) {
 
   }
@@ -23,10 +25,14 @@ export class FacilityPrintReportButtonComponent {
         this.printReport();
       }
     });
+    this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
+      this.helpWidth = helpWidth;
+    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    this.helpWidthSub.unsubscribe();
   }
 
 

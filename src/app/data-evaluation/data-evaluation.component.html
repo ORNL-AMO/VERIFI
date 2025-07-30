@@ -1,4 +1,4 @@
-<div class="d-flex w-100" (mousemove)="drag($event)" (mouseup)="stopResizing($event)" #pageContent
+<div class="d-flex w-100 h-100" (mousemove)="drag($event)" (mouseup)="stopResizing($event)" #pageContent
     (mouseleave)="stopResizing($event)" [ngStyle]="{'h-100': !print}">
     <div class="d-flex hide-print" [ngStyle]="{'width.px': sidebarWidth}">
         <div class="w-100">

@@ -32,11 +32,12 @@ export class FacilityHelpComponent implements OnInit {
   setHelpURL(url: string) {
     let componentOptions: Array<string> = [
       'home',
+      'reports',
       'overview',
+      'analysis',
       'settings',
       'utility',
       'visualization',
-      'analysis'
     ]
     this.helpURL = componentOptions.find(option => {
       return url.includes(option);
