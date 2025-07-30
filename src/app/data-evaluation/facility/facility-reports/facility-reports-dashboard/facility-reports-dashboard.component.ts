@@ -91,11 +91,14 @@ export class FacilityReportsDashboardComponent {
   setReportType(url: string) {
     if (url.includes('analysis')) {
       this.reportType = 'Analysis';
+      this.newReportType = 'analysis';
     } else if (url.includes('overview')) {
       this.reportType = 'Data Overview';
+      this.newReportType = 'overview';
     }
     else if (url.includes('emission-factors')) {
       this.reportType = 'Emission Factors';
+      this.newReportType = 'emissionFactors';
     }
   }
 

@@ -3,9 +3,11 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitiesListComponent } from 'src/app/data-management/account-facilities/facilities-list/facilities-list.component';
 import { FacilityDataComponent } from 'src/app/data-management/account-facilities/facility-data/facility-data.component';
+import { FacilityMeterDataQualityReportComponent } from 'src/app/data-management/account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component';
 import { FacilityMeterMonthlyDataComponent } from 'src/app/data-management/account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
 import { FacilityMeterComponent } from 'src/app/data-management/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
 import { FacilityMetersTableComponent } from 'src/app/data-management/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
+import { FacilityPredictorDataQualityReportComponent } from 'src/app/data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component';
 import { FacilityPredictorComponent } from 'src/app/data-management/account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
 import { FacilityPredictorsTableComponent } from 'src/app/data-management/account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
 import { FacilitySetupComponent } from 'src/app/data-management/account-facilities/facility-data/facility-setup/facility-setup.component';
@@ -83,6 +85,10 @@ export class DataManagementFacilityHelpComponent {
               this.helpContext = 'facility-meter-monthly-data';
             } else if (subComponent === FacilityPredictorComponent) {
               this.helpContext = 'facility-predictors';
+            } else if(subComponent === FacilityMeterDataQualityReportComponent){
+              this.helpContext = 'facility-meter-data-quality';
+            } else if(subComponent === FacilityPredictorDataQualityReportComponent){
+              this.helpContext = 'facility-predictor-data-quality';
             }
           } else {
             if (this.router.url.includes('predictor-data')) {

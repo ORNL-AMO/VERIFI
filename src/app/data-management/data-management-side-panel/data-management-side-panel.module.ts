@@ -11,6 +11,8 @@ import { UploadDataHelpModule } from './data-management-help-panel/upload-data-h
 import { DataManagementFacilityHelpComponent } from './data-management-help-panel/data-management-facility-help/data-management-facility-help.component';
 import { FacilityListHelpComponent } from './data-management-help-panel/data-management-facility-help/facility-list-help/facility-list-help.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
+import { PredictorDataQualityReportHelpComponent } from './data-management-help-panel/data-management-facility-help/predictor-data-quality-report-help/predictor-data-quality-report-help.component';
+import { MeterDataQualityReportHelpComponent } from './data-management-help-panel/data-management-facility-help/meter-data-quality-report-help/meter-data-quality-report-help.component';
 
 
 
@@ -21,7 +23,9 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.mod
     TodoListHelpComponent,
     SetupChecklistComponent,
     DataManagementFacilityHelpComponent,
-    FacilityListHelpComponent
+    FacilityListHelpComponent,
+    PredictorDataQualityReportHelpComponent,
+    MeterDataQualityReportHelpComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +34,7 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.mod
     FormsModule,
     UploadDataHelpModule,
     HelperPipesModule
-  ],
+],
   exports: [
     DataManagementSidePanelComponent
   ]
