@@ -55,7 +55,7 @@
                     *ngFor="let todoItem of allTodoItems; let meterIndex = index;" [routerLink]="todoItem.url">
                     <div class="p-0 bold">
                         <span class="fa fa-temperature-half pe-2" *ngIf="todoItem.isWeather"></span>
-                        {{todoItem.label}}
+                        {{todoItem.label}} ({{todoItem.facilityId | facilityName}})
                     </div>
                 </li>
             </ng-template>
