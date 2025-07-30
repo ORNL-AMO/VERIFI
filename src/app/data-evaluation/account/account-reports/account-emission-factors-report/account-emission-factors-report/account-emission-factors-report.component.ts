@@ -5,9 +5,9 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountReportsService } from '../../account-reports.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
   selector: 'app-account-emission-factors-report',
@@ -24,13 +24,13 @@ export class AccountEmissionFactorsReportComponent {
   accountFacilities: Array<IdbFacility> = [];
 
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService,
+    private dataEvaluationService: DataEvaluationService,
     private router: Router,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.printSub = this.accountReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();

@@ -5,7 +5,6 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, EmissionFactorsReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { FacilityReportsService } from '../../facility-reports.service';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -14,6 +13,7 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
   selector: 'app-facility-emission-factors-report-results',
@@ -38,7 +38,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
   emissionData: Array<EmissionOthers> = [];
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private facilityReportsService: FacilityReportsService,
+    private dataEvaluationService: DataEvaluationService,
     private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
@@ -53,7 +53,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
       this.emissionFactorsReportSettings = this.facilityReport.emissionFactorsReportSettings;
       this.calculateFacilitiesSummary();
     });
-    this.printSub = this.facilityReportsService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
   }
