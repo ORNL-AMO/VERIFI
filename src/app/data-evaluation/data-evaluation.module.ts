@@ -11,8 +11,6 @@ import { FacilityModule } from './facility/facility.module';
 import { HideAccountLinksPipe } from './sidebar/hide-account-links.pipe';
 import { HideFacilityLinksPipe } from './sidebar/hide-facility-links.pipe';
 
-
-
 @NgModule({
   declarations: [
     DataEvaluationComponent,

@@ -53,3 +53,40 @@
     </p>
     <hr>
 </ng-container>
+<ng-container *ngIf="selectedReport.reportType == 'performance'">
+    <p>
+        Select an account analysis to get a detailed report of the performance of the account and its facilities using
+        the models within the selected analysis.
+    </p>
+    <hr>
+    <p>
+        Use the checkboxes under <b>Section to Include</b> to select how granular you want the report to go. View
+        results by facilitiy, utility and/or group.
+    </p>
+    <hr>
+    <p>
+        The content shown within the tables and graphs can also be modified by using the checkboxes under <b>Report
+            Content Options</b>.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="selectedReport.reportType == 'betterClimate'">
+    <p>
+        Select the years to include in the report.
+    </p>
+    <hr>
+    <p>
+        Choose to include all utility data or to manually select which meter groups to include using the radio and
+        checkbox options.
+    </p>
+    <hr>
+    <p>
+        Customize the content included in the report with the checkboxes.
+    </p>
+    <hr>
+    <p>
+        If using the report to fill out the Better Climate Challange form, "Emissions Reduction Iniciatives" can be
+        added at the bottom of the setup and will be included in the report.
+    </p>
+    <hr>
+</ng-container>

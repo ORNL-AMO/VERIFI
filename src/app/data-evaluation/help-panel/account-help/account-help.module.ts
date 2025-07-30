@@ -15,6 +15,8 @@ import { AccountAnalysisSetupHelpComponent } from './account-analysis-help/accou
 import { AccountAnalysisSelectItemsHelpComponent } from './account-analysis-help/account-analysis-select-items-help/account-analysis-select-items-help.component';
 import { AccountAnalysisResultsHelpComponent } from './account-analysis-help/account-analysis-results-help/account-analysis-results-help.component';
 import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shared-help-content.module';
+import { AnalysisReportHelpComponent } from './account-reports-help/analysis-report-help/analysis-report-help.component';
+import { BetterClimateReportHelpComponent } from './account-reports-help/better-climate-report-help/better-climate-report-help.component';
 
 
 
@@ -33,7 +35,9 @@ import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shar
     AccountAnalysisDashboardHelpComponent,
     AccountAnalysisSetupHelpComponent,
     AccountAnalysisSelectItemsHelpComponent,
-    AccountAnalysisResultsHelpComponent
+    AccountAnalysisResultsHelpComponent,
+    AnalysisReportHelpComponent,
+    BetterClimateReportHelpComponent
   ],
   imports: [
     CommonModule,
