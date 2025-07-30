@@ -80,7 +80,6 @@ export class AccountReportsBannerComponent {
     let dataOverviewValid: boolean = true;
     let performanceValid: boolean = true;
     let analysisValid: boolean = true;
-    let accountEmissionFactorsValid: boolean = true;
     if (report.reportType == 'dataOverview') {
       if (this.errorMessage.length > 0) {
         dataOverviewValid = false;
@@ -97,10 +96,8 @@ export class AccountReportsBannerComponent {
         performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
       } else if (report.reportType == 'analysis') {
         analysisValid = this.accountReportsService.getAnalysisFormFromReport(report.analysisReportSetup).valid;
-      } else if (report.reportType == 'accountEmissionFactors') {
-        accountEmissionFactorsValid = this.accountReportsService.getAccountEmissionFactorsFormFromReport(report.accountEmissionFactorsReportSetup).valid;
-      }
-      this.setupValid = (setupValid && betterPlantsValid && performanceValid && analysisValid && accountEmissionFactorsValid);
+      } 
+      this.setupValid = (setupValid && betterPlantsValid && performanceValid && analysisValid);
     }
   }
 

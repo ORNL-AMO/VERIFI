@@ -17,11 +17,6 @@ import _ from 'lodash';
 })
 export class AccountEmissionFactorsReportDashboardComponent {
 
-  facilityReportsSub: Subscription;
-  facilityReports: Array<IdbFacilityReport>;
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
-
   reportList: Array<IdbAccountReport> = [];
   selectedAccount: IdbAccount;
   accountReportsSub: Subscription;

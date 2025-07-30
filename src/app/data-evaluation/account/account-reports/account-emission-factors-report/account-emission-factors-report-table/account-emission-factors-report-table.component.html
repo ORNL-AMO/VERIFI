@@ -1,5 +1,5 @@
-<div class="mt-4">
-    <div *ngFor="let emissionData of facilityEmissionData" class="card-wrapper">
+<div class="mt-4" *ngIf="emissionReportData.length > 0">
+    <div *ngFor="let emissionData of emissionReportData" class="card-wrapper">
         <div class="card shadow-sm rounded">
             <div class="card-body">
                 <h3 class="mt-4 text-center">
@@ -17,7 +17,7 @@
                         <div class="mt-3">
                             <span class="me-3 meter-text"><b class="meter-text">Electricity Meters:</b></span>
                             <span class="meter-text"
-                                *ngFor="let meter of emissionData.electricityMeters; let i = index">
+                                *ngFor="let meter of emissionData.electricityMeters; let i = index; let last = last;">
                                 {{ meter }}<span *ngIf="i < emissionData.electricityMeters.length - 1">, </span>
                             </span>
                         </div>

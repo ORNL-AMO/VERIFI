@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, EmissionFactorsReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -37,8 +34,8 @@ export class FacilityEmissionFactorsReportResultsComponent {
   facilityMeters: Array<IdbUtilityMeter>;
   customFuels: Array<IdbCustomFuel>;
   electricityMeters: Array<string> = [];
-  emissionDataElectricity: Array<{ source: string, year: number, marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean }> = [];
-  emissionData: Array<{ meterName: string, source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
+  emissionDataElectricity: Array<EmissionElectricity> = [];
+  emissionData: Array<EmissionOthers> = [];
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private facilityReportsService: FacilityReportsService,
@@ -133,5 +130,22 @@ export class FacilityEmissionFactorsReportResultsComponent {
       }
     });
   }
+}
 
+export interface EmissionElectricity {
+  source: string;
+  year: number;
+  marketRate: EmissionsRate;
+  locationRate: EmissionsRate;
+  directEmissionsRate: boolean;
+}
+
+export interface EmissionOthers {
+  meterName: string;
+  source: string;
+  fuelValue: string;
+  CO2: number;
+  CH4: number;
+  N2O: number;
+  unit: string;
 }

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { EmissionsRate } from 'src/app/models/eGridEmissions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { EmissionElectricity, EmissionOthers } from '../facility-emission-factors-report-results.component';
 
 @Component({
   selector: 'app-facility-emission-factors-report-table',
@@ -14,10 +14,9 @@ export class FacilityEmissionFactorsReportTableComponent {
   @Input()
   electricityMeters: Array<string> = [];
   @Input()
-  emissionDataElectricity: Array<{ year: number, marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean }> = [];
+  emissionDataElectricity: Array<EmissionElectricity> = [];
   @Input()
-  emissionData: Array<{ meterName: string, source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
+  emissionData: Array<EmissionOthers> = [];
   @Input()
   facility: IdbFacility;
-
 }

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
+import { EmissionElectricity, EmissionOthers } from 'src/app/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
@@ -26,7 +27,7 @@ export class AccountEmissionFactorsReportTableComponent {
   selectedReport: IdbAccountReport;
 
   customFuels: Array<IdbCustomFuel>;
-  facilityEmissionData: Array<{ facility: IdbFacility, emissionsElectricity: Array<{ source: string, year: number, marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean }>, otherEmissions: Array<{ meterName: string, source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }>, electricityMeters: Array<string> }> = [];
+  emissionReportData: Array<EmissionFactorsReportData> = [];
 
   constructor(private customFuelDbService: CustomFuelDbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -42,9 +43,10 @@ export class AccountEmissionFactorsReportTableComponent {
   }
 
   calculateFacilitiesSummary(facility: IdbFacility, facilityMeters: Array<IdbUtilityMeter>) {
-    let emissionDataElectricity: Array<{ source: string, year: number, marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean }> = [];
-    let emissionData: Array<{ meterName: string, source: string, fuelValue: string, CO2: number, CH4: number, N2O: number, unit: string }> = [];
+    let emissionDataElectricity: Array<EmissionElectricity> = [];
+    let emissionData: Array<EmissionOthers> = [];
     let electricityMeters: Array<string> = [];
+
     let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
 
     facilityMeters.forEach(meter => {
@@ -109,7 +111,7 @@ export class AccountEmissionFactorsReportTableComponent {
         });
       }
     });
-    this.facilityEmissionData.push({
+    this.emissionReportData.push({
       facility: facility,
       emissionsElectricity: emissionDataElectricity,
       otherEmissions: emissionData,
@@ -117,3 +119,11 @@ export class AccountEmissionFactorsReportTableComponent {
     });
   }
 }
+
+export interface EmissionFactorsReportData {
+  facility: IdbFacility;
+  emissionsElectricity: Array<EmissionElectricity>;
+  otherEmissions: Array<EmissionOthers>;
+  electricityMeters: Array<string>;
+}
+

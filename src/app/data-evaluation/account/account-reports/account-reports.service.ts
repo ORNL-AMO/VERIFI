@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { AccountEmissionFactorsReportSetup, AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
+import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -302,24 +302,6 @@ export class AccountReportsService {
     return analysisReportSetup;
   }
 
-  getAccountEmissionFactorsFormFromReport(accountEmissionFactorsReportSetup: AccountEmissionFactorsReportSetup): FormGroup {
-    if (!accountEmissionFactorsReportSetup) {
-      accountEmissionFactorsReportSetup = {
-      };
-    }
-    let form: FormGroup = this.formBuilder.group({
-    });
-    return form;
-  }
-
-  updateAccountEmissionFactorsReportFromForm(accountEmissionFactorsReportSetup: AccountEmissionFactorsReportSetup, form: FormGroup): AccountEmissionFactorsReportSetup {
-    if (!accountEmissionFactorsReportSetup) {
-      accountEmissionFactorsReportSetup = {
-      };
-    }
-    return accountEmissionFactorsReportSetup;
-  }
-
   isReportValid(report: IdbAccountReport): boolean {
     let setupForm: FormGroup = this.getSetupFormFromReport(report);
     if (setupForm.invalid) {
@@ -341,8 +323,7 @@ export class AccountReportsService {
       let analysisForm: FormGroup = this.getAnalysisFormFromReport(report.analysisReportSetup);
       return analysisForm.valid;
     } else if (report.reportType == 'accountEmissionFactors') {
-      let accountEmissionFactorsForm: FormGroup = this.getAccountEmissionFactorsFormFromReport(report.accountEmissionFactorsReportSetup);
-      return accountEmissionFactorsForm.valid;
+      return true;
     }
   }
 }
