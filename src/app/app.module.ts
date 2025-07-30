@@ -16,7 +16,7 @@ import { StaticContentModule } from './static-content/static-content.module';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
-import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
@@ -63,7 +63,8 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         WeatherDataModule,
         UserSurveyModule,
         DataManagementModule,
-        DataEvaluationModule
+        DataEvaluationModule,
+        NgbPaginationModule
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })
