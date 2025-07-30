@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 })
 export class AccountReportsHelpComponent {
 
-  helpURL: 'dashboard' | 'setup' | 'data-overview-report' | 'better-plants' | 'analysis-report' | 'better-climate-report';
+  helpURL: 'dashboard' | 'setup' | 'data-overview-report' | 'better-plants' | 'analysis-report' | 'better-climate-report' | 'emission-factors-report';
   routerSub: Subscription;
   constructor(private router: Router) {
   }
@@ -42,6 +42,8 @@ export class AccountReportsHelpComponent {
       this.helpURL = 'analysis-report';
     } else if(url.includes('better-climate-report')){
       this.helpURL = 'better-climate-report';
+    }else if(url.includes('emission-factors-report')){
+      this.helpURL = 'emission-factors-report';
     }
   }
 }

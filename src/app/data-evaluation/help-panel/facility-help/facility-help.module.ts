@@ -16,6 +16,7 @@ import { FacilityReportSetupHelpComponent } from './facility-reports-help/facili
 import { FacilityDataOverviewReportHelpComponent } from './facility-reports-help/facility-data-overview-report-help/facility-data-overview-report-help.component';
 import { FacilityAnalysisReportHelpComponent } from './facility-reports-help/facility-analysis-report-help/facility-analysis-report-help.component';
 import { FacilityReportDashboardHelpComponent } from './facility-reports-help/facility-report-dashboard-help/facility-report-dashboard-help.component';
+import { FacilityEmissionsFactorsReportHelpComponent } from './facility-reports-help/facility-emissions-factors-report-help/facility-emissions-factors-report-help.component';
 
 
 
@@ -35,7 +36,8 @@ import { FacilityReportDashboardHelpComponent } from './facility-reports-help/fa
     FacilityReportSetupHelpComponent,
     FacilityDataOverviewReportHelpComponent,
     FacilityAnalysisReportHelpComponent,
-    FacilityReportDashboardHelpComponent
+    FacilityReportDashboardHelpComponent,
+    FacilityEmissionsFactorsReportHelpComponent
   ],
   imports: [
     CommonModule,
