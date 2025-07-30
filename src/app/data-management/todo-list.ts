@@ -36,14 +36,14 @@ export function getTodoList(account: IdbAccount,
             otherItems.push({
                 label: 'Upload data',
                 url: '/data-management/' + account.guid + '/import-data',
-                description: "Upload data to the account. Facility, utility and predictor data can be imported from an excel template provided by VERIFI or from a variety of excel files.",
+                description: "For accounts with large amounts of facility data, upload data to the account. Use VERIFI's upload data features to get data into VERIFI via excel.",
                 facilityId: undefined,
                 type: 'account'
             });
             otherItems.push({
                 label: 'Add data manually',
                 url: '/data-management/' + account.guid + '/facilities',
-                description: "Create one or more facilities for this account manually. Once a facility is created, you can add utility meters and predictors to it.",
+                description: "For smaller accounts. Manual data entry is possible. Create one or more facilities for this account manually. Once a facility is created, you can add utility meters and predictors to it.",
                 facilityId: undefined,
                 type: 'account'
             });

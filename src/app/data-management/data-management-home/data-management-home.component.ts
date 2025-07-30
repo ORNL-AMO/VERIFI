@@ -60,6 +60,7 @@ export class DataManagementHomeComponent {
   hasTodoItems: boolean = false;
   totalTodoItems: number = 0;
   allTodoItems: Array<TodoItem> = [];
+  hasInitialSetupItems: boolean;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -134,6 +135,10 @@ export class DataManagementHomeComponent {
     }) != undefined;
     this.hasTodoItems = this.allTodoItems.length > 0 || this.toDoItems.otherItems.length > 0;
     this.totalTodoItems = this.allTodoItems.length + this.toDoItems.otherItems.length;
+
+    this.hasInitialSetupItems = this.toDoItems.otherItems.find(item => {
+      return item.label == 'Upload data'
+    }) != undefined;
   }
 
   async updateIncludedItems() {

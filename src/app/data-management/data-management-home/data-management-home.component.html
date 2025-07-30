@@ -30,7 +30,8 @@
                 </div>
                 <hr class="my-2">
                 <p>
-                    The following items have been identified as needing action for this account.
+                    The following items have been identified as needing action for this account. Click the item in the
+                    list and you will be brought to the location within VERIFI to address it.
                 </p>
                 <ng-template [ngIf]="hasTodoItems" [ngIfElse]="noToDoItems">
                     <ul class="list-group" [ngClass]="{'list-group-flush': totalTodoItems > 10}">
@@ -106,6 +107,10 @@
                                 <p class="fw-light mb-0 ms-3" *ngIf="todoItem.description">
                                     {{todoItem.description}} ({{todoItem.facilityId | facilityName}})</p>
                             </li>
+                            <p class="mt-2" *ngIf="hasInitialSetupItems">
+                                <span class="fa fa-circle-exclamation"></span>
+                                A combination of data upload and manual data entry can be done.
+                            </p>
                         </ng-template>
 
                     </ul>
