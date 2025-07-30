@@ -54,6 +54,8 @@ import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-da
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
 import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/edit-meter.component";
 import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility-data/predictors/edit-predictor/edit-predictor.component";
+import { FacilityEmissionsFactorsReportsDashboardComponent } from "../data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-emissions-factors-reports-dashboard/facility-emissions-factors-reports-dashboard.component";
+import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -298,11 +300,13 @@ export const FacilityRoutes: Route = {
                         { path: '', pathMatch: 'full', redirectTo: 'analysis' },
                         { path: 'analysis', component: FacilityAnalysisReportsDashboardComponent },
                         { path: 'overview', component: FacilityOverviewReportsDashboardComponent },
+                        { path: 'emission-factors', component: FacilityEmissionsFactorsReportsDashboardComponent },
                     ]
                 },
                 { path: 'setup', component: FacilityReportSetupComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
-                { path: 'overview-report', component: FacilityOverviewReportResultsComponent }
+                { path: 'overview-report', component: FacilityOverviewReportResultsComponent },
+                { path: 'emission-factors-report', component: FacilityEmissionFactorsReportResultsComponent }
             ]
         }
     ]

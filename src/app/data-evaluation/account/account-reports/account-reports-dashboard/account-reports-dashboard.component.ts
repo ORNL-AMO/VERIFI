@@ -65,6 +65,8 @@ export class AccountReportsDashboardComponent {
       this.newReportType = 'betterClimate';
     } else if (this.router.url.includes('analysis')) {
       this.newReportType = 'analysis';
+    } else if (this.router.url.includes('account-emission-factors')) {
+      this.newReportType = 'accountEmissionFactors';
     }
     this.displayNewReport = true;
   }

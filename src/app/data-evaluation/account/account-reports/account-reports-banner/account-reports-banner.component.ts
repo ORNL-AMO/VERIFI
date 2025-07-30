@@ -96,7 +96,7 @@ export class AccountReportsBannerComponent {
         performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
       } else if (report.reportType == 'analysis') {
         analysisValid = this.accountReportsService.getAnalysisFormFromReport(report.analysisReportSetup).valid;
-      }
+      } 
       this.setupValid = (setupValid && betterPlantsValid && performanceValid && analysisValid);
     }
   }
@@ -112,6 +112,8 @@ export class AccountReportsBannerComponent {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/better-climate')
     } else if (this.selectedReport.reportType == 'analysis') {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/analysis')
+    } else if (this.selectedReport.reportType == 'accountEmissionFactors') {
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/account-emission-factors')
     } else {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard')
     }
