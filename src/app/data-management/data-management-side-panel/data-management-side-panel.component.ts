@@ -17,7 +17,7 @@ export class DataManagementSidePanelComponent {
   helpPanelOpenSub: Subscription;
   helpPanelOpen: boolean;
 
-  activePanel: 'help' | 'checklist' = 'help';
+  activePanel: 'help' | 'checklist' = 'checklist';
 
   constructor(
     private dataManagementService: DataManagementService

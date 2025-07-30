@@ -40,18 +40,18 @@ export class DataManagementHelpPanelComponent {
 
 
   setHelpURL() {
-    let currentComponent = this.activatedRoute.firstChild.component.name;
-    if (currentComponent === 'DataManagementHomeComponent') {
+    let currentComponent = this.activatedRoute.firstChild.snapshot.routeConfig?.component;
+    if (currentComponent === DataManagementHomeComponent) {
       this.helpContext = 'todo-list'
-    } else if (currentComponent === 'AccountSetupComponent') {
+    } else if (currentComponent === AccountSetupComponent) {
       this.helpContext = 'account-setup';
-    } else if (currentComponent === 'DataManagementImportComponent') {
+    } else if (currentComponent === DataManagementImportComponent) {
       this.helpContext = 'upload';
-    } else if (currentComponent === 'AccountFacilitiesComponent') {
+    } else if (currentComponent === AccountFacilitiesComponent) {
       this.helpContext = 'facility';
-    } else if (currentComponent === 'WeatherDataComponent') {
+    } else if (currentComponent === WeatherDataComponent) {
       this.helpContext = 'weather-data';
-    } else if (currentComponent === 'AccountCustomDataComponent') {
+    } else if (currentComponent === AccountCustomDataComponent) {
       this.helpContext = 'account-custom-data';
     } else {
       this.helpContext = 'default';
