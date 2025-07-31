@@ -706,11 +706,10 @@ export class ExportToExcelTemplateV3Service {
 
       worksheet.getCell(alpha + rowIndex).value = charge.name;
       alpha = this.getNextAlpha(alpha);
-      if (charge.chargeType == 'consumption' || charge.chargeType == 'demand') {
-        worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeUsage;
-      }
+      worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeUsage;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeAmount;
+      alpha = this.getNextAlpha(alpha);
       rowIndex++;
     })
   }
