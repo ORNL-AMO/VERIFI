@@ -39,7 +39,7 @@ jobs:
       - name: Build
         run: |
           if [[ "${{ github.ref_name }}" == "master" ]]; then
-            npm run build-prod-web
+            npm run build-prod
           else
             npm run build-dev-srv
           fi
