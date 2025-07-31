@@ -201,17 +201,18 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    if (!utilityMeter.demandUnit) {
+      utilityMeter.demandUnit = 'kW';
+      isChanged = true;
+    }
 
     if (!utilityMeter.charges) {
-      if(!utilityMeter.demandUnit){
-        utilityMeter.demandUnit = 'kW';
-      }
       utilityMeter.charges = [];
       isChanged = true;
       meterDataChanged = true;
       meterData = utilityMeterData.filter(data => data.meterId == utilityMeter.guid);
       meterData.forEach(dataItem => {
-        if(!dataItem.charges){
+        if (!dataItem.charges) {
           dataItem.charges = [];
         }
         if (dataItem.commodityCharge) {
