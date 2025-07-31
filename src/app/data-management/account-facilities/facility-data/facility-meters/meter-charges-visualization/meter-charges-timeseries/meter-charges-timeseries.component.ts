@@ -54,7 +54,7 @@ export class MeterChargesTimeseriesComponent {
           name: 'Total Cost',
           x: meterData.map(data => { return data.readDate }),
           y: meterData.map(data => { return data.totalCost }),
-          line: { color: '#832a75', width: 3 },
+          line: { width: 3 },
           // marker: {
           //   color: markerColors,
           //   size: markerSizes,
@@ -72,8 +72,15 @@ export class MeterChargesTimeseriesComponent {
             mode: "lines+markers",
             name: charge.name,
             x: meterData.map(data => { return data.readDate }),
-            y: meterData.map(data => { return data.charges.find(c => { return c.chargeGuid == charge.guid }).chargeAmount }),
-            line: { color: '#832a75', width: 3 },
+            y: meterData.map(data => {
+              let meterDataCharge = data.charges.find(c => { return c.chargeGuid == charge.guid });
+              if (meterDataCharge) {
+                return meterDataCharge.chargeAmount
+              } else {
+                return undefined
+              }
+            }),
+            line: { width: 3 },
             // marker: {
             //   color: markerColors,
             //   size: markerSizes,
