@@ -8,11 +8,18 @@
                 <div>
                     <label for="{{charge.name + '_' + charge.guid}}">{{charge.name}}</label>
                     <div class="input-group mb-3">
-                        <ng-container *ngIf="charge.chargeType == 'consumption' || charge.chargeType == 'demand'">
+                        <ng-container
+                            *ngIf="charge.chargeType == 'consumption' || charge.chargeType == 'demand' || charge.chargeType == 'sewer'">
                             <input id="{{charge.name + '_' + charge.guid}}" class="form-control" type="number"
                                 formControlName="chargeUsage" onfocus="this.select();" min="0">
                             <span class="input-group-text">
-                                {{editMeter.demandUnit}}
+                                <ng-template
+                                    [ngIf]="charge.chargeType == 'consumption' || charge.chargeType == 'demand'" [ngIfElse]="consumptionUnitBlock">
+                                    {{editMeter.demandUnit}}
+                                </ng-template>
+                                <ng-template #consumptionUnitBlock>
+                                    <span [innerHTML]="editMeter.startingUnit | settingsLabel"></span>
+                                </ng-template>
                             </span>
                         </ng-container>
                         <input id="chargeAmount" class="form-control" type="number" formControlName="chargeAmount"

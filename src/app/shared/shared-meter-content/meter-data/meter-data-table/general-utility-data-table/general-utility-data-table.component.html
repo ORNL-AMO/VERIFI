@@ -71,6 +71,12 @@
 
 
             <ng-container *ngFor="let charge of selectedMeter.charges">
+                <ng-container *ngIf="(charge.chargeType == 'sewer') && charge.displayUsageInTable">
+                    <th (click)="setOrderDataField(charge.guid, 'usage')"
+                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
+                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
+                    </th>
+                </ng-container>
                 <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
                     [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
                     {{ charge.name }} <br>(&dollar;)
@@ -98,7 +104,6 @@
             </td>
             <td *ngIf="generalUtilityDataFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
 
-            <!--TODO: update table and filters for emissions (scope2other, stationary)-->
             <ng-container *ngIf="showEmissions">
                 <ng-template [ngIf]="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'"
                     [ngIfElse]="otherEnergyBlock">
@@ -126,6 +131,11 @@
 
 
             <ng-container *ngFor="let meterCharge of selectedMeter.charges">
+                <ng-container *ngIf="(meterCharge.chargeType == 'sewer') && meterCharge.displayUsageInTable">
+                    <td>
+                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+                    </td>
+                </ng-container>
                 <td *ngIf="meterCharge.displayChargeInTable">
                     {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
                 </td>
