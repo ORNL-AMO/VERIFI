@@ -1,0 +1,74 @@
+.navbar.collapsed{
+    width: auto;
+}
+
+.nav-link{
+    padding: .1rem .2rem;
+    font-size: 20px;
+}
+
+.nav-link .fa, span.large{
+    font-size: 20px;
+}
+
+.toggle-collapse .fa{
+    font-size: x-large;
+}
+
+.toggle-collapse:hover .fa{
+    cursor: pointer;
+    border: so;
+}
+
+.help-container {
+    container-type: inline-size;
+    background-color: white;
+    overflow-y: auto;
+    padding: .25rem;
+}
+
+.help-content {
+    display: block;
+}
+
+@container (max-width: 45px) {
+    .help-content, .panel-label {
+        display: none;
+    }
+}
+
+
+.panel-label{
+    display: inline-block !important;
+    line-height: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    font-size: large;
+}
+
+.navbar{
+    padding-bottom: 0px;
+    border-bottom: 1px black solid;
+}
+nav.navbar .nav.nav-tabs .nav-item .nav-link{
+    border-color: black;
+    color: black;
+}
+
+
+nav.navbar .nav.nav-tabs .nav-item .nav-link.active{
+    background-color: #ff6000;
+    color: white !important;
+    border-bottom-color: black;
+}
+
+.nav-item .nav-link.active .fa{
+    color: white
+}
+
+nav.navbar .nav.nav-tabs .nav-item .nav-link:hover {
+    background-color: #ff873c;
+    color: black;
+}

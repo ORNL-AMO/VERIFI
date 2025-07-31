@@ -1,0 +1,57 @@
+.header {
+    font-weight: bold;
+    font-size: 1.2rem; 
+}
+
+.table thead td {
+  text-align: center;
+  font-weight: bold;
+}
+
+.table tbody td {
+  text-align: center;
+}
+
+.table, .table th, .table td {
+  border-width: 1px !important;
+  border-color: black !important; 
+}
+
+.text {
+  font-size: 16px;
+}
+
+.meter-text {
+  font-size: 14px;
+  font-style: italic;
+}
+
+.market-header {
+  background-color: #cad2d6 !important; 
+}
+
+.location-header {
+  background-color: #c2dede !important; 
+}
+
+.year-header {
+  background-color: #154c79 !important; 
+  color: white !important;
+}
+
+.body-cell {
+  background-color: #f0f0f0 !important; 
+}
+
+.card {
+  border-radius: 1.25rem;
+  border: 1.5px solid #dee2e6;
+}
+
+.card-body {
+  background-color: #f0eff3;
+}
+
+.card-wrapper {
+  margin-bottom: 3.5rem; 
+}

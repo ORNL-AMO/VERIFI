@@ -1,0 +1,236 @@
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}" *ngIf="!isRECs">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            <th [attr.colspan]="numGeneralInformation">
+                General Information
+            </th>
+            <th *ngIf="emissionsFilters.showSection" [attr.colspan]="numEmissions">
+                Emissions
+            </th>
+            <th *ngIf="numDetailedCharges > 0" [attr.colspan]="numDetailedCharges">
+                Detailed Charges
+            </th>
+            <th>
+
+            </th>
+        </tr>
+        <tr>
+            <th *ngIf="!copyingTable" class="input">
+                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th (click)="setOrderDataField('totalEnergyUse')"
+                [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy<br> (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th *ngIf="generalInformationFilters.totalCost" (click)="setOrderDataField('totalCost')"
+                [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <!-- totalRealDemand -->
+            <th *ngIf="generalInformationFilters.realDemand" (click)="setOrderDataField('totalRealDemand')"
+                [ngClass]="{'active': orderDataField == 'totalRealDemand'}">Total
+                Real<br> Demand (kW)</th>
+            <!-- totalBilledDemand -->
+            <th *ngIf="generalInformationFilters.billedDemand" (click)="setOrderDataField('totalBilledDemand')"
+                [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
+                Billed<br> Demand (kW)</th>
+            <!-- totalBilledDemand -->
+            <th *ngIf="generalInformationFilters.powerFactor" (click)="setOrderDataField('powerFactor')"
+                [ngClass]="{'active': orderDataField == 'powerFactor'}">
+                Power Factor</th>
+            <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
+                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
+                (tonne
+                CO<sub>2</sub>e)</th>
+            <th *ngIf="emissionsFilters.locationEmissions" (click)="setOrderDataField('totalLocationEmissions')"
+                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based
+                <br>Emissions (tonne
+                CO<sub>2</sub>e)
+            </th>
+            <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
+                [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+            <ng-container *ngFor="let charge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
+                    <th (click)="setOrderDataField(charge.guid, 'usage')"
+                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
+                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
+                    </th>
+                </ng-container>
+                <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
+                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
+                    {{ charge.name }} <br>(&dollar;)
+                </th>
+            </ng-container>
+
+
+
+
+            <th *ngIf="!copyingTable">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td *ngIf="!copyingTable" class="input">
+                <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
+            </td>
+            <td class="read-date">{{meterData.readDate | date}}</td>
+            <td>
+                <span class="fa fa-asterisk" *ngIf="meterData.isEstimated"></span>
+                <ng-container *ngIf="selectedMeter.includeInEnergy">
+                    {{meterData.totalEnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!selectedMeter.includeInEnergy">
+                    {{0 | customNumber}}
+                </ng-container>
+            </td>
+            <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.powerFactor">{{meterData.powerFactor | customNumber}}</td>
+
+            <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalWithMarketEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalWithLocationEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
+
+            <ng-container *ngFor="let meterCharge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
+                    <td>
+                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+                    </td>
+                </ng-container>
+                <td *ngIf="meterCharge.displayChargeInTable">
+                    {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+                </td>
+
+            </ng-container>
+
+
+            <td *ngIf="!copyingTable" class="actions">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData"
+                        [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}" *ngIf="isRECs">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            <th [attr.colspan]="numGeneralInformation">
+                General Information
+            </th>
+            <th *ngIf="numEmissions > 0" [attr.colspan]="numEmissions">
+                Emissions
+            </th>
+            <th *ngIf="numDetailedCharges > 0" [attr.colspan]="numDetailedCharges">
+                Detailed Charges
+            </th>
+            <th>
+
+            </th>
+        </tr>
+        <tr>
+            <th *ngIf="!copyingTable" class="input">
+                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th *ngIf="generalInformationFilters.totalCost" (click)="setOrderDataField('totalCost')"
+                [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
+                [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+            <th *ngIf="emissionsFilters.excessRECs" (click)="setOrderDataField('excessRECs')"
+                [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+                RECs<br> (MWh)</th>
+            <th *ngIf="emissionsFilters.excessRECsEmissions" (click)="setOrderDataField('excessRECsEmissions')"
+                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
+                RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
+            <ng-container *ngFor="let charge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
+                    <th (click)="setOrderDataField(charge.guid, 'usage')"
+                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
+                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
+                    </th>
+                </ng-container>
+                <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
+                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
+                    {{ charge.name }} <br>(&dollar;)
+                </th>
+            </ng-container>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td *ngIf="!copyingTable" class="input">
+                <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
+            </td>
+            <td class="read-date">{{meterData.readDate | date}}</td>
+            <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
+            <td *ngIf="emissionsFilters.excessRECs">{{meterData.excessRECs | customNumber}}</td>
+            <td *ngIf="emissionsFilters.excessRECsEmissions">{{meterData.excessRECsEmissions | customNumber}}</td>
+            <ng-container *ngFor="let meterCharge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
+                    <td>
+                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+                    </td>
+                </ng-container>
+                <td *ngIf="meterCharge.displayChargeInTable">
+                    {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+                </td>
+
+            </ng-container>
+            <td *ngIf="!copyingTable" class="actions">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData"
+                        [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<div class="d-flex w-100 justify-content-between">
+    <div class="d-flex">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <div class="ps-2" *ngIf="showEstimated">
+            <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+        </div>
+    </div>
+
+    <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>

@@ -13,6 +13,9 @@ import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class AnnualGroupAnalysisSummaryClass {
 
+    // bankedAnnualGroupAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass;
+
+
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
     baselineYear: number;
@@ -26,7 +29,7 @@ export class AnnualGroupAnalysisSummaryClass {
         } else {
             this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryData;
         }
-        this.setBaselineYear(analysisItem);
+        this.setBaselineYear(analysisItem, selectedGroup);
         this.setReportYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility, accountPredictors);
     }
@@ -37,8 +40,20 @@ export class AnnualGroupAnalysisSummaryClass {
         this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
     }
 
-    setBaselineYear(analysisItem: IdbAnalysisItem) {
+    // setBankedMonthlyAnalysisSummaryData(selectedGroup: AnalysisGroup, bankedAnalysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>) {
+    //     let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(selectedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, undefined);
+    //     this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
+    //     this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
+    // }
+
+    setBaselineYear(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup) {
+        // if (!analysisItem.hasBanking) {
         this.baselineYear = analysisItem.baselineYear;
+        // } else if (!selectedGroup.applyBanking) {
+        //     this.baselineYear = analysisItem.baselineYear;
+        // } else {
+        //     this.baselineYear = selectedGroup.newBaselineYear;
+        // }
     }
 
     setReportYear(analysisItem: IdbAnalysisItem) {
@@ -69,6 +84,21 @@ export class AnnualGroupAnalysisSummaryClass {
     }
 
     getAnnualAnalysisSummaries(): Array<AnnualAnalysisSummary> {
+        // if (this.bankedAnnualGroupAnalysisSummaryClass) {
+        //     // let startUnbankedYear: number = this.annualAnalysisSummaryDataClasses[0].year;
+        //     // let startBankedYear: number = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses[0].year;
+        //     let combinedData: Array<AnnualAnalysisSummary> = new Array();
+        //     // for (let indexYear = startBankedYear; indexYear < startUnbankedYear; indexYear++) {
+        //     //     let bankedData: AnnualAnalysisSummaryDataClass = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses.find(data => {
+        //     //         return data.year == indexYear;
+        //     //     });
+        //     //     combinedData.push(this.getFormattedResult(bankedData, true));
+        //     // }
+        //     this.annualAnalysisSummaryDataClasses.forEach(data => {
+        //         combinedData.push(this.getFormattedResult(data, false));
+        //     });
+        //     return combinedData;
+        // } else {
         return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
             return this.getFormattedResult(summaryDataClass);
         });

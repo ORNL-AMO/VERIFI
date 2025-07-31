@@ -26,6 +26,9 @@ export interface IdbPredictor extends IdbEntry {
     heatingBaseTemperature: number,
     coolingBaseTemperature: number,
     weatherDataWarning: boolean,
+    sidebarOpen?: boolean,
+    isValid?: boolean,
+    skipImport?: boolean
     // weatherOverride: boolean
 }
 

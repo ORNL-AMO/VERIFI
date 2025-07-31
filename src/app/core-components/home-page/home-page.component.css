@@ -1,0 +1,43 @@
+
+h1.verifi:first-letter {
+    color: #ff6000;
+  }
+  
+  .large, .fa-question-circle{
+    font-size: 16px;
+  }
+  
+  .card-header, .card-footer{
+    background-color: white;
+    font-weight: bold;
+  }
+
+  .list-item-label{
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  p, p a {
+    font-size: 14px;
+  }
+
+  .fa {
+    color: inherit;
+  }
+
+p.welcome-text{
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-left: solid #ff6000 5px;
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+
+li.page-item{
+  padding: 1px !important;
+}
+
+h4{
+  border-bottom: none;
+  padding: inherit;
+}

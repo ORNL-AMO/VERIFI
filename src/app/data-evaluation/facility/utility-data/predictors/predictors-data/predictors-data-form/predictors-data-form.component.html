@@ -1,0 +1,16 @@
+<div class="row">
+    <div class="col-12">
+        <div class="saveCancel item-right">
+            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
+                [disabled]="calculatingDegreeDays">Save</button>
+            <button *ngIf="addOrEdit == 'add'" class="btn btn-primary me-2" (click)="saveAndQuit()"
+                [disabled]="calculatingDegreeDays">Save + Quit</button>
+            <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()"
+                [disabled]="calculatingDegreeDays">Save +
+                Add Another</button>
+        </div>
+    </div>
+</div>
+<app-edit-predictor-data-entry-form [isSaved]="isSaved" [predictor]="predictor"
+    [predictorData]="predictorData" [calculatingDegreeDays]="calculatingDegreeDays"></app-edit-predictor-data-entry-form>

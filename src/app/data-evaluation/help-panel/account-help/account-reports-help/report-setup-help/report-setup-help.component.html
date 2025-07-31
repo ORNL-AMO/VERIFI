@@ -1,0 +1,102 @@
+<h5>Report Setup</h5>
+<p>
+    Use this menu to setup your report. Provide a meaningful name, date range and choose the report type.
+</p>
+<hr>
+<p>
+    Depending on the report type you select the rest of the menu will change.
+</p>
+<hr>
+<ng-container *ngIf="selectedReport.reportType == 'betterPlants'">
+    <p>
+        Automatically generate a Better Plants annual report for this account. Reports can be submitted to your
+        Technical Account Manager for review and guidance.
+    </p>
+    <hr>
+    <p>
+        For more information on Better Plants annual reporting see the <a
+            href="https://www.energy.gov/eere/amo/downloads/energy-intensity-baselining-and-tracking-guidance"
+            target="_blank">Better Plants Energy Intensity Baselining and Tracking Guidance</a>
+    </p>
+    <hr>
+    <p>
+        For a better plants report, select the account analysis item you want to use. Click "View Analysis" to
+        navigate directly to that analysis item.
+    </p>
+    <hr>
+    <p>
+        The analysis items will show up based on the Report Year.
+    </p>
+    <hr>
+    <p>
+        Some additional details, such as analysis notes, can be provided for the better plants report.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="selectedReport.reportType == 'dataOverview'">
+    <p>
+        The graphs and tables included in the overview report are pulled from the account and facilities data overview
+        tabs. The
+        checkboxes can be used to select which ones you want to include in the report.
+    </p>
+    <hr>
+    <p>
+        For the data overview report select the date range to filter the data to include.
+    </p>
+    <hr>
+    <p>
+        Choose which facilities you want to include.
+    </p>
+    <hr>
+    <p>
+        Choose which sections of the report to include.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="selectedReport.reportType == 'performance'">
+    <p>
+        Select an account analysis to get a detailed report of the performance of the account and its facilities using
+        the models within the selected analysis.
+    </p>
+    <hr>
+    <p>
+        Use the checkboxes under <b>Section to Include</b> to select how granular you want the report to go. View
+        results by facilitiy, utility and/or group.
+    </p>
+    <hr>
+    <p>
+        The content shown within the tables and graphs can also be modified by using the checkboxes under <b>Report
+            Content Options</b>.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="selectedReport.reportType == 'betterClimate'">
+    <p>
+        Select the years to include in the report.
+    </p>
+    <hr>
+    <p>
+        Choose to include all utility data or to manually select which meter groups to include using the radio and
+        checkbox options.
+    </p>
+    <hr>
+    <p>
+        Customize the content included in the report with the checkboxes.
+    </p>
+    <hr>
+    <p>
+        If using the report to fill out the Better Climate Challange form, "Emissions Reduction Iniciatives" can be
+        added at the bottom of the setup and will be included in the report.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="selectedReport.reportType == 'accountEmissionFactors'">
+    <p>
+        Select the years to include in the report.
+    </p>
+    <hr>
+    <p>
+        A report with details on which emissions factors are used for each facility within the account will be generated.
+    </p>
+    <hr>
+</ng-container>

@@ -1,0 +1,64 @@
+<div class="reports banner sticky-top d-flex justify-content-between" *ngIf="!inDashboard"
+    [ngClass]="{'modal-open': modalOpen}">
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
+                    <span class="fa fa-exclamation-circle" *ngIf="!setupValid"></span>
+                    <i class="fa fa-gears"></i>
+                    Report Setup</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'analysis'">
+                <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Analysis Report</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'overview'">
+                <a class="nav-link" routerLink="overview-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Data Overview Report</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'emissionFactors'">
+                <a class="nav-link" routerLink="emission-factors-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Emission Factors Report</a>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <div>
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                     <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+                        <i class="fa fa-file"></i>
+                        {{selectedReport.name}}
+                    </a>
+                    <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
+                        <div class="menu-scroll-section">
+                            <ng-container *ngFor="let report of reportList">
+                                <li
+                                    *ngIf="selectedReport.guid != report.guid && selectedReport.facilityReportType == report.facilityReportType">
+                                    <a class="dropdown-item" (click)="selectItem(report)">
+                                        <i class="fa fa-file"></i>
+                                        {{report.name}}
+                                    </a>
+                                </li>
+                            </ng-container>
+                        </div>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" (click)="goToDashboard()">
+                                <i class="fa fa-list"></i> All Facility Reports
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

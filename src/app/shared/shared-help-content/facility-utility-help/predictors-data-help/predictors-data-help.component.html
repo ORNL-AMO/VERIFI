@@ -1,0 +1,14 @@
+<h5>Manage Predictors</h5>
+<p>Manage and track independent variables that affect <strong>{{ selectedFacility.name }}'s</strong> utility
+    consumption. Independent variables (or predictors) are used with regression analysis to model and normalize utility
+    usage between years. Common predictors for manufacturing include production, cooling degree days, and heating degree
+    days.</p>
+<p>For more information on selecting independent variables see the <a
+        href="https://www.energy.gov/eere/amo/downloads/energy-intensity-baselining-and-tracking-guidance"
+        target="_blank">Better Plants Energy Intensity Baselining and Tracking Guidance</a>.</p>
+
+<hr>
+<app-manage-predictors-help *ngIf="helpURL == 'manage'"></app-manage-predictors-help>
+<app-predictor-entries-help *ngIf="helpURL == 'entries'"></app-predictor-entries-help>
+<app-predictor-form-help *ngIf="helpURL == 'predictor-form'"></app-predictor-form-help>
+<app-predictor-entry-form-help *ngIf="helpURL == 'predictor-entry-form'"></app-predictor-entry-form-help>

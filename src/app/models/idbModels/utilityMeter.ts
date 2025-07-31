@@ -1,3 +1,4 @@
+import { ChargeCostUnit, MeterChargeType } from "src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions";
 import { MeterPhase, MeterSource, WaterDischargeType, WaterIntakeType } from "../constantsAndTypes"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
@@ -25,6 +26,7 @@ export interface IdbUtilityMeter {
 
     startingUnit: string,
     energyUnit: string,
+    demandUnit?: string,
     fuel?: string
     visible?: boolean
     importWizardName?: string
@@ -54,7 +56,9 @@ export interface IdbUtilityMeter {
     vehicleFuelEfficiency?: number,
     vehicleDistanceUnit?: string
     globalWarmingPotentialOption?: number,
-    globalWarmingPotential?: number
+    globalWarmingPotential?: number,
+    sidebarOpen?: boolean,
+    charges?: Array<MeterCharge>
 }
 
 export function getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, energyUnit: string): IdbUtilityMeter {
@@ -87,6 +91,7 @@ export function getNewIdbUtilityMeter(facilityId: string, accountId: string, set
         group: undefined,
         startingUnit: startingUnit,
         energyUnit: energyUnit,
+        demandUnit: 'kW',
         fuel: undefined,
         scope: 3,
         agreementType: 1,
@@ -100,6 +105,15 @@ export function getNewIdbUtilityMeter(facilityId: string, accountId: string, set
         vehicleCategory: 1,
         vehicleCollectionType: 1,
         vehicleDistanceUnit: 'mi',
-        vehicleCollectionUnit: 'gal'
+        vehicleCollectionUnit: 'gal',
+        charges: []
     }
+}
+
+export interface MeterCharge {
+    guid: string,
+    name: string,
+    chargeType: MeterChargeType,
+    displayUsageInTable: boolean,
+    displayChargeInTable: boolean
 }

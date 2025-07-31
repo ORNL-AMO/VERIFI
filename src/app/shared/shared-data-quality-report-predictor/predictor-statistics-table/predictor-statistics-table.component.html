@@ -1,0 +1,118 @@
+<div *ngIf="predictorData && predictorData.length > 0" class="container-fluid px-0">
+    <table class="table table-bordered rounded">
+        <thead>
+            <tr>
+                <th class="header"></th>
+                <th class="header">Minimum</th>
+                <th class="header">Maximum</th>
+                <th class="header">Average</th>
+                <th class="header">Median</th>
+                <th class="header">Median Absolute Deviation <br>(MAD)</th>
+                <th class="header">Median - 5 MAD</th>
+                <th class="header">Median + 5 MAD</th>
+                <th class="header">Number of Outliers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="align-middle">
+                <td>
+                    <span class="fw-bold">
+                        {{selectedPredictor.name}}
+                    </span>
+                    <ng-container *ngIf="selectedPredictor.unit && selectedPredictor.predictorType != 'Weather'">
+                        <span class="fw-bold">({{selectedPredictor.unit}})</span>
+                    </ng-container>
+                    <br>
+                    <div *ngIf="selectedPredictor.predictorType == 'Weather'">
+                        <ng-container
+                            *ngIf="(selectedPredictor.weatherDataType == 'HDD' || selectedPredictor.weatherDataType == 'CDD')">
+                            <span class="small block fw-bold">({{selectedPredictor.weatherDataType}},
+                                <ng-container *ngIf="selectedPredictor.weatherDataType == 'HDD'">
+                                    {{selectedPredictor.heatingBaseTemperature}} &#8457;
+                                </ng-container>
+                                <ng-container *ngIf="selectedPredictor.weatherDataType == 'CDD'">
+                                    {{selectedPredictor.coolingBaseTemperature}} &#8457;
+                                </ng-container>)</span>
+                        </ng-container>
+                        <ng-container *ngIf="selectedPredictor.weatherDataType == 'relativeHumidity'">
+                            <span class="small block fw-bold">
+                                (Relative Humidity, %)
+                            </span>
+                        </ng-container>
+                        <ng-container *ngIf="selectedPredictor.weatherDataType == 'dryBulbTemp'">
+                            <span class="small block fw-bold">
+                                (Dry Bulb Temp., &#8457;)
+                            </span>
+                        </ng-container>
+                    </div>
+                </td>
+                <td>
+                    <span *ngIf="stats.min !== null">
+                        {{ stats.min | customNumber }}
+                    </span>
+                    <span *ngIf="stats.min === null || isValueNaN(stats.min)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.max !== null">
+                        {{ stats.max | customNumber }}
+                    </span>
+                    <span *ngIf="stats.max === null || isValueNaN(stats.max)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.average !== null">
+                        {{ stats.average | customNumber }}
+                    </span>
+                    <span *ngIf="stats.average === null || isValueNaN(stats.average)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.median !== null">
+                        {{ stats.median | customNumber }}
+                    </span>
+                    <span *ngIf="stats.median === null || isValueNaN(stats.median)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.medianAbsDev !== null">
+                        {{ stats.medianAbsDev | customNumber }}
+                    </span>
+                    <span *ngIf="stats.medianAbsDev === null || isValueNaN(stats.medianAbsDev)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.medianminus2_5MAD !== null">
+                        {{ stats.medianminus2_5MAD | customNumber }}
+                    </span>
+                    <span *ngIf="stats.medianminus2_5MAD === null || isValueNaN(stats.medianminus2_5MAD)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.medianplus2_5MAD !== null">
+                        {{ stats.medianplus2_5MAD | customNumber }}
+                    </span>
+                    <span *ngIf="stats.medianplus2_5MAD === null || isValueNaN(stats.medianplus2_5MAD)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="stats.outliers !== null">
+                        <span *ngIf="stats.outliers > 0" class="badge bg-warning text-dark px-2 py-1 fs-5">{{
+                            stats.outliers }}</span>
+                        <span *ngIf="stats.outliers === 0" class="badge bg-success px-2 py-1 fs-5">0</span>
+                    </span>
+                    <span *ngIf="stats.outliers === null || isValueNaN(stats.outliers)">
+                        &mdash;
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

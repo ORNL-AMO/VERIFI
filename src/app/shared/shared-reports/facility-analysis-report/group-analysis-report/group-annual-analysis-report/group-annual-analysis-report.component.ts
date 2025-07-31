@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnnualAnalysisSummaryDataClass } from 'src/app/calculations/analysis-calculations/annualAnalysisSummaryDataClass';
-import { FacilityReportsService } from 'src/app/facility/facility-reports/facility-reports.service';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AnalysisGroup, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -27,12 +26,12 @@ export class GroupAnnualAnalysisReportComponent {
 
   print: boolean;
   printSub: Subscription;
-  constructor(private facilityReportService: FacilityReportsService) {
+  constructor(private dataEvaluationService: DataEvaluationService) {
 
   }
 
   ngOnInit() {
-    this.printSub = this.facilityReportService.print.subscribe(print => {
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
   }

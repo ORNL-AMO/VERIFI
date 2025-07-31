@@ -11,17 +11,17 @@ contextBridge.exposeInMainWorld(
     "electronAPI", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["ready", "update", "relaunch", "saveData", "fileExists", "openDialog", "getDataFile"];
+            let validChannels = ["ready", "update", "relaunch", "saveData", "fileExists", "openDialog", "getDataFile", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
         },
         on: (channel, func) => {
-            let validChannels = ["release-info", "available", "error", "update-downloaded", "file-path", "file-exists", "data-file"];
+            let validChannels = ["release-info", "available", "error", "update-downloaded", "file-path", "file-exists", "data-file", "utility-file-path", "utility-file-exists", "folder-exists", "folder-selected"];
             if (validChannels.includes(channel)) {
                 // Deliberately strip event as it includes `sender` 
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }
-        }
+         }
     }
 );
