@@ -69,10 +69,8 @@ export class DbChangesService {
   async selectAccount(account: IdbAccount, skipUpdates: boolean) {
     if (!skipUpdates) {
       let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      if (updateAccount.isChanged) {
-        account = updateAccount.account;
-        await this.updateAccount(account)
-      }
+      account = updateAccount.account;
+      await this.updateAccount(account)
     }
 
 

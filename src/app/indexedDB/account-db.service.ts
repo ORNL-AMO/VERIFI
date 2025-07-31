@@ -40,10 +40,12 @@ export class AccountdbService {
     }
 
     addWithObservable(account: IdbAccount): Observable<IdbAccount> {
+        account.modifiedDate = new Date();
         return this.dbService.add('accounts', account);
     }
 
     updateWithObservable(account: IdbAccount): Observable<IdbAccount> {
+        account.modifiedDate = new Date();
         return this.dbService.update('accounts', account);
     }
 
