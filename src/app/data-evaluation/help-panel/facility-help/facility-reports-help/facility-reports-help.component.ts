@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 })
 export class FacilityReportsHelpComponent {
 
-  helpURL: 'dashboard' | 'setup' | 'overview-report' | 'analysis-report';
+  helpURL: 'dashboard' | 'setup' | 'overview-report' | 'analysis-report' | 'emission-factors-report';
   routerSub: Subscription;
   constructor(private router: Router) {
   }
@@ -38,6 +38,8 @@ export class FacilityReportsHelpComponent {
       this.helpURL = 'overview-report';
     } else if(url.includes('analysis-report')){
       this.helpURL = 'analysis-report';
+    }  else if(url.includes('emission-factors-report')){
+      this.helpURL = 'emission-factors-report';
     } 
   }
 }

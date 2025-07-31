@@ -24,3 +24,18 @@ h1.verifi:first-letter {
   .fa {
     color: inherit;
   }
+
+p.welcome-text{
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-left: solid #ff6000 5px;
+}
+
+li.page-item{
+  padding: 1px !important;
+}
+
+h4{
+  border-bottom: none;
+  padding: inherit;
+}

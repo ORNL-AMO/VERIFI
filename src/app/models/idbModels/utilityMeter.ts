@@ -1,4 +1,4 @@
-import { ChargeCostUnit } from "src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions";
+import { ChargeCostUnit, MeterChargeType } from "src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions";
 import { MeterPhase, MeterSource, WaterDischargeType, WaterIntakeType } from "../constantsAndTypes"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
@@ -113,7 +113,7 @@ export function getNewIdbUtilityMeter(facilityId: string, accountId: string, set
 export interface MeterCharge {
     guid: string,
     name: string,
-    chargeType: string,
+    chargeType: MeterChargeType,
     displayUsageInTable: boolean,
     displayChargeInTable: boolean
 }
