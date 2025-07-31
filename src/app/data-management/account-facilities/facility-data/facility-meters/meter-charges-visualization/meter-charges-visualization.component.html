@@ -1,0 +1,4 @@
+<h4>{{utilityMeter.name}} Charges Visualization <span class="badge float-end"
+        [ngStyle]="{'background-color': utilityMeter.source | meterSourceColor}">{{utilityMeter.source}}</span>
+</h4>
+<app-meter-charges-timeseries [meter]="utilityMeter"></app-meter-charges-timeseries>

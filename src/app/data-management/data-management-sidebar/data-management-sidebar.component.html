@@ -157,6 +157,13 @@
                                         <span class="fa fa-calendar-days"></span> Meter Monthly Data
                                     </a>
                                 </div>
+                                <div class="ps-2 nav-item" *ngIf="meter.charges.length > 0">
+                                    <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-charges-visualization'"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-magnifying-glass-dollar"></span> Meter Charges Visualization
+                                    </a>
+                                </div>
                             </div>
                         </ng-container>
                     </div>
