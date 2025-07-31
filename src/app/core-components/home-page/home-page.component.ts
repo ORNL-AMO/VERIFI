@@ -7,6 +7,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { firstValueFrom } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-home-page',
@@ -28,6 +29,9 @@ export class HomePageComponent {
     this.accounts = this.accountDbService.allAccounts.getValue().filter(account => {
       return !account.deleteAccount;
     });
+    this.accounts = _.orderBy(this.accounts, (account: IdbAccount) => {
+      return new Date(account.modifiedDate).getTime();
+    }, 'desc');
   }
 
   loadTestData() {

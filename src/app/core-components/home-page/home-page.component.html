@@ -35,7 +35,12 @@
                         <div>
                             <button class="btn nav-btn" (click)="createNewAccount();">
                                 <span class="fa fa-plus"></span>
-                                Get Started
+                                <ng-template [ngIf]="accounts.length == 0" [ngIfElse]="newAccountBlock">
+                                    Get Started
+                                </ng-template>
+                                <ng-template #newAccountBlock>
+                                    Add Account
+                                </ng-template>
                             </button>
                         </div>
                     </div>
@@ -87,15 +92,30 @@
     <div class="row justify-content-center" *ngIf="accounts.length > 0">
         <div class="col-md-12 col-lg-9">
             <hr>
-            <h5>VERIFI Accounts</h5>
-            <div class="list-group">
+
+            <div class="d-flex w-100 justify-content-between">
+                <div class="mt-auto">
+                    <h4>Account Portfolio</h4>
+                </div>
+                <div *ngIf="accounts.length > 5">
+                    <ngb-pagination [collectionSize]="accounts.length" [(page)]="currentPageNumber" [pageSize]="5"
+                        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+                    </ngb-pagination>
+                </div>
+            </div>
+
+            <div class="list-group ps-2 pe-2">
                 <div class="list-group-item"
                     *ngFor="let account of accounts|  slice: ((currentPageNumber-1) * 5): currentPageNumber * 5">
                     <div class="d-flex justify-content-between">
                         <div class="list-item-label mt-auto mb-auto">
+                            <span class="fa fa-building"></span>
                             {{account.name}}
                         </div>
                         <div>
+                            <span class="fw-light small pe-2">
+                                Last Modified: {{account.modifiedDate | date:'short'}}
+                            </span>
                             <button class="btn nav-btn me-2 btn-sm" (click)="goToDataWizard(account)">
                                 <span class="fa fa-database"></span> Data Management
                             </button>
@@ -106,26 +126,19 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex w-100 justify-content-end" *ngIf="accounts.length > 4">
-                <div class="mt-2">
-                    <ngb-pagination [collectionSize]="accounts.length" [(page)]="currentPageNumber" [pageSize]="5"
-                        [maxSize]="5" [rotate]="true" aria-label="Pagination">
-                    </ngb-pagination>
-                </div>
-            </div>
         </div>
     </div>
     <div class="row justify-content-center">
         <div class="col-md-12 col-lg-9">
             <hr>
-            <h5>About VERIFI and ORNL's Industrial Resources</h5>
-            <p>
-                For more information about VERIFI, as well as information about similar resources developed by ORNL
+            <h4>About VERIFI and ORNL's Industrial Resources</h4>
+            <p class="welcome-text">
+                For more information about VERIFI, as well as information about similar resources developed by ORNL,
                 please
                 visit <a href="https://www.industrialresources.ornl.gov/VERIFI" target="_blank">ORNL's Industrial
                     Resources</a>. Here you will find a collection of guidance
                 and user support documents.</p>
-            <p>
+            <p class="welcome-text">
                 Dynamic help text is provided throughout VERIFI. If you need help at any time within the tool, click or
                 hover the <span class="fa fa-question-circle"></span> icon and
                 help text will appear.
@@ -136,8 +149,8 @@
     <div class="row justify-content-center">
         <div class="col-md-12 col-lg-9">
             <hr>
-            <h5>Contact and Feedback</h5>
-            <p>
+            <h4>Contact and Feedback</h4>
+            <p class="welcome-text">
                 If you have any feedback or would like to contact the team behind VERIFI, please reach out to us at
                 <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.
             </p>
