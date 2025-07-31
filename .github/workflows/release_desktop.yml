@@ -210,7 +210,7 @@ jobs:
           TMP_CERT_PATH="$RUNNER_TEMP/cert.pem"
           BUNDLE_PATH=$(find . -name "VERIFI-Setup-*.exe")
 
-          echo -n "${{ secrets.WIN_CERT_BASE64 }}" | base64 --decode -o $TMP_CERT_PATH
+          echo -n "${{ secrets.WIN_CERT_BASE64 }}" | base64 --decode > $TMP_CERT_PATH
 
           jsign --storetype "${{ secrets.WIN_STORE_TYPE }}" \
                 --storepass "${{ secrets.WIN_STORE_SECRET }}" \
