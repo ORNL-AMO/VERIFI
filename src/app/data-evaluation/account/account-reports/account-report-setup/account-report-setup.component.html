@@ -15,7 +15,7 @@
                 <div class="col-6"
                     *ngIf="setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountEmissionFactors'">
                     <div class="row form-group"
-                        *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis'">
+                        *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis' && setupForm.controls.reportType.value != 'goalCompletion'">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
                         <div class="col-7">
@@ -37,7 +37,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'accountEmissionFactors'">
                     <div class="row form-group">
                         <label class="col-5 col-form-label semibold" for="startDate">Start Year</label>
@@ -111,6 +111,8 @@
                 *ngIf="setupForm.controls.reportType.value == 'betterClimate'"></app-better-climate-setup>
             <app-analysis-report-setup
                 *ngIf="setupForm.controls.reportType.value == 'analysis'"></app-analysis-report-setup>
+            <app-goal-completion-setup
+                *ngIf="setupForm.controls.reportType.value == 'goalCompletion'"></app-goal-completion-setup>
         </ng-container>
         <ng-container *ngIf="setupForm.valid == false || errorMessage.length > 0">
             <div class="alert alert-warning text-center">

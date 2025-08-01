@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
+import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, GoalCompletionReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { energy } from 'src/app/calculations/conversions/definitions/energy';
+import { getGUID } from 'src/app/shared/sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +47,7 @@ export class AccountReportsService {
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
     let dateValidators: Array<ValidatorFn> = [];
-    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis' || report.reportType == 'accountEmissionFactors') {
+    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis' || report.reportType == 'accountEmissionFactors' || report.reportType == 'goalCompletion') {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview') {
       dateValidators = [Validators.required];
@@ -64,7 +66,7 @@ export class AccountReportsService {
       });
       return form;
     }
-    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis') {
+    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis' || report.reportType == 'goalCompletion') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
         reportType: [report.reportType, Validators.required],
@@ -300,6 +302,126 @@ export class AccountReportsService {
     return analysisReportSetup;
   }
 
+  getGoalCompletionFormFromReport(goalCompletionReportSetup: GoalCompletionReportSetup): FormGroup {
+    if (!goalCompletionReportSetup) {
+      goalCompletionReportSetup = {
+        analysisItemId: undefined,
+        energyIntensityChangeArray: [],
+        partnerCompanyName: undefined,
+        partnerCompanyPOC: undefined,
+        technicalAccountManager: undefined,
+        corporateOrPlant: 'corporate',
+        baselineYear: undefined,
+        goalsMet: undefined,
+        calculatingMethod: undefined,
+        variablesUsed: undefined,
+        plantLevelData: undefined,
+        projects: undefined,
+        additionalDetails: undefined,
+        datasetsUsed: undefined,
+        didCompanyShare: undefined,
+        recommendations: undefined,
+        additionalComments: undefined
+      };
+    }
+
+    let energyIntensityChangeArray: FormArray = this.formBuilder.array(goalCompletionReportSetup.energyIntensityChangeArray ? goalCompletionReportSetup.energyIntensityChangeArray.map(change => {
+      return this.formBuilder.group({
+        guid: [change.guid || getGUID()],
+        energyIntensityYear: [change.energyIntensityYear],
+        energyIntensityChange: [change.energyIntensityChange],
+        energyIntensityExplanation: [change.energyIntensityExplanation]
+      });
+    }) : []);
+
+    let form: FormGroup = this.formBuilder.group({
+      analysisItemId: [goalCompletionReportSetup.analysisItemId, Validators.required],
+      energyIntensityChangeArray: energyIntensityChangeArray,
+      partnerCompanyName: [goalCompletionReportSetup.partnerCompanyName],
+      partnerCompanyPOC: [goalCompletionReportSetup.partnerCompanyPOC],
+      technicalAccountManager: [goalCompletionReportSetup.technicalAccountManager],
+      corporateOrPlant: [goalCompletionReportSetup.corporateOrPlant],
+      baselineYear: [goalCompletionReportSetup.baselineYear],
+      goalsMet: [goalCompletionReportSetup.goalsMet],
+      calculatingMethod: [goalCompletionReportSetup.calculatingMethod],
+      variablesUsed: [goalCompletionReportSetup.variablesUsed],
+      plantLevelData: [goalCompletionReportSetup.plantLevelData],
+      projects: [goalCompletionReportSetup.projects],
+      additionalDetails: [goalCompletionReportSetup.additionalDetails],
+      datasetsUsed: [goalCompletionReportSetup.datasetsUsed],
+      didCompanyShare: [goalCompletionReportSetup.didCompanyShare],
+      recommendations: [goalCompletionReportSetup.recommendations],
+      additionalComments: [goalCompletionReportSetup.additionalComments]
+    });
+    return form;
+  }
+
+  updateGoalCompletionReportFromForm(goalCompletionReportSetup: GoalCompletionReportSetup, form: FormGroup): GoalCompletionReportSetup {
+    if (!goalCompletionReportSetup) {
+      goalCompletionReportSetup = {
+        analysisItemId: undefined,
+        energyIntensityChangeArray: [],
+        partnerCompanyName: undefined,
+        partnerCompanyPOC: undefined,
+        technicalAccountManager: undefined,
+        corporateOrPlant: 'corporate',
+        baselineYear: undefined,
+        goalsMet: undefined,
+        calculatingMethod: undefined,
+        variablesUsed: undefined,
+        plantLevelData: undefined,
+        projects: undefined,
+        additionalDetails: undefined,
+        datasetsUsed: undefined,
+        didCompanyShare: undefined,
+        recommendations: undefined,
+        additionalComments: undefined
+      };
+    }
+    goalCompletionReportSetup.analysisItemId = form.controls.analysisItemId.value;
+    goalCompletionReportSetup.partnerCompanyName = form.controls.partnerCompanyName.value;
+    goalCompletionReportSetup.partnerCompanyPOC = form.controls.partnerCompanyPOC.value;
+    goalCompletionReportSetup.technicalAccountManager = form.controls.technicalAccountManager.value;
+    goalCompletionReportSetup.corporateOrPlant = form.controls.corporateOrPlant.value;
+    goalCompletionReportSetup.baselineYear = form.controls.baselineYear.value;
+    goalCompletionReportSetup.goalsMet = form.controls.goalsMet.value;
+    goalCompletionReportSetup.calculatingMethod = form.controls.calculatingMethod.value;
+    goalCompletionReportSetup.variablesUsed = form.controls.variablesUsed.value;
+    goalCompletionReportSetup.plantLevelData = form.controls.plantLevelData.value;
+    goalCompletionReportSetup.projects = form.controls.projects.value;
+    goalCompletionReportSetup.additionalDetails = form.controls.additionalDetails.value;
+    goalCompletionReportSetup.datasetsUsed = form.controls.datasetsUsed.value;
+    goalCompletionReportSetup.didCompanyShare = form.controls.didCompanyShare.value;
+    goalCompletionReportSetup.recommendations = form.controls.recommendations.value;
+    goalCompletionReportSetup.additionalComments = form.controls.additionalComments.value;
+
+    let energyIntensityChangeArray: FormArray = form.get('energyIntensityChangeArray') as FormArray;
+    if (!goalCompletionReportSetup.energyIntensityChangeArray) {
+      goalCompletionReportSetup.energyIntensityChangeArray = [];
+    }
+    goalCompletionReportSetup.energyIntensityChangeArray = energyIntensityChangeArray.controls.map(changeGroup => {
+      return {
+        guid: changeGroup.get('guid').value,
+        energyIntensityYear: changeGroup.get('energyIntensityYear').value,
+        energyIntensityChange: changeGroup.get('energyIntensityChange').value,
+        energyIntensityExplanation: changeGroup.get('energyIntensityExplanation').value
+      };
+    });
+
+    return goalCompletionReportSetup;
+  }
+
+  addEnergyIntensityChangeRow(form: FormGroup) {
+    const changeArray = form.get('energyIntensityChangeArray') as FormArray;
+    let newRow = this.formBuilder.group({
+      guid: [getGUID()],
+      energyIntensityYear: [''],
+      energyIntensityChange: [''],
+      energyIntensityExplanation: ['']
+    });
+    changeArray.push(newRow);
+  }
+
   isReportValid(report: IdbAccountReport): boolean {
     let setupForm: FormGroup = this.getSetupFormFromReport(report);
     if (setupForm.invalid) {
@@ -322,6 +444,9 @@ export class AccountReportsService {
       return analysisForm.valid;
     } else if (report.reportType == 'accountEmissionFactors') {
       return true;
+    } else if (report.reportType == 'goalCompletion') {
+      let goalCompletionForm: FormGroup = this.getGoalCompletionFormFromReport(report.goalCompletionReportSetup);
+      return goalCompletionForm.valid;
     }
   }
 }

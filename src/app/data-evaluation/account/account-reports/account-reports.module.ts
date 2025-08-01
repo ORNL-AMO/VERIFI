@@ -62,6 +62,9 @@ import { AnalysisDataValidationTablesComponent } from './analysis-report/analysi
 import { AccountEmissionFactorsReportDashboardComponent } from './account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component';
 import { AccountEmissionFactorsReportComponent } from './account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
 import { AccountEmissionFactorsReportTableComponent } from './account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
+import { GoalCompletionReportDashboardComponent } from './account-reports-dashboard/goal-completion-report-dashboard/goal-completion-report-dashboard.component';
+import { GoalCompletionReportComponent } from './goal-completion-report/goal-completion-report/goal-completion-report.component';
+import { GoalCompletionSetupComponent } from './account-report-setup/goal-completion-setup/goal-completion-setup.component';
 
 @NgModule({
   declarations: [
@@ -121,7 +124,10 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
     AnalysisDataValidationTablesComponent,
     AccountEmissionFactorsReportDashboardComponent,
     AccountEmissionFactorsReportComponent,
-    AccountEmissionFactorsReportTableComponent
+    AccountEmissionFactorsReportTableComponent,
+    GoalCompletionReportDashboardComponent,
+    GoalCompletionReportComponent,
+    GoalCompletionSetupComponent
   ],
   imports: [
     CommonModule,
@@ -132,6 +138,6 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
     LabelWithTooltipModule,
     CalculatingSpinnerModule,
     DataOverviewModule
-  ]
+]
 })
 export class AccountReportsModule { }

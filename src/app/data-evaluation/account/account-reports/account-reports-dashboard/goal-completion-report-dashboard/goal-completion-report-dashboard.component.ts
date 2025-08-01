@@ -7,25 +7,23 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import _ from 'lodash';
 
 @Component({
-  selector: 'app-account-emission-factors-report-dashboard',
+  selector: 'app-goal-completion-report-dashboard',
   standalone: false,
 
-  templateUrl: './account-emission-factors-report-dashboard.component.html',
-  styleUrl: './account-emission-factors-report-dashboard.component.css'
+  templateUrl: './goal-completion-report-dashboard.component.html',
+  styleUrl: './goal-completion-report-dashboard.component.css'
 })
-export class AccountEmissionFactorsReportDashboardComponent {
-
-  reportList: Array<IdbAccountReport> = [];
+export class GoalCompletionReportDashboardComponent {
+  reportItemsList: Array<{
+    year: number,
+    reports: Array<IdbAccountReport>
+  }> = [];
   selectedAccount: IdbAccount;
   accountReportsSub: Subscription;
-
   constructor(private accountDbService: AccountdbService,
-    private accountReportDbService: AccountReportDbService
-  ) {
+    private accountReportDbService: AccountReportDbService) { }
 
-  }
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     this.accountReportsSub = this.accountReportDbService.accountReports.subscribe(items => {
       this.setListItems(items);
@@ -37,12 +35,24 @@ export class AccountEmissionFactorsReportDashboardComponent {
   }
 
   setListItems(accountReports: Array<IdbAccountReport>) {
-    this.reportList = new Array();
+    this.reportItemsList = new Array();
     let reports: Array<IdbAccountReport> = accountReports.filter(report => {
-      return report.reportType == 'accountEmissionFactors';
+      return report.reportType == 'goalCompletion';
+    })
+    let years: Array<number> = reports.map(item => {
+      return item.reportYear
     });
-    this.reportList = reports;
+    years = _.uniq(years);
+    years = _.orderBy(years, (year) => { return year }, 'desc');
+    years.forEach(year => {
+      let yearReports: Array<IdbAccountReport> = reports.filter(item => {
+        return item.reportYear == year;
+      });
+      this.reportItemsList.push({
+        year: year,
+        reports: yearReports,
+      });
+    });
   }
 }
-
 

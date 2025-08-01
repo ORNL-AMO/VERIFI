@@ -1,0 +1,24 @@
+<ng-container *ngIf="selectedReport">
+    <div class="report" [ngClass]="{'print': print}">
+        <div class="mx-5">
+            <div class="text-center mt-3">
+                <span class="h5 fw-bold">U.S. Department of Energy Advanced Manufacturing Office</span><br>
+                <span class="h5 fw-bold">Better Buildings, Better Plants Program Partner Pledge Goal
+                    Completion</span><br>
+                <i class="h5 fw-bold">Technical Account Manager Review</i><br>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-5">
+                    <h5>Better Plants Program Partner Company Name: </h5> 
+                    <p class="text">{{selectedReport.goalCompletionReportSetup.partnerCompanyName}}</p>
+                </div>
+                <div class="col-5 text-end">
+                    <h5>Date: </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+
+<app-print-report-button></app-print-report-button>

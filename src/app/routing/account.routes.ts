@@ -43,6 +43,8 @@ import { AnalysisReportDashboardComponent } from "src/app/data-evaluation/accoun
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
 import { AccountEmissionFactorsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component";
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
+import { GoalCompletionReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/goal-completion-report-dashboard/goal-completion-report-dashboard.component";
+import { GoalCompletionReportComponent } from "../data-evaluation/account/account-reports/goal-completion-report/goal-completion-report/goal-completion-report.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -88,7 +90,8 @@ export const AccountRoutes: Route = {
                         { path: 'performance', component: PerformanceReportDashboardComponent },
                         { path: 'better-climate', component: BetterClimateReportDashboardComponent },
                         { path: 'analysis', component: AnalysisReportDashboardComponent },
-                        { path: 'account-emission-factors', component: AccountEmissionFactorsReportDashboardComponent }
+                        { path: 'account-emission-factors', component: AccountEmissionFactorsReportDashboardComponent },
+                        { path: 'goal-completion', component: GoalCompletionReportDashboardComponent }
                     ]
                 },
                 { path: 'setup', component: AccountReportSetupComponent },
@@ -97,7 +100,8 @@ export const AccountRoutes: Route = {
                 { path: 'performance-report', component: PerformanceReportComponent },
                 { path: 'better-climate-report', component: BetterClimateReportComponent },
                 { path: 'analysis-report', component: AnalysisReportComponent },
-                { path: 'account-emission-factors-report', component: AccountEmissionFactorsReportComponent }
+                { path: 'account-emission-factors-report', component: AccountEmissionFactorsReportComponent },
+                { path: 'goal-completion-report', component: GoalCompletionReportComponent }
             ]
         },
         {

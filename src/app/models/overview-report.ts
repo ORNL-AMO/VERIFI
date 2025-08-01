@@ -172,3 +172,28 @@ export interface AnalysisReportSetup {
   includeExecutiveSummary: boolean,
   includeDataValidationTables: boolean
 }
+
+export interface GoalCompletionReportSetup {
+  analysisItemId: string,
+  energyIntensityChangeArray: Array<{
+    guid: string,
+    energyIntensityYear: number,
+    energyIntensityChange: number,
+    energyIntensityExplanation: string
+  }>,
+  partnerCompanyName: string,
+  partnerCompanyPOC: string,
+  technicalAccountManager: string,
+  corporateOrPlant: 'corporate' | 'plant',
+  baselineYear: number,
+  goalsMet: string,
+  calculatingMethod: string,
+  variablesUsed: string,
+  plantLevelData: string,
+  projects: string,
+  additionalDetails: string,
+  datasetsUsed: string,
+  didCompanyShare: string,
+  recommendations: string,
+  additionalComments: string
+}

@@ -80,6 +80,7 @@ export class AccountReportsBannerComponent {
     let dataOverviewValid: boolean = true;
     let performanceValid: boolean = true;
     let analysisValid: boolean = true;
+    let goalCompletionValid: boolean = true;
     if (report.reportType == 'dataOverview') {
       if (this.errorMessage.length > 0) {
         dataOverviewValid = false;
@@ -96,8 +97,10 @@ export class AccountReportsBannerComponent {
         performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
       } else if (report.reportType == 'analysis') {
         analysisValid = this.accountReportsService.getAnalysisFormFromReport(report.analysisReportSetup).valid;
-      } 
-      this.setupValid = (setupValid && betterPlantsValid && performanceValid && analysisValid);
+      } else if (report.reportType == 'goalCompletion') {
+        goalCompletionValid = this.accountReportsService.getGoalCompletionFormFromReport(report.goalCompletionReportSetup).valid;
+      }
+      this.setupValid = (setupValid && betterPlantsValid && performanceValid && analysisValid && goalCompletionValid);
     }
   }
 
@@ -114,6 +117,8 @@ export class AccountReportsBannerComponent {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/analysis')
     } else if (this.selectedReport.reportType == 'accountEmissionFactors') {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/account-emission-factors')
+    } else if (this.selectedReport.reportType == 'goalCompletion') {
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/goal-completion')
     } else {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard')
     }

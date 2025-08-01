@@ -67,6 +67,8 @@ export class AccountReportsDashboardComponent {
       this.newReportType = 'analysis';
     } else if (this.router.url.includes('account-emission-factors')) {
       this.newReportType = 'accountEmissionFactors';
+    } else if (this.router.url.includes('goal-completion')) {
+      this.newReportType = 'goalCompletion';
     }
     this.displayNewReport = true;
   }

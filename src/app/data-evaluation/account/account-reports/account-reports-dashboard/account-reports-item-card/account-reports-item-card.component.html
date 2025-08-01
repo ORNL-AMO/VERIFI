@@ -9,6 +9,7 @@
                     <span class="fa fa-table" *ngIf="report.reportType == 'betterClimate'"></span>
                     <span class="fa fa-table" *ngIf="report.reportType == 'analysis'"></span>
                     <span class="fa fa-smog" *ngIf="report.reportType == 'accountEmissionFactors'"></span>
+                    <span class="fa fa-file" *ngIf="report.reportType == 'goalCompletion'"></span>
                     {{report.name}}
                     <span class="fa fa-exclamation-circle" *ngIf="!isValid"></span>
                 </a>
@@ -99,6 +100,15 @@
             </div>
             <div class="bold" *ngIf="report.reportType == 'accountEmissionFactors'">
                 Emission Factors Report
+            </div>
+            <div class="bold" *ngIf="report.reportType == 'goalCompletion'">
+                <ng-container *ngIf="(report.goalCompletionReportSetup.analysisItemId | analysisCategory) == 'Water'">
+                    <span class="fa fa-droplet"></span> Water
+                </ng-container>
+                <ng-container *ngIf="(report.goalCompletionReportSetup.analysisItemId | analysisCategory) == 'Energy'">
+                    <span class="fa fa-plug"></span> Energy
+                </ng-container>
+                Goal Completion Report
             </div>
             <div class="d-flex">
                 Last Modified: {{report.modifiedDate | date:'short'}}

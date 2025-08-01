@@ -1,0 +1,293 @@
+<form [formGroup]="goalCompletionForm">
+    <div class="row">
+        <div class="col-12">
+            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
+                [field]="'selectAccountAnalysis'" [isFloatRight]="true">
+            </app-label-with-tooltip>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <td>
+
+                            </td>
+                            <td>
+                                Analysis Name
+                            </td>
+                            <td>
+                                Analysis Category
+                            </td>
+                            <td>
+                                Facilities Included
+                            </td>
+                            <td>
+                                Baseline Year
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    </thead>
+
+                    <tbody class="table-group-divider">
+                        <tr *ngFor="let analysisItem of accountAnalysisItems">
+                            <td class="text-center">
+                                <input type="radio" class="form-check-input" formControlName="analysisItemId"
+                                    [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}"
+                                    (change)="save()">
+                            </td>
+                            <td>
+                                {{analysisItem.name}}
+                            </td>
+                            <td>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">Energy</ng-container>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">Water</ng-container>
+                            </td>
+                            <td>
+                                <span
+                                    *ngFor="let facilityItem of analysisItem.facilityAnalysisItems; let index = index;">
+                                    <span *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
+                                        {{facilityItem.facilityId | facilityName}}<span
+                                            *ngIf="index != analysisItem.facilityAnalysisItems.length-1">,</span>
+                                    </span>
+                                </span>
+                            </td>
+                            <td>
+                                {{analysisItem.baselineYear}}
+                            </td>
+                            <td class="text-center">
+                                <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
+                            </td>
+                        </tr>
+                        <tr *ngIf="accountAnalysisItems.length == 0">
+                            <td colspan="4" class="alert alert-warning">
+                                No analysis items matching selected report year.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert alert-warning text-center p-1" *ngIf="baselineYearWarning">
+                {{baselineYearWarning}}
+            </div>
+
+            <hr>
+
+            <ng-container *ngIf="selectedAnalysisItem">
+                <div class="col-12">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="partnerCompanyName" class="form-label fw-bold">Better Plants Program Partner
+                                Company Name</label>
+                            <input type="text" class="form-control" name="partnerCompanyName" id="partnerCompanyName"
+                                formControlName="partnerCompanyName" (input)="save()">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label for="partnerCompanyPOC" class="form-label fw-bold">Better Plants Program Partner
+                                Point of Contact</label>
+                            <input type="text" class="form-control" name="partnerCompanyPOC" id="partnerCompanyPOC"
+                                formControlName="partnerCompanyPOC" (input)="save()">
+                        </div>
+                        <div class="col-6">
+                            <label for="technicalAccountManager" class="form-label fw-bold">Technical Account
+                                Manager</label>
+                            <input type="text" class="form-control" name="technicalAccountManager"
+                                id="technicalAccountManager" formControlName="technicalAccountManager" (input)="save()">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Is the Partner's Pledge Commitment at a corporate- or
+                                plant-level?</label>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="corporateOrPlant" id="corporateLevel"
+                                    formControlName="corporateOrPlant" [value]="true" (change)="save()">
+                                <label class="form-check-label" for="corporateLevel">Corporate-level</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="corporateOrPlant" id="plantLevel"
+                                    formControlName="corporateOrPlant" [value]="false" (change)="save()">
+                                <label class="form-check-label" for="plantLevel">Plant-level</label>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <label for="baselineYear" class="form-label fw-bold">Partner's Baseline Year</label>
+                            <select name="baselineYear" formControlName="baselineYear" class="form-select"
+                                (change)="save()">
+                                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-4">
+                            <label for="goalsMet" class="form-label fw-bold">First Year Pledge Goal Met</label>
+                            <input type="text" class="form-control" name="goalsMet" id="goalsMet"
+                                formControlName="goalsMet" (input)="save()">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="calculatingMethod" class="form-label fw-bold">Partner's Method of Calculating
+                                Energy
+                                Intensity</label>
+                            <textarea class="form-control" name="calculatingMethod" id="calculatingMethod"
+                                formControlName="calculatingMethod" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="variablesUsed" class="form-label fw-bold">Do Partner calculations and metrics
+                                normalize for weather,
+                                production, or other variables? If so, please list variables below.</label>
+                            <textarea class="form-control" name="variablesUsed" id="variablesUsed"
+                                formControlName="variablesUsed" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="plantLevelData" class="form-label fw-bold">If a corporate-wide pledge, did
+                                the Partner provide
+                                plant-level
+                                data? If so, what plant-level metrics were collected?</label>
+                            <textarea class="form-control" name="plantLevelData" id="plantLevelData"
+                                formControlName="plantLevelData" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="projects" class="form-label fw-bold">What major projects has the company put in
+                                place to help meet its
+                                efficiency target?</label>
+                            <textarea class="form-control" name="projects" id="projects" formControlName="projects"
+                                (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex w-100 justify-content-between">
+                                <label class="form-label fw-bold">Was progress toward the
+                                    25%
+                                    goal relatively linear? Provide year-by-year data and describe any dramatic single
+                                    year
+                                    spikes.</label>
+                                <div>
+                                    <button class="btn action-btn me-2 mb-2" (click)="addRow()"><i
+                                            class="fa fa-plus"></i> Add
+                                        Year</button>
+                                </div>
+                            </div>
+
+                            <div formArrayName="energyIntensityChangeArray">
+                                <ng-template [ngIf]="energyIntensityChangeArray.length != 0" [ngIfElse]="noDataBlock">
+                                    <ng-container
+                                        *ngFor="let row of energyIntensityChangeArray.controls; let index = index;"
+                                        [formGroupName]="index">
+                                        <div class="row g-2 align-items-center mb-2">
+                                            <div class="col">
+                                                <label *ngIf="index == 0">Year</label>
+                                                <input class="form-control" formControlName="energyIntensityYear"
+                                                    (input)="save()" />
+                                            </div>
+                                            <div class="col">
+                                                <label *ngIf="index == 0">Energy Intensity Change</label>
+                                                <input class="form-control" formControlName="energyIntensityChange"
+                                                    (input)="save()" />
+                                            </div>
+                                            <div class="col">
+                                                <label *ngIf="index == 0">Explanation (as needed)</label>
+                                                <input class="form-control" formControlName="energyIntensityExplanation"
+                                                    (input)="save()" />
+                                            </div>
+                                            <div class="col-auto mt-auto">
+                                                <button type="button" class="btn btn-danger"
+                                                    (click)="deleteRow(index)"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-template>
+                                <ng-template #noDataBlock>
+                                    <div class="text-muted">Click "<i class="fa fa-plus"></i> Add Year" to
+                                        add any dramatic single year spikes.</div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="additionalDetails" class="form-label fw-bold">Additional Details on annual
+                                report data</label>
+                            <textarea class="form-control" name="additionalDetails" id="additionalDetails"
+                                formControlName="additionalDetails" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="datasetsUsed" class="form-label fw-bold">What datasets did the TAM review beyond
+                                the annual
+                                reports?</label>
+                            <textarea class="form-control" name="datasetsUsed" id="datasetsUsed"
+                                formControlName="datasetsUsed" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="didCompanyShare" class="form-label fw-bold">Did the company share plant-level
+                                data? If so, what
+                                additional information was gleaned?</label>
+                            <textarea class="form-control" name="didCompanyShare" id="didCompanyShare"
+                                formControlName="didCompanyShare" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="recommendations" class="form-label fw-bold">Any Comments or Recommendations for
+                                Better Plants Program
+                                Partner:</label>
+                            <textarea class="form-control" name="recommendations" id="recommendations"
+                                formControlName="recommendations" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="additionalComments" class="form-label fw-bold">Additional Comments</label>
+                            <textarea class="form-control" name="additionalComments" id="additionalComments"
+                                formControlName="additionalComments" (input)="save()"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+            </ng-container>
+
+
+        </div>
+    </div>
+</form>
+
+<div [ngClass]="{'windowOverlay': itemToEdit}"></div>
+<div class="popup" [class.open]="itemToEdit">
+    <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}
+        <button class="item-right" (click)="cancelEditItem()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
+            this screen.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
+        <button class="btn btn-outline" (click)="confirmEditItem()">Go To Analysis</button>
+    </div>
+</div>
