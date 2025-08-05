@@ -13,6 +13,11 @@
     text-align: center;
 }
 
+thead th.can-click:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .form-label {
     font-size: 14px;
     font-style: italic;

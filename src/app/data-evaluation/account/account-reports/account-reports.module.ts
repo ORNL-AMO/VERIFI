@@ -65,6 +65,7 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
 import { AccountReportsDashboardTableComponent } from './account-reports-dashboard/account-reports-dashboard-table/account-reports-dashboard-table.component';
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
+import { ReportOrderByPipe } from './report-pipes/report-order-by.pipe';
 
 @NgModule({
   declarations: [
@@ -125,7 +126,9 @@ import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
     AccountEmissionFactorsReportDashboardComponent,
     AccountEmissionFactorsReportComponent,
     AccountEmissionFactorsReportTableComponent,
-    AccountReportsDashboardTableComponent
+    AccountReportsDashboardTableComponent,
+    ReportOrderByPipe,
+    AccountReportTypePipe
   ],
   imports: [
     CommonModule,
@@ -138,6 +141,9 @@ import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
     DataOverviewModule,
     TableItemsDropdownModule,
     NgbPagination
-]
+  ],
+  providers: [
+    AccountReportTypePipe,
+  ]
 })
 export class AccountReportsModule { }

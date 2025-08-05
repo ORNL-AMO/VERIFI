@@ -16,16 +16,28 @@
         <table class="table table-bordered table-hover">
             <thead>
                 <tr>
-                    <th>Report Name</th>
-                    <th>Report Type</th>
-                    <th>Report Year</th>
-                    <th>Last Modified</th>
+                     <th class="can-click" (click)="setOrderDataField('report.name')"
+                        [ngClass]="{'active': orderDataField == 'report.name'}">
+                        Report Name
+                    </th>
+                    <th class="can-click" (click)="setOrderDataField('report.reportType')"
+                        [ngClass]="{'active': orderDataField == 'report.reportType'}">
+                        Report Type
+                    </th>
+                    <th class="can-click" (click)="setOrderDataField('report.reportYear')"
+                        [ngClass]="{'active': orderDataField == 'report.reportYear'}">
+                        Report Year
+                    </th>
+                    <th class="can-click" (click)="setOrderDataField('report.modifiedDate')"
+                        [ngClass]="{'active': orderDataField == 'report.modifiedDate'}">
+                        Last Modified
+                    </th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr
-                    *ngFor="let data of filteredReports | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                    *ngFor="let data of filteredReports | reportOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                     <td>
                         <span class="fa fa-exclamation-circle" *ngIf="!data.isValid"></span>
                         {{ data.report.name }}

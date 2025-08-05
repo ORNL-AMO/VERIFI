@@ -29,6 +29,8 @@ export class AccountReportsDashboardTableComponent {
   deletedReport: IdbAccountReport;
   reportList: Array<{ isValid: boolean, report: IdbAccountReport }> = [];
   filteredReports: Array<{ isValid: boolean, report: IdbAccountReport }> = [];
+  orderDataField: string = 'report.reportName';
+  orderByDirection: 'asc' | 'desc' = 'desc';
 
   currentPageNumber: number = 1;
   itemsPerPage: number;
@@ -124,6 +126,18 @@ export class AccountReportsDashboardTableComponent {
         return 'badge-analysis';
       case 'accountEmissionFactors':
         return 'badge-emission-factors';
+    }
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
     }
   }
 }
