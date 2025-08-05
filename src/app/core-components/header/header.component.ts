@@ -229,7 +229,7 @@ export class HeaderComponent implements OnInit {
       if (url.includes('facilities')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
         if (selectedFacility) {
-          this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id);
+          this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid);
         } else {
           this.router.navigateByUrl('/data-evaluation/account')
         }

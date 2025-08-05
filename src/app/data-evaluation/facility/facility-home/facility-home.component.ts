@@ -99,7 +99,7 @@ export class FacilityHomeComponent implements OnInit {
 
 
   navigateToMeters() {
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/utility');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/utility');
   }
 
   setAnnualEnergyAnalysisSummary() {

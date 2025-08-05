@@ -296,7 +296,7 @@ export class CalculatedPredictorDataUpdateComponent {
       this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
     } else {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid)
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
     }
   }
 

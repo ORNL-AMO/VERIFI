@@ -109,7 +109,7 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   continue() {
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/analysis/run-analysis/group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis/group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
   }
 
   setBaselineYearWarning() {
