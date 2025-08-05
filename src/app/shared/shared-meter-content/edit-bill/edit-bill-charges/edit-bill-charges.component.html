@@ -1,0 +1,37 @@
+<hr>
+<p class="bold">Detailed Charges</p>
+<form [formGroup]="meterDataForm">
+    <div formArrayName="chargesArray">
+        <ng-template [ngIf]="chargesArray.length != 0" [ngIfElse]="noChargesBlock">
+            <ng-container *ngFor="let chargeGroup of chargesArray.controls; let index = index" [formGroupName]="index">
+                @let charge = (chargeGroup.get('chargeGuid').value | meterCharge: editMeter.charges);
+                <div>
+                    <label for="{{charge.name + '_' + charge.guid}}">{{charge.name}}</label>
+                    <div class="input-group mb-3">
+                        <ng-container
+                            *ngIf="charge.chargeType == 'consumption' || charge.chargeType == 'demand' || charge.chargeType == 'sewer'">
+                            <input id="{{charge.name + '_' + charge.guid}}" class="form-control" type="number"
+                                formControlName="chargeUsage" onfocus="this.select();" min="0">
+                            <span class="input-group-text">
+                                <ng-template
+                                    [ngIf]="charge.chargeType == 'consumption' || charge.chargeType == 'demand'" [ngIfElse]="consumptionUnitBlock">
+                                    {{editMeter.demandUnit}}
+                                </ng-template>
+                                <ng-template #consumptionUnitBlock>
+                                    <span [innerHTML]="editMeter.startingUnit | settingsLabel"></span>
+                                </ng-template>
+                            </span>
+                        </ng-container>
+                        <input id="chargeAmount" class="form-control" type="number" formControlName="chargeAmount"
+                            min="0">
+                        <span class="input-group-text">$</span>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-template>
+        <ng-template #noChargesBlock>
+            <div class="text-muted">No charges added for this meter. Add charges you want to track in the edit meter
+                screen.</div>
+        </ng-template>
+    </div>
+</form>

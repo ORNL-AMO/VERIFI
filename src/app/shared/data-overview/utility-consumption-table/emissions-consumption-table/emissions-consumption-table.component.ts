@@ -1,8 +1,8 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
 import { IUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { Subscription } from 'rxjs';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 
 @Component({
     selector: 'app-emissions-consumption-table',

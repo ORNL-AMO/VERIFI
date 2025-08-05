@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import * as _ from 'lodash';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';

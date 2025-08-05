@@ -69,10 +69,8 @@ export class DbChangesService {
   async selectAccount(account: IdbAccount, skipUpdates: boolean) {
     if (!skipUpdates) {
       let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      if (updateAccount.isChanged) {
-        account = updateAccount.account;
-        await this.updateAccount(account)
-      }
+      account = updateAccount.account;
+      await this.updateAccount(account)
     }
 
 
@@ -267,12 +265,18 @@ export class DbChangesService {
 
   async setMeters(account: IdbAccount, facility?: IdbFacility) {
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     for (let i = 0; i < accountMeters.length; i++) {
-      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i]);
+      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean, utilityMeterData: Array<IdbUtilityMeterData>, meterDataChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i], accountMeterData);
       if (updateMeter.isChanged) {
         accountMeters[i] = updateMeter.utilityMeter;
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
       };
+      if (updateMeter.meterDataChanged) {
+        for (let i = 0; i < updateMeter.utilityMeterData.length; i++) {
+          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(updateMeter.utilityMeterData[i]));
+        }
+      }
     }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
     if (facility) {
@@ -371,5 +375,32 @@ export class DbChangesService {
     await this.selectAccount(selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
+  }
+
+  async updateDataNewFacility(newFacility: IdbFacility) {
+    this.loadingService.setLoadingMessage('Updating Reports...');
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    for (let index = 0; index < accountReports.length; index++) {
+      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
+        facilityId: newFacility.guid,
+        included: false,
+        includedGroups: []
+      });
+      accountReports[index].betterClimateReportSetup.includedFacilityGroups.push({
+        facilityId: newFacility.guid,
+        include: false,
+        groups: []
+      });
+      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
+    }
+    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      accountAnalysisItems[index].facilityAnalysisItems.push({
+        facilityId: newFacility.guid,
+        analysisItemId: undefined
+      });
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+    }
   }
 }

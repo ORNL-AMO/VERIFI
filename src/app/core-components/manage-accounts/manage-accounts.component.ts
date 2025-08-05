@@ -6,8 +6,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
-import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -29,7 +29,7 @@ export class ManageAccountsComponent {
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService
+    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service
   ) {
   }
 
@@ -82,7 +82,7 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingStatus(true);
     try {
       await this.dbChangesService.selectAccount(account, true);
-      this.exportToExcelTemplateService.exportFacilityData();
+      this.exportToExcelTemplateV3Service.exportFacilityData();
       this.toastNotificationService.showToast(account.name + 'Backup Exported To Excel', undefined, undefined, false, 'alert-success');
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to backup ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
@@ -96,7 +96,7 @@ export class ManageAccountsComponent {
     try {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
-      this.router.navigate(['/']);
+      this.router.navigateByUrl('/data-evaluation/account/home');
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.accountErrors[index] = err;
@@ -136,7 +136,12 @@ export class ManageAccountsComponent {
     this.displayMoreHelp = false;
   }
 
-  addNewAccount() {
-    this.router.navigateByUrl('/setup-wizard');
+  async addNewAccount() {
+    let account: IdbAccount = getNewIdbAccount();
+    account = await firstValueFrom(this.accountDbService.addWithObservable(account));
+    let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+    this.accountDbService.allAccounts.next(allAccounts);
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/data-management/' + account.guid);
   }
 }

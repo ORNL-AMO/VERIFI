@@ -1,0 +1,173 @@
+<div class="mt-4" *ngIf="emissionReportData.length > 0">
+    <div *ngFor="let emissionData of emissionReportData" class="card-wrapper">
+        <div class="card shadow-sm rounded">
+            <div class="card-body">
+                <h3 class="mt-4 text-center">
+                    {{ emissionData.facility.guid | facilityName }} Facility
+                </h3>
+                <div *ngIf="emissionData.emissionsElectricity.length > 0">
+                    <h4>
+                        Electricity Emission Factors
+                    </h4>
+
+                    <div class="mt-4 text-center">
+                        <span class="me-3 text"><b class="text">Zip Code:</b> {{ emissionData.facility.zip }}</span>
+                        <span class="text"><b class="text">eGrid Region:</b> {{ emissionData.facility.eGridSubregion
+                            }}</span><br>
+                        <div class="mt-3">
+                            <span class="me-3 meter-text"><b class="meter-text">Electricity Meters:</b></span>
+                            <span class="meter-text"
+                                *ngFor="let meter of emissionData.electricityMeters; let i = index; let last = last;">
+                                {{ meter }}<span *ngIf="i < emissionData.electricityMeters.length - 1">, </span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <td class="year-header">
+                                    </td>
+                                    <td colspan="3" class="market-header">
+                                        Market Emission Rates
+                                    </td>
+                                    <td colspan="3" class="location-header">
+                                        Location Emission Rates
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="year-header">
+                                        Year
+                                    </td>
+                                    <td class="market-header">
+                                        CO<sub>2</sub> (kg CO<sub>2</sub>/MWh)
+                                    </td>
+                                    <td class="market-header">
+                                        CH<sub>4</sub> (g CH<sub>4</sub>/MWh)
+                                    </td>
+                                    <td class="market-header">
+                                        N<sub>2</sub>O (g N<sub>2</sub>O/MWh)
+                                    </td>
+                                    <td class="location-header">
+                                        CO<sub>2</sub> (kg CO<sub>2</sub>/MWh)
+                                    </td>
+                                    <td class="location-header">
+                                        CH<sub>4</sub> (g CH<sub>4</sub>/MWh)
+                                    </td>
+                                    <td class="location-header">
+                                        N<sub>2</sub>O (g N<sub>2</sub>O/MWh)
+                                    </td>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr *ngFor="let data of emissionData.emissionsElectricity">
+                                    <td class="year-header">
+                                        {{ data.year }}
+                                    </td>
+                                    <td class="market-header">
+                                        {{ data.marketRate.CO2 | number }}
+                                    </td>
+                                    <td class="market-header">
+                                        {{ data.marketRate.CH4 | number }}
+                                    </td>
+                                    <td class="market-header">
+                                        {{ data.marketRate.N2O | number }}
+                                    </td>
+                                    <td class="location-header">
+                                        {{ data.locationRate.CO2 | number }}
+                                    </td>
+                                    <td class="location-header">
+                                        {{ data.locationRate.CH4 | number }}
+                                    </td>
+                                    <td class="location-header">
+                                        {{ data.locationRate.N2O | number }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div *ngIf="emissionData.otherEmissions.length > 0" class="mt-5">
+                    <h4>
+                        Other Emission Factors
+                    </h4>
+                    <div class="table-responsive mt-4">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <td class="year-header">
+                                        Meter
+                                    </td>
+                                    <td class="year-header">
+                                        Source
+                                    </td>
+                                    <td class="year-header">
+                                        Fuel Type
+                                    </td>
+                                    <td class="year-header">
+                                        CO<sub class="year-header">2</sub> Factor
+                                    </td>
+                                    <td class="year-header">
+                                        CH<sub class="year-header">4</sub> Factor
+                                    </td>
+                                    <td class="year-header">
+                                        N<sub class="year-header">2</sub>O Factor
+                                    </td>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr *ngFor="let data of emissionData.otherEmissions">
+                                    <td class="body-cell">
+                                        {{ data.meterName }}
+                                    </td>
+                                    <td class="body-cell">
+                                        {{ data.source }}
+                                    </td>
+                                    <td class="body-cell" *ngIf="data.fuelValue !== ''">
+                                        {{ data.fuelValue }}
+                                    </td>
+                                    <td class="body-cell" *ngIf="data.fuelValue === ''">
+                                        &mdash;
+                                    </td>
+                                    <td class="body-cell">
+                                        <ng-container *ngIf="data.CO2">
+                                            {{ data.CO2 }}
+                                            g CO<sub>2</sub>/{{ data.unit }}
+                                        </ng-container>
+                                        <ng-container *ngIf="!data.CO2">
+                                            &mdash;
+                                        </ng-container>
+                                    </td>
+                                    <td class="body-cell">
+                                        <ng-container *ngIf="data.CH4">
+                                            {{ data.CH4 }}
+                                            g CH<sub>4</sub>/
+                                            {{ data.unit }}
+                                        </ng-container>
+                                        <ng-container *ngIf="!data.CH4">
+                                            &mdash;
+                                        </ng-container>
+                                    </td>
+                                    <td class="body-cell">
+                                        <ng-container *ngIf="data.CH4">
+                                            {{ data.CH4 }}
+                                            g CH<sub>4</sub>/
+                                            {{ data.unit }}
+                                        </ng-container>
+                                        <ng-container *ngIf="!data.N2O">
+                                            &mdash;
+                                        </ng-container>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

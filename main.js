@@ -9,9 +9,7 @@ const fs = require('fs');
 const os = require('os');
 
 function isDev() {
-    //TODO: check for isDev. Latest electron update breaks old
-    // return require.filename.indexOf('app.asar') === -1;
-    return false;
+    return app.isPackaged === false;
 };
 
 

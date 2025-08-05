@@ -1,0 +1,108 @@
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                <h1 class="card-title"><span class="fa fa-building"></span> {{account.name}}</h1>
+                <p class="card-text mg-0" *ngIf="account.address">{{account.address}}, {{account.city}},
+                    {{account.state}}
+                    {{account.zip}}
+                    {{account.country}}
+                </p>
+            </div>
+            <div class="col-8">
+                <div class="d-flex justify-content-center flex-wrap">
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('overview')"
+                            [disabled]="disableButtons">
+                            <span class="fa fa-chart-column"></span><br>
+                            View Account <br> Data Overview
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0 position-relative" (click)="navigateTo('analysis')"
+                            [disabled]="disableButtons">
+                            <span class="fa fa-microscope"></span><br>
+                            Conduct Account <br> Analysis
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
+                                <span class="fa fa-exclamation white"></span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('reports')" [disabled]="disableButtons">
+                            <span class="fa fa-folder"></span><br>
+                            Generate Account <br> Reports
+                            <!-- <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                *ngIf="energyReportNeeded || waterReportNeeded">
+                                <span class="fa-exclamation white"></span>
+                            </span> -->
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="navigateTo('settings')">
+                            <span class="fa fa-gear"></span><br>
+                            Manage Account <br> Settings
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="goToDataManagement()">
+                            <span class="fa fa-database"></span><br>
+                            Upload and Manage<br> Utility Data
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="exportData()">
+                            <span class="fa fa-download"></span><br>
+                            Export Account <br> Utility Data
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center"
+                    *ngIf="(energyAnalysisNeeded || waterAnalysisNeeded) && !disableButtons">
+                    <ul class="list-group list-group-flush">
+
+                        <li class="list-group-item" *ngIf="energyAnalysisNeeded">
+                            <a class="nav-link" routerLink="/account/analysis/dashboard/energy">
+                                <span class="badge rounded-pill bg-danger">
+                                    <span class="fa fa-exclamation white"></span>
+                                </span>
+                                Energy analysis needed. <ng-container *ngIf="latestEnergyAnalysisItem">Latest energy
+                                    analysis conducted for
+                                    {{latestEnergyAnalysisItem.reportYear |
+                                    yearDisplay:account.fiscalYear}}</ng-container>
+                            </a>
+                        </li>
+                        <li class="list-group-item" *ngIf="waterAnalysisNeeded">
+                            <a class="nav-link" routerLink="/account/analysis/dashboard/water">
+                                <span class="badge rounded-pill bg-danger">
+                                    <span class="fa fa-exclamation white"></span>
+                                </span>
+                                Water analysis needed. <ng-container *ngIf="latestWaterAnalysisItem">Latest water
+                                    analysis conducted for
+                                    {{latestWaterAnalysisItem.reportYear |
+                                    yearDisplay:account.fiscalYear}}</ng-container>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="row" *ngIf="disableButtons">
+        <div class="col-12">
+            <hr>
+            <div class="d-flex justify-content-center">
+                <div class="alert alert-warning">
+                    No meter data found for this account. Please add meter data to facilities within this account to
+                    begin.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

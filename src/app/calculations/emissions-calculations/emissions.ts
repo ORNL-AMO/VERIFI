@@ -132,7 +132,6 @@ export function getEmissions(meter: IdbUtilityMeter,
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel
         });
-
         //not On Road Vehicle or On Road Calcuatated by consumption
         if (meter.vehicleCategory != 2 || meter.vehicleCollectionType == 1) {
             //TOTAL VOLUME IS IN gal
@@ -147,12 +146,17 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileCarbonEmissions = (totalVolume * meterFuel.CO2) / 1000;
                 mobileBiogenicEmissions = 0;
             }
-            //miles = gal * mpg 
-            let miles = (totalVolume * hhvOrFuelEfficiency);
-            let totalCH4 = miles * CH4_Multiplier * meterFuel.CH4;
-            let totalN2O = miles * N2O_Multiplier * meterFuel.N2O;
-            mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
-
+            if (meter.vehicleCategory == 2) {
+                let miles = (totalVolume * hhvOrFuelEfficiency);
+                let totalCH4 = miles * CH4_Multiplier * meterFuel.CH4;
+                let totalN2O = miles * N2O_Multiplier * meterFuel.N2O;
+                mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+            } else {
+                let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
+                let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
+                mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+            }
+            mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
         } else {
             //TOTAL VOLUME IS IN MILES
             if (vehicleDistanceUnit != 'mi') {
@@ -170,8 +174,8 @@ export function getEmissions(meter: IdbUtilityMeter,
             let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
             let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
             mobileOtherEmissions = (totalCH4 + totalN2O);
+            mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
         }
-        mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
     } else if (meter.source == 'Other') {
         //Fugitive or process
         if (meter.scope == 5) {

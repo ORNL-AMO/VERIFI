@@ -2,14 +2,14 @@ import { Component, Input } from '@angular/core';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WeatherDataService } from '../../weather-data.service';
 
 @Component({
-    selector: 'app-weather-stations-table',
-    templateUrl: './weather-stations-table.component.html',
-    styleUrls: ['./weather-stations-table.component.css'],
-    standalone: false
+  selector: 'app-weather-stations-table',
+  templateUrl: './weather-stations-table.component.html',
+  styleUrls: ['./weather-stations-table.component.css'],
+  standalone: false
 })
 export class WeatherStationsTableComponent {
   @Input()
@@ -21,7 +21,8 @@ export class WeatherStationsTableComponent {
   orderDataField: string = 'distanceFrom';
   orderByDirection: string = 'asc';
   constructor(private sharedDataService: SharedDataService, private router: Router,
-    private weatherDataService: WeatherDataService) {
+    private weatherDataService: WeatherDataService,
+    private route: ActivatedRoute) {
 
   }
 
@@ -37,7 +38,7 @@ export class WeatherStationsTableComponent {
 
   selectStation(station: WeatherStation) {
     this.weatherDataService.selectedStation = station;
-    this.router.navigateByUrl('weather-data/annual-station');
+    this.router.navigate(['../annual-station'], { relativeTo: this.route });
   }
 
   setOrderDataField(str: string) {

@@ -1,0 +1,67 @@
+<div class="d-flex w-100 flex-column justify-content-end">
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveChanges()"
+            [disabled]="(groupForm.invalid || !groupForm.dirty) && !selectionsChanged">
+            <span class="fa fa-save"></span>
+            Save Changes
+        </button>
+    </div>
+</div>
+<p class="bold">Group Information</p>
+<form [formGroup]="groupForm">
+    <label for="name">Name <span class="required">*</span> </label>
+    <div class="input-group mb-3">
+        <input id="name" class="form-control" type="text" formControlName="name" minlength="0" maxlength="42">
+    </div>
+    <span class="inputError" *ngIf="groupForm.get('name').hasError('required')">Name is required</span>
+
+    <label for="groupType">Group Type <span class="required">*</span></label>
+    <select id="groupType" class="form-select mb-3" formControlName="groupType" (change)="setGroupOptions()">
+        <option [value]="'Energy'" *ngIf="hasEnergyMeters">Energy</option>
+        <option [value]="'Water'" *ngIf="hasWaterMeters">Water</option>
+        <option [value]="'Other'">Other</option>
+    </select>
+
+    <label for="name">Description</label>
+    <div class="input-group mb-3">
+        <textarea class="form-control" formControlName="description" minlength="1" maxlength="65"></textarea>
+    </div>
+</form>
+<p class="bold">Select Group Meters</p>
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Include</th>
+            <th>Meter</th>
+            <th>Source</th>
+            <th>Scope</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let groupOption of meterGroupOptions">
+            <td>
+                <div class="form-check">
+                    <input (change)="setSelectionsChanged()" type="checkbox" class="form-check-input"
+                        [name]="groupOption.guid" [id]="groupOption.guid" [(ngModel)]="groupOption.includeInGroup">
+                </div>
+            </td>
+            <td>
+                {{groupOption.name}}
+                <span class="fa fa-asterisk" *ngIf="groupOption.inAnotherGroup"></span>
+            </td>
+            <td>
+                {{groupOption.source}}
+            </td>
+            <td>
+                <span [innerHTML]="groupOption.scope | scopeLabel"></span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p class="fw-light" *ngIf="hasExistingGroups">
+    <span class="fa fa-asterisk"></span> Indicates this meter is already in a different group. Adding it to this group
+    will remove it from the group it currently is in. Changing groups can create bad models in analysis if they already
+    exist.
+</p>

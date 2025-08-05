@@ -123,6 +123,7 @@ export class WeatherDataService {
       responseType: 'text' as const,
       headers: this.requestHeaders
     };
+
     return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
   }
 

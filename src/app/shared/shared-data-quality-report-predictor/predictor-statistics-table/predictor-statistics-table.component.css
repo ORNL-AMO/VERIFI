@@ -1,0 +1,7 @@
+.header {
+    background-color: #2e517f;
+    color: #fff;
+}
+.container-fluid{
+    overflow-x: auto;
+}

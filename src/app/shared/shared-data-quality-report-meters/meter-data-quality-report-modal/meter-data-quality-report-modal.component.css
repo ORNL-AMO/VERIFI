@@ -1,0 +1,18 @@
+.popup{
+    top: 10px;
+    left: 10px;
+    width: calc(100vw - 20px)
+}
+
+.popup .popup-body{
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+.popup-header .fa{
+  color: white;
+}
+
+.btn .fa{
+  color: inherit;
+}

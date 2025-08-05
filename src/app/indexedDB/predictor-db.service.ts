@@ -84,4 +84,10 @@ export class PredictorDbService {
             return predictor.facilityId == facilityId;
         })
     }
+
+    getFacilityPredictorsCopy(facilityId: string): Array<IdbPredictor> {
+        let facilityPredictors: Array<IdbPredictor> = this.getByFacilityId(facilityId);
+        let facilityPredictorsCopy: Array<IdbPredictor> = JSON.parse(JSON.stringify(facilityPredictors));
+        return facilityPredictorsCopy;
+    }
 }

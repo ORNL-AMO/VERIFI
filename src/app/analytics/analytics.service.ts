@@ -133,10 +133,11 @@ export class AnalyticsService {
   }
 
   getPageWithoutId(pagePath: string) {
-    let pathWithoutId: string = pagePath.replace(/[0-9]/g, '');
-    pathWithoutId = pathWithoutId.replace(/\/$/, "");
-    pathWithoutId = pathWithoutId.replace("//", "/:id/");
-    return pathWithoutId;
+    // Replace segments that match the custom ID pattern: 9 chars, lowercase letters and digits, with ':id'
+    return pagePath
+      .split('/')
+      .map(segment => /^[a-z0-9]{9}$/.test(segment) ? ':id' : segment)
+      .join('/') || '/';
   }
 
   sendEvent(eventName: AnalyticsEventString, path?: string) {

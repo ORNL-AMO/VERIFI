@@ -1,0 +1,31 @@
+<div class="wrapper main-content p-0">
+    <div class="content-padding">
+        <h4>{{facilityReportType | facilityReportType}} Report Setup</h4>
+        <form>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row form-group">
+                        <label class="col-6 col-form-label semibold" for="reportName">Report Name</label>
+                        <div class="col-6">
+                            <input class="form-control" type="text" id="reportName" name="reportName"
+                                [(ngModel)]="reportName" (input)="saveName()" [required]="true">
+                            <div class="alert alert-danger small mt-2" *ngIf="!reportName">
+                                Report Name Required.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <app-facility-analysis-report-setup
+                        *ngIf="facilityReportType == 'analysis'"></app-facility-analysis-report-setup>
+                    <app-facility-overview-report-setup
+                        *ngIf="facilityReportType == 'overview'"></app-facility-overview-report-setup>
+                    <app-facility-savings-report-setup
+                        *ngIf="facilityReportType == 'savings'"></app-facility-savings-report-setup>
+                    <app-facility-emission-factors-report-setup
+                        *ngIf="facilityReportType == 'emissionFactors'"></app-facility-emission-factors-report-setup>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

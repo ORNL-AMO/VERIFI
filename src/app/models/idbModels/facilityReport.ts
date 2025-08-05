@@ -10,7 +10,8 @@ export interface IdbFacilityReport extends IdbEntry {
     analysisItemId: string,
     analysisReportSettings: AnalysisReportSettings,
     dataOverviewReportSettings: DataOverviewFacilityReportSettings,
-    savingsReportSettings: SavingsFacilityReportSettings
+    savingsReportSettings: SavingsFacilityReportSettings,
+    emissionFactorsReportSettings: EmissionFactorsReportSettings
 }
 
 export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
@@ -24,11 +25,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         name: 'New Report',
         analysisReportSettings: getAnalysisReportSettings(),
         dataOverviewReportSettings: getDataOverviewReportSettings(groups),
-        savingsReportSettings: getSavingsReportSettings()
+        savingsReportSettings: getSavingsReportSettings(),
+        emissionFactorsReportSettings: getEmissionFactorsReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'savings';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -195,4 +197,16 @@ export interface SavingsFacilityReportSettings {
     groupTrailingTwelveMonthsConsumption: boolean,
     groupTrailingTwelveMonthsSavings: boolean,
     groupAnnualResultsTable: boolean,
+}
+
+export function getEmissionFactorsReportSettings(): EmissionFactorsReportSettings {
+    return {
+        startYear: undefined,
+        endYear: undefined
+    }
+}
+
+export interface EmissionFactorsReportSettings {
+    startYear: number,
+    endYear: number,
 }

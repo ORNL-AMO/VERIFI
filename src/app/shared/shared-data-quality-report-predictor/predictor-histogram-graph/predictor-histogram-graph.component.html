@@ -1,0 +1,15 @@
+<div #predictorHistogram id="predictorHistogram" class="w-100"></div>
+<div class="d-flex justify-content-center mt-2">
+  <div class="mt-auto me-2">
+    <label for="binInput" class="form-label fw-bold">Number of bins:</label>
+  </div>
+  <div>
+    <input id="binInput" type="number" [(ngModel)]="numberOfBins"
+      class="form-control border-2 border-primary shadow-sm bin-input" (input)="updateGraph()">
+  </div>
+</div>
+<div class="d-flex justify-content-center mt-2">
+  <div>
+    Bin Size: {{ binSize }}
+  </div>
+</div>

@@ -6,7 +6,7 @@ import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { checkSameMonth } from "src/app/upload-data/upload-helper-functions";
+import { checkSameMonth } from "src/app/data-management/data-management-import/import-services/upload-helper-functions";
 import * as _ from 'lodash';
 
 export class MonthlyAnalysisSummaryClass {
