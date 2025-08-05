@@ -62,6 +62,9 @@ import { AnalysisDataValidationTablesComponent } from './analysis-report/analysi
 import { AccountEmissionFactorsReportDashboardComponent } from './account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component';
 import { AccountEmissionFactorsReportComponent } from './account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
 import { AccountEmissionFactorsReportTableComponent } from './account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
+import { AccountReportsDashboardTableComponent } from './account-reports-dashboard/account-reports-dashboard-table/account-reports-dashboard-table.component';
+import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
   declarations: [
@@ -121,7 +124,8 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
     AnalysisDataValidationTablesComponent,
     AccountEmissionFactorsReportDashboardComponent,
     AccountEmissionFactorsReportComponent,
-    AccountEmissionFactorsReportTableComponent
+    AccountEmissionFactorsReportTableComponent,
+    AccountReportsDashboardTableComponent
   ],
   imports: [
     CommonModule,
@@ -131,7 +135,9 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
     FormsModule,
     LabelWithTooltipModule,
     CalculatingSpinnerModule,
-    DataOverviewModule
-  ]
+    DataOverviewModule,
+    TableItemsDropdownModule,
+    NgbPagination
+]
 })
 export class AccountReportsModule { }
