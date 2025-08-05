@@ -1,0 +1,39 @@
+.list-group-item-action:hover {
+    cursor: pointer;
+}
+
+
+i.fa.fa-list-check {
+    font-size: inherit;
+}
+
+select.form-select {
+    width: auto;
+}
+
+label.form-label {
+    white-space: nowrap;
+}
+
+.btn .fa.fa-temperature-half,
+.btn .fa.fa-upload {
+    font-size: 14px;
+}
+
+.btn:hover .fa.fa-temperature-half {
+    color: white;
+}
+
+.list-group-item-action.sub-item-1{
+    margin-left: 1rem;
+    /* margin-right: 1rem; */
+    width: auto;
+    font-weight: bold;
+}
+
+.list-group-item-action.sub-item-2{
+    margin-left: 2rem;
+    /* margin-right: 1rem; */
+    width: auto;
+    font-weight: bold;
+}

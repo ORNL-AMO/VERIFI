@@ -165,3 +165,10 @@ export interface BetterClimateReportSetup {
     }>
   }>
 }
+
+export interface AnalysisReportSetup {
+  analysisItemId: string,
+  includeProblemsInformation: boolean,
+  includeExecutiveSummary: boolean,
+  includeDataValidationTables: boolean
+}

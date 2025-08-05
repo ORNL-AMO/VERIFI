@@ -1,7 +1,7 @@
 {
   "name": "verifi",
   "description": "Application for analyzing utility usage",
-  "version": "0.13.6-beta",
+  "version": "0.14.0-beta",
   "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
@@ -14,7 +14,7 @@
     "copyright": "Copyright 2021 ORNL. All rights reserved.",
     "productName": "VERIFI",
     "directories": {
-      "output": "../output/verifi/"
+      "output": "output/"
     },
     "win": {
       "target": "nsis",
@@ -107,7 +107,7 @@
     "@types/jasmine": "5.1.4",
     "@types/jasminewd2": "^2.0.10",
     "@types/node": "20.12.5",
-    "electron": "29.2.0",
+    "electron": "29.3.3",
     "electron-builder": "24.13.3",
     "exceljs": "4.3.0",
     "jasmine-core": "4.6.0",

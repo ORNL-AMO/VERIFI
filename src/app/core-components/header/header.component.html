@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-sm" #header>
-    <a class="navbar-brand" routerLink="/account">VERIFI</a>
+    <a class="navbar-brand" (click)="goHome()">VERIFI</a>
     <span class="badge bg-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -9,9 +9,10 @@
                 Update Available!
             </button>
         </div>
-        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
+        <!-- <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <app-search-bar></app-search-bar>
-        </div>
+        </div> -->
+
 
         <div class="dropdown ms-auto" *ngIf="dataInitialized">
             <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown"
@@ -39,6 +40,12 @@
                 </li>
             </ul>
         </div>
+        <div class="btn btn-group ms-2" *ngIf="dataInitialized && activeAccount && displayToggle">
+            <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
+                [ngClass]="{'active': !inDataEvaluation}"><span class="fa fa-database"></span> Data Management</button>
+            <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
+                [ngClass]="{'active': inDataEvaluation}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
+        </div>
         <ng-container *ngIf="dataInitialized && activeAccount">
             <ng-container *ngIf="!activeAccount.dataBackupFilePath">
                 <div class="ps-2">
@@ -50,7 +57,8 @@
                 </div>
             </ng-container>
             <div class="ps-2" *ngIf="activeAccount.dataBackupFilePath">
-                <div class="badge" title="Automatic Account Backups Active" [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
+                <div class="badge" title="Automatic Account Backups Active"
+                    [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
                     <span class="fa fa-file-arrow-down"></span>
                 </div>
             </div>

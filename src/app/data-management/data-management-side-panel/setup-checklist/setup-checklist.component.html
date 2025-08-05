@@ -1,0 +1,71 @@
+<div class="pt-2 pe-1 ps-1">
+    <h6>{{account.name}} To Do List:</h6>
+    <p>
+        The following items have been identified as needing action for this account.
+    </p>
+    <ng-template [ngIf]="hasTodoItems" [ngIfElse]="noToDoItems">
+        <ul class="list-group" [ngClass]="{'list-group-flush': totalTodoItems > 10}">
+            <!--Other Todo Items-->
+            <li class="list-group-item list-group-item-action bold"
+                *ngFor="let item of toDoItems.otherItems; let index = index;" [routerLink]="item.url">
+                {{item.label}}
+            </li>
+            <!--Items shown by facility-->
+            <ng-template [ngIf]="totalTodoItems > 10" [ngIfElse]="listItemsBlock">
+                <ng-container *ngFor="let facilityItem of toDoItems.facilityTodoItems; let facilityIndex = index;">
+                    <li class="list-group-item bold">
+                        <span class="fa fa-industry" [ngStyle]="{'color': facilityItem.facility.color}"></span>
+                        {{facilityItem.facility.name}}
+                        <span class="badge bg-secondary float-end">
+                            {{facilityItem.numberOfItems}} items
+                        </span>
+                    </li>
+                    <li class="list-group-item list-group-item-action"
+                        (click)="toggleShowMeterItem(facilityIndex)">
+                        <span class="fa"
+                            [ngClass]="{'fa-chevron-right': !facilityItem.showMeterItems, 'fa-chevron-down': facilityItem.showMeterItems}"></span>
+                        Meter To Do Items: {{facilityItem.meterTodoItems.length}}
+                    </li>
+                    <ng-container *ngIf="facilityItem.showMeterItems">
+                        <li class="list-group-item list-group-item-action"
+                            *ngFor="let meterItem of facilityItem.meterTodoItems; let meterIndex = index;"
+                            [routerLink]="meterItem.url">
+                            {{meterItem.label}}
+                        </li>
+                    </ng-container>
+                    <li class="list-group-item list-group-item-action"
+                        (click)="toggleShowPredictorItem(facilityIndex)">
+                        <span class="fa"
+                            [ngClass]="{'fa-chevron-right': !facilityItem.showPredictorItems, 'fa-chevron-down': facilityItem.showPredictorItems}"></span>
+                        Predictor To Do Items: {{facilityItem.predictorTodoItems.length}}
+                    </li>
+                    <ng-container *ngIf="facilityItem.showPredictorItems">
+                        <li class="list-group-item list-group-item-action"
+                            *ngFor="let predictorItem of facilityItem.predictorTodoItems; let predictorIndex = index;"
+                            [routerLink]="predictorItem.url">
+                            <span class="fa fa-temperature-half pe-2" *ngIf="predictorItem.isWeather"></span>
+                            {{predictorItem.label}}
+                        </li>
+                    </ng-container>
+                </ng-container>
+            </ng-template>
+            <!--List of all To Do Items-->
+            <ng-template #listItemsBlock>
+                <li class="list-group-item list-group-item-action"
+                    *ngFor="let todoItem of allTodoItems; let meterIndex = index;" [routerLink]="todoItem.url">
+                    <div class="p-0 bold">
+                        <span class="fa fa-temperature-half pe-2" *ngIf="todoItem.isWeather"></span>
+                        {{todoItem.label}} ({{todoItem.facilityId | facilityName}})
+                    </div>
+                </li>
+            </ng-template>
+
+        </ul>
+    </ng-template>
+    <ng-template #noToDoItems>
+        <div class="alert alert-info" role="alert">
+            <i class="fa fa-check-circle"></i>
+            No items to do at this time. Proceed to data evaluation and analysis!
+        </div>
+    </ng-template>
+</div>

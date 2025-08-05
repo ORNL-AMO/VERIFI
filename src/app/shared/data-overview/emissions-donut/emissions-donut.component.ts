@@ -2,17 +2,17 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { EmissionsResults, EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 
 @Component({
-    selector: 'app-emissions-donut',
-    templateUrl: './emissions-donut.component.html',
-    styleUrls: ['./emissions-donut.component.css'],
-    standalone: false
+  selector: 'app-emissions-donut',
+  templateUrl: './emissions-donut.component.html',
+  styleUrls: ['./emissions-donut.component.css'],
+  standalone: false
 })
 export class EmissionsDonutComponent {
   @Input()
@@ -23,6 +23,7 @@ export class EmissionsDonutComponent {
   accountOverviewFacility: Array<AccountOverviewFacility>;
   @Input()
   inHomeScreen: boolean;
+  isVisible: boolean = true;
 
   @ViewChild('emissionsDonut', { static: false }) emissionsDonut: ElementRef;
   emissionsDisplay: 'market' | 'location';
@@ -65,42 +66,72 @@ export class EmissionsDonutComponent {
   drawChart() {
     if (this.emissionsDonut && (this.facilityOverviewMeters || this.accountOverviewFacility)) {
       let emissionsTypes: Array<EmissionsTypes> = getEmissionsTypes(this.emissionsDisplay);
+      emissionsTypes.reverse();
       let valuesAndTypes: { values: Array<number>, includedEmissionsTypes: Array<EmissionsTypes> } = this.getValues(emissionsTypes);
-      var data = [{
-        values: valuesAndTypes.values,
-        labels: valuesAndTypes.includedEmissionsTypes.map(eType => { return eType }),
-        marker: {
-          colors: valuesAndTypes.includedEmissionsTypes.map(eType => { return getEmissionsTypeColor(eType) }),
-          line: {
-            color: '#fff',
-            width: 5
-          }
-        },
-        texttemplate: '%{label}: (%{percent:.1%})',
-        textposition: 'auto',
-        insidetextorientation: "horizontal",
-        hovertemplate: '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>',
-        hole: .5,
-        type: 'pie',
-        automargin: true,
-        sort: false
-      }];
-      let height: number;
-      if (this.inHomeScreen) {
-        height = 350;
+      let hasNoValue = valuesAndTypes.values.every(value => value == 0);
+      let values = valuesAndTypes.values;
+      let labels = valuesAndTypes.includedEmissionsTypes.map(eType => { return eType });
+      let colors = valuesAndTypes.includedEmissionsTypes.map(eType => { return getEmissionsTypeColor(eType) });
+      let total = values.reduce((sum, val) => sum + val, 0);
+      let labelText = labels.map((label, i) => {
+        let percentage = ((values[i] / total) * 100).toFixed(1);
+        let text = label + " (" + percentage + "%) ";
+        return text;
+      });
+
+      var data = [];
+      if (hasNoValue) {
+        this.isVisible = false;
+      }
+      else {
+        this.isVisible = true
+        data = [{
+          type: 'bar',
+          orientation: 'h',
+          x: values,
+          y: labelText,
+          marker: {
+            color: colors
+          },
+          texttemplate: '%{x:,.0f} tonne CO<sub>2</sub>e',
+          textposition: 'auto',
+          hovertemplate: '%{x:,.0f} tonne CO<sub>2</sub>e <extra></extra>',
+          automargin: true
+        }];
       }
 
       var layout = {
-        height: height,
-        margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-        showlegend: false
+        height: 400,
+        title: {
+          text: '<b>Emission Breakdown</b>',
+          font: {
+            size: 14,
+            family: 'Arial'
+          }
+        },
+        yaxis: {
+          automargin: true
+        },
+        xaxis: {
+          automargin: true,
+          title: {
+            text: '(tonne CO<sub>2</sub>e)',
+            font: {
+              size: 12,
+              family: 'Arial'
+            }
+          }
+        },
+        font: {
+          family: 'Arial'
+        }
       };
 
       let config = {
-        displayModeBar: true,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true
-      }
+      };
       this.plotlyService.newPlot(this.emissionsDonut.nativeElement, data, layout, config);
     }
   }

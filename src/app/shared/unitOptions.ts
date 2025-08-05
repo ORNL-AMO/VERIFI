@@ -191,3 +191,27 @@ export const ChilledWaterUnitOptions: Array<UnitOption> = [
     },
 
 ]
+
+export const DemandUnitOptions: Array<UnitOption> = [
+    //kW kVA MW MVA
+    {
+        display: 'Kilowatt (kW)',
+        value: 'kW',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Kilovolt-Ampere (kVA)',
+        value: 'kVA',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Megawatt (MW)',
+        value: 'MW',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'MegaVolt-Ampere (MVA)',
+        value: 'MVA',
+        unitsOfMeasure: 'Metric'
+    }
+]

@@ -1,0 +1,177 @@
+<div class="wrapper">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <h1>Welcome to </h1>
+                <h1 class="verifi ps-2 pe-2">VERIFI</h1>
+            </div>
+        </div>
+        <div class="col-lg-8 col-md-12 text-center">
+            <p class="large">VERIFI is a tool used to track and analyze utility consumption data at both a coorporate
+                and facility level.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-12 text-center">
+            <p class="large bold">
+                There are a few options for getting started.
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    Create New Account
+                </div>
+                <div class="card-body">
+                    Fill out the account, facility, meter, and predictor data details. Once data has been added, users
+                    can conduct an analysis on the performance of their facilities.
+                </div>
+                <div class="card-footer justify-content-end">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn nav-btn" (click)="createNewAccount();">
+                                <span class="fa fa-plus"></span>
+                                <ng-template [ngIf]="accounts.length == 0" [ngIfElse]="newAccountBlock">
+                                    Get Started
+                                </ng-template>
+                                <ng-template #newAccountBlock>
+                                    Add Account
+                                </ng-template>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    Upload Account Backup
+                </div>
+                <div class="card-body">
+                    Use this method if you have an account backup file that was exported from a different VERIFI system.
+                </div>
+                <div class="card-footer justify-content-end">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn btn-primary" (click)="openImportBackup();">
+                                <span class="fa fa-upload"></span>
+                                Upload Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    Load Example Account
+                </div>
+                <div class="card-body">
+                    Load in an example account to let you test out VERIFI's capabilities with example data created to
+                    mirror a real world company.
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn btn-success" (click)="openLoadTestData();">
+                                <span class="fa fa-file-circle-plus"></span>
+                                Load Example
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center" *ngIf="accounts.length > 0">
+        <div class="col-md-12 col-lg-9">
+            <hr>
+
+            <div class="d-flex w-100 justify-content-between">
+                <div class="mt-auto">
+                    <h4>Account Portfolio</h4>
+                </div>
+                <div *ngIf="accounts.length > 5">
+                    <ngb-pagination [collectionSize]="accounts.length" [(page)]="currentPageNumber" [pageSize]="5"
+                        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+                    </ngb-pagination>
+                </div>
+            </div>
+
+            <div class="list-group ps-2 pe-2">
+                <div class="list-group-item"
+                    *ngFor="let account of accounts|  slice: ((currentPageNumber-1) * 5): currentPageNumber * 5">
+                    <div class="d-flex justify-content-between">
+                        <div class="list-item-label mt-auto mb-auto">
+                            <span class="fa fa-building"></span>
+                            {{account.name}}
+                        </div>
+                        <div>
+                            <span class="fw-light small pe-2">
+                                Last Modified: {{account.modifiedDate | date:'short'}}
+                            </span>
+                            <button class="btn nav-btn me-2 btn-sm" (click)="goToDataWizard(account)">
+                                <span class="fa fa-database"></span> Data Management
+                            </button>
+                            <button class="btn nav-btn btn-sm" (click)="goToAccountHome(account)">
+                                <span class="fa fa-chart-simple"></span> Data Evaluation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-9">
+            <hr>
+            <h4 class="ps-0">About VERIFI and ORNL's Industrial Resources</h4>
+            <p class="welcome-text">
+                For more information about VERIFI, as well as information about similar resources developed by ORNL,
+                please
+                visit <a href="https://www.industrialresources.ornl.gov/VERIFI" target="_blank">ORNL's Industrial
+                    Resources</a>. Here you will find a collection of guidance
+                and user support documents.</p>
+            <p class="welcome-text">
+                Dynamic help text is provided throughout VERIFI. If you need help at any time within the tool, click or
+                hover the <span class="fa fa-question-circle"></span> icon and
+                help text will appear.
+            </p>
+
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-9">
+            <hr>
+            <h4 class="ps-0">Contact and Feedback</h4>
+            <p class="welcome-text">
+                If you have any feedback or would like to contact the team behind VERIFI, please reach out to us at
+                <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.
+            </p>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': showTestDataModal}"></div>
+<div class="popup" [ngClass]="{'open': showTestDataModal}">
+    <div class="popup-header">Load Example Account
+        <button class="item-right" (click)="cancelTestData()">x</button>
+    </div>
+    <div class="popup-body">
+        Do you want to load in an example account with test data? You can use this data to view all the functionality of
+        VERIFI.
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelTestData()">Cancel</button>
+        <button class="btn btn-success" (click)="loadTestData()">Load Example</button>
+    </div>
+</div>

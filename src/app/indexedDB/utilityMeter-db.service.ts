@@ -11,10 +11,12 @@ export class UtilityMeterdbService {
 
     facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
     accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
+    selectedMeter: BehaviorSubject<IdbUtilityMeter>;
     constructor(private dbService: NgxIndexedDBService,
         private loadingService: LoadingService) {
         this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
+        this.selectedMeter = new BehaviorSubject<IdbUtilityMeter>(undefined);
     }
 
     getAll(): Observable<Array<IdbUtilityMeter>> {

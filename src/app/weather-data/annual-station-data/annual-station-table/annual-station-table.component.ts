@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WeatherDataService } from '../../weather-data.service';
 import { WeatherDataSelection } from 'src/app/models/degreeDays';
 import { AnnualStationDataSummary } from '../annual-station-data.component';
@@ -23,14 +23,15 @@ export class AnnualStationTableComponent {
   copyingTable: boolean = false;
 
   constructor(private weatherDataService: WeatherDataService, private router: Router,
-    private copyTableService: CopyTableService
+    private copyTableService: CopyTableService,
+    private activatedRoute: ActivatedRoute
   ) {
 
   }
 
   gotToMonthSummary(date: Date) {
     this.weatherDataService.selectedMonth = date;
-    this.router.navigateByUrl('weather-data/monthly-station');
+    this.router.navigate(['../monthly-station'], { relativeTo: this.activatedRoute });
   }
 
   copyTable() {

@@ -63,6 +63,7 @@ export class AppComponent {
 
   showSurveyToast: boolean;
   showSurveyModal: boolean;
+  inDataManagement: boolean = false;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -112,6 +113,12 @@ export class AppComponent {
     this.surveyService.showSurveyToast.subscribe(val => {
       this.showSurveyToast = val;
     });
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.inDataManagement = this.router.url.includes('data-management');
+      }
+    });
+    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   async initializeData() {
@@ -164,7 +171,7 @@ export class AppComponent {
         await this.initializeElectronBackups();
 
         this.dataInitialized = true;
-        this.router.navigateByUrl('setup-wizard');
+        this.router.navigateByUrl('welcome');
       }
 
     } catch (err) {
@@ -275,12 +282,18 @@ export class AppComponent {
     //set meters
     this.loadingMessage = "Loading Meters..";
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     for (let i = 0; i < accountMeters.length; i++) {
-      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i]);
+      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean, utilityMeterData: Array<IdbUtilityMeterData>, meterDataChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i], accountMeterData);
       if (updateMeter.isChanged) {
         accountMeters[i] = updateMeter.utilityMeter;
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
       };
+      if(updateMeter.meterDataChanged) {
+        for(let i = 0; i < updateMeter.utilityMeterData.length; i++) {
+          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(updateMeter.utilityMeterData[i]));
+        }
+      }
     }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
   }
@@ -324,8 +337,8 @@ export class AppComponent {
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
-    for(let i = 0; i < customFuels.length; i++){
-      if(isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined){
+    for (let i = 0; i < customFuels.length; i++) {
+      if (isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined) {
         customFuels[i].directEmissionsRate = true;
         await firstValueFrom(this.customFuelDbservice.updateWithObservable(customFuels[i]));
       }

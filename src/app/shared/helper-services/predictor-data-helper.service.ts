@@ -11,7 +11,7 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
+import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 

@@ -1,0 +1,11 @@
+th{
+    width: 33%;
+}
+
+th.bg-dark{
+    color: white;
+}
+
+h5, h5 i{
+    font-size: 16px;
+}

@@ -1,0 +1,39 @@
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+        <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
+            [disabled]="meterDataForm.invalid || invalidDate">Save Changes</button>
+        <button *ngIf="addOrEdit == 'add'" class="btn btn-primary me-2" (click)="saveAndQuit()"
+            [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
+        <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()"
+            [disabled]="meterDataForm.invalid || invalidDate">Save +
+            Add Another</button>
+    </div>
+</div>
+<hr>
+
+<app-edit-electricity-bill *ngIf="editMeter.source == 'Electricity'" [editMeterData]="editMeterData"
+    [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm" [invalidDate]="invalidDate">
+</app-edit-electricity-bill>
+<app-edit-utility-bill
+    *ngIf="editMeter.source != 'Electricity' && editMeter.scope != 2 && editMeter.scope != 5 && editMeter.scope != 6"
+    [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter"
+    [displayVolumeInput]="displayVolumeInput" [displayEnergyUse]="displayEnergyUse" [meterDataForm]="meterDataForm"
+    [invalidDate]="invalidDate" [displayHeatCapacity]="displayHeatCapacity">
+</app-edit-utility-bill>
+<app-edit-vehicle-meter-bill *ngIf="editMeter.source != 'Electricity' && editMeter.scope == 2"
+    [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm"
+    [invalidDate]="invalidDate" [displayVehicleFuelEfficiency]="displayVehicleFuelEfficiency">
+</app-edit-vehicle-meter-bill>
+<app-edit-other-emissions-bill
+    *ngIf="editMeter.source != 'Electricity' && (editMeter.scope == 5 || editMeter.scope == 6)"
+    [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm"
+    [invalidDate]="invalidDate">
+</app-edit-other-emissions-bill>
+
+<app-edit-bill-charges [editMeter]="editMeter" [meterDataForm]="meterDataForm"
+    [editMeterData]="editMeterData" [addOrEdit]="addOrEdit"></app-edit-bill-charges>
+
+<app-edit-connect-bill *ngIf="isElectron" [editMeterData]="editMeterData" [meterDataForm]="meterDataForm"
+    [editMeter]="editMeter" [addOrEdit]="addOrEdit">
+</app-edit-connect-bill>

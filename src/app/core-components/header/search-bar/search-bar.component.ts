@@ -48,7 +48,7 @@ export class SearchBarComponent implements OnInit {
         type: 'facility',
         facilityId: item.id,
         facilityGuid: item.guid,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
@@ -62,7 +62,7 @@ export class SearchBarComponent implements OnInit {
         type: 'meter',
         facilityId: facility.id,
         facilityGuid: item.facilityId,
-        meterId: item.id,
+        meterGuid: item.guid,
         idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
@@ -75,7 +75,7 @@ export class SearchBarComponent implements OnInit {
         type: 'accountAnalysis',
         facilityId: undefined,
         facilityGuid: undefined,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: item,
@@ -89,7 +89,7 @@ export class SearchBarComponent implements OnInit {
         type: 'facilityAnalysis',
         facilityId: facility.id,
         facilityGuid: item.facilityId,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: undefined,
         facilityAnalysisItem: item,
         accountAnalysisItem: undefined,
@@ -102,7 +102,7 @@ export class SearchBarComponent implements OnInit {
         type: 'report',
         facilityId: undefined,
         facilityGuid: undefined,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: reportOptions,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
@@ -125,9 +125,9 @@ export class SearchBarComponent implements OnInit {
 
   selectValue(item: DropdownOption) {
     if (item.type == 'facility') {
-      this.router.navigateByUrl('facility/' + item.facilityId)
+      this.router.navigateByUrl('facility/' + item.facilityGuid)
     } else if (item.type == 'meter') {
-      this.router.navigateByUrl('facility/' + item.facilityId + '/utility/energy-consumption/utility-meter/' + item.meterId);
+      this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterGuid);
     } else if (item.type == 'accountAnalysis') {
       this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
       if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
@@ -138,9 +138,9 @@ export class SearchBarComponent implements OnInit {
     } else if (item.type == 'facilityAnalysis') {
       this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
       if (item.facilityAnalysisItem.setupErrors.hasError || item.facilityAnalysisItem.setupErrors.groupsHaveErrors) {
-        this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis');
+        this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis');
       } else {
-        this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis/facility-analysis');
+        this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis/facility-analysis');
       }
     } else if (item.type == 'report') {
       this.accountReportsDbService.selectedReport.next(item.idbAccountReport);
@@ -167,7 +167,7 @@ export interface DropdownOption {
   facilityId: number,
   facilityGuid: string,
   // accountId: number,
-  meterId: number,
+  meterGuid: string,
   idbAccountReport: IdbAccountReport,
   facilityAnalysisItem: IdbAnalysisItem,
   accountAnalysisItem: IdbAccountAnalysisItem,

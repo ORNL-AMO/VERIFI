@@ -5,12 +5,12 @@ import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -72,11 +72,11 @@ export class CreateReportModalComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let navigateToStr: string;
     if (this.router.url.includes('account/overview')) {
-      navigateToStr = 'account/reports/data-overview-report';
+      navigateToStr = '/data-evaluation/account/reports/data-overview-report';
     } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
-      navigateToStr = 'account/reports/data-overview-report';
+      navigateToStr = '/data-evaluation/account/reports/data-overview-report';
     } else if (this.router.url.includes('account/analysis')) {
-      navigateToStr = 'account/reports/better-plants-report';
+      navigateToStr = '/data-evaluation/account/reports/better-plants-report';
     }
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(this.accountReport));
     await this.dbChangesService.setAccountReports(account);

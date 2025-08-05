@@ -1,0 +1,14 @@
+<h4>{{predictor.name}} Entry
+</h4>
+
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary me-2" (click)="saveAndQuit()" [disabled]="calculatingDegreeDays">Save +
+            Quit</button>
+        <button class="btn btn-primary" (click)="saveAndAddAnother()" [disabled]="calculatingDegreeDays">Save +
+            Add Another</button>
+    </div>
+</div>
+<app-edit-predictor-data-entry-form [isSaved]="isSaved" [predictor]="predictor" [predictorData]="predictorData"
+    [calculatingDegreeDays]="calculatingDegreeDays"></app-edit-predictor-data-entry-form>

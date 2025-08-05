@@ -1,0 +1,17 @@
+.button-div{
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    background-color: white;
+    /* border-radius: 25px; */
+    padding: 9.5px;
+    opacity: .75
+}
+
+.button-div:hover{
+    opacity: .9;
+}
+
+.fa{
+    font-size: 25px
+}

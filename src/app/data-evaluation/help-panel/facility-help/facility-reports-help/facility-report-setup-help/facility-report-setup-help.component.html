@@ -1,0 +1,35 @@
+<h5>Report Setup</h5>
+<p>
+    Use this menu to setup your report. Provide a meaningful name, date range and choose the report type.
+</p>
+<hr>
+<p>
+    Depending on the report type you select the rest of the menu will change.
+</p>
+<hr>
+<ng-container *ngIf="selectedReport.facilityReportType == 'overview'">
+    <p>
+        The graphs and tables included in the overview report are pulled from the facilities data overview
+        tabs. The
+        checkboxes can be used to select which ones you want to include in the report.
+    </p>
+    <hr>
+    <p>
+        For the data overview report select the date range to filter the data to include.
+    </p>
+    <hr>
+    <p>
+        Customize the content included in the report with the checkboxes.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="selectedReport.facilityReportType == 'analysis'">
+    <p>
+        Select the analysis item to use for the report. The models used in the analysis will be used for calculations.
+    </p>
+    <hr>
+    <p>
+        Customize the content included in the report with the checkboxes.
+    </p>
+    <hr>
+</ng-container>

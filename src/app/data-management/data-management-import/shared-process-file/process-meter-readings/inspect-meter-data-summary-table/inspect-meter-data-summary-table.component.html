@@ -1,0 +1,26 @@
+<div class="d-flex w-100 justify-content-start mb-2">
+    <button class="btn btn-success btn-sm" (click)="closeSummary()">
+        <span class="fa fa-chevron-left"></span> Back to Summary
+    </button>
+</div>
+
+<h5>{{meterDataSummary.meter.name}} <span class="badge float-end"
+        [ngStyle]="{'background-color': meterDataSummary.meter.source | meterSourceColor}">{{meterDataSummary.meter.source}}</span>
+</h5>
+
+<!--TODO: add items per dropdown-->
+<!--TODO: table with summary of data-->
+<app-electricity-data-table *ngIf="meterDataSummary.meter.source == 'Electricity'"
+    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+</app-electricity-data-table>
+<app-general-utility-data-table
+    *ngIf="meterDataSummary.meter.source != 'Electricity' && (meterDataSummary.meter.scope != 2 && meterDataSummary.meter.scope != 5 && meterDataSummary.meter.scope != 6)"
+    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+</app-general-utility-data-table>
+<app-vehicle-data-table *ngIf="meterDataSummary.meter.source != 'Electricity' && meterDataSummary.meter.scope == 2"
+    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+</app-vehicle-data-table>
+<app-other-emissions-data-table
+    *ngIf="meterDataSummary.meter.source != 'Electricity' && (meterDataSummary.meter.scope == 5 || meterDataSummary.meter.scope ==6)"
+    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+</app-other-emissions-data-table>

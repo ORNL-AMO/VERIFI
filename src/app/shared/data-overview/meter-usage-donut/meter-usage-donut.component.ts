@@ -3,16 +3,16 @@ import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-meter-usage-donut',
-    templateUrl: './meter-usage-donut.component.html',
-    styleUrls: ['./meter-usage-donut.component.css'],
-    standalone: false
+  selector: 'app-meter-usage-donut',
+  templateUrl: './meter-usage-donut.component.html',
+  styleUrls: ['./meter-usage-donut.component.css'],
+  standalone: false
 })
 export class MeterUsageDonutComponent {
   @Input()
@@ -23,6 +23,9 @@ export class MeterUsageDonutComponent {
   facilityOverviewMeters: Array<FacilityOverviewMeter>;
   @Input()
   inHomeScreen: boolean;
+  isVisible: boolean = true;
+  energyUnit: string;
+  titleText: string;
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
   selectedFacility: IdbFacility;
@@ -66,27 +69,38 @@ export class MeterUsageDonutComponent {
   drawChart() {
     if (this.energyUseDonut && this.facilityOverviewMeters) {
       this.facilityOverviewMeters = _.orderBy(this.facilityOverviewMeters, (meterOverview) => { return meterOverview.meter.source });
+      this.facilityOverviewMeters.reverse();
+      let values = this.getValues();
+      let hasNoValue = this.getValues().every(value => value == 0)
+      let labels = this.facilityOverviewMeters.map(meterOverview => { return meterOverview.meter.name });
+      let colors = this.facilityOverviewMeters.map(meterOverview => { return UtilityColors[meterOverview.meter.source].color });
+      let total = values.reduce((sum, val) => sum + val, 0);
+      let labelText = labels.map((label, i) => {
+        let percentage = ((values[i] / total) * 100).toFixed(1);
+        let text = label + " (" + percentage + "%) ";
+        return text;
+      });
 
-      var data = [{
-        values: this.getValues(),
-        labels: this.facilityOverviewMeters.map(meterOverview => { return meterOverview.meter.name }),
-        marker: {
-          colors: this.facilityOverviewMeters.map(meterOverview => { return UtilityColors[meterOverview.meter.source].color }),
-          line: {
-            color: '#fff',
-            width: 5
-          }
-        },
-        texttemplate: '%{label}: (%{percent:.1%})',
-        textposition: 'auto',
-        insidetextorientation: "horizontal",
-        hovertemplate: this.getHoverTemplate(),
-        hole: .5,
-        type: 'pie',
-        automargin: true,
-        sort: false
-      }];
-
+      if (hasNoValue) {
+        this.isVisible = false;
+      }
+      else {
+        this.isVisible = true;
+        var data = [{
+          type: 'bar',
+          orientation: 'h',
+          x: values,
+          y: labelText,
+          marker: {
+            color: colors
+          },
+          texttemplate: this.getHoverTemplate(),
+          textposition: 'auto',
+          hovertemplate: this.getHoverTemplate(),
+          automargin: true,
+          name: ''
+        }];
+      }
       let height: number;
       if (this.inHomeScreen) {
         height = 350;
@@ -94,31 +108,60 @@ export class MeterUsageDonutComponent {
 
       var layout = {
         height: height,
-        margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-        showlegend: false
+        title: {
+          text: this.titleText,
+          font: {
+            size: 14,
+            family: 'Arial'
+          }
+        },
+        yaxis: {
+          automargin: true
+        },
+        xaxis: {
+          automargin: true,
+          title: {
+            text: '(' + this.energyUnit + ')',
+            font: {
+              size: 12,
+              family: 'Arial'
+            }
+          }
+        },
+        font: {
+          family: 'Arial'
+        }
       };
 
       let config = {
-        displayModeBar: true,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true
-      }
+      };
       this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);
     }
   }
 
   getHoverTemplate(): string {
     if (this.dataType == 'energyUse') {
-      return '%{label}: %{value:,.0f} ' + this.selectedFacility.energyUnit + ' <extra></extra>';
+      this.energyUnit = this.selectedFacility.energyUnit;
+      this.titleText = '<b>Utility Usage Breakdown</b>'
+      return '%{x:,.0f} ' + this.energyUnit;
     } else if (this.dataType == 'cost') {
-      return '%{label}: %{value:$,.0f} <extra></extra>';
+      this.energyUnit = '$';
+      this.titleText = '<b>Utility Cost Breakdown</b>';
+      return '%{x:$,.0f}';
     } else if (this.dataType == 'emissions') {
-      return '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
+      this.energyUnit = 'tonne CO<sub>2</sub>e';
+      this.titleText = '<b>Emission Breakdown</b>';
+      return '%{x:,.0f} tonne CO<sub>2</sub>e';
     } else if (this.dataType == 'water') {
-      return '%{label}: %{value:,.0f} ' + this.selectedFacility.volumeLiquidUnit + ' <extra></extra>';
+      this.energyUnit = this.selectedFacility.volumeLiquidUnit;
+      this.titleText = '<b>Water Consumption Breakdown</b>';
+      return '%{x:,.0f} ' + this.energyUnit;
     }
   }
-
+  
   getValues(): Array<number> {
     if (this.dataType == 'energyUse' || this.dataType == 'water') {
       return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalUsage });
