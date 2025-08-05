@@ -57,16 +57,10 @@ export class MeterDataTableComponent {
   ngOnInit(): void {
     this.setInDataManagement();
     this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
-      //TODO: update for int
       this.showFilterDropdown = false;
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-      if (this.inDataManagement) {
-        let meterId: string = params['id'];
-        this.selectedMeter = this.facilityMeters.find(meter => { return meter.guid == meterId });
-      } else {
-        let meterId: number = parseInt(params['id']);
-        this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterId });
-      }
+      let meterId: string = params['id'];
+      this.selectedMeter = this.facilityMeters.find(meter => { return meter.guid == meterId });
       this.setData();
     });
 
@@ -171,7 +165,7 @@ export class MeterDataTableComponent {
     if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/new-bill');
     }
   }
 
@@ -181,7 +175,7 @@ export class MeterDataTableComponent {
     if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/edit-bill/' + meterData.guid);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/edit-bill/' + meterData.guid);
     }
   }
 
@@ -189,8 +183,8 @@ export class MeterDataTableComponent {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-  goToDataQualityReport(){
-          this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/data-quality-report');
+  goToDataQualityReport() {
+    this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/data-quality-report');
 
   }
 }

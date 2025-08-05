@@ -50,41 +50,21 @@ export class EditBillComponent implements OnInit {
     this.isElectron = this.electronService.isElectron;
     this.paramsSub = this.activatedRoute.parent.params.subscribe(parentParams => {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-      if (this.inDataManagement) {
-        let meterId: string = parentParams['id'];
-        this.editMeter = accountMeters.find(meter => { return meter.guid == meterId });
-      } else {
-        let meterId: number = parseInt(parentParams['id']);
-        this.editMeter = accountMeters.find(meter => { return meter.id == meterId });
-      }
+      let meterId: string = parentParams['id'];
+      this.editMeter = accountMeters.find(meter => { return meter.guid == meterId });
       this.setDisplayHeatCapacity();
       this.activatedRoute.params.subscribe(params => {
-        if (this.inDataManagement) {
-          let meterReadingId: string = params['id'];
-          if (meterReadingId) {
-            //existing reading
-            this.addOrEdit = 'edit';
-            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-            this.editMeterData = accountMeterData.find(data => { return data.guid == meterReadingId });
-          } else {
-            //new Reading
-            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-            this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
-            this.addOrEdit = 'add';
-          }
+        let meterReadingId: string = params['id'];
+        if (meterReadingId) {
+          //existing reading
+          this.addOrEdit = 'edit';
+          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+          this.editMeterData = accountMeterData.find(data => { return data.guid == meterReadingId });
         } else {
-          let meterReadingId: number = parseInt(params['id']);
-          if (meterReadingId) {
-            //existing reading
-            this.addOrEdit = 'edit';
-            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-            this.editMeterData = accountMeterData.find(data => { return data.id == meterReadingId });
-          } else {
-            //new Reading
-            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-            this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
-            this.addOrEdit = 'add';
-          }
+          //new Reading
+          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+          this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
+          this.addOrEdit = 'add';
         }
         if (this.editMeterData) {
           this.setMeterDataForm();
@@ -106,7 +86,7 @@ export class EditBillComponent implements OnInit {
     if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/' + this.editMeter.guid + '/meter-data');
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.editMeter.guid + '/data-table');
     }
   }
 

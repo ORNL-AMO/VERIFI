@@ -48,7 +48,7 @@ export class SearchBarComponent implements OnInit {
         type: 'facility',
         facilityId: item.id,
         facilityGuid: item.guid,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
@@ -62,7 +62,7 @@ export class SearchBarComponent implements OnInit {
         type: 'meter',
         facilityId: facility.id,
         facilityGuid: item.facilityId,
-        meterId: item.id,
+        meterGuid: item.guid,
         idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
@@ -75,7 +75,7 @@ export class SearchBarComponent implements OnInit {
         type: 'accountAnalysis',
         facilityId: undefined,
         facilityGuid: undefined,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: item,
@@ -89,7 +89,7 @@ export class SearchBarComponent implements OnInit {
         type: 'facilityAnalysis',
         facilityId: facility.id,
         facilityGuid: item.facilityId,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: undefined,
         facilityAnalysisItem: item,
         accountAnalysisItem: undefined,
@@ -102,7 +102,7 @@ export class SearchBarComponent implements OnInit {
         type: 'report',
         facilityId: undefined,
         facilityGuid: undefined,
-        meterId: undefined,
+        meterGuid: undefined,
         idbAccountReport: reportOptions,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
@@ -127,7 +127,7 @@ export class SearchBarComponent implements OnInit {
     if (item.type == 'facility') {
       this.router.navigateByUrl('facility/' + item.facilityGuid)
     } else if (item.type == 'meter') {
-      this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterId);
+      this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterGuid);
     } else if (item.type == 'accountAnalysis') {
       this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
       if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
@@ -167,7 +167,7 @@ export interface DropdownOption {
   facilityId: number,
   facilityGuid: string,
   // accountId: number,
-  meterId: number,
+  meterGuid: string,
   idbAccountReport: IdbAccountReport,
   facilityAnalysisItem: IdbAnalysisItem,
   accountAnalysisItem: IdbAccountAnalysisItem,
