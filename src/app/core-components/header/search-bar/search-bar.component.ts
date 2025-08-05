@@ -125,9 +125,9 @@ export class SearchBarComponent implements OnInit {
 
   selectValue(item: DropdownOption) {
     if (item.type == 'facility') {
-      this.router.navigateByUrl('facility/' + item.facilityId)
+      this.router.navigateByUrl('facility/' + item.facilityGuid)
     } else if (item.type == 'meter') {
-      this.router.navigateByUrl('facility/' + item.facilityId + '/utility/energy-consumption/utility-meter/' + item.meterId);
+      this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterId);
     } else if (item.type == 'accountAnalysis') {
       this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
       if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
@@ -138,9 +138,9 @@ export class SearchBarComponent implements OnInit {
     } else if (item.type == 'facilityAnalysis') {
       this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
       if (item.facilityAnalysisItem.setupErrors.hasError || item.facilityAnalysisItem.setupErrors.groupsHaveErrors) {
-        this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis');
+        this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis');
       } else {
-        this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis/facility-analysis');
+        this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis/facility-analysis');
       }
     } else if (item.type == 'report') {
       this.accountReportsDbService.selectedReport.next(item.idbAccountReport);

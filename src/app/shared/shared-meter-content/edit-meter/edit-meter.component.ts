@@ -100,7 +100,7 @@ export class EditMeterComponent implements OnInit {
 
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/energy-source/meters')
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/energy-source/meters')
   }
 
   async updateMeterData(meter: IdbUtilityMeter) {

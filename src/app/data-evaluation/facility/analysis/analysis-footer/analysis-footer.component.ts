@@ -72,7 +72,7 @@ export class AnalysisFooterComponent implements OnInit {
 
   goBack() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.id + '/analysis/run-analysis/';
+    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
     if (this.router.url.includes('account-analysis')) {
       this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
     } else if (this.router.url.includes('facility-analysis')) {
@@ -101,13 +101,13 @@ export class AnalysisFooterComponent implements OnInit {
         }
       }
     } else {
-      this.router.navigateByUrl('/facility/' + facility.id + '/analysis/analysis-dashboard');
+      this.router.navigateByUrl('/facility/' + facility.guid + '/analysis/analysis-dashboard');
     }
   }
 
   continue() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityUrlStr: string = '/facility/' + facility.id + '/analysis/run-analysis/';
+    let facilityUrlStr: string = '/facility/' + facility.guid + '/analysis/run-analysis/';
     if (this.router.url.includes('analysis-setup')) {
       this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
     } else if (this.router.url.includes('group-analysis')) {
@@ -191,7 +191,7 @@ export class AnalysisFooterComponent implements OnInit {
 
   returnToDashboard() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/analysis/analysis-dashboard');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
   }
 
 }

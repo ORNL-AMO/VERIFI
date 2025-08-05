@@ -47,7 +47,7 @@
         <div *ngFor="let facility of facilityList | facilityList:(showAllFacilities && sidebarOpen); let index = index;"
             [ngClass]="{'open': sidebarOpen, 'not-open': !sidebarOpen}" (mouseenter)="setHoverIndex(index)"
             (mouseleave)="setHoverIndex(undefined)">
-            <a title="Facility Home" class="nav-link" routerLink="/data-evaluation/facility/{{facility.id}}"
+            <a title="Facility Home" class="nav-link" routerLink="/data-evaluation/facility/{{facility.guid}}"
                 [routerLinkActive]="['active-head']"><i class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
                 <span [hidden]="!sidebarOpen" class="ps-2 nav-label">
                     {{facility.guid | facilityName}}
@@ -55,31 +55,31 @@
             </a>
             <div class="d-flex icon-row"
                 [ngClass]="{'flex-column not-open': !sidebarOpen, 'icon-row': sidebarOpen, 'hidden': url|hideFacilityLinks:index:sidebarOpen:showAllFacilities:hoverIndex:selectedFacility:facility.guid}">
-                <a title="Facility Home" class="nav-link" routerLink="/data-evaluation/facility/{{facility.id}}/home"
+                <a title="Facility Home" class="nav-link" routerLink="/data-evaluation/facility/{{facility.guid}}/home"
                     [routerLinkActive]="['active']"><i class="fa fa-home"></i>
                 </a>
                 <a title="Facility Utility Data" class="nav-link"
-                    routerLink="/data-evaluation/facility/{{facility.id}}/utility" [routerLinkActive]="['active']"><i
+                    routerLink="/data-evaluation/facility/{{facility.guid}}/utility" [routerLinkActive]="['active']"><i
                         class="fa fa-book"></i>
                 </a>
                 <a title="Facility Overview" class="nav-link"
-                    routerLink="/data-evaluation/facility/{{facility.id}}/overview" [routerLinkActive]="['active']"><i
+                    routerLink="/data-evaluation/facility/{{facility.guid}}/overview" [routerLinkActive]="['active']"><i
                         class="fa fa-chart-column"></i>
                 </a>
                 <a title="Facility Data Visualization" class="nav-link"
-                    routerLink="/data-evaluation/facility/{{facility.id}}/visualization"
+                    routerLink="/data-evaluation/facility/{{facility.guid}}/visualization"
                     [routerLinkActive]="['active']"><i class="fa fa-chart-line"></i>
                 </a>
                 <a title="Facility Analysis" class="nav-link"
-                    routerLink="/data-evaluation/facility/{{facility.id}}/analysis" [routerLinkActive]="['active']"><i
+                    routerLink="/data-evaluation/facility/{{facility.guid}}/analysis" [routerLinkActive]="['active']"><i
                         class="fa fa-microscope"></i>
                 </a>
                 <a title="Facility Analysis" class="nav-link"
-                    routerLink="/data-evaluation/facility/{{facility.id}}/reports" [routerLinkActive]="['active']"><i
+                    routerLink="/data-evaluation/facility/{{facility.guid}}/reports" [routerLinkActive]="['active']"><i
                         class="fa fa-folder"></i>
                 </a>
                 <a title="Facility Settings" class="nav-link"
-                    routerLink="/data-evaluation/facility/{{facility.id}}/settings" [routerLinkActive]="['active']"><i
+                    routerLink="/data-evaluation/facility/{{facility.guid}}/settings" [routerLinkActive]="['active']"><i
                         class="fa fa-cog"></i>
                 </a>
             </div>

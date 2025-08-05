@@ -277,7 +277,7 @@ export class SharedMeterCalendarizationComponent {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
     } else {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
+      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
     }
   }
 }

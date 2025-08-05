@@ -59,6 +59,6 @@ export class CalanderizationComponent implements OnInit {
 
   addMeter() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/energy-source/new-meter');
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/energy-source/new-meter');
   }
 }
