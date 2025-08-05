@@ -141,6 +141,7 @@ export class MonthlyUtilityUsageLineChartComponent {
 
       let config = {
         modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
         displaylogo: false,
         responsive: true,
       };

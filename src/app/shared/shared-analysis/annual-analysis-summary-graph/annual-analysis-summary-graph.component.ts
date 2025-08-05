@@ -111,6 +111,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       var config = {
         responsive: true,
         modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
         displaylogo: false,
       };
       this.plotlyService.newPlot(this.annualEnergyIntensityAnalysisGraph.nativeElement, traceData, layout, config);
@@ -185,6 +186,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       var config = {
         responsive: true,
         modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
         displaylogo: false,
       };
       this.plotlyService.newPlot(this.percentImprovementAnalysisGraph.nativeElement, traceData, layout, config);
