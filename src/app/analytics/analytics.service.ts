@@ -136,7 +136,6 @@ export class AnalyticsService {
     // let pathWithoutId: string = pagePath.replace(/[0-9]/g, '');
     // pathWithoutId = pathWithoutId.replace(/\/$/, "");
     // pathWithoutId = pathWithoutId.replace("//", "/:id/");
-    // return pathWithoutId;
     // Replace segments that match the custom ID pattern: 9 chars, lowercase letters and digits, with ':id'
     return pagePath
       .split('/')
