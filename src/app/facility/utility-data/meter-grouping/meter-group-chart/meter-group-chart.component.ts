@@ -4,10 +4,10 @@ import { MeterGroupType } from 'src/app/models/calanderization';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-    selector: 'app-meter-group-chart',
-    templateUrl: './meter-group-chart.component.html',
-    styleUrls: ['./meter-group-chart.component.css'],
-    standalone: false
+  selector: 'app-meter-group-chart',
+  templateUrl: './meter-group-chart.component.html',
+  styleUrls: ['./meter-group-chart.component.css'],
+  standalone: false
 })
 export class MeterGroupChartComponent implements OnInit {
   @Input()
@@ -171,7 +171,11 @@ export class MeterGroupChartComponent implements OnInit {
         },
         margin: { r: 0, t: 50 }
       };
-      var config = { responsive: true };
+      var config = {
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        responsive: true
+      };
       this.plotlyService.newPlot(this.meterGroupingChart.nativeElement, traceData, layout, config);
     }
   }
