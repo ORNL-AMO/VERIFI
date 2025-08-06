@@ -105,6 +105,7 @@ export class PredictorHistogramGraphComponent {
       bargap: 0.15
     };
     var config = {
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
       displaylogo: false,
       responsive: true
     };
