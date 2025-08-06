@@ -110,6 +110,7 @@ export class FacilityUsageDonutComponent {
       };
 
       let config = {
+        displayModeBar: true,
         displaylogo: false,
         responsive: true
       }
