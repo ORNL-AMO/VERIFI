@@ -111,6 +111,8 @@ export class FacilityMeterComponent {
   }
 
   async deleteMeter() {
+    this.showDeleteMeter = false;
+    this.meterForm.markAsPristine();
     this.loadingService.setLoadingMessage('Deleting Meters and Data...')
     this.loadingService.setLoadingStatus(true);
     //delete meter
