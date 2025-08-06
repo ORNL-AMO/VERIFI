@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-upload-files',
@@ -24,7 +25,8 @@ export class UploadFilesComponent {
   constructor(private router: Router,
     private uploadDataService: UploadDataService,
     private dataManagementService: DataManagementService,
-    private accountDbService: AccountdbService
+    private accountDbService: AccountdbService,
+    private loadingService: LoadingService
   ) {
 
   }
@@ -44,6 +46,8 @@ export class UploadFilesComponent {
     if (files) {
       if (files.length !== 0) {
         let regex3 = /.xlsx$/;
+        this.loadingService.setLoadingMessage('Uploading Files...');
+        this.loadingService.setLoadingStatus(true);
         for (let index = 0; index < files.length; index++) {
           if (regex3.test(files[index].name)) {
             this.addFile(files[index]);
@@ -62,9 +66,11 @@ export class UploadFilesComponent {
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
         this.dataManagementService.fileReferences.next(this.fileReferences);
+        this.loadingService.setLoadingStatus(false);
       } catch (err) {
         console.log(err);
         this.fileUploadError = true;
+        this.loadingService.setLoadingStatus(false);
       }
     };
     reader.readAsBinaryString(file);
