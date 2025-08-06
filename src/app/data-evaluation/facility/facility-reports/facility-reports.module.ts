@@ -24,6 +24,10 @@ import { FacilityEmissionsFactorsReportsDashboardComponent } from './facility-re
 import { FacilityEmissionFactorsReportResultsComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { FacilityEmissionFactorsReportSetupComponent } from './facility-report-setup/facility-emission-factors-report-setup/facility-emission-factors-report-setup.component';
 import { FacilityEmissionFactorsReportTableComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-table/facility-emission-factors-report-table.component';
+import { FacilityReportsDashboardTableComponent } from './facility-reports-dashboard/facility-reports-dashboard-table/facility-reports-dashboard-table.component';
+import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
+import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-report-order-by.pipe';
 
 
 
@@ -46,7 +50,9 @@ import { FacilityEmissionFactorsReportTableComponent } from './report-results/fa
     FacilityEmissionsFactorsReportsDashboardComponent,
     FacilityEmissionFactorsReportResultsComponent,
     FacilityEmissionFactorsReportSetupComponent,
-    FacilityEmissionFactorsReportTableComponent
+    FacilityEmissionFactorsReportTableComponent,
+    FacilityReportsDashboardTableComponent,
+    FacilityReportOrderByPipe
   ],
   imports: [
     CommonModule,
@@ -55,7 +61,12 @@ import { FacilityEmissionFactorsReportTableComponent } from './report-results/fa
     SharedReportsModule,
     HelperPipesModule,
     DataOverviewModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    TableItemsDropdownModule,
+    NgbPagination
+], 
+providers: [
+    FacilityReportTypePipe,
   ]
 })
 export class FacilityReportsModule { }

@@ -293,16 +293,7 @@ export const FacilityRoutes: Route = {
             component: FacilityReportsComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-                {
-                    path: 'dashboard',
-                    component: FacilityReportsDashboardComponent,
-                    children: [
-                        { path: '', pathMatch: 'full', redirectTo: 'analysis' },
-                        { path: 'analysis', component: FacilityAnalysisReportsDashboardComponent },
-                        { path: 'overview', component: FacilityOverviewReportsDashboardComponent },
-                        { path: 'emission-factors', component: FacilityEmissionsFactorsReportsDashboardComponent },
-                    ]
-                },
+                { path: 'dashboard', component: FacilityReportsDashboardComponent },
                 { path: 'setup', component: FacilityReportSetupComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
                 { path: 'overview-report', component: FacilityOverviewReportResultsComponent },

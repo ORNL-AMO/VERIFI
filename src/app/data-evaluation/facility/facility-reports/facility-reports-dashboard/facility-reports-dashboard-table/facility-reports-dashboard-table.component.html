@@ -4,7 +4,7 @@
         <div class="col-2">
             <select class="form-select" [(ngModel)]="selectedReportType" (change)="applyFilter()">
                 <option value="">All</option>
-                <option *ngFor="let type of reportTypes" [value]="type">{{ type | accountReportType}}</option>
+                <option *ngFor="let type of reportTypes" [value]="type">{{ type | facilityReportType}}</option>
             </select>
         </div>
         <div class="col">
@@ -16,20 +16,20 @@
         <table class="table table-bordered table-hover">
             <thead>
                 <tr>
-                    <th class="can-click" (click)="setOrderDataField('report.name')"
-                        [ngClass]="{'active': orderDataField == 'report.name'}">
+                    <th class="can-click" (click)="setOrderDataField('name')"
+                        [ngClass]="{'active': orderDataField == 'name'}">
                         Report Name
                     </th>
-                    <th class="can-click" (click)="setOrderDataField('report.reportType')"
-                        [ngClass]="{'active': orderDataField == 'report.reportType'}">
+                    <th class="can-click" (click)="setOrderDataField('facilityReportType')"
+                        [ngClass]="{'active': orderDataField == 'facilityReportType'}">
                         Report Type
                     </th>
-                    <th class="can-click" (click)="setOrderDataField('report.reportYear')"
-                        [ngClass]="{'active': orderDataField == 'report.reportYear'}">
-                        Report Year
+                   <th class="can-click" (click)="setOrderDataField('analysisItemId')"
+                        [ngClass]="{'active': orderDataField == 'analysisItemId'}">
+                        Analysis Item
                     </th>
-                    <th class="can-click" (click)="setOrderDataField('report.modifiedDate')"
-                        [ngClass]="{'active': orderDataField == 'report.modifiedDate'}">
+                    <th class="can-click" (click)="setOrderDataField('modifiedDate')"
+                        [ngClass]="{'active': orderDataField == 'modifiedDate'}">
                         Last Modified
                     </th>
                     <th>Actions</th>
@@ -37,26 +37,27 @@
             </thead>
             <tbody>
                 <tr
-                    *ngFor="let data of filteredReports | reportOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
+                    *ngFor="let data of filteredReports | facilityReportOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                     <td>
-                        <span class="fa fa-exclamation-circle" *ngIf="!data.isValid"></span>
-                        {{ data.report.name }}
+                        {{ data.name }}
                     </td>
                     <td>
-                        <span class="badge {{ getBadgeClass(data.report.reportType) }}">{{ data.report.reportType |
-                            accountReportType }}</span>
+                        <span class="badge {{ getBadgeClass(data.facilityReportType) }}">{{ data.facilityReportType |
+                            facilityReportType }}</span>
                     </td>
-                    <td *ngIf="data.report.reportYear">{{ data.report.reportYear }}</td>
-                    <td *ngIf="!data.report.reportYear">&mdash;</td>
-                    <td>{{data.report.modifiedDate | date:'short'}}</td>
+                    <td *ngIf="data.analysisItemId">{{ data.analysisItemId | facilityAnalysisName}}</td>
+                    <td *ngIf="!data.analysisItemId"> &mdash; </td>
+                    <td>
+                        {{ data.modifiedDate | date:'short' }}
+                    </td>
                     <td class="text-center">
-                        <button title="View" class="btn action-btn btn-sm me-2" (click)="selectReport(data.report)">
+                        <button title="View" class="btn action-btn btn-sm me-2" (click)="selectReport(data)">
                             <i class="fa fa-eye"></i>
                         </button>
-                        <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(data.report)">
+                        <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(data)">
                             <i class="fa fa-copy"></i>
                         </button>
-                        <button title="Delete" class="btn action-btn btn-sm me-2" (click)="deleteReport(data.report)">
+                        <button title="Delete" class="btn action-btn btn-sm me-2" (click)="deleteItem(data)">
                             <i class="fa fa-trash"></i>
                         </button>
                     </td>
@@ -75,7 +76,7 @@
 
 <div class="card card-body" *ngIf="filteredReports.length == 0">
     <div class="text-center bold">
-        No reports found for this account. Click "+Add New Report" to create your first report!
+        No reports found for this facility. Click "+Add New Report" to create your first report!
     </div>
 </div>
 
