@@ -112,6 +112,7 @@ export class DataEvaluationComponent {
       this.contentWidth = contentWidth;
     }
     this.dataEvaluationService.helpWidthBs.next(this.helpWidth);
+    this.dataEvaluationService.sidebarWidthBs.next(this.sidebarWidth);
   }
 
   @HostListener('window:resize', ['$event'])
