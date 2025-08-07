@@ -67,6 +67,8 @@ export class FacilityUsageDonutComponent {
       let colors = [null, ...this.accountOverviewFacilities.map(summary => { return summary.facility.color })];
       let data = [];
 
+      let texttemplate = labels.length > 2 ? '%{label}<br>%{percentParent:.1%}' : '%{label}<br>100%';
+
       if (hasNoValue) {
         this.isVisible = false;
       }
@@ -77,7 +79,7 @@ export class FacilityUsageDonutComponent {
           values: values,
           labels: labels,
           parents: parents,
-          texttemplate: '%{label}<br>%{percentParent:.1%}',
+          texttemplate: texttemplate,
           hovertemplate: this.getHoverTemplate(labels),
           textposition: 'auto',
           insidetextorientation: "horizontal",
