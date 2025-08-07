@@ -52,7 +52,7 @@ export class EditConnectBillComponent {
         }
         if (this.addOrEdit == 'edit') {
           await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
-        } 
+        }
       }
       this.cd.detectChanges();
     });
@@ -101,7 +101,7 @@ export class EditConnectBillComponent {
           }
           if (this.addOrEdit == 'edit') {
             await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
-          } 
+          }
         }
         this.cd.detectChanges();
       });
@@ -129,6 +129,23 @@ export class EditConnectBillComponent {
       }
       this.cd.detectChanges();
     });
+  }
+
+  async disconnectBill() {
+    if (this.savedUtilityFilePath) {
+      this.electronService.disconnectBill(this.savedUtilityFilePath);
+      this.savedUtilityFilePath = undefined;
+      this.utilityFileDeleted = true;
+      if (this.editMeter.source == 'Electricity') {
+        this.utilityMeterDataService.updateElectricityMeterDataFromForm(this.editMeterData, this.meterDataForm, 'Deleted');
+      } else {
+        this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm, 'Deleted');
+      }
+      if (this.addOrEdit == 'edit') {
+        firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
+      }
+      this.cd.detectChanges();
+    }
   }
 
 }

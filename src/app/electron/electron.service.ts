@@ -105,8 +105,8 @@ export class ElectronService {
     });
 
     window["electronAPI"].on("folder-exists", ({ exists, folderPath }: { exists: boolean, folderPath: string }) => {
-     const currentFolderPath = this.folderPathSubject.value;
-      if(!exists && currentFolderPath === folderPath) {
+      const currentFolderPath = this.folderPathSubject.value;
+      if (!exists && currentFolderPath === folderPath) {
         this.folderPathSubject.next(null);
         this.folderErrorSubject.next('Deleted');
       }
@@ -119,8 +119,15 @@ export class ElectronService {
       this.folderPathSubject.next(path);
       this.folderErrorSubject.next(null);
     });
-  }
 
+    window["electronAPI"].on("bill-disconnected", (data: { success: boolean }) => {
+      if (data.success) {
+        this.savedUtilityFilePath[this.currentKey].next(null);
+      } else {
+        console.log('Error disconnecting bill');
+      }
+    });
+  }
 
   //Used to tell electron that app is ready
   //does nothing when in browser
@@ -243,11 +250,11 @@ export class ElectronService {
     const path = this.savedUtilityFilePath[this.currentKey].value;
     this.checkUtilityFileExists(this.currentKey, path);
     window["electronAPI"].send("openUploadedFileLocation", path);
-    
+
   }
 
   selectFolder() {
-    if (!window["electronAPI"]) { 
+    if (!window["electronAPI"]) {
       return;
     }
     window["electronAPI"].send("selectFolder");
@@ -260,13 +267,20 @@ export class ElectronService {
     window["electronAPI"].send("openBillsFolder", folderPath);
   }
 
+  disconnectBill(path: string) {
+    if (!window["electronAPI"]) {
+      return;
+    }
+    window["electronAPI"].send("disconnectBill",  path);
+  }
+
   checkBillFolderExists() {
     if (!window["electronAPI"]) {
       return;
     }
     const currentFolderPath = this.folderPathSubject.value;
     if (currentFolderPath) {
-     window["electronAPI"].send("checkFolderExists", currentFolderPath);
+      window["electronAPI"].send("checkFolderExists", currentFolderPath);
     }
   }
 
