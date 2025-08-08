@@ -133,7 +133,7 @@ export class EditConnectBillComponent {
 
   async disconnectBill() {
     if (this.savedUtilityFilePath) {
-      this.electronService.disconnectBill(this.savedUtilityFilePath);
+      this.electronService.disconnectBill(this.key);
       this.savedUtilityFilePath = undefined;
       this.utilityFileDeleted = true;
       if (this.editMeter.source == 'Electricity') {

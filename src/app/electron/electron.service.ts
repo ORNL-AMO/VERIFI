@@ -267,10 +267,9 @@ export class ElectronService {
     window["electronAPI"].send("openBillsFolder", folderPath);
   }
 
-  disconnectBill(path: string) {
-    if (!window["electronAPI"]) {
-      return;
-    }
+  disconnectBill(key: string) {
+    this.currentKey = key;
+    const path = this.savedUtilityFilePath[this.currentKey].value;
     window["electronAPI"].send("disconnectBill",  path);
   }
 
