@@ -142,7 +142,17 @@ export class MonthlyFacilityAnalysisClass {
                 isBanked: false,
                 isIntermediateBanked: false,
                 savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
-                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked),
+                //1964
+                fivePercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentTarget),
+                tenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentTarget),
+                fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentTarget),
+                rollingActual: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingActual),
+                fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentSavings),
+                tenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentSavings),
+                fifteenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentSavings),
+                thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
+                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings)
             }
         })
     }

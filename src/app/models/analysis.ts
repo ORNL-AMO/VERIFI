@@ -79,7 +79,17 @@ export interface MonthlyAnalysisSummaryData {
   isBanked: boolean,
   isIntermediateBanked: boolean,
   savingsBanked: number
-  savingsUnbanked: number
+  savingsUnbanked: number,
+  //1964
+  fivePercentTarget: number,
+  tenPercentTarget: number,
+  fifteenPercentTarget: number,
+  rollingActual: number,
+  fivePercentSavings: number,
+  tenPercentSavings: number,
+  fifteenPercentSavings: number,
+  thirtyPercentTarget: number,
+  thirtyPercentSavings: number
 }
 
 export interface AnnualAnalysisSummary {

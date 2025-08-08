@@ -52,6 +52,19 @@ export class GroupMonthlyAnalysisRollupValues {
 
     monthDataAdjustment: number;
     rollingDataAdjustment: number;
+
+    //1964
+    rollingChangeRatio: number;
+    monthlyChangeRatio: number;
+    fivePercentTarget: number;
+    tenPercentTarget: number;
+    fifteenPercentTarget: number;
+    thirtyPercentTarget: number;
+    fifteenPercentSavings: number;
+    tenPercentSavings: number;
+    fivePercentSavings: number;
+    thirtyPercentSavings: number;
+
     rollingBaselineAdjustmentInput: number;
     constructor(
         energyUse: number,
@@ -88,6 +101,18 @@ export class GroupMonthlyAnalysisRollupValues {
             this.setAdjustmentForNormalization(modelYearDataAdjusted, previousMonthValues);
             //step 8
             this.setAdjustmentForOtherV3(modelYearDataAdjusted, previousMonthValues);
+            //1964
+            this.setRollingChangeRatio();
+            this.setMonthlyChangeRatio();
+            this.setFifteenPercentTarget();
+            this.setTenPercentTarget();
+            this.setFivePercentTarget();
+            this.setFifteenPercentSavings();
+            this.setTenPercentSavings();
+            this.setFivePercentSavings();
+            this.setThirtyPercentTarget();
+            this.setThirtyPercentSavings();
+
         } else {
             this.setBaselineYearValues();
         }
@@ -111,6 +136,17 @@ export class GroupMonthlyAnalysisRollupValues {
         this.baselineAdjustmentForNormalization = 0;
         this.baselineAdjustmentForOtherV2 = 0;
         this.rollingDataAdjustment = 0;
+        //1964
+        this.rollingChangeRatio = 1;
+        this.monthlyChangeRatio = 1;
+        this.tenPercentTarget = 0;
+        this.fivePercentTarget = 0;
+        this.fifteenPercentTarget = 0;
+        this.fifteenPercentSavings = 0;
+        this.tenPercentSavings = 0;
+        this.fivePercentSavings = 0;
+        this.thirtyPercentTarget = 0;
+        this.thirtyPercentSavings = 0;
         this.rollingBaselineAdjustmentInput = 0;
     }
 
@@ -333,5 +369,50 @@ export class GroupMonthlyAnalysisRollupValues {
         this.savingsUnbanked = new ConvertValue(this.savingsUnbanked, startingUnit, endingUnit).convertedValue;
         this.yearToDateSavings = new ConvertValue(this.yearToDateSavings, startingUnit, endingUnit).convertedValue;
         this.rollingSavings = new ConvertValue(this.rollingSavings, startingUnit, endingUnit).convertedValue;
+
+        this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
+        this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.rollingActual = new ConvertValue(this.rollingActual, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentSavings = new ConvertValue(this.fifteenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.tenPercentSavings = new ConvertValue(this.tenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.fivePercentSavings = new ConvertValue(this.fivePercentSavings, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentTarget = new ConvertValue(this.thirtyPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentSavings = new ConvertValue(this.thirtyPercentSavings, startingUnit, endingUnit).convertedValue;
+    }
+
+    //1964
+    setRollingChangeRatio() {
+        this.rollingChangeRatio = (this.rollingModeled / this.rollingModeledBaseline)
+    }
+    setMonthlyChangeRatio() {
+        this.monthlyChangeRatio = (this.modeledEnergy / this.baselineModeledEnergyUse);
+    }
+    setFivePercentTarget() {
+        this.fivePercentTarget = this.rollingAdjusted * 0.95;
+    }
+    setTenPercentTarget() {
+        this.tenPercentTarget = this.rollingAdjusted * 0.90;
+    }
+    setFifteenPercentTarget() {
+        this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
+    }
+    setThirtyPercentTarget() {
+        this.thirtyPercentTarget = this.rollingAdjusted * 0.70;
+    }
+
+    setFifteenPercentSavings() {
+        this.fifteenPercentSavings = this.rollingAdjusted - this.fifteenPercentTarget;
+    }
+
+    setTenPercentSavings() {
+        this.tenPercentSavings = this.rollingAdjusted - this.tenPercentTarget;
+    }
+
+    setFivePercentSavings() {
+        this.fivePercentSavings = this.rollingAdjusted - this.fivePercentTarget;
+    }
+    setThirtyPercentSavings() {
+        this.thirtyPercentSavings = this.rollingAdjusted - this.thirtyPercentTarget;
     }
 }

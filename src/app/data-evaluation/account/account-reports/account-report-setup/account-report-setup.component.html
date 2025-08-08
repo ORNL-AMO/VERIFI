@@ -13,9 +13,9 @@
                     </div>
                 </div>
                 <div class="col-6"
-                    *ngIf="setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountEmissionFactors'">
+                    *ngIf="setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountEmissionFactors' && setupForm.controls.reportType.value != 'accountSavings'">
                     <div class="row form-group"
-                        *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis'">
+                        *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis' && setupForm.controls.reportType.value != 'accountSavings'">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
                         <div class="col-7">
@@ -37,30 +37,10 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'accountEmissionFactors'">
-                    <div class="row form-group">
-                        <label class="col-5 col-form-label semibold" for="startDate">Start Year</label>
-                        <div class="col-6">
-                            <select name="startYear" formControlName="startYear" class="form-select" (change)="save()">
-                                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <label class="col-5 col-form-label semibold" for="endYear">End Year</label>
-                        <div class="col-6">
-                            <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
-                                <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'dataOverview'">
+                <div class="col-6"
+                    *ngIf="setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value == 'accountSavings' || setupForm.controls.reportType.value == 'accountEmissionFactors'">
 
-                    <div class="row form-group">
+                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'accountSavings'">
                         <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
 
                         <div class="col-3">
@@ -111,6 +91,8 @@
                 *ngIf="setupForm.controls.reportType.value == 'betterClimate'"></app-better-climate-setup>
             <app-analysis-report-setup
                 *ngIf="setupForm.controls.reportType.value == 'analysis'"></app-analysis-report-setup>
+            <app-account-savings-report-setup
+                *ngIf="setupForm.controls.reportType.value == 'accountSavings'"></app-account-savings-report-setup>
         </ng-container>
         <ng-container *ngIf="setupForm.valid == false || errorMessage.length > 0">
             <div class="alert alert-warning text-center">

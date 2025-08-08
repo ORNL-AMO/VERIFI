@@ -10,6 +10,7 @@ export interface IdbFacilityReport extends IdbEntry {
     analysisItemId: string,
     analysisReportSettings: AnalysisReportSettings,
     dataOverviewReportSettings: DataOverviewFacilityReportSettings,
+    savingsReportSettings: SavingsFacilityReportSettings,
     emissionFactorsReportSettings: EmissionFactorsReportSettings
 }
 
@@ -24,11 +25,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         name: 'New Report',
         analysisReportSettings: getAnalysisReportSettings(),
         dataOverviewReportSettings: getDataOverviewReportSettings(groups),
+        savingsReportSettings: getSavingsReportSettings(),
         emissionFactorsReportSettings: getEmissionFactorsReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -150,10 +152,10 @@ export interface DataOverviewFacilityReportSettings {
     // includeStackedBarChart: boolean,
     // includeMonthlyLineChart: boolean,
     includeAllMeterData: boolean,
-      includedGroups: Array<{
+    includedGroups: Array<{
         groupId: string,
         include: boolean
-      }>
+    }>
     includeMeterUsageStackedLineChart: boolean,
     includeMeterUsageTable: boolean,
     includeMeterUsageDonut: boolean,
@@ -161,6 +163,39 @@ export interface DataOverviewFacilityReportSettings {
     includeAnnualBarChart: boolean,
     includeMonthlyLineChartForFacility: boolean
 
+}
+
+export function getSavingsReportSettings(): SavingsFacilityReportSettings {
+    return {
+        endYear: undefined,
+        endMonth: undefined,
+        facilityAnnualResults: true,
+        facilityAnnualResultsTable: true,
+        groupReports: true,
+        groupMonthlyResults: true,
+        groupMonthlyResultsTable: true,
+        groupMonthlyResultsGraphs: true,
+        groupTrailingTwelveMonthsConsumption: true,
+        groupTrailingTwelveMonthsSavings: true,
+        groupAnnualResultsTable: true,
+    };
+}
+
+export interface SavingsFacilityReportSettings {
+    //using baseline year of analysis
+    // startYear: number,
+    // startMonth: number,
+    endYear: number,
+    endMonth: number,
+    facilityAnnualResults: boolean,
+    facilityAnnualResultsTable: boolean,
+    groupReports: boolean,
+    groupMonthlyResults: boolean,
+    groupMonthlyResultsTable: boolean,
+    groupMonthlyResultsGraphs: boolean,
+    groupTrailingTwelveMonthsConsumption: boolean,
+    groupTrailingTwelveMonthsSavings: boolean,
+    groupAnnualResultsTable: boolean,
 }
 
 export function getEmissionFactorsReportSettings(): EmissionFactorsReportSettings {

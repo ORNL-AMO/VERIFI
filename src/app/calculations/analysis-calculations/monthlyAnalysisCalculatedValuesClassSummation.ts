@@ -26,6 +26,19 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     summaryDataIndex: number;
     monthIndex: number;
     baselineAdjustmentForOtherV2: number;
+
+    //1964
+    rollingAdjusted: number;
+
+    fivePercentTarget: number;
+    tenPercentTarget: number;
+    fifteenPercentTarget: number;
+    rollingActual: number;
+    fifteenPercentSavings: number;
+    tenPercentSavings: number;
+    fivePercentSavings: number;
+    thirtyPercentTarget: number;
+    thirtyPercentSavings: number;
     constructor(
         currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
         baselineAdjustmentForNew: number,
@@ -49,6 +62,14 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setBaselineAdjustment(currentMonthData);
         this.setRollingSavingsValues(previousMonthsValues)
         this.setYearToDatePercentSavings();
+        this.setFivePercentTarget();
+        this.setTenPercentTarget();
+        this.setFifteenPercentTarget();
+        this.setFifteenPercentSavings();
+        this.setTenPercentSavings();    
+        this.setFivePercentSavings();
+        this.setThirtyPercentTarget();
+        this.setThirtyPercentSavings();
     }
 
 
@@ -154,14 +175,15 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
         if (this.summaryDataIndex > 11) {
             let last11MonthsData: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
-            // let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
-            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
+            this.rollingAdjusted = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
             this.rollingSavings = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.savings }) + this.savings;
-            // this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
-            this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
+            this.rolling12MonthImprovement = this.rollingSavings / this.rollingAdjusted;
+            this.rollingActual = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
         } else {
             this.rolling12MonthImprovement = 0;
             this.rollingSavings = 0;
+            this.rollingAdjusted = 0;
+            this.rollingActual = 0;
         }
     }
 
@@ -178,5 +200,40 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.savings = new ConvertValue(this.savings, startingUnit, endingUnit).convertedValue;
         this.yearToDateSavings = new ConvertValue(this.yearToDateSavings, startingUnit, endingUnit).convertedValue;
         this.rollingSavings = new ConvertValue(this.rollingSavings, startingUnit, endingUnit).convertedValue;
+        this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
+        this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentSavings = new ConvertValue(this.fifteenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.tenPercentSavings = new ConvertValue(this.tenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.fivePercentSavings = new ConvertValue(this.fivePercentSavings, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentTarget = new ConvertValue(this.thirtyPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentSavings = new ConvertValue(this.thirtyPercentSavings, startingUnit, endingUnit).convertedValue;
+    }
+
+    //1964
+    setFivePercentTarget() {
+        this.fivePercentTarget = this.rollingAdjusted * 0.95;
+    }
+    setTenPercentTarget() {
+        this.tenPercentTarget = this.rollingAdjusted * 0.90;
+    }
+    setFifteenPercentTarget() {
+        this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
+    }
+    setThirtyPercentTarget() {
+        this.thirtyPercentTarget = this.rollingAdjusted * 0.70;
+    }
+
+    setFifteenPercentSavings() {
+        this.fifteenPercentSavings = this.rollingAdjusted - this.fifteenPercentTarget;
+    }
+    setTenPercentSavings() {
+        this.tenPercentSavings = this.rollingAdjusted - this.tenPercentTarget;
+    }
+    setFivePercentSavings() {
+        this.fivePercentSavings = this.rollingAdjusted - this.fivePercentTarget;
+    }
+    setThirtyPercentSavings() {
+        this.thirtyPercentSavings = this.rollingAdjusted - this.thirtyPercentTarget;
     }
 }

@@ -43,6 +43,8 @@ import { AnalysisReportDashboardComponent } from "src/app/data-evaluation/accoun
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
 import { AccountEmissionFactorsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component";
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
+import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
+import { AccountSavingsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -88,6 +90,7 @@ export const AccountRoutes: Route = {
                         { path: 'performance', component: PerformanceReportDashboardComponent },
                         { path: 'better-climate', component: BetterClimateReportDashboardComponent },
                         { path: 'analysis', component: AnalysisReportDashboardComponent },
+                        { path: 'account-savings', component: AccountSavingsReportDashboardComponent },
                         { path: 'account-emission-factors', component: AccountEmissionFactorsReportDashboardComponent }
                     ]
                 },
@@ -97,6 +100,7 @@ export const AccountRoutes: Route = {
                 { path: 'performance-report', component: PerformanceReportComponent },
                 { path: 'better-climate-report', component: BetterClimateReportComponent },
                 { path: 'analysis-report', component: AnalysisReportComponent },
+                { path: 'account-savings-report', component: AccountSavingsReportComponent },
                 { path: 'account-emission-factors-report', component: AccountEmissionFactorsReportComponent }
             ]
         },
