@@ -167,8 +167,6 @@ export interface DataOverviewFacilityReportSettings {
 
 export function getSavingsReportSettings(): SavingsFacilityReportSettings {
     return {
-        startYear: undefined,
-        startMonth: undefined,
         endYear: undefined,
         endMonth: undefined,
         facilityAnnualResults: true,
@@ -184,8 +182,9 @@ export function getSavingsReportSettings(): SavingsFacilityReportSettings {
 }
 
 export interface SavingsFacilityReportSettings {
-    startYear: number,
-    startMonth: number,
+    //using baseline year of analysis
+    // startYear: number,
+    // startMonth: number,
     endYear: number,
     endMonth: number,
     facilityAnnualResults: boolean,

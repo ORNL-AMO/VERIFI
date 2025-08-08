@@ -111,8 +111,6 @@ export class FacilityReportsTabsComponent {
         this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '' &&
           this.selectedReport.savingsReportSettings.endMonth != undefined &&
           this.selectedReport.savingsReportSettings.endYear != undefined &&
-          this.selectedReport.savingsReportSettings.startMonth != undefined &&
-          this.selectedReport.savingsReportSettings.startYear != undefined &&
           this.errorMessage == undefined);
       } else if (this.selectedReport.facilityReportType == 'emissionFactors') {
         this.setupValid = (this.selectedReport.name != '' &&
