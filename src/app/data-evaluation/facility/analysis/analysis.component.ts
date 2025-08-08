@@ -57,12 +57,12 @@ export class AnalysisComponent implements OnInit {
 
   goToMeterGroups() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/meter-groups')
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/meter-groups')
   }
 
   goToUtilityData() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility')
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility')
   }
 
   async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {

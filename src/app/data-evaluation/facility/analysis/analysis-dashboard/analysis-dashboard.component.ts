@@ -85,7 +85,7 @@ export class AnalysisDashboardComponent implements OnInit {
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
   }
 
   saveShowDetails() {
@@ -133,10 +133,10 @@ export class AnalysisDashboardComponent implements OnInit {
     this.hasEnergy = hasEnergy;
     //check nav
     if (this.analysisType == 'Energy' && !this.hasEnergy) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/analysis-dashboard/water');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/analysis-dashboard/water');
     }
     if (this.analysisType == 'Water' && !this.hasWater) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/analysis-dashboard/energy');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/analysis-dashboard/energy');
     }
   }
 

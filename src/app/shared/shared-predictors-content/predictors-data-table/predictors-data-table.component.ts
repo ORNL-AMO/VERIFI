@@ -137,7 +137,7 @@ export class PredictorsDataTableComponent {
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(newEntry);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/add-entry');
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid + '/add-entry');
     }
   }
 
@@ -162,7 +162,7 @@ export class PredictorsDataTableComponent {
       this.router.navigateByUrl('data-management/' + predictorEntry.accountId + '/facilities/' + predictorEntry.facilityId + '/predictors/' + predictorEntry.predictorId + '/predictor-data/edit-entry/' + predictorEntry.guid);
     } else {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/edit-entry/' + predictorEntry.guid);
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid + '/edit-entry/' + predictorEntry.guid);
     }
   }
 
@@ -321,7 +321,7 @@ export class PredictorsDataTableComponent {
       this.router.navigateByUrl('data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data/update-calculated-entries');
     } else {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
     }
 
   }

@@ -320,7 +320,7 @@ export class BetterClimateYearDetails {
                 return mData.fiscalYear == this.year;
             });
             let sumConsumption: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
-                return monthlyData.energyConsumption;
+                return monthlyData.energyUse;
             });
             this.stationaryFuelTotals.push({
                 fuelType: type,

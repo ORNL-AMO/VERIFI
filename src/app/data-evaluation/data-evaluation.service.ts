@@ -14,6 +14,7 @@ export class DataEvaluationService {
   helpWidth: number = 200;
   sidebarWidth: number = 200;
   helpWidthBs: BehaviorSubject<number>;
+  sidebarWidthBs: BehaviorSubject<number>;
   print: BehaviorSubject<boolean>;
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
@@ -39,6 +40,7 @@ export class DataEvaluationService {
     } else {
       this.sidebarOpen = new BehaviorSubject<boolean>(true);
     }
+    this.sidebarWidthBs = new BehaviorSubject<number>(this.sidebarWidth);
   }
 
   getFileReferenceById(id: string): FileReference {

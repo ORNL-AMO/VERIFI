@@ -6,10 +6,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-regression-model-details',
-    templateUrl: './regression-model-details.component.html',
-    styleUrl: './regression-model-details.component.css',
-    standalone: false
+  selector: 'app-regression-model-details',
+  templateUrl: './regression-model-details.component.html',
+  styleUrl: './regression-model-details.component.css',
+  standalone: false
 })
 export class RegressionModelDetailsComponent {
   @Input({ required: true })
@@ -112,7 +112,12 @@ export class RegressionModelDetailsComponent {
         },
         margin: { r: 0, t: 50 }
       };
-      var config = { responsive: true };
+      var config = {
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
+        displaylogo: false,
+        responsive: true
+      };
       this.plotlyService.newPlot(this.monthlyAnalysisGraph.nativeElement, data, layout, config);
     }
   }

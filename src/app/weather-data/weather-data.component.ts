@@ -218,7 +218,7 @@ export class WeatherDataComponent {
       if (this.router.url.includes('data-management')) {
         this.router.navigateByUrl('data-management/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors');
       } else {
-        this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table');
+        this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/predictor-table');
       }
     } else {
       this.toastNotificationService.weatherDataErrorToast();

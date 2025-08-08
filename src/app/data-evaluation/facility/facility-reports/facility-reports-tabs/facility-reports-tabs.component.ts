@@ -83,13 +83,13 @@ export class FacilityReportsTabsComponent {
 
   goToDashboard() {
     if (this.selectedReport.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard/analysis');
     }
     else if (this.selectedReport.facilityReportType == 'overview') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/overview');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard/overview');
     }
     else if (this.selectedReport.facilityReportType == 'emissionFactors') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/emission-factors');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard/emission-factors');
     }
   }
 
@@ -122,7 +122,7 @@ export class FacilityReportsTabsComponent {
   selectItem(item: IdbFacilityReport) {
     this.facilityReportsDbService.selectedReport.next(item);
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/reports/setup');
     this.showDropdown = false;
   }
 
