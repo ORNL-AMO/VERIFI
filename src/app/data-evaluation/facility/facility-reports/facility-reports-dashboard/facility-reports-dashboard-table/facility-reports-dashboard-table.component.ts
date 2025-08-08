@@ -58,10 +58,10 @@ export class FacilityReportsDashboardTableComponent {
     });
 
     this.facilityReportsSub = this.facilityDbReportsService.facilityReports.subscribe(reports => {
-     this.facilityReports = reports;
-     this.getReports();
+      this.facilityReports = reports;
+      this.getReports();
     });
-    
+
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
@@ -76,6 +76,7 @@ export class FacilityReportsDashboardTableComponent {
   async getReports() {
     this.filteredReports = [];
     this.filteredReports = [...this.facilityReports];
+    this.applyFilter();
   }
 
   applyFilter() {
@@ -145,5 +146,13 @@ export class FacilityReportsDashboardTableComponent {
     } else {
       this.orderDataField = str;
     }
+  }
+
+  getDate(month: number, year: number): Date {
+    return new Date(year, month, 1);
+  }
+
+  get sortYear(): string {
+    return 'sortYear';
   }
 }

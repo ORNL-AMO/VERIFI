@@ -23,10 +23,14 @@ export class ReportOrderByPipe implements PipeTransform {
       );
     }
 
-    if (orderDataBy === 'report.reportYear') {
+    if (orderDataBy === 'report.reportYearOrEndYear') {
       return _.orderBy(
         data,
-        item => Number(_.get(item, orderDataBy)),
+        item => {
+          const endYear = item.report.endYear;
+          const reportYear = item.report.reportYear;
+          return endYear !== undefined && endYear !== null ? Number(endYear) : Number(reportYear);
+        },
         orderDirection
       );
     }

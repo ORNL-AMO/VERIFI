@@ -24,9 +24,13 @@
                         [ngClass]="{'active': orderDataField == 'facilityReportType'}">
                         Report Type
                     </th>
-                   <th class="can-click" (click)="setOrderDataField('analysisItemId')"
+                    <th class="can-click" (click)="setOrderDataField('analysisItemId')"
                         [ngClass]="{'active': orderDataField == 'analysisItemId'}">
                         Analysis Item
+                    </th>
+                    <th class="can-click" (click)="setOrderDataField(sortYear)"
+                        [ngClass]="{'active': orderDataField == sortYear}">
+                        Report Year
                     </th>
                     <th class="can-click" (click)="setOrderDataField('modifiedDate')"
                         [ngClass]="{'active': orderDataField == 'modifiedDate'}">
@@ -47,6 +51,41 @@
                     </td>
                     <td *ngIf="data.analysisItemId">{{ data.analysisItemId | facilityAnalysisName}}</td>
                     <td *ngIf="!data.analysisItemId"> &mdash; </td>
+                    <td [ngSwitch]="data.facilityReportType">
+                        <ng-container *ngSwitchCase="'emissionFactors'">
+                            <ng-container *ngIf="data.emissionFactorsReportSettings.startYear != undefined">
+                                {{ data.emissionFactorsReportSettings.startYear }} -
+                            </ng-container>
+                            <ng-container *ngIf="data.emissionFactorsReportSettings.endYear != undefined">
+                                {{ data.emissionFactorsReportSettings.endYear }}
+                            </ng-container>
+                            <ng-container
+                                *ngIf="data.emissionFactorsReportSettings.startYear === undefined && data.emissionFactorsReportSettings.endYear === undefined">
+                                &mdash;
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngSwitchCase="'overview'">
+                            <ng-container
+                                *ngIf="data.dataOverviewReportSettings.startMonth != undefined && data.dataOverviewReportSettings.startYear != undefined">
+                                {{ getDate(data.dataOverviewReportSettings.startMonth,
+                                data.dataOverviewReportSettings.startYear) | date: 'MMM. y' }} -
+                            </ng-container>
+                            <ng-container
+                                *ngIf="data.dataOverviewReportSettings.endMonth != undefined && data.dataOverviewReportSettings.endYear != undefined">
+                                {{ getDate(data.dataOverviewReportSettings.endMonth,
+                                data.dataOverviewReportSettings.endYear) | date: 'MMM. y' }}
+                            </ng-container>
+                            <ng-container
+                                *ngIf="data.dataOverviewReportSettings.startMonth === undefined && data.dataOverviewReportSettings.startYear === undefined && data.dataOverviewReportSettings.endMonth === undefined && data.dataOverviewReportSettings.endYear === undefined">
+                                &mdash;
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngSwitchDefault>
+                            &mdash;
+                        </ng-container>
+                    </td>
                     <td>
                         {{ data.modifiedDate | date:'short' }}
                     </td>

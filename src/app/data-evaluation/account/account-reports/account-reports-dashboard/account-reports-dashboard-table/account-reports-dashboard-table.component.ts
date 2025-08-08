@@ -66,6 +66,7 @@ export class AccountReportsDashboardTableComponent {
       this.reportList.push({ isValid, report });
     });
     this.filteredReports = [...this.reportList];
+    this.applyFilter();
   }
 
   applyFilter() {
@@ -139,5 +140,13 @@ export class AccountReportsDashboardTableComponent {
     } else {
       this.orderDataField = str;
     }
+  }
+
+  getDate(month: number, year: number): Date {
+    return new Date(year, month, 1);
+  }
+
+  get yearSortField(): string {
+    return 'report.reportYearOrEndYear';
   }
 }
