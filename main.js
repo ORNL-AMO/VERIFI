@@ -245,7 +245,7 @@ ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, dat
 
         const newFileName = `${meterNumber}_${date}${fileExtension}`;
         const subFolderPath = path.join(folderPath, facilityName);
-        if(!fs.existsSync(subFolderPath)) {
+        if (!fs.existsSync(subFolderPath)) {
             fs.mkdirSync(subFolderPath, { recursive: true });
         }
         const destinationPath = path.join(subFolderPath, newFileName);
@@ -265,6 +265,21 @@ ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, dat
 ipcMain.on("openUploadedFileLocation", (event, filepath) => {
     if (filepath && fs.existsSync(filepath)) {
         shell.openPath(filepath);
+    }
+});
+
+ipcMain.on("disconnectBill", async (event, path) => {
+    try {
+        if (path && fs.existsSync(path)) {
+            fs.unlinkSync(path);
+            win.webContents.send('bill-disconnected', { success: true });
+        }
+        else {
+            win.webContents.send('bill-disconnected', { success: false });
+        }
+    } catch (err) {
+        console.error('In main.js Error disconnecting bill:', err);
+        win.webContents.send('bill-disconnected', { success: false });
     }
 });
 
