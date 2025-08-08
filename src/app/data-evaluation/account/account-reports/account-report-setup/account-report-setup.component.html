@@ -40,7 +40,7 @@
                 <div class="col-6"
                     *ngIf="setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value == 'accountSavings' || setupForm.controls.reportType.value == 'accountEmissionFactors'">
 
-                    <div class="row form-group">
+                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'accountSavings'">
                         <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
 
                         <div class="col-3">

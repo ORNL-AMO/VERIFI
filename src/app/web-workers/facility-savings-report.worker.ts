@@ -1,7 +1,5 @@
 /// <reference lib="webworker" />
 
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { CalanderizedMeter } from "../models/calanderization";
 import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
 import { getNeededUnits } from "../calculations/shared-calculations/calanderizationFunctions";

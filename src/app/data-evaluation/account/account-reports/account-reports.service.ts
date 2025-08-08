@@ -44,11 +44,15 @@ export class AccountReportsService {
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
-    let dateValidators: Array<ValidatorFn> = [];
+    let startDateValidators: Array<ValidatorFn> = [];
+    let endDateValidators: Array<ValidatorFn> = [];
     if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis' || report.reportType == 'accountEmissionFactors') {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
-      dateValidators = [Validators.required];
+      endDateValidators = [Validators.required];
+      if(report.reportType == 'dataOverview'){
+        startDateValidators = [Validators.required];
+      }
     }
 
     if (report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
@@ -57,10 +61,10 @@ export class AccountReportsService {
         reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, yearValidators],
         baselineYear: [report.baselineYear, yearValidators],
-        startMonth: [report.startMonth, dateValidators],
-        startYear: [report.startYear, dateValidators],
-        endMonth: [report.endMonth, dateValidators],
-        endYear: [report.endYear, dateValidators]
+        startMonth: [report.startMonth, startDateValidators],
+        startYear: [report.startYear, startDateValidators],
+        endMonth: [report.endMonth, endDateValidators],
+        endYear: [report.endYear, endDateValidators]
       });
       return form;
     }
@@ -70,10 +74,10 @@ export class AccountReportsService {
         reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, yearValidators],
         baselineYear: [report.baselineYear, ''],
-        startMonth: [report.startMonth, dateValidators],
-        startYear: [report.startYear, dateValidators],
-        endMonth: [report.endMonth, dateValidators],
-        endYear: [report.endYear, dateValidators]
+        startMonth: [report.startMonth, startDateValidators],
+        startYear: [report.startYear, startDateValidators],
+        endMonth: [report.endMonth, endDateValidators],
+        endYear: [report.endYear, endDateValidators]
       });
       return form;
     }

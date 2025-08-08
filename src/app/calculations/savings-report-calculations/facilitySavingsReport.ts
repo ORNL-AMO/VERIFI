@@ -6,6 +6,7 @@ import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { getSavingsReportAnnualAnalysisSummaries, getSavingsReportMonthlyAnalysisSummaryData } from "./sharedSavingsReport";
 
 export class FacilitySavingsReport {
 
@@ -22,44 +23,14 @@ export class FacilitySavingsReport {
     ) {
         analysisItem.reportYear = report.savingsReportSettings.endYear;
         let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined, true);
-        this.annualAnalysisSummaries = this.getAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.savingsReportSettings);
-        this.monthlyAnalysisSummaryData = this.getMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.savingsReportSettings);
+        this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
+        this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.groupSummaries = annualAnalysisSummaryClass.groupSummaries.map((groupSummary: { group: AnalysisGroup, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, annualAnalysisSummaryData: Array<AnnualAnalysisSummary> }) => {
             return {
                 group: groupSummary.group,
-                monthlyAnalysisSummaryData: this.getMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings),
-                annualAnalysisSummaryData: this.getAnnualAnalysisSummaries(groupSummary.annualAnalysisSummaryData, report.savingsReportSettings)
+                monthlyAnalysisSummaryData: getSavingsReportMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear),
+                annualAnalysisSummaryData: getSavingsReportAnnualAnalysisSummaries(groupSummary.annualAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear)
             }
         });
-    }
-
-    getAnnualAnalysisSummaries(annualAnalysisSummaryData: Array<AnnualAnalysisSummary>, savingsReportSettings: SavingsFacilityReportSettings): Array<AnnualAnalysisSummary> {
-        if (savingsReportSettings.endMonth != 11) {
-            //savings report ends mid-year, remove partial year summary
-            return annualAnalysisSummaryData.filter((summary: AnnualAnalysisSummary) => {
-                return summary.year != savingsReportSettings.endYear;
-            });
-        } else {
-            //savings report ends at year-end, keep all summaries
-            return annualAnalysisSummaryData;
-        }
-    }
-
-    getMonthlyAnalysisSummaryData(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, savingsReportSettings: SavingsFacilityReportSettings): Array<MonthlyAnalysisSummaryData> {
-        if (savingsReportSettings.endMonth != 11) {
-            //savings report ends mid-year, remove monthly data past end month
-            return monthlyAnalysisSummaryData.filter((summary: MonthlyAnalysisSummaryData) => {
-                let date: Date = new Date(summary.date);
-                if (date.getFullYear() < savingsReportSettings.endYear) {
-                    return true;
-                } else if (date.getFullYear() == savingsReportSettings.endYear) {
-                    return date.getMonth() <= savingsReportSettings.endMonth;
-                }
-                return false;
-            });
-        } else {
-            //savings report ends at year-end, keep all summaries
-            return monthlyAnalysisSummaryData;
-        }
     }
 }
