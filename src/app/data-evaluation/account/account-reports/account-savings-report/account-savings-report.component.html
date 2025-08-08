@@ -1,7 +1,7 @@
 <div *ngIf="calculating == false">
     <div>
         <div
-            *ngIf="accountSavingsReportSetup.includeAnnualResultsTable || accountSavingsReportSetup.includeAnnualResultsGraph">
+            *ngIf="accountSavingsReportSetup.includeAnnualResultsTable || accountSavingsReportSetup.includeAnnualResultsGraph || accountSavingsReportSetup.includeAccountMonthlyResults">
             <div class="report" [ngClass]="{'print': print}">
                 <div class="text-center">
                     <h3>
@@ -23,17 +23,26 @@
                 </div>
                 <app-annual-analysis-summary-graph
                     *ngIf="annualAnalysisSummaries && annualAnalysisSummaries.length > 0 && accountSavingsReportSetup.includeAnnualResultsGraph"
-                    [annualAnalysisSummary]="annualAnalysisSummaries"
-                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="selectedAnalysisItem">
+                    [annualAnalysisSummary]="annualAnalysisSummaries" [annualAnalysisSummary]="annualAnalysisSummaries"
+                    [analysisItem]="selectedAnalysisItem">
                 </app-annual-analysis-summary-graph>
+                <div
+                    *ngIf="monthlyAnalysisSummaryData && monthlyAnalysisSummaryData.length > 0 && accountSavingsReportSetup.includeAccountMonthlyResults">
+                    <i><u>
+                            <h5 class="text-center">Monthly Analysis</h5>
+                        </u></i>
+                    <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+                        [analysisItem]="selectedAnalysisItem" [facilityOrAccount]="account">
+                    </app-monthly-analysis-summary-graph>
+                </div>
             </div>
         </div>
 
         <div
-            *ngIf="accountSavingsReportSetup.includeFacilityResultsTable || accountSavingsReportSetup.includeFacilityResultsGraph">
+            *ngIf="accountSavingsReportSetup.includeFacilityResultsTable || accountSavingsReportSetup.includeFacilityResultsGraph || accountSavingsReportSetup.includeFacilityMonthlyResultsGraph">
             <div class="report" [ngClass]="{'print': print}">
                 <div class="text-center"
-                    *ngIf="!accountSavingsReportSetup.includeAnnualResultsTable && !accountSavingsReportSetup.includeAnnualResultsGraph">
+                    *ngIf="!accountSavingsReportSetup.includeAnnualResultsTable && !accountSavingsReportSetup.includeAnnualResultsGraph && !accountSavingsReportSetup.includeAccountMonthlyResults">
                     <h3>
                         {{ selectedReport.name }}
                     </h3>
@@ -42,7 +51,7 @@
                     </h6>
                 </div>
                 <ng-container>
-                    <div *ngFor="let summary of facilitySummaries">
+                    <div *ngFor="let summary of facilitySummaries" class="summary-margin">
                         <h4>
                             Annual {{ summary.facility.name }} Analysis
                         </h4>
@@ -50,8 +59,8 @@
                             <app-annual-analysis-summary-table
                                 *ngIf="summary.annualAnalysisSummaries && summary.annualAnalysisSummaries.length > 0 && accountSavingsReportSetup.includeFacilityResultsTable"
                                 [annualAnalysisSummary]="summary.annualAnalysisSummaries"
-                                [analysisItem]="summary.analysisItem"
-                                [accountOrFacility]="summary.facility" [printBlock]="'all'">
+                                [analysisItem]="summary.analysisItem" [accountOrFacility]="summary.facility"
+                                [printBlock]="'all'">
                             </app-annual-analysis-summary-table>
                         </div>
 
@@ -60,7 +69,18 @@
                             [annualAnalysisSummary]="summary.annualAnalysisSummaries"
                             [analysisItem]="summary.analysisItem">
                         </app-annual-analysis-summary-graph>
-                        <hr>
+                        
+                        <div
+                            *ngIf="summary.monthlySummaryData && summary.monthlySummaryData.length > 0 && accountSavingsReportSetup.includeFacilityMonthlyResultsGraph">
+                            <i><u>
+                                    <h5 class="text-center">Monthly Analysis</h5>
+                                </u></i>
+                            <app-monthly-analysis-summary-graph
+                                [monthlyAnalysisSummaryData]="summary.monthlySummaryData"
+                                [analysisItem]="summary.analysisItem" [facilityOrAccount]="summary.facility">
+                            </app-monthly-analysis-summary-graph>
+                            <hr>
+                        </div>
                     </div>
                 </ng-container>
             </div>
@@ -71,7 +91,7 @@
         *ngIf="performanceReport.annualFacilityData.length > 0 && performanceReport.facilityTotals.length > 0 && (accountSavingsReportSetup.includePerformanceResultsTable || accountSavingsReportSetup.includePerformanceResultsGraph)">
         <div class="report" [ngClass]="{'print': print}">
             <div class="text-center"
-                *ngIf="!accountSavingsReportSetup.includeAnnualResultsTable && !accountSavingsReportSetup.includeAnnualResultsGraph && !accountSavingsReportSetup.includeFacilityResultsTable && !accountSavingsReportSetup.includeFacilityResultsGraph">
+                *ngIf="!accountSavingsReportSetup.includeAnnualResultsTable && !accountSavingsReportSetup.includeAnnualResultsGraph && !accountSavingsReportSetup.includeAccountMonthlyResults && !accountSavingsReportSetup.includeFacilityResultsTable && !accountSavingsReportSetup.includeFacilityResultsGraph && !accountSavingsReportSetup.includeFacilityMonthlyResultsGraph">
                 <h3>
                     {{ selectedReport.name }}
                 </h3>
@@ -88,12 +108,12 @@
                         *ngIf="performanceReport && accountSavingsReportSetup.includePerformanceResultsTable"
                         [account]="account" [performanceReport]="performanceReport"
                         [selectedAnalysisItem]="selectedAnalysisItem"
-                        [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-facility-table>
+                        [performanceReportSetup]="setupDetails"></app-performance-report-facility-table>
                 </div>
                 <app-performance-chart
                     *ngIf="performanceReport && accountSavingsReportSetup.includePerformanceResultsGraph"
                     [performanceReport]="performanceReport" [chartDataOption]="'savings'" [chartDataType]="'facility'"
-                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-chart>
+                    [performanceReportSetup]="setupDetails"></app-performance-chart>
             </ng-container>
         </div>
     </div>

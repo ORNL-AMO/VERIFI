@@ -7,7 +7,7 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
+import { AccountSavingsReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -40,6 +40,20 @@ export class AccountSavingsReportComponent {
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   printSub: Subscription;
   print: boolean;
+
+  setupDetails: PerformanceReportSetup = {
+    analysisItemId: '',
+    includeFacilityPerformanceDetails: false,
+    includeUtilityPerformanceDetails: false,
+    includeGroupPerformanceDetails: false,
+    groupPerformanceByYear: false,
+    numberOfTopPerformers: 5,
+    includeActual: false,
+    includeAdjusted: false,
+    includeContribution: false,
+    includeSavings: false,
+    includeTopPerformersTable: false
+  };
 
   worker: Worker;
   calculating: boolean | 'error' = true;
@@ -80,6 +94,24 @@ export class AccountSavingsReportComponent {
     this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
     this.calculateSavingsReport();
+    this.getSetupDetails();
+  }
+
+  getSetupDetails() {
+    const reportSetup = this.selectedReport.accountSavingsReportSetup;
+    this.setupDetails = {
+      analysisItemId: reportSetup.analysisItemId,
+      includeFacilityPerformanceDetails: reportSetup.includePerformanceResultsTable,
+      includeUtilityPerformanceDetails: false,
+      includeGroupPerformanceDetails: false,
+      groupPerformanceByYear: false,
+      numberOfTopPerformers: reportSetup.numberOfTopPerformers,
+      includeActual: reportSetup.includePerformanceActual,
+      includeAdjusted: reportSetup.includePerformanceAdjusted,
+      includeContribution: reportSetup.includePerformanceContribution,
+      includeSavings: reportSetup.includePerformanceSavings,
+      includeTopPerformersTable: false
+    };
   }
 
   ngOnDestroy(): void {

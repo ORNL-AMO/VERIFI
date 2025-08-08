@@ -311,12 +311,19 @@ export class AccountReportsService {
         includeAnnualResults: true,
         includeAnnualResultsTable: true,
         includeAnnualResultsGraph: true,
+        includeAccountMonthlyResults: true,
         includeFacilityResults: true,
         includeFacilityResultsTable: true,
         includeFacilityResultsGraph: true,
+        includeFacilityMonthlyResultsGraph: true,
         includePerformanceResults: true,
         includePerformanceResultsTable: true,
         includePerformanceResultsGraph: true,
+        includePerformanceActual: true,
+        includePerformanceAdjusted: true,
+        includePerformanceContribution: true,
+        includePerformanceSavings: true,
+        numberOfTopPerformers: 5
       };
     }
     let form: FormGroup = this.formBuilder.group({
@@ -324,12 +331,19 @@ export class AccountReportsService {
       includeAnnualResults: [accountSavingsReportSetup.includeAnnualResults],
       includeAnnualResultsTable: [accountSavingsReportSetup.includeAnnualResultsTable], 
       includeAnnualResultsGraph: [accountSavingsReportSetup.includeAnnualResultsGraph],
+      includeAccountMonthlyResults: [accountSavingsReportSetup.includeAccountMonthlyResults],
       includeFacilityResults: [accountSavingsReportSetup.includeFacilityResults],
       includeFacilityResultsTable: [accountSavingsReportSetup.includeFacilityResultsTable],
       includeFacilityResultsGraph: [accountSavingsReportSetup.includeFacilityResultsGraph],
+      includeFacilityMonthlyResultsGraph: [accountSavingsReportSetup.includeFacilityMonthlyResultsGraph],
       includePerformanceResults: [accountSavingsReportSetup.includePerformanceResults],
       includePerformanceResultsTable: [accountSavingsReportSetup.includePerformanceResultsTable],
-      includePerformanceResultsGraph: [accountSavingsReportSetup.includePerformanceResultsGraph]
+      includePerformanceResultsGraph: [accountSavingsReportSetup.includePerformanceResultsGraph],
+      includePerformanceActual: [accountSavingsReportSetup.includePerformanceActual],
+      includePerformanceAdjusted: [accountSavingsReportSetup.includePerformanceAdjusted],
+      includePerformanceContribution: [accountSavingsReportSetup.includePerformanceContribution],
+      includePerformanceSavings: [accountSavingsReportSetup.includePerformanceSavings],
+      numberOfTopPerformers: [accountSavingsReportSetup.numberOfTopPerformers]
     });
     return form;
   }
@@ -341,24 +355,38 @@ export class AccountReportsService {
         includeAnnualResults: true,
         includeAnnualResultsTable: true,
         includeAnnualResultsGraph: true,
+        includeAccountMonthlyResults: true,
         includeFacilityResults: true,
         includeFacilityResultsTable: true,
         includeFacilityResultsGraph: true,
+        includeFacilityMonthlyResultsGraph: true,
         includePerformanceResults: true,
         includePerformanceResultsTable: true,
         includePerformanceResultsGraph: true,
+        includePerformanceActual: true,
+        includePerformanceAdjusted: true,
+        includePerformanceContribution: true,
+        includePerformanceSavings: true,
+        numberOfTopPerformers: 5
       };
     }
     accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
     accountSavingsReportSetup.includeAnnualResults = form.controls.includeAnnualResults.value;
     accountSavingsReportSetup.includeAnnualResultsTable = form.controls.includeAnnualResultsTable.value;
     accountSavingsReportSetup.includeAnnualResultsGraph = form.controls.includeAnnualResultsGraph.value;
+    accountSavingsReportSetup.includeAccountMonthlyResults = form.controls.includeAccountMonthlyResults.value;
     accountSavingsReportSetup.includeFacilityResults = form.controls.includeFacilityResults.value;
     accountSavingsReportSetup.includeFacilityResultsTable = form.controls.includeFacilityResultsTable.value;
     accountSavingsReportSetup.includeFacilityResultsGraph = form.controls.includeFacilityResultsGraph.value;
+    accountSavingsReportSetup.includeFacilityMonthlyResultsGraph = form.controls.includeFacilityMonthlyResultsGraph.value;
     accountSavingsReportSetup.includePerformanceResults = form.controls.includePerformanceResults.value;
     accountSavingsReportSetup.includePerformanceResultsTable = form.controls.includePerformanceResultsTable.value;
     accountSavingsReportSetup.includePerformanceResultsGraph = form.controls.includePerformanceResultsGraph.value;
+    accountSavingsReportSetup.includePerformanceActual = form.controls.includePerformanceActual.value;
+    accountSavingsReportSetup.includePerformanceAdjusted = form.controls.includePerformanceAdjusted.value;
+    accountSavingsReportSetup.includePerformanceContribution = form.controls.includePerformanceContribution.value;
+    accountSavingsReportSetup.includePerformanceSavings = form.controls.includePerformanceSavings.value;
+    accountSavingsReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
     return accountSavingsReportSetup;
   }
 

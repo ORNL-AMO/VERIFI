@@ -178,10 +178,17 @@ export interface AccountSavingsReportSetup {
   includeAnnualResults: boolean,
   includeAnnualResultsTable: boolean,
   includeAnnualResultsGraph: boolean,
+  includeAccountMonthlyResults: boolean,
   includeFacilityResults: boolean,
   includeFacilityResultsTable: boolean,
   includeFacilityResultsGraph: boolean,
+  includeFacilityMonthlyResultsGraph: boolean,
   includePerformanceResults: boolean,
   includePerformanceResultsTable: boolean,
-  includePerformanceResultsGraph: boolean
+  includePerformanceResultsGraph: boolean,
+  includePerformanceActual: boolean,
+  includePerformanceAdjusted: boolean,
+  includePerformanceContribution: boolean,
+  includePerformanceSavings: boolean,
+  numberOfTopPerformers: number
 }

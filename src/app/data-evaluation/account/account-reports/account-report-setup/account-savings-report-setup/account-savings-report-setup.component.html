@@ -89,6 +89,14 @@
                                 Graph
                             </label>
                         </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeAccountMonthlyResults"
+                                id="includeAccountMonthlyResults" formControlName="includeAccountMonthlyResults"
+                                (change)="save()">
+                            <label class="form-check-label" for="includeAnnualResultsGraph">Account Monthly Results
+                                Graph
+                            </label>
+                        </div>
                     </ng-container>
                 </div>
 
@@ -116,6 +124,15 @@
                                 Graph
                             </label>
                         </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeFacilityMonthlyResultsGraph"
+                                id="includeFacilityMonthlyResultsGraph"
+                                formControlName="includeFacilityMonthlyResultsGraph" (change)="save()">
+                            <label class="form-check-label" for="includeFacilityMonthlyResultsGraph">Facility Monthly
+                                Results
+                                Graph
+                            </label>
+                        </div>
                     </ng-container>
                 </div>
 
@@ -136,6 +153,46 @@
                                 Table
                             </label>
                         </div>
+                        <ng-container *ngIf="reportSetup.includePerformanceResultsTable">
+                            <div class="form-check ms-4">
+                                <input class="form-check-input" type="checkbox" name="includePerformanceActual"
+                                    id="includePerformanceActual" formControlName="includePerformanceActual"
+                                    (change)="save()">
+                                <label class="form-check-label" for="includePerformanceActual">Include Actual
+                                </label>
+                            </div>
+                            <div class="form-check ms-4">
+                                <input class="form-check-input" type="checkbox" name="includePerformanceAdjusted"
+                                    id="includePerformanceAdjusted" formControlName="includePerformanceAdjusted"
+                                    (change)="save()">
+                                <label class="form-check-label" for="includePerformanceAdjusted">Include Adjusted
+                                </label>
+                            </div>
+                            <div class="form-check ms-4">
+                                <input class="form-check-input" type="checkbox" name="includePerformanceSavings"
+                                    id="includePerformanceSavings" formControlName="includePerformanceSavings"
+                                    (change)="save()">
+                                <label class="form-check-label" for="includePerformanceSavings">Include Savings
+                                </label>
+                            </div>
+                            <div class="form-check ms-4">
+                                <input class="form-check-input" type="checkbox" name="includePerformanceContribution"
+                                    id="includePerformanceContribution" formControlName="includePerformanceContribution"
+                                    (change)="save()">
+                                <label class="form-check-label" for="includePerformanceContribution">Include
+                                    Contribution
+                                </label>
+                            </div>
+                        </ng-container>
+                        <div class="form-group">
+                            <label for="numberOfTopPerformers">Number of Top Performers to Highlight</label>
+                            <select id="numberOfTopPerformers" name="numberOfTopPerformers"
+                                formControlName="numberOfTopPerformers" class="form-select auto-width" required
+                                (change)="save()">
+                                <option *ngFor="let value of numberOfPerformerOptions" [ngValue]="value">{{value}}
+                                </option>
+                            </select>
+                        </div>
                         <div class="form-check ms-2">
                             <input class="form-check-input" type="checkbox" name="includePerformanceResultsGraph"
                                 id="includePerformanceResultsGraph" formControlName="includePerformanceResultsGraph"
@@ -150,7 +207,3 @@
         </div>
     </div>
 </form>
-
-
-
-
