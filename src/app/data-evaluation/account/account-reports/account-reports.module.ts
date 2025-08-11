@@ -59,9 +59,13 @@ import { AnalysisReportSetupComponent } from './account-report-setup/analysis-re
 import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
 import { AnalysisProblemsInformationComponent } from './analysis-report/analysis-problems-information/analysis-problems-information.component';
 import { AnalysisDataValidationTablesComponent } from './analysis-report/analysis-data-validation-tables/analysis-data-validation-tables.component';
+import { SharedAnalysisModule } from "src/app/shared/shared-analysis/shared-analysis.module";
 import { AccountEmissionFactorsReportDashboardComponent } from './account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component';
 import { AccountEmissionFactorsReportComponent } from './account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
 import { AccountEmissionFactorsReportTableComponent } from './account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
+import { AccountSavingsReportSetupComponent } from 'src/app/data-evaluation/account/account-reports/account-report-setup/account-savings-report-setup/account-savings-report-setup.component';
+import { AccountSavingsReportComponent } from 'src/app/data-evaluation/account/account-reports/account-savings-report/account-savings-report.component';
+import { AccountSavingsReportDashboardComponent } from 'src/app/data-evaluation/account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -119,6 +123,9 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
     AnalysisFacilityReportComponent,
     AnalysisProblemsInformationComponent,
     AnalysisDataValidationTablesComponent,
+    AccountSavingsReportDashboardComponent,
+    AccountSavingsReportComponent,
+    AccountSavingsReportSetupComponent,
     AccountEmissionFactorsReportDashboardComponent,
     AccountEmissionFactorsReportComponent,
     AccountEmissionFactorsReportTableComponent
@@ -131,7 +138,8 @@ import { AccountEmissionFactorsReportTableComponent } from './account-emission-f
     FormsModule,
     LabelWithTooltipModule,
     CalculatingSpinnerModule,
-    DataOverviewModule
-  ]
+    DataOverviewModule,
+    SharedAnalysisModule
+]
 })
 export class AccountReportsModule { }

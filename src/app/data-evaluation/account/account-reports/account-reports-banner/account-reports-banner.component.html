@@ -32,13 +32,19 @@
                     <i class="fa fa-file"></i>
                     Better Climate Report</a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
-                *ngIf="selectedReport.reportType == 'analysis'">
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}" *ngIf="selectedReport.reportType == 'analysis'">
                 <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Modeling Report</a>
             </li>
-             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.reportType == 'accountSavings'">
+                <a class="nav-link" routerLink="account-savings-report"
+                    [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Savings Report</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'accountEmissionFactors'">
                 <a class="nav-link" routerLink="account-emission-factors-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
@@ -53,7 +59,8 @@
                     <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
                         <i class="fa fa-file"></i>
                         {{selectedReport.name}}
-                        <ng-container *ngIf="selectedReport.reportType != 'dataOverview' && selectedReport.reportType != 'accountEmissionFactors'">
+                        <ng-container
+                            *ngIf="selectedReport.reportType != 'dataOverview' && selectedReport.reportType != 'accountSavings' && selectedReport.reportType != 'accountEmissionFactors'">
                             - ({{selectedReport.reportYear}})
                         </ng-container>
                     </a>
@@ -67,7 +74,7 @@
                                         <i class="fa fa-file"></i>
                                         {{report.name}}
                                         <span class="badge text-bg-secondary ms-2 float-right"
-                                            *ngIf="selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'betterClimate' || selectedReport.reportType == 'analysis'">
+                                            *ngIf="selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'betterClimate' || selectedReport.reportType == 'analysis' || selectedReport.reportType == 'accountSavings'">
                                             {{report.reportYear}}
                                         </span>
                                     </a>

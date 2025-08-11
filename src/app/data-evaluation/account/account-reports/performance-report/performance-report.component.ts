@@ -58,7 +58,7 @@ export class PerformanceReportComponent {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.setAnalysisItem();
-    this.setBetterPlantsSummary();
+    this.setPerformanceReport();
   }
 
   ngOnDestroy() {
@@ -73,7 +73,7 @@ export class PerformanceReportComponent {
     this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.performanceReportSetup.analysisItemId });
   }
 
-  setBetterPlantsSummary() {
+  setPerformanceReport() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();

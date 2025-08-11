@@ -2,8 +2,10 @@
     <div class="card-header bg-white justify-content-between bold">
         <div class="d-flex justify-content-between">
             <a class="item-name click-link" (click)="selectReport()">
-                <span class="fa pe-2"
-                    [ngClass]="{'fa-microscope': report.facilityReportType == 'analysis', 'fa-file': report.facilityReportType == 'overview', 'fa-smog': report.facilityReportType == 'emissionFactors'}"></span>
+                <span class="fa pe-2" [ngClass]="{'fa-microscope': report.facilityReportType == 'analysis',
+                     'fa-file': report.facilityReportType == 'overview', 
+                     'fa-sack-dollar': report.facilityReportType == 'savings', 
+                    'fa-smog': report.facilityReportType == 'emissionFactors'}"></span>
                 {{report.name}}
             </a>
             <div class="d-flex">
@@ -17,8 +19,8 @@
         </div>
     </div>
     <div class="card-body">
-        <ng-template [ngIf]="report.facilityReportType == 'analysis'">
-            <p class="mb-0" *ngIf="report.facilityReportType == 'analysis'">
+        <ng-template [ngIf]="report.facilityReportType == 'analysis' || report.facilityReportType == 'savings'">
+            <p class="mb-0">
                 Analysis Item: {{report.analysisItemId | facilityAnalysisName}}
             </p>
         </ng-template>
@@ -65,6 +67,9 @@
                 </ng-container>
                 <ng-container *ngIf="report.facilityReportType == 'overview'">
                     Overview Report
+                </ng-container>
+                <ng-container *ngIf="report.facilityReportType == 'savings'">
+                    Savings Report
                 </ng-container>
                 <ng-container *ngIf="report.facilityReportType == 'emissionFactors'">
                     Emission Factors Report
