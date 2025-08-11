@@ -30,14 +30,7 @@ export class FacilityReportOrderByPipe implements PipeTransform {
         orderDirection
       );
     }
-    if (orderDataBy === 'report.reportYear') {
-      return _.orderBy(
-        data,
-        item => Number(_.get(item, orderDataBy)),
-        orderDirection
-      );
-    }
-
+   
     if (orderDataBy === 'sortYear') {
       return _.orderBy(
         data,

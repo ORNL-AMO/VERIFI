@@ -13,7 +13,7 @@
     text-align: center;
 }
 
-thead th.can-click:hover{
+thead th.can-click:hover {
     cursor: pointer;
     text-decoration: underline;
 }
@@ -74,6 +74,14 @@ thead th.can-click:hover{
 
 .badge-emission-factors {
     background-color: #154c79;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
+.badge-savings {
+    background-color: #4f5040;
     color: #fff;
     font-size: 12px;
     padding: 0.5em 0.75em;

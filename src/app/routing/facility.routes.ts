@@ -53,7 +53,6 @@ import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit
 import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/edit-meter.component";
 import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility-data/predictors/edit-predictor/edit-predictor.component";
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
-import { FacilitySavingsReportsDashboardComponent } from "../data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-savings-reports-dashboard/facility-savings-reports-dashboard.component";
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
 
 export const FacilityRoutes: Route = {

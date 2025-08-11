@@ -74,6 +74,16 @@
                             </ng-container>
                         </ng-container>
 
+                         <ng-container *ngSwitchCase="'accountSavings'">
+                            <ng-container
+                                *ngIf="data.report.endYear !== undefined">
+                                {{ data.report.endYear }}
+                            </ng-container>
+                            <ng-container *ngIf="data.report.endYear === undefined">
+                                &mdash;
+                            </ng-container>
+                        </ng-container>
+
                         <ng-container *ngSwitchDefault>
                             <ng-container
                                 *ngIf="data.report.reportYear !== undefined && data.report.reportYear !== null; else dashCell">
@@ -109,7 +119,7 @@
 </div>
 
 
-<div class="card card-body" *ngIf="filteredReports.length == 0">
+<div class="card card-body" *ngIf="reportList.length == 0">
     <div class="text-center bold">
         No reports found for this account. Click "+Add New Report" to create your first report!
     </div>

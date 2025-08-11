@@ -38,7 +38,6 @@ import { CustomGwpFormComponent } from "src/app/shared/custom-database/custom-gw
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
 import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
-import { AccountSavingsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component";
 
 export const AccountRoutes: Route = {
     path: 'account',

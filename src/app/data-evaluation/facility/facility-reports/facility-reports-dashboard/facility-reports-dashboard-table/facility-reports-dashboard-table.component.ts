@@ -29,7 +29,7 @@ export class FacilityReportsDashboardTableComponent {
   facilityReportsSub: Subscription;
   selectedReportType = '';
   filteredReports: Array<IdbFacilityReport> = [];
-  reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors'];
+  reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors', 'savings'];
   displayDeleteModal: boolean;
   deletedReport: IdbFacilityReport;
   account: IdbAccount;
@@ -89,7 +89,7 @@ export class FacilityReportsDashboardTableComponent {
 
   selectReport(report: IdbFacilityReport) {
     this.facilityDbReportsService.selectedReport.next(report);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 
   async createCopy(report: IdbFacilityReport) {
@@ -103,7 +103,7 @@ export class FacilityReportsDashboardTableComponent {
     this.facilityDbReportsService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
     this.facilityDbReportsService.selectedReport.next(addedReport);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 
 
@@ -133,6 +133,8 @@ export class FacilityReportsDashboardTableComponent {
         return 'badge-data-overview';
       case 'emissionFactors':
         return 'badge-emission-factors';
+      case 'savings':
+        return 'badge-savings';
     }
   }
 

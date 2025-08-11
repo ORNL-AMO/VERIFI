@@ -82,6 +82,15 @@
                             </ng-container>
                         </ng-container>
 
+                        <ng-container *ngSwitchCase="'savings'">
+                            <ng-container *ngIf="data.savingsReportSettings.endYear !== undefined">
+                                {{ data.savingsReportSettings.endYear }}
+                            </ng-container>
+                            <ng-container *ngIf="data.savingsReportSettings.endYear === undefined">
+                                &mdash;
+                            </ng-container>
+                        </ng-container>
+
                         <ng-container *ngSwitchDefault>
                             &mdash;
                         </ng-container>
@@ -113,7 +122,7 @@
 </div>
 
 
-<div class="card card-body" *ngIf="filteredReports.length == 0">
+<div class="card card-body" *ngIf="facilityReports.length == 0">
     <div class="text-center bold">
         No reports found for this facility. Click "+Add New Report" to create your first report!
     </div>

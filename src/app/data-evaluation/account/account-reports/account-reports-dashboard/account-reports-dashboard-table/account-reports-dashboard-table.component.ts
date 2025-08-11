@@ -22,7 +22,7 @@ export class AccountReportsDashboardTableComponent {
 
   reports: Array<IdbAccountReport> = [];
   selectedAccount: IdbAccount;
-  reportTypes: Array<ReportType> = ['betterPlants', 'dataOverview', 'performance', 'betterClimate', 'analysis', 'accountEmissionFactors'];
+  reportTypes: Array<ReportType> = ['betterPlants', 'dataOverview', 'performance', 'betterClimate', 'analysis', 'accountEmissionFactors', 'accountSavings'];
   reportText: string;
   selectedReportType = '';
   displayDeleteModal: boolean;
@@ -127,6 +127,8 @@ export class AccountReportsDashboardTableComponent {
         return 'badge-analysis';
       case 'accountEmissionFactors':
         return 'badge-emission-factors';
+      case 'accountSavings':
+        return 'badge-savings';
     }
   }
 

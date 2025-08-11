@@ -7,7 +7,7 @@ import { ReportType } from 'src/app/models/constantsAndTypes';
 })
 export class AccountReportTypePipe implements PipeTransform {
 
-  transform(reportType: ReportType): 'Better Plants' | 'Data Overview' | 'Performance' | 'Better Climate' | 'Modeling' | 'Emission Factors' | undefined {
+  transform(reportType: ReportType): 'Better Plants' | 'Data Overview' | 'Performance' | 'Better Climate' | 'Modeling' | 'Emission Factors' | 'Savings' | undefined {
     if (reportType == 'betterPlants') {
       return 'Better Plants';
     } else if (reportType == 'dataOverview') {
@@ -20,6 +20,8 @@ export class AccountReportTypePipe implements PipeTransform {
       return 'Modeling';
     } else if (reportType == 'accountEmissionFactors') {
       return 'Emission Factors';
+    } else if (reportType == 'accountSavings') {
+      return 'Savings';
     }
   }
 }

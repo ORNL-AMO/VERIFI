@@ -56,3 +56,11 @@ thead th.can-click:hover{
     padding: 0.5em 0.75em;
     border-radius: 0.50rem;
 }
+
+.badge-savings {
+    background-color: #291c1f;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
