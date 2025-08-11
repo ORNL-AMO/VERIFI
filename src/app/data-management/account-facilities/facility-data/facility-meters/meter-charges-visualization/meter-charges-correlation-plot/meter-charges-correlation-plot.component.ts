@@ -127,12 +127,12 @@ export class MeterChargesCorrelationPlotComponent {
         return c.chargeGuid == this.charge.guid
       });
       if (meterDataCharge?.chargeAmount) {
-        this.xValues.push(meterDataCharge.chargeAmount)
+        this.yValues.push(meterDataCharge.chargeAmount)
         this.dates.push(new Date(mData.readDate));
         if (getIsEnergyMeter(this.meter.source)) {
-          this.yValues.push(mData.totalEnergyUse);
+          this.xValues.push(mData.totalEnergyUse);
         } else {
-          this.yValues.push(mData.totalVolume);
+          this.xValues.push(mData.totalVolume);
         }
       }
     });
@@ -144,8 +144,8 @@ export class MeterChargesCorrelationPlotComponent {
     let exog: Array<Array<number>> = this.xValues.map(val => { return [1, val] });
     try {
       this.jstatModel = jStat.models.ols(endog, exog);
-      this.xLabel = this.charge.name;
-      this.yLabel = 'Energy Use';
+      this.yLabel = this.charge.name;
+      this.xLabel = 'Energy Use';
       this.r2Value = this.jstatModel.R2;
       this.pValue = this.jstatModel.f.pvalue;
       let coefStr: Array<string> = new Array();
