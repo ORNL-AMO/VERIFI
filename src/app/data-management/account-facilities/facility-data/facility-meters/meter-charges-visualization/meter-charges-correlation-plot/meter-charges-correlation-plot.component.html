@@ -1,12 +1,13 @@
 <div class="p-2 w-100">
     <div class="d-flex flex-column">
         <div class="text-center">
-            <label class="bold">{{yLabel}} vs {{xLabel}}</label>
+            <label class="bold">
+                <!-- {{yLabel}}  -->
+                vs {{xLabel}}</label>
             <ng-container *ngIf="bestFit">
                 <br>Best Fit:
                 <br> {{bestFit}}
                 <br>R&#178;: {{r2Value | number:'0.3-3'}}
-                <br>P-value: {{pValue| number:'0.2-2'}}
             </ng-container>
             <ng-container *ngIf="!bestFit">
                 <br>Best fit line not found.

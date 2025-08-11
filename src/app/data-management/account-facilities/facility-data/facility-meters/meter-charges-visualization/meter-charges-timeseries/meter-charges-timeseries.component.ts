@@ -33,16 +33,6 @@ export class MeterChargesTimeseriesComponent {
 
   drawChart() {
     if (this.chargesTimeseries) {
-      // this.meterData = this.meterData.slice().sort((a, b) => new Date(a.readDate).getTime() - new Date(b.readDate).getTime());
-      // let markers: Array<{
-      //   color: string,
-      //   symbol: string,
-      //   size: number
-      // }> = this.meterData.map(data => { return this.getMarker(data.totalCost) });
-
-      // let markerSizes: Array<number> = markers.map(marker => marker.size);
-      // let markerColors: Array<string> = markers.map(marker => marker.color);
-      // let markerSymbols: Array<string> = markers.map(marker => marker.symbol);
 
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
       meterData = _.sortBy(meterData, (data) => new Date(data.readDate).getTime(), 'desc');
@@ -55,12 +45,6 @@ export class MeterChargesTimeseriesComponent {
           x: meterData.map(data => { return data.readDate }),
           y: meterData.map(data => { return data.totalCost }),
           line: { width: 3 },
-          // marker: {
-          //   color: markerColors,
-          //   size: markerSizes,
-          //   symbol: markerSymbols,
-          //   line: { width: 2, color: '#fff' }
-          // },
           hovertemplate: 'Date: %{x}<br>Cost: $%{y}<extra></extra>',
         }
       ];
@@ -81,12 +65,6 @@ export class MeterChargesTimeseriesComponent {
               }
             }),
             line: { width: 3 },
-            // marker: {
-            //   color: markerColors,
-            //   size: markerSizes,
-            //   symbol: markerSymbols,
-            //   line: { width: 2, color: '#fff' }
-            // },
             hovertemplate: 'Date: %{x}<br>' + charge.name + ': $%{y}<extra></extra>',
           })
       })
@@ -119,29 +97,12 @@ export class MeterChargesTimeseriesComponent {
       };
       var config = {
         displaylogo: false,
-        responsive: true
+        responsive: true,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
       };
       this.plotlyService.newPlot(this.chargesTimeseries.nativeElement, data, layout, config);
     }
 
   }
-
-
-  // getMarker(cost: number) {
-  //   if (cost >= this.costStats.medianminus2_5MAD && cost <= this.costStats.medianplus2_5MAD) {
-  //     return {
-  //       size: 8,
-  //       color: '#43a047',
-  //       symbol: 'circle',
-  //       line: { width: 2, color: '#fff' }
-  //     };
-  //   } else {
-  //     return {
-  //       size: 12,
-  //       color: '#d32f2f',
-  //       symbol: 'x',
-  //       line: { width: 2, color: '#fff' }
-  //     };
-  //   }
-  // }
 }

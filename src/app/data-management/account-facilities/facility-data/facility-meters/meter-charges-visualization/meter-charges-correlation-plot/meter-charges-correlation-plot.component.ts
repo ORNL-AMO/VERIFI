@@ -18,6 +18,7 @@ import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 export class MeterChargesCorrelationPlotComponent {
   @Input({ required: true }) meter: IdbUtilityMeter;
   @Input({ required: true }) charge: MeterCharge;
+  @Input({ required: true }) compareTo: 'totalCost' | 'energyUse' | 'demand';
 
 
 
@@ -31,7 +32,6 @@ export class MeterChargesCorrelationPlotComponent {
   yValues: Array<number>;
   bestFit: string;
   r2Value: number;
-  pValue: number;
   xLabel: string;
   yLabel: string;
   jstatModel: JStatRegressionModel;
@@ -90,6 +90,7 @@ export class MeterChargesCorrelationPlotComponent {
       let layout = {
         plot_bgcolor: "#e7f1f2",
         paper_bgcolor: "#e7f1f2",
+        height: 300,
         xaxis: {
           title: {
             text: this.xLabel
@@ -101,11 +102,13 @@ export class MeterChargesCorrelationPlotComponent {
           },
         },
         showlegend: false,
-        margin: { t: 0 }
+        margin: { t: 10, r: 10 }
       }
       let config = {
         displaylogo: false,
-        responsive: true
+        responsive: true,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
       };
       this.plotlyService.newPlot(this.matrixPlot.nativeElement, data, layout, config);
     }
@@ -129,10 +132,20 @@ export class MeterChargesCorrelationPlotComponent {
       if (meterDataCharge?.chargeAmount) {
         this.yValues.push(meterDataCharge.chargeAmount)
         this.dates.push(new Date(mData.readDate));
-        if (getIsEnergyMeter(this.meter.source)) {
-          this.xValues.push(mData.totalEnergyUse);
+        if (this.compareTo == 'totalCost') {
+          this.xValues.push(mData.totalCost);
+        } else if (this.compareTo == 'demand') {
+          if (mData.totalBilledDemand) {
+            this.xValues.push(mData.totalBilledDemand);
+          } else {
+            this.xValues.push(mData.totalRealDemand);
+          }
         } else {
-          this.xValues.push(mData.totalVolume);
+          if (getIsEnergyMeter(this.meter.source)) {
+            this.xValues.push(mData.totalEnergyUse);
+          } else {
+            this.xValues.push(mData.totalVolume);
+          }
         }
       }
     });
@@ -146,8 +159,12 @@ export class MeterChargesCorrelationPlotComponent {
       this.jstatModel = jStat.models.ols(endog, exog);
       this.yLabel = this.charge.name;
       this.xLabel = 'Energy Use';
+      if (this.compareTo == 'totalCost') {
+        this.xLabel = 'Total Cost';
+      } else if (this.compareTo == 'demand') {
+        this.xLabel = 'Demand';
+      }
       this.r2Value = this.jstatModel.R2;
-      this.pValue = this.jstatModel.f.pvalue;
       let coefStr: Array<string> = new Array();
       this.jstatModel.coef.forEach(coef => {
         let str: string = this.getSigFigs(coef);
