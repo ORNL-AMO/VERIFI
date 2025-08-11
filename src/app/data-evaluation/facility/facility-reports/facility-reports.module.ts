@@ -42,13 +42,9 @@ import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-repo
     FacilityPrintReportButtonComponent,
     FacilityOverviewReportSetupComponent,
     FacilityOverviewReportResultsComponent,
-    FacilityReportsDashboardTabsComponent,
-    FacilityAnalysisReportsDashboardComponent,
-    FacilityOverviewReportsDashboardComponent,
     FacilitySavingsReportsDashboardComponent,
     FacilitySavingsReportSetupComponent,
     FacilitySavingsReportResultsComponent,
-    FacilityEmissionsFactorsReportsDashboardComponent,
     FacilityEmissionFactorsReportResultsComponent,
     FacilityEmissionFactorsReportSetupComponent,
     FacilityEmissionFactorsReportTableComponent,
@@ -64,7 +60,8 @@ import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-repo
     DataOverviewModule,
     CalculatingSpinnerModule,
     TableItemsDropdownModule,
-    NgbPagination
+    NgbPagination,
+    SharedAnalysisModule
 ], 
 providers: [
     FacilityReportTypePipe,
