@@ -48,13 +48,10 @@ import { FacilityReportSetupComponent } from "src/app/data-evaluation/facility/f
 import { BankedGroupAnalysisComponent } from "src/app/data-evaluation/facility/analysis/run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component";
 import { FacilityOverviewReportResultsComponent } from "src/app/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-results.component";
 import { FacilityAnalysisReportResultsComponent } from "src/app/data-evaluation/facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component";
-import { FacilityAnalysisReportsDashboardComponent } from "src/app/data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component";
-import { FacilityOverviewReportsDashboardComponent } from "src/app/data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
 import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
 import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/edit-meter.component";
 import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility-data/predictors/edit-predictor/edit-predictor.component";
-import { FacilityEmissionsFactorsReportsDashboardComponent } from "../data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-emissions-factors-reports-dashboard/facility-emissions-factors-reports-dashboard.component";
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 
 export const FacilityRoutes: Route = {

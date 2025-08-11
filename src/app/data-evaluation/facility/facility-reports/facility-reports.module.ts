@@ -10,17 +10,12 @@ import { FacilityReportTypePipe } from './facility-report-pipes/facility-report-
 import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
 import { SharedReportsModule } from 'src/app/shared/shared-reports/shared-reports.module';
 import { FacilityPrintReportButtonComponent } from './facility-print-report-button/facility-print-report-button.component';
-import { FacilityReportItemCardComponent } from './facility-reports-dashboard/facility-report-item-card/facility-report-item-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { FacilityOverviewReportSetupComponent } from './facility-report-setup/facility-overview-report-setup/facility-overview-report-setup.component';
 import { FacilityOverviewReportResultsComponent } from './report-results/facility-overview-report-results/facility-overview-report-results.component';
 import { FacilityAnalysisReportResultsComponent } from './report-results/facility-analysis-report-results/facility-analysis-report-results.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
-import { FacilityReportsDashboardTabsComponent } from './facility-reports-dashboard/facility-reports-dashboard-tabs/facility-reports-dashboard-tabs.component';
-import { FacilityAnalysisReportsDashboardComponent } from './facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component';
-import { FacilityOverviewReportsDashboardComponent } from './facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component';
-import { FacilityEmissionsFactorsReportsDashboardComponent } from './facility-reports-dashboard/facility-emissions-factors-reports-dashboard/facility-emissions-factors-reports-dashboard.component';
 import { FacilityEmissionFactorsReportResultsComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { FacilityEmissionFactorsReportSetupComponent } from './facility-report-setup/facility-emission-factors-report-setup/facility-emission-factors-report-setup.component';
 import { FacilityEmissionFactorsReportTableComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-table/facility-emission-factors-report-table.component';
@@ -41,13 +36,8 @@ import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-repo
     FacilityAnalysisReportSetupComponent,
     FacilityAnalysisReportResultsComponent,
     FacilityPrintReportButtonComponent,
-    FacilityReportItemCardComponent,
     FacilityOverviewReportSetupComponent,
     FacilityOverviewReportResultsComponent,
-    FacilityReportsDashboardTabsComponent,
-    FacilityAnalysisReportsDashboardComponent,
-    FacilityOverviewReportsDashboardComponent,
-    FacilityEmissionsFactorsReportsDashboardComponent,
     FacilityEmissionFactorsReportResultsComponent,
     FacilityEmissionFactorsReportSetupComponent,
     FacilityEmissionFactorsReportTableComponent,
