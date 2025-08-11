@@ -37,6 +37,8 @@ import { CustomGwpDashboardComponent } from "src/app/shared/custom-database/cust
 import { CustomGwpFormComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
+import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
+import { AccountSavingsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -80,6 +82,7 @@ export const AccountRoutes: Route = {
                 { path: 'performance-report', component: PerformanceReportComponent },
                 { path: 'better-climate-report', component: BetterClimateReportComponent },
                 { path: 'analysis-report', component: AnalysisReportComponent },
+                { path: 'account-savings-report', component: AccountSavingsReportComponent },
                 { path: 'account-emission-factors-report', component: AccountEmissionFactorsReportComponent }
             ]
         },

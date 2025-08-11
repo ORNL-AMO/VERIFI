@@ -116,6 +116,7 @@ export class WeatherStationsMapComponent {
       };
 
       let config = {
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true,
       }

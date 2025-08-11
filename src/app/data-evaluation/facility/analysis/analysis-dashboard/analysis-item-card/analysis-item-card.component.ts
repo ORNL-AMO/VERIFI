@@ -78,9 +78,9 @@ export class AnalysisItemCardComponent implements OnInit {
   selectAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
     if (this.analysisItem.setupErrors.hasError || this.analysisItem.setupErrors.groupsHaveErrors) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis/facility-analysis');
     }
   }
 
@@ -103,7 +103,7 @@ export class AnalysisItemCardComponent implements OnInit {
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
   }
 
   deleteItem() {
@@ -272,7 +272,7 @@ export class AnalysisItemCardComponent implements OnInit {
   goToReport(reportGuid: string) {
     let facilityReport: IdbFacilityReport = this.facilityReportsDbService.getByGuid(reportGuid);
     this.facilityReportsDbService.selectedReport.next(facilityReport);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/reports/setup')
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup')
   }
 
   goToAccountAnalysis(analysisGuid: string) {
@@ -289,9 +289,9 @@ export class AnalysisItemCardComponent implements OnInit {
     let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
     this.analysisDbService.selectedAnalysisItem.next(bankedAnalysisItem);
     if (bankedAnalysisItem.setupErrors.hasError || bankedAnalysisItem.setupErrors.groupsHaveErrors) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis/facility-analysis');
     }
   }
 }

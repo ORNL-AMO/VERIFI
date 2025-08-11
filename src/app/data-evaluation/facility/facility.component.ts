@@ -28,9 +28,9 @@ export class FacilityComponent implements OnInit {
       this.selectedFacility = val;
     });
     this.activatedRoute.params.subscribe(params => {
-      let facilityId: number = parseInt(params['id']);
+      let facilityId: string = params['id'];
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let selectedFacility: IdbFacility = facilities.find(facility => { return facility.id == facilityId });
+      let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == facilityId });
       if (selectedFacility) {
         this.dbChangesService.selectFacility(selectedFacility);
       } else {

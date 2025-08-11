@@ -97,7 +97,7 @@ export class AccountSettingsComponent implements OnInit {
 
   switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/settings');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/settings');
   }
 
   async addNewFacility() {
@@ -110,7 +110,7 @@ export class AccountSettingsComponent implements OnInit {
     await this.dbChangesService.selectAccount(this.selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
-    this.router.navigateByUrl('/data-evaluation/facility/' + newFacility.id + '/settings');
+    this.router.navigateByUrl('/data-evaluation/facility/' + newFacility.guid + '/settings');
   }
 
 

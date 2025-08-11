@@ -150,7 +150,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);
     this.facilityReportDbService.selectedReport.next(this.facilityReport);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 
   // date validation
