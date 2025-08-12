@@ -12,6 +12,8 @@ import { IncludeTablePipe } from './include-table.pipe';
 import { GroupAnnualAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-annual-analysis-report/group-annual-analysis-report.component';
 import { GroupMonthlyAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-monthly-analysis-report/group-monthly-analysis-report.component';
 import { BreakUpTableForPrintPipe } from './break-up-table-for-print.pipe';
+import { RollingEnergyConsumptionGraphComponent } from './facility-savings-report/rolling-energy-consumption-graph/rolling-energy-consumption-graph.component';
+import { RollingEnergySavingsGraphComponent } from './facility-savings-report/rolling-energy-savings-graph/rolling-energy-savings-graph.component';
 
 
 
@@ -25,7 +27,9 @@ import { BreakUpTableForPrintPipe } from './break-up-table-for-print.pipe';
     IncludeTablePipe,
     GroupAnnualAnalysisReportComponent,
     GroupMonthlyAnalysisReportComponent,
-    BreakUpTableForPrintPipe
+    BreakUpTableForPrintPipe,
+    RollingEnergyConsumptionGraphComponent,
+    RollingEnergySavingsGraphComponent
   ],
   imports: [
     CommonModule,
@@ -35,7 +39,9 @@ import { BreakUpTableForPrintPipe } from './break-up-table-for-print.pipe';
   ],
   exports: [
     FacilityAnalysisReportComponent,
-    GroupAnalysisReportComponent
+    GroupAnalysisReportComponent,
+    RollingEnergyConsumptionGraphComponent,
+    RollingEnergySavingsGraphComponent
   ]
 })
 export class SharedReportsModule { }

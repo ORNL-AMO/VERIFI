@@ -24,6 +24,10 @@ import { FacilityEmissionsFactorsReportsDashboardComponent } from './facility-re
 import { FacilityEmissionFactorsReportResultsComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { FacilityEmissionFactorsReportSetupComponent } from './facility-report-setup/facility-emission-factors-report-setup/facility-emission-factors-report-setup.component';
 import { FacilityEmissionFactorsReportTableComponent } from './report-results/facility-emission-factors-report-results/facility-emission-factors-report-table/facility-emission-factors-report-table.component';
+import { FacilitySavingsReportResultsComponent } from 'src/app/data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component';
+import { FacilitySavingsReportSetupComponent } from 'src/app/data-evaluation/facility/facility-reports/facility-report-setup/facility-savings-report-setup/facility-savings-report-setup.component';
+import { FacilitySavingsReportsDashboardComponent } from 'src/app/data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-savings-reports-dashboard/facility-savings-reports-dashboard.component';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 
 
 
@@ -43,6 +47,9 @@ import { FacilityEmissionFactorsReportTableComponent } from './report-results/fa
     FacilityReportsDashboardTabsComponent,
     FacilityAnalysisReportsDashboardComponent,
     FacilityOverviewReportsDashboardComponent,
+    FacilitySavingsReportsDashboardComponent,
+    FacilitySavingsReportSetupComponent,
+    FacilitySavingsReportResultsComponent,
     FacilityEmissionsFactorsReportsDashboardComponent,
     FacilityEmissionFactorsReportResultsComponent,
     FacilityEmissionFactorsReportSetupComponent,
@@ -55,7 +62,8 @@ import { FacilityEmissionFactorsReportTableComponent } from './report-results/fa
     SharedReportsModule,
     HelperPipesModule,
     DataOverviewModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    SharedAnalysisModule
   ]
 })
 export class FacilityReportsModule { }

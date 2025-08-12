@@ -1,0 +1,52 @@
+<div [ngClass]="{'windowOverlay': showWeatherPredictorModal}">
+</div>
+
+<div class="popup popup-lg" [class.open]="showWeatherPredictorModal" *ngIf="showWeatherPredictorModal">
+    <div class="popup-header">Update Weather Predictors
+        <button class="item-right" (click)="closeWeatherPredictorModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>
+            Updating weather predictor data will add predictor data entries for each facility based on the date ranges
+            listed below. Existing predictor data will not be altered. This process may take some time depending on the
+            duration of the time period and the number of facilities.
+        </p>
+        <div class="row">
+            <div class="col-4 bold">
+                Facility
+            </div>
+            <div class="col-4 bold">
+                Start Date
+            </div>
+            <div class="col-4 bold">
+                End Date<br>
+                <a class="click-link" (click)="setEndDateToCurrentDate()">
+                    Set Current Month
+                </a>
+            </div>
+        </div>
+        <div class="row" *ngFor="let facility of facilityList; let index = index;">
+            <div class="col-4 my-auto">
+                {{ facility.facilityId | facilityName}}
+            </div>
+            <div class="col-4">
+                <input id="startDate" class="form-control" type="month" [ngModel]="facility.startDate | date:'yyyy-MM'"
+                    (ngModelChange)="setStartDate($event, index)" name="startDate">
+            </div>
+            <div class="col-4">
+                <input id="endDate" class="form-control" type="month" [ngModel]="facility.endDate | date:'yyyy-MM'"
+                    (ngModelChange)="setEndDate($event, index)" name="endDate">
+            </div>
+        </div>
+    </div>
+    <div class="d-flex flex-column">
+        <div>
+            <hr class="my-1">
+        </div>
+        <div class="d-flex justify-content-end p-2">
+            <button class="btn btn-secondary me-2" (click)="closeWeatherPredictorModal()">Cancel</button>
+            <button class="btn btn-success" (click)="updateAccountWeatherPredictors()" [disabled]="invalidForm">Confirm
+                Update</button>
+        </div>
+    </div>
+</div>

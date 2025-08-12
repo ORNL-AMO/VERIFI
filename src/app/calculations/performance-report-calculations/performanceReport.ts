@@ -5,7 +5,6 @@ import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/ann
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
 import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
-import { MonthlyAnalysisSummaryClass } from "../analysis-calculations/monthlyAnalysisSummaryClass";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
@@ -258,13 +257,13 @@ export class PerformanceReport {
                 contribution: contribution,
                 savings: totalSavings * 100,
                 year: startYear,
-                maxContribution: maxYearContribution.contribution,
-                minContribution: minYearContribution.contribution,
-                maxChangeInContribution: maxYearChangeInContribution.changeInContribution,
-                minChangeInContribution: minYearChangeInContribution.changeInContribution,
+                maxContribution: maxYearContribution?.contribution,
+                minContribution: minYearContribution?.contribution,
+                maxChangeInContribution: maxYearChangeInContribution?.changeInContribution,
+                minChangeInContribution: minYearChangeInContribution?.changeInContribution,
                 changeInAdjustedBaseline: changeInAdjustedBaseline * 100,
-                maxChangeInAdjustedBaseline: maxYearChangeInAdjustedBaseline.changeInAdjustedBaseline,
-                minChangeInAdjustedBaseline: minYearChangeInAdjustedBaseline.changeInAdjustedBaseline,
+                maxChangeInAdjustedBaseline: maxYearChangeInAdjustedBaseline?.changeInAdjustedBaseline,
+                minChangeInAdjustedBaseline: minYearChangeInAdjustedBaseline?.changeInAdjustedBaseline,
                 changeInContribution: (contribution - previousYearContribution)
             });
             previousYearContribution = contribution;

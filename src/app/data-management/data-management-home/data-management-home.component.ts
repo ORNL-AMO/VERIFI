@@ -154,17 +154,6 @@ export class DataManagementHomeComponent {
     this.showWeatherPredictorModal = false;
   }
 
-  async updateAccountWeatherPredictors() {
-    this.closeWeatherPredictorModal();
-    let results = await this.weatherPredictorManagementService.updateAccountWeatherPredictors();
-    if (results === "success") {
-      console.log('success....')
-    } else {
-      // Handle error case
-      console.error("Error updating weather predictors");
-    }
-  }
-
   goToUpload() {
     this.router.navigate(['../import-data'], { relativeTo: this.activatedRoute });
   }

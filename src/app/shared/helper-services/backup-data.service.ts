@@ -137,7 +137,9 @@ export class BackupDataService {
     const dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
     let name = backupName + dateStr;
     dlLink.setAttribute('download', name + '.json');
+    window.document.body.appendChild(dlLink);
     dlLink.click();
+    window.document.body.removeChild(dlLink);
   }
 
   getGUID(): string {

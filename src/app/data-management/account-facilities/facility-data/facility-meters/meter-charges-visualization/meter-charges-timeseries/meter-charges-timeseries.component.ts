@@ -15,9 +15,6 @@ export class MeterChargesTimeseriesComponent {
 
   @ViewChild('chargesTimeseries', { static: false }) chargesTimeseries: ElementRef;
 
-
-  viewInitialized: boolean = false;
-
   constructor(private plotlyService: PlotlyService,
     private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }

@@ -16,6 +16,12 @@
                 The selected file is available at: &nbsp;
                 <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
             </div>
+            <div class="text-center">
+                <button class="btn btn-danger mt-2 px-4" (click)="disconnectBill()">
+                    <span class="fa-solid fa-unlink me-2"></span>
+                    Disconnect Bill
+                </button>
+            </div>
         </ng-container>
         <ng-container *ngIf="folderError">
             <div class="alert alert-danger mt-3 text-center">
