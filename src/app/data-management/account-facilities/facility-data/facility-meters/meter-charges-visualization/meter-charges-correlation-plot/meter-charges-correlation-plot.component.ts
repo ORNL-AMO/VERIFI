@@ -35,6 +35,7 @@ export class MeterChargesCorrelationPlotComponent {
   xLabel: string;
   yLabel: string;
   jstatModel: JStatRegressionModel;
+  isBilledDemand: boolean = false;
   constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnChanges(): void {
@@ -136,8 +137,10 @@ export class MeterChargesCorrelationPlotComponent {
           this.xValues.push(mData.totalCost);
         } else if (this.compareTo == 'demand') {
           if (mData.totalBilledDemand) {
+            this.isBilledDemand = true;
             this.xValues.push(mData.totalBilledDemand);
           } else {
+            this.isBilledDemand = false;
             this.xValues.push(mData.totalRealDemand);
           }
         } else {
@@ -162,7 +165,11 @@ export class MeterChargesCorrelationPlotComponent {
       if (this.compareTo == 'totalCost') {
         this.xLabel = 'Total Cost';
       } else if (this.compareTo == 'demand') {
-        this.xLabel = 'Demand';
+        if (this.isBilledDemand) {
+          this.xLabel = 'Billed Demand';
+        } else {
+          this.xLabel = 'Real Demand';
+        }
       }
       this.r2Value = this.jstatModel.R2;
       let coefStr: Array<string> = new Array();
