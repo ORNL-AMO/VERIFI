@@ -53,6 +53,7 @@ import { FacilityMeterDataQualityReportComponent } from './account-facilities/fa
 import { SharedDataQualityReportMetersModule } from "src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module";
 import { FacilityPredictorDataQualityReportComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component';
 import { SharedDataQualityReportPredictorsModule } from '../shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
+import { UpdateWeatherPredictorsModalComponent } from './data-management-home/update-weather-predictors-modal/update-weather-predictors-modal.component';
 
 
 @NgModule({
@@ -95,7 +96,8 @@ import { SharedDataQualityReportPredictorsModule } from '../shared/shared-data-q
     AccountCustomDataComponent,
     SidebarItemActivePipe,
     FacilityMeterDataQualityReportComponent,
-    FacilityPredictorDataQualityReportComponent
+    FacilityPredictorDataQualityReportComponent,
+    UpdateWeatherPredictorsModalComponent
   ],
   imports: [
     CommonModule,

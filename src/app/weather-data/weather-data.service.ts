@@ -147,7 +147,11 @@ export class WeatherDataService {
 
   async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading> | 'error'> {
     try {
+      console.log(stationId)
+      console.log(startDate);
+      console.log(endDate);
       let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
+      console.log('done...');
       let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
       return parsedData;
     } catch (err) {
@@ -166,6 +170,7 @@ export class WeatherDataService {
       "end_date": getWeatherDataDate(monthAfterEndDate),
       "parameters": ['dry_bulb_temp', 'humidity', 'dew_point_temp', 'wet_bulb_temp', 'pressure', 'precipitation', 'wind_speed']
     };
+    console.log(data);
     let httpOptions = {
       responseType: 'text' as const,
       headers: this.requestHeaders

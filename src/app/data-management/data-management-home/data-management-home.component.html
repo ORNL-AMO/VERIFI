@@ -126,25 +126,5 @@
     </div>
 </div>
 
-
-
-
-<div [ngClass]="{'windowOverlay': showWeatherPredictorModal}">
-</div>
-
-<div class="popup" [class.open]="showWeatherPredictorModal" *ngIf="showWeatherPredictorModal">
-    <div class="popup-header">Update Weather Predictors
-        <button class="item-right" (click)="closeWeatherPredictorModal()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>
-            Updating weather predictor data will add predictor data entries from the latest entry for the predictor up
-            to the current month. This will not delete or modify any existing predictor data. Be sure to double check
-            the new weather readings as some stations may have gaps in their data.
-        </p>
-    </div>
-    <div class="popup-footer text-end">
-        <button class="btn btn-secondary" (click)="closeWeatherPredictorModal()">Cancel</button>
-        <button class="btn btn-success" (click)="updateAccountWeatherPredictors()">Confirm Update</button>
-    </div>
-</div>
+<app-update-weather-predictors-modal *ngIf="showWeatherPredictorModal"
+    (emitClose)="closeWeatherPredictorModal()"></app-update-weather-predictors-modal>
