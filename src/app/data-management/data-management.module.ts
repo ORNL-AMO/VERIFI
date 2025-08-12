@@ -55,7 +55,8 @@ import { FacilityPredictorDataQualityReportComponent } from './account-facilitie
 import { SharedDataQualityReportPredictorsModule } from '../shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 import { MeterChargesVisualizationComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-visualization.component';
 import { MeterChargesTimeseriesComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-timeseries/meter-charges-timeseries.component';
-import { MeterChargesCorrelationPlotComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlation-plot/meter-charges-correlation-plot.component';
+import { MeterChargesCorrelationPlotComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlation-plot/meter-charges-correlation-plot.component';
+import { MeterChargesCorrelationsComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlations.component';
 
 
 @NgModule({
@@ -101,7 +102,8 @@ import { MeterChargesCorrelationPlotComponent } from './account-facilities/facil
     FacilityPredictorDataQualityReportComponent,
     MeterChargesVisualizationComponent,
     MeterChargesTimeseriesComponent,
-    MeterChargesCorrelationPlotComponent
+    MeterChargesCorrelationPlotComponent,
+    MeterChargesCorrelationsComponent
   ],
   imports: [
     CommonModule,

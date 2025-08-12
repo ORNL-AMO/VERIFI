@@ -5,19 +5,12 @@
 <hr>
 <div class="row justify-content-center" *ngFor="let charge of utilityMeter.charges">
         <div class="col-12 text-center">
-                <label class="bold">{{charge.name}} <span class="italic">({{charge.chargeType | chargeTypeLabel}})</span></label>
+                <label class="bold">{{charge.name}} <span class="italic">({{charge.chargeType |
+                                chargeTypeLabel}})</span></label>
         </div>
-        <div class="col-lg-4 col-md-6">
-                <app-meter-charges-correlation-plot [charge]="charge" [meter]="utilityMeter"
-                        [compareTo]="'energyUse'"></app-meter-charges-correlation-plot>
-        </div>
-        <div class="col-lg-4 col-md-6">
-                <app-meter-charges-correlation-plot [charge]="charge" [meter]="utilityMeter"
-                        [compareTo]="'totalCost'"></app-meter-charges-correlation-plot>
-        </div>
-        <div class="col-lg-4 col-md-6">
-                <app-meter-charges-correlation-plot [charge]="charge" [meter]="utilityMeter"
-                        [compareTo]="'demand'"></app-meter-charges-correlation-plot>
+        <div class="col-12">
+                <app-meter-charges-correlations [charge]="charge"
+                        [meter]="utilityMeter"></app-meter-charges-correlations>
         </div>
         <div class="col-12">
                 <hr>

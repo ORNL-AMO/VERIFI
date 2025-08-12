@@ -1,0 +1,23 @@
+<ng-template [ngIf]="hasData" [ngIfElse]="noDataBlock">
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6">
+            <app-meter-charges-correlation-plot [charge]="charge" [meter]="meter"
+                [compareTo]="'energyUse'"></app-meter-charges-correlation-plot>
+        </div>
+        <div class="col-lg-4 col-md-6" *ngIf="hasTotalCost">
+            <app-meter-charges-correlation-plot [charge]="charge" [meter]="meter"
+                [compareTo]="'totalCost'"></app-meter-charges-correlation-plot>
+        </div>
+        <div class="col-lg-4 col-md-6" *ngIf="hasDemand">
+            <app-meter-charges-correlation-plot [charge]="charge" [meter]="meter"
+                [compareTo]="'demand'"></app-meter-charges-correlation-plot>
+        </div>
+    </div>
+</ng-template>
+<ng-template #noDataBlock>
+    <div class="row justify-content-center">
+        <div class="col-12 text-center">
+            <p>Not enough data available for correlation plots.</p>
+        </div>
+    </div>
+</ng-template>
