@@ -1,0 +1,18 @@
+<h4>{{utilityMeter.name}} Utility Bill Inspection <span class="badge float-end"
+                [ngStyle]="{'background-color': utilityMeter.source | meterSourceColor}">{{utilityMeter.source}}</span>
+</h4>
+<app-meter-charges-timeseries [meter]="utilityMeter"></app-meter-charges-timeseries>
+<hr>
+<div class="row justify-content-center" *ngFor="let charge of utilityMeter.charges">
+        <div class="col-12 text-center">
+                <label class="bold">{{charge.name}} <span class="italic">({{charge.chargeType |
+                                chargeTypeLabel}})</span></label>
+        </div>
+        <div class="col-12">
+                <app-meter-charges-correlations [charge]="charge"
+                        [meter]="utilityMeter"></app-meter-charges-correlations>
+        </div>
+        <div class="col-12">
+                <hr>
+        </div>
+</div>

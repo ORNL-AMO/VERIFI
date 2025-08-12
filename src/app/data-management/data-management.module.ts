@@ -53,6 +53,10 @@ import { FacilityMeterDataQualityReportComponent } from './account-facilities/fa
 import { SharedDataQualityReportMetersModule } from "src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module";
 import { FacilityPredictorDataQualityReportComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component';
 import { SharedDataQualityReportPredictorsModule } from '../shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
+import { MeterChargesVisualizationComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-visualization.component';
+import { MeterChargesTimeseriesComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-timeseries/meter-charges-timeseries.component';
+import { MeterChargesCorrelationPlotComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlation-plot/meter-charges-correlation-plot.component';
+import { MeterChargesCorrelationsComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlations.component';
 import { UpdateWeatherPredictorsModalComponent } from './data-management-home/update-weather-predictors-modal/update-weather-predictors-modal.component';
 
 
@@ -97,6 +101,10 @@ import { UpdateWeatherPredictorsModalComponent } from './data-management-home/up
     SidebarItemActivePipe,
     FacilityMeterDataQualityReportComponent,
     FacilityPredictorDataQualityReportComponent,
+    MeterChargesVisualizationComponent,
+    MeterChargesTimeseriesComponent,
+    MeterChargesCorrelationPlotComponent,
+    MeterChargesCorrelationsComponent,
     UpdateWeatherPredictorsModalComponent
   ],
   imports: [
