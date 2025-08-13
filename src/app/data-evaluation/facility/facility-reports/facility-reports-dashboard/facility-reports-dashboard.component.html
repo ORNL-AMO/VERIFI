@@ -1,5 +1,4 @@
 <div class="main-content p-0">
-    <app-facility-reports-dashboard-tabs></app-facility-reports-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
@@ -15,9 +14,10 @@
             </h4>
         </div>
         <hr>
-        <router-outlet></router-outlet>
     </div>
 </div>
+
+<app-facility-reports-dashboard-table></app-facility-reports-dashboard-table>
 
 <div [ngClass]="{'windowOverlay': displayNewReport}"></div>
 <div class="popup" [class.open]="displayNewReport">

@@ -40,7 +40,9 @@ export class FacilityReportSetupComponent {
   }
 
   ngOnDestroy() {
-    this.selectedReportSub.unsubscribe();
+    if(this.selectedReportSub) {
+      this.selectedReportSub.unsubscribe();
+    }
   }
 
 

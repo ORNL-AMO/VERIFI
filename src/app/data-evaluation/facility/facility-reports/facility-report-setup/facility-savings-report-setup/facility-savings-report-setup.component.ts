@@ -8,7 +8,6 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilityReportsService } from '../../facility-reports.service';
