@@ -36,6 +36,7 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
   }
 
   drawChart() { 
+    const skip = 12;
     let title = 'Trailing 12-Month Actual Energy Consumption';
 
     if (this.rollingEnergyConsumptionGraph) {
@@ -59,8 +60,8 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
         type: "scatter",
         mode: "lines+markers",
         name: trace1Name,
-        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => { return results.rollingActual }),
+        x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.rollingActual }),
         line: { color: '#063970', width: 4 },
         marker: {
           size: 8
@@ -68,8 +69,8 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
       }
 
       var trace2 = {
-        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => { return results.fifteenPercentTarget }),
+        x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.fifteenPercentTarget }),
         fillcolor: '#8e9f88',
         fill: 'tozeroy',
         line: { width: 0 },
@@ -78,8 +79,8 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
       }
 
       var trace3 = {
-        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => { return results.tenPercentTarget }),
+        x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.tenPercentTarget }),
         fillcolor: '#9cb491',
         fill: 'tonexty',
         line: { width: 0 },
@@ -88,8 +89,8 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
       }
 
       var trace4 = {
-        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => { return results.fivePercentTarget }),
+        x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.fivePercentTarget }),
         fillcolor: '#d5e3d0',
         fill: 'tonexty',
         line: { width: 0 },

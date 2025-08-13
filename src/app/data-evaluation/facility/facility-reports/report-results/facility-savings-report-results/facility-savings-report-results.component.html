@@ -1,5 +1,5 @@
 <div *ngIf="facilityReport && calculating != true">
-    <div class="report" [ngClass]="{'print': print}" *ngIf="facilityReport.savingsReportSettings.facilityAnnualResultsTable">
+    <div class="report" [ngClass]="{'print': print}" *ngIf="facilityReport.savingsReportSettings.facilityAnnualResultsTable || facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption || facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings">
         <div class="text-center">
             <h3>
                 {{ facilityReport.name }}
@@ -20,12 +20,29 @@
                     [accountOrFacility]="facility" [printBlock]="'all'" [inReport]="true">
                 </app-annual-analysis-summary-table>
             </div>
-            <hr>
         </ng-container>
+
+        <ng-container *ngIf="facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption">
+            <div class="mt-5">
+                <app-rolling-energy-consumption-graph *ngIf="monthlyAnalysisSummaryData"
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
+                <hr>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings">
+            <div class="mt-5">
+                <app-rolling-energy-savings-graph *ngIf="monthlyAnalysisSummaryData"
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
+                <hr>
+            </div>
+        </ng-container>
+
     </div>
 
     <div class="report" [ngClass]="{'print': print}" *ngIf="facilityReport.savingsReportSettings.groupAnnualResultsTable || facilityReport.savingsReportSettings.groupMonthlyResultsTable || facilityReport.savingsReportSettings.groupMonthlyResultsGraphs || facilityReport.savingsReportSettings.groupTrailingTwelveMonthsConsumption || facilityReport.savingsReportSettings.groupTrailingTwelveMonthsSavings">
-        <div class="text-center" *ngIf="!facilityReport.savingsReportSettings.facilityAnnualResultsTable">
+        <div class="text-center" *ngIf="!facilityReport.savingsReportSettings.facilityAnnualResultsTable && !facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption && !facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings">
             <h3>
                 {{ facilityReport.name }}
             </h3>

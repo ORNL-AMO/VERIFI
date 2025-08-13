@@ -33,6 +33,7 @@ export class RollingEnergySavingsGraphComponent {
     }
   
     drawChart() {
+      const skip = 12;
       let title = 'Trailing 12-Month Actual Energy Savings';
 
       const fivePercentLowerBound = this.monthlyAnalysisSummaryData.map(results => results.fivePercentSavings);
@@ -65,8 +66,8 @@ export class RollingEnergySavingsGraphComponent {
           type: "scatter",
           mode: "lines+markers",
           name: trace1Name,
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: this.monthlyAnalysisSummaryData.map(results => { return results.rollingSavings }),
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.rollingSavings }),
           line: { color: '#063970', width: 4 },
           marker: {
             size: 8
@@ -74,8 +75,8 @@ export class RollingEnergySavingsGraphComponent {
         }
   
         var trace2lb = {
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: fivePercentLowerBound,
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: fivePercentLowerBound.slice(skip),
           fill: 'none',
           line: { color: 'rgba(0, 0, 0, 0)' },
           mode: 'lines',
@@ -85,8 +86,8 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace2 = {
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: fivePercentUpperBound,
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: fivePercentUpperBound.slice(skip),
           fillcolor: '#d2d9e8',
           fill: 'tonexty',
           line: { width: 0 },
@@ -95,8 +96,8 @@ export class RollingEnergySavingsGraphComponent {
         }
 
          var trace3lb = {
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: fivePercentUpperBound,
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: fivePercentUpperBound.slice(skip),
           fill: 'none',
           line: { color: 'rgba(0, 0, 0, 0)' },
           mode: 'lines',
@@ -106,8 +107,8 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace3 = {
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: tenPercentUpperBound,
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: tenPercentUpperBound.slice(skip),
           fillcolor: '#a5b3d0',
           fill: 'tonexty',
           line: { width: 0 },
@@ -116,8 +117,8 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace4lb = {
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: tenPercentUpperBound,
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: tenPercentUpperBound.slice(skip),
           fill: 'none',
           line: { color: 'rgba(0, 0, 0, 0)' },
           mode: 'lines',
@@ -127,8 +128,8 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace4 = {
-          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: fifteenPercentUpperBound,
+          x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+          y: fifteenPercentUpperBound.slice(skip),
           fillcolor: '#687faa',
           fill: 'tonexty',
           line: { width: 0 },
