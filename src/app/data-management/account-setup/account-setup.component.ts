@@ -26,6 +26,7 @@ export class AccountSetupComponent {
   backupFile: BackupFile;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
+  downloadAsZip: boolean = false;
   constructor(private router: Router,
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
@@ -113,6 +114,6 @@ export class AccountSetupComponent {
   }
 
   backupAccount() {
-    this.backupDataService.backupAccount();
+    this.backupDataService.backupAccount(this.downloadAsZip);
   }
 }

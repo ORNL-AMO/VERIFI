@@ -51,10 +51,10 @@ export class BackupDataService {
     private predictorsDbServiceDeprecated: PredictordbServiceDeprecated) { }
 
 
-  backupAccount() {
+  backupAccount(downloadAsZip?: boolean) {
     let backupFile: BackupFile = this.getAccountBackupFile();
     let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
-    this.downloadBackup(backupFile, backupName);
+    this.downloadBackup(backupFile, backupName, downloadAsZip);
   }
 
   getAccountBackupFile(): BackupFile {
@@ -129,28 +129,42 @@ export class BackupDataService {
     this.downloadBackup(backupFile, backupName);
   }
 
-  async downloadBackup(backupFile: BackupFile, backupName: string) {
-     const stringifyData = JSON.stringify(backupFile);
-    const zip = new JSZip();
-    const date = new Date();
-    const dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-    const name = backupName + dateStr;
-    const jsonFileName = name + '.json';
-    const zipFileName = name + '.zip';
+  async downloadBackup(backupFile: BackupFile, backupName: string, downloadAsZip?: boolean) {
+    if (downloadAsZip) {
+      const stringifyData = JSON.stringify(backupFile);
+      const zip = new JSZip();
+      const date = new Date();
+      const dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      const name = backupName + dateStr;
+      const jsonFileName = name + '.json';
+      const zipFileName = name + '.zip';
+      // Add the JSON file to the zip
+      zip.file(jsonFileName, stringifyData);
+      // Generate the zip and trigger download
+      const content = await zip.generateAsync({ type: 'blob' });
+      const dlLink = window.document.createElement("a");
+      const url = URL.createObjectURL(content);
+      dlLink.setAttribute("href", url);
+      dlLink.setAttribute('download', zipFileName);
+      window.document.body.appendChild(dlLink);
+      dlLink.click();
+      window.document.body.removeChild(dlLink);
+      URL.revokeObjectURL(url);
 
-    // Add the JSON file to the zip
-    zip.file(jsonFileName, stringifyData);
+    } else {
 
-    // Generate the zip and trigger download
-    const content = await zip.generateAsync({ type: 'blob' });
-    const dlLink = window.document.createElement("a");
-    const url = URL.createObjectURL(content);
-    dlLink.setAttribute("href", url);
-    dlLink.setAttribute('download', zipFileName);
-    window.document.body.appendChild(dlLink);
-    dlLink.click();
-    window.document.body.removeChild(dlLink);
-    URL.revokeObjectURL(url);
+      let stringifyData = JSON.stringify(backupFile);
+      let dlLink = window.document.createElement("a");
+      let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(stringifyData);
+      dlLink.setAttribute("href", dataStr);
+      const date = new Date();
+      const dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      let name = backupName + dateStr;
+      dlLink.setAttribute('download', name + '.json');
+      window.document.body.appendChild(dlLink);
+      dlLink.click();
+      window.document.body.removeChild(dlLink);
+    }
   }
 
   getGUID(): string {

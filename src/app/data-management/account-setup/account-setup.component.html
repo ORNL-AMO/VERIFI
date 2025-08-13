@@ -126,6 +126,12 @@
                             information
                             then selected the facility from the table above and export from that page.</p>
                         <button class="btn btn-outline" (click)="backupAccount()">Backup Account</button>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="downloadAsZip" id="downloadAsZip"
+                                [(ngModel)]="downloadAsZip">
+                            <label class="bold form-check-label" for="downloadAsZip">Download As .zip File
+                            </label>
+                        </div>
                     </div>
                     <div class="col-lg-6">
                         <h4>Import Backup Data</h4>
