@@ -87,7 +87,7 @@ export class SelectItemTableComponent implements OnInit {
     this.sharedDataService.modalOpen.next(false);
     this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
     this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/analysis/run-analysis');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
   }
 
   createNewItem() {
@@ -124,7 +124,7 @@ export class SelectItemTableComponent implements OnInit {
     this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
     this.loadingService.setLoadingStatus(false);
     this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
-    this.router.navigateByUrl("/data-evaluation/facility/" + this.facility.id + "/analysis/run-analysis/analysis-setup");
+    this.router.navigateByUrl("/data-evaluation/facility/" + this.facility.guid + "/analysis/run-analysis/analysis-setup");
   }
 
   setSelectedFacilityItem() {

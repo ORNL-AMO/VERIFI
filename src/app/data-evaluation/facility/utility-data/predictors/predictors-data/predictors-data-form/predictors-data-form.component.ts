@@ -60,7 +60,7 @@ export class PredictorsDataFormComponent {
 
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid)
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
   }
 
   async saveChanges() {

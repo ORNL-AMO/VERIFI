@@ -42,7 +42,7 @@ export class MeterCostTimeseriesGraphComponent {
 
   drawChart() {
 
-    this.meterData = this.meterData.slice().sort((a, b) => new Date(a.readDate).getTime() - new Date(b.readDate).getTime());
+    this.meterData = this.meterData.filter(data => { return isNaN(data.totalCost) == false }).slice().sort((a, b) => new Date(a.readDate).getTime() - new Date(b.readDate).getTime());
     let markers: Array<{
       color: string,
       symbol: string,
@@ -97,6 +97,8 @@ export class MeterCostTimeseriesGraphComponent {
       margin: { r: 0, t: 50 }
     };
     var config = {
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+      modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
       displaylogo: false,
       responsive: true
     };

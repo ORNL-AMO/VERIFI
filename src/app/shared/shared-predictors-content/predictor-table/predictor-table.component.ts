@@ -147,7 +147,7 @@ export class PredictorTableComponent {
       await this.dbChangesService.setPredictorsV2(account, facility);
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
     }
   }
 
@@ -165,7 +165,7 @@ export class PredictorTableComponent {
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
       this.selectEditPredictor(newPredictor);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/utility/predictors/manage/add-predictor');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/add-predictor');
     }
   }
 
@@ -277,7 +277,7 @@ export class PredictorTableComponent {
     await this.dbChangesService.setPredictorsV2(account);
     await this.dbChangesService.setPredictorDataV2(account)
     await this.dbChangesService.selectFacility(facility);
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/utility/predictors/manage/predictor-table');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/predictor-table');
   }
 
   setPredictors(facilityPredictors: Array<IdbPredictor>) {

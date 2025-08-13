@@ -172,3 +172,23 @@ export interface AnalysisReportSetup {
   includeExecutiveSummary: boolean,
   includeDataValidationTables: boolean
 }
+
+export interface AccountSavingsReportSetup {
+  analysisItemId: string,
+  includeAnnualResults: boolean,
+  includeAnnualResultsTable: boolean,
+  includeAnnualResultsGraph: boolean,
+  includeAccountMonthlyResults: boolean,
+  includeFacilityResults: boolean,
+  includeFacilityResultsTable: boolean,
+  includeFacilityResultsGraph: boolean,
+  includeFacilityMonthlyResultsGraph: boolean,
+  includePerformanceResults: boolean,
+  includePerformanceResultsTable: boolean,
+  includePerformanceResultsGraph: boolean,
+  includePerformanceActual: boolean,
+  includePerformanceAdjusted: boolean,
+  includePerformanceContribution: boolean,
+  includePerformanceSavings: boolean,
+  numberOfTopPerformers: number
+}

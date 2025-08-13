@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -11,17 +10,16 @@ import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
-    selector: 'app-analysis-footer',
-    templateUrl: './analysis-footer.component.html',
-    styleUrls: ['./analysis-footer.component.css'],
-    standalone: false
+  selector: 'app-analysis-footer',
+  templateUrl: './analysis-footer.component.html',
+  styleUrls: ['./analysis-footer.component.css'],
+  standalone: false
 })
 export class AnalysisFooterComponent implements OnInit {
 
-  sidebarOpen: boolean;
-  sidebarOpenSub: Subscription;
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;
   selectedGroup: AnalysisGroup;
@@ -31,13 +29,19 @@ export class AnalysisFooterComponent implements OnInit {
   showContinue: boolean;
   showGoBackToAccount: boolean;
   disableContinue: boolean = false;
-  constructor(private sharedDataService: SharedDataService,
+  helpWidth: number;
+  helpWidthSub: Subscription;
+
+  sidebarWidth: number;
+  sidebarWidthSub: Subscription;
+  constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisService: AccountAnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
@@ -47,11 +51,6 @@ export class AnalysisFooterComponent implements OnInit {
       }
     });
     this.setShowContinue();
-
-    this.sidebarOpenSub = this.sharedDataService.sidebarOpen.subscribe(val => {
-      this.sidebarOpen = val;
-    });
-
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
       this.setDisableContinue();
@@ -61,18 +60,25 @@ export class AnalysisFooterComponent implements OnInit {
       this.selectedGroup = val;
       this.setDisableContinue();
     });
+    this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
+      this.helpWidth = helpWidth;
+    });
+    this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
+      this.sidebarWidth = sidebarWidth;
+    });
   }
 
   ngOnDestroy() {
-    this.sidebarOpenSub.unsubscribe();
     this.analysisItemSub.unsubscribe();
     this.selectedGroupSub.unsubscribe();
     this.routerSub.unsubscribe();
+    this.helpWidthSub.unsubscribe();
+    this.sidebarWidthSub.unsubscribe();
   }
 
   goBack() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.id + '/analysis/run-analysis/';
+    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
     if (this.router.url.includes('account-analysis')) {
       this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
     } else if (this.router.url.includes('facility-analysis')) {
@@ -95,23 +101,27 @@ export class AnalysisFooterComponent implements OnInit {
       } else if (this.router.url.includes('options')) {
         let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
         if (groupIndex > 0) {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
+          if( this.analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
+          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
+          }else{
+            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
+          }
         } else {
           this.router.navigateByUrl(facilityUrlStr + 'analysis-setup');
         }
       }
     } else {
-      this.router.navigateByUrl('/facility/' + facility.id + '/analysis/analysis-dashboard');
+      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
     }
   }
 
   continue() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityUrlStr: string = '/facility/' + facility.id + '/analysis/run-analysis/';
+    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
     if (this.router.url.includes('analysis-setup')) {
       this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
     } else if (this.router.url.includes('group-analysis')) {
-      if (this.router.url.includes('options')) {
+      if (this.router.url.includes('options') && this.selectedGroup.analysisType != 'skip') {
         if (this.selectedGroup.analysisType == 'regression') {
           this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/model-selection');
         } else {
@@ -191,7 +201,7 @@ export class AnalysisFooterComponent implements OnInit {
 
   returnToDashboard() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/analysis/analysis-dashboard');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
   }
 
 }

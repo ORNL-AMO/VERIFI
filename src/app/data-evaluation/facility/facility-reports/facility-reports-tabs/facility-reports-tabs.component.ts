@@ -83,13 +83,16 @@ export class FacilityReportsTabsComponent {
 
   goToDashboard() {
     if (this.selectedReport.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard/analysis');
     }
     else if (this.selectedReport.facilityReportType == 'overview') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/overview');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard/overview');
     }
     else if (this.selectedReport.facilityReportType == 'emissionFactors') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/emission-factors');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard/emission-factors');
+    }
+    else if (this.selectedReport.facilityReportType == 'savings') {
+      this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/savings');
     }
   }
 
@@ -104,6 +107,11 @@ export class FacilityReportsTabsComponent {
           this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
           this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
           this.errorMessage == undefined)
+      } else if (this.selectedReport.facilityReportType == 'savings') {
+        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '' &&
+          this.selectedReport.savingsReportSettings.endMonth != undefined &&
+          this.selectedReport.savingsReportSettings.endYear != undefined &&
+          this.errorMessage == undefined);
       } else if (this.selectedReport.facilityReportType == 'emissionFactors') {
         this.setupValid = (this.selectedReport.name != '' &&
           this.selectedReport.emissionFactorsReportSettings.endYear != undefined &&
@@ -122,7 +130,7 @@ export class FacilityReportsTabsComponent {
   selectItem(item: IdbFacilityReport) {
     this.facilityReportsDbService.selectedReport.next(item);
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/reports/setup');
     this.showDropdown = false;
   }
 

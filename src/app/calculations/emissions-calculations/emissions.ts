@@ -156,6 +156,7 @@ export function getEmissions(meter: IdbUtilityMeter,
                 let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
                 mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
             }
+            mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
         } else {
             //TOTAL VOLUME IS IN MILES
             if (vehicleDistanceUnit != 'mi') {
@@ -173,6 +174,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
             let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
             mobileOtherEmissions = (totalCH4 + totalN2O);
+            mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
         }
     } else if (meter.source == 'Other') {
         //Fugitive or process

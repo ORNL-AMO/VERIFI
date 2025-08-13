@@ -90,7 +90,7 @@
                     <ul class="list-group list-group-flush">
                         <!--meters-->
                         <li class="list-group-item" *ngIf="meterReadingsNeeded">
-                            <a class="nav-link" routerLink="/facility/{{facility.id}}/utility">
+                            <a class="nav-link" routerLink="/facility/{{facility.guid}}/utility">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa fa-exclamation white"></span>
                                 </span>
@@ -100,7 +100,7 @@
                         </li>
                         <li class="list-group-item" *ngIf="energyAnalysisNeeded && lastBill">
                             <a class="nav-link"
-                                routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/energy">
+                                routerLink="/facility/{{facility.guid}}/analysis/analysis-dashboard/energy">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa fa-exclamation white"></span>
                                 </span>
@@ -112,7 +112,7 @@
                         </li>
                         <li class="list-group-item" *ngIf="waterAnalysisNeeded && lastBill">
                             <a class="nav-link"
-                                routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/water">
+                                routerLink="/facility/{{facility.guid}}/analysis/analysis-dashboard/water">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa fa-exclamation white"></span>
                                 </span>

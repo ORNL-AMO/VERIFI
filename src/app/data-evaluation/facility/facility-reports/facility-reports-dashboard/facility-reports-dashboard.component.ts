@@ -14,10 +14,10 @@ import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-    selector: 'app-facility-reports-dashboard',
-    templateUrl: './facility-reports-dashboard.component.html',
-    styleUrl: './facility-reports-dashboard.component.css',
-    standalone: false
+  selector: 'app-facility-reports-dashboard',
+  templateUrl: './facility-reports-dashboard.component.html',
+  styleUrl: './facility-reports-dashboard.component.css',
+  standalone: false
 })
 export class FacilityReportsDashboardComponent {
 
@@ -30,7 +30,7 @@ export class FacilityReportsDashboardComponent {
   newReportType: FacilityReportType = 'analysis';
   displayNewReport: boolean = false;
   routerSub: Subscription;
-  reportType: 'Analysis' | 'Data Overview' | 'Emission Factors';
+  reportType: 'Analysis' | 'Data Overview' | 'Savings' | 'Emission Factors';
   constructor(private facilityDbService: FacilitydbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private dbChangesService: DbChangesService,
@@ -84,7 +84,7 @@ export class FacilityReportsDashboardComponent {
     this.facilityReportsDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
     this.facilityReportsDbService.selectedReport.next(addedReport);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 
 
@@ -94,9 +94,10 @@ export class FacilityReportsDashboardComponent {
       this.newReportType = 'analysis';
     } else if (url.includes('overview')) {
       this.reportType = 'Data Overview';
+    } else if (url.includes('savings')) {
+      this.reportType = 'Savings';
       this.newReportType = 'overview';
-    }
-    else if (url.includes('emission-factors')) {
+    } else if (url.includes('emission-factors')) {
       this.reportType = 'Emission Factors';
       this.newReportType = 'emissionFactors';
     }

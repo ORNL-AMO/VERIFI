@@ -90,6 +90,7 @@ export class CorrelationPlotGraphItemComponent {
       margin: { t: 0 }
     }
     let config = {
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
       displaylogo: false,
       responsive: true
     };

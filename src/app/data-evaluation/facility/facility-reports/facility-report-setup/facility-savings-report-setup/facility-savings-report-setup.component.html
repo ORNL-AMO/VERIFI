@@ -1,0 +1,219 @@
+<form>
+    <!-- <div class="row form-group">
+        <label class="col-6 col-form-label semibold" for="startDate">Start Date</label>
+
+        <div class="col-3">
+            <select name="startMonth" [(ngModel)]="reportSettings.startMonth" class="form-select" (change)="save()"
+                [required]="true">
+                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+            </select>
+        </div>
+        <div class="col-3">
+            <select name="startYear" [(ngModel)]="reportSettings.startYear" class="form-select" (change)="save()"
+                [required]="true">
+                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
+                </option>
+            </select>
+        </div>
+    </div> -->
+    <div class="row form-group">
+        <label class="col-6 col-form-label semibold" for="endMonth">End Date</label>
+        <div class="col-3">
+            <select name="endMonth" [(ngModel)]="reportSettings.endMonth" class="form-select" (change)="save()"
+                [required]="true">
+                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+            </select>
+        </div>
+        <div class="col-3">
+            <select name="endYear" [(ngModel)]="reportSettings.endYear" class="form-select" (change)="save()"
+                [required]="true">
+                <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row justify-content-end" *ngIf="errorMessage">
+        <span class="col-6 alert alert-danger small mt-2">
+            {{errorMessage}}
+        </span>
+    </div>
+
+    <hr>
+    <div>
+        <label class="bold">
+            Select Analysis Item
+        </label>
+
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Baseline Year
+                    </th>
+                    <th>
+                        Report Year
+                    </th>
+                    <th>
+                        Analysis Type
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of analysisItems">
+                    <td>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" name="{{item.name + '_item'}}"
+                                [value]="item.guid" id="{{item.name + '_item'}}"
+                                [(ngModel)]="facilityReport.analysisItemId" (change)="setSelectedAnalysisItem(false)">
+                        </div>
+                    </td>
+                    <td>
+                        {{item.name}}
+                        <span class="text-danger ps-1"
+                            *ngIf="item.setupErrors.hasError || item.setupErrors.groupsHaveErrors">
+                            <span class="fa fa-exclamation-circle"></span> Contains Errors
+                        </span>
+                    </td>
+                    <td>
+                        {{item.baselineYear}}
+                    </td>
+                    <td>
+                        {{item.reportYear}}
+                    </td>
+                    <td>
+                        <ng-template [ngIf]="item.analysisCategory == 'water'">
+                            Water
+                        </ng-template>
+                        <ng-template [ngIf]="item.analysisCategory == 'energy'">
+                            Energy
+                        </ng-template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="w-100 m-2" *ngIf="!facilityReport.analysisItemId">
+            <div class="alert alert-danger">
+                Analysis Item Selection Required.
+            </div>
+        </div>
+        <hr>
+
+        <ng-container *ngIf="facilityReport.analysisItemId">
+            <span class="bold">
+                Choose Report Content
+            </span>
+            <div class="row">
+                <div class="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="facilityAnnualResults"
+                            [(ngModel)]="facilityReport.savingsReportSettings.facilityAnnualResults" (change)="save()"
+                            id="facilityAnnualResults">
+                        <label class="bold form-check-label" for="facilityAnnualResults">Facility Reports
+                        </label>
+                    </div>
+                    <ng-container *ngIf="facilityReport.savingsReportSettings.facilityAnnualResults">
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="facilityAnnualResultsTable"
+                                [(ngModel)]="facilityReport.savingsReportSettings.facilityAnnualResultsTable"
+                                (change)="save()" id="facilityAnnualResultsTable">
+                            <label class="form-check-label" for="facilityAnnualResultsTable">Facility Annual Results
+                                Table
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox"
+                                name="facilityTrailingTwelveMonthsConsumption"
+                                [(ngModel)]="facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption"
+                                (change)="save()" id="facilityTrailingTwelveMonthsConsumption">
+                            <label class="form-check-label" for="facilityTrailingTwelveMonthsConsumption">Facility
+                                Trailing Twelve Months
+                                Consumption
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="facilityTrailingTwelveMonthsSavings"
+                                [(ngModel)]="facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings"
+                                (change)="save()" id="facilityTrailingTwelveMonthsSavings">
+                            <label class="form-check-label" for="facilityTrailingTwelveMonthsSavings">Facility Trailing
+                                Twelve Months
+                                Savings
+                            </label>
+                        </div>
+
+                    </ng-container>
+                </div>
+
+                <div class="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="groupReports"
+                            [(ngModel)]="facilityReport.savingsReportSettings.groupReports" (change)="save()"
+                            id="groupReports">
+                        <label class="bold form-check-label" for="groupReports">Group Reports
+                        </label>
+                    </div>
+                    <ng-container *ngIf="facilityReport.savingsReportSettings.groupReports">
+                        <div class="form-check ms-3">
+                            <input class="form-check-input" type="checkbox" name="groupAnnualResultsTable"
+                                [(ngModel)]="facilityReport.savingsReportSettings.groupAnnualResultsTable"
+                                (change)="save()" id="groupAnnualResultsTable">
+                            <label class="form-check-label" for="groupAnnualResultsTable">Group Annual Results Table
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="groupMonthlyResults"
+                                [(ngModel)]="facilityReport.savingsReportSettings.groupMonthlyResults" (change)="save()"
+                                id="groupMonthlyResults">
+                            <label class="form-check-label" for="groupMonthlyResults">Group Monthly Results
+                            </label>
+                        </div>
+                        <ng-container *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults">
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" name="groupMonthlyResultsTable"
+                                    [(ngModel)]="facilityReport.savingsReportSettings.groupMonthlyResultsTable"
+                                    (change)="save()" id="groupMonthlyResultsTable">
+                                <label class="form-check-label" for="groupMonthlyResultsTable">Group Monthly Results
+                                    Table
+                                </label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" name="groupMonthlyResultsGraphs"
+                                    [(ngModel)]="facilityReport.savingsReportSettings.groupMonthlyResultsGraphs"
+                                    (change)="save()" id="groupMonthlyResultsGraphs">
+                                <label class="form-check-label" for="groupMonthlyResultsGraphs">Group Monthly
+                                    Results
+                                    Graph
+                                </label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" name="groupMonthlyTrailingConsumption"
+                                    [(ngModel)]="facilityReport.savingsReportSettings.groupTrailingTwelveMonthsConsumption"
+                                    (change)="save()" id="groupMonthlyTrailingConsumption">
+                                <label class="form-check-label" for="groupMonthlyTrailingConsumption">Trailing
+                                    12-Month
+                                    {{actualUseLabel}}
+                                </label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="form-check-input" type="checkbox" name="groupMonthlyTrailingSavings"
+                                    [(ngModel)]="facilityReport.savingsReportSettings.groupTrailingTwelveMonthsSavings"
+                                    (change)="save()" id="groupMonthlyTrailingSavings">
+                                <label class="form-check-label" for="groupMonthlyTrailingSavings">Trailing 12-Month
+                                    Actual Savings
+                                </label>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</form>

@@ -24,9 +24,9 @@ export class UtilityMeterDataComponent implements OnInit {
 
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
-      let meterId: number = parseInt(params['id']);
+      let meterId: string = params['id'];
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      this.selectedMeter = facilityMeters.find(meter => { return meter.id == meterId });
+      this.selectedMeter = facilityMeters.find(meter => { return meter.guid == meterId });
     });
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {

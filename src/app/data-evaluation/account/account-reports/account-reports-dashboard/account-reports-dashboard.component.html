@@ -55,6 +55,11 @@
                             id="analysis" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="analysis">Modeling Report</label>
                     </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="reportType" [value]="'accountSavings'"
+                            id="accountSavings" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="accountSavings">Savings Report</label>
+                    </div>
                      <div class="form-check">
                         <input type="radio" class="form-check-input" name="reportType" [value]="'accountEmissionFactors'"
                             id="accountEmissionFactors" [(ngModel)]="newReportType">
