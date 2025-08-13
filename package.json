@@ -1,7 +1,7 @@
 {
   "name": "verifi",
   "description": "Application for analyzing utility usage",
-  "version": "0.14.1-beta",
+  "version": "0.14.2-beta",
   "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
@@ -89,6 +89,7 @@
     "fs-jetpack": "^5.1.0",
     "jquery": "^3.6.1",
     "jstat": "^1.9.5",
+    "jszip": "^3.10.1",
     "ngx-indexed-db": "19.3.2",
     "ngx-webstorage": "19.0.1",
     "plotly.js": "3.0.0",
