@@ -48,7 +48,8 @@ export class AccountSettingsComponent implements OnInit {
   isElectron: boolean;
   backupFile: BackupFile;
   folderPath: string;
-   folderError: string;
+  folderError: string;
+  downloadAsZip: boolean = false;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -161,7 +162,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   backupAccount() {
-    this.backupDataService.backupAccount();
+    this.backupDataService.backupAccount(this.downloadAsZip);
   }
 
   openImportBackup() {
@@ -263,7 +264,7 @@ export class AccountSettingsComponent implements OnInit {
 
   async openFolder() {
     this.electronService.checkBillFolderExists();
-    this.electronService.getFolderError().pipe( skip(1),take(1)).subscribe(error => {
+    this.electronService.getFolderError().pipe(skip(1), take(1)).subscribe(error => {
       if (error == 'Deleted') {
         this.folderError = error;
         console.log('Folder was deleted' + this.folderError);
