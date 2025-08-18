@@ -26,6 +26,7 @@ import { FacilityReportsDashboardTableComponent } from './facility-reports-dashb
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-report-order-by.pipe';
+import { FacilityReportBadgeClassPipe } from './facility-report-pipes/facility-report-badge-class.pipe';
 
 
 
@@ -47,7 +48,8 @@ import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-repo
     FacilityEmissionFactorsReportSetupComponent,
     FacilityEmissionFactorsReportTableComponent,
     FacilityReportsDashboardTableComponent,
-    FacilityReportOrderByPipe
+    FacilityReportOrderByPipe,
+    FacilityReportBadgeClassPipe
   ],
   imports: [
     CommonModule,

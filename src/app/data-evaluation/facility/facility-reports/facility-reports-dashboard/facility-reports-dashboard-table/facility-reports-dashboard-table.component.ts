@@ -28,7 +28,6 @@ export class FacilityReportsDashboardTableComponent {
   selectedFacilitySub: Subscription;
   facilityReportsSub: Subscription;
   selectedReportType = '';
-  filteredReports: Array<IdbFacilityReport> = [];
   reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors', 'savings'];
   displayDeleteModal: boolean;
   deletedReport: IdbFacilityReport;
@@ -57,10 +56,7 @@ export class FacilityReportsDashboardTableComponent {
       this.selectedFacility = facility;
     });
 
-    this.facilityReportsSub = this.facilityDbReportsService.facilityReports.subscribe(reports => {
-      this.facilityReports = reports;
-      this.getReports();
-    });
+    this.getReports();
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
@@ -74,16 +70,8 @@ export class FacilityReportsDashboardTableComponent {
   }
 
   async getReports() {
-    this.filteredReports = [];
-    this.filteredReports = [...this.facilityReports];
-    this.applyFilter();
-  }
-
-  applyFilter() {
-    this.filteredReports = [];
-    this.filteredReports = this.facilityReports.filter(val => {
-      const matchReportType = !this.selectedReportType || val.facilityReportType === this.selectedReportType;
-      return matchReportType;
+     this.facilityReportsSub = this.facilityDbReportsService.facilityReports.subscribe(reports => {
+      this.facilityReports = reports;
     });
   }
 
@@ -123,19 +111,6 @@ export class FacilityReportsDashboardTableComponent {
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
     this.getReports();
-  }
-
-  getBadgeClass(reportType: string): string {
-    switch (reportType) {
-      case 'analysis':
-        return 'badge-analysis';
-      case 'overview':
-        return 'badge-data-overview';
-      case 'emissionFactors':
-        return 'badge-emission-factors';
-      case 'savings':
-        return 'badge-savings';
-    }
   }
 
   setOrderDataField(str: string) {

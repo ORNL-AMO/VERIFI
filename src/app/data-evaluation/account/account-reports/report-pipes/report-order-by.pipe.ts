@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import _ from 'lodash';
 import { AccountReportTypePipe } from './account-report-type.pipe';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Pipe({
   name: 'reportOrderBy',
@@ -10,14 +11,20 @@ export class ReportOrderByPipe implements PipeTransform {
 
   constructor(private accountReportTypePipe: AccountReportTypePipe) { }
 
-  transform(data: Array<any>, orderDataBy: string, orderDirection?: string): Array<any> {
+  transform(data: Array<{ isValid: boolean, report: IdbAccountReport }>, orderDataBy: string, orderDirection: string, selectedReportType: string): Array<{ isValid: boolean, report: IdbAccountReport }> {
+    
+    let filteredData = data;
+    if (selectedReportType) {
+      filteredData = filteredData.filter(val => val.report.reportType === selectedReportType);
+    }
+
     if (!orderDirection) {
       orderDirection = 'desc';
     }
 
     if (orderDataBy === 'report.modifiedDate') {
       return _.orderBy(
-        data,
+        filteredData,
         item => new Date(_.get(item, orderDataBy)),
         orderDirection
       );
@@ -25,7 +32,7 @@ export class ReportOrderByPipe implements PipeTransform {
 
     if (orderDataBy === 'report.reportYearOrEndYear') {
       return _.orderBy(
-        data,
+        filteredData,
         item => {
           const endYear = item.report.endYear;
           const reportYear = item.report.reportYear;
@@ -37,12 +44,12 @@ export class ReportOrderByPipe implements PipeTransform {
 
     if (orderDataBy === 'report.reportType') {
       return _.orderBy(
-        data,
+        filteredData,
         item => this.accountReportTypePipe.transform(_.get(item, orderDataBy)),
         orderDirection
       );
     }
 
-    return _.orderBy(data, orderDataBy, orderDirection);
+    return _.orderBy(filteredData, orderDataBy, orderDirection);
   }
 }

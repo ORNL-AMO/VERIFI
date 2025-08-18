@@ -1,8 +1,8 @@
-<div class="wrapper" *ngIf="filteredReports.length != 0">
+<div class="wrapper" *ngIf="reportList.length != 0">
     <div class="row mb-5">
         <label class="form-label fw-bold">Filter by Report Type:</label>
         <div class="col-2">
-            <select class="form-select" [(ngModel)]="selectedReportType" (change)="applyFilter()">
+            <select class="form-select" [(ngModel)]="selectedReportType" (change)="getReports()">
                 <option value="">All</option>
                 <option *ngFor="let type of reportTypes" [value]="type">{{ type | accountReportType}}</option>
             </select>
@@ -37,13 +37,13 @@
             </thead>
             <tbody>
                 <tr
-                    *ngFor="let data of filteredReports | reportOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
+                    *ngFor="let data of reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                     <td>
                         <span class="fa fa-exclamation-circle" *ngIf="!data.isValid"></span>
                         {{ data.report.name }}
                     </td>
                     <td>
-                        <span class="badge {{ getBadgeClass(data.report.reportType) }}">{{ data.report.reportType |
+                        <span class="badge" [ngClass]="data.report.reportType | reportBadgeClass">{{ data.report.reportType |
                             accountReportType }}</span>
                     </td>
                     <td [ngSwitch]="data.report.reportType">
@@ -112,7 +112,7 @@
     </div>
 
     <div class="d-flex w-100 justify-content-end">
-        <ngb-pagination [collectionSize]="filteredReports.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        <ngb-pagination [collectionSize]="(reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType).length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
             [maxSize]="5" [rotate]="true" aria-label="Pagination">
         </ngb-pagination>
     </div>

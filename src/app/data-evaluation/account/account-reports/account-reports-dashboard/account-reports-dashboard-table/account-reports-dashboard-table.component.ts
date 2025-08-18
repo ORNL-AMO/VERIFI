@@ -28,7 +28,6 @@ export class AccountReportsDashboardTableComponent {
   displayDeleteModal: boolean;
   deletedReport: IdbAccountReport;
   reportList: Array<{ isValid: boolean, report: IdbAccountReport }> = [];
-  filteredReports: Array<{ isValid: boolean, report: IdbAccountReport }> = [];
   orderDataField: string = 'report.reportName';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
@@ -59,21 +58,10 @@ export class AccountReportsDashboardTableComponent {
 
   async getReports() {
     this.reportList = [];
-    this.filteredReports = [];
     this.reports = await this.accountReportDbService.getAllAccountReports(this.selectedAccount.guid);
     this.reports.forEach(report => {
       const isValid = this.accountReportsService.isReportValid(report);
       this.reportList.push({ isValid, report });
-    });
-    this.filteredReports = [...this.reportList];
-    this.applyFilter();
-  }
-
-  applyFilter() {
-    this.filteredReports = [];
-    this.filteredReports = this.reportList.filter(val => {
-      const matchReportType = !this.selectedReportType || val.report.reportType === this.selectedReportType;
-      return matchReportType;
     });
   }
 
@@ -81,7 +69,6 @@ export class AccountReportsDashboardTableComponent {
     this.accountReportDbService.selectedReport.next(report);
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
-
 
   async createCopy(report: IdbAccountReport) {
     let newReport: IdbAccountReport = JSON.parse(JSON.stringify(report));
@@ -111,25 +98,6 @@ export class AccountReportsDashboardTableComponent {
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "alert-success");
     this.getReports();
-  }
-
-  getBadgeClass(reportType: string): string {
-    switch (reportType) {
-      case 'betterPlants':
-        return 'badge-better-plants';
-      case 'performance':
-        return 'badge-performance';
-      case 'dataOverview':
-        return 'badge-data-overview';
-      case 'betterClimate':
-        return 'badge-better-climate';
-      case 'analysis':
-        return 'badge-analysis';
-      case 'accountEmissionFactors':
-        return 'badge-emission-factors';
-      case 'accountSavings':
-        return 'badge-savings';
-    }
   }
 
   setOrderDataField(str: string) {

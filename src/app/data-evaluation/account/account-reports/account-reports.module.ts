@@ -61,6 +61,7 @@ import { AccountReportsDashboardTableComponent } from './account-reports-dashboa
 import { ReportOrderByPipe } from './report-pipes/report-order-by.pipe';
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
+import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
 
 @NgModule({
   declarations: [
@@ -116,7 +117,8 @@ import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/ta
     AccountEmissionFactorsReportComponent,
     AccountEmissionFactorsReportTableComponent,
     AccountReportsDashboardTableComponent,
-    ReportOrderByPipe
+    ReportOrderByPipe,
+    ReportBadgeClassPipe
   ],
   imports: [
     CommonModule,

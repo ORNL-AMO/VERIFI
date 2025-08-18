@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import _ from 'lodash';
 import { FacilityReportTypePipe } from './facility-report-type.pipe';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Pipe({
   name: 'facilityReportOrderBy',
@@ -10,14 +11,20 @@ export class FacilityReportOrderByPipe implements PipeTransform {
 
   constructor(private facilityReportTypePipe: FacilityReportTypePipe) { }
 
-  transform(data: Array<any>, orderDataBy: string, orderDirection?: string): Array<any> {
+  transform(data: Array<IdbFacilityReport>, orderDataBy: string, orderDirection: string, selectedReportType: string): Array<IdbFacilityReport> {
+
+    let filteredData = data;
+    if (selectedReportType) {
+      filteredData = filteredData.filter(val => val.facilityReportType === selectedReportType);
+    }
+
     if (!orderDirection) {
       orderDirection = 'desc';
     }
 
     if (orderDataBy === 'modifiedDate') {
       return _.orderBy(
-        data,
+        filteredData,
         item => new Date(_.get(item, orderDataBy)),
         orderDirection
       );
@@ -25,7 +32,7 @@ export class FacilityReportOrderByPipe implements PipeTransform {
 
     if (orderDataBy === 'facilityReportType') {
       return _.orderBy(
-        data,
+        filteredData,
         item => this.facilityReportTypePipe.transform(_.get(item, orderDataBy)),
         orderDirection
       );
@@ -33,16 +40,16 @@ export class FacilityReportOrderByPipe implements PipeTransform {
    
     if (orderDataBy === 'sortYear') {
       return _.orderBy(
-        data,
+        filteredData,
         item => {
-          const year = item.dataOverviewReportSettings?.endYear ?? item.emissionFactorsReportSettings?.endYear;
+          const year = item.dataOverviewReportSettings?.endYear ?? item.emissionFactorsReportSettings?.endYear ?? item.savingsReportSettings?.endYear;
           return Number(year);
         },
         orderDirection
       );
     }
 
-    return _.orderBy(data, orderDataBy, orderDirection);
+    return _.orderBy(filteredData, orderDataBy, orderDirection);
   }
 
 }
