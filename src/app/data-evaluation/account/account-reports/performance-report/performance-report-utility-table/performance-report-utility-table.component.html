@@ -252,7 +252,7 @@
                     </ng-container>
                 </ng-container>
                 <td class="text-center"
-                    [ngStyle]="{'background-color': groupData.annualData[groupData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].minChangeInSavings: performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].maxChangeInSavings}">
+                    [ngStyle]="{'background-color': groupData.annualData[groupData.annualData.length-1].changeInSavings | tableCellShading:performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].minChangeInSavings: performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].maxChangeInSavings}">
                     {{groupData.annualData[groupData.annualData.length-1].changeInSavings | number:'1.0-2'}} %
                 </td>
                 <td class="text-center"
