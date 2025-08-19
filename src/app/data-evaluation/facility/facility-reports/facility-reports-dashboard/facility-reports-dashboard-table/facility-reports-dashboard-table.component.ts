@@ -56,7 +56,9 @@ export class FacilityReportsDashboardTableComponent {
       this.selectedFacility = facility;
     });
 
-    this.getReports();
+    this.facilityReportsSub = this.facilityDbReportsService.facilityReports.subscribe(reports => {
+      this.facilityReports = reports;
+    });
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
@@ -67,12 +69,6 @@ export class FacilityReportsDashboardTableComponent {
     this.selectedFacilitySub.unsubscribe();
     this.facilityReportsSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
-  }
-
-  async getReports() {
-     this.facilityReportsSub = this.facilityDbReportsService.facilityReports.subscribe(reports => {
-      this.facilityReports = reports;
-    });
   }
 
   selectReport(report: IdbFacilityReport) {
@@ -110,7 +106,6 @@ export class FacilityReportsDashboardTableComponent {
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, this.selectedFacility);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
-    this.getReports();
   }
 
   setOrderDataField(str: string) {
@@ -123,10 +118,6 @@ export class FacilityReportsDashboardTableComponent {
     } else {
       this.orderDataField = str;
     }
-  }
-
-  getDate(month: number, year: number): Date {
-    return new Date(year, month, 1);
   }
 
   get sortYear(): string {

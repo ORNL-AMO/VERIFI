@@ -63,10 +63,10 @@
                         <ng-container *ngSwitchCase="'dataOverview'">
                             <ng-container
                                 *ngIf="data.report.startMonth != undefined && data.report.startYear != undefined">
-                                {{ getDate(data.report.startMonth, data.report.startYear) | date: 'MMM. y' }} -
+                                {{ data.report.startMonth | reportDate: data.report.startYear | date: 'MMM. y' }} -
                             </ng-container>
                             <ng-container *ngIf="data.report.endMonth != undefined && data.report.endYear != undefined">
-                                {{ getDate(data.report.endMonth, data.report.endYear) | date: 'MMM. y' }}
+                                {{ data.report.endMonth | reportDate: data.report.endYear | date: 'MMM. y' }}
                             </ng-container>
                             <ng-container
                                 *ngIf="data.report.startMonth === undefined && data.report.startYear === undefined && data.report.endMonth === undefined && data.report.endYear === undefined">

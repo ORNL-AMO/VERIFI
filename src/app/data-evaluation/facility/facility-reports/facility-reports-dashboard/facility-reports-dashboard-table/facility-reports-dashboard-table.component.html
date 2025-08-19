@@ -2,7 +2,7 @@
     <div class="row mb-5">
         <label class="form-label fw-bold">Filter by Report Type:</label>
         <div class="col-2">
-            <select class="form-select" [(ngModel)]="selectedReportType" (change)="getReports()">
+            <select class="form-select" [(ngModel)]="selectedReportType">
                 <option value="">All</option>
                 <option *ngFor="let type of reportTypes" [value]="type">{{ type | facilityReportType}}</option>
             </select>
@@ -68,13 +68,11 @@
                         <ng-container *ngSwitchCase="'overview'">
                             <ng-container
                                 *ngIf="data.dataOverviewReportSettings.startMonth != undefined && data.dataOverviewReportSettings.startYear != undefined">
-                                {{ getDate(data.dataOverviewReportSettings.startMonth,
-                                data.dataOverviewReportSettings.startYear) | date: 'MMM. y' }} -
+                                {{ data.dataOverviewReportSettings.startMonth | reportDate: data.dataOverviewReportSettings.startYear | date: 'MMM. y' }} -
                             </ng-container>
                             <ng-container
                                 *ngIf="data.dataOverviewReportSettings.endMonth != undefined && data.dataOverviewReportSettings.endYear != undefined">
-                                {{ getDate(data.dataOverviewReportSettings.endMonth,
-                                data.dataOverviewReportSettings.endYear) | date: 'MMM. y' }}
+                                {{ data.dataOverviewReportSettings.endMonth | reportDate: data.dataOverviewReportSettings.endYear | date: 'MMM. y' }}
                             </ng-container>
                             <ng-container
                                 *ngIf="data.dataOverviewReportSettings.startMonth === undefined && data.dataOverviewReportSettings.startYear === undefined && data.dataOverviewReportSettings.endMonth === undefined && data.dataOverviewReportSettings.endYear === undefined">

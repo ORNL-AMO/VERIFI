@@ -112,10 +112,6 @@ export class AccountReportsDashboardTableComponent {
     }
   }
 
-  getDate(month: number, year: number): Date {
-    return new Date(year, month, 1);
-  }
-
   get yearSortField(): string {
     return 'report.reportYearOrEndYear';
   }
