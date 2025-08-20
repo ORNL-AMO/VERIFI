@@ -76,6 +76,7 @@ export function getUnitFromMeter(meter: IdbUtilityMeter, meterData: Array<IdbUti
 }
 
 export function calculateStatistics(data: number[]): Statistics {
+    data = data.filter(val => { return isNaN(val) == false });
     if (!data.length) {
         return { min: NaN, max: NaN, average: NaN, median: NaN, medianAbsDev: NaN, medianminus2_5MAD: NaN, medianplus2_5MAD: NaN, outliers: 0 };
     }

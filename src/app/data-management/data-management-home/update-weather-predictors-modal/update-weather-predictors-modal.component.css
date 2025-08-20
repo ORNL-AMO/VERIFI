@@ -1,0 +1,7 @@
+.popup.popup-lg{
+    top: 10px;
+    width: 75vw;
+    left: calc(50% - 37.5vw);
+    max-height: 95vh;
+    overflow-y: auto;
+}

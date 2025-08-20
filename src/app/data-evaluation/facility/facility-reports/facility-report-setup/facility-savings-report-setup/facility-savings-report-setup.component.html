@@ -129,6 +129,26 @@
                                 Table
                             </label>
                         </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox"
+                                name="facilityTrailingTwelveMonthsConsumption"
+                                [(ngModel)]="facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption"
+                                (change)="save()" id="facilityTrailingTwelveMonthsConsumption">
+                            <label class="form-check-label" for="facilityTrailingTwelveMonthsConsumption">Facility
+                                Trailing Twelve Months
+                                Consumption
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="facilityTrailingTwelveMonthsSavings"
+                                [(ngModel)]="facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings"
+                                (change)="save()" id="facilityTrailingTwelveMonthsSavings">
+                            <label class="form-check-label" for="facilityTrailingTwelveMonthsSavings">Facility Trailing
+                                Twelve Months
+                                Savings
+                            </label>
+                        </div>
+
                     </ng-container>
                 </div>
 

@@ -30,6 +30,7 @@ import { CharactersRemainingPipe } from './characters-remaining.pipe';
 import { InvalidMeterPipe } from './invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
 import { ReportDatePipe } from './report-date.pipe';
+import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { ReportDatePipe } from './report-date.pipe';
     CharactersRemainingPipe,
     InvalidMeterPipe,
     FacilityItemPipe,
-    ReportDatePipe
+    ReportDatePipe,
+    ChargeTypeLabelPipe
   ],
   imports: [
     CommonModule
@@ -97,7 +99,8 @@ import { ReportDatePipe } from './report-date.pipe';
     CharactersRemainingPipe,
     InvalidMeterPipe,
     FacilityItemPipe,
-    ReportDatePipe
+    ReportDatePipe,
+    ChargeTypeLabelPipe
   ]
 })
 export class HelperPipesModule { }
