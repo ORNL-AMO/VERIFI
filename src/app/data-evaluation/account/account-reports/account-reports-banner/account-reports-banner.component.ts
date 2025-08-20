@@ -105,23 +105,7 @@ export class AccountReportsBannerComponent {
   }
 
   goToDashboard() {
-    if (this.selectedReport.reportType == 'betterPlants') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/better-plants')
-    } else if (this.selectedReport.reportType == 'dataOverview') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/overview')
-    } else if (this.selectedReport.reportType == 'performance') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/performance')
-    } else if (this.selectedReport.reportType == 'betterClimate') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/better-climate')
-    } else if (this.selectedReport.reportType == 'analysis') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/analysis')
-    } else if (this.selectedReport.reportType == 'accountSavings') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/account-savings')
-    } else if (this.selectedReport.reportType == 'accountEmissionFactors') {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/account-emission-factors')
-    } else {
-      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard')
-    }
+    this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
   }
 
   toggleShow() {

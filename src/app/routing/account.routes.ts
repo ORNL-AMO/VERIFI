@@ -28,10 +28,6 @@ import { AccountAnalysisEnergyDashboardComponent } from "src/app/data-evaluation
 import { AccountAnalysisWaterDashboardComponent } from "src/app/data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
 import { AccountAnalysisFacilitiesSummaryComponent } from "src/app/data-evaluation/account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
 import { PerformanceReportComponent } from "src/app/data-evaluation/account/account-reports/performance-report/performance-report.component";
-import { BetterPlantsReportDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component";
-import { OverviewReportDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component";
-import { PerformanceReportDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component";
-import { BetterClimateReportDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component";
 import { BetterClimateReportComponent } from "src/app/data-evaluation/account/account-reports/better-climate-report/better-climate-report.component";
 import { CustomFuelDataComponent } from "src/app/shared/custom-database/custom-fuel-data/custom-fuel-data.component";
 import { CustomFuelDataDashboardComponent } from "src/app/shared/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
@@ -39,12 +35,9 @@ import { CustomFuelDataFormComponent } from "src/app/shared/custom-database/cust
 import { CustomGWPComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp.component";
 import { CustomGwpDashboardComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
 import { CustomGwpFormComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
-import { AnalysisReportDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/analysis-report-dashboard/analysis-report-dashboard.component";
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
-import { AccountEmissionFactorsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component";
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
 import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
-import { AccountSavingsReportDashboardComponent } from "../data-evaluation/account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -81,19 +74,7 @@ export const AccountRoutes: Route = {
             component: AccountReportsComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-                {
-                    path: 'dashboard', component: AccountReportsDashboardComponent,
-                    children: [
-                        { path: '', pathMatch: 'full', redirectTo: 'better-plants' },
-                        { path: 'better-plants', component: BetterPlantsReportDashboardComponent },
-                        { path: 'overview', component: OverviewReportDashboardComponent },
-                        { path: 'performance', component: PerformanceReportDashboardComponent },
-                        { path: 'better-climate', component: BetterClimateReportDashboardComponent },
-                        { path: 'analysis', component: AnalysisReportDashboardComponent },
-                        { path: 'account-savings', component: AccountSavingsReportDashboardComponent },
-                        { path: 'account-emission-factors', component: AccountEmissionFactorsReportDashboardComponent }
-                    ]
-                },
+                { path: 'dashboard', component: AccountReportsDashboardComponent },
                 { path: 'setup', component: AccountReportSetupComponent },
                 { path: 'better-plants-report', component: BetterPlantsReportComponent },
                 { path: 'data-overview-report', component: DataOverviewReportComponent },

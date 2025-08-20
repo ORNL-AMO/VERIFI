@@ -29,6 +29,7 @@ import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 import { CharactersRemainingPipe } from './characters-remaining.pipe';
 import { InvalidMeterPipe } from './invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
+import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
 
 @NgModule({
@@ -62,6 +63,7 @@ import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
     CharactersRemainingPipe,
     InvalidMeterPipe,
     FacilityItemPipe,
+    ReportDatePipe,
     ChargeTypeLabelPipe
   ],
   imports: [
@@ -97,6 +99,7 @@ import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
     CharactersRemainingPipe,
     InvalidMeterPipe,
     FacilityItemPipe,
+    ReportDatePipe,
     ChargeTypeLabelPipe
   ]
 })
