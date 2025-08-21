@@ -48,15 +48,15 @@
                         Contribution
                     </th>
                     <ng-container *ngIf="index == performanceReport.annualUtilityData[0].annualData.length-1">
+                        <th (click)="setOrderDataField('changeInSavings', data.year)"
+                            [ngClass]="{'active': orderDataField == 'changeInSavings' && orderByYear == data.year}"
+                            class="text-center">
+                            Change in<br> Savings
+                        </th>
                         <th (click)="setOrderDataField('changeInContribution', data.year)"
                             [ngClass]="{'active': orderDataField == 'changeInContribution' && orderByYear == data.year}"
                             class="text-center">
                             Change in<br> Contribution
-                        </th>
-                        <th (click)="setOrderDataField('changeInAdjustedBaseline', data.year)"
-                            [ngClass]="{'active': orderDataField == 'changeInAdjustedBaseline' && orderByYear == data.year}"
-                            class="text-center">
-                            Change in<br> Adj. Baseline
                         </th>
                     </ng-container>
                 </ng-container>
@@ -85,13 +85,13 @@
                         {{data.contribution | number:'1.0-2'}} %
                     </td>
                     <ng-container *ngIf="index == performanceReport.annualUtilityData[0].annualData.length-1">
+                         <td class="text-center"
+                            [ngStyle]="{'background-color': data.changeInSavings | tableCellShading:performanceReport.facilityTotals[index].minChangeInSavings: performanceReport.facilityTotals[index].maxChangeInSavings}">
+                            {{data.changeInSavings | number:'1.0-2'}} %
+                        </td>
                         <td class="text-center"
                             [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.facilityTotals[index].minChangeInContribution: performanceReport.facilityTotals[index].maxChangeInContribution}">
                             {{data.changeInContribution | number:'1.0-2'}} %
-                        </td>
-                        <td class="text-center"
-                            [ngStyle]="{'background-color': data.changeInAdjustedBaseline | tableCellShading:performanceReport.facilityTotals[index].minChangeInAdjustedBaseline: performanceReport.facilityTotals[index].maxChangeInAdjustedBaseline}">
-                            {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
                         </td>
                     </ng-container>
                 </ng-container>
@@ -119,8 +119,8 @@
                         <th>
 
                         </th>
-                        <th class="text-center">
-                            {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
+                        <th>
+
                         </th>
                     </ng-container>
                 </ng-container>
@@ -200,15 +200,14 @@
                         </th>
                     </ng-container>
                 </ng-container>
+                <th (click)="setOrderDataField('changeInSavings', performanceReport.reportYear)"
+                    [ngClass]="{'active': orderDataField == 'changeInSavings'}" class="text-center">
+                    Savings
+                </th>
                 <th (click)="setOrderDataField('changeInContribution', performanceReport.reportYear)"
                     [ngClass]="{'active': orderDataField == 'changeInContribution'}" class="text-center">
                     Contribution
                 </th>
-                <th (click)="setOrderDataField('changeInAdjustedBaseline',  performanceReport.reportYear)"
-                    [ngClass]="{'active': orderDataField == 'changeInAdjustedBaseline'}" class="text-center">
-                    Adj. Baseline
-                </th>
-
             </tr>
         </thead>
         <tbody>
@@ -253,13 +252,12 @@
                     </ng-container>
                 </ng-container>
                 <td class="text-center"
-                    [ngStyle]="{'background-color': groupData.annualData[groupData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].minChangeInContribution: performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].maxChangeInContribution}">
-                    {{groupData.annualData[groupData.annualData.length-1].changeInContribution | number:'1.0-2'}} %
+                    [ngStyle]="{'background-color': groupData.annualData[groupData.annualData.length-1].changeInSavings | tableCellShading:performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].minChangeInSavings: performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].maxChangeInSavings}">
+                    {{groupData.annualData[groupData.annualData.length-1].changeInSavings | number:'1.0-2'}} %
                 </td>
                 <td class="text-center"
-                    [ngStyle]="{'background-color': groupData.annualData[groupData.annualData.length-1].changeInAdjustedBaseline | tableCellShading:performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].minChangeInAdjustedBaseline: performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].maxChangeInAdjustedBaseline}">
-                    {{groupData.annualData[groupData.annualData.length-1].changeInAdjustedBaseline | number:'1.0-2'}}
-                    %
+                    [ngStyle]="{'background-color': groupData.annualData[groupData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].minChangeInContribution: performanceReport.facilityTotals[performanceReport.annualUtilityData[0].annualData.length-1].maxChangeInContribution}">
+                    {{groupData.annualData[groupData.annualData.length-1].changeInContribution | number:'1.0-2'}} %
                 </td>
             </tr>
         </tbody>
@@ -300,11 +298,11 @@
                     </ng-container>
                 </ng-container>
                 <th class="text-center">
-                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution | number:'1.0-2'}} %
+                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInSavings |
+                    number:'1.0-2'}} %
                 </th>
                 <th class="text-center">
-                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInAdjustedBaseline
-                    |
+                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution |
                     number:'1.0-2'}} %
                 </th>
             </tr>

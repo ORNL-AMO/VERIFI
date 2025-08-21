@@ -53,10 +53,13 @@ export class PerformanceReport {
         year: number,
         maxChangeInContribution: number,
         minChangeInContribution: number,
+        maxChangeInSavings: number,
+        minChangeInSavings: number,
         changeInAdjustedBaseline: number,
         maxChangeInAdjustedBaseline: number,
         minChangeInAdjustedBaseline: number,
-        changeInContribution: number
+        changeInContribution: number,
+        changeInSavings: number
     }>;
     constructor(
         baselineYear: number,
@@ -138,6 +141,7 @@ export class PerformanceReport {
             let annualData: Array<PerformanceReportAnnualData> = new Array();
             let startYear: number = baselineYear;
             let previousYearContribution: number = 0;
+            let previousYearSavings: number = 0;
             let baselineYearAdjusted: number = 0;
             while (startYear <= reportYear) {
                 let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
@@ -151,7 +155,9 @@ export class PerformanceReport {
                 });
                 if (facilityYearSummary) {
                     let changeInContribution: number = 0;
+                    let changeInSavings: number = 0;
                     let contribution: number = (facilityYearSummary.adjusted * facilityYearSummary.totalSavingsPercentImprovement) / totalAdjusted;
+                    let savings: number = facilityYearSummary.totalSavingsPercentImprovement;
                     if (startYear == baselineYear) {
                         baselineYearAdjusted = facilityYearSummary.adjusted;
                     }
@@ -161,6 +167,13 @@ export class PerformanceReport {
                     } else if (startYear == (baselineYear + 1)) {
                         changeInContribution = contribution;
                     }
+
+                    if (startYear != baselineYear && startYear != (baselineYear + 1)) {
+                        changeInSavings = (savings - previousYearSavings);
+                    } else if (startYear == (baselineYear + 1)) {
+                        changeInSavings = savings;
+                    }
+
                     annualData.push({
                         adjusted: facilityYearSummary.adjusted,
                         actual: facilityYearSummary.energyUse,
@@ -168,9 +181,11 @@ export class PerformanceReport {
                         year: startYear,
                         contribution: contribution,
                         changeInContribution: changeInContribution,
+                        changeInSavings: changeInSavings,
                         changeInAdjustedBaseline: changeInAdjustedBaseline * 100
                     });
                     previousYearContribution = contribution;
+                    previousYearSavings = savings;
                 } else {
                     annualData.push({
                         adjusted: 0,
@@ -179,6 +194,7 @@ export class PerformanceReport {
                         year: startYear,
                         contribution: 0,
                         changeInContribution: 0,
+                        changeInSavings: 0,
                         changeInAdjustedBaseline: 0
                     });
                 }
@@ -203,6 +219,7 @@ export class PerformanceReport {
         let startYear: number = baselineYear;
         let baselineYearAdjusted: number = 0;
         let previousYearContribution: number = 0;
+        let previousYearSavings: number = 0;
         while (startYear <= reportYear) {
             let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
                 return summary.year == startYear
@@ -215,7 +232,6 @@ export class PerformanceReport {
                 return data.energyUse;
             });
 
-
             let totalSavings: number = (totalAdjusted - actual) / totalAdjusted;
 
             let yearAnnualData: Array<PerformanceReportAnnualData> = allAnnualData.filter(data => { return data.year == startYear });
@@ -223,6 +239,8 @@ export class PerformanceReport {
             let contribution: number = _.sumBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
                 return data.contribution;
             });
+
+            let savings: number = totalSavings * 100;
 
             let maxYearContribution: PerformanceReportAnnualData = _.maxBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
                 return data.contribution;
@@ -237,6 +255,13 @@ export class PerformanceReport {
 
             let minYearChangeInContribution: PerformanceReportAnnualData = _.minBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
                 return data.changeInContribution;
+            });
+            let maxYearChangeInSavings: PerformanceReportAnnualData = _.maxBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
+                return data.changeInSavings;
+            });
+
+            let minYearChangeInSavings: PerformanceReportAnnualData = _.minBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
+                return data.changeInSavings;
             });
             let maxYearChangeInAdjustedBaseline: PerformanceReportAnnualData = _.maxBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
                 return data.changeInAdjustedBaseline;
@@ -261,12 +286,16 @@ export class PerformanceReport {
                 minContribution: minYearContribution?.contribution,
                 maxChangeInContribution: maxYearChangeInContribution?.changeInContribution,
                 minChangeInContribution: minYearChangeInContribution?.changeInContribution,
+                maxChangeInSavings: maxYearChangeInSavings?.changeInSavings,
+                minChangeInSavings: minYearChangeInSavings?.changeInSavings,
                 changeInAdjustedBaseline: changeInAdjustedBaseline * 100,
                 maxChangeInAdjustedBaseline: maxYearChangeInAdjustedBaseline?.changeInAdjustedBaseline,
                 minChangeInAdjustedBaseline: minYearChangeInAdjustedBaseline?.changeInAdjustedBaseline,
-                changeInContribution: (contribution - previousYearContribution)
+                changeInContribution: (contribution - previousYearContribution),
+                changeInSavings: (savings - previousYearSavings)
             });
             previousYearContribution = contribution;
+            previousYearSavings = savings;
             startYear++;
         }
     }
@@ -282,6 +311,7 @@ export class PerformanceReport {
                 let annualData: Array<PerformanceReportAnnualData> = new Array();
                 let startYear: number = baselineYear;
                 let previousYearContribution: number = 0;
+                let previousYearSavings: number = 0;
                 let baselineYearAdjusted: number = 0;
                 while (startYear <= reportYear) {
                     let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
@@ -296,7 +326,9 @@ export class PerformanceReport {
                     if (facilityYearSummary) {
                         let changeInAdjustedBaseline: number = 0;
                         let changeInContribution: number = 0;
+                        let changeInSavings: number = 0;
                         let contribution: number = (facilityYearSummary.adjusted * facilityYearSummary.totalSavingsPercentImprovement) / totalAdjusted;
+                        let savings: number = facilityYearSummary.totalSavingsPercentImprovement;
                         if (startYear == baselineYear) {
                             baselineYearAdjusted = facilityYearSummary.adjusted;
                         }
@@ -306,6 +338,13 @@ export class PerformanceReport {
                         } else if (startYear == (baselineYear + 1)) {
                             changeInContribution = contribution;
                         }
+
+                        if (startYear != baselineYear && startYear != (baselineYear + 1)) {
+                            changeInSavings = (savings - previousYearSavings);
+                        } else if (startYear == (baselineYear + 1)) {
+                            changeInSavings = savings;
+                        }
+
                         annualData.push({
                             adjusted: facilityYearSummary.adjusted,
                             actual: facilityYearSummary.energyUse,
@@ -313,9 +352,11 @@ export class PerformanceReport {
                             year: startYear,
                             contribution: contribution,
                             changeInContribution: changeInContribution,
+                            changeInSavings: changeInSavings,
                             changeInAdjustedBaseline: changeInAdjustedBaseline * 100
                         });
                         previousYearContribution = contribution;
+                        previousYearSavings = savings;
                     } else {
                         annualData.push({
                             adjusted: 0,
@@ -324,6 +365,7 @@ export class PerformanceReport {
                             year: startYear,
                             contribution: 0,
                             changeInContribution: 0,
+                            changeInSavings: 0,
                             changeInAdjustedBaseline: 0
                         });
                     }
@@ -361,6 +403,7 @@ export class PerformanceReport {
             let annualData: Array<PerformanceReportAnnualData> = new Array();
             let startYear: number = baselineYear;
             let previousYearContribution: number = 0;
+            let previousYearSavings: number = 0;
             let baselineYearAdjusted: number = 0;
             while (startYear <= reportYear) {
                 let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
@@ -394,7 +437,10 @@ export class PerformanceReport {
 
                 let changeInAdjustedBaseline: number = 0;
                 let changeInContribution: number = 0;
+                let changeInSavings: number = 0;
                 let contribution: number = (adjusted * (totalSavingsPercentImprovement * 100)) / totalAdjusted;
+                let savings: number = totalSavingsPercentImprovement * 100;
+
                 if (startYear == baselineYear) {
                     baselineYearAdjusted = adjusted;
                 }
@@ -404,16 +450,25 @@ export class PerformanceReport {
                 } else if (startYear == (baselineYear + 1)) {
                     changeInContribution = contribution;
                 }
+
+                if (startYear != baselineYear && startYear != (baselineYear + 1)) {
+                    changeInSavings = (savings - previousYearSavings);
+                } else if (startYear == (baselineYear + 1)) {
+                    changeInSavings = savings;
+                }
+
                 annualData.push({
                     adjusted: adjusted,
                     actual: energyUse,
                     savings: totalSavingsPercentImprovement * 100,
                     year: startYear,
                     contribution: contribution,
+                    changeInSavings: changeInSavings,
                     changeInContribution: changeInContribution,
                     changeInAdjustedBaseline: changeInAdjustedBaseline * 100
                 });
                 previousYearContribution = contribution;
+                previousYearSavings = savings;
 
                 startYear++;
             }
@@ -432,6 +487,7 @@ export interface PerformanceReportAnnualData {
     savings: number,
     contribution: number,
     year: number,
+    changeInSavings: number,
     changeInContribution: number,
     changeInAdjustedBaseline: number
 }
