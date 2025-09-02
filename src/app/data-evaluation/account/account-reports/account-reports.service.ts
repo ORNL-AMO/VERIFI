@@ -50,7 +50,7 @@ export class AccountReportsService {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
       endDateValidators = [Validators.required];
-      if(report.reportType == 'dataOverview'){
+      if (report.reportType == 'dataOverview') {
         startDateValidators = [Validators.required];
       }
     }
@@ -311,6 +311,7 @@ export class AccountReportsService {
         includeAnnualResults: true,
         includeAnnualResultsTable: true,
         includeAnnualResultsGraph: true,
+        includeAccountMonthlyTable: true,
         includeAccountMonthlyResults: true,
         includeFacilityResults: true,
         includeFacilityResultsTable: true,
@@ -323,14 +324,70 @@ export class AccountReportsService {
         includePerformanceAdjusted: true,
         includePerformanceContribution: true,
         includePerformanceSavings: true,
-        numberOfTopPerformers: 5
+        numberOfTopPerformers: 5,
+        analysisTableColumns: {
+          incrementalImprovement: false,
+          SEnPI: false,
+          savings: false,
+          percentSavingsComparedToBaseline: false,
+          yearToDateSavings: false,
+          yearToDatePercentSavings: false,
+          rollingSavings: false,
+          rolling12MonthImprovement: false,
+          productionVariables: false,
+          energy: true,
+          actualEnergy: true,
+          modeledEnergy: true,
+          adjusted: true,
+          baselineAdjustmentForNormalization: true,
+          baselineAdjustmentForOther: true,
+          baselineAdjustment: true,
+          totalSavingsPercentImprovement: true,
+          annualSavingsPercentImprovement: true,
+          cummulativeSavings: true,
+          newSavings: true,
+          predictors: [],
+          predictorGroupId: undefined,
+          bankedSavings: false,
+          savingsUnbanked: false
+        }
+      };
+    }
+
+    if (!accountSavingsReportSetup.analysisTableColumns) {
+      accountSavingsReportSetup.analysisTableColumns = {
+        incrementalImprovement: false,
+        SEnPI: false,
+        savings: false,
+        percentSavingsComparedToBaseline: false,
+        yearToDateSavings: false,
+        yearToDatePercentSavings: false,
+        rollingSavings: false,
+        rolling12MonthImprovement: false,
+        productionVariables: false,
+        energy: true,
+        actualEnergy: true,
+        modeledEnergy: true,
+        adjusted: true,
+        baselineAdjustmentForNormalization: true,
+        baselineAdjustmentForOther: true,
+        baselineAdjustment: true,
+        totalSavingsPercentImprovement: true,
+        annualSavingsPercentImprovement: true,
+        cummulativeSavings: true,
+        newSavings: true,
+        predictors: [],
+        predictorGroupId: undefined,
+        bankedSavings: false,
+        savingsUnbanked: false
       };
     }
     let form: FormGroup = this.formBuilder.group({
       analysisItemId: [accountSavingsReportSetup.analysisItemId, Validators.required],
       includeAnnualResults: [accountSavingsReportSetup.includeAnnualResults],
-      includeAnnualResultsTable: [accountSavingsReportSetup.includeAnnualResultsTable], 
+      includeAnnualResultsTable: [accountSavingsReportSetup.includeAnnualResultsTable],
       includeAnnualResultsGraph: [accountSavingsReportSetup.includeAnnualResultsGraph],
+      includeAccountMonthlyTable: [accountSavingsReportSetup.includeAccountMonthlyTable],
       includeAccountMonthlyResults: [accountSavingsReportSetup.includeAccountMonthlyResults],
       includeFacilityResults: [accountSavingsReportSetup.includeFacilityResults],
       includeFacilityResultsTable: [accountSavingsReportSetup.includeFacilityResultsTable],
@@ -343,7 +400,32 @@ export class AccountReportsService {
       includePerformanceAdjusted: [accountSavingsReportSetup.includePerformanceAdjusted],
       includePerformanceContribution: [accountSavingsReportSetup.includePerformanceContribution],
       includePerformanceSavings: [accountSavingsReportSetup.includePerformanceSavings],
-      numberOfTopPerformers: [accountSavingsReportSetup.numberOfTopPerformers]
+      numberOfTopPerformers: [accountSavingsReportSetup.numberOfTopPerformers],
+      analysisTableColumns: this.formBuilder.group({
+        energy: [accountSavingsReportSetup.analysisTableColumns.energy],
+        actualEnergy: [accountSavingsReportSetup.analysisTableColumns.actualEnergy],
+        modeledEnergy: [accountSavingsReportSetup.analysisTableColumns.modeledEnergy],
+        adjusted: [accountSavingsReportSetup.analysisTableColumns.adjusted],
+        baselineAdjustmentForNormalization: [accountSavingsReportSetup.analysisTableColumns.baselineAdjustmentForNormalization],
+        baselineAdjustmentForOther: [accountSavingsReportSetup.analysisTableColumns.baselineAdjustmentForOther],
+        baselineAdjustment: [accountSavingsReportSetup.analysisTableColumns.baselineAdjustment],
+        incrementalImprovement: [accountSavingsReportSetup.analysisTableColumns.incrementalImprovement],
+        SEnPI: [accountSavingsReportSetup.analysisTableColumns.SEnPI],
+        bankedSavings: [accountSavingsReportSetup.analysisTableColumns.bankedSavings],
+        savingsUnbanked: [accountSavingsReportSetup.analysisTableColumns.savingsUnbanked],
+        savings: [accountSavingsReportSetup.analysisTableColumns.savings],
+        rollingSavings: [accountSavingsReportSetup.analysisTableColumns.rollingSavings],
+        rolling12MonthImprovement: [accountSavingsReportSetup.analysisTableColumns.rolling12MonthImprovement],
+        totalSavingsPercentImprovement: [accountSavingsReportSetup.analysisTableColumns.totalSavingsPercentImprovement],
+        annualSavingsPercentImprovement: [accountSavingsReportSetup.analysisTableColumns.annualSavingsPercentImprovement],
+        cummulativeSavings: [accountSavingsReportSetup.analysisTableColumns.cummulativeSavings],
+        newSavings: [accountSavingsReportSetup.analysisTableColumns.newSavings],
+        productionVariables: [accountSavingsReportSetup.analysisTableColumns.productionVariables],
+        percentSavingsComparedToBaseline: [accountSavingsReportSetup.analysisTableColumns.percentSavingsComparedToBaseline],
+        yearToDateSavings: [accountSavingsReportSetup.analysisTableColumns.yearToDateSavings],
+        yearToDatePercentSavings: [accountSavingsReportSetup.analysisTableColumns.yearToDatePercentSavings],
+        predictors: [accountSavingsReportSetup.analysisTableColumns.predictors ?? []]
+      })
     });
     return form;
   }
@@ -355,6 +437,7 @@ export class AccountReportsService {
         includeAnnualResults: true,
         includeAnnualResultsTable: true,
         includeAnnualResultsGraph: true,
+        includeAccountMonthlyTable: true,
         includeAccountMonthlyResults: true,
         includeFacilityResults: true,
         includeFacilityResultsTable: true,
@@ -367,13 +450,41 @@ export class AccountReportsService {
         includePerformanceAdjusted: true,
         includePerformanceContribution: true,
         includePerformanceSavings: true,
-        numberOfTopPerformers: 5
+        numberOfTopPerformers: 5,
+        analysisTableColumns: {
+          incrementalImprovement: false,
+          SEnPI: false,
+          savings: false,
+          percentSavingsComparedToBaseline: false,
+          yearToDateSavings: false,
+          yearToDatePercentSavings: false,
+          rollingSavings: false,
+          rolling12MonthImprovement: false,
+          productionVariables: false,
+          energy: true,
+          actualEnergy: true,
+          modeledEnergy: true,
+          adjusted: true,
+          baselineAdjustmentForNormalization: true,
+          baselineAdjustmentForOther: true,
+          baselineAdjustment: true,
+          totalSavingsPercentImprovement: true,
+          annualSavingsPercentImprovement: true,
+          cummulativeSavings: true,
+          newSavings: true,
+          predictors: [],
+          predictorGroupId: undefined,
+          bankedSavings: false,
+          savingsUnbanked: false
+        }
       };
     }
+    
     accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
     accountSavingsReportSetup.includeAnnualResults = form.controls.includeAnnualResults.value;
     accountSavingsReportSetup.includeAnnualResultsTable = form.controls.includeAnnualResultsTable.value;
     accountSavingsReportSetup.includeAnnualResultsGraph = form.controls.includeAnnualResultsGraph.value;
+    accountSavingsReportSetup.includeAccountMonthlyTable = form.controls.includeAccountMonthlyTable.value;
     accountSavingsReportSetup.includeAccountMonthlyResults = form.controls.includeAccountMonthlyResults.value;
     accountSavingsReportSetup.includeFacilityResults = form.controls.includeFacilityResults.value;
     accountSavingsReportSetup.includeFacilityResultsTable = form.controls.includeFacilityResultsTable.value;
@@ -387,6 +498,7 @@ export class AccountReportsService {
     accountSavingsReportSetup.includePerformanceContribution = form.controls.includePerformanceContribution.value;
     accountSavingsReportSetup.includePerformanceSavings = form.controls.includePerformanceSavings.value;
     accountSavingsReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
+    accountSavingsReportSetup.analysisTableColumns = form.controls.analysisTableColumns.value;
     return accountSavingsReportSetup;
   }
 

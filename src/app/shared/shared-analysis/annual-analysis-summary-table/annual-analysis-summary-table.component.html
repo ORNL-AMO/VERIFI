@@ -198,7 +198,8 @@
                     </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.bankedSavings">
-                    <ng-template [ngIf]="summary.savingsBanked && !summary.isIntermediateBanked" [ngIfElse]="bankedSavingsMdash">
+                    <ng-template [ngIf]="summary.savingsBanked && !summary.isIntermediateBanked"
+                        [ngIfElse]="bankedSavingsMdash">
                         <span [ngClass]="{'red': summary.savingsBanked < 0}">
                             {{summary.savingsBanked | customNumber}}
                         </span>
@@ -210,7 +211,8 @@
                     </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.savingsUnbanked">
-                    <ng-template [ngIf]="summary.savingsUnbanked && !summary.isIntermediateBanked" [ngIfElse]="unbankedSavingsMdash">
+                    <ng-template [ngIf]="summary.savingsUnbanked && !summary.isIntermediateBanked"
+                        [ngIfElse]="unbankedSavingsMdash">
                         <span [ngClass]="{'red': summary.savingsUnbanked < 0}">
                             {{summary.savingsUnbanked | customNumber}}
                         </span>
@@ -269,11 +271,112 @@
                 </td>
             </ng-container>
         </tr>
+        <tr *ngIf="latestMonthSummary" class="table-secondary">
+            <td>
+                <span>
+                    {{ latestMonthSummary.date | date: 'MMM y' }}
+                    <span style="color: red; font-weight: bold;">*</span>
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.actualEnergy">
+                <span *ngIf="latestMonthSummary.energyUse" [ngClass]="{'red': latestMonthSummary.energyUse < 0}">
+                    {{latestMonthSummary.energyUse | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.energyUse">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.adjusted">
+                <span *ngIf="latestMonthSummary.adjusted" [ngClass]="{'red': latestMonthSummary.adjusted < 0}">
+                    {{latestMonthSummary.adjusted | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.adjusted">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
+                <span *ngIf="latestMonthSummary.baselineAdjustmentForNormalization"
+                    [ngClass]="{'red': latestMonthSummary.baselineAdjustmentForNormalization < 0}">
+                    {{latestMonthSummary.baselineAdjustmentForNormalization | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.baselineAdjustmentForNormalization">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
+                <span *ngIf="latestMonthSummary.baselineAdjustmentForOtherV2"
+                    [ngClass]="{'red': latestMonthSummary.baselineAdjustmentForOtherV2 < 0}">
+                    {{latestMonthSummary.baselineAdjustmentForOtherV2 | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.baselineAdjustmentForOtherV2">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.baselineAdjustment">
+                <span *ngIf="latestMonthSummary.baselineAdjustment"
+                    [ngClass]="{'red': latestMonthSummary.baselineAdjustment < 0}">
+                    {{latestMonthSummary.baselineAdjustment | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.baselineAdjustment">
+                    &mdash;
+                </span>
+            </td>
+            <ng-container>
+                <td *ngFor="let predictorVariable of predictorColumns">
+                    <span *ngIf="latestMonthSummary[predictorVariable.name]"
+                        [ngClass]="{'red': latestMonthSummary[predictorVariable.name] < 0}">
+                        {{latestMonthSummary[predictorVariable.name] | customNumber}}
+                    </span>
+                    <span *ngIf="!latestMonthSummary[predictorVariable.name]">
+                        &mdash;
+                    </span>
+                </td>
+            </ng-container>
+            <td *ngIf="analysisTableColumns.SEnPI">
+                <span *ngIf="latestMonthSummary.SEnPI" [ngClass]="{'red': latestMonthSummary.SEnPI < 0}">
+                    {{latestMonthSummary.SEnPI | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.SEnPI">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.bankedSavings">
+                &mdash;
+            </td>
+            <td *ngIf="analysisTableColumns.savingsUnbanked">
+                &mdash;
+            </td>
+            <td *ngIf="analysisTableColumns.savings">
+                <span *ngIf="latestMonthSummary.savings" [ngClass]="{'red': latestMonthSummary.savings < 0}">
+                    {{latestMonthSummary.rollingSavings | customNumber}}
+                </span>
+                <span *ngIf="!latestMonthSummary.savings">
+                    &mdash;
+                </span>
+            </td>
+            <td *ngIf="analysisTableColumns.totalSavingsPercentImprovement">
+                {{ latestMonthSummary.rolling12MonthImprovement | number:'1.0-2' }} %
+            </td>
+            <td *ngIf="analysisTableColumns.newSavings">
+                &mdash;
+            </td>
+            <td *ngIf="analysisTableColumns.annualSavingsPercentImprovement">
+                &mdash;
+            </td>
+            <td *ngIf="analysisTableColumns.cummulativeSavings">
+                &mdash;
+            </td>
+        </tr>
     </tbody>
 </table>
+<div *ngIf="latestMonthSummary">
+    <span style="color: red; font-weight: bold;">*</span>
+    <span class="note"> This represents the rolling 12-month energy use and savings for the last month of the
+        report</span>
+</div>
 <div class="d-flex w-100 justify-content-between hide-print">
     <div *ngIf="!inReport">
-        <button class="btn action-btn btn-sm" (click)="copyTable()">
+        <button class="btn action-btn btn-sm mt-3" (click)="copyTable()">
             <span class="fa fa-copy"></span> Copy Table
         </button>
     </div>

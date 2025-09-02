@@ -10,7 +10,7 @@ import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { AnnualAccountAnalysisSummaryClass } from "../analysis-calculations/annualAccountAnalysisSummaryClass";
 import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
-import { getSavingsReportAnnualAnalysisSummaries, getSavingsReportMonthlyAnalysisSummaryData } from "./sharedSavingsReport";
+import { getLatestMonthSummary, getSavingsReportAnnualAnalysisSummaries, getSavingsReportMonthlyAnalysisSummaryData } from "./sharedSavingsReport";
 import { AnnualAnalysisSummaryDataClass } from "../analysis-calculations/annualAnalysisSummaryDataClass";
 
 
@@ -23,8 +23,10 @@ export class AccountSavingsReport {
         facility: IdbFacility,
         analysisItem: IdbAnalysisItem,
         monthlySummaryData: Array<MonthlyAnalysisSummaryData>,
-        annualAnalysisSummaries: Array<AnnualAnalysisSummary>
-    }>
+        annualAnalysisSummaries: Array<AnnualAnalysisSummary>,
+        latestMonthSummary: MonthlyAnalysisSummaryData
+    }>;
+    latestMonthSummary: MonthlyAnalysisSummaryData;
 
     constructor(
         report: IdbAccountReport,
@@ -56,6 +58,7 @@ export class AccountSavingsReport {
         let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, false, meters, meterData, accountPredictors);
         this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.endMonth, report.endYear);
         this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.endMonth, report.endYear);
+        this.latestMonthSummary = getLatestMonthSummary(this.monthlyAnalysisSummaryData);
         this.setFacilitySummaries(annualAnalysisSummaryClass, report, accountPredictorEntries, accountPredictors);
     }
 
@@ -80,7 +83,8 @@ export class AccountSavingsReport {
                 facility: facilitySummary.facility,
                 analysisItem: facilitySummary.analysisItem,
                 monthlySummaryData: getSavingsReportMonthlyAnalysisSummaryData(facilitySummary.monthlySummaryData, report.endMonth, report.endYear),
-                annualAnalysisSummaries: getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaries, report.endMonth, report.endYear)
+                annualAnalysisSummaries: getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaries, report.endMonth, report.endYear),
+                latestMonthSummary: getLatestMonthSummary(getSavingsReportMonthlyAnalysisSummaryData(facilitySummary.monthlySummaryData, report.endMonth, report.endYear))
             });
         });
     }

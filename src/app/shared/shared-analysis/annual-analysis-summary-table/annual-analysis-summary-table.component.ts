@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -10,10 +10,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-    selector: 'app-annual-analysis-summary-table',
-    templateUrl: './annual-analysis-summary-table.component.html',
-    styleUrls: ['./annual-analysis-summary-table.component.css'],
-    standalone: false
+  selector: 'app-annual-analysis-summary-table',
+  templateUrl: './annual-analysis-summary-table.component.html',
+  styleUrls: ['./annual-analysis-summary-table.component.css'],
+  standalone: false
 })
 export class AnnualAnalysisSummaryTableComponent implements OnInit {
   @Input()
@@ -22,12 +22,14 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   accountOrFacility: IdbAccount | IdbFacility;
-  @Input({required: true})
+  @Input({ required: true })
   printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
   @Input()
   inReport: boolean;
   @Input()
   group: AnalysisGroup;
+  @Input({ required: false })
+  latestMonthSummary: MonthlyAnalysisSummaryData;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -36,7 +38,6 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   numEnergyColumns: number;
   numImprovementColumns: number;
   numPredictorColumns: number;
-
 
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
@@ -185,8 +186,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     }) != undefined;
   }
 
-  setModelYear(){
-    if(this.group && this.group.analysisType == 'regression'){
+  setModelYear() {
+    if (this.group && this.group.analysisType == 'regression') {
       this.modelYear = this.group.regressionModelYear;
     }
   }

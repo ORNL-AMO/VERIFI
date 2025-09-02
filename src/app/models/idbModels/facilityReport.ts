@@ -171,6 +171,9 @@ export function getSavingsReportSettings(): SavingsFacilityReportSettings {
         endMonth: undefined,
         facilityAnnualResults: true,
         facilityAnnualResultsTable: true,
+        facilityMonthlyResults: true,
+        facilityMonthlyResultsTable: true,
+        facilityMonthlyResultsGraphs: true,
         facilityTrailingTwelveMonthsConsumption: true,
         facilityTrailingTwelveMonthsSavings: true,
         groupReports: true,
@@ -180,6 +183,32 @@ export function getSavingsReportSettings(): SavingsFacilityReportSettings {
         groupTrailingTwelveMonthsConsumption: true,
         groupTrailingTwelveMonthsSavings: true,
         groupAnnualResultsTable: true,
+        analysisTableColumns: {
+            incrementalImprovement: false,
+            SEnPI: false,
+            savings: false,
+            percentSavingsComparedToBaseline: false,
+            yearToDateSavings: false,
+            yearToDatePercentSavings: false,
+            rollingSavings: false,
+            rolling12MonthImprovement: false,
+            productionVariables: true,
+            energy: true,
+            actualEnergy: true,
+            modeledEnergy: true,
+            adjusted: true,
+            baselineAdjustmentForNormalization: true,
+            baselineAdjustmentForOther: true,
+            baselineAdjustment: true,
+            totalSavingsPercentImprovement: true,
+            annualSavingsPercentImprovement: true,
+            cummulativeSavings: true,
+            newSavings: true,
+            predictors: [],
+            predictorGroupId: undefined,
+            bankedSavings: false,
+            savingsUnbanked: false
+        }
     };
 }
 
@@ -191,6 +220,9 @@ export interface SavingsFacilityReportSettings {
     endMonth: number,
     facilityAnnualResults: boolean,
     facilityAnnualResultsTable: boolean,
+    facilityMonthlyResults: boolean,
+    facilityMonthlyResultsTable: boolean,
+    facilityMonthlyResultsGraphs: boolean,
     facilityTrailingTwelveMonthsConsumption: boolean,
     facilityTrailingTwelveMonthsSavings: boolean,
     groupReports: boolean,
@@ -200,6 +232,7 @@ export interface SavingsFacilityReportSettings {
     groupTrailingTwelveMonthsConsumption: boolean,
     groupTrailingTwelveMonthsSavings: boolean,
     groupAnnualResultsTable: boolean,
+    analysisTableColumns: AnalysisTableColumns,
 }
 
 export function getEmissionFactorsReportSettings(): EmissionFactorsReportSettings {

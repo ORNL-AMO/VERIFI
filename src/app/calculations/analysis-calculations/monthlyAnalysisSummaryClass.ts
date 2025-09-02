@@ -149,9 +149,13 @@ export class MonthlyAnalysisSummaryClass {
                 fivePercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fivePercentTarget),
                 tenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.tenPercentTarget),
                 fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fifteenPercentTarget),
+                twentyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.twentyPercentTarget),
+                twentyFivePercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.twentyFivePercentTarget),
                 rollingActual: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.rollingActual),
                 fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fivePercentSavings),
                 tenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.tenPercentSavings),
+                twentyFivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.twentyFivePercentSavings),
+                twentyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.twentyPercentSavings),
                 fifteenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fifteenPercentSavings),
                 thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.thirtyPercentTarget),
                 thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.thirtyPercentSavings)
