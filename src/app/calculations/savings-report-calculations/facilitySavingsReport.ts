@@ -28,11 +28,12 @@ export class FacilitySavingsReport {
         this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.groupSummaries = annualAnalysisSummaryClass.groupSummaries.map((groupSummary: { group: AnalysisGroup, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, annualAnalysisSummaryData: Array<AnnualAnalysisSummary> }) => {
+            let monthlyData = getSavingsReportMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
             return {
                 group: groupSummary.group,
-                monthlyAnalysisSummaryData: getSavingsReportMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear),
+                monthlyAnalysisSummaryData: monthlyData,
                 annualAnalysisSummaryData: getSavingsReportAnnualAnalysisSummaries(groupSummary.annualAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear),
-                latestMonthGroupSummary: getLatestMonthSummary(getSavingsReportMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear))
+                latestMonthGroupSummary: getLatestMonthSummary(monthlyData)
             }
         });
         this.latestMonthSummary = getLatestMonthSummary(this.monthlyAnalysisSummaryData);
