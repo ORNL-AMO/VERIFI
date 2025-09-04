@@ -1,4 +1,4 @@
-import { AnnualAnalysisSummary } from "./analysis";
+import { AnalysisTableColumns, AnnualAnalysisSummary } from "./analysis";
 import { IdbFacility } from "./idbModels/facility";
 
 export interface BetterPlantsSummary {
@@ -178,6 +178,7 @@ export interface AccountSavingsReportSetup {
   includeAnnualResults: boolean,
   includeAnnualResultsTable: boolean,
   includeAnnualResultsGraph: boolean,
+  includeAccountMonthlyTable: boolean,
   includeAccountMonthlyResults: boolean,
   includeFacilityResults: boolean,
   includeFacilityResultsTable: boolean,
@@ -190,5 +191,6 @@ export interface AccountSavingsReportSetup {
   includePerformanceAdjusted: boolean,
   includePerformanceContribution: boolean,
   includePerformanceSavings: boolean,
-  numberOfTopPerformers: number
+  numberOfTopPerformers: number,
+  analysisTableColumns: AnalysisTableColumns,
 }

@@ -29,3 +29,7 @@ export function getSavingsReportMonthlyAnalysisSummaryData(monthlyAnalysisSummar
         return monthlyAnalysisSummaryData;
     }
 }
+
+export function getLatestMonthSummary(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>): MonthlyAnalysisSummaryData {
+    return monthlyAnalysisSummaryData[monthlyAnalysisSummaryData.length - 1];
+}

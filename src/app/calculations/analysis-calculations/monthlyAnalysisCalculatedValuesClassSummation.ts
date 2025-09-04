@@ -33,7 +33,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     fivePercentTarget: number;
     tenPercentTarget: number;
     fifteenPercentTarget: number;
+    twentyPercentTarget: number;
+    twentyFivePercentTarget: number;
     rollingActual: number;
+    twentyPercentSavings: number;
+    twentyFivePercentSavings: number;
     fifteenPercentSavings: number;
     tenPercentSavings: number;
     fivePercentSavings: number;
@@ -65,6 +69,10 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setFivePercentTarget();
         this.setTenPercentTarget();
         this.setFifteenPercentTarget();
+        this.setTwentyPercentTarget();
+        this.setTwentyFivePercentTarget();
+        this.setTwentyPercentSavings();
+        this.setTwentyFivePercentSavings();
         this.setFifteenPercentSavings();
         this.setTenPercentSavings();    
         this.setFivePercentSavings();
@@ -203,6 +211,10 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
         this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.twentyPercentTarget = new ConvertValue(this.twentyPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.twentyFivePercentTarget = new ConvertValue(this.twentyFivePercentTarget, startingUnit, endingUnit).convertedValue;
+        this.twentyFivePercentSavings = new ConvertValue(this.twentyFivePercentSavings, startingUnit, endingUnit).convertedValue;
+        this.twentyPercentSavings = new ConvertValue(this.twentyPercentSavings, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentSavings = new ConvertValue(this.fifteenPercentSavings, startingUnit, endingUnit).convertedValue;
         this.tenPercentSavings = new ConvertValue(this.tenPercentSavings, startingUnit, endingUnit).convertedValue;
         this.fivePercentSavings = new ConvertValue(this.fivePercentSavings, startingUnit, endingUnit).convertedValue;
@@ -220,8 +232,21 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     setFifteenPercentTarget() {
         this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
     }
+    setTwentyPercentTarget() {
+        this.twentyPercentTarget = this.rollingAdjusted * 0.80;
+    }
+    setTwentyFivePercentTarget() {
+        this.twentyFivePercentTarget = this.rollingAdjusted * 0.75;
+    }
     setThirtyPercentTarget() {
         this.thirtyPercentTarget = this.rollingAdjusted * 0.70;
+    }
+
+    setTwentyPercentSavings() {
+        this.twentyPercentSavings = this.rollingAdjusted - this.twentyPercentTarget;
+    }
+    setTwentyFivePercentSavings() {
+        this.twentyFivePercentSavings = this.rollingAdjusted - this.twentyFivePercentTarget;
     }
 
     setFifteenPercentSavings() {

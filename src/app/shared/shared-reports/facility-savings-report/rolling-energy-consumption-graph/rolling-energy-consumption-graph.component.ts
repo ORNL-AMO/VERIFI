@@ -35,7 +35,7 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
     this.drawChart();
   }
 
-  drawChart() { 
+  drawChart() {
     const skip = 12;
     let title = 'Trailing 12-Month Actual Energy Consumption';
 
@@ -45,6 +45,8 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
       let trace2Name: string = '15% Target';
       let trace3Name: string = '10% Target';
       let trace4Name: string = '5% Target';
+      let trace5Name: string = '20% Target';
+      let trace6Name: string = '25% Target';
 
       let yAxisTitle: string = this.analysisItem.energyUnit;
       let traceColor: string;
@@ -68,10 +70,30 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
         }
       }
 
+      var trace6 = {
+        x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.twentyFivePercentTarget }),
+        fillcolor: 'rgba(109, 160, 109, 0.3)',
+        fill: 'tozeroy',
+        line: { width: 0 },
+        mode: 'lines',
+        name: trace6Name,
+      }
+
+      var trace5 = {
+        x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
+        y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.twentyPercentTarget }),
+        fillcolor: 'rgba(138, 188, 138, 0.3)',
+        fill: 'tozeroy',
+        line: { width: 0 },
+        mode: 'lines',
+        name: trace5Name,
+      }
+
       var trace2 = {
         x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.fifteenPercentTarget }),
-        fillcolor: '#8e9f88',
+        fillcolor: 'rgba(169, 211, 169, 0.6)',
         fill: 'tozeroy',
         line: { width: 0 },
         mode: 'lines',
@@ -81,7 +103,7 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
       var trace3 = {
         x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.tenPercentTarget }),
-        fillcolor: '#9cb491',
+        fillcolor: 'rgba(198, 226, 198, 0.6)',
         fill: 'tonexty',
         line: { width: 0 },
         mode: 'lines',
@@ -91,19 +113,25 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
       var trace4 = {
         x: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.slice(skip).map(results => { return results.fivePercentTarget }),
-        fillcolor: '#d5e3d0',
+
+        fillcolor: 'rgba(224, 242, 224, 0.6)',
         fill: 'tonexty',
         line: { width: 0 },
         mode: 'lines',
         name: trace4Name,
       }
 
-      var data = [trace2, trace3, trace4, trace1];
+      var data = [trace6, trace5, trace2, trace3, trace4, trace1];
 
       let height: number;
       if (this.inHomeScreen) {
         height = 350;
       }
+
+      const xVals = this.monthlyAnalysisSummaryData.slice(skip).map(results => results.date);
+      const lastIndex = xVals.length - 1;
+      const lastX = xVals[lastIndex];
+      const lastData = this.monthlyAnalysisSummaryData.slice(skip)[lastIndex];
 
       var layout = {
         title: {
@@ -114,9 +142,7 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
           }
         },
         height: height,
-        legend: {
-          orientation: "h"
-        },
+        showlegend: false,
         xaxis: {
           hoverformat: "%b, %y",
           tickformat: "%b %Y",
@@ -132,7 +158,69 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
           },
           automargin: true,
         },
-        margin: { r: 0, t: 50 }
+        margin: { r: 0, t: 50 },
+        annotations: [
+          {
+            x: lastX,
+            y: (lastData.twentyFivePercentTarget + 0) / 2,
+            xref: 'x',
+            yref: 'y',
+            text: '25% Target',
+            showarrow: false,
+            font: { size: 12 },
+            align: 'left',
+            xanchor: 'left',
+            xshift: 10
+          },
+          {
+            x: lastX,
+            y: (lastData.twentyPercentTarget + lastData.twentyFivePercentTarget) / 2,
+            xref: 'x',
+            yref: 'y',
+            text: '20% Target',
+            showarrow: false,
+            font: { size: 12 },
+            align: 'left',
+            xanchor: 'left',
+            xshift: 10
+          },
+          {
+            x: lastX,
+            y: (lastData.fifteenPercentTarget + lastData.twentyPercentTarget) / 2,
+            xref: 'x',
+            yref: 'y',
+            text: '15% Target',
+            showarrow: false,
+            font: { size: 12 },
+            align: 'left',
+            xanchor: 'left',
+            xshift: 10
+          },
+          {
+            x: lastX,
+            y: (lastData.fifteenPercentTarget + lastData.tenPercentTarget) / 2,
+            xref: 'x',
+            yref: 'y',
+            text: '10% Target',
+            showarrow: false,
+            font: { size: 12 },
+            align: 'left',
+            xanchor: 'left',
+            xshift: 10
+          },
+          {
+            x: lastX,
+            y: (lastData.tenPercentTarget + lastData.fivePercentTarget) / 2,
+            xref: 'x',
+            yref: 'y',
+            text: '5% Target',
+            showarrow: false,
+            font: { size: 12 },
+            align: 'left',
+            xanchor: 'left',
+            xshift: 10
+          }
+        ]
       };
       var config = {
         displaylogo: false,

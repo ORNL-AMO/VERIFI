@@ -13,7 +13,8 @@ addEventListener('message', ({ data }) => {
         postMessage({
             annualAnalysisSummaries: annualAnalysisSummaryClass.annualAnalysisSummaries,
             monthlyAnalysisSummaryData: annualAnalysisSummaryClass.monthlyAnalysisSummaryData,
-            groupSummaries: annualAnalysisSummaryClass.groupSummaries
+            groupSummaries: annualAnalysisSummaryClass.groupSummaries,
+            latestMonthSummary: annualAnalysisSummaryClass.latestMonthSummary
         });
     } catch (err) {
         console.log(err);
@@ -21,7 +22,8 @@ addEventListener('message', ({ data }) => {
             error: true,
             annualAnalysisSummaries: undefined,
             monthlyAnalysisSummaryData: undefined,
-            groupSummaries: undefined
+            groupSummaries: undefined,
+            latestMonthSummary: undefined
         });
     }
 });

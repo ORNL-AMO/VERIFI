@@ -6,7 +6,7 @@ import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { getSavingsReportAnnualAnalysisSummaries, getSavingsReportMonthlyAnalysisSummaryData } from "./sharedSavingsReport";
+import { getLatestMonthSummary, getSavingsReportAnnualAnalysisSummaries, getSavingsReportMonthlyAnalysisSummaryData } from "./sharedSavingsReport";
 
 export class FacilitySavingsReport {
 
@@ -15,8 +15,10 @@ export class FacilitySavingsReport {
     groupSummaries: Array<{
         group: AnalysisGroup,
         monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-        annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+        annualAnalysisSummaryData: Array<AnnualAnalysisSummary>,
+        latestMonthGroupSummary: MonthlyAnalysisSummaryData
     }>;
+    latestMonthSummary: MonthlyAnalysisSummaryData;
 
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, accountPredictors: Array<IdbPredictor>,
         report: IdbFacilityReport
@@ -26,11 +28,14 @@ export class FacilitySavingsReport {
         this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.groupSummaries = annualAnalysisSummaryClass.groupSummaries.map((groupSummary: { group: AnalysisGroup, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, annualAnalysisSummaryData: Array<AnnualAnalysisSummary> }) => {
+            let monthlyData = getSavingsReportMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
             return {
                 group: groupSummary.group,
-                monthlyAnalysisSummaryData: getSavingsReportMonthlyAnalysisSummaryData(groupSummary.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear),
-                annualAnalysisSummaryData: getSavingsReportAnnualAnalysisSummaries(groupSummary.annualAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear)
+                monthlyAnalysisSummaryData: monthlyData,
+                annualAnalysisSummaryData: getSavingsReportAnnualAnalysisSummaries(groupSummary.annualAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear),
+                latestMonthGroupSummary: getLatestMonthSummary(monthlyData)
             }
         });
+        this.latestMonthSummary = getLatestMonthSummary(this.monthlyAnalysisSummaryData);
     }
 }

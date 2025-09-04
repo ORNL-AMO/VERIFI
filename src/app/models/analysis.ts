@@ -84,10 +84,14 @@ export interface MonthlyAnalysisSummaryData {
   fivePercentTarget: number,
   tenPercentTarget: number,
   fifteenPercentTarget: number,
+  twentyPercentTarget: number,
+  twentyFivePercentTarget: number,
   rollingActual: number,
   fivePercentSavings: number,
   tenPercentSavings: number,
   fifteenPercentSavings: number,
+  twentyPercentSavings: number,
+  twentyFivePercentSavings: number,
   thirtyPercentTarget: number,
   thirtyPercentSavings: number
 }
