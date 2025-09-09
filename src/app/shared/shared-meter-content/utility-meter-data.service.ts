@@ -7,6 +7,7 @@ import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, Ge
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { maxDateValidator, minDateValidator } from '../customFormValidators';
 
 @Injectable({
   providedIn: 'root'
@@ -129,7 +130,7 @@ export class UtilityMeterDataService {
     }) : []);
 
     return this.formBuilder.group({
-      readDate: [dateString, Validators.required],
+      readDate: [dateString, [Validators.required, maxDateValidator(), minDateValidator()]],
       //ISSUE 1176: Validators.min(0) removed
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required]],
       totalCost: [meterData.totalCost, [Validators.min(0)]],
@@ -217,7 +218,7 @@ export class UtilityMeterDataService {
     }) : []);
 
     let form: FormGroup = this.formBuilder.group({
-      readDate: [dateString, Validators.required],
+      readDate: [dateString, [Validators.required, maxDateValidator(), minDateValidator()]],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
       totalCost: [meterData.totalCost],

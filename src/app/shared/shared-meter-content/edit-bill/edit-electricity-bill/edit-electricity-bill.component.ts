@@ -65,6 +65,7 @@ export class EditElectricityBillComponent implements OnInit {
         this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
       }
     }
+    console.log(this.meterDataForm.controls.readDate)
   }
 
   setTotalEmissions() {

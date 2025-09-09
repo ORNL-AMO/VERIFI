@@ -11,7 +11,7 @@ export class EditPredictorFormService {
 
   getFormFromPredictor(predictor: IdbPredictor): FormGroup {
     let predictorForm: FormGroup = this.formBuilder.group({
-      'name': [predictor.name, [Validators.required]],
+      'name': [predictor.name, [Validators.required ]],
       'unit': [predictor.unit],
       'description': [predictor.description],
       'production': [predictor.production || false],
