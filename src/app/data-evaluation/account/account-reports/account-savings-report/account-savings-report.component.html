@@ -19,8 +19,7 @@
                     <app-annual-analysis-summary-table
                         *ngIf="annualAnalysisSummaries && annualAnalysisSummaries.length > 0 && accountSavingsReportSetup.includeAnnualResultsTable"
                         [latestMonthSummary]="latestMonthSummary" [annualAnalysisSummary]="annualAnalysisSummaries"
-                        [inReport]="true" [analysisItem]="selectedAnalysisItem" [accountOrFacility]="account"
-                        [printBlock]="'all'">
+                        [analysisItem]="selectedAnalysisItem" [accountOrFacility]="account" [printBlock]="'all'">
                     </app-annual-analysis-summary-table>
                     <app-annual-analysis-summary-graph
                         *ngIf="annualAnalysisSummaries && annualAnalysisSummaries.length > 0 && accountSavingsReportSetup.includeAnnualResultsGraph"
@@ -33,9 +32,12 @@
                     <h4>
                         Monthly Company Analysis
                     </h4>
+                    <div class="d-flex w-100 justify-content-end mb-2">
+                        <app-table-items-dropdown></app-table-items-dropdown>
+                    </div>
                     <div class="w-100 scroll-x">
                         <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
-                            [analysisItem]="selectedAnalysisItem" [facilityOrAccount]="account" [inReport]="true"
+                            [analysisItem]="selectedAnalysisItem" [facilityOrAccount]="account"
                             [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
                         </app-monthly-analysis-summary-table>
                     </div>
@@ -77,7 +79,7 @@
                         <div class="w-100 scroll-x">
                             <app-annual-analysis-summary-table
                                 *ngIf="summary.annualAnalysisSummaries && summary.annualAnalysisSummaries.length > 0 && accountSavingsReportSetup.includeFacilityResultsTable"
-                                [annualAnalysisSummary]="summary.annualAnalysisSummaries" [inReport]="true"
+                                [annualAnalysisSummary]="summary.annualAnalysisSummaries"
                                 [latestMonthSummary]="summary.latestMonthSummary" [analysisItem]="summary.analysisItem"
                                 [accountOrFacility]="summary.facility" [printBlock]="'all'">
                             </app-annual-analysis-summary-table>
