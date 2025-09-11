@@ -170,13 +170,13 @@
     </div>
   </ng-container>
 
-  <div class="row">
-    <div class="col-12">
-      <hr class="my-2">
-    </div>
-  </div>
 
   <ng-template [ngIf]="inModal" [ngIfElse]="notInModalBlock">
+    <div class="row">
+      <div class="col-12">
+        <hr class="my-2">
+      </div>
+    </div>
     <div class="d-flex w-100 justify-content-between">
       <ng-template [ngIf]="completedStatus !== 'success' && completedStatus !== 'error'" [ngIfElse]="closeModalBlock">
         <div>
@@ -195,10 +195,12 @@
     </div>
   </ng-template>
   <ng-template #notInModalBlock>
-    <div *ngIf="completedStatus !== 'success'" class="p-2 pull-right">
-      <button type="button" class="btn btn-secondary me-2" (click)="initForm()">Reset Form</button>
-      <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
-        Answers</button>
+    <div *ngIf="completedStatus !== 'success'" class="d-flex w-100 justify-content-end">
+      <div class="p-2">
+        <button type="button" class="btn btn-secondary me-2" (click)="initForm()">Reset Form</button>
+        <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
+          Answers</button>
+      </div>
     </div>
   </ng-template>
 
