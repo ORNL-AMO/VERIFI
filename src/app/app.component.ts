@@ -171,7 +171,9 @@ export class AppComponent {
         await this.initializeElectronBackups();
 
         this.dataInitialized = true;
-        this.router.navigateByUrl('welcome');
+        if (this.router.url != '/feedback') {
+          this.router.navigateByUrl('welcome');
+        }
       }
 
     } catch (err) {
@@ -289,8 +291,8 @@ export class AppComponent {
         accountMeters[i] = updateMeter.utilityMeter;
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
       };
-      if(updateMeter.meterDataChanged) {
-        for(let i = 0; i < updateMeter.utilityMeterData.length; i++) {
+      if (updateMeter.meterDataChanged) {
+        for (let i = 0; i < updateMeter.utilityMeterData.length; i++) {
           await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(updateMeter.utilityMeterData[i]));
         }
       }
