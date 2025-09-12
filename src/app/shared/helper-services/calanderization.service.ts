@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizationFilters } from 'src/app/models/calanderization';
+import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -13,6 +13,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Injectable({
   providedIn: 'root'
@@ -242,7 +243,7 @@ export class CalanderizationService {
 
   getYearOptionsAccount(meterCategory: 'water' | 'energy' | 'all', facilityId?: string): Array<number> {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    if(facilityId){
+    if (facilityId) {
       meters = meters.filter(meter => {
         return meter.facilityId == facilityId
       });
@@ -265,6 +266,28 @@ export class CalanderizationService {
       return years;
     }
     return [];
+  }
+
+  checkReportYearSelection(meterCategory: 'water' | 'energy' | 'all', reportYear: number, accountOrFacility: IdbAccount | IdbFacility): boolean {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if ((accountOrFacility as IdbFacility).accountId !== undefined) {
+      meters = meters.filter(meter => {
+        return meter.facilityId == accountOrFacility.guid
+      });
+    }
+    let categoryMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
+    let categoryMeterIds: Array<string> = categoryMeters.map(meter => { return meter.guid });
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let categoryMeterData: Array<IdbUtilityMeterData> = meterData.filter(data => { return categoryMeterIds.includes(data.meterId) });
+    let yearData: Array<IdbUtilityMeterData> = categoryMeterData.filter(data => {
+      return getFiscalYear(data.readDate, accountOrFacility) == reportYear;
+    });
+    let months: Array<number> =  yearData.map(data => {
+      let readDate: Date = new Date(data.readDate);
+      return readDate.getUTCMonth();
+    });
+    months = _.uniq(months);
+    return months.length != 12;
   }
 
   getYearOptionsFacility(facilityId: string, meterCategory: 'water' | 'energy' | 'all'): Array<number> {
