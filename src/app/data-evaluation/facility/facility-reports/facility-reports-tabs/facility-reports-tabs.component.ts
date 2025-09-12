@@ -82,7 +82,7 @@ export class FacilityReportsTabsComponent {
   }
 
   goToDashboard() {
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard');
   }
 
   setSetupValid() {
