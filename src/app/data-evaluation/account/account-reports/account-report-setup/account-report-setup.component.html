@@ -34,6 +34,11 @@
                                 <option *ngFor="let year of reportYears" [ngValue]="year">{{year | yearDisplay:
                                     account.fiscalYear}}</option>
                             </select>
+                            <div class="alert alert-warning mt-2" *ngIf="showReportYearWarning">
+                                Your final year does not include 12 months of data. Please update to a year with
+                                complete data. To view mid-year progress, return to the reports dashboard and run a
+                                "Savings Report".
+                            </div>
                         </div>
                     </div>
                 </div>

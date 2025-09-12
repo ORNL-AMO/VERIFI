@@ -10,6 +10,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { ReportType } from 'src/app/models/constantsAndTypes';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-account-report-setup',
@@ -29,11 +30,14 @@ export class AccountReportSetupComponent {
   errorMessageSub: Subscription;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
+  showReportYearWarning: boolean = false;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private calanderizationService: CalanderizationService) {
+    private calanderizationService: CalanderizationService,
+    private facilityDbService: FacilitydbService
+  ) {
 
   }
 
@@ -49,10 +53,13 @@ export class AccountReportSetupComponent {
 
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       selectedReport = val;
-      if (!this.isFormChange)
+      if (!this.isFormChange) {
         this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
-      else
+        this.checkReportYear();
+      }
+      else {
         this.isFormChange = false;
+      }
     });
   }
 
@@ -68,6 +75,7 @@ export class AccountReportSetupComponent {
     selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
+    this.checkReportYear();
   }
 
   setYearOptions() {
@@ -77,6 +85,12 @@ export class AccountReportSetupComponent {
     let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount('all');
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
+  }
+
+  checkReportYear() {
+    if (this.reportType == 'analysis' && this.setupForm.controls.reportYear.value != undefined) {
+      this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.setupForm.controls.reportYear.value, this.account);
+    }
   }
 
 }
