@@ -10,7 +10,6 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { ReportType } from 'src/app/models/constantsAndTypes';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-account-report-setup',
@@ -35,8 +34,7 @@ export class AccountReportSetupComponent {
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private calanderizationService: CalanderizationService,
-    private facilityDbService: FacilitydbService
+    private calanderizationService: CalanderizationService
   ) {
 
   }
