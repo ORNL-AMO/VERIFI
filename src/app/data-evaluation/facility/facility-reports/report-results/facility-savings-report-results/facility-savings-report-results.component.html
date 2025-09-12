@@ -15,12 +15,38 @@
                     Annual Facility Analysis
                 </h4>
             </div>
-            <div class="scroll-x">
-                <app-annual-analysis-summary-table *ngIf="annualAnalysisSummaries"
+            <ng-template
+                [ngIf]="!print || !(facilityReport.savingsReportSettings.analysisTableColumns | breakUpTableForPrint: 'annual')"
+                [ngIfElse]="printBlock">
+                <div class="scroll-x">
+                    <app-annual-analysis-summary-table *ngIf="annualAnalysisSummaries"
+                        [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility" [printBlock]="'all'">
+                    </app-annual-analysis-summary-table>
+                </div>
+            </ng-template>
+
+            <ng-template #printBlock>
+                <app-annual-analysis-summary-table
+                    *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption'"
                     [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
-                    [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility" [printBlock]="'all'">
+                    [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility"
+                    [printBlock]="'consumption'">
                 </app-annual-analysis-summary-table>
-            </div>
+                <app-annual-analysis-summary-table
+                    *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors'"
+                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                    [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility"
+                    [printBlock]="'predictors'">
+                </app-annual-analysis-summary-table>
+                <app-annual-analysis-summary-table
+                    *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings'"
+                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                    [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility" [printBlock]="'savings'">
+                </app-annual-analysis-summary-table>
+            </ng-template>
+
+            <div class="print-break-after"></div>
         </ng-container>
 
         <ng-container
@@ -33,12 +59,37 @@
             <div class="d-flex w-100 justify-content-end mb-2">
                 <app-table-items-dropdown></app-table-items-dropdown>
             </div>
-            <div class="scroll-x">
-                <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
-                    [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
-                    [printBlock]="'all'">
+            <ng-template
+                [ngIf]="!print || !(facilityReport.savingsReportSettings.analysisTableColumns| breakUpTableForPrint: 'monthly')"
+                [ngIfElse]="reportPrintBlock">
+                <div class="scroll-x">
+                    <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                        [printBlock]="'all'">
+                    </app-monthly-analysis-summary-table>
+                </div>
+            </ng-template>
+
+            <ng-template #reportPrintBlock>
+                <app-monthly-analysis-summary-table
+                    *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption'"
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'consumption'">
                 </app-monthly-analysis-summary-table>
-            </div>
+
+                <app-monthly-analysis-summary-table
+                    *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors'"
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'predictors'">
+                </app-monthly-analysis-summary-table>
+
+                <app-monthly-analysis-summary-table
+                    *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings'"
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'savings'">
+                </app-monthly-analysis-summary-table>
+            </ng-template>
+            <div class="print-break-after"></div>
         </ng-container>
 
         <ng-container
@@ -48,38 +99,44 @@
                     Monthly Facility Analysis Graphs
                 </h4>
             </div>
-            <app-monthly-analysis-summary-graph *ngIf="monthlyAnalysisSummaryData"
-                [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                [facilityOrAccount]="facility">
-            </app-monthly-analysis-summary-graph>
-
-            <hr>
-
-            <app-monthly-analysis-summary-savings-graph *ngIf="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
-            </app-monthly-analysis-summary-savings-graph>
-
-        </ng-container>
-
-        <ng-container
-            *ngIf="facilityReport.savingsReportSettings.facilityMonthlyResults && facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption">
-            <div class="mt-5">
-                <app-rolling-energy-consumption-graph *ngIf="monthlyAnalysisSummaryData"
+            <div class="print-break-avoid">
+                <app-monthly-analysis-summary-graph *ngIf="monthlyAnalysisSummaryData"
                     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                    [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
+                    [facilityOrAccount]="facility">
+                </app-monthly-analysis-summary-graph>
                 <hr>
             </div>
-        </ng-container>
-        <ng-container
-            *ngIf="facilityReport.savingsReportSettings.facilityMonthlyResults && facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings">
-            <div class="mt-5">
-                <app-rolling-energy-savings-graph *ngIf="monthlyAnalysisSummaryData"
-                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                    [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
-                <hr>
+            <div class="print-break-avoid">
+                <app-monthly-analysis-summary-savings-graph *ngIf="monthlyAnalysisSummaryData"
+                    [analysisItem]="analysisItem" [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+                    [facilityOrAccount]="facility">
+                </app-monthly-analysis-summary-savings-graph>
             </div>
+            <div class="print-break-after"></div>
         </ng-container>
 
+        <div class="print-break-avoid">
+            <ng-container
+                *ngIf="facilityReport.savingsReportSettings.facilityMonthlyResults && facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption">
+                <div class="mt-5">
+                    <app-rolling-energy-consumption-graph *ngIf="monthlyAnalysisSummaryData"
+                        [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
+                    <hr>
+                </div>
+                <div class="print-break-after"></div>
+            </ng-container>
+            <ng-container
+                *ngIf="facilityReport.savingsReportSettings.facilityMonthlyResults && facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings">
+                <div class="mt-5">
+                    <app-rolling-energy-savings-graph *ngIf="monthlyAnalysisSummaryData"
+                        [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
+                    <hr>
+                </div>
+                <div class="print-break-after"></div>
+            </ng-container>
+        </div>
     </div>
 
     <div class="report" [ngClass]="{'print': print}"
@@ -100,15 +157,42 @@
                         {{groupSummary.group.idbGroupId | groupName}} Annual Results
                     </h4>
                 </div>
-                <div class="scroll-x">
-                    <app-annual-analysis-summary-table *ngIf="annualAnalysisSummaries"
+                <ng-template
+                    [ngIf]="!print || !(facilityReport.savingsReportSettings.analysisTableColumns | breakUpTableForPrint: 'annual')"
+                    [ngIfElse]="printBlock">
+                    <div class="scroll-x">
+                        <app-annual-analysis-summary-table *ngIf="annualAnalysisSummaries"
+                            [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData"
+                            [analysisItem]="analysisItem" [latestMonthSummary]="groupSummary.latestMonthGroupSummary"
+                            [accountOrFacility]="facility" [printBlock]="'all'" [group]="groupSummary.group">
+                        </app-annual-analysis-summary-table>
+                    </div>
+                </ng-template>
+
+                <ng-template #printBlock>
+                    <app-annual-analysis-summary-table
+                        *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption'"
                         [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem"
-                        [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [accountOrFacility]="facility"
-                        [printBlock]="'all'" [group]="groupSummary.group">
+                        [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [group]="groupSummary.group"
+                        [accountOrFacility]="facility" [printBlock]="'consumption'">
                     </app-annual-analysis-summary-table>
-                </div>
+                    <app-annual-analysis-summary-table
+                        *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors'"
+                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [group]="groupSummary.group"
+                        [accountOrFacility]="facility" [printBlock]="'predictors'">
+                    </app-annual-analysis-summary-table>
+                    <app-annual-analysis-summary-table
+                        *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings'"
+                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [group]="groupSummary.group"
+                        [accountOrFacility]="facility" [printBlock]="'savings'">
+                    </app-annual-analysis-summary-table>
+                </ng-template>
                 <hr>
+                <div class="print-break-after"></div>
             </ng-container>
+
             <ng-container>
                 <ng-container
                     *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults && (facilityReport.savingsReportSettings.groupMonthlyResultsTable || facilityReport.savingsReportSettings.groupMonthlyResultsGraphs || facilityReport.savingsReportSettings.groupTrailingTwelveMonthsConsumption || facilityReport.savingsReportSettings.groupTrailingTwelveMonthsSavings)">
@@ -123,44 +207,82 @@
                     <div class="d-flex w-100 justify-content-end mb-2">
                         <app-table-items-dropdown></app-table-items-dropdown>
                     </div>
-                    <div class="scroll-x">
+                    <ng-template
+                        [ngIf]="!print || !(facilityReport.savingsReportSettings.analysisTableColumns| breakUpTableForPrint: 'monthly')"
+                        [ngIfElse]="reportPrintBlock">
+                        <div class="scroll-x">
+                            <app-monthly-analysis-summary-table
+                                [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                                [analysisItem]="analysisItem" [facilityOrAccount]="facility"
+                                [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
+                            </app-monthly-analysis-summary-table>
+                            <hr>
+                        </div>
+                    </ng-template>
+                    <ng-template #reportPrintBlock>
                         <app-monthly-analysis-summary-table
+                            *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption'"
                             [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
                             [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
-                            [printBlock]="'all'">
+                            [printBlock]="'consumption'">
                         </app-monthly-analysis-summary-table>
-                        <hr>
-                    </div>
+
+                        <app-monthly-analysis-summary-table
+                            *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors'"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                            [printBlock]="'predictors'">
+                        </app-monthly-analysis-summary-table>
+
+                        <app-monthly-analysis-summary-table
+                            *ngIf="facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings'"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                            [printBlock]="'savings'">
+                        </app-monthly-analysis-summary-table>
+                    </ng-template>
+                    <div class="print-break-after"></div>
                 </ng-container>
+
                 <ng-container
                     *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupMonthlyResultsGraphs">
-                    <app-monthly-analysis-summary-graph *ngIf="monthlyAnalysisSummaryData"
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem" [facilityOrAccount]="facility">
-                    </app-monthly-analysis-summary-graph>
+                    <div class="print-break-avoid">
+                        <app-monthly-analysis-summary-graph *ngIf="monthlyAnalysisSummaryData"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                            [analysisItem]="analysisItem" [facilityOrAccount]="facility">
+                        </app-monthly-analysis-summary-graph>
+                    </div>
+                    <div class="print-break-avoid">
+                        <app-monthly-analysis-summary-savings-graph *ngIf="monthlyAnalysisSummaryData"
+                            [analysisItem]="analysisItem"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                            [facilityOrAccount]="facility">
+                        </app-monthly-analysis-summary-savings-graph>
+                        <hr>
+                    </div>
+                    <div class="print-break-after"></div>
+                </ng-container>
 
-                    <app-monthly-analysis-summary-savings-graph *ngIf="monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem"
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [facilityOrAccount]="facility">
-                    </app-monthly-analysis-summary-savings-graph>
-                    <hr>
-                </ng-container>
-                <ng-container
-                    *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupTrailingTwelveMonthsConsumption">
-                    <app-rolling-energy-consumption-graph *ngIf="monthlyAnalysisSummaryData"
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem"
-                        [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
-                    <hr>
-                </ng-container>
-                <ng-container
-                    *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupTrailingTwelveMonthsSavings">
-                    <app-rolling-energy-savings-graph *ngIf="monthlyAnalysisSummaryData"
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem" [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
-                    <hr>
-                </ng-container>
+                <div class="print-break-avoid">
+                    <ng-container
+                        *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupTrailingTwelveMonthsConsumption">
+                        <app-rolling-energy-consumption-graph *ngIf="monthlyAnalysisSummaryData"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                            [analysisItem]="analysisItem"
+                            [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
+                        <hr>
+                        <div class="print-break-after"></div>
+                    </ng-container>
+                    <ng-container
+                        *ngIf="facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupTrailingTwelveMonthsSavings">
+                        <app-rolling-energy-savings-graph *ngIf="monthlyAnalysisSummaryData"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                            [analysisItem]="analysisItem"
+                            [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
+                        <hr>
+                        <div class="print-break-after"></div>
+                    </ng-container>
+                </div>
             </ng-container>
         </ng-container>
     </div>

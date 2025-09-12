@@ -41,7 +41,9 @@ import { RollingEnergySavingsGraphComponent } from './facility-savings-report/ro
     FacilityAnalysisReportComponent,
     GroupAnalysisReportComponent,
     RollingEnergyConsumptionGraphComponent,
-    RollingEnergySavingsGraphComponent
+    RollingEnergySavingsGraphComponent,
+    IncludeTablePipe,
+    BreakUpTableForPrintPipe
   ]
 })
 export class SharedReportsModule { }

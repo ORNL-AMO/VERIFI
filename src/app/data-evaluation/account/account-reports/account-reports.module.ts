@@ -62,6 +62,7 @@ import { ReportOrderByPipe } from './report-pipes/report-order-by.pipe';
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
+import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
 
 @NgModule({
   declarations: [
@@ -131,8 +132,9 @@ import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
     DataOverviewModule,
     SharedAnalysisModule,
     NgbPagination,
-    TableItemsDropdownModule
-  ],
+    TableItemsDropdownModule,
+    SharedReportsModule
+],
   providers: [
     AccountReportTypePipe
   ]
