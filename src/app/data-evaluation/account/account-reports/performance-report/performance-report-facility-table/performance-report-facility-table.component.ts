@@ -21,6 +21,8 @@ export class PerformanceReportFacilityTableComponent {
   selectedAnalysisItem: IdbAccountAnalysisItem;
   @Input()
   performanceReportSetup: PerformanceReportSetup;
+  @Input({ required: true})
+  printBlock: 'actual' | 'adjusted' | 'savings' | 'contribution' | 'all';
 
   savingsGoal: number;
   orderDataField: string = 'facilityName';
