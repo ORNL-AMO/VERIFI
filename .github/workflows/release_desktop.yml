@@ -104,7 +104,7 @@ jobs:
 
           cp "$PROV_PROF_PATH" ./embedded.provisionprofile
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Build
         run: npm run build-prod-electron
       - name: Package [Mac]
@@ -165,7 +165,7 @@ jobs:
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Build
         run: npm run build-prod-electron
       - name: Package [Win]
