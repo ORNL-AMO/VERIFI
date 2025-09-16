@@ -219,7 +219,6 @@ export class UploadDataV3Service {
           }
           meter.phase = excelMeter['Phase']
           meter.fuel = getFuelEnum(fuel, meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType)
-
           meter.startingUnit = checkImportStartingUnit(excelMeter['Unit (COLLECTION)'], meter.source, meter.phase, meter.fuel, meter.scope);
           let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
           if (isEnergyUnit) {
@@ -244,11 +243,7 @@ export class UploadDataV3Service {
           if (groupData.group) {
             meter.groupId = groupData.group.guid;
           }
-          if (excelMeter['Energy Unit']) {
-            meter.energyUnit = excelMeter['Energy Unit'];
-          } else {
-            meter.energyUnit = facility.energyUnit;
-          }
+
           meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, false);
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
           meter = this.editMeterFormService.setMultipliers(meter);

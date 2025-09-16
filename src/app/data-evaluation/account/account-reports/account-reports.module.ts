@@ -4,7 +4,6 @@ import { AccountReportsComponent } from './account-reports.component';
 import { AccountReportsBannerComponent } from './account-reports-banner/account-reports-banner.component';
 import { RouterModule } from '@angular/router';
 import { AccountReportsDashboardComponent } from './account-reports-dashboard/account-reports-dashboard.component';
-import { AccountReportsItemCardComponent } from './account-reports-dashboard/account-reports-item-card/account-reports-item-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { AccountReportSetupComponent } from './account-report-setup/account-report-setup.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -34,13 +33,8 @@ import { PerformanceChartComponent } from './performance-report/performance-char
 import { TopPerformersTableComponent } from './performance-report/top-performers-table/top-performers-table.component';
 import { TableCellShadingPipe } from './report-pipes/table-cell-shading.pipe';
 import { TableFillPipe } from './report-pipes/table-fill.pipe';
-import { PerformanceReportDashboardComponent } from './account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component';
-import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
-import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';
-import { AccountReportsDashboardTabsComponent } from './account-reports-dashboard/account-reports-dashboard-tabs/account-reports-dashboard-tabs.component';
 import { BetterClimateReportComponent } from './better-climate-report/better-climate-report.component';
 import { BetterClimateSetupComponent } from './account-report-setup/better-climate-setup/better-climate-setup.component';
-import { BetterClimateReportDashboardComponent } from './account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component';
 import { PortfolioInformationTableComponent } from './better-climate-report/portfolio-information-table/portfolio-information-table.component';
 import { AbsoluteEmissionsTableComponent } from './better-climate-report/absolute-emissions-table/absolute-emissions-table.component';
 import { EmissionsReductionsTableComponent } from './better-climate-report/emissions-reductions-table/emissions-reductions-table.component';
@@ -53,26 +47,28 @@ import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolut
 import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
 import { TopPerformersChartComponent } from './better-climate-report/top-performers-chart/top-performers-chart.component';
 import { AccountReportTypePipe } from './report-pipes/account-report-type.pipe';
-import { AnalysisReportDashboardComponent } from './account-reports-dashboard/analysis-report-dashboard/analysis-report-dashboard.component';
 import { AnalysisReportComponent } from './analysis-report/analysis-report.component';
 import { AnalysisReportSetupComponent } from './account-report-setup/analysis-report-setup/analysis-report-setup.component';
 import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
 import { AnalysisProblemsInformationComponent } from './analysis-report/analysis-problems-information/analysis-problems-information.component';
 import { AnalysisDataValidationTablesComponent } from './analysis-report/analysis-data-validation-tables/analysis-data-validation-tables.component';
 import { SharedAnalysisModule } from "src/app/shared/shared-analysis/shared-analysis.module";
-import { AccountEmissionFactorsReportDashboardComponent } from './account-reports-dashboard/account-emission-factors-report-dashboard/account-emission-factors-report-dashboard.component';
 import { AccountEmissionFactorsReportComponent } from './account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
 import { AccountEmissionFactorsReportTableComponent } from './account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
 import { AccountSavingsReportSetupComponent } from 'src/app/data-evaluation/account/account-reports/account-report-setup/account-savings-report-setup/account-savings-report-setup.component';
 import { AccountSavingsReportComponent } from 'src/app/data-evaluation/account/account-reports/account-savings-report/account-savings-report.component';
-import { AccountSavingsReportDashboardComponent } from 'src/app/data-evaluation/account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component';
+import { AccountReportsDashboardTableComponent } from './account-reports-dashboard/account-reports-dashboard-table/account-reports-dashboard-table.component';
+import { ReportOrderByPipe } from './report-pipes/report-order-by.pipe';
+import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
+import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
+import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
+import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
 
 @NgModule({
   declarations: [
     AccountReportsComponent,
     AccountReportsBannerComponent,
     AccountReportsDashboardComponent,
-    AccountReportsItemCardComponent,
     AccountReportSetupComponent,
     BetterPlantsSetupComponent,
     DataOverviewSetupComponent,
@@ -98,13 +94,8 @@ import { AccountSavingsReportDashboardComponent } from 'src/app/data-evaluation/
     PerformanceReportUtilityTableComponent,
     PerformanceChartComponent,
     TopPerformersTableComponent,
-    PerformanceReportDashboardComponent,
-    OverviewReportDashboardComponent,
-    BetterPlantsReportDashboardComponent,
-    AccountReportsDashboardTabsComponent,
     BetterClimateReportComponent,
     BetterClimateSetupComponent,
-    BetterClimateReportDashboardComponent,
     PortfolioInformationTableComponent,
     AbsoluteEmissionsTableComponent,
     EmissionsReductionsTableComponent,
@@ -117,18 +108,18 @@ import { AccountSavingsReportDashboardComponent } from 'src/app/data-evaluation/
     TopEmissionsPerformersTableComponent,
     TopPerformersChartComponent,
     AccountReportTypePipe,
-    AnalysisReportDashboardComponent,
     AnalysisReportComponent,
     AnalysisReportSetupComponent,
     AnalysisFacilityReportComponent,
     AnalysisProblemsInformationComponent,
     AnalysisDataValidationTablesComponent,
-    AccountSavingsReportDashboardComponent,
     AccountSavingsReportComponent,
     AccountSavingsReportSetupComponent,
-    AccountEmissionFactorsReportDashboardComponent,
     AccountEmissionFactorsReportComponent,
-    AccountEmissionFactorsReportTableComponent
+    AccountEmissionFactorsReportTableComponent,
+    AccountReportsDashboardTableComponent,
+    ReportOrderByPipe,
+    ReportBadgeClassPipe
   ],
   imports: [
     CommonModule,
@@ -139,7 +130,13 @@ import { AccountSavingsReportDashboardComponent } from 'src/app/data-evaluation/
     LabelWithTooltipModule,
     CalculatingSpinnerModule,
     DataOverviewModule,
-    SharedAnalysisModule
-]
+    SharedAnalysisModule,
+    NgbPagination,
+    TableItemsDropdownModule,
+    SharedReportsModule
+],
+  providers: [
+    AccountReportTypePipe
+  ]
 })
 export class AccountReportsModule { }

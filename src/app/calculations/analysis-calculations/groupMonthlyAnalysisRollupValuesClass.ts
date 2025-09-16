@@ -59,7 +59,11 @@ export class GroupMonthlyAnalysisRollupValues {
     fivePercentTarget: number;
     tenPercentTarget: number;
     fifteenPercentTarget: number;
+    twentyPercentTarget: number;
+    twentyFivePercentTarget: number;
     thirtyPercentTarget: number;
+    twentyPercentSavings: number;
+    twentyFivePercentSavings: number;
     fifteenPercentSavings: number;
     tenPercentSavings: number;
     fivePercentSavings: number;
@@ -104,6 +108,8 @@ export class GroupMonthlyAnalysisRollupValues {
             //1964
             this.setRollingChangeRatio();
             this.setMonthlyChangeRatio();
+            this.setTwentyPercentTarget();
+            this.setTwentyFivePercentTarget();
             this.setFifteenPercentTarget();
             this.setTenPercentTarget();
             this.setFivePercentTarget();
@@ -112,6 +118,8 @@ export class GroupMonthlyAnalysisRollupValues {
             this.setFivePercentSavings();
             this.setThirtyPercentTarget();
             this.setThirtyPercentSavings();
+            this.setTwentyPercentSavings();
+            this.setTwentyFivePercentSavings();
 
         } else {
             this.setBaselineYearValues();
@@ -142,9 +150,13 @@ export class GroupMonthlyAnalysisRollupValues {
         this.tenPercentTarget = 0;
         this.fivePercentTarget = 0;
         this.fifteenPercentTarget = 0;
+        this.twentyPercentTarget = 0;
+        this.twentyFivePercentTarget = 0;
         this.fifteenPercentSavings = 0;
         this.tenPercentSavings = 0;
         this.fivePercentSavings = 0;
+        this.twentyPercentSavings = 0;
+        this.twentyFivePercentSavings = 0;
         this.thirtyPercentTarget = 0;
         this.thirtyPercentSavings = 0;
         this.rollingBaselineAdjustmentInput = 0;
@@ -373,7 +385,11 @@ export class GroupMonthlyAnalysisRollupValues {
         this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
         this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.twentyPercentTarget = new ConvertValue(this.twentyPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.twentyFivePercentTarget = new ConvertValue(this.twentyFivePercentTarget, startingUnit, endingUnit).convertedValue;
         this.rollingActual = new ConvertValue(this.rollingActual, startingUnit, endingUnit).convertedValue;
+        this.twentyFivePercentSavings = new ConvertValue(this.twentyFivePercentSavings, startingUnit, endingUnit).convertedValue;
+        this.twentyPercentSavings = new ConvertValue(this.twentyPercentSavings, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentSavings = new ConvertValue(this.fifteenPercentSavings, startingUnit, endingUnit).convertedValue;
         this.tenPercentSavings = new ConvertValue(this.tenPercentSavings, startingUnit, endingUnit).convertedValue;
         this.fivePercentSavings = new ConvertValue(this.fivePercentSavings, startingUnit, endingUnit).convertedValue;
@@ -399,6 +415,20 @@ export class GroupMonthlyAnalysisRollupValues {
     }
     setThirtyPercentTarget() {
         this.thirtyPercentTarget = this.rollingAdjusted * 0.70;
+    }
+    setTwentyPercentTarget() {
+        this.twentyPercentTarget = this.rollingAdjusted * 0.80;
+    }
+    setTwentyFivePercentTarget() {
+        this.twentyFivePercentTarget = this.rollingAdjusted * 0.75;
+    }
+
+    setTwentyPercentSavings() {
+        this.twentyPercentSavings = this.rollingAdjusted - this.twentyPercentTarget;
+    }
+
+    setTwentyFivePercentSavings() {
+        this.twentyFivePercentSavings = this.rollingAdjusted - this.twentyFivePercentTarget;
     }
 
     setFifteenPercentSavings() {

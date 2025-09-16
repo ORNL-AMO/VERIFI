@@ -69,7 +69,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="includeAnnualResults"
                             id="includeAnnualResults" formControlName="includeAnnualResults" (change)="save()">
-                        <label class="bold form-check-label" for="includeAnnualResults">Account Results
+                        <label class="bold form-check-label" for="includeAnnualResults">Company Results
                         </label>
                     </div>
                     <ng-container *ngIf="reportSetup.includeAnnualResults">
@@ -77,7 +77,7 @@
                             <input class="form-check-input" type="checkbox" name="includeAnnualResultsTable"
                                 id="includeAnnualResultsTable" formControlName="includeAnnualResultsTable"
                                 (change)="save()">
-                            <label class="form-check-label" for="includeAnnualResultsTable">Account Annual Results
+                            <label class="form-check-label" for="includeAnnualResultsTable">Company Annual Results
                                 Table
                             </label>
                         </div>
@@ -85,15 +85,23 @@
                             <input class="form-check-input" type="checkbox" name="includeAnnualResultsGraph"
                                 id="includeAnnualResultsGraph" formControlName="includeAnnualResultsGraph"
                                 (change)="save()">
-                            <label class="form-check-label" for="includeAnnualResultsGraph">Account Annual Results
+                            <label class="form-check-label" for="includeAnnualResultsGraph">Company Annual Results
                                 Graph
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeAccountMonthlyTable"
+                                id="includeAccountMonthlyTable" formControlName="includeAccountMonthlyTable"
+                                (change)="save()">
+                            <label class="form-check-label" for="includeAccountMonthlyTable">Company Monthly Results
+                                Table
                             </label>
                         </div>
                         <div class="form-check ms-2">
                             <input class="form-check-input" type="checkbox" name="includeAccountMonthlyResults"
                                 id="includeAccountMonthlyResults" formControlName="includeAccountMonthlyResults"
                                 (change)="save()">
-                            <label class="form-check-label" for="includeAnnualResultsGraph">Account Monthly Results
+                            <label class="form-check-label" for="includeAccountMonthlyResults">Company Monthly Results
                                 Graph
                             </label>
                         </div>
@@ -202,6 +210,131 @@
                             </label>
                         </div>
                     </ng-container>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+        <div formGroupName="analysisTableColumns" *ngIf="selectedAnalysisItem">
+            <div class="d-flex w-100 justify-content-between">
+                <span class="bold">
+                    Choose Table Columns
+                </span>
+                <span>
+                    <a class="small click-link" (click)="setDefault()">Use Default Columns</a>
+                </span>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="energy" formControlName="energy"
+                            (change)="toggleEnergyColumns()" id="energy">
+                        <label class="bold form-check-label" for="energy">{{energyColumnLabel}}
+                        </label>
+
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="actualEnergy"
+                            formControlName="actualEnergy" (change)="save()" id="actualEnergy">
+                        <label class="form-check-label" for="actualEnergy">{{actualUseLabel}}</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="adjusted" formControlName="adjusted"
+                            (change)="save()" id="adjusted">
+                        <label class="form-check-label" for="adjusted">Adjusted</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="baselineAdjustmentForNormalization"
+                            formControlName="baselineAdjustmentForNormalization" (change)="save()"
+                            id="baselineAdjustmentForNormalization">
+                        <label class="form-check-label" for="baselineAdjustmentForNormalization">Baseline
+                            Adjustment for Normalization</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="baselineAdjustmentForOther"
+                            formControlName="baselineAdjustmentForOther" (change)="save()"
+                            id="baselineAdjustmentForOther">
+                        <label class="form-check-label" for="baselineAdjustmentForOther">Baseline
+                            Adjustment for Other</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="baselineAdjustment"
+                            formControlName="baselineAdjustment" (change)="save()" id="baselineAdjustment">
+                        <label class="form-check-label" for="baselineAdjustment">Baseline Adjustment</label>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="incrementalImprovement"
+                            formControlName="incrementalImprovement" (change)="toggleIncrementalImprovement()"
+                            id="incrementalImprovement">
+                        <label class="bold form-check-label" for="incrementalImprovement">
+                            Incremental Improvement
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="SEnPI" formControlName="SEnPI"
+                            (change)="save()" id="SEnPI">
+                        <label class="form-check-label" for="SEnPI">SEnPI</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="bankedSavings"
+                            formControlName="bankedSavings" (change)="save()" id="bankedSavings">
+                        <label class="form-check-label" for="bankedSavings">Banked Savings</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="savingsUnbanked"
+                            formControlName="savingsUnbanked" (change)="save()" id="savingsUnbanked">
+                        <label class="form-check-label" for="savingsUnbanked">Unbanked Savings</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="savings" formControlName="savings"
+                            (change)="save()" id="savings">
+                        <label class="form-check-label" for="savings">Savings</label>
+                    </div>
+                    <div class="col">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="rollingSavings"
+                                formControlName="rollingSavings" (change)="save()" id="rollingSavings">
+                            <label class="form-check-label" for="rollingSavings">Rolling Savings</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="rolling12MonthImprovement"
+                                formControlName="rolling12MonthImprovement" (change)="save()"
+                                id="rolling12MonthImprovement">
+                            <label class="form-check-label" for="rolling12MonthImprovement">Rolling
+                                12-Month
+                                Improvement</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <!--groupAnnual-->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="totalSavingsPercentImprovement"
+                                formControlName="totalSavingsPercentImprovement" (change)="save()"
+                                id="totalSavingsPercentImprovement">
+                            <label class="form-check-label" for="totalSavingsPercentImprovement">Total
+                                Savings % Improvement</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="annualSavingsPercentImprovement"
+                                formControlName="annualSavingsPercentImprovement" (change)="save()"
+                                id="annualSavingsPercentImprovement">
+                            <label class="form-check-label" for="annualSavingsPercentImprovement">Annual
+                                Savings % Improvement</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="cummulativeSavings"
+                                formControlName="cummulativeSavings" (change)="save()" id="cummulativeSavings">
+                            <label class="form-check-label" for="cummulativeSavings">Cumulative Savings</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="newSavings"
+                                formControlName="newSavings" (change)="save()" id="newSavings">
+                            <label class="form-check-label" for="newSavings">New Savings</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

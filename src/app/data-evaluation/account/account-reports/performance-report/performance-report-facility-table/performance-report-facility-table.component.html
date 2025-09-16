@@ -52,15 +52,15 @@
                         Contribution
                     </th>
                     <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
+                        <th (click)="setOrderDataField('changeInSavings', data.year)"
+                            [ngClass]="{'active': orderDataField == 'changeInSavings' && orderByYear == data.year}"
+                            class="text-center">
+                            Change in<br> Savings
+                        </th>
                         <th (click)="setOrderDataField('changeInContribution', data.year)"
                             [ngClass]="{'active': orderDataField == 'changeInContribution' && orderByYear == data.year}"
                             class="text-center">
                             Change in<br> Contribution
-                        </th>
-                        <th (click)="setOrderDataField('changeInAdjustedBaseline', data.year)"
-                            [ngClass]="{'active': orderDataField == 'changeInAdjustedBaseline' && orderByYear == data.year}"
-                            class="text-center">
-                            Change in<br> Adj. Baseline
                         </th>
                     </ng-container>
                 </ng-container>
@@ -93,12 +93,12 @@
                     </td>
                     <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
                         <td class="text-center"
-                            [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.facilityTotals[index].minChangeInContribution: performanceReport.facilityTotals[index].maxChangeInContribution}">
-                            {{data.changeInContribution | number:'1.0-2'}} %
+                            [ngStyle]="{'background-color': data.changeInSavings | tableCellShading:performanceReport.facilityTotals[index].minChangeInSavings: performanceReport.facilityTotals[index].maxChangeInSavings}">
+                            {{data.changeInSavings | number:'1.0-2'}} %
                         </td>
                         <td class="text-center"
-                            [ngStyle]="{'background-color': data.changeInAdjustedBaseline | tableCellShading:performanceReport.facilityTotals[index].minChangeInAdjustedBaseline: performanceReport.facilityTotals[index].maxChangeInAdjustedBaseline}">
-                            {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
+                            [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.facilityTotals[index].minChangeInContribution: performanceReport.facilityTotals[index].maxChangeInContribution}">
+                            {{data.changeInContribution | number:'1.0-2'}} %
                         </td>
                     </ng-container>
                 </ng-container>
@@ -129,8 +129,8 @@
                         <th>
 
                         </th>
-                        <th class="text-center">
-                            {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
+                        <th>
+
                         </th>
                     </ng-container>
                 </ng-container>
@@ -145,24 +145,32 @@
         <thead class="sortable">
             <tr class="table-mh">
                 <th colspan="2"></th>
-                <th *ngIf="performanceReportSetup.includeActual" class="text-center"
-                    [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                    Actual<br>
-                    (<span [innerHTML]="units | settingsLabel"></span>)
-                </th>
-                <th *ngIf="performanceReportSetup.includeAdjusted" class="text-center"
-                    [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                    Adjusted<br>
-                    (<span [innerHTML]="units | settingsLabel"></span>)
-                </th>
-                <th *ngIf="performanceReportSetup.includeSavings" class="text-center"
-                    [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                    Savings (%)
-                </th>
-                <th *ngIf="performanceReportSetup.includeContribution" class="text-center"
-                    [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                    Contribution (%)
-                </th>
+                <ng-container *ngIf="printBlock == 'all' || printBlock == 'actual'">
+                    <th *ngIf="performanceReportSetup.includeActual" class="text-center"
+                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+                        Actual<br>
+                        (<span [innerHTML]="units | settingsLabel"></span>)
+                    </th>
+                </ng-container>
+                <ng-container *ngIf="printBlock == 'all' || printBlock == 'adjusted'">
+                    <th *ngIf="performanceReportSetup.includeAdjusted" class="text-center"
+                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+                        Adjusted<br>
+                        (<span [innerHTML]="units | settingsLabel"></span>)
+                    </th>
+                </ng-container>
+                <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
+                    <th *ngIf="performanceReportSetup.includeSavings" class="text-center"
+                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+                        Savings (%)
+                    </th>
+                </ng-container>
+                <ng-container *ngIf="printBlock == 'all' || printBlock == 'contribution'">
+                    <th *ngIf="performanceReportSetup.includeContribution" class="text-center"
+                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+                        Contribution (%)
+                    </th>
+                </ng-container>
                 <th class="text-center" colspan="2">
                     Change
                 </th>
@@ -176,7 +184,7 @@
                     class="text-center">
                     State
                 </th>
-                <ng-container *ngIf="performanceReportSetup.includeActual">
+                <ng-container *ngIf="performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')">
                     <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData">
                         <th (click)="setOrderDataField('actual', data.year)"
                             [ngClass]="{'active': orderDataField == 'actual' && orderByYear == data.year}"
@@ -185,7 +193,7 @@
                         </th>
                     </ng-container>
                 </ng-container>
-                <ng-container *ngIf="performanceReportSetup.includeAdjusted">
+                <ng-container *ngIf="performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')">
                     <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData">
                         <th (click)="setOrderDataField('adjusted', data.year)"
                             [ngClass]="{'active': orderDataField == 'adjusted' && orderByYear == data.year}"
@@ -195,7 +203,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeSavings">
+                <ng-container *ngIf="performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')">
                     <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData">
                         <th (click)="setOrderDataField('savings', data.year)"
                             [ngClass]="{'active': orderDataField == 'savings' && orderByYear == data.year}"
@@ -205,7 +213,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeContribution">
+                <ng-container *ngIf="performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')">
                     <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData;">
                         <th (click)="setOrderDataField('contribution', data.year)"
                             [ngClass]="{'active': orderDataField == 'contribution' && orderByYear == data.year}"
@@ -214,15 +222,14 @@
                         </th>
                     </ng-container>
                 </ng-container>
+                <th (click)="setOrderDataField('changeInSavings', performanceReport.reportYear)"
+                    [ngClass]="{'active': orderDataField == 'changeInSavings'}" class="text-center">
+                    Savings
+                </th>
                 <th (click)="setOrderDataField('changeInContribution', performanceReport.reportYear)"
                     [ngClass]="{'active': orderDataField == 'changeInContribution'}" class="text-center">
                     Contribution
                 </th>
-                <th (click)="setOrderDataField('changeInAdjustedBaseline',  performanceReport.reportYear)"
-                    [ngClass]="{'active': orderDataField == 'changeInAdjustedBaseline'}" class="text-center">
-                    Adj. Baseline
-                </th>
-
             </tr>
         </thead>
         <tbody>
@@ -233,7 +240,7 @@
                 <td class="text-center">
                     {{facilityData.facility.state}}
                 </td>
-                <ng-container *ngIf="performanceReportSetup.includeActual">
+                <ng-container *ngIf="performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')">
                     <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
                         <td class="text-center fill-cell"
                             [ngStyle]="{'background-size': data.actual | tableFill: performanceReport.facilityTotals[index].actual}">
@@ -242,7 +249,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeAdjusted">
+                <ng-container *ngIf="performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')">
                     <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
                         <td class="text-center fill-cell"
                             [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.facilityTotals[index].adjusted}">
@@ -251,7 +258,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeSavings">
+                <ng-container *ngIf="performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')">
                     <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
                         <td class="text-center"
                             [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
@@ -260,7 +267,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeContribution">
+                <ng-container *ngIf="performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')">
                     <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
                         <td class="text-center"
                             [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.facilityTotals[index].minContribution: performanceReport.facilityTotals[index].maxContribution}">
@@ -269,14 +276,13 @@
                     </ng-container>
                 </ng-container>
                 <td class="text-center"
-                    [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInContribution: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInContribution}">
-                    {{facilityData.annualData[facilityData.annualData.length-1].changeInContribution | number:'1.0-2'}}
+                    [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInSavings | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInSavings: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInSavings}">
+                    {{facilityData.annualData[facilityData.annualData.length-1].changeInSavings | number:'1.0-2'}}
                     %
                 </td>
                 <td class="text-center"
-                    [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInAdjustedBaseline | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInAdjustedBaseline: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInAdjustedBaseline}">
-                    {{facilityData.annualData[facilityData.annualData.length-1].changeInAdjustedBaseline |
-                    number:'1.0-2'}}
+                    [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInContribution: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInContribution}">
+                    {{facilityData.annualData[facilityData.annualData.length-1].changeInContribution | number:'1.0-2'}}
                     %
                 </td>
             </tr>
@@ -289,7 +295,7 @@
                 <th>
 
                 </th>
-                <ng-container *ngIf="performanceReportSetup.includeActual">
+                <ng-container *ngIf="performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')">
                     <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
                         <th class="text-center fill-cell">
                             {{data.actual | customNumber}}
@@ -297,7 +303,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeAdjusted">
+                <ng-container *ngIf="performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')">
                     <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
                         <th class="text-center fill-cell">
                             {{data.adjusted | customNumber}}
@@ -305,7 +311,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeSavings">
+                <ng-container *ngIf="performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')">
                     <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
                         <th class="text-center">
                             {{data.savings | number:'1.0-2'}} %
@@ -313,7 +319,7 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="performanceReportSetup.includeContribution">
+                <ng-container *ngIf="performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')">
                     <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
                         <th class="text-center">
                             {{data.contribution | number:'1.0-2'}} %
@@ -321,11 +327,11 @@
                     </ng-container>
                 </ng-container>
                 <th class="text-center">
-                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution | number:'1.0-2'}} %
+                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInSavings |
+                    number:'1.0-2'}} %
                 </th>
                 <th class="text-center">
-                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInAdjustedBaseline
-                    |
+                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution |
                     number:'1.0-2'}} %
                 </th>
             </tr>

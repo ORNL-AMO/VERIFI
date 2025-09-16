@@ -34,7 +34,6 @@ export class PerformanceReportUtilityTableComponent {
   }
 
   ngOnInit() {
-    console.log(this.performanceReport);
     if (this.selectedAnalysisItem.analysisCategory == 'energy') {
       this.savingsGoal = this.account.sustainabilityQuestions.energyReductionPercent;
       this.units = this.selectedAnalysisItem.energyUnit;

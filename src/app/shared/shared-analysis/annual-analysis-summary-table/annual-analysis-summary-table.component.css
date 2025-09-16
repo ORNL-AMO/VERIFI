@@ -9,3 +9,7 @@ tr.table-mh th.th-3 span{
 .period-column{
     width: 70px;
 }
+
+.note {
+    font-size: 14px;
+}

@@ -13,6 +13,12 @@
           </div>
           <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
             required</div>
+          <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('maxDate')">Meter read date
+            exceeds
+            maximum read date.</div>
+          <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('minDate')">Meter read date is
+            before
+            minimum read date.</div>
           <div class="alert alert-danger" *ngIf="invalidDate">Meter already has data entered for selected date</div>
         </div>
         <div class="col-6">

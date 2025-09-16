@@ -24,6 +24,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AccountSavingsReport } from 'src/app/calculations/savings-report-calculations/accountSavingsReport';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 
 @Component({
   selector: 'app-account-savings-report',
@@ -40,6 +42,8 @@ export class AccountSavingsReportComponent {
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   printSub: Subscription;
   print: boolean;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
 
   setupDetails: PerformanceReportSetup = {
     analysisItemId: '',
@@ -64,8 +68,10 @@ export class AccountSavingsReportComponent {
     facility: IdbFacility,
     analysisItem: IdbAnalysisItem,
     monthlySummaryData: Array<MonthlyAnalysisSummaryData>,
-    annualAnalysisSummaries: Array<AnnualAnalysisSummary>
-  }>
+    annualAnalysisSummaries: Array<AnnualAnalysisSummary>,
+    latestMonthSummary: MonthlyAnalysisSummaryData
+  }>;
+  latestMonthSummary: MonthlyAnalysisSummaryData;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -76,7 +82,9 @@ export class AccountSavingsReportComponent {
     private predictorDataDbService: PredictorDataDbService,
     private analysisDbService: AnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
+    private sharedDataService: SharedDataService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService
   ) { }
 
@@ -84,7 +92,11 @@ export class AccountSavingsReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.analysisService.analysisTableColumns.next(this.selectedReport.accountSavingsReportSetup.analysisTableColumns);
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     } else {
@@ -119,6 +131,7 @@ export class AccountSavingsReportComponent {
     if (this.worker) {
       this.worker.terminate();
     }
+    this.itemsPerPageSub.unsubscribe();
   }
 
   calculateSavingsReport() {
@@ -143,6 +156,7 @@ export class AccountSavingsReportComponent {
           this.performanceReport = accountSavingsReport.performanceReport;
           this.annualAnalysisSummaries = accountSavingsReport.annualAnalysisSummaries;
           this.monthlyAnalysisSummaryData = accountSavingsReport.monthlyAnalysisSummaryData;
+          this.latestMonthSummary = accountSavingsReport.latestMonthSummary;
           this.facilitySummaries = accountSavingsReport.facilitySummaries;
           this.calculating = false;
         } else {
@@ -177,6 +191,7 @@ export class AccountSavingsReportComponent {
       this.performanceReport = accountSavingsReport.performanceReport;
       this.annualAnalysisSummaries = accountSavingsReport.annualAnalysisSummaries;
       this.monthlyAnalysisSummaryData = accountSavingsReport.monthlyAnalysisSummaryData;
+      this.latestMonthSummary = accountSavingsReport.latestMonthSummary;
       this.facilitySummaries = accountSavingsReport.facilitySummaries;
       this.calculating = false;
     }

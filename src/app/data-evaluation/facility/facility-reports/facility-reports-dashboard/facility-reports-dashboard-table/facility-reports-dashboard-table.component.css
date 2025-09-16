@@ -1,0 +1,66 @@
+.wrapper {
+    margin-top: 0px;
+    margin-bottom: 100px;
+}
+
+.table {
+    overflow: hidden;
+    border: black 1px solid;
+}
+
+.table th {
+    background-color: #154c79;
+    color: white;
+    text-align: center;
+}
+
+thead th.can-click:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.form-label {
+    font-size: 14px;
+    font-style: italic;
+}
+
+.fa.fa-exclamation-circle {
+    color: red;
+}
+
+.card {
+    margin-right: 30px;
+    margin-left: 30px;
+}
+
+.badge-analysis {
+    background-color: #4f8143;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
+.badge-data-overview {
+    background-color: #873e23;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
+.badge-emission-factors {
+    background-color: #7b1fa2;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
+.badge-savings {
+    background-color: #291c1f;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}

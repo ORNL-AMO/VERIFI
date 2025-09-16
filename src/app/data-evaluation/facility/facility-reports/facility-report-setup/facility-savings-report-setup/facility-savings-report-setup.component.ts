@@ -8,11 +8,11 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilityReportsService } from '../../facility-reports.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
+import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-facility-savings-report-setup',
@@ -31,14 +31,13 @@ export class FacilitySavingsReportSetupComponent {
   selectedAnalysisItem: IdbAnalysisItem;
   energyColumnLabel: string;
   actualUseLabel: string;
-  modeledUseLabel: string;
-  isFormChange: boolean = false;
   reportSettings: SavingsFacilityReportSettings;
   reportYears: Array<number>;
   baselineYears: Array<number>;
   errorMessage: string;
   errorMessageSub: Subscription;
   months: Array<Month> = Months;
+  analysisTableColumns: AnalysisTableColumns;
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
@@ -53,13 +52,11 @@ export class FacilitySavingsReportSetupComponent {
 
   ngOnInit() {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
-      if (this.isFormChange == false) {
-        this.facilityReport = report;
-        this.reportSettings = this.facilityReport.savingsReportSettings;
-      } else {
-        this.isFormChange = false;
-      }
+      this.facilityReport = report;
+      this.reportSettings = this.facilityReport.savingsReportSettings;
+      this.analysisTableColumns = this.reportSettings.analysisTableColumns;
     });
+
     this.setYearOptions();
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -82,13 +79,41 @@ export class FacilitySavingsReportSetupComponent {
     this.selectedAnalysisItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
+    this.setPredictorVariables();
     this.setLabels();
     if (!onInit) {
       await this.save();
     }
   }
 
+  setPredictorVariables() {
+    if (this.selectedAnalysisItem) {
+      let predictorSelections: Array<{
+        predictor: AnalysisGroupPredictorVariable,
+        display: boolean,
+        usedInAnalysis: boolean
+      }> = new Array();
+
+      let variableCopy: Array<AnalysisGroupPredictorVariable> = this.selectedAnalysisItem.groups[0].predictorVariables.map(pVar => {
+        return JSON.parse(JSON.stringify(pVar));
+      })
+      variableCopy.forEach(variable => {
+        predictorSelections.push({
+          predictor: variable,
+          display: variable.productionInAnalysis && this.analysisTableColumns.productionVariables,
+          usedInAnalysis: variable.productionInAnalysis
+        });
+      });
+      this.analysisTableColumns.predictors = predictorSelections;
+      this.save();
+    }
+  }
+
   async save() {
+    this.setMonthIncrementalImprovement();
+    this.setEnergyColumns();
+    this.setPredictorColumn();
+    this.facilityReport.savingsReportSettings.analysisTableColumns = this.analysisTableColumns;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -100,18 +125,139 @@ export class FacilitySavingsReportSetupComponent {
     if (this.selectedAnalysisItem) {
       if (this.selectedAnalysisItem.analysisCategory == 'water') {
         this.actualUseLabel = 'Actual Consumption';
+        this.energyColumnLabel = 'Consumption Columns';
       } else if (this.selectedAnalysisItem.analysisCategory == 'energy') {
         this.actualUseLabel = 'Actual Energy Use';
+        this.energyColumnLabel = 'Energy Columns';
       }
     }
   }
 
   setYearOptions() {
-    //TODO: baseline years less than report year selection
-    //TODO: report years greater than baseline year selection
-    //TODO: get options by water/energy
     let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount('all', this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }
+
+  async setDefault() {
+    this.analysisTableColumns.incrementalImprovement = true;
+    this.analysisTableColumns.SEnPI = false;
+    this.analysisTableColumns.savings = false;
+    this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+    this.analysisTableColumns.yearToDateSavings = false;
+    this.analysisTableColumns.yearToDatePercentSavings = false;
+    this.analysisTableColumns.rollingSavings = false;
+    this.analysisTableColumns.rolling12MonthImprovement = false;
+    this.analysisTableColumns.productionVariables = true;
+    this.analysisTableColumns.energy = true;
+    this.analysisTableColumns.actualEnergy = true;
+    this.analysisTableColumns.modeledEnergy = true;
+    this.analysisTableColumns.adjusted = true;
+    this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+    this.analysisTableColumns.baselineAdjustmentForOther = true;
+    this.analysisTableColumns.baselineAdjustment = true;
+    this.analysisTableColumns.totalSavingsPercentImprovement = true;
+    this.analysisTableColumns.annualSavingsPercentImprovement = true;
+    this.analysisTableColumns.cummulativeSavings = true;
+    this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.bankedSavings = false;
+    this.analysisTableColumns.savingsUnbanked = false;
+    await this.save();
+  }
+
+  toggleEnergyColumns() {
+    if (this.analysisTableColumns.energy == false) {
+      this.analysisTableColumns.actualEnergy = false;
+      this.analysisTableColumns.modeledEnergy = false;
+      this.analysisTableColumns.adjusted = false;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = false;
+      this.analysisTableColumns.baselineAdjustmentForOther = false;
+      this.analysisTableColumns.baselineAdjustment = false;
+    } else {
+      this.analysisTableColumns.actualEnergy = true;
+      this.analysisTableColumns.modeledEnergy = true;
+      this.analysisTableColumns.adjusted = true;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+      this.analysisTableColumns.baselineAdjustmentForOther = true;
+      this.analysisTableColumns.baselineAdjustment = true;
+    }
+    this.save();
+  }
+
+  toggleIncrementalImprovement() {
+    if (this.analysisTableColumns.incrementalImprovement == false) {
+      this.analysisTableColumns.SEnPI = false;
+      this.analysisTableColumns.savings = false;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+      // this.analysisTableColumns.yearToDateSavings = false;
+      // this.analysisTableColumns.yearToDatePercentSavings = false;
+      this.analysisTableColumns.bankedSavings = false;
+      this.analysisTableColumns.savingsUnbanked = false;
+      this.analysisTableColumns.rollingSavings = false;
+      this.analysisTableColumns.rolling12MonthImprovement = false;
+      this.analysisTableColumns.totalSavingsPercentImprovement = false;
+      this.analysisTableColumns.annualSavingsPercentImprovement = false;
+      this.analysisTableColumns.cummulativeSavings = false;
+      this.analysisTableColumns.newSavings = false;
+    } else {
+      this.analysisTableColumns.SEnPI = true;
+      this.analysisTableColumns.savings = true;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
+      // this.analysisTableColumns.yearToDateSavings = true;
+      // this.analysisTableColumns.yearToDatePercentSavings = true;
+      this.analysisTableColumns.bankedSavings = true;
+      this.analysisTableColumns.savingsUnbanked = true;
+      this.analysisTableColumns.rollingSavings = true;
+      this.analysisTableColumns.rolling12MonthImprovement = true;
+      this.analysisTableColumns.totalSavingsPercentImprovement = true;
+      this.analysisTableColumns.annualSavingsPercentImprovement = true;
+      this.analysisTableColumns.cummulativeSavings = true;
+      this.analysisTableColumns.newSavings = true;
+    }
+    this.save();
+  }
+
+  setEnergyColumns() {
+    this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy
+      || this.analysisTableColumns.modeledEnergy
+      || this.analysisTableColumns.adjusted
+      || this.analysisTableColumns.baselineAdjustmentForNormalization
+      || this.analysisTableColumns.baselineAdjustmentForOther
+      || this.analysisTableColumns.baselineAdjustment);
+  }
+
+  setMonthIncrementalImprovement() {
+    this.analysisTableColumns.incrementalImprovement = (
+      this.analysisTableColumns.SEnPI ||
+      this.analysisTableColumns.savings ||
+      // this.analysisTableColumns.percentSavingsComparedToBaseline ||
+      // this.analysisTableColumns.yearToDateSavings ||
+      // this.analysisTableColumns.yearToDatePercentSavings ||
+      this.analysisTableColumns.rollingSavings ||
+      this.analysisTableColumns.rolling12MonthImprovement ||
+      this.analysisTableColumns.SEnPI ||
+      this.analysisTableColumns.savings ||
+      this.analysisTableColumns.totalSavingsPercentImprovement ||
+      this.analysisTableColumns.annualSavingsPercentImprovement ||
+      this.analysisTableColumns.cummulativeSavings ||
+      this.analysisTableColumns.newSavings ||
+      this.analysisTableColumns.bankedSavings ||
+      this.analysisTableColumns.savingsUnbanked
+    )
+  }
+
+  setPredictorColumn() {
+    let predictorOn = this.analysisTableColumns.predictors.find(predictor => {
+      return predictor.display;
+    });
+    this.analysisTableColumns.productionVariables = (predictorOn != undefined);
+  }
+
+  async toggleAllPredictors() {
+    this.analysisTableColumns.predictors.forEach(predictor => {
+      predictor.display = this.analysisTableColumns.productionVariables;
+    });
+    await this.save();
+  }
+
 }

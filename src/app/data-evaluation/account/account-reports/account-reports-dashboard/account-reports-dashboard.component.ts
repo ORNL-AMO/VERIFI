@@ -55,21 +55,6 @@ export class AccountReportsDashboardComponent {
   }
 
   openCreateReport() {
-    if (this.router.url.includes('performance')) {
-      this.newReportType = 'performance';
-    } else if (this.router.url.includes('better-plants')) {
-      this.newReportType = 'betterPlants';
-    } else if (this.router.url.includes('overview')) {
-      this.newReportType = 'dataOverview';
-    } else if (this.router.url.includes('better-climate')) {
-      this.newReportType = 'betterClimate';
-    } else if (this.router.url.includes('analysis')) {
-      this.newReportType = 'analysis';
-    } else if (this.router.url.includes('account-savings')) {
-      this.newReportType = 'accountSavings';
-    } else if (this.router.url.includes('account-emission-factors')) {
-      this.newReportType = 'accountEmissionFactors';
-    }
     this.displayNewReport = true;
   }
 
