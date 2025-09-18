@@ -16,7 +16,6 @@ button span{
     color: white;
 }
 
-
 td{
     vertical-align: middle;
 }
@@ -28,4 +27,14 @@ tr.selected-model{
 
 .no-break{
     text-wrap: nowrap;
+}
+
+.btn-invalid {
+  background-color: #fff;
+  border-color: red;
+}
+
+.btn-invalid:hover {
+  background-color: #e5e8ea;
+  color: red;
 }
