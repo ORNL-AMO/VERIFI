@@ -1,5 +1,3 @@
-
-
 <div class="row" *ngIf="showInUseMessage">
     <div class="col-12 alert alert-info text-center">
         <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
@@ -16,7 +14,7 @@
         </div>
         <hr>
     </ng-container>
-    
+
     <ng-container *ngIf="selectedGroup.groupErrors?.missingRegressionModelSelection">
         <div class="alert alert-warning w-100 text-center">
             Model selection required.
@@ -85,7 +83,8 @@
                     </td>
                     <td *ngIf="!model.errorModeling">
                         <span *ngFor="let pVal of model.t.p; let index = index">
-                            <span class="no-break" *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | number:'0.2-2'}}
+                            <span class="no-break" *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal
+                                | number:'0.2-2'}}
                                 <br>
                             </span>
                         </span>
@@ -94,10 +93,10 @@
                         {{model.R2 | number:'0.3-3'}}
                     </td>
                     <td *ngIf="!model.errorModeling">
-                        {{model.adjust_R2|  number:'0.3-3'}}
+                        {{model.adjust_R2| number:'0.3-3'}}
                     </td>
                     <td *ngIf="!model.errorModeling">
-                        {{model.modelPValue|  number:'0.2-2'}}
+                        {{model.modelPValue| number:'0.2-2'}}
                     </td>
                     <td *ngIf="!model.errorModeling">
                         <span *ngFor="let coefVal of model.coef; let index = index;">
@@ -115,7 +114,7 @@
                             &mdash;
                         </span>
                     </td>
-                     <td *ngIf="showInvalid && !model.errorModeling">
+                    <td *ngIf="showInvalid && !model.errorModeling">
                         <span *ngIf="model.isValid">&mdash;</span>
                         <span *ngFor="let notes of model.modelValidationNotes">
                             {{notes}}<br>
@@ -133,8 +132,9 @@
                             *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
                     </td>
                     <td class="text-center">
-                        <button class="btn nav-btn" (click)="inspectModel(model)" title="Inspect Model">
-                            <span class="fa fa-microscope"></span>
+                        <button class="btn nav-btn" [ngClass]="{'btn-invalid': !model.SEPValidationPass}"
+                            (click)="inspectModel(model)" title="Inspect Model">
+                            <span class="fa fa-microscope" [ngClass]="{'text-danger': !model.SEPValidationPass}"></span>
                         </button>
                     </td>
                 </tr>
