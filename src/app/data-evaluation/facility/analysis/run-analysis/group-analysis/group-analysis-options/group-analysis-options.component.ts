@@ -84,6 +84,11 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.changeModelType();
   }
 
+  setExcludeGroup() {
+    this.group.analysisType = this.group.isGroupExcluded ? 'skip' : 'regression';
+    this.setAnalysisType();
+  }
+
   changeModelType() {
     this.group.models = undefined;
     this.group.selectedModelId = undefined;
