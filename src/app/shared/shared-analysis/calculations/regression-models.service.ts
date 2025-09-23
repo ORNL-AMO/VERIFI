@@ -223,7 +223,7 @@ export class RegressionModelsService {
       // modelNotes.push('Model p-Value > .1');
     }
 
-    model.t.p.forEach((val, index) => {
+    model.t.p?.forEach((val, index) => {
       if (val > .2 && index != 0) {
         //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
         modeValidationNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2');
@@ -233,7 +233,7 @@ export class RegressionModelsService {
 
     //need one p value less than .1
     let hasLessThan: boolean = false;
-    model.t.p.forEach((val, index) => {
+    model.t.p?.forEach((val, index) => {
       if (val < .1 && index != 0) {
         hasLessThan = true;
       }
