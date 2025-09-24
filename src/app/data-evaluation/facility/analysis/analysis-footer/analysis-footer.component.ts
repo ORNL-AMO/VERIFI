@@ -172,7 +172,7 @@ export class AnalysisFooterComponent implements OnInit {
       if (this.router.url.includes('options')) {
         if (this.selectedGroup.groupErrors.hasErrors) {
           if (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload
-            || (this.selectedGroup.groupErrors.missingGroupMeters && !this.selectedGroup.isGroupExcluded) || this.selectedGroup.groupErrors.noProductionVariables || this.selectedGroup.groupErrors.missingProductionVariables) {
+            || (this.selectedGroup.groupErrors.missingGroupMeters && this.selectedGroup.analysisType !== 'skip') || this.selectedGroup.groupErrors.noProductionVariables || this.selectedGroup.groupErrors.missingProductionVariables) {
             this.disableContinue = true;
           } else {
             this.disableContinue = false;

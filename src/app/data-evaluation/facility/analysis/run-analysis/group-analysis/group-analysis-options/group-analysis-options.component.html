@@ -6,9 +6,9 @@
     </div>
 
     <div class="form-check mt-5">
-        <input class="form-check-input checkbox-input" type="checkbox" id="excludeGroup" name="excludeGroup"
-            [(ngModel)]="group.isGroupExcluded" (ngModelChange)="setExcludeGroup()">
-        <label class="form-check-label checkbox-label" for="excludeGroup">
+        <input class="form-check-input checkbox-input" type="checkbox" id="skip" name="analysisType"
+            [checked]="group.analysisType === 'skip'" (change)="setExcludeGroup($event)">
+        <label class="form-check-label checkbox-label" for="skip">
             Exclude this group from analysis
         </label>
     </div>

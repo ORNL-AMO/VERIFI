@@ -248,8 +248,7 @@ export interface AnalysisGroup {
   maxModelVariables: number,
   applyBanking: boolean,
   newBaselineYear: number,
-  bankedAnalysisYear: number,
-  isGroupExcluded: boolean
+  bankedAnalysisYear: number
 }
 
 export interface AnalysisGroupPredictorVariable {
