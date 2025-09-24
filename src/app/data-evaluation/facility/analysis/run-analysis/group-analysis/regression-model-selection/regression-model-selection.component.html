@@ -22,7 +22,8 @@
         <hr>
     </ng-container>
     <app-regression-model-menu
-        (userDefinedModelClicked)="onUserDefinedModelClicked($event)"></app-regression-model-menu>
+        (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
+        (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
 
     <hr>
 
@@ -147,5 +148,4 @@
     (emitClose)="cancelInspectModel()" (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
 
 <app-regression-user-defined-model-inspection
-    *ngIf="!selectedGroup.userDefinedModel && generateUserDefinedModel && !hideUserDefinedView"
-    [regressionModelStartMonth]="selectedGroup.regressionModelStartMonth"></app-regression-user-defined-model-inspection>
+    *ngIf="!selectedGroup.userDefinedModel && generateUserDefinedModel && showView"></app-regression-user-defined-model-inspection>

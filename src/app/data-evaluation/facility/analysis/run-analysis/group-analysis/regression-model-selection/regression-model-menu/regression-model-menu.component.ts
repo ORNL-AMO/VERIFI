@@ -52,6 +52,7 @@ export class RegressionModelMenuComponent implements OnInit {
   isButtonDisabled: boolean = false;
 
   @Output() userDefinedModelClicked = new EventEmitter<boolean>();
+  @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
 
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
@@ -97,6 +98,7 @@ export class RegressionModelMenuComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
+    this.isUserDefinedViewVisible.emit(false);
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, this.analysisItem);
     this.setNumVariableOptions();
@@ -294,5 +296,6 @@ export class RegressionModelMenuComponent implements OnInit {
 
   generateUserDefinedModel() {
     this.userDefinedModelClicked.emit(true);
+    this.isUserDefinedViewVisible.emit(true);
   }
 }

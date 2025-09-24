@@ -87,12 +87,12 @@
             </div>
             <div class="p-2" *ngIf="!group.userDefinedModel">
                 <div class="alert alert-info">
-                    Manually select production variables and define model coefficients and constants.
+                    Manually select production variables and define model coefficients and constants. Click below to evaluate the model and data validity.
                 </div>
 
                 <div class="d-flex flex-column justify-content-center align-items-center">
                     <div class="p-0">
-                        <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled" (click)="generateUserDefinedModel()">Generate Model</button>
+                        <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled" (click)="generateUserDefinedModel()">Evaluate Model</button>
                     </div>
                 </div>
             </div>
@@ -150,7 +150,7 @@
                 </label>
             </div>
             <div class="col-6">
-                <select required class="form-control" id="regressionModelStartMonth" id="regressionModelStartMonth"
+                <select required class="form-select" id="regressionModelStartMonth" id="regressionModelStartMonth"
                     [(ngModel)]="group.regressionModelStartMonth" (change)="saveItem()">
                     <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
                     </option>
@@ -164,7 +164,7 @@
                 </label>
             </div>
             <div class="col-6">
-                <select required class="form-control" id="regressionModelYear" id="regressionModelYear"
+                <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
                     [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
                     <option *ngFor="let year of yearOptions" [ngValue]="year">{{year |
                         yearDisplay:selectedFacility.fiscalYear}}</option>

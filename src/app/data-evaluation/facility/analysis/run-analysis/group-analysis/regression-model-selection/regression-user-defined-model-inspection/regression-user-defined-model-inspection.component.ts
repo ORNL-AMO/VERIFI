@@ -32,9 +32,6 @@ import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculati
 })
 export class RegressionUserDefinedModelInspectionComponent {
 
-  @Input()
-  regressionModelStartMonth: number;
-  
   selectedGroup: AnalysisGroup;
   selectedGroupSub: Subscription;
   analysisItem: IdbAnalysisItem;
@@ -89,12 +86,6 @@ export class RegressionUserDefinedModelInspectionComponent {
 
   ngAfterViewInit() {
     this.drawChart();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if(changes['regressionModelStartMonth']){
-      this.drawChart();
-    }
   }
 
   generateUserDefinedModel() {

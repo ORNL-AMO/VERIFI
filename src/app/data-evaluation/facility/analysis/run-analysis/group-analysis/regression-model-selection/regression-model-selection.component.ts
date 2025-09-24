@@ -31,7 +31,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedInspectModel: JStatRegressionModel;
   showInUseMessage: boolean;
   generateUserDefinedModel: boolean;
-  hideUserDefinedView: boolean;
+  showView: boolean = true;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -42,7 +42,6 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.selectedGroup = group;
-      this.checkUserDefinedModelValues();
     });
 
     this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
@@ -131,14 +130,7 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.generateUserDefinedModel = isClicked;
   }
 
-  checkUserDefinedModelValues() {
-    if (!this.selectedGroup.userDefinedModel) {
-      this.hideUserDefinedView = this.selectedGroup.groupErrors.missingRegressionModelStartMonth || this.selectedGroup.groupErrors.missingRegressionModelYear ||
-        this.selectedGroup.groupErrors.missingRegressionConstant || this.selectedGroup.groupErrors.missingRegressionPredictorCoef;
-
-      if (this.hideUserDefinedView) {
-        this.generateUserDefinedModel = false;
-      }
-    }
+  onFormChanged(isFormChanged: boolean) {
+    this.showView = isFormChanged;
   }
 }
