@@ -15,7 +15,9 @@
                     Invalid Readings
                 </th>
                 <th>
-                    Existing Readings
+                    <app-label-with-tooltip [isBold]="true" [label]="'Existing Readings'"
+                        [field]="'checkMeterDifferences'" [isFloatRight]="true">
+                    </app-label-with-tooltip>
                 </th>
                 <th>
                     <div class="w-100 d-flex">
@@ -57,6 +59,10 @@
                     <span *ngIf="summary.existingStart">
                         ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
                     </span>
+
+                    <span class="float-end" *ngIf="summary.newEntries > 0">
+                        <i class="fa-solid fa-eye icon-style" (click)="openModal(summary)"></i>
+                    </span>
                 </td>
                 <td>
                     <div class="d-flex w-100 h-100 justify-content-center align-items-center">
@@ -66,4 +72,77 @@
             </tr>
         </tbody>
     </table>
+</div>
+
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [class.open]="showModal">
+    <div class="popup-header" *ngIf="showModal"><i class="fa fa-clipboard-check me-2"></i>Compare Meter Data:
+        {{selectedMeterName}}
+        <button class="item-right" (click)="hideModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <div class="mt-3" *ngIf="comparisonSummaryWithDifferences.length > 0">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover utility-data">
+                    <thead class="table-mh table-info">
+                        <tr>
+                            <th class="col-date can-click" (click)="setOrderDataField('readDate')"
+                                [ngClass]="{'active': orderDataField == 'readDate'}">
+                                Meter Read Date
+                            </th>
+                            <th class="col-existing can-click" (click)="setOrderDataField('oldReading')"
+                                [ngClass]="{'active': orderDataField == 'oldReading'}">
+                                Current Reading ({{meterUnit}})
+                            </th>
+                            <th class="col-new can-click" (click)="setOrderDataField('newReading')"
+                                [ngClass]="{'active': orderDataField == 'newReading'}">
+                                Imported Reading ({{meterUnit}})
+                            </th>
+                            <th class="col-difference can-click" (click)="setOrderDataField('difference')"
+                                [ngClass]="{'active': orderDataField == 'difference'}">
+                                Difference ({{meterUnit}})
+                            </th>
+                            <th class="col-percentage-difference can-click"
+                                (click)="setOrderDataField('percentageDifference')"
+                                [ngClass]="{'active': orderDataField == 'percentageDifference'}">
+                                % Difference
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        <tr
+                            *ngFor="let summary of comparisonSummaryWithDifferences | orderBy: orderDataField: orderByDirection">
+                            <td class="col-date">
+                                {{summary.readDate | date}}
+                            </td>
+                            <td class="col-existing">
+                                {{ summary.oldReading | number: '1.2-4' }}
+                            </td>
+                            <td class="col-new">
+                                {{ summary.newReading | number: '1.2-4' }}
+                            </td>
+                            <td class="col-difference">
+                                {{ summary.difference | number: '1.2-4' }}
+                            </td>
+                            <td class="col-percentage-difference">
+                                {{ summary.percentageDifference | number: '1.2-2' }}%
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div *ngIf="comparisonSummaryWithDifferences.length === 0" class="text-center my-5">
+            <div
+                class="alert alert-info d-flex flex-column align-items-center justify-content-center py-4 rounded shadow-sm">
+                <i class="fa fa-info-circle fa-2x mb-2 text-primary"></i>
+                <div class="fw-bold fs-5 mb-1">No differences found between the existing and imported meter readings
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <hr class="my-1">
+        <button class="btn btn-secondary" (click)="hideModal()">Close</button>
+    </div>
 </div>
