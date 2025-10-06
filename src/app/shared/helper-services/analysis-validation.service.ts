@@ -62,6 +62,7 @@ export class AnalysisValidationService {
     let missingProductionVariables: boolean = false;
     let missingRegressionConstant: boolean = false;
     let missingRegressionModelYear: boolean = false;
+    let missingRegressionModelStartMonth: boolean = false;
     let missingRegressionModelSelection: boolean = false;
     let missingRegressionPredictorCoef: boolean = false;
     let invalidAverageBaseload: boolean = false;
@@ -79,6 +80,9 @@ export class AnalysisValidationService {
       if (group.analysisType == 'regression') {
         missingRegressionConstant = this.checkValueValid(group.regressionConstant) == false;
         missingRegressionModelYear = this.checkValueValid(group.regressionModelYear) == false;
+        if(!group.userDefinedModel) {
+          missingRegressionModelStartMonth = this.checkValueValid(group.regressionModelStartMonth) == false;
+        }
         for (let index = 0; index < group.predictorVariables.length; index++) {
           let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
           if (variable.productionInAnalysis && !this.checkValueValid(variable.regressionCoefficient)) {
@@ -126,7 +130,7 @@ export class AnalysisValidationService {
         }
       }
     }
-    let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelSelection ||
+    let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelStartMonth || missingRegressionModelSelection ||
       missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear || missingBankingAppliedYear ||
       invalidBankingYears);
     return {
@@ -134,6 +138,7 @@ export class AnalysisValidationService {
       missingProductionVariables: missingProductionVariables,
       missingRegressionConstant: missingRegressionConstant,
       missingRegressionModelYear: missingRegressionModelYear,
+      missingRegressionModelStartMonth: missingRegressionModelStartMonth,
       missingRegressionModelSelection: missingRegressionModelSelection,
       missingRegressionPredictorCoef: missingRegressionPredictorCoef,
       invalidAverageBaseload: invalidAverageBaseload,

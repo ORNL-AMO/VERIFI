@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -24,6 +24,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { Month, Months } from 'src/app/shared/form-data/months';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -47,6 +48,12 @@ export class RegressionModelMenuComponent implements OnInit {
   isFormChange: boolean;
   analysisItem: IdbAnalysisItem;
   numVariableOptions: Array<number>;
+  months: Array<Month> = Months;
+  isButtonDisabled: boolean = false;
+
+  @Output() userDefinedModelClicked = new EventEmitter<boolean>();
+  @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
+
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -67,6 +74,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
+        this.checkUserDefinedModelValues();
         this.setNumVariableOptions();
         if (this.group.models && this.group.models.length != 0) {
           this.checkModelData();
@@ -90,9 +98,11 @@ export class RegressionModelMenuComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
+    this.isUserDefinedViewVisible.emit(false);
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, this.analysisItem);
     this.setNumVariableOptions();
+    this.checkUserDefinedModelValues();
     this.analysisItem.groups[groupIndex] = this.group;
     this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
@@ -111,6 +121,7 @@ export class RegressionModelMenuComponent implements OnInit {
         variable.regressionCoefficient = undefined;
       });
       this.group.regressionModelYear = undefined;
+      this.group.regressionModelStartMonth = undefined;
       this.group.regressionConstant = undefined;
     }
     this.saveItem();
@@ -190,7 +201,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.noDataValidationModels = this.group.models.find(model => {
       if (model.SEPValidation) {
         return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
-      }else{
+      } else {
         return undefined;
       }
     }) == undefined;
@@ -249,6 +260,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.selectedModelId = undefined;
     this.group.dateModelsGenerated = undefined;
     this.group.regressionModelYear = undefined;
+    this.group.regressionModelStartMonth = undefined;
     this.group.regressionConstant = undefined;
     this.saveItem();
     this.showConfirmPredictorChangeModel = false;
@@ -273,5 +285,17 @@ export class RegressionModelMenuComponent implements OnInit {
     } else {
       this.group.maxModelVariables = 0;
     }
+  }
+
+  checkUserDefinedModelValues() {
+    if (!this.group.userDefinedModel) {
+      this.isButtonDisabled = this.group.groupErrors.missingRegressionModelStartMonth || this.group.groupErrors.missingRegressionModelYear ||
+        this.group.groupErrors.missingRegressionConstant || this.group.groupErrors.missingRegressionPredictorCoef;
+    }
+  }
+
+  generateUserDefinedModel() {
+    this.userDefinedModelClicked.emit(true);
+    this.isUserDefinedViewVisible.emit(true);
   }
 }

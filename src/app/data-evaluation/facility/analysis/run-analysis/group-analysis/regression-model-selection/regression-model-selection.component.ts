@@ -30,6 +30,8 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedFacility: IdbFacility;
   selectedInspectModel: JStatRegressionModel;
   showInUseMessage: boolean;
+  generateUserDefinedModel: boolean;
+  showView: boolean = true;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -122,5 +124,13 @@ export class RegressionModelSelectionComponent implements OnInit {
   hideInUseMessage() {
     this.showInUseMessage = false;
     this.analysisService.hideInUseMessage = true;
+  }
+
+  onUserDefinedModelClicked(isClicked: boolean) {
+    this.generateUserDefinedModel = isClicked;
+  }
+
+  onFormChanged(isFormChanged: boolean) {
+    this.showView = isFormChanged;
   }
 }
