@@ -29,6 +29,14 @@
                         [meterData]="meterData"></app-meter-data-quality-report-modal>
                 </ng-template>
             </div>
+
+            <div class="ps-2 d-flex align-items-center">
+                <select class="form-select me-2" style="width: auto;" [(ngModel)]="optionSelected" (change)="filterEstimatedReadings($event)">
+                    <option value="all">All</option>
+                    <option value="estimated">Estimated Readings</option>
+                </select>
+                <app-label-with-tooltip [field]="'estimatedReading'"></app-label-with-tooltip>
+            </div>
         </div>
         <div class="d-flex">
             <!--Bulk Delete-->
@@ -85,26 +93,26 @@
         <div class="row no-margin">
             <div class="col no-margin table-responsive">
                 <app-electricity-data-table *ngIf="selectedMeter.source == 'Electricity'"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
-                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-                    (setDelete)="setDeleteMeterData($event)">
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
+                    [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()"
+                    (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
                 </app-electricity-data-table>
                 <app-general-utility-data-table
                     *ngIf="selectedMeter.source != 'Electricity' && (selectedMeter.scope != 2 && selectedMeter.scope != 5 && selectedMeter.scope != 6)"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
-                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-                    (setDelete)="setDeleteMeterData($event)">
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
+                    [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()"
+                    (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
                 </app-general-utility-data-table>
                 <app-vehicle-data-table *ngIf="selectedMeter.source != 'Electricity' && selectedMeter.scope == 2"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
-                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-                    (setDelete)="setDeleteMeterData($event)">
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
+                    [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()"
+                    (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
                 </app-vehicle-data-table>
                 <app-other-emissions-data-table
                     *ngIf="selectedMeter.source != 'Electricity' && (selectedMeter.scope == 5 || selectedMeter.scope ==6)"
-                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
-                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-                    (setDelete)="setDeleteMeterData($event)">
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
+                    [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()"
+                    (setEdit)="setEditMeterData($event)" (setDelete)="setDeleteMeterData($event)">
                 </app-other-emissions-data-table>
             </div>
         </div>

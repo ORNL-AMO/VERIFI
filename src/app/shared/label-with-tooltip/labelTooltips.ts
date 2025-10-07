@@ -61,5 +61,8 @@ export const LabelTooltips = {
     },
     "meterCharges": {
         "tooltip": "Add charges associated with this meter. Examples of charges include: demand charges, delivery fees, and taxes."
+    }, 
+    "estimatedReading": {
+        "tooltip": "Filter meter data to show estimated readings."
     }
 }
