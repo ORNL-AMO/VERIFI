@@ -15,13 +15,17 @@
     </div>
 </div>
 
-<div class="w-100" *ngIf="calculating == false">
+<div class="w-100" *ngIf="calculating == false && calculatingGroupSummaries == false">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'">
     </app-annual-analysis-summary-table>
     <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">
     </app-annual-analysis-summary-graph>
+    <app-annual-analysis-group-savings-table *ngIf="dataDisplay == 'table'" [groupSummaries]="groupSummaries"
+    [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-table>
+    <app-annual-analysis-group-savings-graph *ngIf="dataDisplay == 'graph'" [groupSummaries]="groupSummaries"
+    [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-graph>
 </div>
 <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Annual Results...'"
     [error]="calculating == 'error'"></app-calculating-spinner>

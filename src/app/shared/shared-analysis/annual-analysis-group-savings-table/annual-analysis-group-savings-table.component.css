@@ -1,0 +1,6 @@
+.sortable-header {
+    cursor: pointer;
+}
+.sortable-header.active {
+    text-decoration: underline;
+}
