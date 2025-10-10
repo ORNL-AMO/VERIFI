@@ -31,7 +31,7 @@
             </div>
 
             <div class="ps-2 d-flex align-items-center">
-                <select class="form-select me-2" style="width: auto;" [(ngModel)]="optionSelected" (change)="filterEstimatedReadings($event)">
+                <select class="form-select me-2 filter-reading" [(ngModel)]="optionSelected" (change)="filterEstimatedReadings()">
                     <option value="all">All</option>
                     <option value="estimated">Estimated Readings</option>
                 </select>

@@ -41,7 +41,7 @@ export class MeterDataTableComponent {
   hasNegativeReadings: boolean;
   duplicateReadingDates: Array<Date>;
   filteredMeterData: Array<IdbUtilityMeterData>;
-  optionSelected: string = 'all';
+  optionSelected: 'all' | 'estimated' = 'all';
 
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
@@ -191,9 +191,8 @@ export class MeterDataTableComponent {
     this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/data-quality-report');
   }
 
-  filterEstimatedReadings(event: Event) {
-    const selectedOption = (event.target as HTMLSelectElement).value;
-    if( selectedOption === 'estimated') 
+  filterEstimatedReadings() {
+    if( this.optionSelected === 'estimated') 
       this.filteredMeterData = this.meterData.filter(data => { return data.isEstimated == true });
     else
       this.filteredMeterData = [...this.meterData];
