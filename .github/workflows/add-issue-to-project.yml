@@ -1,5 +1,9 @@
 name: Add new Issues to GitHub Project
 
+permissions: 
+  issues: write
+  contents: read
+  
 on:
   issues:
     types: [opened]
