@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<div class="w-100" *ngIf="calculating == false && calculatingGroupSummaries == false">
+<div class="w-100" *ngIf="calculating == false">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'">
     </app-annual-analysis-summary-table>

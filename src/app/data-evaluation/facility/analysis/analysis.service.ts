@@ -24,6 +24,12 @@ export class AnalysisService {
   accountAnalysisItem: IdbAccountAnalysisItem;
   showDetail: BehaviorSubject<boolean>;
   hideInUseMessage: boolean = false;
+   groupSummaries: BehaviorSubject<Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+  }>>;
+
   constructor(private localStorageService: LocalStorageService) {
     let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
     if (!dataDisplay) {
@@ -92,6 +98,12 @@ export class AnalysisService {
         this.localStorageService.store('showDetail', showDetail);
       }
     });
+
+    this.groupSummaries = new BehaviorSubject<Array<{
+      group: AnalysisGroup,
+      monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+      annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+    }>>(undefined);
   }
 
   setDataAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
