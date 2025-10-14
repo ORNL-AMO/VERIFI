@@ -63,6 +63,6 @@ export const LabelTooltips = {
         "tooltip": "Add charges associated with this meter. Examples of charges include: demand charges, delivery fees, and taxes."
     },
     "checkMeterDifferences": {
-        "tooltip": "Click the icon to compare existing meter readings with imported meter readings."
+        "tooltip": "Click the icon to check the differences between the existing meter readings and the imported meter readings."
     }
 }
