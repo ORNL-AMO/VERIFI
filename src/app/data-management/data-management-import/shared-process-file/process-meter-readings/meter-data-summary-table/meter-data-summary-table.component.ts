@@ -22,7 +22,7 @@ export class MeterDataSummaryTableComponent {
   skipAll: boolean = false;
   facilities: Array<IdbFacility>;
   meters: Array<IdbUtilityMeter>;
-  comparisonSummaryWithDifferences: { readDate: Date, oldReading: number, newReading: number, difference: number, percentageDifference: number }[] = [];
+  comparisonSummaryWithDifferences: Array<MeterReadingComparison> = [];
   showModal: boolean = false;
   selectedMeterName: string;
   meterUnit: string;
@@ -76,28 +76,20 @@ export class MeterDataSummaryTableComponent {
     this.comparisonSummaryWithDifferences = this.checkDifferences(existingMeterReadings, summary);
   }
 
-  checkDifferences(meterData: Array<IdbUtilityMeterData>, newMeterDataSummary: MeterDataSummary): Array<{ readDate: Date, oldReading: number, newReading: number, difference: number, percentageDifference: number }> {
-    const comparisonData = new Array<{ readDate: Date, oldReading: number, newReading: number, difference: number, percentageDifference: number }>();
-
-    this.meterUnit = this.getReading(newMeterDataSummary.meterReadings[0], newMeterDataSummary.meter).unit;
+  checkDifferences(meterData: Array<IdbUtilityMeterData>, newMeterDataSummary: MeterDataSummary): Array<MeterReadingComparison> {
+    const comparisonData: Array<MeterReadingComparison> = [];
 
     meterData.forEach(oldData => {
       const oldDateStr = oldData.readDate.getFullYear() + '-' + (oldData.readDate.getMonth() + 1) + '-' + oldData.readDate.getDate();
       for (let i = 0; i < newMeterDataSummary.meterReadings.length; i++) {
         const reading = newMeterDataSummary.meterReadings[i];
         const newDateStr = reading.readDate.getFullYear() + '-' + (reading.readDate.getMonth() + 1) + '-' + reading.readDate.getDate();
+        let meterReadingComparisonObj: MeterReadingComparison;
         if (oldDateStr === newDateStr) {
-          let oldReading = this.getReading(oldData, newMeterDataSummary.meter).value;
-          let newReading = this.getReading(reading, newMeterDataSummary.meter).value;
-          let difference = Math.abs(newReading - oldReading);
-          if (difference !== 0) {
-            comparisonData.push({
-              readDate: oldData.readDate,
-              oldReading: oldReading,
-              newReading: newReading,
-              difference: difference,
-              percentageDifference: (oldReading !== 0) ? (difference / oldReading * 100) : null
-            });
+          meterReadingComparisonObj = this.getMeterReadingValues(oldData, reading, newMeterDataSummary.meter);
+          if (meterReadingComparisonObj.difference != 0 || meterReadingComparisonObj.parametersWithDifference.length > 0) {
+            comparisonData.push(meterReadingComparisonObj);
+            this.meterUnit = meterReadingComparisonObj.unit;
           }
           break;
         }
@@ -107,25 +99,126 @@ export class MeterDataSummaryTableComponent {
     return comparisonData;
   }
 
-  getReading(data: IdbUtilityMeterData, meter: IdbUtilityMeter) {
+  getMeterReadingValues(oldData: IdbUtilityMeterData, newData: IdbUtilityMeterData, meter: IdbUtilityMeter) {
+    let meterReadingComparisonObj: MeterReadingComparison;
+
     if (meter.source === 'Electricity') {
-      return { value: data.totalEnergyUse, unit: meter.startingUnit };
+      let difference: number = Math.abs(newData.totalEnergyUse - oldData.totalEnergyUse);
+      let percentageDifference: number = (oldData.totalEnergyUse !== 0) ? (difference / oldData.totalEnergyUse * 100) : null;
+      let diffMeterReadings: Array<string> = [];
+      if (oldData.totalRealDemand !== newData.totalRealDemand && !(oldData.totalRealDemand == null && newData.totalRealDemand == null))
+        diffMeterReadings.push('Total Real Demand');
+
+      if (oldData.powerFactor !== newData.powerFactor && !(oldData.powerFactor == null && newData.powerFactor == null))
+        diffMeterReadings.push('Power Factor');
+
+      if (oldData.totalCost !== newData.totalCost && !(oldData.totalCost == null && newData.totalCost == null))
+        diffMeterReadings.push('Total Cost');
+
+      meterReadingComparisonObj = {
+        readDate: oldData.readDate,
+        oldReading: oldData.totalEnergyUse,
+        newReading: newData.totalEnergyUse,
+        difference: difference,
+        percentageDifference: percentageDifference,
+        unit: meter.startingUnit,
+        parametersWithDifference: diffMeterReadings
+      }
+      return meterReadingComparisonObj;
     }
     else if (meter.scope == 2) {
-      return { value: data.totalEnergyUse, unit: meter.energyUnit };
+      let difference: number = Math.abs(newData.totalVolume - oldData.totalVolume);
+      let percentageDifference: number = (oldData.totalVolume !== 0) ? (difference / oldData.totalVolume * 100) : null;
+      let diffMeterReadings: Array<string> = [];
+
+      if (oldData.totalCost !== newData.totalCost && !(oldData.totalCost == null && newData.totalCost == null))
+        diffMeterReadings.push('Total Cost');
+      if (oldData.vehicleFuelEfficiency !== newData.vehicleFuelEfficiency && !(oldData.vehicleFuelEfficiency == null && newData.vehicleFuelEfficiency == null))
+        diffMeterReadings.push('Vehicle Fuel Efficiency');
+
+      meterReadingComparisonObj = {
+        readDate: oldData.readDate,
+        oldReading: oldData.totalVolume,
+        newReading: newData.totalVolume,
+        difference: difference,
+        percentageDifference: percentageDifference,
+        unit: meter.vehicleDistanceUnit,
+        parametersWithDifference: diffMeterReadings
+      }
+      return meterReadingComparisonObj;
     }
     else if (meter.scope == 5 || meter.scope == 6) {
-      return { value: data.totalVolume, unit: meter.startingUnit };
+      let difference: number = Math.abs(newData.totalVolume - oldData.totalVolume);
+      let percentageDifference: number = (oldData.totalVolume !== 0) ? (difference / oldData.totalVolume * 100) : null;
+      let diffMeterReadings: Array<string> = [];
+
+      if (oldData.totalCost !== newData.totalCost && !(oldData.totalCost == null && newData.totalCost == null))
+        diffMeterReadings.push('Total Cost');
+
+      meterReadingComparisonObj = {
+        readDate: oldData.readDate,
+        oldReading: oldData.totalVolume,
+        newReading: newData.totalVolume,
+        difference: difference,
+        percentageDifference: percentageDifference,
+        unit: meter.startingUnit,
+        parametersWithDifference: diffMeterReadings
+      }
+      return meterReadingComparisonObj;
     }
     else if (meter.scope != 2 && meter.scope != 5 && meter.scope != 6) {
-      if (meter.source === 'Other' || meter.source === 'Water Intake' || meter.source === 'Water Discharge')
-        return { value: data.totalVolume, unit: meter.startingUnit };
-      else
-        return { value: data.totalEnergyUse, unit: meter.energyUnit };
+      if (meter.source === 'Other' || meter.source === 'Water Intake' || meter.source === 'Water Discharge') {
+        let difference: number = Math.abs(newData.totalVolume - oldData.totalVolume);
+        let percentageDifference: number = (oldData.totalVolume !== 0) ? (difference / oldData.totalVolume * 100) : null;
+        let diffMeterReadings: Array<string> = [];
+
+        if (oldData.totalCost !== newData.totalCost && !(oldData.totalCost == null && newData.totalCost == null))
+          diffMeterReadings.push('Total Cost');
+
+        meterReadingComparisonObj = {
+          readDate: oldData.readDate,
+          oldReading: oldData.totalVolume,
+          newReading: newData.totalVolume,
+          difference: difference,
+          percentageDifference: percentageDifference,
+          unit: meter.startingUnit,
+          parametersWithDifference: diffMeterReadings
+        }
+        return meterReadingComparisonObj;
+      }
+      else {
+        let difference: number = Math.abs(newData.totalEnergyUse - oldData.totalEnergyUse);
+        let percentageDifference: number = (oldData.totalEnergyUse !== 0) ? (difference / oldData.totalEnergyUse * 100) : null;
+        let diffMeterReadings: Array<string> = [];
+
+        if (oldData.totalCost !== newData.totalCost && !(oldData.totalCost == null && newData.totalCost == null))
+          diffMeterReadings.push('Total Cost');
+
+        meterReadingComparisonObj = {
+          readDate: oldData.readDate,
+          oldReading: oldData.totalEnergyUse,
+          newReading: newData.totalEnergyUse,
+          difference: difference,
+          percentageDifference: percentageDifference,
+          unit: meter.startingUnit,
+          parametersWithDifference: diffMeterReadings
+        }
+        return meterReadingComparisonObj;
+      }
     }
   }
 
   selectMeterSummary(meterSummary: MeterDataSummary) {
     this.emitInspectSummary.emit(meterSummary);
   }
+}
+
+export interface MeterReadingComparison {
+  readDate?: Date;
+  oldReading?: number;
+  newReading?: number;
+  difference: number;
+  percentageDifference: number;
+  unit: string;
+  parametersWithDifference: Array<string>;
 }

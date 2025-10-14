@@ -92,11 +92,11 @@
                             </th>
                             <th class="col-existing can-click" (click)="setOrderDataField('oldReading')"
                                 [ngClass]="{'active': orderDataField == 'oldReading'}">
-                                Current Reading ({{meterUnit}})
+                                Current Total Usage or Distance ({{meterUnit}})
                             </th>
                             <th class="col-new can-click" (click)="setOrderDataField('newReading')"
                                 [ngClass]="{'active': orderDataField == 'newReading'}">
-                                Imported Reading ({{meterUnit}})
+                                Imported Total Usage or Distance ({{meterUnit}})
                             </th>
                             <th class="col-difference can-click" (click)="setOrderDataField('difference')"
                                 [ngClass]="{'active': orderDataField == 'difference'}">
@@ -106,6 +106,9 @@
                                 (click)="setOrderDataField('percentageDifference')"
                                 [ngClass]="{'active': orderDataField == 'percentageDifference'}">
                                 % Difference
+                            </th>
+                            <th class="col-different-parameters">
+                               Other Parameters with differences
                             </th>
                         </tr>
                     </thead>
@@ -126,6 +129,14 @@
                             </td>
                             <td class="col-percentage-difference">
                                 {{ summary.percentageDifference | number: '1.2-2' }}%
+                            </td>
+                            <td class="col-different-parameters">
+                                <ng-container *ngIf="summary.parametersWithDifference.length > 0">
+                                    {{ summary?.parametersWithDifference.join(', ') }}
+                                </ng-container>
+                                <ng-container *ngIf="summary.parametersWithDifference.length === 0">
+                                    &mdash;
+                                </ng-container>
                             </td>
                         </tr>
                     </tbody>

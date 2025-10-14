@@ -60,6 +60,12 @@
   border: 1px solid black;
 }
 
+.col-different-parameters {
+  background-color: #d3d072;
+  text-align: center;
+  border: 1px solid black;
+}
+
 thead tr:not(.table-mh) th.can-click:hover{
     cursor: pointer;
     text-decoration: underline;
