@@ -159,7 +159,6 @@ export class CalculatedPredictorDataUpdateComponent {
       }
       let predictorIndex: number = existingPredictorIndex[i];
       if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
-        let stationId: string = this.predictor.weatherStationId;
         let entryDate: Date = new Date(this.predictorData[predictorIndex].date);
         let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
@@ -306,6 +305,7 @@ export class CalculatedPredictorDataUpdateComponent {
     for (let i = 0; i < this.predictorData.length; i++) {
       let pData: CalculatedPredictorTableItem = this.predictorData[i];
       if (pData.changeAmount && !pData.added && !pData.deleted) {
+        pData.amount = pData.updatedAmount;
         delete pData.changeAmount;
         delete pData.updatedAmount;
         await firstValueFrom(this.predictorDataDbService.updateWithObservable(pData));
