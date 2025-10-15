@@ -166,8 +166,7 @@
             <div class="col-6">
                 <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
                     [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
-                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year |
-                        yearDisplay:selectedFacility.fiscalYear}}</option>
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
                 </select>
             </div>
         </div>
