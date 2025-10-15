@@ -5,7 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisService } from '../../analysis.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -19,10 +19,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
-    selector: 'app-analysis-setup',
-    templateUrl: './analysis-setup.component.html',
-    styleUrls: ['./analysis-setup.component.css'],
-    standalone: false
+  selector: 'app-analysis-setup',
+  templateUrl: './analysis-setup.component.html',
+  styleUrls: ['./analysis-setup.component.css'],
+  standalone: false
 })
 export class AnalysisSetupComponent implements OnInit {
 
@@ -46,6 +46,7 @@ export class AnalysisSetupComponent implements OnInit {
 
   analysisItemSub: Subscription;
   isFormChange: boolean = false;
+  showReportYearWarning: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -53,24 +54,26 @@ export class AnalysisSetupComponent implements OnInit {
     private accountDbService: AccountdbService,
     private calanderizationService: CalanderizationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private regressionModelsService: RegressionModelsService) { }
+    private regressionModelsService: RegressionModelsService,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
-      if(!this.isFormChange){
+      if (!this.isFormChange) {
         this.analysisItem = item;
         this.facility = this.facilityDbService.selectedFacility.getValue();
         this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
         this.setReportYears();
         this.setBaselineYearWarning();
+        this.setReportYearWarning();
         this.setComponentBools();
-      }else{
+      } else {
         this.isFormChange = false;
       }
     })
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
   }
 
@@ -87,6 +90,7 @@ export class AnalysisSetupComponent implements OnInit {
   async changeReportYear() {
     this.analysisItem = this.analysisService.setDataAdjustments(this.analysisItem);
     this.setBaselineYearWarning();
+    this.setReportYearWarning();
     if (!this.baselineYearWarning) {
       let allFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
       let selectYearAnalysis: boolean = true;
@@ -238,5 +242,18 @@ export class AnalysisSetupComponent implements OnInit {
       this.analysisItem.bankedAnalysisItemId = undefined;
     }
     await this.saveItem();
+  }
+
+
+  setReportYearWarning() {
+    if (this.analysisItem.reportYear != undefined) {
+      this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.analysisItem.reportYear, this.facility);
+    } else {
+      this.showReportYearWarning = false;
+    }
+  }
+
+  goToSavingsReport(){
+    this.router.navigate(['../../../reports'], { relativeTo: this.activatedRoute });
   }
 }
