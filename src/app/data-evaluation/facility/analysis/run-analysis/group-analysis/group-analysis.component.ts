@@ -98,6 +98,7 @@ export class GroupAnalysisComponent implements OnInit {
     if (this.selectedGroup.groupErrors.hasErrors) {
       this.regressionErrors = (this.selectedGroup.groupErrors.missingRegressionConstant ||
         this.selectedGroup.groupErrors.missingRegressionModelYear ||
+        this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
         this.selectedGroup.groupErrors.missingRegressionModelSelection ||
         this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
       this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||

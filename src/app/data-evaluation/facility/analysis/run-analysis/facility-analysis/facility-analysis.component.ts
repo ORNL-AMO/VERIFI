@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnalysisService } from '../../analysis.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -57,10 +57,12 @@ export class FacilityAnalysisComponent implements OnInit {
         if (!data.error) {
           this.analysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
           this.analysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.analysisService.groupSummaries.next(data.groupSummaries);
           this.analysisService.calculating.next(false);
         } else {
           this.analysisService.annualAnalysisSummary.next(undefined);
           this.analysisService.monthlyAccountAnalysisData.next(undefined);
+          this.analysisService.groupSummaries.next(undefined);
           this.analysisService.calculating.next('error');
         }
       };
@@ -74,6 +76,7 @@ export class FacilityAnalysisComponent implements OnInit {
         calculateAllMonthlyData: false,
         accountPredictors: accountPredictors,
         accountAnalysisItems: accountAnalysisItems,
+        includeGroupSummaries: true,
         assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
@@ -82,8 +85,14 @@ export class FacilityAnalysisComponent implements OnInit {
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, false);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+      let groupSummaries: Array<{
+        group: AnalysisGroup,
+        monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+      }> = annualAnalysisSummaryClass.groupSummaries;
       this.analysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
       this.analysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
+      this.analysisService.groupSummaries.next(groupSummaries);
       this.analysisService.calculating.next(false);
     }
   }

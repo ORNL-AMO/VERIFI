@@ -64,5 +64,8 @@ export const LabelTooltips = {
     },
     "checkMeterDifferences": {
         "tooltip": "Click the icon to check the differences between the existing meter readings and the imported meter readings."
+    }, 
+    "estimatedReading": {
+        "tooltip": "Filter meter data to show estimated readings."
     }
 }

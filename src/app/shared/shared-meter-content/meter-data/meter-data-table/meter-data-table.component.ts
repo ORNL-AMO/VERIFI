@@ -40,6 +40,8 @@ export class MeterDataTableComponent {
   inDataManagement: boolean;
   hasNegativeReadings: boolean;
   duplicateReadingDates: Array<Date>;
+  filteredMeterData: Array<IdbUtilityMeterData>;
+  optionSelected: 'all' | 'estimated' = 'all';
 
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
@@ -62,6 +64,7 @@ export class MeterDataTableComponent {
       let meterId: string = params['id'];
       this.selectedMeter = this.facilityMeters.find(meter => { return meter.guid == meterId });
       this.setData();
+      this.optionSelected = 'all';
     });
 
     this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(data => {
@@ -85,6 +88,7 @@ export class MeterDataTableComponent {
 
   setData() {
     this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+    this.filteredMeterData = [...this.meterData];
     this.hasNegativeReadings = this.meterData.findIndex(mData => {
       return mData.totalEnergyUse < 0
     }) != -1;
@@ -185,6 +189,12 @@ export class MeterDataTableComponent {
 
   goToDataQualityReport() {
     this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/data-quality-report');
+  }
 
+  filterEstimatedReadings() {
+    if( this.optionSelected === 'estimated') 
+      this.filteredMeterData = this.meterData.filter(data => { return data.isEstimated == true });
+    else
+      this.filteredMeterData = [...this.meterData];
   }
 }
