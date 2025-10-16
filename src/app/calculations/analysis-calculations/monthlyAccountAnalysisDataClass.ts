@@ -29,7 +29,7 @@ export class MonthlyAccountAnalysisDataClass {
         this.setModelYearDataAdjustment();
         this.setDataAdjustment();
         this.setBaselineAdjustmentInput();
-        this.setBaselineAdjustmentForNew(allFacilityAnalysisData);
+        this.setBaselineAdjustmentForNew(allFacilityAnalysisData, account);
         this.setMonthlyAnalysisCalculatedValues(previousMonthsSummaryData, baselineYear);
     }
 
@@ -40,8 +40,8 @@ export class MonthlyAccountAnalysisDataClass {
         });
     }
 
-    setFiscalYear(facility: IdbAccount) {
-        this.fiscalYear = getFiscalYear(new Date(this.date), facility);
+    setFiscalYear(account: IdbAccount) {
+        this.fiscalYear = getFiscalYear(new Date(this.date), account);
     }
 
     setModelYearDataAdjustment() {
@@ -56,12 +56,13 @@ export class MonthlyAccountAnalysisDataClass {
         this.baselineAdjustmentInput = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.baselineAdjustmentInput });
     }
 
-    setBaselineAdjustmentForNew(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>) {
+    setBaselineAdjustmentForNew(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>, account: IdbAccount) {
         //Filter out baseline data of new facilities corresponding to the month
         //Jan account -> Baseline Year of Jan for new facility
         let allBaselineDataForNewFacilitiesThisMonth: Array<MonthlyAnalysisSummaryDataClass> = allFacilityAnalysisData.filter(summaryData => {
             let summaryDataDate: Date = new Date(summaryData.date);
-            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && (summaryData.isNew && summaryData.isBaselineYear) && (summaryData.baselineYear <= this.date.getUTCFullYear());
+            let fiscalYear: number = getFiscalYear(this.date, account);
+            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && (summaryData.isNew && summaryData.isBaselineYear) && (summaryData.baselineYear <= fiscalYear);
         });
 
         this.baselineAdjustmentForNew = _.sumBy(allBaselineDataForNewFacilitiesThisMonth, (data: MonthlyAnalysisSummaryDataClass) => {
