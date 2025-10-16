@@ -63,7 +63,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
         this.setBaselineAdjustmentForNormalization(currentMonthData);
-        this.setBaselineAdjustment(currentMonthData);
+        this.setBaselineAdjustment(currentMonthData, baselineAdjustmentForNew);
         this.setRollingSavingsValues(previousMonthsValues)
         this.setYearToDatePercentSavings();
         this.setFivePercentTarget();
@@ -174,10 +174,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         });
     }
 
-    setBaselineAdjustment(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
+    setBaselineAdjustment(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>, baselineAdjustmentForNew: number) {
         this.baselineAdjustment = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
             return data.monthlyAnalysisRollingValues.baselineAdjustment;
         });
+        this.baselineAdjustment = this.baselineAdjustment + baselineAdjustmentForNew;
     }
 
     setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
