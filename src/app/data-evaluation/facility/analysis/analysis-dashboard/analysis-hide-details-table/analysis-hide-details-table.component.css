@@ -1,0 +1,65 @@
+.wrapper {
+    margin-bottom: 100px;
+}
+
+.table {
+    overflow: hidden;
+    border: black 1px solid;
+}
+
+.table th {
+    background-color: #154c79;
+    color: white;
+    text-align: center;
+}
+
+.table tr {
+    text-align: center;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+thead th.can-click:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.error-icon {
+    font-size: 14px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-style: italic;
+}
+
+.fa.fa-exclamation-circle {
+    color: red;
+}
+
+.fa-circle-check,
+.fa-circle {
+    font-size: 18px;
+}
+
+.fa-circle-check {
+    color: green;
+}
+
+
+.fa-circle {
+    color: lightgray;
+}
+
+.fa-circle:hover {
+    color: gray;
+    cursor: pointer;
+}
+
+.fa-circle-check:hover {
+    cursor: pointer;
+}
+

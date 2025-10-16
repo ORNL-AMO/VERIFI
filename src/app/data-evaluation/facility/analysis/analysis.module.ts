@@ -36,6 +36,7 @@ import { SharedReportsModule } from "src/app/shared/shared-reports/shared-report
 import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
 import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/group-analysis-options/banked-group-results-table/banked-group-results-table.component';
 import { RegressionUserDefinedModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-user-defined-model-inspection/regression-user-defined-model-inspection.component';
+import { AnalysisHideDetailsTableComponent } from './analysis-dashboard/analysis-hide-details-table/analysis-hide-details-table.component';
 
 @NgModule({
   declarations: [
@@ -65,7 +66,8 @@ import { RegressionUserDefinedModelInspectionComponent } from './run-analysis/gr
     BankedGroupsDetailsComponent,
     BankedGroupAnalysisComponent,
     BankedGroupResultsTableComponent,
-    RegressionUserDefinedModelInspectionComponent
+    RegressionUserDefinedModelInspectionComponent,
+    AnalysisHideDetailsTableComponent
   ],
   imports: [
     CommonModule,

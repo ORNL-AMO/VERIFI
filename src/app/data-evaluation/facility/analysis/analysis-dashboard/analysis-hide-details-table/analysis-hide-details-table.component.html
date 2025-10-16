@@ -1,0 +1,137 @@
+<div class="wrapper" *ngIf="filteredAnalysisItems.length > 0">
+    <div class="row mb-5">
+        <div class="col-auto">
+            <label class="form-label fw-bold">Filter by Analysis Category:</label>
+            <select class="form-select" [(ngModel)]="selectedAnalysisCategory" (change)="filterAnalysisItems()">
+                <option value="all">All</option>
+                <option value="energy">Energy</option>
+                <option value="water">Water</option>
+            </select>
+        </div>
+        <div class="col-auto ms-5">
+            <label class="form-label fw-bold">Filter by Report Year:</label>
+            <select class="form-select" [(ngModel)]="selectedReportYear" (change)="filterAnalysisItems()">
+                <option value="all">All</option>
+                <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="can-click" (click)="setOrderDataField('reportYear')"
+                        [ngClass]="{'active': orderDataField == 'reportYear'}">
+                        Report Year
+                    </th>
+                    <th class="can-click" (click)="setOrderDataField('name')"
+                        [ngClass]="{'active': orderDataField == 'name'}">
+                        Analysis Item
+                    </th>
+                    <th>
+                        Analysis Category
+                    </th>
+                    <th class="can-click" (click)="setOrderDataField('modifiedDate')"
+                        [ngClass]="{'active': orderDataField == 'modifiedDate'}">
+                        Last Modified
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let analysisItem of filteredAnalysisItems | orderBy: orderDataField: orderByDirection">
+                    <td>
+                        <span class="fa"
+                            [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}"
+                            (click)="setUseItem(analysisItem)"></span>
+                    </td>
+                    <td>
+                        {{analysisItem.reportYear}}
+                    </td>
+                    <td>
+                        <a (click)="selectAnalysisItem(analysisItem)">
+                            <span class="me-2 fa fa-exclamation-circle error-icon"
+                                *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors"></span>
+                            {{analysisItem.name}}
+                        </a>
+                    </td>
+                    <td>
+                        <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
+                            Energy Analysis
+                        </ng-container>
+                        <ng-container *ngIf="analysisItem.analysisCategory == 'water'">
+                            Water Analysis
+                        </ng-container>
+                    </td>
+                    <td>
+                        {{ analysisItem.modifiedDate | date:'short'}}
+                    </td>
+                    <td>
+                        <button class="btn action-btn btn-sm" (click)="addReport(analysisItem)" title="Create Report"
+                            *ngIf="!analysisItem.setupErrors.hasError && !analysisItem.setupErrors.groupsHaveErrors">
+                            <i class="fa fa-file-circle-plus"></i>
+                        </button>
+                        <button class="btn action-btn btn-sm ms-1" (click)="createCopy(analysisItem)"
+                            title="Create Copy">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                        <button class="btn action-btn btn-sm ms-1" (click)="deleteItem(analysisItem)"
+                            title="Delete Analysis">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div>
+    <div *ngIf="filteredAnalysisItems.length == 0" class="alert alert-info">
+        No analysis items to display. Please adjust your filters or create a new analysis item.
+    </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': displayDeleteModal || displayCreateCopyModal || displayCreateReportModal}">
+</div>
+<div class="popup" [class.open]="displayDeleteModal">
+    <div class="popup-header" *ngIf="displayDeleteModal">Delete: {{analysisItemToDelete?.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting this analysis item cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete(analysisItemToDelete)">Delete</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="displayCreateCopyModal">
+    <div class="popup-header" *ngIf="displayCreateCopyModal">Create Copy: {{analysisItemToCopy?.name}}
+        <button class="item-right" (click)="cancelCreateCopy()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>Would you like to create a copy of {{analysisItemToCopy?.name}}?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreateCopy()">Cancel</button>
+        <button class="btn btn-success" (click)="confirmCreateCopy(analysisItemToCopy)">Create Copy</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="displayCreateReportModal">
+    <div class="popup-header">Create Report: {{analysisItemToCreateReport?.name}}
+        <button class="item-right" (click)="cancelCreateReport()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>Would you like to create an analysis report for {{analysisItemToCreateReport?.name}}?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreateReport()">Cancel</button>
+        <button class="btn btn-success" (click)="confirmCreateReport(analysisItemToCreateReport)">Create Report</button>
+    </div>
+</div>
