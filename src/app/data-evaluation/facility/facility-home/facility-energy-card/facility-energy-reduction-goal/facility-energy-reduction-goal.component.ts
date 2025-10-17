@@ -6,12 +6,14 @@ import { FacilityHomeService } from '../../facility-home.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { Router } from '@angular/router';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
-    selector: 'app-facility-energy-reduction-goal',
-    templateUrl: './facility-energy-reduction-goal.component.html',
-    styleUrls: ['./facility-energy-reduction-goal.component.css'],
-    standalone: false
+  selector: 'app-facility-energy-reduction-goal',
+  templateUrl: './facility-energy-reduction-goal.component.html',
+  styleUrls: ['./facility-energy-reduction-goal.component.css'],
+  standalone: false
 })
 export class FacilityEnergyReductionGoalComponent {
 
@@ -25,7 +27,11 @@ export class FacilityEnergyReductionGoalComponent {
   facility: IdbFacility;
   selectedFacilitySub: Subscription;
   latestAnalysisDate: Date;
-  constructor(private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService) { }
+  latestAnalysisItem: IdbAnalysisItem;
+  constructor(private facilityDbService: FacilitydbService,
+    private facilityHomeService: FacilityHomeService,
+    private router: Router,
+    private analysisDbService: AnalysisDbService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -34,9 +40,9 @@ export class FacilityEnergyReductionGoalComponent {
     });
 
     this.latestSummarySub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
-      let latestAnalysisItem: IdbAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
+      this.latestAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && latestAnalysisItem?.selectedYearAnalysis) {
+      if (this.latestAnalysisSummary && this.latestAnalysisItem?.selectedYearAnalysis) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {
@@ -65,6 +71,15 @@ export class FacilityEnergyReductionGoalComponent {
     this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
     if (this.percentTowardsGoal < 0) {
       this.percentTowardsGoal = 0;
+    }
+  }
+
+  goToAnalysisItem() {
+    this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
+    if (this.latestAnalysisItem.setupErrors.hasError || this.latestAnalysisItem.setupErrors.groupsHaveErrors) {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis/facility-analysis');
     }
   }
 }
