@@ -796,7 +796,6 @@ export class ExportToExcelTemplateV3Service {
         worksheet.getCell('B' + rowIndex).value = this.getFormatedDate(date);
         let alpha: string = 'C';
         facilityPredictors.forEach(predictor => {
-          worksheet.getCell(alpha + rowIndex).value = predictor.name;
           alpha = this.getNextAlpha(alpha);
           let reading: IdbPredictorData = facilityPredictorData.find(pData => {
             return checkSameMonth(new Date(pData.date), new Date(pDate.year, pDate.month, 1)) && pData.predictorId == predictor.guid;
