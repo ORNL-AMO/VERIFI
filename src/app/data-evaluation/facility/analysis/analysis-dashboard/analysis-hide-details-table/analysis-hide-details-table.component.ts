@@ -15,6 +15,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbFacilityReport, getNewIdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-analysis-hide-details-table',
@@ -25,12 +26,12 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class AnalysisHideDetailsTableComponent {
 
-  @Input()
-  analysisItemsList: Array<{
-    year: number,
-    analysisItems: Array<IdbAnalysisItem>,
-    hasSelectedItem: boolean
-  }>;
+  // @Input()
+  // analysisItemsList: Array<{
+  //   year: number,
+  //   analysisItems: Array<IdbAnalysisItem>,
+  //   hasSelectedItem: boolean
+  // }>;
 
   @Input()
   selectedFacility: IdbFacility;
@@ -48,6 +49,8 @@ export class AnalysisHideDetailsTableComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   selectedReportYear: number | 'all' = 'all';
   yearOptions: Array<number>;
+  selectedYearCategoryMap: {[year: number]: {[category: string]: boolean}} = {};
+  errorList: Array<{ year: number, category: string }> = [];
 
   constructor(private analysisDbService: AnalysisDbService, private router: Router,
     private dbChangesService: DbChangesService,
@@ -62,6 +65,7 @@ export class AnalysisHideDetailsTableComponent {
     this.filteredAnalysisItems = this.facilityAnalysisItems;
     this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.selectedAnalysisCategory);
     this.filterAnalysisItems();
+    this.computeSelectionErrors();
   }
 
   selectAnalysisItem(analysisItem: IdbAnalysisItem) {
@@ -95,6 +99,7 @@ export class AnalysisHideDetailsTableComponent {
       await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
       this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
       this.filteredAnalysisItems = this.facilityAnalysisItems;
+      this.computeSelectionErrors();
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
     }
@@ -131,6 +136,25 @@ export class AnalysisHideDetailsTableComponent {
         const yearMatch = this.selectedReportYear === 'all' || item.reportYear === this.selectedReportYear;
         return categoryMatch && yearMatch;
       });
+  }
+
+  computeSelectionErrors() {
+    this.errorList = [];
+    let yearCategoryPairs = Array.from(new Set(this.filteredAnalysisItems.map(item => item.reportYear + '-' + item.analysisCategory)));
+
+    yearCategoryPairs.forEach(pair => {
+      const [yearStr, category] = pair.split('-');
+      const year = +yearStr;
+      const itemsForYearCategory = this.filteredAnalysisItems.filter(item => item.reportYear === year && item.analysisCategory === category);
+
+      if(itemsForYearCategory.every(item => !item.selectedYearAnalysis)) {
+        this.errorList.push({ year: year, category: category });
+      }
+    });
+  }
+
+  hasSelectionError(year: number, category: string): boolean {
+    return this.errorList.some(error => error.year === year && error.category === category);
   }
 
   addReport(analysisItem: IdbAnalysisItem) {
@@ -213,6 +237,7 @@ export class AnalysisHideDetailsTableComponent {
     this.filteredAnalysisItems = this.facilityAnalysisItems;
     this.selectedAnalysisCategory = 'all';
     this.selectedReportYear = 'all';
+    this.computeSelectionErrors();
   }
 
   cancelDelete() {

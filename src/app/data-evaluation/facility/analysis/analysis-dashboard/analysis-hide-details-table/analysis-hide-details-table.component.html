@@ -43,13 +43,17 @@
             </thead>
             <tbody>
                 <tr *ngFor="let analysisItem of filteredAnalysisItems | orderBy: orderDataField: orderByDirection">
-                    <td>
+                    <td class="text-center">
                         <span class="fa"
                             [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}"
                             (click)="setUseItem(analysisItem)"></span>
                     </td>
                     <td>
                         {{analysisItem.reportYear}}
+                        <span class="ms-2 text-danger fw-bold"
+                            *ngIf="hasSelectionError(analysisItem.reportYear, analysisItem.analysisCategory)">
+                            No item selected for this year!
+                        </span>
                     </td>
                     <td>
                         <a (click)="selectAnalysisItem(analysisItem)">
@@ -69,7 +73,7 @@
                     <td>
                         {{ analysisItem.modifiedDate | date:'short'}}
                     </td>
-                    <td>
+                    <td class="text-center">
                         <button class="btn action-btn btn-sm" (click)="addReport(analysisItem)" title="Create Report"
                             *ngIf="!analysisItem.setupErrors.hasError && !analysisItem.setupErrors.groupsHaveErrors">
                             <i class="fa fa-file-circle-plus"></i>
