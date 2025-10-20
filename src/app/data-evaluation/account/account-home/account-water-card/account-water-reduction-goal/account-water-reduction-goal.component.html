@@ -31,9 +31,9 @@
         {{goalYear | yearDisplay:account.fiscalYear}} ({{percentGoal}}%)
     </div>
 </div>
-<div *ngIf="latestAnalysisItem" class="d-flex justify-content-end me-5 mt-3 item-name">
-    Analysis Used:
-    <a class="item-name ms-2" (click)="goToAnalysisItem()">
+<div class="d-flex w-100 justify-content-center" *ngIf="latestAnalysisItem">
+    <a class="small click-link" (click)="goToAnalysisItem()">
+        <span class="fa fa-microscope"></span>
         {{latestAnalysisItem.name}}
     </a>
 </div>
