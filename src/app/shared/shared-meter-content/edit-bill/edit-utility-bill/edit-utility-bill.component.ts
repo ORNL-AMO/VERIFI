@@ -8,7 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
-import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFunctions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

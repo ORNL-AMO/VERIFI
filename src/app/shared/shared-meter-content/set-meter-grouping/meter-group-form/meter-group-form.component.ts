@@ -11,7 +11,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 
 @Component({

@@ -7,7 +7,7 @@ import * as jStat from 'jstat';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-meter-charges-correlation-plot',

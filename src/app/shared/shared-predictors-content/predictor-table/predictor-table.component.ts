@@ -19,7 +19,7 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { getGUID, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
+import { getGUID, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 

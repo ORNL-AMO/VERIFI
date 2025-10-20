@@ -1,4 +1,4 @@
-import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
+import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFunctions";
 import { EmissionsResults } from "../eGridEmissions"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbUtilityMeter } from "./utilityMeter";

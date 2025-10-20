@@ -1,4 +1,4 @@
-import { getGUID } from "src/app/shared/sharedHelperFuntions";
+import { getGUID } from "src/app/shared/sharedHelperFunctions";
 
 export interface IdbEntry {
     id?: number;

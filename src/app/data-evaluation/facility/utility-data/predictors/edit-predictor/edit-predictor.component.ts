@@ -19,7 +19,7 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';

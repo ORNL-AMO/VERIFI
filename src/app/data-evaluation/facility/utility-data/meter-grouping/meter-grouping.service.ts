@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';

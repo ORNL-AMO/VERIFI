@@ -11,7 +11,7 @@ import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
-import { getGUID } from '../shared/sharedHelperFuntions';
+import { getGUID } from '../shared/sharedHelperFunctions';
 import { ChargeCostUnit, MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 
 @Injectable({

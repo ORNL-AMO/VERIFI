@@ -8,7 +8,7 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
-import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFunctions';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
 import { getMeterDataCopy } from 'src/app/calculations/conversions/convertMeterData';

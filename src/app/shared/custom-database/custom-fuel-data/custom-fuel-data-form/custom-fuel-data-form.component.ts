@@ -16,7 +16,7 @@ import { StationaryGasOptions } from 'src/app/shared/fuel-options/stationaryGasO
 import { StationaryLiquidOptions } from 'src/app/shared/fuel-options/stationaryLiquidOptions';
 import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
 import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySolidOptions';
-import { convertHeatCapacity } from 'src/app/shared/sharedHelperFuntions';
+import { convertHeatCapacity } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-custom-fuel-data-form',
