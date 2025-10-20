@@ -152,11 +152,7 @@ export class FacilityHomeComponent implements OnInit {
       return isNaN(summary.adjusted) == false;
     });
     monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
-      let predictorUsage: number = 0;
-      summary.predictorUsage?.forEach(predictor => {
-        predictorUsage += predictor.usage;
-      });
-      return isNaN(summary.adjusted) == false && summary.energyUse != 0 && predictorUsage != 0;
+      return isNaN(summary.adjusted) == false;
     });
     this.facilityHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
     this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(monthlyAnalysisSummaryData);
@@ -211,11 +207,7 @@ export class FacilityHomeComponent implements OnInit {
       return isNaN(summary.adjusted) == false;
     })
     monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
-      let predictorUsage: number = 0;
-      summary.predictorUsage?.forEach(predictor => {
-        predictorUsage += predictor.usage;
-      });
-      return isNaN(summary.adjusted) == false && summary.energyUse != 0 && predictorUsage != 0;
+      return isNaN(summary.adjusted) == false;
     })
     this.facilityHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
     this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(monthlyAnalysisSummaryData);

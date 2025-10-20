@@ -21,6 +21,8 @@ export class AnnualFacilityAnalysisSummaryClass {
     }>;
     baselineYear: number;
     reportYear: number;
+
+    dataEndDate: Date;
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>, includeGroupSummaries: boolean) {
         this.setBaselineYear(analysisItem);
         this.setReportYear(analysisItem);
@@ -30,6 +32,7 @@ export class AnnualFacilityAnalysisSummaryClass {
 
     setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>, includeGroupSummaries: boolean) {
         let monthlyAnalysisSummaryClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
+        this.dataEndDate = monthlyAnalysisSummaryClass.endDate;
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
         if (includeGroupSummaries) {
             this.setGroupMonthlyAnalysis(monthlyAnalysisSummaryClass.groupMonthlySummariesClasses, accountPredictorEntries, facility, accountPredictors)
@@ -64,7 +67,6 @@ export class AnnualFacilityAnalysisSummaryClass {
     setReportYear(analysisItem: IdbAnalysisItem) {
         this.reportYear = analysisItem.reportYear;
     }
-
 
     setAnnualAnalysisSummaryDataClasses(accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility, accountPredictors: Array<IdbPredictor>) {
         this.annualAnalysisSummaryDataClasses = new Array();
