@@ -10,7 +10,7 @@ import { SubRegionData } from 'src/app/models/eGridEmissions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
-import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
+import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFunctions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';

@@ -9,7 +9,7 @@ import { EnergyUnitsHelperService } from '../../../shared/helper-services/energy
 import { EditMeterFormService } from '../../../shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterGroupdbService } from '../../../indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '../../../shared/unitOptions';
-import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../../../shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../../../shared/sharedHelperFunctions';
 import { MeterPhase, MeterSource } from '../../../models/constantsAndTypes';
 import { getMeterDataCopy } from '../../../calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '../../../shared/fuel-options/fuelTypeOption';;

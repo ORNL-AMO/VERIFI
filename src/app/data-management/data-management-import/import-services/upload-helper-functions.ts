@@ -5,7 +5,7 @@ import { Countries, Country } from "../../../shared/form-data/countries";
 import { State, States } from "../../../shared/form-data/states";
 import { FuelTypeOption } from "../../../shared/fuel-options/fuelTypeOption";
 import { getFuelTypeOptions } from "../../../shared/fuel-options/getFuelTypeOptions";
-import { getStartingUnitOptions } from "../../../shared/sharedHelperFuntions";
+import { getStartingUnitOptions } from "../../../shared/sharedHelperFunctions";
 import { UnitOption } from "../../../shared/unitOptions";
 
 export function getCountryCode(country: string): string {

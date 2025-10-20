@@ -7,7 +7,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { getIsEnergyUnit } from '../sharedHelperFuntions';
+import { getIsEnergyUnit } from '../sharedHelperFunctions';
 import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { VehicleTypes } from '../vehicle-data/vehicleType';

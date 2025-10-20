@@ -16,7 +16,7 @@ import { getCalanderizedMeterData } from '../calculations/calanderization/caland
 import { DatePipe, formatDate } from '@angular/common';
 import { getDetailedDataForMonth } from './weatherDataCalculations';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
-import { getDegreeDayAmount } from '../shared/sharedHelperFuntions';
+import { getDegreeDayAmount } from '../shared/sharedHelperFunctions';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';

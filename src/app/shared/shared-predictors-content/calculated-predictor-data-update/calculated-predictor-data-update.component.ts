@@ -16,7 +16,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
