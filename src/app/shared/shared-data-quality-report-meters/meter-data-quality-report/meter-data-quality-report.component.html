@@ -45,6 +45,14 @@
                     cost reading<ng-container *ngIf="costOutlierCount > 1">s</ng-container>
                     <br>
                 </span>
+                <span class="alert-message" *ngIf="datesList.length > 0">
+                    There <ng-container *ngIf="datesList.length == 1">is </ng-container>
+                    <ng-container *ngIf="datesList.length > 1">are </ng-container>
+                    <span class="fw-bold text-danger">{{ datesList.length}}</span>
+                    month<ng-container *ngIf="datesList.length > 1">s</ng-container>
+                    with multiple readings.
+                    <br>
+                </span>
             </div>
         </div>
     </ng-container>
@@ -113,8 +121,8 @@
                     <i class="fa fa-line-chart me-2"></i>
                     Total Consumption
                 </h5>
-                <app-meter-energy-timeseries-graph [meterData]="meterData"
-                    [selectedMeter]="selectedMeter" [energyStats]="energyStats"></app-meter-energy-timeseries-graph>
+                <app-meter-energy-timeseries-graph [meterData]="meterData" [selectedMeter]="selectedMeter"
+                    [energyStats]="energyStats"></app-meter-energy-timeseries-graph>
             </div>
             <ng-container *ngIf="includeConsumption">
                 <div class="col-md-6 col-sm-12">
@@ -128,4 +136,14 @@
             </ng-container>
         </div>
     </ng-template>
+    <div *ngIf="datesList.length > 0">
+        <hr>
+        <h5 class="mt-5">
+            <i class="fa fa-table me-2 mb-3"></i>
+            Months with multiple readings
+        </h5>
+        <span *ngFor="let date of datesList" class="badge bg-warning text-dark px-2 py-2 fs-5 me-2 mb-2 ms-3">
+            {{ date.monthYear }}
+        </span>
+    </div>
 </ng-template>

@@ -20,6 +20,8 @@ export class PredictorDataQualityReportComponent {
   outlierCount: number;
 
   hasData: boolean;
+  datesList: Array<{ monthYear: string }> = [];
+  showAlert: boolean = false;
 
   constructor(private router: Router) { }
 
@@ -29,7 +31,32 @@ export class PredictorDataQualityReportComponent {
       const data = this.predictorData?.map(d => d.amount);
       this.stats = getPredictorStatistics(data);
       this.outlierCount = this.stats.outliers;
+      this.checkMultipleReadings();
+      if (this.outlierCount > 0 || this.datesList.length > 0) {
+        this.showAlert = true;
+      } else {
+        this.showAlert = false;
+      }
     }
+  }
+
+  checkMultipleReadings() {
+    let dateCount: { [key: string]: number } = {};
+    this.predictorData.forEach(data => {
+      let date = new Date(data.date);
+      let month = date.toLocaleString('default', { month: 'short' });
+      let year = date.getFullYear();
+      let monthYear = `${month}, ${year}`;
+      if (dateCount[monthYear]) {
+        dateCount[monthYear]++;
+      } else {
+        dateCount[monthYear] = 1;
+      }
+    });
+    this.datesList = Object.keys(dateCount).filter(key => dateCount[key] > 1)
+      .map(key => {
+        return { monthYear: key };
+      });
   }
 
   predictorDataAdd() {
