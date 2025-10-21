@@ -13,7 +13,6 @@ import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculat
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -50,6 +49,7 @@ export class RegressionModelMenuComponent implements OnInit {
   numVariableOptions: Array<number>;
   months: Array<Month> = Months;
   isButtonDisabled: boolean = false;
+  facilityMeterData: Array<IdbUtilityMeterData>;
 
   @Output() userDefinedModelClicked = new EventEmitter<boolean>();
   @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
@@ -61,7 +61,6 @@ export class RegressionModelMenuComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisValidationService: AnalysisValidationService,
     private sharedDataService: SharedDataService,
-    private calanderizationService: CalanderizationService,
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService) { }
 
@@ -70,7 +69,8 @@ export class RegressionModelMenuComponent implements OnInit {
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
     this.showFailedValidationModel = this.analysisService.showFailedValidationModels.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid, this.analysisItem.analysisCategory);
+    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.setYears();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
@@ -94,6 +94,19 @@ export class RegressionModelMenuComponent implements OnInit {
 
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
+  }
+
+  setYears() {
+    let firstReading: IdbUtilityMeterData = _.minBy(this.facilityMeterData, (data) => { return new Date(data.readDate) });
+    let lastReading: IdbUtilityMeterData = _.maxBy(this.facilityMeterData, (data) => { return new Date(data.readDate) });
+    if(firstReading && lastReading) {
+      let start: number = firstReading.readDate.getFullYear();
+      let end: number = lastReading.readDate.getFullYear() - 1;
+      this.yearOptions = [];
+      for (let x = start; x <= end; x++) {
+        this.yearOptions.push(x);
+      }
+    }
   }
 
   async saveItem() {
