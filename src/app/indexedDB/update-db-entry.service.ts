@@ -133,6 +133,10 @@ export class UpdateDbEntryService {
           group.maxModelVariables = 4;
           isChanged = true;
         }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelStartMonth == undefined){
+          group.regressionModelStartMonth = 0;
+          isChanged = true;
+        }
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
