@@ -1,0 +1,17 @@
+.nav-item .nav-link:not(.active) {
+    background-color: #efefef;
+}
+
+.nav-item .nav-link {
+    border-radius: 0;
+}
+
+.nav-link.active a {
+    color: var(--bs-nav-tabs-link-active-color);
+    background-color: var(--bs-nav-tabs-link-active-bg);
+    border-color: var(--bs-nav-tabs-link-active-border-color);
+}
+
+.nav-link a {
+    text-decoration: none;
+}

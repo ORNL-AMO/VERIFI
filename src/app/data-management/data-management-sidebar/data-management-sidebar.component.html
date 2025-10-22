@@ -10,7 +10,8 @@
     </div>
     <div class="ps-1 w-100" [hidden]="!sidebarOpen">
         <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/home'" [routerLinkActive]="['active']"
-            [routerLinkActiveOptions]="{ exact: true }">
+            [routerLinkActiveOptions]="{ exact: true }"
+            (contextmenu)="onRightClick($event, '/data-management/'+account.guid + '/home')">
             <h5 class="ps-2 mb-0">
                 <span class="fa fa-list-check"></span>
                 {{account.name}}
@@ -21,7 +22,8 @@
         </div>
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/account-setup'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"
+                (contextmenu)="onRightClick($event, '/data-management/'+account.guid + '/account-setup')">
                 <span class="fa fa-gear"></span>
                 Corporate Settings
             </a>
@@ -31,7 +33,8 @@
         </div>
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/import-data/upload-files'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"
+                (contextmenu)="onRightClick($event, '/data-management/'+account.guid + '/import-data/upload-files')">
                 <span class="fa fa-upload"></span>
                 Data Upload
             </a>
@@ -161,7 +164,8 @@
                                     <a class="nav-link"
                                         [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-charges-visualization'"
                                         [routerLinkActive]="['active']">
-                                        <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill Inspection
+                                        <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill
+                                        Inspection
                                     </a>
                                 </div>
                             </div>
@@ -314,4 +318,14 @@
     <div class="p-2 w-100">
         <hr class="my-1">
     </div>
+</div>
+
+
+
+<!-- Context menu -->
+<div *ngIf="contextMenuVisible" [ngStyle]="{'top.px': contextMenuPosition.y, 'left.px': contextMenuPosition.x}"
+    class="context-menu" (click)="contextMenuVisible = false">
+    <ul>
+        <li (click)="openNewTab()">Open in new tab</li>
+    </ul>
 </div>

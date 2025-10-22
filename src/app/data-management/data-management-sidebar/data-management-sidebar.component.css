@@ -128,3 +128,26 @@ a.nav-link, .btn.btn-dark, .link-section-heading{
 .fa-magnifying-glass-dollar{
     color: #198754;
 }
+
+
+
+/**/
+.context-menu {
+  position: fixed;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+}
+.context-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.context-menu li {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.context-menu li:hover {
+  background: #eee;
+}

@@ -13,6 +13,8 @@ export class DataManagementService {
   helpPanelOpen: BehaviorSubject<boolean>;
   helpWidth: number = 200;
   sidebarWidth: number = 200;
+
+  addTab: BehaviorSubject<string>;
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
 
@@ -35,6 +37,8 @@ export class DataManagementService {
     } else {
       this.sidebarOpen = new BehaviorSubject<boolean>(true);
     }
+
+    this.addTab = new BehaviorSubject<string>(undefined);
   }
 
   getFileReferenceById(id: string): FileReference {

@@ -1,0 +1,11 @@
+<ul class="nav nav-tabs">
+  <li class="nav-item" *ngFor="let tab of tabs">
+    <div class="nav-link" routerLinkActive="active">
+      <a [routerLink]="tab.route">
+        <i class="{{ tab.icon }}"></i> {{ tab.label }}
+      </a>
+      <!--add button to close tab-->
+      <button *ngIf="tabs.length > 1" (click)="closeTab(tab.route)" class="btn-close" aria-label="Close"></button>
+    </div>
+  </li>
+</ul>

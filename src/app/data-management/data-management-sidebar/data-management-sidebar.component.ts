@@ -60,6 +60,10 @@ export class DataManagementSidebarComponent {
 
   url: string;
   routerSub: Subscription;
+
+  contextMenuVisible = false;
+  contextMenuPosition = { x: 0, y: 0 };
+  selectedReferenceURL: string;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataManagementService: DataManagementService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -71,7 +75,10 @@ export class DataManagementSidebarComponent {
   ) {
   }
 
-  ngOnInit() {
+  ngOnInit() {  
+    //hide menu on document click
+    document.addEventListener('click', () => this.contextMenuVisible = false);
+
     this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.account = account;
     });
@@ -181,5 +188,16 @@ export class DataManagementSidebarComponent {
 
   toggleSidebar() {
     this.emitToggleCollapse.emit(!this.sidebarOpen);
+  }
+
+  onRightClick(event: MouseEvent, selectedReferenceURL: string) {
+    event.preventDefault();
+    this.contextMenuVisible = true;
+    this.contextMenuPosition = { x: event.clientX, y: event.clientY };
+    this.selectedReferenceURL = selectedReferenceURL;
+  }
+
+  openNewTab(){
+    this.dataManagementService.addTab.next(this.selectedReferenceURL);
   }
 }
