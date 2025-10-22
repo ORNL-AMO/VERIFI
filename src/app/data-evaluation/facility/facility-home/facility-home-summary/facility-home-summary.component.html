@@ -61,7 +61,7 @@
                             Conduct Facility <br> Analysis
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
+                                *ngIf="energyAnalysisNeeded || waterAnalysisNeeded || energyAnalysisHasErrors || waterAnalysisHasErrors">
                                 <span class="fa fa-exclamation white"></span>
                             </span>
                         </button>
@@ -86,11 +86,11 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center"
-                    *ngIf="meterReadingsNeeded || energyAnalysisNeeded || waterAnalysisNeeded">
+                    *ngIf="meterReadingsNeeded || energyAnalysisNeeded || waterAnalysisNeeded || energyAnalysisHasErrors || waterAnalysisHasErrors">
                     <ul class="list-group list-group-flush">
                         <!--meters-->
                         <li class="list-group-item" *ngIf="meterReadingsNeeded">
-                            <a class="nav-link" routerLink="/facility/{{facility.guid}}/utility">
+                            <a class="nav-link" routerLink="/data-evaluation/facility/{{facility.guid}}/utility">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa fa-exclamation white"></span>
                                 </span>
@@ -100,7 +100,7 @@
                         </li>
                         <li class="list-group-item" *ngIf="energyAnalysisNeeded && lastBill">
                             <a class="nav-link"
-                                routerLink="/facility/{{facility.guid}}/analysis/analysis-dashboard/energy">
+                                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/energy">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa fa-exclamation white"></span>
                                 </span>
@@ -112,7 +112,7 @@
                         </li>
                         <li class="list-group-item" *ngIf="waterAnalysisNeeded && lastBill">
                             <a class="nav-link"
-                                routerLink="/facility/{{facility.guid}}/analysis/analysis-dashboard/water">
+                                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/water">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa fa-exclamation white"></span>
                                 </span>
@@ -120,6 +120,26 @@
                                     analysis conducted for
                                     {{latestWaterAnalysisItem.reportYear |
                                     yearDisplay:facility.fiscalYear}}</ng-container>
+                            </a>
+                        </li>
+                        <li class="list-group-item" *ngIf="energyAnalysisHasErrors && lastBill">
+                            <a class="nav-link"
+                                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/energy">
+                                <span class="badge rounded-pill bg-danger">
+                                    <span class="fa fa-exclamation white"></span>
+                                </span>
+                                Errors in the energy analysis conducted for {{latestEnergyAnalysisItem.reportYear |
+                                yearDisplay:facility.fiscalYear}} - {{latestEnergyAnalysisItem.name}}
+                            </a>
+                        </li>
+                        <li class="list-group-item" *ngIf="waterAnalysisHasErrors && lastBill">
+                            <a class="nav-link"
+                                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/water">
+                                <span class="badge rounded-pill bg-danger">
+                                    <span class="fa fa-exclamation white"></span>
+                                </span>
+                                Errors in the water analysis conducted for {{latestWaterAnalysisItem.reportYear |
+                                yearDisplay:facility.fiscalYear}} - {{latestWaterAnalysisItem.name}}
                             </a>
                         </li>
                     </ul>
