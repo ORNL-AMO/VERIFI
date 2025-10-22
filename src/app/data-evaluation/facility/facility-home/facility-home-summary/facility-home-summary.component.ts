@@ -33,6 +33,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   energyAnalysisNeeded: boolean;
   meterReadingsNeeded: boolean;
   predictorsNeeded: boolean;
+  energyAnalysisHasErrors: boolean;
+  waterAnalysisHasErrors: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
@@ -66,6 +68,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.setEnergyAnalysisNeeded();
     this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
     this.setWaterAnalysisNeeded();
+    this.setAnalysisErrors();
     this.setSources();
   }
 
@@ -114,6 +117,14 @@ export class FacilityHomeSummaryComponent implements OnInit {
     }
   }
 
+  setAnalysisErrors() {
+    if (this.latestEnergyAnalysisItem) {
+      this.energyAnalysisHasErrors = this.latestEnergyAnalysisItem.setupErrors.hasError || this.latestEnergyAnalysisItem.setupErrors.groupsHaveErrors;
+    }
+    if (this.latestWaterAnalysisItem) {
+      this.waterAnalysisHasErrors = this.latestWaterAnalysisItem.setupErrors.hasError || this.latestWaterAnalysisItem.setupErrors.groupsHaveErrors;
+    }
+  }
 
   setSources() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
