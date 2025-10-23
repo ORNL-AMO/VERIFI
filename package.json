@@ -6,8 +6,8 @@
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
   "engines": {
-    "node": "20.11.1",
-    "npm": "10.2.4"
+    "node": "24.10.0",
+    "npm": "11.6.1"
   },
   "build": {
     "appId": "gov.ornl.amo",
