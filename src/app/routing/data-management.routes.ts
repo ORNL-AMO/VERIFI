@@ -52,6 +52,8 @@ import { HelpComponent } from "../static-content/help/help.component";
 import { FacilityMeterDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component";
 import { FacilityPredictorDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component";
 import { MeterChargesVisualizationComponent } from "../data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-visualization.component";
+import { FacilityEnergyUseGroupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component";
+import { FacilityEnergyUseGroupManagementComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -197,6 +199,14 @@ export const DataManagementRoutes: Route = {
                                 },
                                 { path: 'data-quality-report', component: FacilityPredictorDataQualityReportComponent }
                             ]
+                        },
+                        {
+                            path: 'energy-uses',
+                            component: FacilityEnergyUseGroupManagementComponent
+                        },
+                        {
+                            path: 'energy-uses/:id',
+                            component: FacilityEnergyUseGroupComponent
                         }
                     ]
                 }

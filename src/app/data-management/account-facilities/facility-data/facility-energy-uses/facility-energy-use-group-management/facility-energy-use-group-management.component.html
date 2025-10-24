@@ -1,0 +1,48 @@
+<h4>
+    {{facility.name}} Energy Use Groups
+</h4>
+@if(facilityEnergyUseGroups.length > 0){
+    <div class="d-flex w-100 justify-content-end mb-2">
+        <app-table-items-dropdown></app-table-items-dropdown>
+        <!-- <div class="ps-2">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div> -->
+        <div class="ps-2">
+            <button class="btn action-btn" (click)="addGroup()"><i class="fa fa-plus"></i> Add
+                New Group</button>
+        </div>
+
+
+    </div>
+} @else {
+<div class="text-center mt-5">
+    <h5>No energy use groups found for this facility.</h5>
+    <p>Please <i class="fa fa-plus"></i> Add New Group.</p>
+    <div class="d-flex w-100 justify-content-center">
+        <div class="pe-1">
+            <button class="btn action-btn" (click)="addGroup()"><i class="fa fa-plus"></i> Add New Group</button>
+        </div>
+        <!-- <div class="ps-1">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div> -->
+    </div>
+</div>
+}
+
+
+
+<!-- <div [ngClass]="{'windowOverlay': meterToDelete}"></div>
+<div class="popup" [class.open]="meterToDelete">
+    <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with
+            it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
+    </div>
+</div> -->

@@ -16,6 +16,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 
 @Component({
   selector: 'app-data-management-sidebar',
@@ -60,6 +62,10 @@ export class DataManagementSidebarComponent {
 
   url: string;
   routerSub: Subscription;
+
+  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
+  facilityEnergyUseGroupsSub: Subscription;
+
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataManagementService: DataManagementService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -67,7 +73,8 @@ export class DataManagementSidebarComponent {
     private dbChangesService: DbChangesService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService
+    private predictorDataDbService: PredictorDataDbService,
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService
   ) {
   }
 
@@ -102,6 +109,11 @@ export class DataManagementSidebarComponent {
       this.accountPredictorData = accountPredictorData;
     });
 
+    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.subscribe(groups => {
+      this.facilityEnergyUseGroups = groups;
+      console.log(this.facilityEnergyUseGroups);
+    });
+
     this.sidebarOpenSub = this.dataManagementService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
       setTimeout(() => {
@@ -128,6 +140,7 @@ export class DataManagementSidebarComponent {
     this.routerSub.unsubscribe();
     this.accountMeterDataSub.unsubscribe();
     this.accountPredictorDataSub.unsubscribe();
+    this.facilityEnergyUseGroupsSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {
@@ -151,7 +164,7 @@ export class DataManagementSidebarComponent {
 
   async toggleFacilityMetersOpen(facility: IdbFacility) {
     facility.sidebarMetersOpen = !facility.sidebarMetersOpen;
-    this.saveFacility(facility);
+    await this.saveFacility(facility);
   }
 
   async saveFacility(facility: IdbFacility) {
@@ -162,7 +175,7 @@ export class DataManagementSidebarComponent {
 
   async toggleFacilityPredictorsOpen(facility: IdbFacility) {
     facility.sidebarPredictorsOpen = !facility.sidebarPredictorsOpen;
-    this.saveFacility(facility);
+    await this.saveFacility(facility);
   }
 
   async togglePredictorOpen(predictor: IdbPredictor) {
@@ -177,6 +190,19 @@ export class DataManagementSidebarComponent {
     this.account.sidebarCustomDataOpen = !this.account.sidebarCustomDataOpen;
     await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
     await this.accountDbService.selectedAccount.next(this.account);
+  }
+
+  async toggleFacilityEnergyUsesOpen(facility: IdbFacility) {
+    facility.sidebarEnergyUsesOpen = !facility.sidebarEnergyUsesOpen;
+    await this.saveFacility(facility);
+  }
+
+  async toggleEnergyUseGroupOpen(energyUseGroup: IdbFacilityEnergyUseGroup) {
+    energyUseGroup.sidebarOpen = !energyUseGroup.sidebarOpen;
+    await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
   }
 
   toggleSidebar() {

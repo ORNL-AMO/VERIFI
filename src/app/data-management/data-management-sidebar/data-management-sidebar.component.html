@@ -161,7 +161,8 @@
                                     <a class="nav-link"
                                         [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-charges-visualization'"
                                         [routerLinkActive]="['active']">
-                                        <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill Inspection
+                                        <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill
+                                        Inspection
                                     </a>
                                 </div>
                             </div>
@@ -218,6 +219,44 @@
                                 </div>
                             </div>
                         </ng-container>
+                    </div>
+                    <div class="ps-2 nav-item">
+                        <a class="nav-link" (click)="toggleFacilityEnergyUsesOpen(facility)"
+                            [ngClass]="{'active': url | sidebarItemActive: 'energy-uses-folder': facility.guid}">
+                            <span class="fa"
+                                [ngClass]="{'fa-chevron-down': facility.sidebarEnergyUsesOpen, 'fa-chevron-right': !facility.sidebarEnergyUsesOpen}"></span>
+                            Energy Uses
+                        </a>
+                    </div>
+                    <div class="sidebar-section" *ngIf="facility.sidebarEnergyUsesOpen">
+                        <div class="ps-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                <span class="fa fa-list"></span> Manage Energy Uses Groups
+                            </a>
+                        </div>
+                        <ng-container
+                            *ngFor="let energyUseGroup of facility.guid | facilityEnergyGroupsList:facilityEnergyUseGroups">
+                            <div class="ps-2 nav-item">
+                                <a class="nav-link" (click)="toggleEnergyUseGroupOpen(energyUseGroup)"
+                                    [ngClass]="{'active': url | sidebarItemActive: 'energy-use': energyUseGroup.guid}">
+                                    <span class="fa"
+                                        [ngClass]="{'fa-chevron-down': energyUseGroup.sidebarOpen, 'fa-chevron-right': !energyUseGroup.sidebarOpen}"></span>
+                                    {{energyUseGroup.name}}
+                                </a>
+                            </div>
+                            <div class="sidebar-section" *ngIf="energyUseGroup.sidebarOpen">
+                                <div class="ps-2 nav-item">
+                                    <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
+                                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                        <span class="fa fa-gear"></span> Group Settings
+                                    </a>
+                                </div>
+                            </div>
+                        </ng-container>
+
                     </div>
                 </div>
             </ng-container>
