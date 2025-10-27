@@ -30,6 +30,8 @@ export class AccountReportSetupComponent {
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   showReportYearWarning: boolean = false;
+  showYearErrorMsg: boolean = false;
+  showYearErrorMsgSub: Subscription;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -49,6 +51,10 @@ export class AccountReportSetupComponent {
       this.errorMessage = message;
     });
 
+    this.showYearErrorMsgSub = this.accountReportsService.compareBaselineYearToReportYearError.subscribe(showError => {
+      this.showYearErrorMsg = showError;
+    });
+
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       selectedReport = val;
       if (!this.isFormChange) {
@@ -64,6 +70,7 @@ export class AccountReportSetupComponent {
   ngOnDestroy() {
     this.errorMessageSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
+    this.showYearErrorMsgSub.unsubscribe();
   }
 
   async save() {
@@ -90,5 +97,4 @@ export class AccountReportSetupComponent {
       this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.setupForm.controls.reportYear.value, this.account);
     }
   }
-
 }
