@@ -189,5 +189,13 @@ export const dbConfig: DBConfig = {
       { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
     ]
   },
+  {
+    store: 'facilityEnergyUseEquipment',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'accountId', keypath: 'accountId', options: { unique: false } },
+      { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
+    ]
+  }
   ]
 };

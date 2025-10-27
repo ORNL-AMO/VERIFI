@@ -6,9 +6,11 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -25,7 +27,6 @@ export class FacilityEnergyUseGroupManagementComponent {
   facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
   facilityEnergyUseGroupsSub: Subscription;
 
-
   groupToDelete: IdbFacilityEnergyUseGroup;
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
@@ -41,7 +42,8 @@ export class FacilityEnergyUseGroupManagementComponent {
     private router: Router,
     private sharedDataService: SharedDataService,
     private loadingService: LoadingService,
-    private toastNotificationsService: ToastNotificationsService
+    private toastNotificationsService: ToastNotificationsService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
   ) { }
 
   ngOnInit(): void {
@@ -103,15 +105,20 @@ export class FacilityEnergyUseGroupManagementComponent {
 
   async deleteGroup() {
     let deleteGroupId: number = this.groupToDelete.id;
+    let deleteGroupGuid: string = this.groupToDelete.guid;
     this.groupToDelete = undefined;
     this.loadingService.setLoadingMessage('Deleting Energy Use Group...')
     this.loadingService.setLoadingStatus(true);
     //delete groups
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.deleteWithObservable(deleteGroupId));
+    //delete equipment associated with group
+    await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(deleteGroupGuid);
     //set groups
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
+    //set equipment
+    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");

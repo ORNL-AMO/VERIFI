@@ -60,6 +60,7 @@ import { MeterChargesCorrelationsComponent } from './account-facilities/facility
 import { UpdateWeatherPredictorsModalComponent } from './data-management-home/update-weather-predictors-modal/update-weather-predictors-modal.component';
 import { FacilityEnergyUseGroupManagementComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component';
 import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
+import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
 
 
 @NgModule({
@@ -109,7 +110,8 @@ import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-d
     MeterChargesCorrelationsComponent,
     UpdateWeatherPredictorsModalComponent,
     FacilityEnergyUseGroupComponent,
-    FacilityEnergyUseGroupManagementComponent
+    FacilityEnergyUseGroupManagementComponent,
+    FacilityEnergyUseEquipmentComponent
   ],
   imports: [
     CommonModule,

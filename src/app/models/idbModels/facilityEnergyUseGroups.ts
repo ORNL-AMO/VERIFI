@@ -1,14 +1,10 @@
-import { getGUID } from "src/app/shared/sharedHelperFunctions";
-import { MeterSource } from "../constantsAndTypes";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
-
 
 export interface IdbFacilityEnergyUseGroup extends IdbEntry {
     facilityId: string,
     accountId: string,
     name: string,
-    sidebarOpen: boolean,
-    equipmentItems: Array<EnergyUseGroupEquipment>
+    sidebarOpen: boolean
 }
 
 export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: string): IdbFacilityEnergyUseGroup {
@@ -18,27 +14,6 @@ export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: s
         facilityId: facilityId,
         accountId: accountId,
         name: 'Energy Use Group',
-        sidebarOpen: true,
-        equipmentItems: new Array<EnergyUseGroupEquipment>()
+        sidebarOpen: true
     }
-}
-
-export function getNewEnergyUseEquipment(energyUseGroupId: string): EnergyUseGroupEquipment {
-    return {
-        guid: getGUID(),
-        energyUseGroupId: energyUseGroupId,
-        name: '',
-        energySource: 'Electricity',
-        size: undefined,
-        units: ''
-    }
-}
-
-export interface EnergyUseGroupEquipment {
-    guid: string,
-    energyUseGroupId: string,
-    name: string,
-    energySource: MeterSource
-    size: number,
-    units: string
 }

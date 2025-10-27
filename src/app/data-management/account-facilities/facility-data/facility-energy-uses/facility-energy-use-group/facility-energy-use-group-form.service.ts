@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { EnergyUseGroupEquipment, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 
 @Injectable({
   providedIn: 'root'

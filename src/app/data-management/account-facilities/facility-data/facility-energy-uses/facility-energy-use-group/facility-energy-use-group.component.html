@@ -8,10 +8,10 @@
     </div>
 </div>
 <!--FORM-->
-<form [formGroup]="form">
-    <div class="row">
-        <div class="col-12">
-            <p class="bold">Group Information</p>
+<div class="row">
+    <div class="col-12">
+        <p class="bold">Group Information</p>
+        <form [formGroup]="form">
             <div>
                 <label class="w-100" for="groupName">Group Name</label>
                 <div class="mb-3">
@@ -21,68 +21,59 @@
                 <div class="alert alert-danger" *ngIf="form.get('name').hasError('required')">Group name is
                     required</div>
             </div>
-        </div>
-        <div class="col-12">
-            <p class="bold">Energy Uses</p>
-            <!-- <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>
-                            Equipment/System
-                        </th>
-                        <th>
-                            Energy Source
-                        </th>
-                        <th>
-                            Total Size/Capacity
-                        </th>
-                        <th>
-                            Units
-                        </th>
-                    </tr>
-                </thead>
-                <tbody formArrayName="equipmentItems">
-                    <tr *ngFor="let equipment of equipmentItems.controls; let i = index" [formGroupName]="i">
-                        <td>
-                            <input class="form-control" type="text" formControlName="name" onfocus="this.select();"
-                                minlength="0" maxlength="100">
-                        </td>
-                        <td>
-                            <select class="form-select" id="source" type="text" formControlName="energySource">
-                                <option *ngFor="let sourceOption of sourceOptions" [ngValue]="sourceOption">
-                                    {{sourceOption}}
-                                </option>
-                            </select>
-                        </td>
-                        <td>
-                            <input class="form-control" type="number" formControlName="size" onfocus="this.select();"
-                                min="0">
-                        </td>
-                        <td>
-                            <input class="form-control" type="text" formControlName="units" onfocus="this.select();"
-                                minlength="0" maxlength="50">
-                        </td>
-                    </tr>
-                </tbody>
-            </table> -->
-            <a class="click-link small pull-right" (click)="addEquipment()">
-                <span class="fa fa-plus"></span>
-                Add Equipment/System
-            </a>
-
-
-            <!-- <div>
-                <label class="w-100" for="groupName">Group Name</label>
-                <div class="mb-3">
-                    <input id="groupName" class="form-control" type="text" formControlName="name"
-                        onfocus="this.select();" minlength="0" maxlength="100">
-                </div>
-                <div class="alert alert-danger" *ngIf="form.get('name').hasError('required')">Group name is
-                    required</div>
-            </div> -->
-        </div>
+        </form>
     </div>
-</form>
+    <div class="col-12">
+        <p class="bold">Energy Uses</p>
+        @let groupEquipment = (energyUseGroup.guid | facilityEnergyEquipmentList:facilityEnergyUseEquipment);
+        @if(groupEquipment.length != 0){
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th class="w-25">
+                        Equipment/System
+                    </th>
+                    <th class="w-25">
+                        Energy Source
+                    </th>
+                    <th class="w-25">
+                        Total Size/Capacity
+                    </th>
+                    <th class="w-25">
+                        Units
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (equipment of groupEquipment; track $index) {
+                <tr>
+                    <td>
+                        {{equipment.name}}
+                    </td>
+                    <td>
+                        {{equipment.energySource}}
+                    </td>
+                    <td>
+                       {{equipment.size}}
+                    </td>
+                    <td>
+                        {{equipment.units}}
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }@else {
+        <div class="alert alert-info">
+            No equipment/systems have been added to this group.
+        </div>
+        }
+        <a class="click-link small pull-right" (click)="addEquipment()">
+            <span class="fa fa-plus"></span>
+            Add Equipment/System
+        </a>
+    </div>
+</div>
 
 
 

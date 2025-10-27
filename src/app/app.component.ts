@@ -46,6 +46,8 @@ import { ApplicationInstanceData } from './models/idbModels/applicationInstanceD
 import { ApplicationInstanceDbService } from './indexedDB/application-instance-db.service';
 import { FacilityEnergyUseGroupsDbService } from './indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacilityEnergyUseGroup } from './models/idbModels/facilityEnergyUseGroups';
+import { FacilityEnergyUseEquipmentDbService } from './indexedDB/facility-energy-use-equipment-db.service';
+import { IdbFacilityEnergyUseEquipment } from './models/idbModels/facilityEnergyUseEquipment';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -94,7 +96,8 @@ export class AppComponent {
     private facilityReportsDbService: FacilityReportsDbService,
     private surveyService: SurveyService,
     private applicationInstanceDbService: ApplicationInstanceDbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService) { 
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -154,6 +157,7 @@ export class AppComponent {
         await this.initializeCustomFuels(account);
         await this.initializeCustomGWPs(account);
         await this.initializeFacilityEnergyGroups(account);
+        await this.initializeFacilityEnergyEquipment(account);
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
         if (updatedAccount.isChanged) {
           await firstValueFrom(this.accountDbService.updateWithObservable(updatedAccount.account));
@@ -373,11 +377,12 @@ export class AppComponent {
     //set energy use groups
     let accountFacilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = await this.facilityEnergyUseGroupsDbService.getAllAccountEnergyUseGroups(account.guid);
     this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.next(accountFacilityEnergyUseGroups);
-    // let localStorageFacilityEnergyUseGroupId: number = this.facilityEnergyUseGroupsDbService.getInitialGroup();
-    // if (localStorageFacilityEnergyUseGroupId) {
-    //   let facilityEnergyUseGroup: IdbFacilityEnergyUseGroup = accountFacilityEnergyUseGroups.find(item => { return item.id == localStorageFacilityEnergyUseGroupId });
-    //   this.facilityEnergyUseGroupsDbService.selectedGroup.next(facilityEnergyUseGroup);
-    // }
+  }
+
+  async initializeFacilityEnergyEquipment(account: IdbAccount) {
+    //set energy use equipment
+    let accountFacilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = await this.facilityEnergyUseEquipmentDbService.getAllAccountEnergyUseEquipment(account.guid);
+    this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.next(accountFacilityEnergyUseEquipment);
   }
 
   async setAppOpenNotifications() {

@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { FormArray, FormGroup } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { first, firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EnergyUseGroupEquipment, getNewEnergyUseEquipment, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupFormService } from './facility-energy-use-group-form.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -14,6 +14,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
+import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -28,6 +30,9 @@ export class FacilityEnergyUseGroupComponent {
   energyUseGroup: IdbFacilityEnergyUseGroup;
   form: FormGroup;
 
+  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
+  facilityEnergyUseEquipmentSub: Subscription;
+
   showDeleteGroup: boolean = false;
   sourceOptions: Array<MeterSource> = AllSources;
   constructor(private activatedRoute: ActivatedRoute,
@@ -39,7 +44,8 @@ export class FacilityEnergyUseGroupComponent {
     private loadingService: LoadingService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private toastNotificationsService: ToastNotificationsService
+    private toastNotificationsService: ToastNotificationsService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
   ) {
   }
 
@@ -48,9 +54,14 @@ export class FacilityEnergyUseGroupComponent {
       this.facility = facility;
     });
 
+    this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
+      this.facilityEnergyUseEquipment = equipment;
+      console.log(this.facilityEnergyUseEquipment);
+    });
+
     this.activatedRoute.params.subscribe(params => {
-      let meterId: string = params['id'];
-      this.energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(meterId);
+      let groupId: string = params['id'];
+      this.energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
       if (this.energyUseGroup) {
         this.form = this.facilityEnergyUseGroupFormService.getFormFromEnergyUseGroup(this.energyUseGroup);
       } else {
@@ -61,6 +72,7 @@ export class FacilityEnergyUseGroupComponent {
 
   ngOnDestroy() {
     this.facilitySub.unsubscribe();
+    this.facilityEnergyUseEquipmentSub.unsubscribe();
   }
 
   async saveChanges() {
@@ -72,7 +84,7 @@ export class FacilityEnergyUseGroupComponent {
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(this.energyUseGroup));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
   }
 
@@ -93,10 +105,14 @@ export class FacilityEnergyUseGroupComponent {
     this.loadingService.setLoadingStatus(true);
     //delete groups
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.deleteWithObservable(this.energyUseGroup.id));
+    //delete equipment associated with group
+    await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(this.energyUseGroup.guid);
     //set groups
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
+    //set equipment
+    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");
@@ -117,10 +133,11 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   async addEquipment() {
-    let newEquipment: EnergyUseGroupEquipment = getNewEnergyUseEquipment(this.energyUseGroup.guid);
-    this.energyUseGroup.equipmentItems.push(newEquipment);
-    this.form = this.facilityEnergyUseGroupFormService.getFormFromEnergyUseGroup(this.energyUseGroup);
-    console.log(this.form);
-    await this.saveChanges();
+    let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup);
+    await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);
   }
 }
