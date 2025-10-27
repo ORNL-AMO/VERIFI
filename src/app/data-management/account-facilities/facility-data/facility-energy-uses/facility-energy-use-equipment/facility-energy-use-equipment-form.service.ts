@@ -14,7 +14,8 @@ export class FacilityEnergyUseEquipmentFormService {
       name: [equipment.name, Validators.required],
       size: [equipment.size, Validators.required],
       units: [equipment.units, Validators.required],
-      energySource: [equipment.energySource, Validators.required]
+      energySource: [equipment.energySource, Validators.required],
+      notes: [equipment.notes]
     });
     return equipmentFormGroup;
   }
@@ -24,6 +25,7 @@ export class FacilityEnergyUseEquipmentFormService {
     equipment.size = form.controls.size.value;
     equipment.units = form.controls.units.value;
     equipment.energySource = form.controls.energySource.value;
+    equipment.notes = form.controls.notes.value;
     return equipment;
   }
 }

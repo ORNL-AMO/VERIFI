@@ -4,7 +4,8 @@ export interface IdbFacilityEnergyUseGroup extends IdbEntry {
     facilityId: string,
     accountId: string,
     name: string,
-    sidebarOpen: boolean
+    sidebarOpen: boolean,
+    notes: string
 }
 
 export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: string): IdbFacilityEnergyUseGroup {
@@ -14,6 +15,7 @@ export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: s
         facilityId: facilityId,
         accountId: accountId,
         name: 'Energy Use Group',
-        sidebarOpen: true
+        sidebarOpen: true,
+        notes: ''
     }
 }

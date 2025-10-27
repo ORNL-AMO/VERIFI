@@ -10,7 +10,8 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     name: string,
     energySource: MeterSource,
     size: number,
-    units: string
+    units: string,
+    notes: string
 }
 
 export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup): IdbFacilityEnergyUseEquipment {
@@ -23,6 +24,7 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         name: 'Equipment or System',
         energySource: 'Electricity',
         size: undefined,
-        units: ''
+        units: '',
+        notes: ''
     }
 }

@@ -56,7 +56,6 @@ export class FacilityEnergyUseGroupComponent {
 
     this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
       this.facilityEnergyUseEquipment = equipment;
-      console.log(this.facilityEnergyUseEquipment);
     });
 
     this.activatedRoute.params.subscribe(params => {
