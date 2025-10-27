@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -8,6 +10,7 @@ import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-ene
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-facility-energy-use-group-management',
@@ -16,16 +19,29 @@ import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/
   styleUrl: './facility-energy-use-group-management.component.css'
 })
 export class FacilityEnergyUseGroupManagementComponent {
- facility: IdbFacility;
+  facility: IdbFacility;
   facilitySub: Subscription;
 
   facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
   facilityEnergyUseGroupsSub: Subscription;
+
+
+  groupToDelete: IdbFacilityEnergyUseGroup;
+  orderDataField: string = 'name';
+  orderByDirection: string = 'desc';
+
+  currentPageNumber: number = 1;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
+
   constructor(private facilityDbService: FacilitydbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private router: Router
+    private router: Router,
+    private sharedDataService: SharedDataService,
+    private loadingService: LoadingService,
+    private toastNotificationsService: ToastNotificationsService
   ) { }
 
   ngOnInit(): void {
@@ -35,18 +51,22 @@ export class FacilityEnergyUseGroupManagementComponent {
     this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
       this.facilityEnergyUseGroups = groups;
     });
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
   }
 
   ngOnDestroy(): void {
     this.facilitySub.unsubscribe();
     this.facilityEnergyUseGroupsSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 
   async addGroup() {
     let newEnergyUseGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
     newEnergyUseGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newEnergyUseGroup));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeters(account, this.facility);
+    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, this.facility);
     this.selectEditGroup(newEnergyUseGroup);
   }
 
@@ -67,7 +87,45 @@ export class FacilityEnergyUseGroupManagementComponent {
     copyGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(copyGroup));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setMeters(account, facility);
+    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
     this.selectEditGroup(copyGroup);
+  }
+
+  selectDeleteGroup(group: IdbFacilityEnergyUseGroup) {
+    this.sharedDataService.modalOpen.next(true);
+    this.groupToDelete = group;
+  }
+
+  cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
+    this.groupToDelete = undefined;
+  }
+
+  async deleteGroup() {
+    let deleteGroupId: number = this.groupToDelete.id;
+    this.groupToDelete = undefined;
+    this.loadingService.setLoadingMessage('Deleting Energy Use Group...')
+    this.loadingService.setLoadingStatus(true);
+    //delete groups
+    await firstValueFrom(this.facilityEnergyUseGroupsDbService.deleteWithObservable(deleteGroupId));
+    //set groups
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
   }
 }

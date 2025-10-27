@@ -206,7 +206,8 @@ export const DataManagementRoutes: Route = {
                         },
                         {
                             path: 'energy-uses/:id',
-                            component: FacilityEnergyUseGroupComponent
+                            component: FacilityEnergyUseGroupComponent,
+                            canDeactivate: [canDeactivateGuard]
                         }
                     ]
                 }
