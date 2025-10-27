@@ -178,4 +178,23 @@ export class GeneralInformationFormComponent implements OnInit {
     }
     this.saveChanges();
   }
+
+  formatPhone(event: Event) {
+    let country = this.form.get('country')?.value;
+    if (country == 'US') {
+      let input = (event.target as HTMLInputElement).value;
+
+      input = input.replace(/\D/g, '');
+      if (input.length > 3 && input.length <= 6) {
+        input = input.replace(/(\d{3})(\d+)/, '$1-$2');
+      }
+      else if (input.length > 6) {
+        input = input.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3');
+      }
+
+      input = input.substring(0, 12);
+      this.form.get('contactPhone')?.setValue(input, { emitEvent: false });
+    }
+    this.saveChanges();
+  }
 }

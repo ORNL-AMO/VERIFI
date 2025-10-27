@@ -118,8 +118,8 @@
         </div>
         <div class="mb-3 col-md-6 col-sm-12">
             <label for="phone">Contact Phone</label>
-            <input type="text" class="form-control" formControlName="contactPhone" (input)="saveChanges()"
-                onfocus="this.select();" minlength="1" maxlength="10">
+            <input type="text" class="form-control" formControlName="contactPhone" (input)="formatPhone($event)"
+                onfocus="this.select();" minlength="1" maxlength="12">
         </div>
         <div class="mb-3 col-md-6 col-sm-12">
             <label for="email">Contact Email</label>
