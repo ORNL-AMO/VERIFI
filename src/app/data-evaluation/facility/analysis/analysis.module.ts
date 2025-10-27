@@ -37,6 +37,8 @@ import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/bank
 import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/group-analysis-options/banked-group-results-table/banked-group-results-table.component';
 import { RegressionUserDefinedModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-user-defined-model-inspection/regression-user-defined-model-inspection.component';
 import { AnalysisHideDetailsTableComponent } from './analysis-dashboard/analysis-hide-details-table/analysis-hide-details-table.component';
+import { AnalysisDetailItemCardComponent } from './analysis-dashboard/analysis-detail-item-card/analysis-detail-item-card.component';
+import { AnalysisDashboardViewComponent } from './analysis-dashboard/analysis-dashboard-view/analysis-dashboard-view.component';
 
 @NgModule({
   declarations: [
@@ -67,7 +69,9 @@ import { AnalysisHideDetailsTableComponent } from './analysis-dashboard/analysis
     BankedGroupAnalysisComponent,
     BankedGroupResultsTableComponent,
     RegressionUserDefinedModelInspectionComponent,
-    AnalysisHideDetailsTableComponent
+    AnalysisHideDetailsTableComponent,
+    AnalysisDetailItemCardComponent,
+    AnalysisDashboardViewComponent
   ],
   imports: [
     CommonModule,

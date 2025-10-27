@@ -26,13 +26,6 @@ import * as _ from 'lodash';
 })
 export class AnalysisHideDetailsTableComponent {
 
-  // @Input()
-  // analysisItemsList: Array<{
-  //   year: number,
-  //   analysisItems: Array<IdbAnalysisItem>,
-  //   hasSelectedItem: boolean
-  // }>;
-
   @Input()
   selectedFacility: IdbFacility;
 

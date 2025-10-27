@@ -1,5 +1,5 @@
-<div class="wrapper" *ngIf="filteredAnalysisItems.length > 0">
-    <div class="row mb-5">
+<div class="wrapper content-padding mb-4" *ngIf="facilityAnalysisItems.length > 0">
+    <div class="row mb-5 justify-content-center">
         <div class="col-auto">
             <label class="form-label fw-bold">Filter by Analysis Category:</label>
             <select class="form-select" [(ngModel)]="selectedAnalysisCategory" (change)="filterAnalysisItems()">
@@ -17,7 +17,9 @@
             </select>
         </div>
     </div>
+</div>
 
+<div class="wrapper" *ngIf="facilityAnalysisItems.length > 0 && filteredAnalysisItems.length > 0">
     <div class="table-responsive mt-4">
         <table class="table table-bordered table-hover">
             <thead>
@@ -93,11 +95,17 @@
     </div>
 </div>
 
-<div>
-    <div *ngIf="filteredAnalysisItems.length == 0" class="alert alert-info">
+<ng-container *ngIf="facilityAnalysisItems.length == 0">
+    <div class="wrapper text-center bold">
         No analysis items to display. Please adjust your filters or create a new analysis item.
     </div>
-</div>
+</ng-container>
+
+<ng-container *ngIf="facilityAnalysisItems.length > 0 && filteredAnalysisItems.length == 0">
+    <div class="wrapper text-center bold">
+        No analysis items match your filter criteria. Please adjust your filters.
+    </div>
+</ng-container>
 
 <div [ngClass]="{'windowOverlay': displayDeleteModal || displayCreateCopyModal || displayCreateReportModal}">
 </div>

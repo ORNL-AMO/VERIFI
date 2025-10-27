@@ -54,6 +54,7 @@ import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/ed
 import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility-data/predictors/edit-predictor/edit-predictor.component";
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
+import { AnalysisDashboardViewComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-dashboard-view/analysis-dashboard-view.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -246,9 +247,7 @@ export const FacilityRoutes: Route = {
                     path: 'analysis-dashboard',
                     component: AnalysisDashboardComponent,
                     children: [
-                        { path: '', pathMatch: 'full', redirectTo: 'energy' },
-                        { path: 'energy', component: EnergyDashboardComponent },
-                        { path: 'water', component: WaterDashboardComponent },
+                        { path: '', component: AnalysisDashboardViewComponent }
                     ]
                 },
                 {

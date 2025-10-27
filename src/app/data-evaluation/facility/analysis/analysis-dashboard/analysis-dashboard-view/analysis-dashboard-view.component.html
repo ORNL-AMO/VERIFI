@@ -1,0 +1,63 @@
+<ng-container *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
+    <ng-container *ngIf="analysisItems.length != 0">
+        <div class="d-flex flex-column" *ngIf="showDetail">
+            <div class="card content-padding mb-4">
+                <div class="row mb-5 justify-content-center">
+                    <div class="col-auto">
+                        <label class="form-label fw-bold">Filter by Analysis Category:</label>
+                        <select class="form-select" [(ngModel)]="selectedAnalysisCategory"
+                            (change)="filterAnalysisItems()">
+                            <option value="all">All</option>
+                            <option value="energy">Energy</option>
+                            <option value="water">Water</option>
+                        </select>
+                    </div>
+                    <div class="col-auto ms-5">
+                        <label class="form-label fw-bold">Filter by Report Year:</label>
+                        <select class="form-select" [(ngModel)]="selectedReportYear" (change)="filterAnalysisItems()">
+                            <option value="all">All</option>
+                            <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row" *ngFor="let listItem of filteredAnalysisItems; let index = index;">
+                <div class="col-12 pt-2">
+                    <app-analysis-detail-item-card [analysisItem]="listItem" [errorList]="errorList"
+                        (itemDeleted)="onItemDeleted($event)"></app-analysis-detail-item-card>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-column" *ngIf="!showDetail">
+            <app-analysis-hide-details-table [selectedFacility]="selectedFacility">
+            </app-analysis-hide-details-table>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="analysisItems.length == 0">
+        <div class="card card-body text-center bold">
+            No analysis items found for this facility. Click "+Add New Analysis" to start analyzing this
+            facility!
+        </div>
+    </ng-container>
+    <ng-container *ngIf="analysisItems.length > 0 && filteredAnalysisItems.length == 0">
+        <div class="card card-body text-center bold">
+            No analysis items match your filter criteria. Please adjust your filters.
+        </div>
+    </ng-container>
+</ng-container>
+
+<div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMax || baselineYearErrorMin">
+    <div class="alert alert-danger text-center p-2">
+        The baseline year for your reduction goal is
+        {{selectedFacility.sustainabilityQuestions.energyReductionBaselineYear}}
+        <ng-container *ngIf="baselineYearErrorMin">
+            and your meter readings start {{yearOptions[0]}}.
+        </ng-container>
+        <ng-container *ngIf="baselineYearErrorMax">
+            and your meter readings end {{yearOptions[yearOptions.length -1]}}.
+        </ng-container>
+        Fix your reduction goal year in <a class="click-link" (click)="goToSettings()">facility settings</a> or <a
+            class="click-link" (click)="goToUtilityData()">add data</a>.
+    </div>
+</div>
