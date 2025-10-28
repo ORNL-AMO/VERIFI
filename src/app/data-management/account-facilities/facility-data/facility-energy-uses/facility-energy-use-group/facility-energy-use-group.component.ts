@@ -24,8 +24,6 @@ import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } fr
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
-  facility: IdbFacility;
-  facilitySub: Subscription;
 
   energyUseGroup: IdbFacilityEnergyUseGroup;
   form: FormGroup;
@@ -50,10 +48,6 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facility = facility;
-    });
-
     this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
       this.facilityEnergyUseEquipment = equipment;
     });
@@ -70,7 +64,6 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   ngOnDestroy() {
-    this.facilitySub.unsubscribe();
     this.facilityEnergyUseEquipmentSub.unsubscribe();
   }
 

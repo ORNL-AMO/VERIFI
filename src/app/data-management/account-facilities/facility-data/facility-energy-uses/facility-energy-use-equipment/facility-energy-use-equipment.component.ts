@@ -11,10 +11,14 @@ import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-
 import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { FacilityEnergyUseEquipmentFormService } from './facility-energy-use-equipment-form.service';
-
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import * as _ from 'lodash';
+import { EquipmentTypes } from './equipmentTypes';
+  
 @Component({
   selector: 'app-facility-energy-use-equipment',
   standalone: false,
@@ -23,15 +27,13 @@ import { FacilityEnergyUseEquipmentFormService } from './facility-energy-use-equ
 })
 export class FacilityEnergyUseEquipmentComponent {
 
-
-  facility: IdbFacility;
-  facilitySub: Subscription;
+  equipmentTypes: Array<EquipmentType> = EquipmentTypes;
 
   energyUseEquipment: IdbFacilityEnergyUseEquipment;
   form: FormGroup;
 
   showDeleteEquipment: boolean = false;
-  sourceOptions: Array<MeterSource> = AllSources;
+  // sourceOptions: Array<MeterSource> = AllSources;
   constructor(private activatedRoute: ActivatedRoute,
     private facilityDbService: FacilitydbService,
     private router: Router,
@@ -41,28 +43,25 @@ export class FacilityEnergyUseEquipmentComponent {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private toastNotificationsService: ToastNotificationsService,
-    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService
+    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) {
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facility = facility;
-    });
-
     this.activatedRoute.params.subscribe(params => {
       let equipmentId: string = params['equipmentId'];
       this.energyUseEquipment = this.facilityEnergyUseEquipmentDbService.getByGuid(equipmentId);
       if (this.energyUseEquipment) {
         this.form = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(this.energyUseEquipment);
+        //temporary
+        if(!this.energyUseEquipment.energyUseData){
+          this.energyUseEquipment.energyUseData = [];
+        }
       } else {
         this.goToGroupList();
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.facilitySub.unsubscribe();
   }
 
   async saveChanges() {
@@ -115,5 +114,26 @@ export class FacilityEnergyUseEquipmentComponent {
       return of(result);
     }
     return of(true);
+  }
+
+  addEnergyUseData(){
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let dates: Array<Date> = facilityMeterData.map(meterData => { return new Date(meterData.readDate) });
+    let years: Array<number> = dates.map(date => { return date.getFullYear() });
+    years = _.uniq(years);
+    let startYear: number = _.min(years);
+    let endYear: number = _.max(years);
+    for(let year = startYear; year <= endYear; year++){
+      if(!this.energyUseEquipment.energyUseData.find(data => { return data.year == year })){
+        this.energyUseEquipment.energyUseData.push({
+          year: year,
+          energyUse: 0,
+          hoursOfOperation: 0,
+          loadFactor: 0,
+          dutyFactor: 0,
+          overrideValue: 0
+        });
+      }
+    }
   }
 }

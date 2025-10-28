@@ -215,3 +215,51 @@ export const DemandUnitOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Metric'
     }
 ]
+
+export const PowerUnitOptions: Array<UnitOption> = [
+    {
+        display: 'Kilowatt (kW)',
+        value: 'kW',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Watt (W)',
+        value: 'W',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Megawatt (MW)',
+        value: 'MW',
+        unitsOfMeasure: 'Metric'
+    },
+    {
+        display: 'Horsepower (hp)',
+        value: 'hp',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Kilojoules per hour (kJ/hr)',
+        value: 'kJh',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Gigajoules per hour (GJ/hr)',
+        value: 'GJh',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Megajoules per hour (MJ/hr)',
+        value: 'MJh',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Million British Thermal Units per hour (MMBtu/hr)',
+        value: 'MMBtuhr',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'British Thermal Units per hour (Btu/hr)',
+        value: 'btuhr',
+        unitsOfMeasure: 'Imperial'
+    },
+]

@@ -21,42 +21,150 @@
                         required</div>
                 </div>
             </div>
+
+            <div class="row">
+                <label class="col-sm-5 col-form-label" for="equipmentType">Industrial System</label>
+                <div class="col-sm-7">
+                    <select name="equipmentType" class="form-select" id="equipmentType"
+                        formControlName="equipmentType">
+                        <option *ngFor="let option of equipmentTypes" [ngValue]="option">
+                            {{option}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group row">
-                <label class="col-5 col-form-label" for="energySource">Energy Source</label>
+                <label class="col-5 col-form-label" for="energySource">Utility Type</label>
                 <div class="col-7">
                     <select id="energySource" class="form-select" formControlName="energySource">
-                        <option *ngFor="let sourceOption of sourceOptions" [ngValue]="sourceOption">
+                        <option *ngFor="let sourceOption of (form.get('equipmentType').value | utilityTypeOptions)"
+                            [ngValue]="sourceOption">
                             {{sourceOption}}
                         </option>
                     </select>
                 </div>
             </div>
             <div class="form-group row">
-                <label class="col-5 col-form-label" for="size">Total Size/Capacity</label>
+                <label class="col-5 col-form-label" for="size">
+                    {{ form.get('equipmentType').value | sizeLabel: form.get('energySource').value }}
+                </label>
                 <div class="col-7">
-                    <input id="size" class="form-control" type="number" formControlName="size" onfocus="this.select();"
-                        min="0">
+                    <div class="input-group">
+                        <input id="size" class="form-control" type="number" formControlName="size"
+                            onfocus="this.select();" min="0">
+
+                        <select class="input-group-text" id="units" name="units" formControlName="units">
+                            <option
+                                *ngFor="let option of (form.get('energySource').value| equipmentUnitOptions )"
+                                [ngValue]="option.value">
+                                <span [innerHTML]="option.value | settingsLabel"></span>
+                            </option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="form-group row">
+            <!-- <div class="form-group row">
                 <label class="col-5 col-form-label" for="units">Units</label>
                 <div class="col-7">
                     <input id="units" class="form-control" type="text" formControlName="units" onfocus="this.select();"
                         minlength="0" maxlength="50">
                 </div>
-            </div>
+            </div> -->
             <div class="form-group row">
                 <label class="col-5 col-form-label" for="equipmentNotes">Notes</label>
                 <div class="col-7">
-                    <textarea id="equipmentNotes" class="form-control" formControlName="notes"
-                        onfocus="this.select();" minlength="0" maxlength="500"></textarea>
+                    <textarea id="equipmentNotes" class="form-control" formControlName="notes" onfocus="this.select();"
+                        minlength="0" maxlength="500"></textarea>
                 </div>
             </div>
         </div>
     </div>
 </form>
+<hr>
+<!-- <form [formGroup]="form"> -->
+<div class="row">
+    <div class="col-12">
+        <p class="bold">Consumption Data</p>
+        @if(energyUseEquipment.energyUseData.length != 0){
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>
+                        Year
+                    </th>
+                    <th>
+                        Operating Hours<br>
+                        (hrs/yr)
+                    </th>
+                    <th>
+                        Load Factor<br>
+                        (%)
+                    </th>
+                    <th>
+                        Duty Factor<br>
+                        (%)
+                    </th>
+                    <th>
+                        Energy<br> Consumption
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (data of energyUseEquipment.energyUseData; track $index) {
+                <tr>
+                    <td>
+                        {{data.year}}
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <input class="form-control" type="number" [(ngModel)]="data.hoursOfOperation" min="0">
+                            <span class="input-group-text">hrs</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <input class="form-control" type="number" [(ngModel)]="data.loadFactor" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <input class="form-control" type="number" [(ngModel)]="data.dutyFactor" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <input class="form-control" type="number" [(ngModel)]="data.energyUse" min="0">
+                            <span class="input-group-text">
+                                <!--TODO: use correct energy units based on selection for size-->
+                                {{energyUseEquipment.units}}
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }@else {
+        <div class="text-center mt-3">
+            <h5>No energy consumption data found for this equipment.</h5>
+            <div class="d-flex w-100 justify-content-center">
+                <div class="pe-1">
+                    <button class="btn action-btn" (click)="addEnergyUseData()"><i class="fa fa-plus"></i> Add Energy
+                        Consumption Data</button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+<!-- </form> -->
+
 
 <hr>
+
 <div class="d-flex w-100 justify-content-end">
     <div>
         <button class="btn btn-danger btn-sm" (click)="showDelete()">

@@ -61,6 +61,9 @@ import { UpdateWeatherPredictorsModalComponent } from './data-management-home/up
 import { FacilityEnergyUseGroupManagementComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component';
 import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
+import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/utility-type-options.pipe';
+import { SizeLabelPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/size-label.pipe';
+import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/equipment-unit-options.pipe';
 
 
 @NgModule({
@@ -111,7 +114,10 @@ import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facili
     UpdateWeatherPredictorsModalComponent,
     FacilityEnergyUseGroupComponent,
     FacilityEnergyUseGroupManagementComponent,
-    FacilityEnergyUseEquipmentComponent
+    FacilityEnergyUseEquipmentComponent,
+    UtilityTypeOptionsPipe,
+    SizeLabelPipe,
+    EquipmentUnitOptionsPipe
   ],
   imports: [
     CommonModule,

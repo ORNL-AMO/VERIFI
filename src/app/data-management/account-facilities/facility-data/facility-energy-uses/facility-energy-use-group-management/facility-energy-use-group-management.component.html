@@ -17,6 +17,7 @@
         <thead class="sortable">
             <tr>
                 <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                <th>Equipment/Systems</th>
                 <!-- <th (click)="setOrderDataField('meterNumber')"
                         [ngClass]="{'active': orderDataField == 'meterNumber'}">
                         Meter #</th> -->
@@ -38,6 +39,15 @@
                 <td>
                     <a (click)="selectEditGroup(group)">{{group.name}}</a>
                 </td>
+
+                @let groupEquipment = (group.guid | facilityEnergyEquipmentList:facilityEnergyUseEquipment);
+                <td>
+                    @for (equipment of groupEquipment; track $index) {
+                        <a class="click-link" (click)="goToEquipment(equipment)">{{equipment.name}}</a><br>
+                    }
+                </td>
+
+
                 <!-- <td>{{meter.meterNumber}}</td> -->
                 <!-- <td>{{meter.source}}</td>
                     <td>

@@ -27,6 +27,9 @@ export class FacilityEnergyUseGroupManagementComponent {
   facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
   facilityEnergyUseGroupsSub: Subscription;
 
+  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
+  facilityEnergyUseEquipmentSub: Subscription;
+
   groupToDelete: IdbFacilityEnergyUseGroup;
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
@@ -56,12 +59,16 @@ export class FacilityEnergyUseGroupManagementComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
+    this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
+      this.facilityEnergyUseEquipment = equipment;
+    });
   }
 
   ngOnDestroy(): void {
     this.facilitySub.unsubscribe();
     this.facilityEnergyUseGroupsSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.facilityEnergyUseEquipmentSub.unsubscribe();
   }
 
   async addGroup() {
@@ -134,5 +141,9 @@ export class FacilityEnergyUseGroupManagementComponent {
     } else {
       this.orderDataField = str;
     }
+  }
+
+  goToEquipment(equipment: IdbFacilityEnergyUseEquipment) {
+    this.router.navigateByUrl('data-management/' + equipment.accountId + '/facilities/' + equipment.facilityId + '/energy-uses/' + equipment.energyUseGroupId + '/equipment/' + equipment.guid);
   }
 }
