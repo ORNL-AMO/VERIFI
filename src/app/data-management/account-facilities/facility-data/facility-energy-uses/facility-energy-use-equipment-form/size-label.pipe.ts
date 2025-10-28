@@ -1,5 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { UtilityType } from './equipmentTypes';
 
 @Pipe({
@@ -8,7 +10,8 @@ import { UtilityType } from './equipmentTypes';
 })
 export class SizeLabelPipe implements PipeTransform {
 
-  transform(equipmentType: EquipmentType, utilityType: UtilityType): string {
+  //TODO: Use Meter Source?
+  transform(equipmentType: EquipmentType, utilityType: UtilityType | MeterSource): string {
     if (!equipmentType) {
       return 'Total Size';
     }

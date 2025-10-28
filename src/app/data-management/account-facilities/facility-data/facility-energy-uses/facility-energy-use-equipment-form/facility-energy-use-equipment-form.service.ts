@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Injectable({
@@ -9,12 +9,16 @@ export class FacilityEnergyUseEquipmentFormService {
   
   constructor(private formBuilder: FormBuilder) { }
 
-  getFormFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): FormGroup {
+  getFormFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment, inSetup: boolean): FormGroup {
+    let requiredValidators: Array<ValidatorFn> = [];
+    if (!inSetup) {
+      requiredValidators.push(Validators.required);
+    }
     let equipmentFormGroup: FormGroup = this.formBuilder.group({
       name: [equipment.name, Validators.required],
-      size: [equipment.size, Validators.required],
-      units: [equipment.units, Validators.required],
-      energySource: [equipment.energySource, Validators.required],
+      size: [equipment.size, requiredValidators],
+      units: [equipment.units, requiredValidators],
+      energySource: [equipment.energySource, requiredValidators],
       notes: [equipment.notes],
       equipmentType: [equipment.equipmentType],
     });

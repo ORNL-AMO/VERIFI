@@ -33,6 +33,7 @@ import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
 import { FacilityEnergyGroupsListPipe } from './facility-energy-groups-list.pipe';
 import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-list.pipe';
+import { FormsValidPipe } from './forms-valid.pipe';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-lis
     ReportDatePipe,
     ChargeTypeLabelPipe,
     FacilityEnergyGroupsListPipe,
-    FacilityEnergyEquipmentListPipe
+    FacilityEnergyEquipmentListPipe,
+    FormsValidPipe
   ],
   imports: [
     CommonModule
@@ -106,7 +108,8 @@ import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-lis
     ReportDatePipe,
     ChargeTypeLabelPipe,
     FacilityEnergyGroupsListPipe,
-    FacilityEnergyEquipmentListPipe
+    FacilityEnergyEquipmentListPipe,
+    FormsValidPipe
   ]
 })
 export class HelperPipesModule { }

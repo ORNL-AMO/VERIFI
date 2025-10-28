@@ -23,7 +23,7 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         facilityId: energyUseGroup.facilityId,
         accountId: energyUseGroup.accountId,
         energyUseGroupId: energyUseGroup.guid,
-        name: 'Equipment or System',
+        name: '',
         energySource: 'Electricity',
         size: undefined,
         units: '',

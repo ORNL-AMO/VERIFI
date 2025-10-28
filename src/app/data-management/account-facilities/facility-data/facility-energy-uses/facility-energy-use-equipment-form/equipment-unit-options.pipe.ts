@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { UtilityType } from './equipmentTypes';
 import { EnergyUnitOptions, PowerUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Pipe({
   name: 'equipmentUnitOptions',
@@ -8,7 +9,8 @@ import { EnergyUnitOptions, PowerUnitOptions, UnitOption, VolumeGasOptions, Volu
 })
 export class EquipmentUnitOptionsPipe implements PipeTransform {
 
-  transform(utilityType: UtilityType): Array<UnitOption> {
+  //TODO: Meter source and Utility Type don't have same properties
+  transform(utilityType: UtilityType | MeterSource): Array<UnitOption> {
     if(utilityType == 'Electricity' || utilityType == 'Natural Gas'){
       return [...EnergyUnitOptions, ...PowerUnitOptions];
     }else if(utilityType == 'Other Fuels'){

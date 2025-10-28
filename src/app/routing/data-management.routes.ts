@@ -55,6 +55,8 @@ import { MeterChargesVisualizationComponent } from "../data-management/account-f
 import { FacilityEnergyUseGroupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component";
 import { FacilityEnergyUseGroupManagementComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component";
 import { FacilityEnergyUseEquipmentComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component";
+import { FacilityEnergyUsesComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component";
+import { FacilityEnergyUsesGroupSetupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -203,18 +205,28 @@ export const DataManagementRoutes: Route = {
                         },
                         {
                             path: 'energy-uses',
-                            component: FacilityEnergyUseGroupManagementComponent
+                            component: FacilityEnergyUsesComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    component: FacilityEnergyUseGroupManagementComponent
+                                },
+                                {
+                                    path: 'setup',
+                                    component: FacilityEnergyUsesGroupSetupComponent
+                                },
+                                {
+                                    path: ':id',
+                                    component: FacilityEnergyUseGroupComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: ':id/equipment/:equipmentId',
+                                    component: FacilityEnergyUseEquipmentComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                }
+                            ]
                         },
-                        {
-                            path: 'energy-uses/:id',
-                            component: FacilityEnergyUseGroupComponent,
-                            canDeactivate: [canDeactivateGuard]
-                        },
-                        {
-                            path: 'energy-uses/:id/equipment/:equipmentId',
-                            component: FacilityEnergyUseEquipmentComponent,
-                            canDeactivate: [canDeactivateGuard]
-                        }
                     ]
                 }
             ]

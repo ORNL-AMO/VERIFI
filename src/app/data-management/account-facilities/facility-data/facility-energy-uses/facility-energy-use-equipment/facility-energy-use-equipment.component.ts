@@ -8,16 +8,15 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { FacilityEnergyUseEquipmentFormService } from './facility-energy-use-equipment-form.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
-import { EquipmentTypes } from './equipmentTypes';
+import { EquipmentTypes } from '../facility-energy-use-equipment-form/equipmentTypes';
+import { FacilityEnergyUseEquipmentFormService } from '../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
   
 @Component({
   selector: 'app-facility-energy-use-equipment',
@@ -33,7 +32,6 @@ export class FacilityEnergyUseEquipmentComponent {
   form: FormGroup;
 
   showDeleteEquipment: boolean = false;
-  // sourceOptions: Array<MeterSource> = AllSources;
   constructor(private activatedRoute: ActivatedRoute,
     private facilityDbService: FacilitydbService,
     private router: Router,
@@ -53,7 +51,7 @@ export class FacilityEnergyUseEquipmentComponent {
       let equipmentId: string = params['equipmentId'];
       this.energyUseEquipment = this.facilityEnergyUseEquipmentDbService.getByGuid(equipmentId);
       if (this.energyUseEquipment) {
-        this.form = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(this.energyUseEquipment);
+        this.form = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(this.energyUseEquipment, false);
         //temporary
         if(!this.energyUseEquipment.energyUseData){
           this.energyUseEquipment.energyUseData = [];

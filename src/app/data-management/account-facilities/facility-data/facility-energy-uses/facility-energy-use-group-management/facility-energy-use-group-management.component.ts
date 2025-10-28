@@ -146,4 +146,8 @@ export class FacilityEnergyUseGroupManagementComponent {
   goToEquipment(equipment: IdbFacilityEnergyUseEquipment) {
     this.router.navigateByUrl('data-management/' + equipment.accountId + '/facilities/' + equipment.facilityId + '/energy-uses/' + equipment.energyUseGroupId + '/equipment/' + equipment.guid);
   }
+
+  setupEnergyUseGroups() {
+    this.router.navigateByUrl('data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/setup');
+  }
 }

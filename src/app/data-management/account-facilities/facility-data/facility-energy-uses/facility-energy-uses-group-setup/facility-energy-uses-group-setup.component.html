@@ -1,0 +1,111 @@
+<h4>
+    {{facility.name}} Energy Use Groups Setup
+</h4>
+
+@if(setupStep == 1) {
+<div class="d-flex mt-5 justify-content-center flex-column align-items-center">
+    <h5>
+        How many energy use groups you would like to set up for this facility?
+    </h5>
+    <div class="d-flex w-100 justify-content-center">
+        <input type="number" class="form-control w-25" [(ngModel)]="numberOfGroups" min="1" />
+        <button class="btn action-btn" (click)="submitNumberOfGroups()" [disabled]="numberOfGroups <= 0"> Setup
+            {{numberOfGroups}}
+            Groups<i class="fa fa-arrow-right"></i></button>
+    </div>
+    <div class="alert alert-danger mt-1" *ngIf="numberOfGroups <= 0">
+        Please enter a valid number of groups.
+    </div>
+    <p class="fw-light mt-3">
+        You can always add, edit, or delete energy use groups after this setup is complete.
+    </p>
+</div>
+} @else if(setupStep == 2) {
+<div>
+    <h5 class="text-center mb-0">Setting up group {{groupSetupIndex + 1}} of {{energyUseGroups.length}}</h5>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            @if(groupSetupIndex == 0) {
+            <button class="btn action-btn" (click)="startOver()"><i class="fa fa-arrow-left"></i> Start Over</button>
+            }@else{
+            <button class="btn action-btn" (click)="previousGroup()"><i class="fa fa-arrow-left"></i> Previous
+                Group</button>
+            }
+        </div>
+
+        <div>
+            @let formsValid = energyUseGroups[groupSetupIndex].equipmentForms | formsValid;
+            @let disableNext = !formsValid || !energyUseGroups[groupSetupIndex].name;
+            @if(groupSetupIndex == energyUseGroups.length - 1) {
+            <button class="btn action-btn me-1" (click)="addGroup()" [disabled]="disableNext"><i class="fa fa-plus"></i>
+                Add Group</button>
+            <button class="btn action-btn" (click)="finalizeSetup()" [disabled]="disableNext"><i
+                    class="fa fa-check"></i>
+                Finalize Setup</button>
+            }@else{
+            <button class="btn action-btn" (click)="nextGroup()" [disabled]="disableNext"><i
+                    class="fa fa-arrow-right"></i> Next
+                Group</button>
+            }
+        </div>
+    </div>
+
+    <hr class="my-2">
+    <div class="row">
+        <div class="col-6">
+            <label for="groupName">Group Name:</label>
+            <input id="groupName" type="text" class="form-control" [(ngModel)]="energyUseGroups[groupSetupIndex].name"
+                required />
+            @if(!energyUseGroups[groupSetupIndex].name) {
+            <div class="alert alert-danger mt-1">
+                Group name is required.
+            </div>
+            }
+        </div>
+        <div class="col-6">
+            <label for="numberOfEquipment">How many systems/equipment would you like to add to this group?</label>
+            <input id="numberOfEquipment" type="number" class="form-control"
+                [(ngModel)]="energyUseGroups[groupSetupIndex].numberOfEquipment" min="1" max="42"
+                (input)="changeNumberOfEquipment(energyUseGroups[groupSetupIndex])" required />
+            @if(numberOfEquipmentWarning) {
+            <div class="alert alert-danger mt-1">
+                {{numberOfEquipmentWarning}}
+            </div>
+            }
+        </div>
+    </div>
+    <hr class="my-2">
+    <h5>Equipment / Systems</h5>
+    <div class="row">
+        @for (eqForm of energyUseGroups[groupSetupIndex].equipmentForms; track $index) {
+        <div class="col-6 mb-2 mt-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            &#35;{{$index + 1}}.
+                        </div>
+                        @if(energyUseGroups[groupSetupIndex].equipmentForms.length > 1) {
+                        <div>
+                            <button class="btn-close" (click)="removeEquipment($index)">
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <app-facility-energy-use-equipment-form [form]="eqForm">
+                    </app-facility-energy-use-equipment-form>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    <div class="row">
+        <div class="col-12 justify-content-end">
+            <button class="btn action-btn float-right" (click)="addEquipmentForm()"><i class="fa fa-plus"></i> Add Another
+                Equipment/System</button>
+        </div>
+    </div>
+</div>
+}

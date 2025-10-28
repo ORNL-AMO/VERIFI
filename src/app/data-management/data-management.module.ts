@@ -61,9 +61,12 @@ import { UpdateWeatherPredictorsModalComponent } from './data-management-home/up
 import { FacilityEnergyUseGroupManagementComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component';
 import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
-import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/utility-type-options.pipe';
-import { SizeLabelPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/size-label.pipe';
-import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/equipment-unit-options.pipe';
+import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-unit-options.pipe';
+import { FacilityEnergyUsesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component';
+import { FacilityEnergyUsesGroupSetupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component';
+import { FacilityEnergyUseEquipmentFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/facility-energy-use-equipment-form.component';
+import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/utility-type-options.pipe';
+import { SizeLabelPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/size-label.pipe';
 
 
 @NgModule({
@@ -117,7 +120,10 @@ import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/fac
     FacilityEnergyUseEquipmentComponent,
     UtilityTypeOptionsPipe,
     SizeLabelPipe,
-    EquipmentUnitOptionsPipe
+    EquipmentUnitOptionsPipe,
+    FacilityEnergyUsesComponent,
+    FacilityEnergyUsesGroupSetupComponent,
+    FacilityEnergyUseEquipmentFormComponent
   ],
   imports: [
     CommonModule,
