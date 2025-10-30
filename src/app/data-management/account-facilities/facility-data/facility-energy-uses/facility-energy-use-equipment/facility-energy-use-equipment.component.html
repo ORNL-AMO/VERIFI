@@ -2,7 +2,8 @@
 
 <div class="d-flex w-100 justify-content-end">
     <div>
-        <button class="btn btn-primary me-2" (click)="saveChanges()" [disabled]="form.invalid || form.pristine">
+        <button class="btn btn-primary me-2" (click)="saveChanges()"
+            [disabled]="form.invalid || (form.pristine && !dataChanged)">
             <span class="fa fa-save"></span>
             Save Changes</button>
     </div>
@@ -18,71 +19,134 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>
+                    <th class="w-15" colspan="2">
                         Year
                     </th>
-                    <th>
+                    <th class="w-15">
                         Operating Hours<br>
                         (hrs/yr)
                     </th>
-                    <th>
+                    <th class="w-15">
                         Load Factor<br>
                         (%)
                     </th>
-                    <th>
+                    <th class="w-15">
                         Duty Factor<br>
                         (%)
                     </th>
-                    <th>
-                        Energy<br> Consumption
+                    <th class="w-15">
+                        Efficiency<br>
+                        (%)
+                    </th>
+                    <th colspan="2">
+                        Energy Consumption
                     </th>
                 </tr>
             </thead>
             <tbody>
-                @for (data of energyUseEquipment.energyUseData; track $index) {
+                @for (data of energyUseEquipment.energyUseData | orderEquipmentEnergyUse; track $index) {
                 <tr>
+                    <td class="center-content">
+                        <button class="btn-close" (click)="removeEnergyUseData(data)"></button>
+                    </td>
                     <td>
-                        {{data.year}}
+                        <!-- {{data.year}} -->
+                        <select class="form-select" [(ngModel)]="data.year" (change)="setDataChanged()">
+                            @for (yearOption of yearOptions | yearOptionsFilter: energyUseEquipment.energyUseData:data.year; track $index) {
+                            <option [value]="yearOption.year">
+                                {{yearOption.year}}</option>
+                            }
+                        </select>
                     </td>
                     <td>
                         <div class="input-group">
-                            <input class="form-control" type="number" [(ngModel)]="data.hoursOfOperation" min="0">
+                            <input class="form-control" type="number" [(ngModel)]="data.hoursOfOperation" min="0"
+                                (input)="setDataChanged()">
                             <span class="input-group-text">hrs</span>
                         </div>
                     </td>
                     <td>
                         <div class="input-group">
-                            <input class="form-control" type="number" [(ngModel)]="data.loadFactor" min="0" max="100">
+                            <input class="form-control" type="number" [(ngModel)]="data.loadFactor" min="0" max="100"
+                                (input)="setDataChanged()">
                             <span class="input-group-text">%</span>
                         </div>
                     </td>
                     <td>
                         <div class="input-group">
-                            <input class="form-control" type="number" [(ngModel)]="data.dutyFactor" min="0" max="100">
+                            <input class="form-control" type="number" [(ngModel)]="data.dutyFactor" min="0" max="100"
+                                (input)="setDataChanged()">
                             <span class="input-group-text">%</span>
                         </div>
                     </td>
                     <td>
                         <div class="input-group">
-                            <input class="form-control" type="number" [(ngModel)]="data.energyUse" min="0">
+                            <input class="form-control" type="number" [(ngModel)]="data.efficiency" min="0" max="100"
+                                (input)="setDataChanged()">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </td>
+                    @if(data.overrideEnergyUse) {
+                    <td>
+                        <div class="input-group">
+                            <input class="form-control" type="number" [(ngModel)]="data.energyUse" min="0"
+                                (input)="setDataChanged()">
                             <span class="input-group-text">
                                 <!--TODO: use correct energy units based on selection for size-->
                                 {{energyUseEquipment.units}}
                             </span>
                         </div>
                     </td>
+                    <td class="center-content">
+                        <button class="btn action-btn" (click)="toggleOverride(data)">
+                            <span class="fa fa-calculator"></span>
+                        </button>
+                    </td>
+                    }@else{
+
+                    <td class="center-content">
+                        {{data.energyUse | number:'1.0-2'}} {{energyUseEquipment.units}}
+                    </td>
+                    <td class="center-content">
+                        <button class="btn action-btn" (click)="toggleOverride(data)">
+                            <span class="fa fa-pencil"></span>
+                        </button>
+                    </td>
+                    }
+
                 </tr>
                 }
             </tbody>
         </table>
+        <div class="d-flex justify-content-end">
+            <div>
+                @if(energyUseEquipment.energyUseData.length < yearOptions.length) {
+                <a class="click-link" (click)="addEnergyUseYear()"><span class="fa fa-plus"></span> Add Year</a>
+                }
+            </div>
+            <div class="border-left ms-2 ps-2">
+                <a class="click-link danger" (click)="clearData()">Clear Data</a>
+            </div>
+        </div>
         }@else {
-        <div class="text-center mt-3">
-            <h5>No energy consumption data found for this equipment.</h5>
-            <div class="d-flex w-100 justify-content-center">
-                <div class="pe-1">
-                    <button class="btn action-btn" (click)="addEnergyUseData()"><i class="fa fa-plus"></i> Add Energy
-                        Consumption Data</button>
+        <div class="d-flex justify-content-center flex-column align-items-center">
+            <p class="text-center bold">No energy consumption data found for this equipment.<br>
+                Which years would you like to include for energy consumption data collection?
+            </p>
+            <div class="d-flex flex-wrap justify-content-center mt-2 mb-4">
+                @for (yearOption of yearOptions; track $index) {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="year-{{yearOption.year}}"
+                        [(ngModel)]="yearOption.selected" />
+                    <label class="form-check-label" for="year-{{yearOption.year}}">{{yearOption.year}}</label>
                 </div>
+                }
+            </div>
+        </div>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="addEnergyUseData()"><i class="fa fa-plus"></i> Add Energy
+                    Consumption Data</button>
             </div>
         </div>
         }

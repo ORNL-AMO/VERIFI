@@ -1,0 +1,8 @@
+import { OrderEquipmentEnergyUsePipe } from './order-equipment-energy-use.pipe';
+
+describe('OrderEquipmentEnergyUsePipe', () => {
+  it('create an instance', () => {
+    const pipe = new OrderEquipmentEnergyUsePipe();
+    expect(pipe).toBeTruthy();
+  });
+});

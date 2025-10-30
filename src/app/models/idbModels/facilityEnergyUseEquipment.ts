@@ -39,7 +39,8 @@ export interface EnergyEquipmentEnergyUseData {
     hoursOfOperation: number,
     loadFactor: number,
     dutyFactor: number,
-    overrideValue: number
+    efficiency:number,
+    overrideEnergyUse: boolean
 }
 
 export type EquipmentType = "Pump" | "Fan" | "Process Heating" | "Compressed Air" | "Steam" |

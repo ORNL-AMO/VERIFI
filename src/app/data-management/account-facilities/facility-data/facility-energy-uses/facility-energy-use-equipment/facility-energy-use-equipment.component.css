@@ -1,0 +1,29 @@
+.border-left{
+    border-left: 1px solid #dee2e6 !important;
+}
+
+a:not([href]).click-link.danger{
+    color: #dc3545 !important;
+    cursor: pointer;
+}
+
+a.click-link .fa-plus{
+    color: #007bff !important
+}
+
+.center-content{
+    vertical-align: middle;
+    text-align: center;
+}
+
+.fa-trash{
+    color: red;
+}
+
+.fa-save{
+    color: white;
+}
+
+.w-15{
+    width: 15%;
+}

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EquipmentType, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EnergyEquipmentEnergyUseData, EquipmentType, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { EquipmentTypes } from '../facility-energy-use-equipment-form/equipmentTypes';
 import { FormGroup } from '@angular/forms';
@@ -11,10 +11,13 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { ToastNotification, ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { Router } from '@angular/router';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-facility-energy-uses-group-setup',
@@ -23,7 +26,6 @@ import { Router } from '@angular/router';
   styleUrl: './facility-energy-uses-group-setup.component.css'
 })
 export class FacilityEnergyUsesGroupSetupComponent {
-
 
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -35,6 +37,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
   groupSetupIndex: number = 0;
   equipmentTypes: Array<EquipmentType> = EquipmentTypes;
   numberOfEquipmentWarning: string;
+  yearOptions: Array<{ year: number, selected: boolean }>
   constructor(private facilityDbService: FacilitydbService,
     private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
     private loadingService: LoadingService,
@@ -43,12 +46,14 @@ export class FacilityEnergyUsesGroupSetupComponent {
     private dbChangesService: DbChangesService,
     private toastNotificationsService: ToastNotificationsService,
     private accountDbService: AccountdbService,
-    private router: Router
+    private router: Router,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }
 
   ngOnInit() {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
+      this.setYearOptions();
     });
   }
 
@@ -94,12 +99,27 @@ export class FacilityEnergyUsesGroupSetupComponent {
         sidebarOpen: false,
         modifiedDate: group.modifiedDate,
         createdDate: group.createdDate
-      };      
+      };
       newGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newGroup));
       for (let eqForm of group.equipmentForms) {
         let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup);
         newEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForm(newEquipment, eqForm);
         newEquipment.energyUseGroupId = newGroup.guid;
+        let energyUseData: Array<EnergyEquipmentEnergyUseData> = new Array();
+        for (let yearOption of this.yearOptions) {
+          if (yearOption.selected) {
+            energyUseData.push({
+              year: yearOption.year,
+              energyUse: undefined,
+              hoursOfOperation: 8760,
+              loadFactor: 100,
+              dutyFactor: 100,
+              efficiency: 100,
+              overrideEnergyUse: false
+            });
+          }
+        }
+        newEquipment.energyUseData = energyUseData;
         await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
       }
     }
@@ -158,11 +178,24 @@ export class FacilityEnergyUsesGroupSetupComponent {
     this.energyUseGroups[this.groupSetupIndex].equipmentForms.splice(index, 1);
   }
 
-  addEquipmentForm(){
+  addEquipmentForm() {
     let currentGroup = this.energyUseGroups[this.groupSetupIndex];
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(currentGroup);
     let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(newEquipment, true);
     currentGroup.equipmentForms.push(equipmentForm);
     currentGroup.numberOfEquipment = currentGroup.equipmentForms.length;
+  }
+
+  setYearOptions() {
+    this.yearOptions = new Array();
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let dates: Array<Date> = facilityMeterData.map(meterData => { return new Date(meterData.readDate) });
+    let years: Array<number> = dates.map(date => { return date.getFullYear() });
+    years = _.uniq(years);
+    let startYear: number = _.min(years);
+    let endYear: number = _.max(years);
+    for (let year = startYear; year <= endYear; year++) {
+      this.yearOptions.push({ year: year, selected: true });
+    }
   }
 }

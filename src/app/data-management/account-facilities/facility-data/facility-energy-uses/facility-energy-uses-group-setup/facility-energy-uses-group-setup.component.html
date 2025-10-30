@@ -7,19 +7,37 @@
     <h5>
         How many energy use groups you would like to set up for this facility?
     </h5>
-    <div class="d-flex w-100 justify-content-center">
+    <div class="d-flex w-50 justify-content-center">
         <input type="number" class="form-control w-25" [(ngModel)]="numberOfGroups" min="1" />
-        <button class="btn action-btn" (click)="submitNumberOfGroups()" [disabled]="numberOfGroups <= 0"> Setup
-            {{numberOfGroups}}
-            Groups<i class="fa fa-arrow-right"></i></button>
     </div>
     <div class="alert alert-danger mt-1" *ngIf="numberOfGroups <= 0">
         Please enter a valid number of groups.
     </div>
-    <p class="fw-light mt-3">
-        You can always add, edit, or delete energy use groups after this setup is complete.
-    </p>
 </div>
+<div class="d-flex mt-4 justify-content-center flex-column align-items-center">
+    <h5>
+        Which years would you like to include for energy use data collection?
+    </h5>
+    <div class="d-flex flex-wrap justify-content-center">
+        @for (yearOption of yearOptions; track $index) {
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="year-{{yearOption.year}}"
+                [(ngModel)]="yearOption.selected" />
+            <label class="form-check-label" for="year-{{yearOption.year}}">{{yearOption.year}}</label>
+        </div>
+        }
+    </div>
+</div>
+<p class="fw-light mt-3 text-center">
+    You can always add, edit, or delete energy use groups after this setup is complete.
+</p>
+<div class="d-flex justify-content-center w-100">
+<button class="btn action-btn" (click)="submitNumberOfGroups()" [disabled]="numberOfGroups <= 0"> Setup
+    {{numberOfGroups}}
+    Groups<i class="fa fa-arrow-right"></i></button>
+</div>
+
+
 } @else if(setupStep == 2) {
 <div>
     <h5 class="text-center mb-0">Setting up group {{groupSetupIndex + 1}} of {{energyUseGroups.length}}</h5>
@@ -103,7 +121,8 @@
     </div>
     <div class="row">
         <div class="col-12 justify-content-end">
-            <button class="btn action-btn float-right" (click)="addEquipmentForm()"><i class="fa fa-plus"></i> Add Another
+            <button class="btn action-btn float-right" (click)="addEquipmentForm()"><i class="fa fa-plus"></i> Add
+                Another
                 Equipment/System</button>
         </div>
     </div>
