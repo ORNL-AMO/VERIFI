@@ -17,11 +17,11 @@ a.click-link .fa-plus{
 }
 
 .fa-trash{
-    color: red;
+    color: inherit;
 }
 
 .fa-save{
-    color: white;
+    color: inherit;
 }
 
 .w-15{

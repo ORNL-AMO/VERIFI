@@ -1,3 +1,15 @@
 .float-right{
     float: right;
 }
+
+.fa-trash{
+    color: inherit;
+}
+
+.fa-save{
+    color: inherit;
+}
+
+a.click-link.fa-plus{
+    color: #007bff !important
+} 

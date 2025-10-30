@@ -21,6 +21,8 @@ export class SidebarItemActivePipe implements PipeTransform {
       return url.includes('predictors') && url.includes(contextGuid);
     } else if (context === 'energy-uses-folder') {
       return url.includes('energy-uses') && url.includes(contextGuid);
+    } else if (context === 'energy-use') {
+      return url.includes('energy-uses') && url.includes(contextGuid);
     }
     return null;
   }
