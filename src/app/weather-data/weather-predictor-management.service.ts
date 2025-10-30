@@ -177,14 +177,14 @@ export class WeatherPredictorManagementService {
     }
   }
 
-
   async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Updating Weather Predictors...');
+    this.loadingService.setLoadingListStatus(true);
+    this.loadingService.setTitle('Updating Weather Predictors');
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let results: "success" | "error" = "success";
     let hasWarning: boolean = false;
+    let index: number = -1;
     //iterate facility list
     for (let i = 0; i < facilityList.length; i++) {
       let facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
@@ -194,7 +194,9 @@ export class WeatherPredictorManagementService {
       //iterate weather predictors for facility
       for (let p = 0; p < facilityWeatherPredictors.length; p++) {
         let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
-        this.loadingService.setLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name + '...');
+        index++;
+        this.loadingService.setCurrentLoadingIndex(index);
+        this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);
         //existing predictor data for this predictor
         let predictorData: Array<IdbPredictorData> = accountPredictorData.filter(data => {
           return data.predictorId == weatherPredictor.guid;
@@ -211,11 +213,15 @@ export class WeatherPredictorManagementService {
           if (!monthPredictorEntry) {
             monthPredictorEntry = getNewIdbPredictorData(weatherPredictor);
             //add predictor data
-            this.loadingService.setLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            index++;
+            this.loadingService.setCurrentLoadingIndex(index);
+            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
             let nextMonthsDate: Date = new Date(startDate)
             nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
             let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
-            this.loadingService.setLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            index++;
+            this.loadingService.setCurrentLoadingIndex(index);
+            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
@@ -246,10 +252,10 @@ export class WeatherPredictorManagementService {
         }
       }
     }
+    this.loadingService.isLoadingComplete.next(true);
 
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(selectedAccount, true);
-    this.loadingService.setLoadingStatus(false);
     if (hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
     } else {
@@ -257,4 +263,84 @@ export class WeatherPredictorManagementService {
     }
     return results;
   }
+
+  // async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {
+  //   this.loadingService.setLoadingStatus(true);
+  //   this.loadingService.setLoadingMessage('Updating Weather Predictors...');
+  //   let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+  //   let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+  //   let results: "success" | "error" = "success";
+  //   let hasWarning: boolean = false;
+  //   //iterate facility list
+  //   for (let i = 0; i < facilityList.length; i++) {
+  //     let facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
+  //       return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
+  //     });
+  //     let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityList[i].facilityId);
+  //     //iterate weather predictors for facility
+  //     for (let p = 0; p < facilityWeatherPredictors.length; p++) {
+  //       let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
+  //       this.loadingService.setLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name + '...');
+  //       //existing predictor data for this predictor
+  //       let predictorData: Array<IdbPredictorData> = accountPredictorData.filter(data => {
+  //         return data.predictorId == weatherPredictor.guid;
+  //       });
+  //       let startDate: Date = new Date(facilityList[i].startDate);
+  //       let endDate: Date = new Date(facilityList[i].endDate);
+  //       //fetch weather data from predictor station
+
+  //       while (startDate < endDate) {
+  //         let entryDate: Date = new Date(startDate);
+  //         let monthPredictorEntry: IdbPredictorData = predictorData.find(data => {
+  //           return checkSameMonth(new Date(data.date), entryDate);
+  //         });
+  //         if (!monthPredictorEntry) {
+  //           monthPredictorEntry = getNewIdbPredictorData(weatherPredictor);
+  //           //add predictor data
+  //           this.loadingService.setLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+  //           let nextMonthsDate: Date = new Date(startDate)
+  //           nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
+  //           let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
+  //           this.loadingService.setLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+  //           if (weatherData != "error") {
+  //             let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
+  //             let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+  //               return degreeDay.gapInData == true
+  //             });
+  //             let newPredictorData: IdbPredictorData = getNewIdbPredictorData(weatherPredictor);
+  //             newPredictorData.date = new Date(entryDate);
+  //             if (weatherPredictor.weatherDataType == 'HDD') {
+  //               newPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
+  //             } else if (weatherPredictor.weatherDataType == 'CDD') {
+  //               newPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
+  //             } else if (weatherPredictor.weatherDataType == 'relativeHumidity') {
+  //               newPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
+  //             } else if (weatherPredictor.weatherDataType == 'dryBulbTemp') {
+  //               newPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
+  //             }
+  //             newPredictorData.weatherDataWarning = hasErrors != undefined;
+  //             if (newPredictorData.weatherDataWarning) {
+  //               hasWarning = true;
+  //             }
+  //             await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
+  //           }
+  //           else {
+  //             results = "error"
+  //           }
+  //         }
+  //         startDate.setMonth(startDate.getMonth() + 1);
+  //       }
+  //     }
+  //   }
+
+  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   await this.dbChangesService.selectAccount(selectedAccount, true);
+  //   this.loadingService.setLoadingStatus(false);
+  //   if (hasWarning) {
+  //     this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
+  //   } else {
+  //     this.toastNotificationService.showToast("Weather Predictors Updated", "No gaps in data found while calculating weather predictors.", undefined, false, "alert-success")
+  //   }
+  //   return results;
+  // }
 }

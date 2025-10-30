@@ -11,7 +11,54 @@ div#loading {
     opacity: 0;
     transition: .5s opacity;
 }
+
 #loading.open {
     top: calc(50% - 100px);
     opacity: 1;
+}
+
+#loading-info {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    background-color: white;
+    box-shadow: 0px 0px 31px #0000002e;
+    z-index: 9999;
+    text-align: center;
+    padding: 20px;
+    width: 400px;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 1rem;
+    transition: .5s opacity;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#loading-info.open {
+    opacity: 1;
+}
+
+.message-container {
+    max-width: 400px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 1rem;
+}
+
+.icon-style {
+    font-size: 1.2rem;
+}
+
+.message-text {
+    font-size: 1.1rem;
+    color: #212529;
+    align-items: center;
+    justify-content: center;
+}
+
+.title-style {
+    font-size: 1.5rem;
 }

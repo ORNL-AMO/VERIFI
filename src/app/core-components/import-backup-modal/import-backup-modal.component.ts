@@ -32,6 +32,7 @@ export class ImportBackupModalComponent implements OnInit {
   backupType: string;
   showModalSub: Subscription;
   showModal: boolean;
+  loadingSub: Subscription;
   constructor(private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private accountDbService: AccountdbService,
@@ -57,7 +58,16 @@ export class ImportBackupModalComponent implements OnInit {
           this.overwriteData = false;
         }
       }
-    })
+    });
+
+    this.loadingService.navigationAfterLoading.subscribe(() => {
+      this.navigateToUrl();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.showModalSub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   cancelImportBackup() {
@@ -117,8 +127,9 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importBackupFile() {
     this.cancelImportBackup();
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage("Importing backup file...")
+    this.loadingService.setLoadingListStatus(true);
+    //this.loadingService.setLoadingMessage("Importing backup file...")
+    this.loadingService.setTitle("Importing backup file");
     try {
       let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
       if (this.importIsAccount) {
@@ -134,13 +145,18 @@ export class ImportBackupModalComponent implements OnInit {
           await this.importNewFacility(tmpBackupFile)
         }
       }
-      this.loadingService.setLoadingStatus(false);
-      this.router.navigateByUrl('/data-evaluation/account');
+      this.loadingService.isLoadingComplete.next(true);
+      // this.loadingService.setLoadingListStatus(false);
+      // this.router.navigateByUrl('/data-evaluation/account');
     } catch (err) {
       console.log(err);
       this.toastNotificationService.showToast('Error importing backup', 'There was an error importing this data file.', 15000, false, 'alert-danger');
-      this.loadingService.setLoadingStatus(false);
+      this.loadingService.setLoadingListStatus(false);
     }
+  }
+
+  navigateToUrl() {
+    this.router.navigateByUrl('/data-evaluation/account');
   }
 
   async importNewAccount(backupFile: BackupFile) {

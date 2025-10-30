@@ -178,7 +178,8 @@ export class BackupDataService {
 
   async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
     this.analyticsService.sendEvent('import_backup_file');
-    this.loadingService.setLoadingMessage('Adding Account...');
+    this.loadingService.setCurrentLoadingIndex(0);
+    this.loadingService.addLoadingMessage('Adding Account');
     let accountGUIDs: { oldId: string, newId: string } = {
       oldId: backupFile.account.guid,
       newId: this.getGUID()
@@ -186,7 +187,8 @@ export class BackupDataService {
     delete backupFile.account.id;
     backupFile.account.guid = accountGUIDs.newId;
     let newAccount: IdbAccount = await firstValueFrom(this.accountDbService.addWithObservable(backupFile.account));
-    this.loadingService.setLoadingMessage('Adding Facilities...');
+    this.loadingService.setCurrentLoadingIndex(1);
+    this.loadingService.addLoadingMessage('Adding Facilities');
     let facilityGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilities.length; i++) {
       let facility: IdbFacility = backupFile.facilities[i];
@@ -201,7 +203,8 @@ export class BackupDataService {
       await firstValueFrom(this.facilityDbService.addWithObservable(facility));
     }
 
-    this.loadingService.setLoadingMessage('Adding Meter Groups...');
+    this.loadingService.setCurrentLoadingIndex(2);
+    this.loadingService.addLoadingMessage('Adding Meter Groups');
     let meterGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.groups.length; i++) {
       let group: IdbUtilityMeterGroup = backupFile.groups[i];
@@ -217,7 +220,8 @@ export class BackupDataService {
       await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(group));
     }
 
-    this.loadingService.setLoadingMessage('Adding Meters...');
+    this.loadingService.setCurrentLoadingIndex(3);
+    this.loadingService.addLoadingMessage('Adding Meters');
     let meterGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.meters.length; i++) {
       let meter: IdbUtilityMeter = backupFile.meters[i];
@@ -234,7 +238,8 @@ export class BackupDataService {
       await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
     }
 
-    this.loadingService.setLoadingMessage('Adding Meter Data...');
+    this.loadingService.setCurrentLoadingIndex(4);
+    this.loadingService.addLoadingMessage('Adding Meter Data');
     let meterDataGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = backupFile.meterData[i];
@@ -252,25 +257,8 @@ export class BackupDataService {
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
-
-    this.loadingService.setLoadingMessage('Adding Predictors...');
-
-    //TODO: convert old deprecated predictors to new
-    // let predictorDataDeprecatedGUIDs: Array<{ oldId: string, newId: string }> = new Array();
-    // for (let i = 0; i < backupFile.predictorData.length; i++) {
-    //   let predictorEntryDeprecated: IdbPredictorEntryDeprecated = backupFile.predictorData[i];
-    //   let newGUID: string = this.getGUID();
-    //   predictorDataDeprecatedGUIDs.push({
-    //     newId: newGUID,
-    //     oldId: predictorEntryDeprecated.guid
-    //   });
-    //   delete predictorEntryDeprecated.id;
-    //   predictorEntryDeprecated.guid = newGUID;
-    //   predictorEntryDeprecated.accountId = accountGUIDs.newId;
-    //   predictorEntryDeprecated.facilityId = this.getNewId(predictorEntryDeprecated.facilityId, facilityGUIDs);
-    //   predictorEntryDeprecated.date = this.getImportDate(predictorEntryDeprecated.date);
-    //   await firstValueFrom(this.predictorsDbServiceDeprecated.addWithObservable(predictorEntryDeprecated));
-    // }
+    this.loadingService.setCurrentLoadingIndex(5);
+    this.loadingService.addLoadingMessage('Adding Predictors');
 
     //migrate old
     let predictorGUIDs: Array<{ oldId: string, newId: string }> = new Array();
@@ -355,7 +343,8 @@ export class BackupDataService {
       }
     }
 
-    this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
+    this.loadingService.setCurrentLoadingIndex(6);
+    this.loadingService.addLoadingMessage('Adding Facility Analysis Items');
     let facilityAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     let bankedItems: Array<IdbAnalysisItem> = new Array();
     for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
@@ -394,7 +383,8 @@ export class BackupDataService {
       }
     }
 
-    this.loadingService.setLoadingMessage('Adding Account Analysis Items...');
+    this.loadingService.setCurrentLoadingIndex(7);
+    this.loadingService.addLoadingMessage('Adding Account Analysis Items');
     let accountAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.accountAnalysisItems.length; i++) {
       let accountAnalysisItem: IdbAccountAnalysisItem = backupFile.accountAnalysisItems[i];
@@ -415,8 +405,8 @@ export class BackupDataService {
       await firstValueFrom(this.accountAnalysisDbService.addWithObservable(accountAnalysisItem));
     }
 
-
-    this.loadingService.setLoadingMessage('Adding Custom Emissions...');
+    this.loadingService.setCurrentLoadingIndex(8);
+    this.loadingService.addLoadingMessage('Adding Custom Emissions');
     for (let i = 0; i < backupFile.customEmissionsItems?.length; i++) {
       let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
       customEmissionsItem.accountId = accountGUIDs.newId;
@@ -424,7 +414,8 @@ export class BackupDataService {
       await firstValueFrom(this.customEmissionsDbService.addWithObservable(customEmissionsItem));
     }
 
-    this.loadingService.setLoadingMessage('Adding Custom Fuels...');
+    this.loadingService.setCurrentLoadingIndex(9);
+    this.loadingService.addLoadingMessage('Adding Custom Fuels');
     for (let i = 0; i < backupFile.customFuels?.length; i++) {
       let customFuel: IdbCustomFuel = backupFile.customFuels[i];
       customFuel.accountId = accountGUIDs.newId;
@@ -432,7 +423,8 @@ export class BackupDataService {
       await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
     }
 
-    this.loadingService.setLoadingMessage('Adding Custom GWPs...');
+    this.loadingService.setCurrentLoadingIndex(10);
+    this.loadingService.addLoadingMessage('Adding Custom GWPs');
     for (let i = 0; i < backupFile.customGWPs?.length; i++) {
       let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
       customGWP.accountId = accountGUIDs.newId;
@@ -440,8 +432,8 @@ export class BackupDataService {
       await firstValueFrom(this.customGWPDbService.addWithObservable(customGWP));
     }
 
-
-    this.loadingService.setLoadingMessage('Adding Account Reports...');
+    this.loadingService.setCurrentLoadingIndex(11);
+    this.loadingService.addLoadingMessage('Adding Account Reports');
     for (let i = 0; i < backupFile.accountReports?.length; i++) {
       let accountReport: IdbAccountReport = backupFile.accountReports[i];
       accountReport.guid = this.getGUID();
@@ -479,6 +471,310 @@ export class BackupDataService {
     }
     return newAccount;
   }
+
+  // async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
+  //   this.analyticsService.sendEvent('import_backup_file');
+  //   this.loadingService.setLoadingMessage('Adding Account...');
+  //   let accountGUIDs: { oldId: string, newId: string } = {
+  //     oldId: backupFile.account.guid,
+  //     newId: this.getGUID()
+  //   }
+  //   delete backupFile.account.id;
+  //   backupFile.account.guid = accountGUIDs.newId;
+  //   let newAccount: IdbAccount = await firstValueFrom(this.accountDbService.addWithObservable(backupFile.account));
+  //   this.loadingService.setLoadingMessage('Adding Facilities...');
+  //   let facilityGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   for (let i = 0; i < backupFile.facilities.length; i++) {
+  //     let facility: IdbFacility = backupFile.facilities[i];
+  //     let newGUID: string = this.getGUID();
+  //     facilityGUIDs.push({
+  //       oldId: facility.guid,
+  //       newId: newGUID
+  //     });
+  //     facility.guid = newGUID;
+  //     delete facility.id;
+  //     facility.accountId = accountGUIDs.newId;
+  //     await firstValueFrom(this.facilityDbService.addWithObservable(facility));
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Meter Groups...');
+  //   let meterGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   for (let i = 0; i < backupFile.groups.length; i++) {
+  //     let group: IdbUtilityMeterGroup = backupFile.groups[i];
+  //     let newGUID: string = this.getGUID();
+  //     meterGroupGUIDs.push({
+  //       newId: newGUID,
+  //       oldId: group.guid
+  //     });
+  //     delete group.id;
+  //     group.accountId = accountGUIDs.newId;
+  //     group.facilityId = this.getNewId(group.facilityId, facilityGUIDs);
+  //     group.guid = newGUID;
+  //     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(group));
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Meters...');
+  //   let meterGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   for (let i = 0; i < backupFile.meters.length; i++) {
+  //     let meter: IdbUtilityMeter = backupFile.meters[i];
+  //     let newGUID: string = this.getGUID();
+  //     meterGUIDs.push({
+  //       newId: newGUID,
+  //       oldId: meter.guid
+  //     });
+  //     delete meter.id;
+  //     meter.accountId = accountGUIDs.newId;
+  //     meter.facilityId = this.getNewId(meter.facilityId, facilityGUIDs);
+  //     meter.guid = newGUID;
+  //     meter.groupId = this.getNewId(meter.groupId, meterGroupGUIDs);
+  //     await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Meter Data...');
+  //   let meterDataGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   for (let i = 0; i < backupFile.meterData.length; i++) {
+  //     let meterData: IdbUtilityMeterData = backupFile.meterData[i];
+  //     let newGUID: string = this.getGUID();
+  //     meterDataGUIDs.push({
+  //       newId: newGUID,
+  //       oldId: meterData.guid
+  //     });
+  //     delete meterData.id;
+  //     meterData.guid = newGUID;
+  //     meterData.accountId = accountGUIDs.newId;
+  //     meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
+  //     meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
+  //     meterData.readDate = this.getImportDate(meterData.readDate);
+  //     await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
+  //   }
+
+
+  //   this.loadingService.setLoadingMessage('Adding Predictors...');
+
+  //   //TODO: convert old deprecated predictors to new
+  //   // let predictorDataDeprecatedGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   // for (let i = 0; i < backupFile.predictorData.length; i++) {
+  //   //   let predictorEntryDeprecated: IdbPredictorEntryDeprecated = backupFile.predictorData[i];
+  //   //   let newGUID: string = this.getGUID();
+  //   //   predictorDataDeprecatedGUIDs.push({
+  //   //     newId: newGUID,
+  //   //     oldId: predictorEntryDeprecated.guid
+  //   //   });
+  //   //   delete predictorEntryDeprecated.id;
+  //   //   predictorEntryDeprecated.guid = newGUID;
+  //   //   predictorEntryDeprecated.accountId = accountGUIDs.newId;
+  //   //   predictorEntryDeprecated.facilityId = this.getNewId(predictorEntryDeprecated.facilityId, facilityGUIDs);
+  //   //   predictorEntryDeprecated.date = this.getImportDate(predictorEntryDeprecated.date);
+  //   //   await firstValueFrom(this.predictorsDbServiceDeprecated.addWithObservable(predictorEntryDeprecated));
+  //   // }
+
+  //   //migrate old
+  //   let predictorGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   if (backupFile.predictorData.length > 0) {
+  //     // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+  //     let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
+  //     for (let index = 0; index < facilityGUIDs.length; index++) {
+  //       let facilityGuid: { oldId: string, newId: string } = facilityGUIDs[index];
+  //       //IDs updated above. use old id when removing
+  //       let facilityEntries: Array<IdbPredictorEntryDeprecated> = predictorEntries.filter(entry => {
+  //         return entry.facilityId == facilityGuid.oldId;
+  //       });
+  //       if (facilityEntries.length > 0) {
+  //         let predictorDataDep: Array<PredictorDataDeprecated> = facilityEntries[0].predictors;
+  //         for (let i = 0; i < predictorDataDep.length; i++) {
+  //           let oldPredictor: PredictorDataDeprecated = predictorDataDep[i];
+  //           let newPredictor: IdbPredictor = getNewIdbPredictor(accountGUIDs.newId, facilityGuid.newId);
+  //           newPredictor.guid = oldPredictor.id;
+  //           newPredictor.name = oldPredictor.name;
+  //           newPredictor.description = oldPredictor.name;
+  //           newPredictor.production = oldPredictor.production;
+  //           newPredictor.predictorType = oldPredictor.predictorType;
+  //           newPredictor.weatherDataType = oldPredictor.weatherDataType;
+  //           newPredictor.weatherStationId = oldPredictor.weatherStationId;
+  //           newPredictor.weatherStationName = oldPredictor.weatherStationName;
+  //           newPredictor.heatingBaseTemperature = oldPredictor.heatingBaseTemperature;
+  //           newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
+  //           newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
+  //           await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
+  //           predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
+  //           for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
+  //             let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
+  //             let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
+  //               return predictor.id == newPredictor.guid
+  //             });
+  //             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
+  //             newIdbPredictorData.date = this.getImportDate(oldEntry.date);
+  //             newIdbPredictorData.amount = oldEntryPredictor.amount;
+  //             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
+  //             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
+  //             await firstValueFrom(this.predictorDataDbService.addWithObservable(newIdbPredictorData));
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+
+
+
+  //   if (backupFile.predictors) {
+  //     for (let i = 0; i < backupFile.predictors.length; i++) {
+  //       let predictor: IdbPredictor = backupFile.predictors[i];
+  //       let newGUID: string = this.getGUID();
+  //       predictorGUIDs.push({
+  //         newId: newGUID,
+  //         oldId: predictor.guid
+  //       });
+  //       delete predictor.id;
+  //       predictor.guid = newGUID;
+  //       predictor.accountId = accountGUIDs.newId;
+  //       predictor.facilityId = this.getNewId(predictor.facilityId, facilityGUIDs);
+  //       await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
+  //     }
+  //   }
+
+  //   let predictorV2GUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   if (backupFile.predictorDataV2) {
+  //     for (let i = 0; i < backupFile.predictorDataV2.length; i++) {
+  //       let predictorData: IdbPredictorData = backupFile.predictorDataV2[i];
+  //       let newGUID: string = this.getGUID();
+  //       predictorV2GUIDs.push({
+  //         newId: newGUID,
+  //         oldId: predictorData.guid
+  //       });
+  //       delete predictorData.id;
+  //       predictorData.guid = newGUID;
+  //       predictorData.accountId = accountGUIDs.newId;
+  //       predictorData.date = this.getImportDate(predictorData.date);
+  //       predictorData.facilityId = this.getNewId(predictorData.facilityId, facilityGUIDs);
+  //       predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
+  //       await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
+  //     }
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
+  //   let facilityAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   let bankedItems: Array<IdbAnalysisItem> = new Array();
+  //   for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
+  //     let facilityAnalysisItem: IdbAnalysisItem = backupFile.facilityAnalysisItems[i];
+  //     let newGUID: string = this.getGUID();
+  //     facilityAnalysisGUIDs.push({
+  //       newId: newGUID,
+  //       oldId: facilityAnalysisItem.guid
+  //     });
+  //     delete facilityAnalysisItem.id;
+  //     facilityAnalysisItem.guid = newGUID;
+  //     facilityAnalysisItem.accountId = accountGUIDs.newId;
+  //     facilityAnalysisItem.facilityId = this.getNewId(facilityAnalysisItem.facilityId, facilityGUIDs);
+  //     facilityAnalysisItem.groups.forEach(group => {
+  //       group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
+  //       if (group.models) {
+  //         group.models = group.models.map(model => {
+  //           return this.getTrimmedModel(model);
+  //         })
+  //       }
+  //       group.predictorVariables.forEach(variable => {
+  //         variable.id = this.getNewId(variable.id, predictorGUIDs);
+  //       });
+  //     });
+  //     facilityAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));
+  //     if (facilityAnalysisItem.hasBanking) {
+  //       bankedItems.push(facilityAnalysisItem);
+  //     }
+  //   }
+
+  //   for (let i = 0; i < bankedItems.length; i++) {
+  //     let facilityAnalysisItem: IdbAnalysisItem = bankedItems[i];
+  //     if (facilityAnalysisItem.hasBanking) {
+  //       facilityAnalysisItem.bankedAnalysisItemId = this.getNewId(facilityAnalysisItem.bankedAnalysisItemId, facilityAnalysisGUIDs);
+  //       await firstValueFrom(this.analysisDbService.updateWithObservable(facilityAnalysisItem));
+  //     }
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Account Analysis Items...');
+  //   let accountAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+  //   for (let i = 0; i < backupFile.accountAnalysisItems.length; i++) {
+  //     let accountAnalysisItem: IdbAccountAnalysisItem = backupFile.accountAnalysisItems[i];
+  //     let newGUID: string = this.getGUID();
+  //     accountAnalysisGUIDs.push({
+  //       newId: newGUID,
+  //       oldId: accountAnalysisItem.guid
+  //     });
+  //     delete accountAnalysisItem.id;
+  //     accountAnalysisItem.guid = newGUID;
+  //     accountAnalysisItem.accountId = accountGUIDs.newId;
+  //     accountAnalysisItem.facilityAnalysisItems.forEach(item => {
+  //       item.facilityId = this.getNewId(item.facilityId, facilityGUIDs);
+  //       if (item.analysisItemId) {
+  //         item.analysisItemId = this.getNewId(item.analysisItemId, facilityAnalysisGUIDs);
+  //       }
+  //     });
+  //     await firstValueFrom(this.accountAnalysisDbService.addWithObservable(accountAnalysisItem));
+  //   }
+
+
+  //   this.loadingService.setLoadingMessage('Adding Custom Emissions...');
+  //   for (let i = 0; i < backupFile.customEmissionsItems?.length; i++) {
+  //     let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
+  //     customEmissionsItem.accountId = accountGUIDs.newId;
+  //     delete customEmissionsItem.id;
+  //     await firstValueFrom(this.customEmissionsDbService.addWithObservable(customEmissionsItem));
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Custom Fuels...');
+  //   for (let i = 0; i < backupFile.customFuels?.length; i++) {
+  //     let customFuel: IdbCustomFuel = backupFile.customFuels[i];
+  //     customFuel.accountId = accountGUIDs.newId;
+  //     delete customFuel.id;
+  //     await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
+  //   }
+
+  //   this.loadingService.setLoadingMessage('Adding Custom GWPs...');
+  //   for (let i = 0; i < backupFile.customGWPs?.length; i++) {
+  //     let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
+  //     customGWP.accountId = accountGUIDs.newId;
+  //     delete customGWP.id;
+  //     await firstValueFrom(this.customGWPDbService.addWithObservable(customGWP));
+  //   }
+
+
+  //   this.loadingService.setLoadingMessage('Adding Account Reports...');
+  //   for (let i = 0; i < backupFile.accountReports?.length; i++) {
+  //     let accountReport: IdbAccountReport = backupFile.accountReports[i];
+  //     accountReport.guid = this.getGUID();
+  //     delete accountReport.id;
+  //     accountReport.accountId = accountGUIDs.newId;
+  //     accountReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
+  //       facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
+  //     });
+  //     if (accountReport.reportType == 'betterPlants') {
+  //       accountReport.betterPlantsReportSetup.analysisItemId = this.getNewId(accountReport.betterPlantsReportSetup.analysisItemId, accountAnalysisGUIDs);
+  //     } else {
+  //       accountReport.betterPlantsReportSetup = {
+  //         analysisItemId: undefined,
+  //         includeFacilityNames: undefined,
+  //         baselineAdjustmentNotes: undefined,
+  //         modificationNotes: undefined,
+  //       }
+  //     }
+
+  //     if (accountReport.betterClimateReportSetup) {
+  //       if (accountReport.betterClimateReportSetup.includedFacilityGroups) {
+  //         accountReport.betterClimateReportSetup.includedFacilityGroups.forEach(facilityGroup => {
+  //           facilityGroup.facilityId = this.getNewId(facilityGroup.facilityId, facilityGUIDs);
+  //           facilityGroup.groups.forEach(group => {
+  //             group.groupId = this.getNewId(group.groupId, meterGroupGUIDs);
+  //           })
+  //         })
+  //       }
+  //     }
+
+  //     if (accountReport.reportType == 'performance') {
+  //       accountReport.performanceReportSetup.analysisItemId = this.getNewId(accountReport.performanceReportSetup.analysisItemId, accountAnalysisGUIDs);
+  //     }
+  //     await firstValueFrom(this.accountReportsDbService.addWithObservable(accountReport));
+  //   }
+  //   return newAccount;
+  // }
 
   async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string): Promise<IdbFacility> {
     this.analyticsService.sendEvent('import_backup_file');
