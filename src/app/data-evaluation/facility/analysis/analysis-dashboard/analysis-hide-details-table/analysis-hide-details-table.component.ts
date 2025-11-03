@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,6 +16,8 @@ import { IdbFacilityReport, getNewIdbFacilityReport } from 'src/app/models/idbMo
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
+import { AnalysisGroupItem } from '../../analysis.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-analysis-hide-details-table',
@@ -32,18 +34,42 @@ export class AnalysisHideDetailsTableComponent {
   displayDeleteModal: boolean = false;
   displayCreateCopyModal: boolean = false;
   displayCreateReportModal: boolean = false;
+  displayAnalysisDetailsModal: boolean = false;
   analysisItemToDelete: IdbAnalysisItem;
   analysisItemToCopy: IdbAnalysisItem;
   analysisItemToCreateReport: IdbAnalysisItem;
-  orderDataField: string = 'reportYear';
+  analysisItemToView: IdbAnalysisItem;
+  orderDataField: string = 'analysisItem.reportYear';
   orderByDirection: 'asc' | 'desc' = 'desc';
   selectedAnalysisCategory: 'energy' | 'water' | 'all' = 'all';
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   selectedReportYear: number | 'all' = 'all';
   yearOptions: Array<number>;
-  selectedYearCategoryMap: {[year: number]: {[category: string]: boolean}} = {};
+  selectedYearCategoryMap: { [year: number]: { [category: string]: boolean } } = {};
   errorList: Array<{ year: number, category: string }> = [];
+
+  linkedItems: Array<{
+    bankedAnalysisId: string,
+    reportId: string,
+    accountAnalysisId: string
+  }>;
+
+  linkedItemsList: Array<{
+    analysisItem: IdbAnalysisItem, linkedItems: Array<{
+      bankedAnalysisId: string,
+      reportId: string,
+      accountAnalysisId: string
+    }>
+  }> = [];
+  isBanked: boolean;
+
+  displayLinkedItemModal: boolean = false;
+  viewLinkedItem: { itemId: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport' } = undefined;
+  groupItems: Array<AnalysisGroupItem>;
+  baselineYearErrorMin: boolean;
+  baselineYearErrorMax: boolean;
+  selectedFacilitySub: Subscription;
 
   constructor(private analysisDbService: AnalysisDbService, private router: Router,
     private dbChangesService: DbChangesService,
@@ -51,14 +77,30 @@ export class AnalysisHideDetailsTableComponent {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private facilityDbService: FacilitydbService,
     private calendarizationService: CalanderizationService) { }
 
   ngOnInit(): void {
-    this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
-    this.filteredAnalysisItems = this.facilityAnalysisItems;
-    this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.selectedAnalysisCategory);
-    this.filterAnalysisItems();
-    this.computeSelectionErrors();
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.selectedFacility = val;
+      this.yearOptions = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'energy');
+      if (this.yearOptions) {
+        this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
+        this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+      }
+
+      this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
+      this.filteredAnalysisItems = this.facilityAnalysisItems;
+      this.selectedAnalysisCategory = 'all';
+      this.selectedReportYear = 'all';
+      this.filterAnalysisItems();
+      this.setLinkedItems();
+      this.computeSelectionErrors();
+    });
+  }
+
+  ngOnDestroy() {
+    this.selectedFacilitySub.unsubscribe();
   }
 
   selectAnalysisItem(analysisItem: IdbAnalysisItem) {
@@ -92,6 +134,7 @@ export class AnalysisHideDetailsTableComponent {
       await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
       this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
       this.filteredAnalysisItems = this.facilityAnalysisItems;
+      this.setLinkedItems();
       this.computeSelectionErrors();
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
@@ -129,6 +172,8 @@ export class AnalysisHideDetailsTableComponent {
         const yearMatch = this.selectedReportYear === 'all' || item.reportYear === this.selectedReportYear;
         return categoryMatch && yearMatch;
       });
+
+    this.setLinkedItems();
   }
 
   computeSelectionErrors() {
@@ -140,7 +185,7 @@ export class AnalysisHideDetailsTableComponent {
       const year = +yearStr;
       const itemsForYearCategory = this.filteredAnalysisItems.filter(item => item.reportYear === year && item.analysisCategory === category);
 
-      if(itemsForYearCategory.every(item => !item.selectedYearAnalysis)) {
+      if (itemsForYearCategory.every(item => !item.selectedYearAnalysis)) {
         this.errorList.push({ year: year, category: category });
       }
     });
@@ -175,7 +220,6 @@ export class AnalysisHideDetailsTableComponent {
     this.facilityReportsDbService.selectedReport.next(facilityReport);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup')
   }
-
 
   createCopy(analysisItem: IdbAnalysisItem) {
     this.displayCreateCopyModal = true;
@@ -230,6 +274,7 @@ export class AnalysisHideDetailsTableComponent {
     this.filteredAnalysisItems = this.facilityAnalysisItems;
     this.selectedAnalysisCategory = 'all';
     this.selectedReportYear = 'all';
+    this.setLinkedItems();
     this.computeSelectionErrors();
   }
 
@@ -247,5 +292,109 @@ export class AnalysisHideDetailsTableComponent {
     } else {
       this.orderDataField = str;
     }
+  }
+
+  viewAnalysisDetails(analysisItem: IdbAnalysisItem) {
+    this.analysisItemToView = analysisItem;
+    this.displayAnalysisDetailsModal = true;
+  }
+
+  closeAnalysisDetails() {
+    this.displayAnalysisDetailsModal = false;
+  }
+
+  setLinkedItems() {
+    this.linkedItemsList = [];
+    this.filteredAnalysisItems.forEach(analysisItem => {
+      this.linkedItems = new Array();
+      if (analysisItem.hasBanking && analysisItem.bankedAnalysisItemId) {
+        this.linkedItems.push({
+          bankedAnalysisId: analysisItem.bankedAnalysisItemId,
+          reportId: undefined,
+          accountAnalysisId: undefined
+        });
+      }
+
+      this.isBanked = false;
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+      facilityAnalysisItems.forEach(item => {
+        if (item.hasBanking && item.bankedAnalysisItemId == analysisItem.guid) {
+          this.isBanked = true;
+        }
+      });
+
+      let facilityReportsItems: Array<IdbFacilityReport> = this.facilityReportsDbService.facilityReports.getValue();
+      facilityReportsItems.forEach(item => {
+        if (item.facilityReportType == 'analysis' && item.analysisItemId == analysisItem.guid) {
+          this.linkedItems.push({
+            bankedAnalysisId: undefined,
+            reportId: item.guid,
+            accountAnalysisId: undefined
+          });
+        }
+      });
+
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+      for (let index = 0; index < accountAnalysisItems.length; index++) {
+        accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
+          if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == analysisItem.guid) {
+            this.linkedItems.push({
+              bankedAnalysisId: undefined,
+              reportId: undefined,
+              accountAnalysisId: accountAnalysisItems[index].guid
+            })
+          }
+        });
+      }
+      this.linkedItemsList.push({ analysisItem: analysisItem, linkedItems: this.linkedItems });
+    });
+  }
+
+  openLinkedItemModal(itemGuid: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport') {
+    this.viewLinkedItem = { itemId: itemGuid, type: type };
+    this.displayLinkedItemModal = true;
+  }
+
+  cancelViewLinkedItem() {
+    this.displayLinkedItemModal = false;
+    this.viewLinkedItem = undefined;
+  }
+
+  confirmViewLinkedItem() {
+    if (this.viewLinkedItem.type == 'accountAnalysis') {
+      this.goToAccountAnalysis(this.viewLinkedItem.itemId);
+    } else if (this.viewLinkedItem.type == 'bankedAnalysis') {
+      this.goToFacilityAnalysis(this.viewLinkedItem.itemId);
+    } else if (this.viewLinkedItem.type == 'facilityReport') {
+      this.goToReport(this.viewLinkedItem.itemId);
+    }
+  }
+
+  goToAccountAnalysis(analysisGuid: string) {
+    let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisGuid);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(accountAnalysisItem);
+    if (accountAnalysisItem.setupErrors.hasError || accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
+      this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
+    } else {
+      this.router.navigateByUrl('/data-evaluation/account/analysis/results');
+    }
+  }
+
+  goToFacilityAnalysis(analysisGuid: string) {
+    let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
+    this.analysisDbService.selectedAnalysisItem.next(bankedAnalysisItem);
+    if (bankedAnalysisItem.setupErrors.hasError || bankedAnalysisItem.setupErrors.groupsHaveErrors) {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis/facility-analysis');
+    }
+  }
+
+  goToSettings() {
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/settings');
+  }
+
+  goToUtilityData() {
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility');
   }
 }

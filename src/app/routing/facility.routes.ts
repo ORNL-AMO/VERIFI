@@ -33,8 +33,6 @@ import { CorrelationPlotComponent } from "src/app/data-evaluation/facility/visua
 import { TimeSeriesComponent } from "src/app/data-evaluation/facility/visualization/time-series/time-series.component";
 import { VisualizationComponent } from "src/app/data-evaluation/facility/visualization/visualization.component";
 import { canDeactivateGuard } from "./can-deactivate.guard";
-import { EnergyDashboardComponent } from "src/app/data-evaluation/facility/analysis/analysis-dashboard/energy-dashboard/energy-dashboard.component";
-import { WaterDashboardComponent } from "src/app/data-evaluation/facility/analysis/analysis-dashboard/water-dashboard/water-dashboard.component";
 import { PredictorsComponent } from "src/app/data-evaluation/facility/utility-data/predictors/predictors.component";
 import { PredictorsManagementComponent } from "src/app/data-evaluation/facility/utility-data/predictors/predictors-management/predictors-management.component";
 import { PredictorTableComponent } from "../shared/shared-predictors-content/predictor-table/predictor-table.component";
@@ -54,7 +52,7 @@ import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/ed
 import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility-data/predictors/edit-predictor/edit-predictor.component";
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
-import { AnalysisDashboardViewComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-dashboard-view/analysis-dashboard-view.component";
+import { AnalysisHideDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-hide-details-table/analysis-hide-details-table.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -247,7 +245,7 @@ export const FacilityRoutes: Route = {
                     path: 'analysis-dashboard',
                     component: AnalysisDashboardComponent,
                     children: [
-                        { path: '', component: AnalysisDashboardViewComponent }
+                        { path: '', component: AnalysisHideDetailsTableComponent }
                     ]
                 },
                 {

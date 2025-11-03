@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisService } from '../../analysis.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
@@ -28,11 +27,10 @@ export class EnergyDashboardComponent {
     analysisItems: Array<IdbAnalysisItem>,
     hasSelectedItem: boolean
   }>;
-  showDetail: boolean;
-  showDetailSub: Subscription;
+  // showDetail: boolean;
+  // showDetailSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
     private calanderizationService: CalanderizationService,
     private router: Router) { }
 
@@ -50,14 +48,14 @@ export class EnergyDashboardComponent {
       }
     });
 
-    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
-      this.showDetail = showDetail;
-    })
+    // this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
+    //   this.showDetail = showDetail;
+    // })
 
   }
 
   ngOnDestroy() {
-    this.showDetailSub.unsubscribe();
+   // this.showDetailSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.facilityAnalysisItemsSub.unsubscribe();
   }

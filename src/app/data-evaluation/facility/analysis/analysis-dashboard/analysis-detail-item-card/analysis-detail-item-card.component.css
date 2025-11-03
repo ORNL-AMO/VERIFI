@@ -3,40 +3,6 @@
     color: red;
 }
 
-.btn-sm {
-    margin: 0px;
-}
-
-.item-name,
-.fa-circle-check,
-.fa-circle {
-    font-size: 18px;
-}
-
-.fa-circle-check {
-    color: green;
-}
-
-
-.fa-circle {
-    color: lightgray;
-}
-
-.fa-circle:hover {
-    color: gray;
-    cursor: pointer;
-}
-
-.fa-circle-check:hover {
-    cursor: pointer;
-}
-
-.bg-dark .fa {
+.banked-style {
     color: white;
-    font-size: 10px;
-}
-
-.action-btn,
-.no-wrap {
-    text-wrap: nowrap;
 }

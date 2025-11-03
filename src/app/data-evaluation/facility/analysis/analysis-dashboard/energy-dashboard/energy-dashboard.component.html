@@ -1,6 +1,6 @@
 <ng-container *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
     <ng-container *ngIf="analysisItemsList.length != 0">
-        <div class="d-flex flex-column" *ngIf="showDetail">
+        <div class="d-flex flex-column">
             <div class="row" *ngFor="let listItem of analysisItemsList; let index = index;">
                 <div class="col-12 text-center pb-2">
                     <span class="badge report-year">
@@ -23,10 +23,10 @@
                 </div>
             </div>
         </div>
-        <div class="d-flex flex-column" *ngIf="!showDetail">
+        <!-- <div class="d-flex flex-column" *ngIf="!showDetail">
             <app-analysis-hide-details-table [selectedFacility]="selectedFacility">
             </app-analysis-hide-details-table>
-        </div>
+        </div> -->
     </ng-container>
     <ng-container *ngIf="analysisItemsList.length == 0">
         <div class="card card-body text-center bold">

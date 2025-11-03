@@ -6,7 +6,6 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { AnalysisService } from '../../analysis.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -25,8 +24,8 @@ export class AnalysisDashboardViewComponent {
   selectedFacilitySub: Subscription;
   facilityAnalysisItemsSub: Subscription;
 
-  showDetail: boolean;
-  showDetailSub: Subscription;
+  // showDetail: boolean;
+  // showDetailSub: Subscription;
   analysisItems: Array<IdbAnalysisItem>;
   selectedAnalysisCategory: 'energy' | 'water' | 'all' = 'all';
   filteredAnalysisItems: Array<IdbAnalysisItem>;
@@ -35,7 +34,6 @@ export class AnalysisDashboardViewComponent {
 
   constructor(private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
     private calanderizationService: CalanderizationService,
     private router: Router) { }
 
@@ -54,17 +52,17 @@ export class AnalysisDashboardViewComponent {
       }
     });
 
-    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
-      this.showDetail = showDetail;
-      this.selectedAnalysisCategory = 'all';
-      this.selectedReportYear = 'all';
-      this.setAnalysisItems();
-    })
+    // this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
+    //   this.showDetail = showDetail;
+    //   this.selectedAnalysisCategory = 'all';
+    //   this.selectedReportYear = 'all';
+    //   this.setAnalysisItems();
+    // })
 
   }
 
   ngOnDestroy() {
-    this.showDetailSub.unsubscribe();
+   // this.showDetailSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.facilityAnalysisItemsSub.unsubscribe();
   }

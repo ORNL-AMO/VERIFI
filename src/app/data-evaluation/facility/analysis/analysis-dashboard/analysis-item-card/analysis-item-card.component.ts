@@ -36,8 +36,8 @@ export class AnalysisItemCardComponent implements OnInit {
     accountAnalysisId: string
   }>;
 
-  showDetailSub: Subscription;
-  showDetail: boolean;
+  // showDetailSub: Subscription;
+  // showDetail: boolean;
   displayDeleteModal: boolean = false;
   displayCreateCopyModal: boolean = false;
   selectedFacility: IdbFacility;
@@ -57,14 +57,14 @@ export class AnalysisItemCardComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.initializeGroups();
-    this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
-      this.showDetail = val;
-    });
+    // this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
+    //   this.showDetail = val;
+    // });
     this.setLinkedItems();
   }
 
   ngOnDestroy() {
-    this.showDetailSub.unsubscribe();
+   // this.showDetailSub.unsubscribe();
   }
 
   initializeGroups() {
