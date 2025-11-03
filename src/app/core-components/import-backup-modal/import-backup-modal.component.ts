@@ -127,8 +127,6 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importBackupFile() {
     this.cancelImportBackup();
-    this.loadingService.setLoadingListStatus(true);
-    //this.loadingService.setLoadingMessage("Importing backup file...")
     this.loadingService.setTitle("Importing backup file");
     try {
       let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
@@ -146,12 +144,9 @@ export class ImportBackupModalComponent implements OnInit {
         }
       }
       this.loadingService.isLoadingComplete.next(true);
-      // this.loadingService.setLoadingListStatus(false);
-      // this.router.navigateByUrl('/data-evaluation/account');
     } catch (err) {
       console.log(err);
       this.toastNotificationService.showToast('Error importing backup', 'There was an error importing this data file.', 15000, false, 'alert-danger');
-      this.loadingService.setLoadingListStatus(false);
     }
   }
 

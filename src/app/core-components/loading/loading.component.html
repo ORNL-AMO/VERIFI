@@ -3,7 +3,7 @@
     <div class="loading_message" [hidden]="!loading">{{loadingMessage}}</div>
 </div>
 
-<div id="loading-info" [class.open]="loadingList && loadingMessages?.length > 0">
+<div id="loading-info" [class.open]="loadingMessages?.length > 0">
     <div class="fw-bold title-style mb-3" *ngIf="title">{{ title }}</div>
     <div class="p-4 bg-white rounded message-container">
         <div *ngFor="let message of loadingMessages; let i = index" class="d-flex align-items-center mb-3">
@@ -22,4 +22,4 @@
     </div>
 </div>
 
-<div [ngClass]="{'windowOverlay': loading || loadingList}"></div>
+<div [ngClass]="{'windowOverlay': loading || loadingMessages?.length > 0}"></div>

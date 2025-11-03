@@ -12,7 +12,6 @@ export class LoadingComponent implements OnInit {
   loadingMessage: string;
   loadingMessages: Array<string>;
   title: string;
-  loadingList: boolean;
   currentLoadingIndex: number;
   loadingComplete: boolean = false;
 
@@ -21,10 +20,6 @@ export class LoadingComponent implements OnInit {
   ngOnInit(): void {
     this.loadingService.getLoadingStatus().subscribe((value) => {
       this.loading = value;
-    });
-
-    this.loadingService.getLoadingListStatus().subscribe((value) => {
-      this.loadingList = value;
     });
 
     this.loadingService.getLoadingMessage().subscribe((value) => {
@@ -55,9 +50,8 @@ export class LoadingComponent implements OnInit {
 
   onClose() {
     this.loadingService.triggerNavigationAfterLoading(); 
-    this.loadingList = false;
     this.loadingService.clearLoadingMessages();
-    this.loadingService.setLoadingListStatus(false);
+    this.loadingService.setLoadingComplete(false);
     this.loadingService.setTitle('');
   }
 }

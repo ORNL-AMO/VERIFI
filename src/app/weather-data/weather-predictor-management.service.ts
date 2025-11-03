@@ -178,7 +178,6 @@ export class WeatherPredictorManagementService {
   }
 
   async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {
-    this.loadingService.setLoadingListStatus(true);
     this.loadingService.setTitle('Updating Weather Predictors');
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();

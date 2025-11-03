@@ -33,14 +33,6 @@ export class LoadingService {
     this.loadingMessage.next(value);
   }
 
-  getLoadingListStatus(): Observable<boolean> {
-    return this.loadingList;
-  }
-
-  setLoadingListStatus(value: boolean) {
-    this.loadingList.next(value);
-  }
-
   getLoadingMessages(): Observable<Array<string>> {
     return this.loadingMessages;
   }
