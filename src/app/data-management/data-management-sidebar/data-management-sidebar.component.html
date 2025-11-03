@@ -236,6 +236,13 @@
                                 <span class="fa fa-list"></span> Manage Energy Uses Groups
                             </a>
                         </div>
+                        <div class="ps-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/summary'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                <span class="fa fa-chart-simple"></span> Energy Uses Summary
+                            </a>
+                        </div>
                         <ng-container
                             *ngFor="let energyUseGroup of facility.guid | facilityEnergyGroupsList:accountEnergyUseGroups">
                             <div class="ps-2 nav-item">
@@ -252,6 +259,13 @@
                                         [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                         <span class="fa fa-gear"></span> Group Settings
+                                    </a>
+                                </div>
+                                <div class="ps-2 nav-item">
+                                    <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/summary'"
+                                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                        <span class="fa fa-chart-simple"></span> Group Summary
                                     </a>
                                 </div>
                                 <ng-container

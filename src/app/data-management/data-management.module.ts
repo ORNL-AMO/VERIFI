@@ -69,6 +69,9 @@ import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facil
 import { SizeLabelPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/size-label.pipe';
 import { OrderEquipmentEnergyUsePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/order-equipment-energy-use.pipe';
 import { YearOptionsFilterPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/year-options-filter.pipe';
+import { FacilityEnergyUsesSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary.component';
+import { FacilityEnergyUsesGroupSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component';
+import { FacilityEnergyUsesTimeSeriesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-time-series/facility-energy-uses-time-series.component';
 
 
 @NgModule({
@@ -127,7 +130,10 @@ import { YearOptionsFilterPipe } from './account-facilities/facility-data/facili
     FacilityEnergyUsesGroupSetupComponent,
     FacilityEnergyUseEquipmentFormComponent,
     OrderEquipmentEnergyUsePipe,
-    YearOptionsFilterPipe
+    YearOptionsFilterPipe,
+    FacilityEnergyUsesSummaryComponent,
+    FacilityEnergyUsesGroupSummaryComponent,
+    FacilityEnergyUsesTimeSeriesComponent
   ],
   imports: [
     CommonModule,

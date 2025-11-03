@@ -1,0 +1,25 @@
+<h4>
+    {{facility.name}} Energy Use Summary
+</h4>
+
+<app-facility-energy-uses-time-series
+    [energyFootprintFacility]="energyFootprintFacility"></app-facility-energy-uses-time-series>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Energy Use Group</th>
+            @for (groupData of energyFootprintFacility.footprintGroups[0].annualEnergyUse; track $index) {
+            <th>{{groupData.year}}</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let group of energyFootprintFacility.footprintGroups">
+            <td>{{group.groupName}}</td>
+            @for (groupData of group.annualEnergyUse; track $index) {
+            <td>{{groupData.energyUse | number:'1.0-2'}}</td>
+            }
+        </tr>
+    </tbody>
+</table>

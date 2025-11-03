@@ -57,6 +57,8 @@ import { FacilityEnergyUseGroupManagementComponent } from "../data-management/ac
 import { FacilityEnergyUseEquipmentComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component";
 import { FacilityEnergyUsesComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component";
 import { FacilityEnergyUsesGroupSetupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component";
+import { FacilityEnergyUsesSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary.component";
+import { FacilityEnergyUsesGroupSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -216,6 +218,10 @@ export const DataManagementRoutes: Route = {
                                     component: FacilityEnergyUsesGroupSetupComponent
                                 },
                                 {
+                                    path: 'summary',
+                                    component: FacilityEnergyUsesSummaryComponent
+                                },
+                                {
                                     path: ':id',
                                     component: FacilityEnergyUseGroupComponent,
                                     canDeactivate: [canDeactivateGuard]
@@ -224,6 +230,10 @@ export const DataManagementRoutes: Route = {
                                     path: ':id/equipment/:equipmentId',
                                     component: FacilityEnergyUseEquipmentComponent,
                                     canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: ':id/summary',
+                                    component: FacilityEnergyUsesGroupSummaryComponent
                                 }
                             ]
                         },
