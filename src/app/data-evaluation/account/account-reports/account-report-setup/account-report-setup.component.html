@@ -41,6 +41,12 @@
                             </div>
                         </div>
                     </div>
+
+                    <div *ngIf="showYearErrorMsg">
+                        <span class="alert alert-danger">
+                            Report Year cannot be earlier than Baseline Year.
+                        </span>
+                    </div>
                 </div>
                 <div class="col-6"
                     *ngIf="setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value == 'accountSavings' || setupForm.controls.reportType.value == 'accountEmissionFactors'">
