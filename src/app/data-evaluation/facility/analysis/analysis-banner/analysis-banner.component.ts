@@ -64,13 +64,20 @@ export class AnalysisBannerComponent implements OnInit {
   }
 
   checkButtonState() {
+    let buttonState = [];
     this.analysisItem.groups.forEach(group => {
-      if(group.groupErrors.hasErrors) {
-        this.isDisabled = true;
+      if (group.groupErrors.hasErrors) {
+        if (group.analysisType === 'skip' && group.groupErrors.missingGroupMeters) {
+          buttonState.push(false);
+        } else {
+          buttonState.push(true);
+        }
       }
-      if (group.groupErrors.missingGroupMeters && group.analysisType === 'skip')
-        this.isDisabled = false;
+      else {
+        buttonState.push(false);
+      }
     });
+    this.isDisabled = buttonState.includes(true);
   }
 
   setInRunAnalysis(url: string) {
