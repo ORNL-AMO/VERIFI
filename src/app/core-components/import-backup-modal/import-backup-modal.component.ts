@@ -13,10 +13,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-import-backup-modal',
-    templateUrl: './import-backup-modal.component.html',
-    styleUrls: ['./import-backup-modal.component.css'],
-    standalone: false
+  selector: 'app-import-backup-modal',
+  templateUrl: './import-backup-modal.component.html',
+  styleUrls: ['./import-backup-modal.component.css'],
+  standalone: false
 })
 export class ImportBackupModalComponent implements OnInit {
 
@@ -60,8 +60,10 @@ export class ImportBackupModalComponent implements OnInit {
       }
     });
 
-    this.loadingService.navigationAfterLoading.subscribe(() => {
-      this.navigateToUrl();
+    this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'import-backup') {
+        this.navigateToUrl();
+      }
     });
   }
 
@@ -127,6 +129,7 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importBackupFile() {
     this.cancelImportBackup();
+    this.loadingService.setContext('import-backup');
     this.loadingService.setTitle("Importing backup file");
     try {
       let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);

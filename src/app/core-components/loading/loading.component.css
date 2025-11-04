@@ -26,15 +26,11 @@ div#loading {
     z-index: 9999;
     text-align: center;
     padding: 20px;
-    width: 400px;
+    width: 500px;
     opacity: 0;
     transform: translate(-50%, -50%);
     border-radius: 1rem;
     transition: .5s opacity;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
 #loading-info.open {
@@ -42,7 +38,7 @@ div#loading {
 }
 
 .message-container {
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
     background: #fff;
     border-radius: 1rem;
@@ -55,8 +51,6 @@ div#loading {
 .message-text {
     font-size: 1.1rem;
     color: #212529;
-    align-items: center;
-    justify-content: center;
 }
 
 .title-style {

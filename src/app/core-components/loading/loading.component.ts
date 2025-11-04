@@ -14,6 +14,7 @@ export class LoadingComponent implements OnInit {
   title: string;
   currentLoadingIndex: number;
   loadingComplete: boolean = false;
+  context: string;
 
   constructor(private loadingService: LoadingService, private cd: ChangeDetectorRef) { }
 
@@ -37,19 +38,24 @@ export class LoadingComponent implements OnInit {
       this.cd.detectChanges();
     });
 
-    this.loadingService.currentLoadingIndex.subscribe((value) => {
+    this.loadingService.getCurrentLoadingIndex().subscribe((value) => {
       this.currentLoadingIndex = value;
       this.cd.detectChanges();
     });
 
-    this.loadingService.isLoadingComplete.subscribe((value) => {
+    this.loadingService.getLoadingComplete().subscribe((value) => {
       this.loadingComplete = value;
+      this.cd.detectChanges();
+    });
+
+    this.loadingService.getContext().subscribe((value) => {
+      this.context = value;
       this.cd.detectChanges();
     });
   }
 
   onClose() {
-    this.loadingService.triggerNavigationAfterLoading(); 
+    this.loadingService.triggerNavigationAfterLoading(this.context); 
     this.loadingService.clearLoadingMessages();
     this.loadingService.setLoadingComplete(false);
     this.loadingService.setTitle('');

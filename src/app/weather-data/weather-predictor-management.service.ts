@@ -32,6 +32,8 @@ import { checkSameMonth } from '../data-management/data-management-import/import
 })
 export class WeatherPredictorManagementService {
 
+  hasWarning: boolean = false;
+
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private predictorDbService: PredictorDbService,
@@ -43,7 +45,13 @@ export class WeatherPredictorManagementService {
     private dbChangesService: DbChangesService,
     private facilityDbService: FacilitydbService,
     private toastNotificationService: ToastNotificationsService
-  ) { }
+  ) {
+    loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'updating-weather-predictors') {
+        this.showToast();
+      }
+    });
+  }
 
   async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility): Promise<"success" | "error"> {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -178,11 +186,12 @@ export class WeatherPredictorManagementService {
   }
 
   async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {
+    this.loadingService.setContext('updating-weather-predictors');
     this.loadingService.setTitle('Updating Weather Predictors');
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let results: "success" | "error" = "success";
-    let hasWarning: boolean = false;
+    this.hasWarning = false;
     let index: number = -1;
     //iterate facility list
     for (let i = 0; i < facilityList.length; i++) {
@@ -239,7 +248,7 @@ export class WeatherPredictorManagementService {
               }
               newPredictorData.weatherDataWarning = hasErrors != undefined;
               if (newPredictorData.weatherDataWarning) {
-                hasWarning = true;
+                this.hasWarning = true;
               }
               await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
             }
@@ -252,15 +261,17 @@ export class WeatherPredictorManagementService {
       }
     }
     this.loadingService.isLoadingComplete.next(true);
+    return results;
+  }
 
+  async showToast() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(selectedAccount, true);
-    if (hasWarning) {
+    if (this.hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
     } else {
       this.toastNotificationService.showToast("Weather Predictors Updated", "No gaps in data found while calculating weather predictors.", undefined, false, "alert-success")
     }
-    return results;
   }
 
   // async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {

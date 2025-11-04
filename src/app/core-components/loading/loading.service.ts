@@ -10,10 +10,11 @@ export class LoadingService {
   public loadingMessage: BehaviorSubject<string> = new BehaviorSubject<string>("Loading...");
   public loadingList: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public loadingMessages: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
-  public title: BehaviorSubject<string> = new BehaviorSubject<string>("");
+  public title: BehaviorSubject<string> = new BehaviorSubject<string>(undefined);
   public currentLoadingIndex: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   public isLoadingComplete: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public navigationAfterLoading: BehaviorSubject<void> = new BehaviorSubject<void>(undefined);
+  public navigationAfterLoading: BehaviorSubject<string> = new BehaviorSubject<string>(undefined);
+  public context: BehaviorSubject<string> = new BehaviorSubject<string>(undefined);
 
   constructor() { }
 
@@ -62,8 +63,8 @@ export class LoadingService {
     return this.currentLoadingIndex;
   }
 
-  triggerNavigationAfterLoading() {
-    this.navigationAfterLoading.next();
+  triggerNavigationAfterLoading(context: string) {
+    this.navigationAfterLoading.next(context);
   }
 
   setLoadingComplete(value: boolean) {
@@ -72,5 +73,13 @@ export class LoadingService {
 
   getLoadingComplete(): Observable<boolean> {
     return this.isLoadingComplete;
+  }
+
+  setContext(value: string) {
+    this.context.next(value);
+  }
+
+  getContext(): Observable<string> {
+    return this.context;
   }
 }

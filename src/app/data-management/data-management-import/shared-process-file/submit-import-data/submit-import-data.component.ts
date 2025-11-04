@@ -12,6 +12,7 @@ import { UploadDataService } from 'src/app/data-management/data-management-impor
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-submit-import-data',
@@ -23,6 +24,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 export class SubmitImportDataComponent {
   fileReference: FileReference;
   paramsSub: Subscription;
+  navSub: Subscription;
 
   importSummary: {
     numFacilities: number,
@@ -39,7 +41,8 @@ export class SubmitImportDataComponent {
     private dataManagementService: DataManagementService,
     private uploadDataService: UploadDataService,
     private router: Router,
-    private accountDbService: AccountdbService
+    private accountDbService: AccountdbService,
+    private loadingService: LoadingService
   ) { }
 
 
@@ -49,10 +52,19 @@ export class SubmitImportDataComponent {
       this.fileReference = this.dataManagementService.getFileReferenceById(id);
       this.setFacilitySummaries();
     });
+
+    this.navSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context == 'submit-file-data') {
+        this.uploadDataService.navigate();
+        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        this.router.navigateByUrl('/data-management/' + account.guid + '/import-data')
+      }
+    });
   }
 
   ngOnDestroy() {
     this.paramsSub.unsubscribe();
+    this.navSub?.unsubscribe();
   }
 
   async submitImport() {
@@ -60,8 +72,8 @@ export class SubmitImportDataComponent {
     let fileReferences: Array<FileReference> = this.dataManagementService.fileReferences.getValue();
     fileReferences = fileReferences.filter(fileRef => { return fileRef.id != this.fileReference.id });
     this.dataManagementService.fileReferences.next(fileReferences);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-management/' + account.guid + '/import-data')
+    // let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    // this.router.navigateByUrl('/data-management/' + account.guid + '/import-data')
   }
 
   setFacilitySummaries() {
