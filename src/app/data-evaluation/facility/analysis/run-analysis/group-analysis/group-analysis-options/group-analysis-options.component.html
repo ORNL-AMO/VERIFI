@@ -4,6 +4,14 @@
             (click)="goToMeterGroups()">Meter Grouping Page</a> to add
         meters to this group for analysis.
     </div>
+
+    <div class="form-check mt-5">
+        <input class="form-check-input checkbox-input" type="checkbox" id="skip" name="analysisType"
+            [checked]="group.analysisType === 'skip'" (change)="setExcludeGroup($event)">
+        <label class="form-check-label checkbox-label" for="skip">
+            Exclude this group from analysis
+        </label>
+    </div>
 </div>
 
 <div class="row" *ngIf="showInUseMessage">
@@ -397,7 +405,8 @@
                 </div>
             </form>
         </div>
-        <div class="col-lg-6 col-md-12" *ngIf="analysisItem.hasBanking && group.applyBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+        <div class="col-lg-6 col-md-12"
+            *ngIf="analysisItem.hasBanking && group.applyBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
             <app-banked-group-results-table></app-banked-group-results-table>
         </div>
     </div>

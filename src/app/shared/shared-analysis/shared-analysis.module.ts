@@ -9,6 +9,8 @@ import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { AnnualAnalysisSummaryGraphComponent } from './annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 import { MonthlyAnalysisSummaryGraphComponent } from './monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
 import { MonthlyAnalysisSummarySavingsGraphComponent } from './monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { AnnualAnalysisGroupSavingsTableComponent } from './annual-analysis-group-savings-table/annual-analysis-group-savings-table.component';
+import { AnnualAnalysisGroupSavingsGraphComponent } from './annual-analysis-group-savings-graph/annual-analysis-group-savings-graph.component';
 
 
 @NgModule({
@@ -18,7 +20,9 @@ import { MonthlyAnalysisSummarySavingsGraphComponent } from './monthly-analysis-
     MonthlyAnalysisSummaryTableComponent,
     AnnualAnalysisSummaryGraphComponent,
     MonthlyAnalysisSummaryGraphComponent,
-    MonthlyAnalysisSummarySavingsGraphComponent
+    MonthlyAnalysisSummarySavingsGraphComponent,
+    AnnualAnalysisGroupSavingsTableComponent,
+    AnnualAnalysisGroupSavingsGraphComponent
   ],
   imports: [
     CommonModule,
@@ -32,7 +36,9 @@ import { MonthlyAnalysisSummarySavingsGraphComponent } from './monthly-analysis-
     MonthlyAnalysisSummaryTableComponent,
     AnnualAnalysisSummaryGraphComponent,
     MonthlyAnalysisSummaryGraphComponent,
-    MonthlyAnalysisSummarySavingsGraphComponent
+    MonthlyAnalysisSummarySavingsGraphComponent,
+    AnnualAnalysisGroupSavingsTableComponent,
+    AnnualAnalysisGroupSavingsGraphComponent
   ]
 })
 export class SharedAnalysisModule { }

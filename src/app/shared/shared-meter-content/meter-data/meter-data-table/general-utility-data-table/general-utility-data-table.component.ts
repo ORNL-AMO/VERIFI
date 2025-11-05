@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { Subscription } from 'rxjs';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';

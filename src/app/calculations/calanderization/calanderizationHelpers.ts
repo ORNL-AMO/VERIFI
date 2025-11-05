@@ -1,5 +1,5 @@
 
-import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
+import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFunctions";
 import * as _ from 'lodash';
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "src/app/shared/fuel-options/stationaryOtherEnergyOptions";

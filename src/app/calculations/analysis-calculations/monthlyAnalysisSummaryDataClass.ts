@@ -60,7 +60,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setFiscalYear(monthlyGroupAnalysisClass.facility);
         this.setIsBaselineYear(monthlyGroupAnalysisClass.baselineYear);
         this.setIsBankedAnalysis();
-        this.setMonthPredictorData(monthlyGroupAnalysisClass.facilityPredictorData);
+        this.setMonthPredictorData(monthlyGroupAnalysisClass.groupPredictorData);
         this.setMonthMeterData(monthlyGroupAnalysisClass.groupMonthlyData);
         this.setMonthIndex(previousMonthsSummaryData);
         this.setEnergyUse(monthlyGroupAnalysisClass.analysisItem.analysisCategory);
@@ -90,8 +90,8 @@ export class MonthlyAnalysisSummaryDataClass {
         }
     }
 
-    setMonthPredictorData(facilityPredictorData: Array<IdbPredictorData>) {
-        this.monthPredictorData = facilityPredictorData.filter(predictorData => {
+    setMonthPredictorData(groupPredictorData: Array<IdbPredictorData>) {
+        this.monthPredictorData = groupPredictorData.filter(predictorData => {
             let predictorDate: Date = new Date(predictorData.date);
             return predictorDate.getUTCFullYear() == this.date.getUTCFullYear() && predictorDate.getUTCMonth() == this.date.getUTCMonth();
         });

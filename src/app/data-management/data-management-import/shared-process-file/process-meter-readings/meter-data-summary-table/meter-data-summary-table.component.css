@@ -1,0 +1,77 @@
+.popup {
+  top: 10px;
+  left: 10px;
+  width: calc(100vw - 20px)
+}
+
+.popup .popup-body {
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.popup-header .fa {
+  color: white;
+}
+
+.fa {
+  color: inherit;
+}
+
+.meter-text {
+  font-size: 1.2em;
+  text-decoration: underline;
+}
+
+.btn-text {
+  font-size: 1.2em;
+  text-align: center;
+  color: green;
+  font-style: italic;
+}
+
+.col-date {
+  background-color: #154c79;
+  color: white;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.col-existing {
+  background-color: #cad2d6;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.col-new {
+  background-color: #e1e1f3;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.col-difference {
+  background-color: #c2dede;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.col-percentage-difference {
+  background-color: #c7bcaf;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.col-different-parameters {
+  background-color: #d3d072;
+  text-align: center;
+  border: 1px solid black;
+}
+
+thead tr:not(.table-mh) th.can-click:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.icon-style {
+  font-size: 14px;
+  color: #972d79;
+}

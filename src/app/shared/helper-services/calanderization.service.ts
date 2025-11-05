@@ -5,7 +5,7 @@ import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
+import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFunctions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from 'src/app/calculations/calanderization/calanderizationHelpers';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';

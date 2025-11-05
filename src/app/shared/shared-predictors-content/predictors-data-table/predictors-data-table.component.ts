@@ -18,7 +18,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
-import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
+import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({

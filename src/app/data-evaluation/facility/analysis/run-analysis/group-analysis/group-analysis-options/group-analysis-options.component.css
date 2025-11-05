@@ -1,3 +1,14 @@
 .sub-column{
     margin-left: 7px;
 }
+
+.checkbox-input {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.checkbox-label {
+  font-size: 1.2rem;
+  margin-left: 0.5em;
+  vertical-align: middle;
+}

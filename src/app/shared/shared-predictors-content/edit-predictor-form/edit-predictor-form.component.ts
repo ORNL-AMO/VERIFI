@@ -8,7 +8,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import * as _ from 'lodash';
-import { getWeatherSearchFromFacility } from '../../sharedHelperFuntions';
+import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 
 @Component({
   selector: 'app-edit-predictor-form',

@@ -23,8 +23,9 @@ export class MeterDataQualityReportComponent {
   costStats: Statistics;
 
   includeCosts: boolean = true;
-
   hasData: boolean;
+
+  datesList: Array<{ monthYear: string }> = [];
 
   constructor(private router: Router) { }
 
@@ -43,7 +44,8 @@ export class MeterDataQualityReportComponent {
       this.includeCosts = isNaN(this.costStats.average) == false && this.costStats.average != 0;
       this.energyOutlierCount = energyStats.outliers;
       this.costOutlierCount = costStats.outliers;
-      if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {
+      this.checkMultipleReadings();
+      if (this.energyOutlierCount > 0 || this.costOutlierCount > 0 || this.datesList.length > 0) {
         this.showAlert = true;
       } else {
         this.showAlert = false;
@@ -51,6 +53,24 @@ export class MeterDataQualityReportComponent {
     }
   }
 
+  checkMultipleReadings() {
+    let dateCount: { [key: string]: number } = {};
+    this.meterData.forEach(data => {
+      let date = new Date(data.readDate);
+      let month = date.toLocaleString('default', { month: 'short' });
+      let year = date.getFullYear();
+      let monthYear = `${month}, ${year}`;
+      if (dateCount[monthYear]) {
+        dateCount[monthYear]++;
+      } else {
+        dateCount[monthYear] = 1;
+      }
+    });
+    this.datesList = Object.keys(dateCount).filter(key => dateCount[key] > 1)
+      .map(key => {
+        return { monthYear: key };
+      });
+  }
 
   meterDataAdd() {
     this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');

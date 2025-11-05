@@ -6,7 +6,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { UserSurvey } from 'src/app/models/userSurvey';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
-import { getMinutesBetweenDates } from '../sharedHelperFuntions';
+import { getMinutesBetweenDates } from '../sharedHelperFunctions';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationInstanceData';
 

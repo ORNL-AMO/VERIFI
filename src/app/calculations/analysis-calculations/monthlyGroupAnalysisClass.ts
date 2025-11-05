@@ -13,7 +13,7 @@ export class MonthlyGroupAnalysisClass {
   selectedGroup: AnalysisGroup;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
-  facilityPredictorData: Array<IdbPredictorData>;
+  groupPredictorData: Array<IdbPredictorData>;
   bankedAnalysisDate: Date;
   baselineDate: Date;
   endDate: Date;
@@ -26,6 +26,8 @@ export class MonthlyGroupAnalysisClass {
   baselineYearEnergyIntensity: number;
   modelYear: number;
   isNew: boolean;
+
+  dataEndDate: Date;
   constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean) {
     this.selectedGroup = selectedGroup;
     this.analysisItem = analysisItem;
@@ -33,9 +35,9 @@ export class MonthlyGroupAnalysisClass {
     this.isNew = this.facility.isNewFacility;
     let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
     this.setModelYear();
-    this.setFacilityPredictorData(accountPredictorEntries);
-    this.setStartAndEndDate(calanderizedFacilityMeters, calculateAllMonthlyData);
     this.setPredictorVariables();
+    this.setGroupPredictorData(accountPredictorEntries);
+    this.setStartAndEndDate(calanderizedFacilityMeters, calculateAllMonthlyData);
     this.setGroupMeters(calanderizedFacilityMeters);
     this.setGroupMonthlyData();
     this.setBaselineYear();
@@ -48,8 +50,9 @@ export class MonthlyGroupAnalysisClass {
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
     this.bankedAnalysisDate = monthlyStartAndEndDate.bankedAnalysisDate;
     if (calculateAllMonthlyData) {
-      let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-      let lastPredictorEntry: IdbPredictorData = _.maxBy(this.facilityPredictorData, (data: IdbPredictorData) => {
+      let metersInGroup: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == this.selectedGroup.idbGroupId });
+      let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(metersInGroup);    
+      let lastPredictorEntry: IdbPredictorData = _.maxBy(this.groupPredictorData, (data: IdbPredictorData) => {
         return data.date;
       });
       if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
@@ -76,9 +79,10 @@ export class MonthlyGroupAnalysisClass {
     });
   }
 
-  setFacilityPredictorData(accountPredictorEntries: Array<IdbPredictorData>) {
-    this.facilityPredictorData = accountPredictorEntries.filter(entry => {
-      return entry.facilityId == this.facility.guid;
+  setGroupPredictorData(accountPredictorEntries: Array<IdbPredictorData>) {
+    let predictorIds: Array<string> = this.predictorVariables.map(variable => { return variable.id });
+    this.groupPredictorData = accountPredictorEntries.filter(entry => {
+      return predictorIds.includes(entry.predictorId);
     });
   }
 
@@ -113,7 +117,7 @@ export class MonthlyGroupAnalysisClass {
 
   setBaselineYearEnergyIntensity() {
     if (this.selectedGroup.analysisType == 'energyIntensity' || this.selectedGroup.analysisType == 'modifiedEnergyIntensity') {
-      let baselineYearPredictorData: Array<IdbPredictorData> = filterYearPredictorData(this.facilityPredictorData, this.baselineYear, this.facility);
+      let baselineYearPredictorData: Array<IdbPredictorData> = filterYearPredictorData(this.groupPredictorData, this.baselineYear, this.facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(this.groupMonthlyData, this.baselineYear, this.facility);
       let totalBaselineYearEnergy: number
       if (this.analysisItem.analysisCategory == 'energy') {

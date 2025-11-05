@@ -16,7 +16,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
@@ -159,7 +159,6 @@ export class CalculatedPredictorDataUpdateComponent {
       }
       let predictorIndex: number = existingPredictorIndex[i];
       if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
-        let stationId: string = this.predictor.weatherStationId;
         let entryDate: Date = new Date(this.predictorData[predictorIndex].date);
         let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
@@ -306,6 +305,7 @@ export class CalculatedPredictorDataUpdateComponent {
     for (let i = 0; i < this.predictorData.length; i++) {
       let pData: CalculatedPredictorTableItem = this.predictorData[i];
       if (pData.changeAmount && !pData.added && !pData.deleted) {
+        pData.amount = pData.updatedAmount;
         delete pData.changeAmount;
         delete pData.updatedAmount;
         await firstValueFrom(this.predictorDataDbService.updateWithObservable(pData));

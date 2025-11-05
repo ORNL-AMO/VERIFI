@@ -165,7 +165,7 @@ export class AccountHomeComponent implements OnInit {
       return isNaN(summary.adjusted) == false;
     })
     monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
-      return isNaN(summary.adjusted) == false;
+      return isNaN(summary.adjusted) == false && summary.energyUse != 0;
     })
     this.accountHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
     this.accountHomeService.monthlyEnergyAnalysisData.next(monthlyAnalysisSummaryData);
@@ -219,7 +219,7 @@ export class AccountHomeComponent implements OnInit {
       return isNaN(summary.adjusted) == false;
     })
     monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
-      return isNaN(summary.adjusted) == false;
+      return isNaN(summary.adjusted) == false && summary.energyUse != 0;
     })
     this.accountHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
     this.accountHomeService.monthlyWaterAnalysisData.next(monthlyAnalysisSummaryData);

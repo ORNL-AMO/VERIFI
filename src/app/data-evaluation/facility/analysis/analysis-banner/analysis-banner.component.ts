@@ -25,6 +25,8 @@ export class AnalysisBannerComponent implements OnInit {
   analysisItems: Array<IdbAnalysisItem>;
   analysisItemsSub: Subscription;
 
+  isDisabled: boolean = false;
+
   showDropdown: boolean = false;
   constructor(private router: Router,
     private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService,
@@ -33,6 +35,10 @@ export class AnalysisBannerComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
       this.analysisItem = item;
+      this.isDisabled = false;
+      if (this.analysisItem.setupErrors.groupsHaveErrors) {
+        this.checkButtonState();
+      }
     })
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
@@ -55,6 +61,23 @@ export class AnalysisBannerComponent implements OnInit {
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
+  }
+
+  checkButtonState() {
+    let buttonState = [];
+    this.analysisItem.groups.forEach(group => {
+      if (group.groupErrors.hasErrors) {
+        if (group.analysisType === 'skip' && group.groupErrors.missingGroupMeters) {
+          buttonState.push(false);
+        } else {
+          buttonState.push(true);
+        }
+      }
+      else {
+        buttonState.push(false);
+      }
+    });
+    this.isDisabled = buttonState.includes(true);
   }
 
   setInRunAnalysis(url: string) {

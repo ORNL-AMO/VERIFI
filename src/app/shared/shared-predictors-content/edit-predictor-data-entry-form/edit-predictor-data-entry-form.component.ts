@@ -3,7 +3,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
 import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
-import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFuntions';
+import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
