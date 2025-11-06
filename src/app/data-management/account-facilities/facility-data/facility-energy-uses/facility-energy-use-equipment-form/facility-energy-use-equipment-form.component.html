@@ -69,6 +69,89 @@
                         minlength="0" maxlength="500"></textarea>
                 </div>
             </div>
+            <div class="row">
+                <label class="col-5 col-form-label">Connect Utility Meter</label>
+                <div class="col-7">
+                    <button class="btn action-btn" (click)="openLinkMeterTable()" type="button">
+                        <span class="fa fa-link"></span>
+                        @if(form.controls.utilityMeterId.value){
+                        {{ linkedMeter.name }}
+                        }@else{
+                        Select Meter
+                        }
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </form>
+
+
+<!--LINK METER TO ENERGY EQUIPMENT MODAL-->
+<div [ngClass]="{'windowOverlay': showLinkMeterModal}"></div>
+<div class="popup" [class.open]="showLinkMeterModal">
+    <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter to Equipment
+        <button class="item-right" (click)="closeLinkMeter()">x</button>
+    </div>
+    <div class="popup-body">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Meter Name</th>
+                    <th>Source</th>
+                    <th>Fuel</th>
+                    <th>Collection Units</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (meter of utilityMeters; track $index) {
+                <tr class="clickable" (click)="changeLinkedMeter(meter)">
+                    <td class="text-center">
+                        @if(meter.guid == form.controls.utilityMeterId.value){
+                        <span class="fa fa-circle-check"></span>
+                        }@else{
+                        <span class="fa fa-circle"></span>
+                        }
+                    </td>
+                    <td>{{ meter.name }}</td>
+                    <td>{{ meter.source }}</td>
+                    <td>
+                        <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
+                            <ng-container *ngIf="meter.scope != 2">
+                                {{meter.fuel}}
+                            </ng-container>
+                            <ng-container *ngIf="meter.scope == 2">
+                                {{meter.vehicleFuel}}
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
+                            &mdash;
+                        </ng-container>
+                    </td>
+
+                    <td>
+                        <ng-container *ngIf="meter.scope != 2">
+                            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                        </ng-container>
+                        <ng-container *ngIf="meter.scope == 2">
+                            <ng-container *ngIf="meter.vehicleCollectionType == 1">
+                                <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
+                            </ng-container>
+                            <ng-container *ngIf="meter.vehicleCollectionType == 2">
+                                <span [innerHTML]="meter.vehicleDistanceUnit | settingsLabel"></span>
+                            </ng-container>
+                        </ng-container>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-danger" (click)="cancelLinkMeter()">Unlink Meter</button>
+        <button class="btn btn-success" (click)="closeLinkMeter()" [disabled]="!form.controls.utilityMeterId.value">Link Meter</button>
+    </div>
+</div>

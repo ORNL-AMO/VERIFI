@@ -71,7 +71,6 @@ export class FacilityEnergyUseGroupComponent {
     this.loadingService.setLoadingMessage('Saving Meter...');
     this.loadingService.setLoadingStatus(true);
     this.form.markAsPristine();
-    // this.energyUseGroup = this.utilityMeterDbService.getFacilityMeterById(this.utilityMeter.guid);
     this.energyUseGroup = this.facilityEnergyUseGroupFormService.updateEnergyUseGroupFromForm(this.energyUseGroup, this.form);
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(this.energyUseGroup));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

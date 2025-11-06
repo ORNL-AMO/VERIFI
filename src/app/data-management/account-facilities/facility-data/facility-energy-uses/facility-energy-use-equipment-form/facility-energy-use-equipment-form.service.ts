@@ -21,6 +21,7 @@ export class FacilityEnergyUseEquipmentFormService {
       energySource: [equipment.energySource, requiredValidators],
       notes: [equipment.notes],
       equipmentType: [equipment.equipmentType],
+      utilityMeterId: [equipment.utilityMeterId]
     });
     return equipmentFormGroup;
   }
@@ -32,6 +33,7 @@ export class FacilityEnergyUseEquipmentFormService {
     equipment.energySource = form.controls.energySource.value;
     equipment.notes = form.controls.notes.value;
     equipment.equipmentType = form.controls.equipmentType.value;
+    equipment.utilityMeterId = form.controls.utilityMeterId.value;
     return equipment;
   }
 }

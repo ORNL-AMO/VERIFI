@@ -1,0 +1,16 @@
+.clickable{
+    cursor: pointer;
+}
+
+.fa.fa-circle-check{
+    color: green;
+    font-size: 1.2em;
+}
+
+.fa.fa-circle{
+    font-size: 1.2rem;
+}
+
+.popup-header .fa-link{
+    color: white;
+}
