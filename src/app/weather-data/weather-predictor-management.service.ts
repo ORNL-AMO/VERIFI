@@ -49,6 +49,7 @@ export class WeatherPredictorManagementService {
     loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'updating-weather-predictors') {
         this.showToast();
+        this.loadingService.setContext(undefined);
       }
     });
   }

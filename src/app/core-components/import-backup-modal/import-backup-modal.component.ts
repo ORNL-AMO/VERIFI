@@ -63,6 +63,7 @@ export class ImportBackupModalComponent implements OnInit {
     this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'import-backup') {
         this.navigateToUrl();
+        this.loadingService.setContext(undefined);
       }
     });
   }
