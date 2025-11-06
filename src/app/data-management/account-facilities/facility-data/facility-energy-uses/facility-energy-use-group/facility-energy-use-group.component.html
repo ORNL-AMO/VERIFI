@@ -24,8 +24,8 @@
             <div>
                 <label class="w-100" for="groupNotes">Group Notes</label>
                 <div class="mb-3">
-                    <textarea id="groupNotes" class="form-control" formControlName="notes"
-                        onfocus="this.select();" minlength="0" maxlength="500"></textarea>
+                    <textarea id="groupNotes" class="form-control" formControlName="notes" onfocus="this.select();"
+                        minlength="0" maxlength="500"></textarea>
                 </div>
                 <div class="alert alert-danger" *ngIf="form.get('notes').hasError('required')">Group notes are
                     required</div>
@@ -57,14 +57,16 @@
                 @for (equipment of groupEquipment; track $index) {
                 <tr>
                     <td>
-                        {{equipment.name}}
+                        <a [routerLink]="'./equipment/'+equipment.guid">
+                            {{equipment.name}}
+                        </a>
                     </td>
                     <td>
                         {{equipment.energySource}}
                         <!-- <div class="badge large" [ngStyle]="{'background-color': equipment.energySource | meterSourceColor}">{{equipment.energySource}}</div> -->
                     </td>
                     <td>
-                       {{equipment.size}}
+                        {{equipment.size}}
                     </td>
                     <td>
                         {{equipment.units}}

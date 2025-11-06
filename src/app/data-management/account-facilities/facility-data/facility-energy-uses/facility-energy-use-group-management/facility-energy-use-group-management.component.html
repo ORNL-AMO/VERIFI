@@ -99,7 +99,6 @@
 } @else {
 <div class="text-center mt-5">
     <h5>No energy use groups found for this facility.</h5>
-    <p>Please <i class="fa fa-plus"></i> Setup Energy Use Groups.</p>
     <div class="d-flex w-100 justify-content-center">
         <div class="pe-1">
             <button class="btn action-btn" (click)="setupEnergyUseGroups()"><i class="fa fa-plus"></i> Setup Energy Use Groups</button>
@@ -108,11 +107,9 @@
 </div>
 }
 
-
-
 <div [ngClass]="{'windowOverlay': groupToDelete}"></div>
 <div class="popup" [class.open]="groupToDelete">
-    <div class="popup-header" *ngIf="groupToDelete">Delete Energy Use Group: {{groupToDelete.name}}
+    <div class="popup-header">Delete Energy Use Group: {{groupToDelete?.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
     <div class="popup-body">
