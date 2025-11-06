@@ -64,3 +64,7 @@ thead th.can-click:hover{
     padding: 0.5em 0.75em;
     border-radius: 0.50rem;
 }
+
+tbody td, .action-btn .fa{
+    vertical-align: middle;
+}
