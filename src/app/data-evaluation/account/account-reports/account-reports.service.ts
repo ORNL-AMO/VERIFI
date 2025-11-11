@@ -23,8 +23,10 @@ export class AccountReportsService {
     this.compareBaselineYearToReportYearError = new BehaviorSubject<boolean>(false);
 
     this.accountReportDbService.selectedReport.subscribe(report => {
-      this.validateReport(report);
-      this.compareBaselineYearToReportYear(report);
+      if (report) {
+        this.validateReport(report);
+        this.compareBaselineYearToReportYear(report);
+      }
     });
   }
 
@@ -493,7 +495,7 @@ export class AccountReportsService {
         }
       };
     }
-    
+
     accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
     accountSavingsReportSetup.includeAnnualResults = form.controls.includeAnnualResults.value;
     accountSavingsReportSetup.includeAnnualResultsTable = form.controls.includeAnnualResultsTable.value;
