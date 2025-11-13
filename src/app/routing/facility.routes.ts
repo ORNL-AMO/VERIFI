@@ -52,7 +52,7 @@ import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/ed
 import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility-data/predictors/edit-predictor/edit-predictor.component";
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
-import { AnalysisHideDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-hide-details-table/analysis-hide-details-table.component";
+import { AnalysisDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-details-table/analysis-details-table.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -245,7 +245,7 @@ export const FacilityRoutes: Route = {
                     path: 'analysis-dashboard',
                     component: AnalysisDashboardComponent,
                     children: [
-                        { path: '', component: AnalysisHideDetailsTableComponent }
+                        { path: '', component: AnalysisDetailsTableComponent }
                     ]
                 },
                 {

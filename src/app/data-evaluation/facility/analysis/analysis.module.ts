@@ -25,10 +25,6 @@ import { AccountAnalysisListComponent } from './account-analysis-list/account-an
 import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { RegressionModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-inspection/regression-model-inspection.component';
-import { AnalysisItemCardComponent } from './analysis-dashboard/analysis-item-card/analysis-item-card.component';
-import { EnergyDashboardComponent } from './analysis-dashboard/energy-dashboard/energy-dashboard.component';
-import { WaterDashboardComponent } from './analysis-dashboard/water-dashboard/water-dashboard.component';
-import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-dashboard-tabs/analysis-dashboard-tabs.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/select-banked-analysis/select-banked-analysis.component';
 import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/select-banked-analysis/banked-groups-details/banked-groups-details.component';
@@ -36,9 +32,8 @@ import { SharedReportsModule } from "src/app/shared/shared-reports/shared-report
 import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
 import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/group-analysis-options/banked-group-results-table/banked-group-results-table.component';
 import { RegressionUserDefinedModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-user-defined-model-inspection/regression-user-defined-model-inspection.component';
-import { AnalysisHideDetailsTableComponent } from './analysis-dashboard/analysis-hide-details-table/analysis-hide-details-table.component';
 import { AnalysisDetailItemCardComponent } from './analysis-dashboard/analysis-detail-item-card/analysis-detail-item-card.component';
-import { AnalysisDashboardViewComponent } from './analysis-dashboard/analysis-dashboard-view/analysis-dashboard-view.component';
+import { AnalysisDetailsTableComponent } from './analysis-dashboard/analysis-details-table/analysis-details-table.component';
 
 @NgModule({
   declarations: [
@@ -60,18 +55,13 @@ import { AnalysisDashboardViewComponent } from './analysis-dashboard/analysis-da
     AccountAnalysisListComponent,
     AnalysisFooterComponent,
     RegressionModelInspectionComponent,
-    AnalysisItemCardComponent,
-    EnergyDashboardComponent,
-    WaterDashboardComponent,
-    AnalysisDashboardTabsComponent,
     SelectBankedAnalysisComponent,
     BankedGroupsDetailsComponent,
     BankedGroupAnalysisComponent,
     BankedGroupResultsTableComponent,
     RegressionUserDefinedModelInspectionComponent,
-    AnalysisHideDetailsTableComponent,
     AnalysisDetailItemCardComponent,
-    AnalysisDashboardViewComponent
+    AnalysisDetailsTableComponent
   ],
   imports: [
     CommonModule,
