@@ -36,7 +36,7 @@ The VERIFI repository is hosted on Github, and located here: http://github.com/O
 
 This repository is organized using a modified git-flow system. Branches are organized as follows:
 
-- main: Stable release version. Must have good test coverage and may not have all the newest features.
+- master: Stable release version. Must have good test coverage and may not have all the newest features.
 - develop: Development branch which contains the newest features and issues will be tracked in the latest release milestone. Tests must pass, but code may be unstable as issues work through the QA phase.
 - issue-xxx[-description]: Feature or bug fix branch from develop, should reference a github issue number. You may provide an optional short description in the branch name.
 - fix-xxx[-description]: Bug fix branch from develop, should reference a github issue number. You may provide an optional short description in the branch name.
