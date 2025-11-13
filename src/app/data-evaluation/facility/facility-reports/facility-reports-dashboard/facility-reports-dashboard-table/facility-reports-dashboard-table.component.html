@@ -46,7 +46,7 @@
                 <tr
                     *ngFor="let data of facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                     <td>
-                        {{ data.name }}
+                        <a (click)="selectReport(data)">{{ data.name }}</a>
                     </td>
                     <td>
                         <span class="badge" [ngClass]="data.facilityReportType | facilityReportBadgeClass">{{
@@ -103,9 +103,6 @@
                         {{ data.modifiedDate | date:'short' }}
                     </td>
                     <td class="text-center">
-                        <button title="View" class="btn action-btn btn-sm m-1" (click)="selectReport(data)">
-                            <i class="fa fa-eye"></i>
-                        </button>
                         <button title="Copy" class="btn action-btn btn-sm m-1" (click)="createCopy(data)">
                             <i class="fa fa-copy"></i>
                         </button>

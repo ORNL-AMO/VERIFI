@@ -20,7 +20,7 @@
                 </a>
             </li>
             <li class="nav-item"
-                [ngClass]="{'disabled': analysisItem.setupErrors.groupsHaveErrors || analysisItem.setupErrors.hasError}">
+                [ngClass]="{'disabled': isDisabled || analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
                     <i class="fa fa-magnifying-glass-chart"></i>Facility
                     Summary</a>

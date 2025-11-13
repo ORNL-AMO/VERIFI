@@ -31,3 +31,9 @@
         {{goalYear | yearDisplay:account.fiscalYear}} ({{percentGoal}}%)
     </div>
 </div>
+<div class="d-flex w-100 justify-content-center" *ngIf="latestAnalysisItem">
+    <a class="small click-link" (click)="goToAnalysisItem()">
+        <span class="fa fa-microscope"></span>
+        {{latestAnalysisItem.name}}
+    </a>
+</div>

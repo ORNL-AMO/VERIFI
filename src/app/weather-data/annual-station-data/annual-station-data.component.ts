@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
 import * as _ from 'lodash';
 import { WeatherDataReading, WeatherDataService } from '../weather-data.service';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { getMonthlyDataFromYear } from '../weatherDataCalculations';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';

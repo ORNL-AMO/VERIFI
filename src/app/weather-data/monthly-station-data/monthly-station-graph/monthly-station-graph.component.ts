@@ -3,7 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { DetailDegreeDay, WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
 import * as _ from 'lodash';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
     selector: 'app-monthly-station-graph',

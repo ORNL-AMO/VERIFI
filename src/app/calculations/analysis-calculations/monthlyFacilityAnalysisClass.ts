@@ -46,13 +46,28 @@ export class MonthlyFacilityAnalysisClass {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, undefined);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
-            let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-            let lastPredictorEntry: IdbPredictorData = _.maxBy(this.facilityPredictorEntries, (data: IdbPredictorData) => { return new Date(data.date) });
-            if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
-                this.endDate = new Date(lastPredictorEntry.date);
-            } else {
-                this.endDate = new Date(lastBill.date);
-            }
+            let includedCalanderizedMeters: Array<CalanderizedMeter> = new Array();
+            let includedDates: Array<Date> = new Array();
+            analysisItem.groups.forEach(group => {
+                let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == group.idbGroupId });
+                includedCalanderizedMeters = includedCalanderizedMeters.concat(groupMeters);
+                let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(groupMeters);
+                includedDates.push(new Date(lastBill.date));
+
+                group.predictorVariables.forEach(variable => {
+                    if (group.analysisType != 'absoluteEnergyConsumption' && variable.productionInAnalysis) {
+                        let predictorData: Array<IdbPredictorData> = this.facilityPredictorEntries.filter(entry => { return entry.predictorId == variable.id });
+                        let latestReading: IdbPredictorData = _.maxBy(predictorData, (pData: IdbPredictorData) => { return pData.date });
+                        if (latestReading) {
+                            includedDates.push(latestReading.date);
+                        }
+                    }
+                });
+            });
+            // Get the earliest last bill date from all group meters and predictors
+            // we want the latest date that has data for all group meters and predictors
+            let lastBill: Date = _.min(includedDates);
+            this.endDate = new Date(lastBill);
             this.endDate.setMonth(this.endDate.getMonth() + 1);
             this.endDate.setDate(1);
         } else {

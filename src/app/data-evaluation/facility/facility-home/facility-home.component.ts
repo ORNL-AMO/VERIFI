@@ -150,10 +150,10 @@ export class FacilityHomeComponent implements OnInit {
   setEnergyBehaviorSubjects(annualAnalysisSummaries: Array<AnnualAnalysisSummary>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
     annualAnalysisSummaries = annualAnalysisSummaries.filter(summary => {
       return isNaN(summary.adjusted) == false;
-    })
+    });
     monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
       return isNaN(summary.adjusted) == false;
-    })
+    });
     this.facilityHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
     this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(monthlyAnalysisSummaryData);
   }

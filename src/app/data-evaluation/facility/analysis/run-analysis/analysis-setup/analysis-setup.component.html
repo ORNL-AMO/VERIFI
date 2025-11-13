@@ -134,6 +134,12 @@
                         </select>
                     </div>
                 </div>
+                <div class="alert alert-warning text-center p-1" *ngIf="showReportYearWarning">
+                    This facility does not have 12 months of data for the selected report year
+                    ({{analysisItem.reportYear}}). An analysis is intended to be run with complete years only. To see
+                    mid-year progress, please run a <a class="click-link" (click)="goToSavingsReport()">"Savings
+                        Report"</a> for an analysis conducted with a different report year.
+                </div>
                 <div class="form-group row">
                     <label class="col-5 col-form-label">
                         Reporting Year
@@ -180,7 +186,8 @@
         </div>
     </form>
     <app-select-banked-analysis *ngIf="analysisItem.hasBanking" [facilityAnalysisItems]="facilityAnalysisItems"
-        [analysisItem]="analysisItem" [facility]="facility" (emitSave)="saveItem()" [disabled]="disableForm"></app-select-banked-analysis>
+        [analysisItem]="analysisItem" [facility]="facility" (emitSave)="saveItem()"
+        [disabled]="disableForm"></app-select-banked-analysis>
 
 
     <div class="row">

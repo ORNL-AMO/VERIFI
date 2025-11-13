@@ -71,3 +71,7 @@ thead th.can-click:hover{
 .select-width{
     width: 200px;
 }
+
+tbody td, .action-btn .fa{
+    vertical-align: middle;
+}

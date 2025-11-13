@@ -29,6 +29,8 @@ export class MeterDataSummaryTableComponent {
   orderDataField: string = 'readDate';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
+  readingDifferencesMap: { [meterId: string]: MeterReadingComparison[] } = {};
+
   constructor(
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
@@ -41,11 +43,13 @@ export class MeterDataSummaryTableComponent {
   ngOnInit() {
     this.facilities = this.facilityDbService.accountFacilities.getValue();
     this.meters = this.utilityMeterDbService.accountMeters.getValue();
+    this.computeReadingChanges();
   }
 
   openModal(summary: MeterDataSummary) {
     this.showModal = true;
-    this.compareMeterData(summary);
+    this.selectedMeterName = summary.meter.name;
+    this.comparisonSummaryWithDifferences = this.readingDifferencesMap[summary.meterId];
   }
 
   hideModal() {
@@ -64,8 +68,14 @@ export class MeterDataSummaryTableComponent {
     }
   }
 
+  computeReadingChanges() {
+    this.readingDifferencesMap = {};
+    this.meterDataSummaries.forEach(summary => {
+      this.readingDifferencesMap[summary.meterId] = this.compareMeterData(summary);
+    });
+  }
+
   compareMeterData(summary: MeterDataSummary) {
-    this.selectedMeterName = summary.meter.name;
     const inspectedFacility = summary.meter.facilityId;
     const inspectedMeterId = summary.meterId;
 
@@ -73,7 +83,7 @@ export class MeterDataSummaryTableComponent {
     const meter = this.meters.find(meter => meter.guid === inspectedMeterId);
     const existingMeterReadings = this.utilityMeterDataDbService.accountMeterData.getValue().filter(data => (data.meterId === meter?.guid && data.facilityId === facility?.guid));
 
-    this.comparisonSummaryWithDifferences = this.checkDifferences(existingMeterReadings, summary);
+    return this.checkDifferences(existingMeterReadings, summary);
   }
 
   checkDifferences(meterData: Array<IdbUtilityMeterData>, newMeterDataSummary: MeterDataSummary): Array<MeterReadingComparison> {

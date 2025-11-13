@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
-import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
+import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFunctions';
 import { AllSources, MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
 import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
 import { StationaryGasOptions } from '../fuel-options/stationaryGasOptions';

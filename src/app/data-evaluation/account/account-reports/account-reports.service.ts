@@ -13,15 +13,20 @@ export class AccountReportsService {
   generateExcel: BehaviorSubject<boolean>;
 
   errorMessage: BehaviorSubject<string>;
+  compareBaselineYearToReportYearError: BehaviorSubject<boolean>;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private formBuilder: FormBuilder
   ) {
     this.generateExcel = new BehaviorSubject<boolean>(false);
     this.errorMessage = new BehaviorSubject<string>(undefined);
+    this.compareBaselineYearToReportYearError = new BehaviorSubject<boolean>(false);
 
     this.accountReportDbService.selectedReport.subscribe(report => {
-      this.validateReport(report);
+      if (report) {
+        this.validateReport(report);
+        this.compareBaselineYearToReportYear(report);
+      }
     });
   }
 
@@ -40,6 +45,17 @@ export class AccountReportsService {
       }
     }
     this.errorMessage.next(errorMessage)
+  }
+
+  compareBaselineYearToReportYear(report: IdbAccountReport) {
+    if (report.reportType == 'performance' || report.reportType == 'betterClimate') {
+      if (report.baselineYear != undefined && report.reportYear != undefined && report.reportYear < report.baselineYear) {
+        this.compareBaselineYearToReportYearError.next(true);
+      }
+      else {
+        this.compareBaselineYearToReportYearError.next(false);
+      }
+    }
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
@@ -479,7 +495,7 @@ export class AccountReportsService {
         }
       };
     }
-    
+
     accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
     accountSavingsReportSetup.includeAnnualResults = form.controls.includeAnnualResults.value;
     accountSavingsReportSetup.includeAnnualResultsTable = form.controls.includeAnnualResultsTable.value;
