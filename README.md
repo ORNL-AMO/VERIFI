@@ -10,7 +10,7 @@
 
 VERIFI is a tool that is a member of **Oak Ridge National Laboratory's Industrial Resources** suite of applications. It can be used to to track, visualize, and analyze facility utility data in industrial settings. Development plans for the tool are to incorporate, modernize and expand upon several existing DOE tools (EnPI, EnPI Lite, Energy Footprint Tool, Plant Energy Profiler), most of which currently are excel-based or excel-add ons.
 
-VERIFI, like it's sister applications [MEASUR](https://github.com/ORNL-AMO/MEASUR) and [JUSTIFI](https://github.com/ORNL-AMO/JUSTIFI), is developed as a web application but is also packaged and distributed as an installable desktop application.
+VERIFI, like it's sibling applications [MEASUR](https://github.com/ORNL-AMO/MEASUR) and [JUSTIFI](https://github.com/ORNL-AMO/JUSTIFI), is developed as a web application but is also packaged and distributed as an installable desktop application.
  
 The latest web version of the application can be found at [https://verifi.ornl.gov](https://verifi.ornl.gov)
 
