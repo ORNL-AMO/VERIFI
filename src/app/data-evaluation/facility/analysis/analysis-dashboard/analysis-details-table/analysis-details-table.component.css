@@ -19,7 +19,7 @@ thead th.can-click:hover {
     text-decoration: underline;
 }
 
-.error-icon {
+.icon-text {
     font-size: 14px;
 }
 
@@ -61,4 +61,12 @@ thead th.can-click:hover {
 
 .placeholder-style {
     visibility: hidden;
+}
+
+.form-select{
+    border-color: #2c386b;
+}
+
+.select-width{
+    width: 200px;
 }

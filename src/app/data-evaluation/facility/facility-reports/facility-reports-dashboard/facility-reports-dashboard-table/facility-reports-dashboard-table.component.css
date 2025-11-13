@@ -64,3 +64,10 @@ thead th.can-click:hover{
     padding: 0.5em 0.75em;
     border-radius: 0.50rem;
 }
+.form-select{
+    border-color: #2c386b;
+}
+
+.select-width{
+    width: 200px;
+}

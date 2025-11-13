@@ -14,10 +14,10 @@
             </h4>
         </div>
         <hr>
+        <app-facility-reports-dashboard-table></app-facility-reports-dashboard-table>
     </div>
 </div>
 
-<app-facility-reports-dashboard-table></app-facility-reports-dashboard-table>
 
 <div [ngClass]="{'windowOverlay': displayNewReport}"></div>
 <div class="popup" [class.open]="displayNewReport">
@@ -39,7 +39,7 @@
                             id="overview" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="overview">Data Overview</label>
                     </div>
-                      <div class="form-check">
+                    <div class="form-check">
                         <input type="radio" class="form-check-input" name="newReportType" [value]="'emissionFactors'"
                             id="emissionFactors" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="emissionFactors">Emission Factors</label>
