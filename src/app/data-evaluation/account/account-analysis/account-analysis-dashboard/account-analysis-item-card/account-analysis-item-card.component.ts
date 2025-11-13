@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -21,25 +20,16 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   @Input()
   analysisItem: IdbAccountAnalysisItem;
 
-  showDetailSub: Subscription;
-  showDetail: boolean;
   displayDeleteModal: boolean = false;
   selectedAccount: IdbAccount;
   constructor(private router: Router,
-    private analysisService: AnalysisService, private dbChangesService: DbChangesService,
+    private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-    this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
-      this.showDetail = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.showDetailSub.unsubscribe();
   }
 
   selectAnalysisItem() {

@@ -22,7 +22,6 @@ export class AnalysisService {
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   accountAnalysisItem: IdbAccountAnalysisItem;
-  showDetail: BehaviorSubject<boolean>;
   hideInUseMessage: boolean = false;
    groupSummaries: BehaviorSubject<Array<{
     group: AnalysisGroup,
@@ -42,11 +41,6 @@ export class AnalysisService {
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
-    let showDetail: boolean = this.localStorageService.retrieve("showDetail");
-    if (showDetail == undefined) {
-      showDetail = true;
-    }
-    this.showDetail = new BehaviorSubject<boolean>(showDetail);
 
     let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");
     if (!analysisTableColumns) {
@@ -89,13 +83,6 @@ export class AnalysisService {
     this.analysisTableColumns.subscribe(analysisTableColumns => {
       if (analysisTableColumns) {
         this.localStorageService.store('analysisTableColumns', analysisTableColumns);
-      }
-    });
-
-
-    this.showDetail.subscribe(showDetail => {
-      if (showDetail != undefined) {
-        this.localStorageService.store('showDetail', showDetail);
       }
     });
 

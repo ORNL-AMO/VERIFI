@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -25,10 +24,8 @@ export class AccountAnalysisEnergyDashboardComponent {
     analysisItems: Array<IdbAccountAnalysisItem>,
     hasSelectedItem: boolean
   }>;
-  showDetail: boolean;
-  showDetailSub: Subscription;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService,
-    private calendarizationService: CalanderizationService, private analysisService: AnalysisService,
+    private calendarizationService: CalanderizationService, 
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
@@ -41,15 +38,10 @@ export class AccountAnalysisEnergyDashboardComponent {
     if (this.yearOptions && this.selectedAccount.sustainabilityQuestions.energyReductionGoal) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
-
-    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
-      this.showDetail = showDetail;
-    })
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
-    this.showDetailSub.unsubscribe();
   }
 
 
