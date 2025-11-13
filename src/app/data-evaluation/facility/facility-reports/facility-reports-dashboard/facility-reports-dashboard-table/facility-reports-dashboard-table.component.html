@@ -43,10 +43,11 @@
                 <tr
                     *ngFor="let data of facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                     <td>
-                        {{ data.name }}
+                        <a (click)="selectReport(data)">{{ data.name }}</a>
                     </td>
                     <td>
-                        <span class="badge" [ngClass]="data.facilityReportType | facilityReportBadgeClass">{{ data.facilityReportType |
+                        <span class="badge" [ngClass]="data.facilityReportType | facilityReportBadgeClass">{{
+                            data.facilityReportType |
                             facilityReportType }}</span>
                     </td>
                     <td *ngIf="data.analysisItemId">{{ data.analysisItemId | facilityAnalysisName}}</td>
@@ -68,11 +69,13 @@
                         <ng-container *ngSwitchCase="'overview'">
                             <ng-container
                                 *ngIf="data.dataOverviewReportSettings.startMonth != undefined && data.dataOverviewReportSettings.startYear != undefined">
-                                {{ data.dataOverviewReportSettings.startMonth | reportDate: data.dataOverviewReportSettings.startYear | date: 'MMM. y' }} -
+                                {{ data.dataOverviewReportSettings.startMonth | reportDate:
+                                data.dataOverviewReportSettings.startYear | date: 'MMM. y' }} -
                             </ng-container>
                             <ng-container
                                 *ngIf="data.dataOverviewReportSettings.endMonth != undefined && data.dataOverviewReportSettings.endYear != undefined">
-                                {{ data.dataOverviewReportSettings.endMonth | reportDate: data.dataOverviewReportSettings.endYear | date: 'MMM. y' }}
+                                {{ data.dataOverviewReportSettings.endMonth | reportDate:
+                                data.dataOverviewReportSettings.endYear | date: 'MMM. y' }}
                             </ng-container>
                             <ng-container
                                 *ngIf="data.dataOverviewReportSettings.startMonth === undefined && data.dataOverviewReportSettings.startYear === undefined && data.dataOverviewReportSettings.endMonth === undefined && data.dataOverviewReportSettings.endYear === undefined">
@@ -97,9 +100,6 @@
                         {{ data.modifiedDate | date:'short' }}
                     </td>
                     <td class="text-center">
-                        <button title="View" class="btn action-btn btn-sm me-2" (click)="selectReport(data)">
-                            <i class="fa fa-eye"></i>
-                        </button>
                         <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(data)">
                             <i class="fa fa-copy"></i>
                         </button>
@@ -113,8 +113,10 @@
     </div>
 
     <div class="d-flex w-100 justify-content-end">
-        <ngb-pagination [collectionSize]="(facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType).length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        <ngb-pagination
+            [collectionSize]="(facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
+            [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
+            aria-label="Pagination">
         </ngb-pagination>
     </div>
 </div>
