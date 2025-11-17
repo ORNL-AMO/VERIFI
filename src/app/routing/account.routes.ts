@@ -24,8 +24,6 @@ import { CustomDatabaseComponent } from "src/app/shared/custom-database/custom-d
 import { EmissionsDataDashboardComponent } from "src/app/shared/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component";
 import { EmissionsDataFormComponent } from "src/app/shared/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component";
 import { RegionalEmissionsDataComponent } from "src/app/shared/custom-database/regional-emissions-data/regional-emissions-data.component";
-import { AccountAnalysisEnergyDashboardComponent } from "src/app/data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
-import { AccountAnalysisWaterDashboardComponent } from "src/app/data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
 import { AccountAnalysisFacilitiesSummaryComponent } from "src/app/data-evaluation/account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
 import { PerformanceReportComponent } from "src/app/data-evaluation/account/account-reports/performance-report/performance-report.component";
 import { BetterClimateReportComponent } from "src/app/data-evaluation/account/account-reports/better-climate-report/better-climate-report.component";
@@ -38,6 +36,7 @@ import { CustomGwpFormComponent } from "src/app/shared/custom-database/custom-gw
 import { AnalysisReportComponent } from "src/app/data-evaluation/account/account-reports/analysis-report/analysis-report.component";
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
 import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
+import { AccountAnalysisDetailsTableComponent } from "../data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-details-table/account-analysis-details-table.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -94,9 +93,7 @@ export const AccountRoutes: Route = {
                     path: 'dashboard',
                     component: AccountAnalysisDashboardComponent,
                     children: [
-                        { path: '', pathMatch: 'full', redirectTo: 'energy' },
-                        { path: 'energy', component: AccountAnalysisEnergyDashboardComponent },
-                        { path: 'water', component: AccountAnalysisWaterDashboardComponent }
+                        { path: '', component: AccountAnalysisDetailsTableComponent }
                     ]
                 },
                 { path: 'setup', component: AccountAnalysisSetupComponent },
