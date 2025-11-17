@@ -45,6 +45,8 @@ export class AnalysisDetailsTableComponent {
     facilityAnalysisItems: Array<IdbAnalysisItem>;
     filteredAnalysisItems: Array<IdbAnalysisItem>;
     selectedReportYear: number | 'all' = 'all';
+    yearOptionsEnergy: Array<number>;
+    yearOptionsWater: Array<number>;
     yearOptions: Array<number>;
     selectedYearCategoryMap: { [year: number]: { [category: string]: boolean } } = {};
     errorList: Array<{ year: number, category: string }> = [];
@@ -67,8 +69,10 @@ export class AnalysisDetailsTableComponent {
     displayLinkedItemModal: boolean = false;
     viewLinkedItem: { itemId: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport' } = undefined;
     groupItems: Array<AnalysisGroupItem>;
-    baselineYearErrorMin: boolean;
-    baselineYearErrorMax: boolean;
+    baselineYearErrorMinEnergy: boolean;
+    baselineYearErrorMaxEnergy: boolean;
+    baselineYearErrorMinWater: boolean;
+    baselineYearErrorMaxWater: boolean;
     selectedFacilitySub: Subscription;
   
     currentPageNumber: number = 1;
@@ -88,13 +92,18 @@ export class AnalysisDetailsTableComponent {
     ngOnInit(): void {
       this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
         this.selectedFacility = val;
-        let yearOptionsEnergy = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'energy');
-        let yearOptionsWater = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'water');
-        this.yearOptions = _.uniq([...yearOptionsEnergy, ...yearOptionsWater]);
+        this.yearOptionsEnergy = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'energy');
+        this.yearOptionsWater = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'water');
+        this.yearOptions = _.uniq([...this.yearOptionsEnergy, ...this.yearOptionsWater]);
         this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
-        if (this.yearOptions) {
-          this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
-          this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+        if (this.yearOptionsEnergy) {
+          this.baselineYearErrorMinEnergy = this.yearOptionsEnergy[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
+          this.baselineYearErrorMaxEnergy = this.yearOptionsEnergy[this.yearOptionsEnergy.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
+        }
+
+        if (this.yearOptionsWater) {
+          this.baselineYearErrorMinWater = this.yearOptionsWater[0] > this.selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
+          this.baselineYearErrorMaxWater = this.yearOptionsWater[this.yearOptionsWater.length - 1] < this.selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
         }
   
         this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();

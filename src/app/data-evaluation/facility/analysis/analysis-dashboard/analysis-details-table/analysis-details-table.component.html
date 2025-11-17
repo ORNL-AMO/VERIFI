@@ -1,6 +1,6 @@
-<ng-container *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
+<ng-container *ngIf="!baselineYearErrorMaxEnergy && !baselineYearErrorMinEnergy && !baselineYearErrorMaxWater && !baselineYearErrorMinWater">
     <div class="wrapper m-0" *ngIf="facilityAnalysisItems.length > 0">
-        <div class="d-flex align-items-start mb-1">
+        <div class="d-flex align-items-end mb-1">
             <div class="pe-4 select-width">
                 <label class="form-label fw-bold mb-2">
                     <i class="fa fa-filter text-primary"></i>
@@ -24,8 +24,7 @@
                 </select>
             </div>
 
-            <div class="col" *ngIf="linkedItemsList.length > 6">
-                <!-- <label class="form-label fw-bold mb-2 placeholder-style">Placeholder</label> -->
+            <div class="select-width" *ngIf="linkedItemsList.length > 6">
                 <app-table-items-dropdown></app-table-items-dropdown>
             </div>
         </div>
@@ -171,15 +170,30 @@
     </ng-container>
 </ng-container>
 
-<div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMax || baselineYearErrorMin">
+<div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMaxEnergy || baselineYearErrorMinEnergy">
     <div class="alert alert-danger text-center p-2">
-        The baseline year for your reduction goal is
+        The baseline year for your energy reduction goal is
         {{selectedFacility.sustainabilityQuestions.energyReductionBaselineYear}}
-        <ng-container *ngIf="baselineYearErrorMin">
-            and your meter readings start {{yearOptions[0]}}.
+        <ng-container *ngIf="baselineYearErrorMinEnergy">
+            and your meter readings start {{yearOptionsEnergy[0]}}.
         </ng-container>
-        <ng-container *ngIf="baselineYearErrorMax">
-            and your meter readings end {{yearOptions[yearOptions.length -1]}}.
+        <ng-container *ngIf="baselineYearErrorMaxEnergy">
+            and your meter readings end {{yearOptionsEnergy[yearOptionsEnergy.length -1]}}.
+        </ng-container>
+        Fix your reduction goal year in <a class="click-link" (click)="goToSettings()">facility settings</a> or <a
+            class="click-link" (click)="goToUtilityData()">add data</a>.
+    </div>
+</div>
+
+<div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMaxWater || baselineYearErrorMinWater">
+    <div class="alert alert-danger text-center p-2">
+        The baseline year for your water reduction goal is
+        {{selectedFacility.sustainabilityQuestions.waterReductionBaselineYear}}
+        <ng-container *ngIf="baselineYearErrorMinWater">
+            and your meter readings start {{yearOptionsWater[0]}}.
+        </ng-container>
+        <ng-container *ngIf="baselineYearErrorMaxWater">
+            and your meter readings end {{yearOptionsWater[yearOptionsWater.length -1]}}.
         </ng-container>
         Fix your reduction goal year in <a class="click-link" (click)="goToSettings()">facility settings</a> or <a
             class="click-link" (click)="goToUtilityData()">add data</a>.
