@@ -33,7 +33,7 @@
                         Download Template</a>
                 </p>
                 <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile"
-                    (dragenter)="setDragEnter()" (input)="setImportFile($event.target)" multiple accept=".xlsx"
+                    (dragenter)="setDragEnter()" (input)="setImportFile($event.target)" multiple accept=".xlsx, .xls"
                     (dragleave)="setDragOut()">
                 <div *ngIf="fileUploadError">
                     <div class="p-2 alert-danger">
