@@ -128,8 +128,8 @@ export class ElectronBackupFileComponent {
         this.automaticBackupsService.overwriteFile();
       } else if (this.overwriteOption == 'updateAccount') {
         this.showModal = false;
-        this.loadingService.setLoadingMessage('Overwriting account. This may take a moment.');
-        this.loadingService.setLoadingStatus(true);
+        this.loadingService.setContext('electron-overwrite-account');
+        this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.pauseDelete.next(true);
         this.account.deleteAccount = true;
         await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
@@ -148,7 +148,6 @@ export class ElectronBackupFileComponent {
         await this.dbChangesService.selectAccount(newAccount, false);
         this.deleteDataService.pauseDelete.next(false);
         this.deleteDataService.gatherAndDelete();
-        this.loadingService.setLoadingStatus(false);
         needUpdate = false;
       }
     }

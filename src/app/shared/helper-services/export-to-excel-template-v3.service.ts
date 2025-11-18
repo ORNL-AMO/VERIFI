@@ -66,48 +66,62 @@ export class ExportToExcelTemplateV3Service {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
-          this.loadingService.setLoadingStatus(false);
+          this.loadingService.isLoadingComplete.next(true);
         });
       })
     };
-    this.loadingService.setLoadingMessage('Exporting to .xlsx template');
-    this.loadingService.setLoadingStatus(true);
     request.send();
   }
 
   fillWorkbook(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Workbook {
     this.utilityMeterDbService.setTemporaryMeterNumbersForExport();
-    this.loadingService.setLoadingMessage('Adding Facility Details...')
+    this.loadingService.setCurrentLoadingIndex(1);
+    this.loadingService.addLoadingMessage('Adding Facility Details');
     this.setFacilityWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Electricity Meters...')
+    this.loadingService.setCurrentLoadingIndex(2);
+    this.loadingService.addLoadingMessage('Adding Electricity Meters');
     this.setElectricityMetersWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Electricity Data...')
+    this.loadingService.setCurrentLoadingIndex(3);
+    this.loadingService.addLoadingMessage('Adding Electricity Data');
     this.setElectricityDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Stationary Meters...')
+    this.loadingService.setCurrentLoadingIndex(4);
+    this.loadingService.addLoadingMessage('Adding Stationary Meters');
     this.setStationaryMetersWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Stationary Data...')
+    this.loadingService.setCurrentLoadingIndex(5);
+    this.loadingService.addLoadingMessage('Adding Stationary Data');
     this.setStationaryDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Mobile Meters...')
+    this.loadingService.setCurrentLoadingIndex(6);
+    this.loadingService.addLoadingMessage('Adding Mobile Meters');
     this.setMobileMetersWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Mobile Data...')
+    this.loadingService.setCurrentLoadingIndex(7);
+    this.loadingService.addLoadingMessage('Adding Mobile Data');
     this.setMobileDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Other Energy Meters...')
+    this.loadingService.setCurrentLoadingIndex(8);
+    this.loadingService.addLoadingMessage('Adding Other Energy Meters');
     this.setOtherEnergyMetersWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Other Energy Data...')
+    this.loadingService.setCurrentLoadingIndex(9);
+    this.loadingService.addLoadingMessage('Adding Other Energy Data');
     this.setOtherEnergyDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Other Emissions Meters...')
+    this.loadingService.setCurrentLoadingIndex(10);
+    this.loadingService.addLoadingMessage('Adding Other Emissions Meters');
     this.setOtherEmissionsWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Other Emissions Data...')
+    this.loadingService.setCurrentLoadingIndex(11);
+    this.loadingService.addLoadingMessage('Adding Other Emissions Data');
     this.setOtherEmissionsDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Water Meters...')
+    this.loadingService.setCurrentLoadingIndex(12);
+    this.loadingService.addLoadingMessage('Adding Water Meters');
     this.setWaterMetersWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Water Data...')
+    this.loadingService.setCurrentLoadingIndex(13);
+    this.loadingService.addLoadingMessage('Adding Water Data');
     this.setWaterDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Predictors...')
+    this.loadingService.setCurrentLoadingIndex(14);
+    this.loadingService.addLoadingMessage('Adding Predictors');
     this.setPredictorsWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Adding Predictor Data...')
+    this.loadingService.setCurrentLoadingIndex(15);
+    this.loadingService.addLoadingMessage('Adding Predictor Data');
     this.setPredictorDataWorksheet(workbook, facilityId);
-    this.loadingService.setLoadingMessage('Finishing up...');
+    this.loadingService.setCurrentLoadingIndex(16);
+    this.loadingService.addLoadingMessage('Finishing up');
     return workbook;
   }
 

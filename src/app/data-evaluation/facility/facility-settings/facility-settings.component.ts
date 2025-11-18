@@ -43,7 +43,6 @@ export class FacilitySettingsComponent implements OnInit {
   async facilityDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
-    this.router.navigate(['/account']);
   }
 
   openDeleteFacility() {
