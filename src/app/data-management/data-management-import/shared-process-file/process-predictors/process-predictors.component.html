@@ -121,6 +121,36 @@
                         <app-edit-predictor-form [predictorForm]="editPredictorForm" [predictor]="editPredictor"
                             [facility]="editPredictorFacility"></app-edit-predictor-form>
                         <!--TODO: map predictor to existing if new predictor like in meters-->
+                        <ng-container *ngIf="editPredictor.id == undefined">
+                            <hr>
+                            <div class="d-flex w-100 alert alert-warning" *ngIf="!showExisting">
+                                If this is showing up as a new predictor and you would like the data to be applied to an
+                                existing predictor.
+                                <a class="ps-1 click-link" (click)="setShowExisting()">Click here</a>.
+                            </div>
+                            <div class="d-flex flex-column">
+                                <ng-container *ngIf="showExisting && existingPredictorOptions.length != 0">
+                                    <div class="alert alert-info">
+                                        Select an available existing predictors:
+                                    </div>
+                                    <ul>
+                                        <li *ngFor="let existingPredictor of existingPredictorOptions">
+                                            <a class="click-link" (click)="selectExistingPredictor(existingPredictor)">
+                                                {{existingPredictor.name}}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </ng-container>
+                                <ng-container *ngIf="showExisting && existingPredictorOptions.length == 0">
+                                    <div class="alert alert-info">
+                                        No existing predictors are available for selection. Either no predictors exist for the
+                                        corresponding
+                                        facility or all existing predictors are already being used for import.
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </ng-container>
+
                     </ng-template>
                 </ng-template>
                 <ng-template #noPredictorsIncludedBlock>
