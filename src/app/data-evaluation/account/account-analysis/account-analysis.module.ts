@@ -17,12 +17,9 @@ import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-anal
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { AccountAnalysisFooterComponent } from './account-analysis-footer/account-analysis-footer.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
-import { AccountAnalysisItemCardComponent } from './account-analysis-dashboard/account-analysis-item-card/account-analysis-item-card.component';
-import { AccountAnalysisWaterDashboardComponent } from './account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component';
-import { AccountAnalysisEnergyDashboardComponent } from './account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component';
-import { AccountAnalysisDashboardTabsComponent } from './account-analysis-dashboard/account-analysis-dashboard-tabs/account-analysis-dashboard-tabs.component';
 import { AccountAnalysisFacilitiesSummaryComponent } from './account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
+import { AccountAnalysisDetailsTableComponent } from './account-analysis-dashboard/account-analysis-details-table/account-analysis-details-table.component';
 
 
 @NgModule({
@@ -37,11 +34,8 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     MonthlyAccountAnalysisComponent,
     AnnualAccountAnalysisComponent,
     AccountAnalysisFooterComponent,
-    AccountAnalysisItemCardComponent,
-    AccountAnalysisWaterDashboardComponent,
-    AccountAnalysisEnergyDashboardComponent,
-    AccountAnalysisDashboardTabsComponent,
-    AccountAnalysisFacilitiesSummaryComponent
+    AccountAnalysisFacilitiesSummaryComponent,
+    AccountAnalysisDetailsTableComponent
   ],
   imports: [
     CommonModule,

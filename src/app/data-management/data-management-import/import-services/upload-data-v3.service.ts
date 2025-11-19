@@ -502,7 +502,7 @@ export class UploadDataV3Service {
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
-        let readDate: Date = new Date(readDateStr);
+        const readDate = this.getTemplateReadDate(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
         if (meter) {
           let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
@@ -532,7 +532,7 @@ export class UploadDataV3Service {
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
-        let readDate: Date = new Date(readDateStr);
+        let readDate: Date = this.getTemplateReadDate(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
         if (meter) {
           let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
@@ -577,7 +577,7 @@ export class UploadDataV3Service {
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage or Distance']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
-        let readDate: Date = new Date(readDateStr);
+        let readDate: Date = this.getTemplateReadDate(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
         if (meter) {
           let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
@@ -617,7 +617,7 @@ export class UploadDataV3Service {
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
-        let readDate: Date = new Date(readDateStr);
+        let readDate: Date = this.getTemplateReadDate(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
         if (meter) {
           let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
@@ -663,7 +663,7 @@ export class UploadDataV3Service {
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage or Emission']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
-        let readDate: Date = new Date(readDateStr);
+        let readDate: Date = this.getTemplateReadDate(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
         if (meter) {
           let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
@@ -690,7 +690,7 @@ export class UploadDataV3Service {
       let readDateStr: string = dataPoint['Read Date'];
       let totalUsage: number = checkImportCellNumber(dataPoint['Total Usage']);
       if (meterNumber && readDateStr && isNaN(totalUsage) == false) {
-        let readDate: Date = new Date(readDateStr);
+        let readDate: Date = this.getTemplateReadDate(readDateStr);
         let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
         if (meter) {
           let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
@@ -956,7 +956,7 @@ export class UploadDataV3Service {
       if (facilityName && readDateStr) {
         let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
         if (facility) {
-          let readDate: Date = new Date(readDateStr);
+          let readDate: Date = this.getTemplateReadDate(readDateStr);
           for (let i = 1; i < 16; i++) {
             let predictorName: string = excelPredictorData['Predictor ' + i + ' Name'];
             if (predictorName) {
@@ -989,5 +989,15 @@ export class UploadDataV3Service {
       }
     });
     return importPredictorData;
+  }
+
+  getTemplateReadDate(readDateStr: string): Date {
+    //Check for YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(readDateStr)) {
+      const [year, month, day] = readDateStr.split('-').map(Number);
+      const readDate = new Date(year, month - 1, day);
+      return readDate;
+    }
+    return new Date(readDateStr)
   }
 }

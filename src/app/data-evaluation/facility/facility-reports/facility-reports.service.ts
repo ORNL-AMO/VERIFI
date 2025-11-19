@@ -21,12 +21,20 @@ export class FacilityReportsService {
   validateReport(report: IdbFacilityReport) {
     let errorMessage: string = undefined;
     if (report) {
-      //write validation for report
-      let startDate: Date = new Date(report.dataOverviewReportSettings.startYear, report.dataOverviewReportSettings.startMonth, 1);
-      let endDate: Date = new Date(report.dataOverviewReportSettings.endYear, report.dataOverviewReportSettings.endMonth, 1);
-      // compare start and end date
-      if (startDate.getTime() >= endDate.getTime()) {
-        errorMessage = 'Start date cannot be later than the end date.';
+      if (report.facilityReportType == 'overview') {
+        //write validation for report
+        let startDate: Date = new Date(report.dataOverviewReportSettings.startYear, report.dataOverviewReportSettings.startMonth, 1);
+        let endDate: Date = new Date(report.dataOverviewReportSettings.endYear, report.dataOverviewReportSettings.endMonth, 1);
+        // compare start and end date
+        if (startDate.getTime() >= endDate.getTime()) {
+          errorMessage = 'Start date cannot be later than the end date.';
+        }
+      }
+      else if (report.facilityReportType == 'emissionFactors') {
+        console.log(report);
+        if (report.emissionFactorsReportSettings.startYear != undefined && report.emissionFactorsReportSettings.endYear != undefined && report.emissionFactorsReportSettings.endYear < report.emissionFactorsReportSettings.startYear) {
+          errorMessage = 'Start year cannot be later than the end year.';
+        }
       }
     }
     this.errorMessage.next(errorMessage)

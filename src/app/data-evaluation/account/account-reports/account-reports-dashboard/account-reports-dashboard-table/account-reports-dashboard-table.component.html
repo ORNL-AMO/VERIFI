@@ -40,10 +40,11 @@
                     *ngFor="let data of reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                     <td>
                         <span class="fa fa-exclamation-circle" *ngIf="!data.isValid"></span>
-                        {{ data.report.name }}
+                        <a (click)="selectReport(data.report)">{{ data.report.name }}</a>
                     </td>
                     <td>
-                        <span class="badge" [ngClass]="data.report.reportType | reportBadgeClass">{{ data.report.reportType |
+                        <span class="badge" [ngClass]="data.report.reportType | reportBadgeClass">{{
+                            data.report.reportType |
                             accountReportType }}</span>
                     </td>
                     <td [ngSwitch]="data.report.reportType">
@@ -74,9 +75,8 @@
                             </ng-container>
                         </ng-container>
 
-                         <ng-container *ngSwitchCase="'accountSavings'">
-                            <ng-container
-                                *ngIf="data.report.endYear !== undefined">
+                        <ng-container *ngSwitchCase="'accountSavings'">
+                            <ng-container *ngIf="data.report.endYear !== undefined">
                                 {{ data.report.endYear }}
                             </ng-container>
                             <ng-container *ngIf="data.report.endYear === undefined">
@@ -96,9 +96,6 @@
                     </td>
                     <td>{{data.report.modifiedDate | date:'short'}}</td>
                     <td class="text-center">
-                        <button title="View" class="btn action-btn btn-sm me-2" (click)="selectReport(data.report)">
-                            <i class="fa fa-eye"></i>
-                        </button>
                         <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(data.report)">
                             <i class="fa fa-copy"></i>
                         </button>
@@ -112,8 +109,10 @@
     </div>
 
     <div class="d-flex w-100 justify-content-end">
-        <ngb-pagination [collectionSize]="(reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType).length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        <ngb-pagination
+            [collectionSize]="(reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
+            [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
+            aria-label="Pagination">
         </ngb-pagination>
     </div>
 </div>

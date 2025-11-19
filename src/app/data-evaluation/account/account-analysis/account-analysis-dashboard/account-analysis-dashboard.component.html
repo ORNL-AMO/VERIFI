@@ -1,5 +1,4 @@
 <div class="main-content p-0">
-    <app-account-analysis-dashboard-tabs *ngIf="hasWater && hasEnergy"></app-account-analysis-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
@@ -14,18 +13,11 @@
                     </div>
                 </div>
             </h4>
-            <div class="d-flex justify-content-between">
-                <div>
-                    <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
-                </div>
-            </div>
         </div>
         <hr>
         <router-outlet></router-outlet>
     </div>
 </div>
-
-
 
 <div [ngClass]="{'windowOverlay': displayNewAnalysis}"></div>
 <div class="popup" [class.open]="displayNewAnalysis">
@@ -46,7 +38,6 @@
                         <input type="radio" class="form-check-input" name="newAnalysisCategory" [value]="'water'"
                             id="water" [(ngModel)]="newAnalysisCategory">
                         <label class="form-check-label" for="water">Water Analysis</label>
-
                     </div>
                 </div>
             </div>
