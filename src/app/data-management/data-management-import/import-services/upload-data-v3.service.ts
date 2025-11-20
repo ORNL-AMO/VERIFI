@@ -973,8 +973,9 @@ export class UploadDataV3Service {
                     return facilityPredictor.guid == pData.predictorId && checkSameMonth(new Date(pData.date), readDate)
                   });
                   if (existingPredictorData) {
-                    existingPredictorData.amount = predictorValue;
-                    importPredictorData.push(existingPredictorData);
+                    let predictorDataCopy: IdbPredictorData = _.cloneDeep(existingPredictorData);
+                    predictorDataCopy.amount = predictorValue;
+                    importPredictorData.push(predictorDataCopy);
                   } else {
                     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(facilityPredictor);
                     newPredictorData.date = readDate;
