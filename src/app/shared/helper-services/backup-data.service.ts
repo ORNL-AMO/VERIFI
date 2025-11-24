@@ -712,56 +712,6 @@ export class BackupDataService {
     return newFacility;
   }
 
-  //TODO: Consolidate delete facility logic.
-  async deleteFacilityData(facility: IdbFacility) {
-    await firstValueFrom(this.facilityDbService.deleteWithObservable(facility.id));
-    //delete meters
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.guid });
-    for (let i = 0; i < facilityMeters.length; i++) {
-      await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(facilityMeters[i].id));
-    }
-    //delete meter data
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
-    for (let i = 0; i < facilityMeterData.length; i++) {
-      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(facilityMeterData[i].id));
-    }
-    //delete predictors
-    let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue();
-    let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
-    for (let i = 0; i < facilityPredictorEntries.length; i++) {
-      await firstValueFrom(this.predictorsDbServiceDeprecated.deleteIndexWithObservable(facilityPredictorEntries[i].id));
-    }
-    //delete meter groups
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facility.guid });
-    for (let i = 0; i < facilityMeterGroups.length; i++) {
-      await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(facilityMeterGroups[i].id));
-    }
-
-    //delete facility analysis
-    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountFacilityAnalysisItems.filter(item => { return item.facilityId == facility.guid });
-    for (let i = 0; i < facilityAnalysisItems.length; i++) {
-      await firstValueFrom(this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id));
-    }
-
-    //update reports
-    let reports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
-    for (let i = 0; i < reports.length; i++) {
-      reports[i].dataOverviewReportSetup.includedFacilities = reports[i].dataOverviewReportSetup.includedFacilities.filter(option => { return option.facilityId != facility.guid });
-      await firstValueFrom(this.accountReportsDbService.updateWithObservable(reports[i]));
-    }
-    //update account analysis
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      accountAnalysisItems[i].facilityAnalysisItems = accountAnalysisItems[i].facilityAnalysisItems.filter(option => { return option.facilityId != facility.guid });
-      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
-    }
-  }
-
-
   getImportDate(date: Date): Date {
     //date imported with timestap cause problems.
     if (typeof date.getMonth === 'function') {
