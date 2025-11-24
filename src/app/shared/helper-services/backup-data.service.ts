@@ -66,7 +66,7 @@ export class BackupDataService {
       accountReports: this.accountReportsDbService.accountReports.getValue(),
       groups: this.trimGroups(this.utilityMeterGroupDbService.accountMeterGroups.getValue()),
       accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
-      facilityAnalysisItems: this.analysisDbService.accountAnalysisItems.getValue(),
+      facilityAnalysisItems: this.trimAnalysisModels(this.analysisDbService.accountAnalysisItems.getValue()),
       predictorData: [],
       predictorDataV2: this.predictorDataDbService.accountPredictorData.getValue(),
       predictors: this.predictorDbService.accountPredictors.getValue(),
@@ -97,7 +97,8 @@ export class BackupDataService {
 
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => { return meter.facilityId == facility.guid });
-
+    facilityAnalysisItems = this.trimAnalysisModels(facilityAnalysisItems);
+    
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(meter => { return meter.facilityId == facility.guid });
 
@@ -819,6 +820,22 @@ export class BackupDataService {
       delete group.combinedMonthlyData;
       return group;
     })
+  }
+
+  //only export selected model in analysis items
+  trimAnalysisModels(analysisItems: Array<IdbAnalysisItem>): Array<IdbAnalysisItem> {
+    analysisItems.forEach(item => {
+      item.groups.forEach(group => {
+        if (group.analysisType == 'regression' && group.models) {
+          group.models = group.models.filter(model => {
+            return model.modelId == group.selectedModelId;
+          });
+        } else {
+          group.models = [];
+        }
+      });
+    });
+    return analysisItems;
   }
 }
 
