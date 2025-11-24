@@ -35,7 +35,6 @@ import { UtilityMeterDataService } from '../../../shared/shared-meter-content/ut
 import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
-import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
 
 @Injectable({
   providedIn: 'root'
@@ -61,8 +60,7 @@ export class UploadDataService {
     private utilityMeterDataService: UtilityMeterDataService,
     private dbChangesService: DbChangesService,
     private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
-    private uploadDataV3Service: UploadDataV3Service,
-    private weatherPredictorManagementService: WeatherPredictorManagementService) {
+    private uploadDataV3Service: UploadDataV3Service) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -625,39 +623,5 @@ export class UploadDataService {
     this.toastNotificationService.showToast(fileReference.name + ' Data Submitted', 'The data has been added to the selected account. You may continue to use the upload data wizard to process additional files.', undefined, false, "alert-success");
     this.sharedDataService.modalOpen.next(false);
     return fileReference;
-  }
-
-
-  async updateWeatherPredictorData(fileReference: FileReference): Promise<void> {
-    //update calculated predictors
-    let facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }> = [];
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    fileReference.importFacilities.forEach(facility => {
-      let facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
-        return predictor.facilityId == facility.guid && predictor.predictorType == 'Weather';
-      });
-      if (facilityWeatherPredictors.length != 0) {
-        let facilityPredictorData: Array<IdbPredictorData> = accountPredictorData.filter(pData => {
-          return pData.facilityId == facility.guid;
-        });
-        let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => {
-          return meterData.facilityId == facility.guid;
-        });
-        let predictorDates: Array<Date> = facilityPredictorData.map(pData => { return new Date(pData.date) });
-        let meterDates: Array<Date> = facilityMeterData.map(mData => { return new Date(mData.readDate) });
-        let allDates: Array<Date> = _.uniqBy(predictorDates.concat(meterDates), date => { return date.toDateString() });
-        let startDate: Date = new Date(Math.min.apply(null, allDates));
-        let endDate: Date = new Date(Math.max.apply(null, allDates));
-        facilityList.push({
-          facilityId: facility.guid,
-          startDate: startDate,
-          endDate: endDate
-        });
-      }
-    });
-    await this.weatherPredictorManagementService.updateAccountWeatherPredictors(facilityList);
-    return;
   }
 }
