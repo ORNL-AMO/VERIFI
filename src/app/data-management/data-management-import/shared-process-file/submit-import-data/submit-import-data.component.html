@@ -15,6 +15,7 @@
                         </div>
                     </div>
                 </h4>
+                @if(!dataSubmitted){
                 <div class="d-flex w-100 justify-content-between pt-2 pb-2">
                     <div class="me-2 w-75">
                         <p class="mb-0 fw-light">
@@ -179,11 +180,34 @@
                         <hr>
                     </div>
                 </div>
+                }@else {
+                <div class="d-flex w-100 flex-column">
+                    <div class="alert alert-success">
+                        Data has been successfully uploaded to the account! Use the button below to update weather
+                        predictor data. If you do not want to do this now, you can update predictors from the
+                        account todo list at anytime.
+                    </div>
+                    <div class="w-100 text-center">
+                        <button class="btn btn-outline mb-2" (click)="openWeatherPredictorModal()">
+                            <span class="fa fa-temperature-half"></span>
+                            Update Weather Predictors
+                        </button>
+                        <button class="btn btn-outline mb-2 ms-2" (click)="finishSubmit()">
+                            <span class="fa fa-refresh"></span>
+                            Upload Another File
+                        </button>
+                    </div>
+                </div>
+                }
             </div>
         </div>
     </div>
 </div>
 
-<!--TODO: disable next-->
+@if(!dataSubmitted){
 <app-data-management-import-footer [fileReference]="fileReference" [navOption]="'review-and-submit'"
     (emitSubmit)="submitImport()"></app-data-management-import-footer>
+}
+
+<app-update-weather-predictors-modal *ngIf="displayUpdatePredictorModal"
+    (emitClose)="finishSubmit()"></app-update-weather-predictors-modal>
