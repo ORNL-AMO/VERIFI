@@ -210,4 +210,4 @@
 }
 
 <app-update-weather-predictors-modal *ngIf="displayUpdatePredictorModal"
-    (emitClose)="finishSubmit()"></app-update-weather-predictors-modal>
+    (emitClose)="hideWeatherPredictorModal()" [fileReference]="fileReference"></app-update-weather-predictors-modal>

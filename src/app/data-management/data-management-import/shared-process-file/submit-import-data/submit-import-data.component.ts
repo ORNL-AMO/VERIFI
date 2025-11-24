@@ -244,6 +244,10 @@ export class SubmitImportDataComponent {
   openWeatherPredictorModal() {
     this.displayUpdatePredictorModal = true;
   }
+
+  hideWeatherPredictorModal() { 
+    this.displayUpdatePredictorModal = false;
+  }
 }
 
 export interface ImportSummaryItem {
