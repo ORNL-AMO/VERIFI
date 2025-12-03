@@ -31,6 +31,8 @@ import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
+import { FacilityReportsDbService } from './facility-reports-db.service';
+import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +63,7 @@ export class DeleteDataService {
   accountElectronBackups: Array<IdbElectronBackup>;
   accountFacilityAnalysis: Array<IdbAnalysisItem>;
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
+  accountFacilityReports: Array<IdbFacilityReport>;
 
   pauseDelete: BehaviorSubject<boolean>;
   constructor(private accountDbService: AccountdbService,
@@ -78,7 +81,8 @@ export class DeleteDataService {
     private dbService: NgxIndexedDBService,
     private electronBackupsDbService: ElectronBackupsDbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) {
+    private predictorDataDbService: PredictorDataDbService,
+    private facilityReportsDbService: FacilityReportsDbService) {
     this.isDeleting = new BehaviorSubject<boolean>(false);
     this.deletingMessaging = new BehaviorSubject(undefined);
     this.pauseDelete = new BehaviorSubject<boolean>(false);
@@ -120,9 +124,10 @@ export class DeleteDataService {
       if (index < this.accountPredictorsDeprecated.length) {
         this.dbService.delete('predictors', this.accountPredictorsDeprecated[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountPredictorsDeprecated.length, 'Deleting Predictor Data..');
-          this.deletePredictor(index + 1);
+          this.deletePredictorDeprecated(index + 1);
         });
       } else {
+
         this.predictorDbService.getAll().subscribe((allPredictorData: Array<IdbPredictor>) => {
           this.accountPredictors = allPredictorData.filter(idbPredictor => {
             return idbPredictor.accountId == this.accountToDelete.guid;
@@ -158,7 +163,7 @@ export class DeleteDataService {
       if (index < this.accountPredictorData.length) {
         this.dbService.delete('predictorData', this.accountPredictorData[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountPredictorData.length, 'Deleting Predictor Data..');
-          this.deletePredictor(index + 1);
+          this.deletePredictorData(index + 1);
         });
       } else {
         this.utilityMeterDataDbService.getAll().subscribe((allMeterData: Array<IdbUtilityMeterData>) => {
@@ -235,6 +240,25 @@ export class DeleteDataService {
         this.dbService.delete('analysisItems', this.accountFacilityAnalysis[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountFacilityAnalysis.length, 'Deleting Facility Analysis..');
           this.deleteFacilityAnalysis(index + 1);
+        });
+      } else {
+        this.facilityReportsDbService.getAll().subscribe((allFacilityReports: Array<IdbFacilityReport>) => {
+          this.accountFacilityReports = allFacilityReports.filter(facilityReport => {
+            return facilityReport.accountId == this.accountToDelete.guid;
+          });
+          this.deleteFacilityReports(0)
+        });
+      }
+    }
+  }
+
+  //facility reports
+  deleteFacilityReports(index: number) {
+    if (!this.pauseDelete.getValue()) {
+      if (index < this.accountFacilityReports.length) {
+        this.dbService.delete('facilityReports', this.accountFacilityReports[index].id).subscribe(() => {
+          this.setDeletingMessage(index, this.accountFacilityReports.length, 'Deleting Facility Reports..');
+          this.deleteFacilityReports(index + 1);
         });
       } else {
         this.facilityDbService.getAll().subscribe((allFacilities: Array<IdbFacility>) => {

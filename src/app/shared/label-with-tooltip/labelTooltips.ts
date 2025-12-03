@@ -67,5 +67,8 @@ export const LabelTooltips = {
     }, 
     "estimatedReading": {
         "tooltip": "Filter meter data to show estimated readings."
+    },
+    "checkPredictorDifferences": {
+        "tooltip": "Click the icon to check the differences between the existing predictor entries and the imported predictor entries."
     }
 }

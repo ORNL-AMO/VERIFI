@@ -615,7 +615,6 @@ export class UploadDataService {
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
-
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage('Finishing Up...');
     await this.dbChangesService.selectAccount(selectedAccount, false)
@@ -625,5 +624,4 @@ export class UploadDataService {
     this.sharedDataService.modalOpen.next(false);
     return fileReference;
   }
-
 }
