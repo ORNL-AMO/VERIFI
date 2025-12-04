@@ -31,6 +31,9 @@ div#loading {
     transform: translate(-50%, -50%);
     border-radius: 1rem;
     transition: .5s opacity;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
 }
 
 #loading-info.open {
@@ -42,6 +45,9 @@ div#loading {
     margin: 0 auto;
     background: #fff;
     border-radius: 1rem;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .icon-style {

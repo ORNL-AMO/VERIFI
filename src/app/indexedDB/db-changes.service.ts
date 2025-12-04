@@ -57,12 +57,6 @@ export class DbChangesService {
     private predictorDataDbService: PredictorDataDbService,
     private migratePredictorsService: MigratePredictorsService,
     private facilityReportsDbService: FacilityReportsDbService) {
-    this.loadingService.navigationAfterLoading.subscribe((context) => {
-      if (context === 'delete-facility') {
-        this.showFacilityDeletionToast();
-        this.loadingService.setContext(undefined);
-      }
-    });
   }
 
   async updateAccount(account: IdbAccount) {
@@ -394,10 +388,6 @@ export class DbChangesService {
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
     await this.selectAccount(selectedAccount, false);
     this.loadingService.isLoadingComplete.next(true);
-  }
-
-  showFacilityDeletionToast() {
-    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
   }
 
   async updateDataNewFacility(newFacility: IdbFacility) {

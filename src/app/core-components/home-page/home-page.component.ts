@@ -56,12 +56,13 @@ export class HomePageComponent {
         try {
           let test = JSON.parse(JSON.stringify(reader.result));
           let tmpBackupFile: BackupFile = JSON.parse(test);
-          let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile);
+          let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);
           await this.dbChangesService.selectAccount(newAccount, false);
           let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
           this.accountDbService.allAccounts.next(allAccounts);
           await this.dbChangesService.selectAccount(newAccount, false);
+          this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
           this.loadingService.clearLoadingMessages();

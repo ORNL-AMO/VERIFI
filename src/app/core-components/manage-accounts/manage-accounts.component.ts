@@ -44,7 +44,6 @@ export class ManageAccountsComponent {
     this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'export-facilities-to-excel') {
         this.showFacilityExportToast();
-        this.loadingService.setContext(undefined);
       }
     });
   }

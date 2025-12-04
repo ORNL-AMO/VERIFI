@@ -43,11 +43,21 @@ export class FacilitiesListComponent {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
+
+    this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'delete-facility') {
+        this.showFacilityDeletionToast();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.facilitiesSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+  }
+
+  showFacilityDeletionToast() {
+    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
   }
 
   async addFacility() {

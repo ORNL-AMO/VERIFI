@@ -63,7 +63,6 @@ export class ImportBackupModalComponent implements OnInit {
     this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'import-account-backup' || context === 'import-facility-backup') {
         this.navigateToUrl();
-        this.loadingService.setContext(undefined);
       }
     });
   }
@@ -132,12 +131,12 @@ export class ImportBackupModalComponent implements OnInit {
     this.cancelImportBackup();
     if (this.importIsAccount) {
       this.loadingService.setContext('import-account-backup');
-      this.loadingService.setTitle("Importing backup file");
+      this.loadingService.setTitle("Importing account backup file");
       this.loadingService.setCurrentLoadingIndex(0);
       this.loadingService.addLoadingMessage("Adding account");
     } else {
       this.loadingService.setContext('import-facility-backup');
-      this.loadingService.setTitle("Importing backup file");
+      this.loadingService.setTitle("Importing facility backup file");
       this.loadingService.setCurrentLoadingIndex(0);
       this.loadingService.addLoadingMessage("Adding facility");
     }
@@ -170,7 +169,7 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importNewAccount(backupFile: BackupFile) {
     this.deleteDataService.pauseDelete.next(true);
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile);
+    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
     await this.dbChangesService.updateAccount(newAccount);
     await this.dbChangesService.selectAccount(newAccount, false);
     this.deleteDataService.pauseDelete.next(false);
@@ -190,7 +189,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewFacility(backupFile: BackupFile) {
-    let newFacility = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid);
+    let newFacility = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, 0);
     let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(currentAccount, false);
     this.dbChangesService.selectFacility(newFacility);

@@ -139,7 +139,7 @@ export class ElectronBackupFileComponent {
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;
         let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
+        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1);
         newAccount.dataBackupFilePath = backupPath;
         newAccount.sharedFileAuthor = sharedFileAuthor;
         newAccount.isSharedBackupFile = isSharedBackupFile;
@@ -149,6 +149,8 @@ export class ElectronBackupFileComponent {
         this.deleteDataService.pauseDelete.next(false);
         this.deleteDataService.gatherAndDelete();
         needUpdate = false;
+
+        this.loadingService.isLoadingComplete.next(true);
       }
     }
 

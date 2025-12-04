@@ -23,7 +23,6 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { checkSameMonth } from '../data-management/data-management-import/import-services/upload-helper-functions';
 
 
@@ -43,15 +42,8 @@ export class WeatherPredictorManagementService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private loadingService: LoadingService,
     private dbChangesService: DbChangesService,
-    private facilityDbService: FacilitydbService,
-    private toastNotificationService: ToastNotificationsService
+    private facilityDbService: FacilitydbService
   ) {
-    loadingService.navigationAfterLoading.subscribe((context) => {
-      if (context === 'updating-weather-predictors') {
-        this.showToast();
-        this.loadingService.setContext(undefined);
-      }
-    });
   }
 
   async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility): Promise<"success" | "error"> {
@@ -263,15 +255,5 @@ export class WeatherPredictorManagementService {
     }
     this.loadingService.isLoadingComplete.next(true);
     return results;
-  }
-
-  async showToast() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(selectedAccount, true);
-    if (this.hasWarning) {
-      this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
-    } else {
-      this.toastNotificationService.showToast("Weather Predictors Updated", "No gaps in data found while calculating weather predictors.", undefined, false, "alert-success")
-    }
   }
 }
