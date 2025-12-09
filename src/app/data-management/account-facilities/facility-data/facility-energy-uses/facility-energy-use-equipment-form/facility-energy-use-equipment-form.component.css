@@ -14,3 +14,12 @@
 .popup-header .fa-link{
     color: white;
 }
+
+span.badge.larger{
+    font-size: larger;
+}
+
+.float-right{
+    float: right;
+
+}

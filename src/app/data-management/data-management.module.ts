@@ -72,6 +72,7 @@ import { YearOptionsFilterPipe } from './account-facilities/facility-data/facili
 import { FacilityEnergyUsesSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary.component';
 import { FacilityEnergyUsesGroupSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component';
 import { FacilityEnergyUsesTimeSeriesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-time-series/facility-energy-uses-time-series.component';
+import { FormUtilityTypesIncludedPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/form-utility-types-included.pipe';
 
 
 @NgModule({
@@ -133,7 +134,8 @@ import { FacilityEnergyUsesTimeSeriesComponent } from './account-facilities/faci
     YearOptionsFilterPipe,
     FacilityEnergyUsesSummaryComponent,
     FacilityEnergyUsesGroupSummaryComponent,
-    FacilityEnergyUsesTimeSeriesComponent
+    FacilityEnergyUsesTimeSeriesComponent,
+    FormUtilityTypesIncludedPipe
   ],
   imports: [
     CommonModule,

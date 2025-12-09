@@ -26,7 +26,7 @@
                 </div>
             </div>
 
-            <div class="form-group row">
+            <!-- <div class="form-group row">
                 <label class="col-5 col-form-label" for="energySource">Utility Type</label>
                 <div class="col-7">
                     <select id="energySource" class="form-select" formControlName="energySource">
@@ -36,8 +36,8 @@
                         </option>
                     </select>
                 </div>
-            </div>
-            <div class="form-group row">
+            </div> -->
+            <!-- <div class="form-group row">
                 <label class="col-5 col-form-label" for="size">
                     {{ form.get('equipmentType').value | sizeLabel: form.get('energySource').value }}
                 </label>
@@ -54,7 +54,7 @@
                         </select>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <!-- <div class="form-group row">
                 <label class="col-5 col-form-label" for="units">Units</label>
                 <div class="col-7">
@@ -70,18 +70,58 @@
                 </div>
             </div>
             <div class="row">
-                <label class="col-5 col-form-label">Connect Utility Meter</label>
+                <label class="col-5 col-form-label">Connect Utility Meter Group</label>
                 <div class="col-7">
                     <button class="btn action-btn" (click)="openLinkMeterTable()" type="button">
                         <span class="fa fa-link"></span>
-                        @if(form.controls.utilityMeterId.value){
-                        {{ linkedMeter.name }}
+                        @if(form.controls.utilityMeterGroupId.value){
+                        {{ linkedMeterGroup.name }}
                         }@else{
-                        Select Meter
+                        Select Meter Group
                         }
                     </button>
                 </div>
             </div>
+            @for (includedSource of includedSources; track $index) {
+            <hr>
+            <div class="form-group row mt-2">
+                <label class="col-12 col-form-label">
+                    <span class="badge me-1 larger"
+                        [ngStyle]="{'background-color': includedSource.source | meterSourceColor}">{{includedSource.source}}
+                        Data</span>
+                    <button type="button" class="btn-close float-right" aria-label="Close"
+                        (click)="removeUtilityType(includedSource)"></button>
+                </label>
+            </div>
+            <div class="form-group row" [formGroup]="$any(form.get('utilityData_' + includedSource.controlName))">
+                <label class="col-5 col-form-label" for="size_{{includedSource.controlName}}">
+                    {{ form.get('equipmentType').value | sizeLabel: includedSource.source }}
+                </label>
+                <div class="col-7 ">
+                    <div class="input-group">
+                        <input id="size_{{includedSource.controlName}}" class="form-control" type="number"
+                            formControlName="size" onfocus="this.select();" min="0">
+                        <select class="input-group-text" id="units_{{includedSource.controlName}}" name="units"
+                            formControlName="units">
+                            <option *ngFor="let option of (includedSource.source | equipmentUnitOptions )"
+                                [ngValue]="option.value">
+                                <span [innerHTML]="option.value | settingsLabel"></span>
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row" [formGroup]="$any(form.get('utilityData_' + includedSource.controlName))">
+                <label class="col-5 col-form-label" for="numberOfEquipment_{{includedSource.controlName}}">Number of
+                    Equipment</label>
+                <div class="col-7">
+                    <input id="numberOfEquipment_{{includedSource.controlName}}" class="form-control" type="number"
+                        formControlName="numberOfEquipment" onfocus="this.select();" min="0">
+                </div>
+            </div>
+            }
+            <hr>
+            <a class="click-link float-right">Add Utility Data</a>
         </div>
     </div>
 </form>
@@ -90,34 +130,42 @@
 <!--LINK METER TO ENERGY EQUIPMENT MODAL-->
 <div [ngClass]="{'windowOverlay': showLinkMeterModal}"></div>
 <div class="popup" [class.open]="showLinkMeterModal">
-    <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter to Equipment
-        <button class="item-right" (click)="closeLinkMeter()">x</button>
+    <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter Group to Equipment
+        <button class="item-right" (click)="closeLinkMeterGroup()">x</button>
     </div>
     <div class="popup-body">
         <table class="table table-bordered table-hover">
             <thead>
                 <tr>
                     <th></th>
-                    <th>Meter Name</th>
-                    <th>Source</th>
-                    <th>Fuel</th>
-                    <th>Collection Units</th>
+                    <th>Meter Group Name</th>
+                    <th>Group Type</th>
+                    <th>Sources</th>
                 </tr>
             </thead>
             <tbody>
-                @for (meter of utilityMeters; track $index) {
-                <tr class="clickable" (click)="changeLinkedMeter(meter)">
+                @for (meterGroup of utilityMeterGroups; track $index) {
+                <tr class="clickable" (click)="changeLinkedMeterGroup(meterGroup)">
                     <td class="text-center">
-                        @if(meter.guid == form.controls.utilityMeterId.value){
+                        @if(meterGroup.guid == form.controls.utilityMeterGroupId.value){
                         <span class="fa fa-circle-check"></span>
                         }@else{
                         <span class="fa fa-circle"></span>
                         }
                     </td>
-                    <td>{{ meter.name }}</td>
-                    <td>{{ meter.source }}</td>
+                    <td>{{ meterGroup.name }}</td>
                     <td>
-                        <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
+                        {{ meterGroup.groupType }}
+                    </td>
+                    <td>
+                        @let meterGroupSources = meterGroup.guid | meterGroupSourcesList: utilityMeters;
+
+                        @for(source of meterGroupSources; track $index) {
+                        <span class="badge me-1"
+                            [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
+                        }
+
+                        <!-- <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
                             <ng-container *ngIf="meter.scope != 2">
                                 {{meter.fuel}}
                             </ng-container>
@@ -127,21 +175,7 @@
                         </ng-container>
                         <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
                             &mdash;
-                        </ng-container>
-                    </td>
-
-                    <td>
-                        <ng-container *ngIf="meter.scope != 2">
-                            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
-                        </ng-container>
-                        <ng-container *ngIf="meter.scope == 2">
-                            <ng-container *ngIf="meter.vehicleCollectionType == 1">
-                                <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
-                            </ng-container>
-                            <ng-container *ngIf="meter.vehicleCollectionType == 2">
-                                <span [innerHTML]="meter.vehicleDistanceUnit | settingsLabel"></span>
-                            </ng-container>
-                        </ng-container>
+                        </ng-container> -->
                     </td>
                 </tr>
                 }
@@ -151,7 +185,8 @@
 
     </div>
     <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-danger" (click)="cancelLinkMeter()">Unlink Meter</button>
-        <button class="btn btn-success" (click)="closeLinkMeter()" [disabled]="!form.controls.utilityMeterId.value">Link Meter</button>
+        <button class="btn btn-danger" (click)="cancelLinkMeterGroup()">Unlink Meter Group</button>
+        <button class="btn btn-success" (click)="closeLinkMeterGroup()"
+            [disabled]="!form.controls.utilityMeterGroupId.value">Link Meter Group</button>
     </div>
 </div>

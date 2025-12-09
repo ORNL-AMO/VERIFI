@@ -7,14 +7,17 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     facilityId: string,
     accountId: string,
     energyUseGroupId: string,
-    utilityMeterId: string,
+    utilityMeterGroupId: string,
     name: string,
-    energySource: MeterSource,
-    size: number,
-    units: string,
     notes: string,
     energyUseData: Array<EnergyEquipmentEnergyUseData>,
-    equipmentType: EquipmentType
+    equipmentType: EquipmentType,
+    utilityData: Array<{
+        energySource: MeterSource,
+        size: number,
+        numberOfEquipment: number,
+        units: string
+    }>
 }
 
 export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup): IdbFacilityEnergyUseEquipment {
@@ -24,14 +27,12 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         facilityId: energyUseGroup.facilityId,
         accountId: energyUseGroup.accountId,
         energyUseGroupId: energyUseGroup.guid,
-        utilityMeterId: '',
+        utilityMeterGroupId: '',
         name: '',
-        energySource: 'Electricity',
-        size: undefined,
-        units: '',
         notes: '',
         energyUseData: [],
-        equipmentType: 'Other'
+        equipmentType: 'Other',
+        utilityData: [],
     }
 }
 
@@ -41,7 +42,7 @@ export interface EnergyEquipmentEnergyUseData {
     hoursOfOperation: number,
     loadFactor: number,
     dutyFactor: number,
-    efficiency:number,
+    efficiency: number,
     overrideEnergyUse: boolean
 }
 

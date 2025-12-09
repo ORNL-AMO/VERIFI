@@ -15,7 +15,7 @@
 <div class="row">
     <div class="col-12">
         <p class="bold">Consumption Data</p>
-        @if(energyUseEquipment.energyUseData.length != 0){
+        <!-- @if(energyUseEquipment.energyUseData.length != 0){
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -50,7 +50,7 @@
                         <button class="btn-close" (click)="removeEnergyUseData(data)"></button>
                     </td>
                     <td>
-                        <!-- {{data.year}} -->
+                        <!-- {{data.year}} --
                         <select class="form-select" [(ngModel)]="data.year" (change)="setDataChanged()">
                             @for (yearOption of yearOptions | yearOptionsFilter: energyUseEquipment.energyUseData:data.year; track $index) {
                             <option [value]="yearOption.year">
@@ -92,7 +92,7 @@
                             <input class="form-control" type="number" [(ngModel)]="data.energyUse" min="0"
                                 (input)="setDataChanged()">
                             <span class="input-group-text">
-                                <!--TODO: use correct energy units based on selection for size-->
+                                <!--TODO: use correct energy units based on selection for size--
                                 {{energyUseEquipment.units}}
                             </span>
                         </div>
@@ -149,7 +149,7 @@
                     Consumption Data</button>
             </div>
         </div>
-        }
+        } -->
     </div>
 </div>
 <!-- </form> -->
