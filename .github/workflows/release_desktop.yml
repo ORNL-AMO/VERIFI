@@ -108,7 +108,7 @@ jobs:
       - name: Build
         run: npm run build-prod-electron
       - name: Package [Mac]
-        run: npm run dist-nopublish
+        run: npm run dist-nopublish -- --mac --universal
       - name: Notarize
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
