@@ -51,7 +51,7 @@ jobs:
 
   bundle_mac:
     if: github.ref_name == 'master'
-    runs-on: macos-13
+    runs-on: macos-14
     needs: [build]
     steps:
       - name: Checkout
@@ -108,7 +108,7 @@ jobs:
       - name: Build
         run: npm run build-prod-electron
       - name: Package [Mac]
-        run: npm run dist-nopublish
+        run: npm run dist-nopublish -- --mac --universal
       - name: Notarize
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
