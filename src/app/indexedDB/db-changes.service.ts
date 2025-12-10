@@ -345,7 +345,7 @@ export class DbChangesService {
   async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount) {
     this.loadingService.setLoadingStatus(true);
 
-    // Delete all info associated with account
+    // Delete all info associated with facility
     this.loadingService.setLoadingMessage("Deleting Facility Predictors...");
     await this.predictorsDbServiceDeprecated.deleteAllFacilityPredictors(facility.guid);
     this.loadingService.setLoadingMessage("Deleting Facility Predictor Data...");
@@ -361,7 +361,7 @@ export class DbChangesService {
     await this.facilityReportsDbService.deleteFacilityReports(facility.guid);
     this.loadingService.setLoadingMessage("Updating Account Reports...")
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
-    this.loadingService.setLoadingMessage("Deleting Account Analysis Items...")
+    this.loadingService.setLoadingMessage("Deleting Facility Analysis Items...")
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
     this.loadingService.setLoadingMessage('Updating Account Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();

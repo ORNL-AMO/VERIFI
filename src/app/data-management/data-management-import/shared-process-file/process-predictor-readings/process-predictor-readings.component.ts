@@ -7,6 +7,7 @@ import { FileReference } from 'src/app/data-management/data-management-import/im
 import * as _ from 'lodash';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-process-predictor-readings',
@@ -21,7 +22,16 @@ export class ProcessPredictorReadingsComponent {
   predictorDataSummaries: Array<PredictorDataSummary>;
   predictorsExist: boolean;
   skipAll: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService) { }
+  showModal: boolean = false;
+  readingDifferencesMap: { [predictorId: string]: Array<PredictorReadingComparison> } = {};
+  selectedPredictorName: string;
+  selectedPredictorUnit: string;
+  comparisonSummaryWithDifferences: Array<PredictorReadingComparison> = [];
+  orderDataField: string = 'readDate';
+  orderByDirection: 'asc' | 'desc' = 'desc';
+
+  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
+    private predictorDataDbService: PredictorDataDbService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -29,11 +39,69 @@ export class ProcessPredictorReadingsComponent {
       this.fileReference = this.dataManagementService.getFileReferenceById(id);
       this.predictorsExist = this.fileReference.predictors.length != 0 || this.fileReference.predictorData.length != 0;
       this.setSummary();
+      this.comparePredictorReadings();
     });
   }
 
   ngOnDestroy() {
     this.paramsSub.unsubscribe();
+  }
+
+  comparePredictorReadings() {
+    this.readingDifferencesMap = {};
+
+    this.fileReference.predictorData.forEach(newData => {
+      const key = `${newData.predictorId}_${newData.facilityId}`;
+      if (!this.readingDifferencesMap[key]) {
+        this.readingDifferencesMap[key] = [];
+      }
+
+      const existingPredictorReadings = this.predictorDataDbService.accountPredictorData.getValue().filter(data => (data.predictorId === newData.predictorId && data.facilityId === newData.facilityId));
+
+      existingPredictorReadings.forEach(oldData => {
+        const oldDateObj = new Date(oldData.date);
+        const newDateObj = new Date(newData.date);
+        const existingDateStr = oldDateObj.getFullYear() + '-' + (oldDateObj.getMonth() + 1) + '-' + oldDateObj.getDate();
+        const newDateStr = newDateObj.getFullYear() + '-' + (newDateObj.getMonth() + 1) + '-' + newDateObj.getDate();
+
+        if (existingDateStr === newDateStr) {
+          let difference: number = Math.abs(newData.amount - oldData.amount);
+          let percentageDifference: number = (oldData.amount !== 0) ? (difference / oldData.amount * 100) : null;
+          if (difference !== 0) {
+            this.readingDifferencesMap[key].push({
+              readDate: new Date(newData.date),
+              oldReading: oldData.amount,
+              newReading: newData.amount,
+              difference: difference,
+              percentageDifference: percentageDifference
+            });
+          }
+        }
+      });
+    });
+  }
+
+  openModal(summary: PredictorDataSummary) {
+    this.showModal = true;
+    this.selectedPredictorName = summary.predictor.name;
+    this.selectedPredictorUnit = summary.predictor.unit;
+    this.comparisonSummaryWithDifferences = this.readingDifferencesMap[summary.predictor.guid + '_' + summary.predictor.facilityId];
+  }
+
+  hideModal() {
+    this.showModal = false;
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
   }
 
   setSummary() {
@@ -80,7 +148,7 @@ export class ProcessPredictorReadingsComponent {
           })
         }
       }
-    })
+    });
     this.predictorDataSummaries = dataSummaries;
   }
 
@@ -101,4 +169,12 @@ export interface PredictorDataSummary {
   newStart: Date,
   newEnd: Date,
   skipExisting: boolean
+}
+
+export interface PredictorReadingComparison {
+  readDate?: Date;
+  oldReading?: number;
+  newReading?: number;
+  difference: number;
+  percentageDifference: number;
 }

@@ -6,7 +6,6 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisService } from '../analysis.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
@@ -28,7 +27,6 @@ export class AnalysisDashboardComponent implements OnInit {
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  showDetail: boolean;
   showDetailSub: Subscription;
   newAnalysisCategory: AnalysisCategory = 'energy';
   displayNewAnalysis: boolean = false;
@@ -40,7 +38,6 @@ export class AnalysisDashboardComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisService: AnalysisService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private analyticsService: AnalyticsService,
     private predictorDbService: PredictorDbService,
@@ -59,15 +56,10 @@ export class AnalysisDashboardComponent implements OnInit {
       this.selectedFacility = val;
       this.setHasEnergyAndWater();
     });
-
-    this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
-      this.showDetail = showDetail;
-    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
-    this.showDetailSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
 
@@ -86,10 +78,6 @@ export class AnalysisDashboardComponent implements OnInit {
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
-  }
-
-  saveShowDetails() {
-    this.analysisService.showDetail.next(this.showDetail);
   }
 
   async openCreateAnalysis() {

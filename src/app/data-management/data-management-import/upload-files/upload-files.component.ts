@@ -45,7 +45,7 @@ export class UploadFilesComponent {
     let files: FileList = (event as HTMLInputElement).files;
     if (files) {
       if (files.length !== 0) {
-        let regex3 = /.xlsx$/;
+        let regex3 =  /\.(xlsx|xls)$/i;
         this.loadingService.setLoadingMessage('Uploading Files...');
         this.loadingService.setLoadingStatus(true);
         for (let index = 0; index < files.length; index++) {

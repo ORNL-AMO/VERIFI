@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
@@ -9,6 +9,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { FileReference } from '../../data-management-import/import-services/upload-data-models';
 
 @Component({
   selector: 'app-update-weather-predictors-modal',
@@ -18,6 +19,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 })
 export class UpdateWeatherPredictorsModalComponent {
   @Output('emitClose') emitClose = new EventEmitter<void>();
+  @Input() fileReference: FileReference;
 
 
   showWeatherPredictorModal: boolean = false;
@@ -70,6 +72,9 @@ export class UpdateWeatherPredictorsModalComponent {
   setFacilityList() {
     this.facilityList = new Array();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    if(this.fileReference){
+      facilities = this.fileReference.importFacilities;
+    }
     facilities.forEach(facility => {
       let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(facility.guid);
       let weatherPredictors: Array<IdbPredictor> = facilityPredictors.filter(predictor => {

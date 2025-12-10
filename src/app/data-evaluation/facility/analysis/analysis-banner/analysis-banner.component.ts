@@ -36,7 +36,7 @@ export class AnalysisBannerComponent implements OnInit {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
       this.analysisItem = item;
       this.isDisabled = false;
-      if (this.analysisItem.setupErrors.groupsHaveErrors) {
+      if (this.analysisItem?.setupErrors.groupsHaveErrors) {
         this.checkButtonState();
       }
     })
