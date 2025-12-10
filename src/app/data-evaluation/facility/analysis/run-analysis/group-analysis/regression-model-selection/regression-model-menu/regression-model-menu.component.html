@@ -87,14 +87,32 @@
             </div>
             <div class="p-2" *ngIf="!group.userDefinedModel">
                 <div class="alert alert-info">
-                    Manually select production variables and define model coefficients and constants. Click below to evaluate the model and data validity.
+                    Manually select production variables and define model coefficients and constants. Click below to
+                    evaluate the model and data validity.
                 </div>
 
                 <div class="d-flex flex-column justify-content-center align-items-center">
                     <div class="p-0">
-                        <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled" (click)="generateUserDefinedModel()">Evaluate Model</button>
+                        <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled"
+                            (click)="generateUserDefinedModel()">Evaluate Model</button>
                     </div>
                 </div>
+
+                <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center"
+                    *ngIf="!isDateRangeValid">
+                    End date must be after the start date. Please check the input values.
+                </div>
+
+                <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center"
+                    *ngIf="!isTwelveMonthSelected && isDateRangeValid">
+                    Model generation requires at least 12 months of data. Please check the input values.
+                </div>
+
+                <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center"
+                    *ngIf="!allMeterReadingsPresent || !allPredictorReadingsPresent">
+                    Data is missing within the provided date range. Please check the data.
+                </div>
+
             </div>
         </div>
     </div>
@@ -143,6 +161,20 @@
                     [disabled]="group.userDefinedModel">
             </div>
         </div>
+
+        <div class="row mb-2 sub-column" *ngIf="group.userDefinedModel">
+            <div class="col-6">
+                <label for="regressionModelYear">
+                    Model Year
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
+                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+        </div>
         <div class="row mb-2 sub-column" *ngIf="!group.userDefinedModel">
             <div class="col-6">
                 <label for="regressionModelStartMonth">
@@ -157,15 +189,42 @@
                 </select>
             </div>
         </div>
-        <div class="row sub-column">
+        <div class="row mb-2 sub-column" *ngIf="!group.userDefinedModel">
             <div class="col-6">
-                <label for="regressionModelYear">
-                    Model Year
+                <label for="regressionStartYear">
+                    Model Start Year
                 </label>
             </div>
             <div class="col-6">
-                <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
-                    [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
+                <select required class="form-select" id="regressionStartYear" id="regressionStartYear"
+                    [(ngModel)]="group.regressionStartYear" (change)="saveItem()">
+                    <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mb-2 sub-column" *ngIf="!group.userDefinedModel">
+            <div class="col-6">
+                <label for="regressionModelEndMonth">
+                    Model End Month
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-select" id="regressionModelEndMonth" id="regressionModelEndMonth"
+                    [(ngModel)]="group.regressionModelEndMonth" (change)="saveItem()">
+                    <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="row sub-column" *ngIf="!group.userDefinedModel">
+            <div class="col-6">
+                <label for="regressionEndYear">
+                    Model End Year
+                </label>
+            </div>
+            <div class="col-6">
+                <select required class="form-select" id="regressionEndYear" id="regressionEndYear"
+                    [(ngModel)]="group.regressionEndYear" (change)="saveItem()">
                     <option *ngFor="let year of yearOptions" [ngValue]="year">{{year}}</option>
                 </select>
             </div>

@@ -63,6 +63,9 @@ export class AnalysisValidationService {
     let missingRegressionConstant: boolean = false;
     let missingRegressionModelYear: boolean = false;
     let missingRegressionModelStartMonth: boolean = false;
+    let missingRegressionStartYear: boolean = false;
+    let missingRegressionModelEndMonth: boolean = false;
+    let missingRegressionEndYear: boolean = false;
     let missingRegressionModelSelection: boolean = false;
     let missingRegressionPredictorCoef: boolean = false;
     let invalidAverageBaseload: boolean = false;
@@ -82,6 +85,9 @@ export class AnalysisValidationService {
         missingRegressionModelYear = this.checkValueValid(group.regressionModelYear) == false;
         if(!group.userDefinedModel) {
           missingRegressionModelStartMonth = this.checkValueValid(group.regressionModelStartMonth) == false;
+          missingRegressionStartYear = this.checkValueValid(group.regressionStartYear) == false;
+          missingRegressionModelEndMonth = this.checkValueValid(group.regressionModelEndMonth) == false;
+          missingRegressionEndYear = this.checkValueValid(group.regressionEndYear) == false;
         }
         for (let index = 0; index < group.predictorVariables.length; index++) {
           let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
@@ -130,7 +136,7 @@ export class AnalysisValidationService {
         }
       }
     }
-    let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelStartMonth || missingRegressionModelSelection ||
+    let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelStartMonth || missingRegressionStartYear || missingRegressionModelEndMonth || missingRegressionEndYear || missingRegressionModelSelection ||
       missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear || missingBankingAppliedYear ||
       invalidBankingYears);
     return {
@@ -139,6 +145,9 @@ export class AnalysisValidationService {
       missingRegressionConstant: missingRegressionConstant,
       missingRegressionModelYear: missingRegressionModelYear,
       missingRegressionModelStartMonth: missingRegressionModelStartMonth,
+      missingRegressionStartYear: missingRegressionStartYear,
+      missingRegressionModelEndMonth: missingRegressionModelEndMonth,
+      missingRegressionEndYear: missingRegressionEndYear,
       missingRegressionModelSelection: missingRegressionModelSelection,
       missingRegressionPredictorCoef: missingRegressionPredictorCoef,
       invalidAverageBaseload: invalidAverageBaseload,

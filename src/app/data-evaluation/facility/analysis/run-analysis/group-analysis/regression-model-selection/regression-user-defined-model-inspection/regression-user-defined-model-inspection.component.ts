@@ -198,22 +198,20 @@ export class RegressionUserDefinedModelInspectionComponent {
           }
         }
 
-        const index = this.inspectedMonthlyAnalysisSummaryData.findIndex(data => {
-          const dateObject = data.date;
-          return (
-            dateObject.getMonth() === this.selectedGroup.regressionModelStartMonth &&
-            dateObject.getFullYear() === this.selectedGroup.regressionModelYear
-          );
-        });
+        const startMonth = this.selectedGroup.regressionModelStartMonth;;
+        const startYear = this.selectedGroup.regressionStartYear;
+        const endMonth = this.selectedGroup.regressionModelEndMonth;
+        const endYear = this.selectedGroup.regressionEndYear;
 
         let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = [];
-        if (index != -1) {
-          for (let i = 0; i < 12; i++) {
-            const indexToAdd = index + i;
-            if (indexToAdd < this.inspectedMonthlyAnalysisSummaryData.length) {
-              potentialModelYearData.push(this.inspectedMonthlyAnalysisSummaryData[indexToAdd]);
-            }
-          }
+        if(this.inspectedMonthlyAnalysisSummaryData) {
+          potentialModelYearData = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
+            const date = data.date;
+            return(
+              (date.getFullYear() > startYear || (date.getFullYear() == startYear && date.getMonth() >= startMonth)) &&
+              (date.getFullYear() < endYear || (date.getFullYear() == endYear && date.getMonth() <= endMonth))
+            );
+          });
         }
 
         var trace2 = {
