@@ -11,7 +11,7 @@
     font-size: 1.2rem;
 }
 
-.popup-header .fa-link{
+.popup-header .fa-link, .popup-header .fa-plus{
     color: white;
 }
 

@@ -3,7 +3,7 @@
 <div class="d-flex w-100 justify-content-end">
     <div>
         <button class="btn btn-primary me-2" (click)="saveChanges()"
-            [disabled]="form.invalid || (form.pristine && !dataChanged)">
+            [disabled]="form.invalid || !dataChanged">
             <span class="fa fa-save"></span>
             Save Changes</button>
     </div>

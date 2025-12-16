@@ -1,5 +1,4 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { UtilityType } from './equipmentTypes';
 import { EnergyUnitOptions, PowerUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 
@@ -10,21 +9,21 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 export class EquipmentUnitOptionsPipe implements PipeTransform {
 
   //TODO: Meter source and Utility Type don't have same properties
-  transform(utilityType: UtilityType | MeterSource): Array<UnitOption> {
+  transform(utilityType: MeterSource): Array<UnitOption> {
     if(utilityType == 'Electricity' || utilityType == 'Natural Gas'){
       return [...EnergyUnitOptions, ...PowerUnitOptions];
-    }else if(utilityType == 'Other Fuels'){
+    }else if(utilityType == 'Other Fuels' || utilityType == 'Other Energy'){
       return [...EnergyUnitOptions, ...PowerUnitOptions, ...VolumeLiquidOptions, ...VolumeLiquidOptions];
     }
     //unused
-    else if(utilityType == 'Water' || utilityType == 'Waste Water'){
+    else if(utilityType == 'Water Discharge' || utilityType == 'Water Intake'){
       return [...VolumeLiquidOptions, ...PowerUnitOptions];
     } 
-    else if(utilityType == 'Compressed Air'){
-      return [...PowerUnitOptions, ...VolumeGasOptions];
-    } else if(utilityType == 'Steam'){
-      return [...EnergyUnitOptions, ...VolumeGasOptions];
-    }
+    // else if(utilityType == 'Compressed Air'){
+    //   return [...PowerUnitOptions, ...VolumeGasOptions];
+    // } else if(utilityType == 'Steam'){
+    //   return [...EnergyUnitOptions, ...VolumeGasOptions];
+    // }
     return [];
   }
 

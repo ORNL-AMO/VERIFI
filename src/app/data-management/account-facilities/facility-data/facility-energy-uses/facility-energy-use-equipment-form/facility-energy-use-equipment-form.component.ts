@@ -33,6 +33,8 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
   linkedMeterGroup: IdbUtilityMeterGroup;
   includedSources: Array<{ source: MeterSource, controlName: string }> = [];
+  showUtilityTypeModal: boolean = false;
+  availableSources: Array<MeterSource>;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utiltiyMeterDbService: UtilityMeterdbService,
     private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService
@@ -46,6 +48,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
       this.utilityMeterGroups = groups;
       this.setLinkedMeterGroup();
     });
+    this.setIncludedSources();
   }
 
   ngOnDestroy() {
@@ -113,7 +116,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
     });
     formSources.forEach(formSource => {
       if (!sources.includes(formSource as MeterSource)) {
-        console.log('remove...?')
         //remove from form
         this.form.removeControl('utilityData_' + formSource.replace(/\s+/g, '_'));
       }
@@ -131,10 +133,33 @@ export class FacilityEnergyUseEquipmentFormComponent {
         this.includedSources.push(source);
       }
     }
+    this.setAvailableSources();
   }
 
   removeUtilityType(sourceToRemove: { source: MeterSource, controlName: string }) {
     this.facilityEnergyUseEquipmentFormService.removeUtilityDataFromForm(this.form, sourceToRemove.source);
     this.setIncludedSources();
   }
+
+  openAddUtilityModal() {
+    this.showUtilityTypeModal = true;
+  }
+
+  closeAddUtilityModal() {
+    this.showUtilityTypeModal = false;
+  }
+
+  setAvailableSources() {
+    let selectedSources: Array<MeterSource> = this.includedSources.map(sourceObj => { return sourceObj.source; });
+    this.availableSources = AllSources.filter(source => {
+      return !selectedSources.includes(source);
+    });
+  }
+
+  addUtilityType(sourceToAdd: MeterSource) {
+    this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, sourceToAdd);
+    this.setIncludedSources();
+    this.closeAddUtilityModal();
+  }
+
 }

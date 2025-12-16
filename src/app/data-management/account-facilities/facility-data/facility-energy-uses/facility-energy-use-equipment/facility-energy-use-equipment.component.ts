@@ -55,6 +55,9 @@ export class FacilityEnergyUseEquipmentComponent {
       this.energyUseEquipment = this.facilityEnergyUseEquipmentDbService.getByGuid(equipmentId);
       if (this.energyUseEquipment) {
         this.form = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(this.energyUseEquipment, false);
+        this.form.valueChanges.subscribe(() => {
+          this.dataChanged = true;
+        });
       } else {
         this.goToGroupList();
       }

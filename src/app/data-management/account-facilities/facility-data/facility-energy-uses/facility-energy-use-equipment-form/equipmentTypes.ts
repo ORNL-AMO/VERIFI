@@ -1,22 +1,23 @@
+import { MeterSource } from "src/app/models/constantsAndTypes";
 import { EquipmentType } from "src/app/models/idbModels/facilityEnergyUseEquipment";
 
-export type UtilityType = 'Electricity' | 'Natural Gas' | 'Other Fuels' | 'Water' | 'Waste Water' | 'Steam' | 'Compressed Air';
+// export type UtilityType = 'Electricity' | 'Natural Gas' | 'Other Fuels' | 'Water' | 'Waste Water' | 'Steam' | 'Compressed Air';
 
 export const EquipmentTypes: Array<EquipmentType> = ["Pump", "Fan", "Process Heating", "Compressed Air", "Steam",
     "Process Cooling", "Motor", "Lighting", "HVAC", "Mobile", "Other"];
 
-export function getUtilityTypesForEquipmentType(equipmentType: EquipmentType): Array<UtilityType> {
+export function getUtilityTypesForEquipmentType(equipmentType: EquipmentType): Array<MeterSource> {
     switch (equipmentType) {
         case "Pump":
             return ['Electricity'];
         case "Fan":
             return ['Electricity'];
         case "Process Heating":
-            return ['Natural Gas', 'Other Fuels', 'Electricity', 'Steam'];
+            return ['Natural Gas', 'Other Fuels', 'Electricity', 'Other Energy'];
         case "Compressed Air":
-            return ['Electricity', 'Compressed Air'];
+            return ['Electricity', 'Other Energy'];
         case "Steam":
-            return ['Natural Gas', 'Other Fuels', 'Electricity', 'Steam'];
+            return ['Natural Gas', 'Other Fuels', 'Electricity', 'Other Energy'];
         case "Process Cooling":
             return ['Electricity'];
         case "Motor":
@@ -29,7 +30,7 @@ export function getUtilityTypesForEquipmentType(equipmentType: EquipmentType): A
         //     return { equipmentType: type, utilityTypes: ['Electricity', 'Natural Gas', 'Other Fuels'],
         // defaultUnit: 'kW'};
         case "Other":
-            return ['Electricity', 'Natural Gas', 'Other Fuels', 'Steam', 'Compressed Air'];
+            return ['Electricity', 'Natural Gas', 'Other Fuels', 'Other Energy'];
 
     }
 }

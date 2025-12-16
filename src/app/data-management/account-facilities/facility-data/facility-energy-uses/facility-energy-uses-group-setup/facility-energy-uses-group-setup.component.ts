@@ -80,6 +80,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
     this.loadingService.setLoadingMessage('Adding Energy Use Groups and Equipment...');
     this.loadingService.setLoadingStatus(true);
     for (let group of this.energyUseGroups) {
+      console.log(group);
       let newGroup: IdbFacilityEnergyUseGroup = {
         accountId: group.accountId,
         facilityId: group.facilityId,

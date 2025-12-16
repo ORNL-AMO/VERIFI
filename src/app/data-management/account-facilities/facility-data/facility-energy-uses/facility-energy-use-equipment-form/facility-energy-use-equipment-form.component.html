@@ -25,43 +25,6 @@
                     </select>
                 </div>
             </div>
-
-            <!-- <div class="form-group row">
-                <label class="col-5 col-form-label" for="energySource">Utility Type</label>
-                <div class="col-7">
-                    <select id="energySource" class="form-select" formControlName="energySource">
-                        <option *ngFor="let sourceOption of (form.get('equipmentType').value | utilityTypeOptions)"
-                            [ngValue]="sourceOption">
-                            {{sourceOption}}
-                        </option>
-                    </select>
-                </div>
-            </div> -->
-            <!-- <div class="form-group row">
-                <label class="col-5 col-form-label" for="size">
-                    {{ form.get('equipmentType').value | sizeLabel: form.get('energySource').value }}
-                </label>
-                <div class="col-7">
-                    <div class="input-group">
-                        <input id="size" class="form-control" type="number" formControlName="size"
-                            onfocus="this.select();" min="0">
-
-                        <select class="input-group-text" id="units" name="units" formControlName="units">
-                            <option *ngFor="let option of (form.get('energySource').value| equipmentUnitOptions )"
-                                [ngValue]="option.value">
-                                <span [innerHTML]="option.value | settingsLabel"></span>
-                            </option>
-                        </select>
-                    </div>
-                </div>
-            </div> -->
-            <!-- <div class="form-group row">
-                <label class="col-5 col-form-label" for="units">Units</label>
-                <div class="col-7">
-                    <input id="units" class="form-control" type="text" formControlName="units" onfocus="this.select();"
-                        minlength="0" maxlength="50">
-                </div>
-            </div> -->
             <div class="form-group row">
                 <label class="col-5 col-form-label" for="equipmentNotes">Notes</label>
                 <div class="col-7">
@@ -95,7 +58,7 @@
             </div>
             <div class="form-group row" [formGroup]="$any(form.get('utilityData_' + includedSource.controlName))">
                 <label class="col-5 col-form-label" for="size_{{includedSource.controlName}}">
-                    {{ form.get('equipmentType').value | sizeLabel: includedSource.source }}
+                    {{ form.get('equipmentType').value | sizeLabel }}
                 </label>
                 <div class="col-7 ">
                     <div class="input-group">
@@ -121,14 +84,19 @@
             </div>
             }
             <hr>
-            <a class="click-link float-right">Add Utility Data</a>
+            @if(availableSources.length > 0){
+            <a class="click-link float-right" (click)="openAddUtilityModal()">
+                <span class="fa fa-plus me-1"></span>
+                Add Utility Type
+            </a>
+            }
         </div>
     </div>
 </form>
 
 
+<div [ngClass]="{'windowOverlay': showLinkMeterModal || showUtilityTypeModal}"></div>
 <!--LINK METER TO ENERGY EQUIPMENT MODAL-->
-<div [ngClass]="{'windowOverlay': showLinkMeterModal}"></div>
 <div class="popup" [class.open]="showLinkMeterModal">
     <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter Group to Equipment
         <button class="item-right" (click)="closeLinkMeterGroup()">x</button>
@@ -188,5 +156,23 @@
         <button class="btn btn-danger" (click)="cancelLinkMeterGroup()">Unlink Meter Group</button>
         <button class="btn btn-success" (click)="closeLinkMeterGroup()"
             [disabled]="!form.controls.utilityMeterGroupId.value">Link Meter Group</button>
+    </div>
+</div>
+
+
+<div class="popup" [class.open]="showUtilityTypeModal">
+    <div class="popup-header"><span class="fa fa-plus"></span> Add Utility Type to Equipment
+        <button class="item-right" (click)="closeAddUtilityModal()">x</button>
+    </div>
+    <div class="popup-body d-flex flex-wrap justify-content-center">
+        @for (source of availableSources; track $index) {
+        <div class="p-1">
+            <button class="btn" (click)="addUtilityType(source)" type="button"
+                [ngStyle]="{'background-color': source | meterSourceColor}">
+                <span class="fa fa-plus me-1"></span>
+                {{source}}
+            </button>
+        </div>
+        }
     </div>
 </div>
