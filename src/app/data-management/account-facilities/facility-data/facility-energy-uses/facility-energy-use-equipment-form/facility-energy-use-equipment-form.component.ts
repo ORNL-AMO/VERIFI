@@ -7,7 +7,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { Subscription } from 'rxjs';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
+import { AllSources, EnergySources, MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService } from './facility-energy-use-equipment-form.service';
 
@@ -45,7 +45,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
       this.utilityMeters = meters;
     });
     this.utilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(groups => {
-      this.utilityMeterGroups = groups;
+      this.utilityMeterGroups = groups.filter(group => { return group.groupType == 'Energy' });
       this.setLinkedMeterGroup();
     });
     this.setIncludedSources();
@@ -126,7 +126,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
   setIncludedSources() {
     let sources: Array<{
       source: MeterSource, controlName: string
-    }> = AllSources.map(source => { return { source: source, controlName: source.replace(/\s+/g, '_') }; });
+    }> = EnergySources.map(source => { return { source: source, controlName: source.replace(/\s+/g, '_') }; });
     this.includedSources = [];
     for (let source of sources) {
       if (this.form.contains('utilityData_' + source.controlName)) {
@@ -151,7 +151,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
   setAvailableSources() {
     let selectedSources: Array<MeterSource> = this.includedSources.map(sourceObj => { return sourceObj.source; });
-    this.availableSources = AllSources.filter(source => {
+    this.availableSources = EnergySources.filter(source => {
       return !selectedSources.includes(source);
     });
   }

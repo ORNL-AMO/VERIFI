@@ -48,13 +48,19 @@
             @for (includedSource of includedSources; track $index) {
             <hr>
             <div class="form-group row mt-2">
-                <label class="col-12 col-form-label">
-                    <span class="badge me-1 larger"
-                        [ngStyle]="{'background-color': includedSource.source | meterSourceColor}">{{includedSource.source}}
-                        Data</span>
-                    <button type="button" class="btn-close float-right" aria-label="Close"
-                        (click)="removeUtilityType(includedSource)"></button>
-                </label>
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        <label class="col-12 col-form-label">
+                            <span class="badge me-1 larger"
+                                [ngStyle]="{'background-color': includedSource.source | meterSourceColor}">{{includedSource.source}}
+                                Data</span>
+                        </label>
+                    </div>
+                    <div>
+                        <button type="button" class="btn-close" aria-label="Close"
+                            (click)="removeUtilityType(includedSource)"></button>
+                    </div>
+                </div>
             </div>
             <div class="form-group row" [formGroup]="$any(form.get('utilityData_' + includedSource.controlName))">
                 <label class="col-5 col-form-label" for="size_{{includedSource.controlName}}">
