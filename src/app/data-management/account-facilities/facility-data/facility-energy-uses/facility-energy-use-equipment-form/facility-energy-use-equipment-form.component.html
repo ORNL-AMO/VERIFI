@@ -69,9 +69,9 @@
                 <div class="col-7 ">
                     <div class="input-group">
                         <input id="size_{{includedSource.controlName}}" class="form-control" type="number"
-                            formControlName="size" onfocus="this.select();" min="0">
+                            formControlName="size" onfocus="this.select();" min="0" (input)="calculateEnergyUse()">
                         <select class="input-group-text" id="units_{{includedSource.controlName}}" name="units"
-                            formControlName="units">
+                            formControlName="units" (change)="calculateEnergyUse()">
                             <option *ngFor="let option of (includedSource.source | equipmentUnitOptions )"
                                 [ngValue]="option.value">
                                 <span [innerHTML]="option.value | settingsLabel"></span>
@@ -85,7 +85,8 @@
                     Equipment</label>
                 <div class="col-7">
                     <input id="numberOfEquipment_{{includedSource.controlName}}" class="form-control" type="number"
-                        formControlName="numberOfEquipment" onfocus="this.select();" min="0">
+                        formControlName="numberOfEquipment" onfocus="this.select();" min="0"
+                        (input)="calculateEnergyUse()">
                 </div>
             </div>
             @if(energyUseEquipment){
@@ -97,8 +98,8 @@
                 <label class="col-5 bold">Year</label>
                 <label class="col-7 bold">Energy Use</label>
             </div>
-            @for (energyUseGroup of $any(form.get('utilityData_'
-            +includedSource.controlName)).get('energyUse')?.controls; track $index) {
+            @let utilityDataForm = $any(form.get('utilityData_'+includedSource.controlName));
+            @for (energyUseGroup of utilityDataForm.get('energyUse')?.controls; track $index) {
             <div [formGroup]="energyUseGroup" class="form-group">
                 <div class="row">
                     <label class="col-5 col-form-label" for="numberOfEquipment_{{includedSource.controlName}}">
@@ -106,7 +107,7 @@
                     </label>
                     <div class="col-7">
                         <div class="input-group">
-                            <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseGroup)">
+                            <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseGroup, utilityDataForm, includedSource.source)">
                                 @if(energyUseGroup.controls.overrideEnergyUse.value){
                                 <span class="fa fa-calculator"></span>
                                 }@else {
