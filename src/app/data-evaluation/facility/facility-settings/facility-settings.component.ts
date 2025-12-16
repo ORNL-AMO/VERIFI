@@ -22,6 +22,7 @@ export class FacilitySettingsComponent implements OnInit {
   showDeleteFacility: boolean = false;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
+  loadingSub: Subscription;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -38,7 +39,7 @@ export class FacilitySettingsComponent implements OnInit {
       this.selectedFacility = facility;
     });
 
-    this.loadingService.navigationAfterLoading.subscribe((context) => {
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'delete-facility') {
         this.showFacilityDeletionToast();
       }
@@ -47,6 +48,7 @@ export class FacilitySettingsComponent implements OnInit {
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   showFacilityDeletionToast() {

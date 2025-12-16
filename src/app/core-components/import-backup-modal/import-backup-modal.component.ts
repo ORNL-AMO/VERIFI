@@ -60,7 +60,7 @@ export class ImportBackupModalComponent implements OnInit {
       }
     });
 
-    this.loadingService.navigationAfterLoading.subscribe((context) => {
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'import-account-backup' || context === 'import-facility-backup') {
         this.navigateToUrl();
       }

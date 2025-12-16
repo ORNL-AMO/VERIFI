@@ -5,7 +5,7 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
 import { Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
@@ -21,6 +21,7 @@ export class HomePageComponent {
   showTestDataModal: boolean = false;
   accounts: Array<IdbAccount>;
   currentPageNumber: number = 1;
+  loadingSub: Subscription;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private toastNotificationService: ToastNotificationsService,
@@ -35,11 +36,15 @@ export class HomePageComponent {
       return new Date(account.modifiedDate).getTime();
     }, 'desc');
 
-    this.loadingService.navigationAfterLoading.subscribe((context) => {
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'load-example-data') {
         this.navigateToAccount();
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.loadingSub.unsubscribe();
   }
 
   loadTestData() {

@@ -64,6 +64,8 @@ export class DataManagementHomeComponent {
   totalTodoItems: number = 0;
   allTodoItems: Array<TodoItem> = [];
   hasInitialSetupItems: boolean;
+
+  loadingSub: Subscription;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -114,7 +116,7 @@ export class DataManagementHomeComponent {
       this.setTodoItems();
     });
 
-    this.loadingService.navigationAfterLoading.subscribe((context) => {
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'updating-weather-predictors') {
         this.showToast();
       }
@@ -129,6 +131,7 @@ export class DataManagementHomeComponent {
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
     this.meterGroupsSub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   async showToast() {

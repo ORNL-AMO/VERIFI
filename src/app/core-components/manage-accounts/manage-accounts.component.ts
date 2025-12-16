@@ -26,6 +26,7 @@ export class ManageAccountsComponent {
   allAccountsSub: Subscription;
   displayMoreHelp: boolean = false;
   account: IdbAccount;
+  loadingSub: Subscription;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -41,7 +42,7 @@ export class ManageAccountsComponent {
       this.accountErrors = this.accounts.map(account => { return undefined });
     });
 
-    this.loadingService.navigationAfterLoading.subscribe((context) => {
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'export-facilities-to-excel') {
         this.showFacilityExportToast();
       }
@@ -50,6 +51,7 @@ export class ManageAccountsComponent {
 
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   async setAccounts() {
