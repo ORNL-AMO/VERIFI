@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EnergyEquipmentEnergyUseData, EquipmentType, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EnergyEquipmentOperatingConditionsData, EquipmentType, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { EquipmentTypes } from '../facility-energy-use-equipment-form/equipmentTypes';
 import { FormGroup } from '@angular/forms';
@@ -80,7 +80,6 @@ export class FacilityEnergyUsesGroupSetupComponent {
     this.loadingService.setLoadingMessage('Adding Energy Use Groups and Equipment...');
     this.loadingService.setLoadingStatus(true);
     for (let group of this.energyUseGroups) {
-      console.log(group);
       let newGroup: IdbFacilityEnergyUseGroup = {
         accountId: group.accountId,
         facilityId: group.facilityId,
@@ -96,16 +95,26 @@ export class FacilityEnergyUsesGroupSetupComponent {
         let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup);
         newEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForm(newEquipment, eqForm);
         newEquipment.energyUseGroupId = newGroup.guid;
-        let energyUseData: Array<EnergyEquipmentEnergyUseData> = [{
-              year: new Date().getFullYear(),
-              energyUse: undefined,
-              hoursOfOperation: 8760,
-              loadFactor: 100,
-              dutyFactor: 100,
-              efficiency: 100,
+        let operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData> = [{
+          year: new Date().getFullYear(),
+          hoursOfOperation: 8760,
+          loadFactor: 100,
+          dutyFactor: 100,
+          efficiency: 100,
+        }];
+        newEquipment.operatingConditionsData = operatingConditionsData;
+        newEquipment.utilityData.forEach(uData => {
+          uData.energyUse = operatingConditionsData.map(eu => {
+            return {
+              year: eu.year,
+              //todo: Calculate energy use
+              energyUse: 0,
               overrideEnergyUse: false
-            }];
-        newEquipment.energyUseData = energyUseData;
+            }
+          });
+          return uData;
+
+        })
         await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
       }
     }

@@ -88,6 +88,42 @@
                         formControlName="numberOfEquipment" onfocus="this.select();" min="0">
                 </div>
             </div>
+            @if(energyUseEquipment){
+            <!--iterate energy use-->
+            <div class="mt-3 mb-2">
+                <p class="bold">Energy Use Data</p>
+            </div>
+            <div class="row">
+                <label class="col-5 bold">Year</label>
+                <label class="col-7 bold">Energy Use</label>
+            </div>
+            @for (energyUseGroup of $any(form.get('utilityData_'
+            +includedSource.controlName)).get('energyUse')?.controls; track $index) {
+            <div [formGroup]="energyUseGroup" class="form-group">
+                <div class="row">
+                    <label class="col-5 col-form-label" for="numberOfEquipment_{{includedSource.controlName}}">
+                        {{energyUseGroup.controls.year.value}}
+                    </label>
+                    <div class="col-7">
+                        <div class="input-group">
+                            <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseGroup)">
+                                @if(energyUseGroup.controls.overrideEnergyUse.value){
+                                <span class="fa fa-calculator"></span>
+                                }@else {
+                                <span class="fa fa-pencil"></span>
+                                }
+                            </button>
+                            <input class="form-control" type="number" formControlName="energyUse" min="0">
+                            <span class="input-group-text">
+                                <!--TODO: Units-->
+                                ??
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+            }
             }
             <hr>
             @if(availableSources.length > 0){

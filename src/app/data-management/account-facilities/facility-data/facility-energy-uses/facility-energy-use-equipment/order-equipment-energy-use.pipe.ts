@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EnergyEquipmentEnergyUseData } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EnergyEquipmentOperatingConditionsData } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Pipe({
   name: 'orderEquipmentEnergyUse',
@@ -8,7 +8,7 @@ import { EnergyEquipmentEnergyUseData } from 'src/app/models/idbModels/facilityE
 })
 export class OrderEquipmentEnergyUsePipe implements PipeTransform {
 
-  transform(energyUseData: Array<EnergyEquipmentEnergyUseData>): Array<EnergyEquipmentEnergyUseData> {
+  transform(energyUseData: Array<EnergyEquipmentOperatingConditionsData>): Array<EnergyEquipmentOperatingConditionsData> {
     return energyUseData.sort((a, b) => a.year - b.year);
   }
 

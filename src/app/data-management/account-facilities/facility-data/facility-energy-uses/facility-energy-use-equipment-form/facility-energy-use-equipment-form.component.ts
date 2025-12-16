@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { EquipmentTypes } from './equipmentTypes';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -20,6 +20,8 @@ import { FacilityEnergyUseEquipmentFormService } from './facility-energy-use-equ
 export class FacilityEnergyUseEquipmentFormComponent {
   @Input({ required: true })
   form: FormGroup;
+  @Input()
+  energyUseEquipment: IdbFacilityEnergyUseEquipment;
 
   equipmentTypes: Array<EquipmentType> = EquipmentTypes;
 
@@ -103,7 +105,17 @@ export class FacilityEnergyUseEquipmentFormComponent {
     sources = _.uniq(sources);
     sources.forEach(source => {
       if (!this.form.contains('utilityData_' + source.replace(/\s+/g, '_'))) {
-        this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, source);
+        let energyUse: Array<{year: number, energyUse: number, overrideEnergyUse: boolean}> = [];
+        if(this.energyUseEquipment){
+          this.energyUseEquipment.operatingConditionsData.forEach(opCond => {
+            energyUse.push({
+              year: opCond.year,
+              energyUse: 0,
+              overrideEnergyUse: false
+            });
+          });
+        }
+        this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, { energySource: source, size: 0, numberOfEquipment: 1, units: '', energyUse: energyUse });
       }
     });
     //remove any that are not in the meter group
@@ -157,9 +169,28 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   addUtilityType(sourceToAdd: MeterSource) {
-    this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, sourceToAdd);
+    let energyUse: Array<{year: number, energyUse: number, overrideEnergyUse: boolean}> = [];
+    if(this.energyUseEquipment){
+      this.energyUseEquipment.operatingConditionsData.forEach(opCond => {
+        energyUse.push({
+          year: opCond.year,
+          energyUse: 0,
+          overrideEnergyUse: false
+        });
+      });
+    }
+    this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, { energySource: sourceToAdd, size: 0, numberOfEquipment: 1, units: '', energyUse: energyUse });
     this.setIncludedSources();
     this.closeAddUtilityModal();
   }
 
+  toggleOverride(energyUseGroup: FormGroup) {
+    energyUseGroup.controls.overrideEnergyUse.setValue(!energyUseGroup.controls.overrideEnergyUse.value);
+    if(!energyUseGroup.controls.overrideEnergyUse.value){
+      energyUseGroup.controls.energyUse.disable();
+      //TODO: Calculate
+    }else{
+      energyUseGroup.controls.energyUse.enable();
+    }
+  }
 }

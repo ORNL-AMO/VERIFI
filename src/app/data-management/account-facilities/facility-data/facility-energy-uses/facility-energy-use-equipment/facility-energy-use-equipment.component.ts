@@ -10,7 +10,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EnergyEquipmentEnergyUseData, EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EnergyEquipmentOperatingConditionsData, EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -117,36 +117,34 @@ export class FacilityEnergyUseEquipmentComponent {
     return of(true);
   }
 
-  addEnergyUseData() {
+  addOperatingConditionsData() {
     for (let yearOption of this.yearOptions) {
       if (yearOption.selected) {
-        this.energyUseEquipment.energyUseData.push({
+        this.energyUseEquipment.operatingConditionsData.push({
           year: yearOption.year,
-          energyUse: 0,
           hoursOfOperation: 8760,
           loadFactor: 100,
           dutyFactor: 100,
-          efficiency: 100,
-          overrideEnergyUse: false
+          efficiency: 100
         });
       }
     }
     this.dataChanged = true;
   }
 
-  addEnergyUseYear() {
-    let currentYears: Array<number> = this.energyUseEquipment.energyUseData.map(data => { return data.year });
+  addOperatingConditionsYear() {
+    let currentYears: Array<number> = this.energyUseEquipment.operatingConditionsData.map(data => { return data.year });
     let availableYears: Array<{ year: number }> = this.yearOptions.filter(yearOption => { return !currentYears.includes(yearOption.year) });
     let year: number = availableYears[0].year;
-    this.energyUseEquipment.energyUseData.push({
+    this.energyUseEquipment.operatingConditionsData.push({
       year: year,
-      energyUse: 0,
       hoursOfOperation: 8760,
       loadFactor: 100,
       dutyFactor: 100,
-      efficiency: 100,
-      overrideEnergyUse: false
+      efficiency: 100
     });
+    //add year to utility data energy use
+    this.facilityEnergyUseEquipmentFormService.addYearToUtilityDataForm(this.form, year);
     this.dataChanged = true;
   }
 
@@ -167,19 +165,15 @@ export class FacilityEnergyUseEquipmentComponent {
     this.dataChanged = true;
   }
 
-  removeEnergyUseData(data: EnergyEquipmentEnergyUseData) {
-    this.energyUseEquipment.energyUseData = this.energyUseEquipment.energyUseData.filter(d => d.year !== data.year);
+  removeOperatingConditionsData(data: EnergyEquipmentOperatingConditionsData) {
+    this.energyUseEquipment.operatingConditionsData = this.energyUseEquipment.operatingConditionsData.filter(d => d.year !== data.year);
+    this.facilityEnergyUseEquipmentFormService.removeYearFromUtilityDataForm(this.form, data.year);
     this.dataChanged = true;
-  }
-
-  toggleOverride(data: EnergyEquipmentEnergyUseData) {
-    data.overrideEnergyUse = !data.overrideEnergyUse;
-    this.dataChanged = true;
-    //todo calculate if turning off override
   }
 
   clearData() {
-    this.energyUseEquipment.energyUseData = [];
+    this.energyUseEquipment.operatingConditionsData = [];
+    this.facilityEnergyUseEquipmentFormService.removeAllYearsFromUtilityDataForm(this.form);
     this.dataChanged = true;
   }
 }

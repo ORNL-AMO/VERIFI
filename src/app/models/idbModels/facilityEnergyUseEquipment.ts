@@ -10,14 +10,9 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     utilityMeterGroupId: string,
     name: string,
     notes: string,
-    energyUseData: Array<EnergyEquipmentEnergyUseData>,
+    operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData>,
     equipmentType: EquipmentType,
-    utilityData: Array<{
-        energySource: MeterSource,
-        size: number,
-        numberOfEquipment: number,
-        units: string
-    }>
+    utilityData: Array<EquipmentUtilityData>
 }
 
 export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup): IdbFacilityEnergyUseEquipment {
@@ -30,20 +25,26 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         utilityMeterGroupId: '',
         name: '',
         notes: '',
-        energyUseData: [],
+        operatingConditionsData: [],
         equipmentType: 'Other',
         utilityData: [],
     }
 }
 
-export interface EnergyEquipmentEnergyUseData {
+export interface EnergyEquipmentOperatingConditionsData {
     year: number,
-    energyUse: number,
     hoursOfOperation: number,
     loadFactor: number,
     dutyFactor: number,
     efficiency: number,
-    overrideEnergyUse: boolean
+}
+
+export interface EquipmentUtilityData {
+    energySource: MeterSource,
+    size: number,
+    numberOfEquipment: number,
+    units: string,
+    energyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean}>
 }
 
 export type EquipmentType = "Pump" | "Fan" | "Process Heating" | "Compressed Air" | "Steam" |

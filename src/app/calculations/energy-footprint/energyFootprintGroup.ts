@@ -18,18 +18,18 @@ export class EnergyFootprintGroup {
 
     setAnnualEnergyUse(facility: IdbFacility) {
         //calculate annual energy use for group based on equipment data
-        let years: Array<number> = this.groupEquipment.flatMap(equip => equip.energyUseData.map(data => data.year));
-        let uniqueYears: Array<number> = _.uniq(years);
-        uniqueYears.forEach(year => {
-            let totalEnergyUseForYear: number = 0;
-            this.groupEquipment.forEach(equip => {
-                let energyUseDataForYear = equip.energyUseData.find(data => data.year == year);
-                if (energyUseDataForYear) {
-                    //TODO: unit conversions
-                    totalEnergyUseForYear += energyUseDataForYear.energyUse;
-                }
-            });
-            this.annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear });
-        });
+        // let years: Array<number> = this.groupEquipment.flatMap(equip => equip.operatingConditionsData.map(data => data.year));
+        // let uniqueYears: Array<number> = _.uniq(years);
+        // uniqueYears.forEach(year => {
+        //     let totalEnergyUseForYear: number = 0;
+        //     this.groupEquipment.forEach(equip => {
+        //         let energyUseDataForYear = equip.operatingConditionsData.find(data => data.year == year);
+        //         if (energyUseDataForYear) {
+        //             //TODO: unit conversions
+        //             totalEnergyUseForYear += energyUseDataForYear.energyUse;
+        //         }
+        //     });
+        //     this.annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear });
+        // });
     }
 }

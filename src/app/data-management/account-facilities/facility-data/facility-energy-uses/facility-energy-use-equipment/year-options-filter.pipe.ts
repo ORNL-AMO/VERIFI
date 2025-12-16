@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EnergyEquipmentEnergyUseData } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EnergyEquipmentOperatingConditionsData } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Pipe({
   name: 'yearOptionsFilter',
@@ -8,7 +8,7 @@ import { EnergyEquipmentEnergyUseData } from 'src/app/models/idbModels/facilityE
 })
 export class YearOptionsFilterPipe implements PipeTransform {
 
-  transform(yearOptions: Array<{ year: number, selected: boolean }>, energyUseData: Array<EnergyEquipmentEnergyUseData>, selectedYear: number): Array<{ year: number }> {
+  transform(yearOptions: Array<{ year: number, selected: boolean }>, energyUseData: Array<EnergyEquipmentOperatingConditionsData>, selectedYear: number): Array<{ year: number }> {
     let inUseYears: Array<number> = energyUseData.map(data => data.year);
     let filteredYears: Array<{ year: number }> = yearOptions.filter(option => {
       return !inUseYears.includes(option.year) || option.year === selectedYear;
