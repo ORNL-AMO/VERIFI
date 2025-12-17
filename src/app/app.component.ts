@@ -171,7 +171,7 @@ export class AppComponent {
         await this.initializeElectronBackups();
 
         this.dataInitialized = true;
-        if (this.router.url != '/feedback') {
+        if (this.router.url != '/feedback' && this.router.url.includes('docs') == false) {
           this.router.navigateByUrl('welcome');
         }
       }

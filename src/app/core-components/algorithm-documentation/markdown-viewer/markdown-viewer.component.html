@@ -1,0 +1,24 @@
+<div class="wrapper">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb bg-light p-2 rounded">
+            <li class="breadcrumb-item">
+                <a [routerLink]="'/docs'" class="text-primary">Home</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <div class="dropdown d-inline">
+                    <button class="btn btn-link dropdown-toggle p-0 align-baseline fw-bold text-primary" type="button"
+                        id="docDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ currentDocTitle || 'Documentation' }}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="docDropdown">
+                        <li *ngFor="let doc of docs">
+                            <a class="dropdown-item" [routerLink]="doc.link">{{ doc.title }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    <markdown [src]="markdownSrc"></markdown>
+</div>

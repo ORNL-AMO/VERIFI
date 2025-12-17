@@ -7,6 +7,9 @@ import { DataManagementRoutes } from './data-management.routes';
 import { DataEvaluationRoutes } from './data-evaluation.routes';
 import { FeedbackComponent } from '../static-content/feedback/feedback.component';
 import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
+import { AlgorithmDocumentationComponent } from '../core-components/algorithm-documentation/algorithm-documentation.component';
+import { DocumentationHomeComponent } from '../core-components/algorithm-documentation/documentation-home/documentation-home.component';
+import { MarkdownViewerComponent } from '../core-components/algorithm-documentation/markdown-viewer/markdown-viewer.component';
 
 const routes: Routes = [
   {
@@ -20,6 +23,25 @@ const routes: Routes = [
   { path: 'manage-accounts', component: ManageAccountsComponent },
   { path: 'feedback', component: FeedbackComponent },
   { path: 'privacy', component: PrivacyNoticeComponent },
+  { 
+    path: 'docs', 
+    component: AlgorithmDocumentationComponent, 
+    children:[
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'home'
+      },
+      {
+        path: 'home',
+        component: DocumentationHomeComponent
+      },
+      {
+        path: ':docId',
+        component: MarkdownViewerComponent
+      }
+    ]
+  },
   //wildcard/page not found needs to be last route
   { path: "**", component: PageNotFoundComponent },
 ];

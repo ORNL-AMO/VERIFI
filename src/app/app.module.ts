@@ -29,6 +29,10 @@ import { UserSurveyModule } from './shared/user-survey/user-survey.module';
 import { DataManagementModule } from './data-management/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
+import { AlgorithmDocumentationComponent } from './core-components/algorithm-documentation/algorithm-documentation.component';
+import { DocumentationHomeComponent } from './core-components/algorithm-documentation/documentation-home/documentation-home.component';
+import { MarkdownModule } from 'ngx-markdown';
+import { MarkdownViewerComponent } from './core-components/algorithm-documentation/markdown-viewer/markdown-viewer.component';
 
 @NgModule({
     declarations: [
@@ -46,7 +50,10 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         DeletingAccountDataComponent,
         SurveyModalComponent,
         SurveyToastComponent,
-        HomePageComponent
+        HomePageComponent,
+        AlgorithmDocumentationComponent,
+        DocumentationHomeComponent,
+        MarkdownViewerComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -64,7 +71,8 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         UserSurveyModule,
         DataManagementModule,
         DataEvaluationModule,
-        NgbPaginationModule
+        NgbPaginationModule,
+        MarkdownModule.forRoot()
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })

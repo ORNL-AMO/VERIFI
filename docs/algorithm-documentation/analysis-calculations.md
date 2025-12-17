@@ -9,16 +9,6 @@ The analysis calculations module is the core computational engine of VERIFI, res
 3. **Facility Level** - Combine all groups within a facility
 4. **Account Level** - Combine all facilities within an account
 
-## Key Classes and Their Roles
-
-- `MonthlyGroupAnalysisClass` - Initializes and organizes monthly data for a single group
-- `MonthlyAnalysisSummaryDataClass` - Performs monthly calculations for a group
-- `GroupMonthlyAnalysisRollupValues` - Calculates rolling 12-month metrics
-- `AnnualAnalysisSummaryDataClass` - Aggregates monthly data to annual summaries
-- `AnnualGroupAnalysisSummaryClass` - Manages annual summaries for a group
-- `AnnualFacilityAnalysisSummaryClass` - Manages facility-level annual summaries
-- `AnnualAccountAnalysisSummaryClass` - Manages account-level annual summaries
-
 ## Analysis Types
 
 VERIFI supports four fundamental analysis methodologies:
