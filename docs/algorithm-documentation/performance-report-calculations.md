@@ -4,9 +4,9 @@
 
 The performance report calculations module generates comprehensive reports that combine multiple aspects of facility and account performance into unified summaries. These reports integrate energy, water, cost, emissions, and operational metrics to provide a holistic view of organizational performance.
 
-## PerformanceReport Class
+## Performance Reports
 
-The main class that orchestrates the generation of comprehensive performance reports.
+VERIFI generates comprehensive performance reports that combine multiple aspects of facility and account performance.
 
 **Key Components:**
 - Energy and water performance metrics
@@ -23,31 +23,23 @@ The main class that orchestrates the generation of comprehensive performance rep
 
 High-level overview of key performance indicators:
 
-```
-{
-    reportPeriod: string,
-    totalEnergyUse: number (MMBtu),
-    totalCost: number ($),
-    totalEmissions: number (metric tons CO₂e),
-    overallImprovement: percentage,
-    goalsStatus: array of goal progress
-}
-```
+**Summary Includes:**
+- Report period
+- Total energy use (MMBtu)
+- Total cost ($)
+- Total emissions (metric tons CO₂e)
+- Overall improvement percentage
+- Progress toward goals
 
-**Example:**
-```
-{
-    reportPeriod: "FY 2024",
-    totalEnergyUse: 125,000 MMBtu,
-    totalCost: $1,500,000,
-    totalEmissions: 8,500 tCO₂e,
-    overallImprovement: 15.2%,
-    goalsStatus: [
-        {goal: "25% energy intensity reduction", progress: 60.8%},
-        {goal: "20% GHG reduction", progress: 76.0%}
-    ]
-}
-```
+**Example Summary:**
+- Report Period: FY 2024
+- Total Energy Use: 125,000 MMBtu
+- Total Cost: $1,500,000
+- Total Emissions: 8,500 metric tons CO₂e
+- Overall Improvement: 15.2%
+- Goal Progress:
+  - 25% energy intensity reduction: 60.8% complete
+  - 20% GHG reduction: 76.0% complete
 
 ### Detailed Sections
 

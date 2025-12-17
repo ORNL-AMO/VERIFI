@@ -15,9 +15,9 @@ Similar to Better Plants, Better Climate focuses on:
 - 25% reduction in GHG intensity over 10 years, OR
 - Specific absolute reduction target (e.g., 1,000 metric tons CO₂e)
 
-## BetterClimateReport Class
+## Better Climate Reports
 
-Generates comprehensive carbon emissions reports with year-over-year tracking.
+VERIFI generates comprehensive carbon emissions reports with year-over-year tracking.
 
 **Key Components:**
 - Total GHG emissions (Scope 1 and Scope 2)
@@ -91,9 +91,9 @@ Intensity metrics:
 
 ## Better Climate Years Details
 
-### BetterClimateYearsDetails Class
+### Year-by-Year Details
 
-Provides detailed year-by-year breakdown of emissions data.
+The report provides a detailed year-by-year breakdown of emissions data.
 
 **For Each Year:**
 ```

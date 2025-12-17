@@ -373,21 +373,16 @@ For each facility:
 
 ### MonthlyData Structure
 
-Each calanderized month produces:
-```
-{
-    date: Date (first day of month)
-    year: Fiscal year
-    fiscalYear: Fiscal year number
-    energyUse: Number (in consistent units)
-    energyConsumption: Number (volume/mass if different from energy)
-    energyCost: Number
-    demandUsage: Number (peak demand)
-    demandCost: Number
-    totalCost: Number
-    emissions: EmissionsResults (calculated separately)
-}
-```
+Each calanderized month includes:
+- Date (first day of month)
+- Fiscal year
+- Energy use (in consistent units)
+- Energy consumption (volume/mass if different from energy)
+- Energy cost
+- Demand usage (peak demand)
+- Demand cost
+- Total cost
+- Emissions (calculated separately)
 
 ## Integration with Analysis
 

@@ -14,9 +14,9 @@ Improvements are measured against a baseline year.
 
 ## Better Plants Report Structure
 
-### BetterPlantsReportClass
+### Report Components
 
-The main class that generates comprehensive Better Plants performance reports.
+Better Plants performance reports provide comprehensive tracking of energy and water improvements.
 
 **Key Outputs:**
 - Energy performance metrics
@@ -184,14 +184,10 @@ For each facility in the account:
 Facility_improvement = (Facility_savings / Facility_adjusted_baseline) × 100%
 ```
 
-**Facility Performance Array:**
-```
-[
-    {facility: Facility_A, performance: 20.5%},
-    {facility: Facility_B, performance: 18.2%},
-    {facility: Facility_C, performance: 22.1%}
-]
-```
+**Facility Performance Summary:**
+- Facility A: 20.5% improvement
+- Facility B: 18.2% improvement
+- Facility C: 22.1% improvement
 
 ### Account-Level Aggregation
 
@@ -226,9 +222,9 @@ The larger facility (A) has more weight in the account total.
 
 ## Better Plants Energy Summary
 
-### BetterPlantsEnergySummaryClass
+### Energy Usage Summary
 
-Summarizes energy usage by fuel type and source for a specific year.
+The energy summary breaks down energy usage by fuel type and source for a specific year.
 
 **Fuel Categories:**
 - Electricity
@@ -273,9 +269,9 @@ Total cost: $380,000
 
 ## Better Plants Water Summary
 
-### BetterPlantsWaterSummaryClass
+### Water Usage Summary
 
-Summarizes water usage and associated metrics.
+The water summary provides an overview of water usage and associated metrics.
 
 **Water Categories:**
 - Potable water
@@ -283,15 +279,11 @@ Summarizes water usage and associated metrics.
 - Wastewater discharged
 - Water reused/recycled
 
-**Summary Structure:**
-```
-{
-    totalWaterUse: kgal,
-    waterIntensity: kgal per unit production,
-    waterCost: dollars,
-    costPerUnit: dollars per kgal
-}
-```
+**Summary Metrics:**
+- Total water use (kgal)
+- Water intensity (kgal per unit production)
+- Water cost (dollars)
+- Cost per unit (dollars per kgal)
 
 ## Report Year Selection
 

@@ -56,12 +56,12 @@ VERIFI performs utility data analysis, tracking, and reporting for industrial fa
   - Use and cost aggregations
   - Source totals
 
-### Utility Functions
-- **[Shared Calculations](./shared-calculations.md)** - Common utility functions
+### Shared Calculations
+- **[Shared Calculations](./shared-calculations.md)** - Common calculation methods
   - Fiscal year calculations
   - Date filtering and manipulation
   - Predictor usage calculations
-  - Helper functions used across modules
+  - Helper calculations used across modules
 
 ## Key Concepts
 

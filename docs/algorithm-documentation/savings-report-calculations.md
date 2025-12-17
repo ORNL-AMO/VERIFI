@@ -30,9 +30,9 @@ Cost_savings = (Adjusted_baseline_cost) - Actual_cost
 
 ## Facility Savings Report
 
-### FacilitySavingsReport Class
+### Facility Savings Reports
 
-Generates comprehensive savings reports for a single facility.
+VERIFI generates comprehensive savings reports for individual facilities.
 
 **Key Components:**
 - Monthly savings breakdown
@@ -143,9 +143,9 @@ Total facility:
 
 ## Account Savings Report
 
-### AccountSavingsReport Class
+### Account Savings Reports
 
-Aggregates savings across all facilities in an account.
+Account-level savings reports aggregate savings across all facilities in an account.
 
 ### Facility-Level Aggregation
 
@@ -280,23 +280,23 @@ Actual additional cost = 8,500 × $2 = $17,000
 Avoided cost escalation = $20,000 - $17,000 = $3,000
 ```
 
-## Shared Savings Report Functions
+## Common Savings Report Features
 
-### sharedSavingsReport
+### Shared Report Elements
 
-Common functions used by both facility and account savings reports:
+Both facility and account savings reports include:
 
-**Formatting Functions:**
-- Format numbers with appropriate precision
-- Convert units as needed
-- Generate report tables and charts
+**Data Formatting:**
+- Numbers formatted with appropriate precision
+- Unit conversions applied as needed
+- Tables and charts generated for visualization
 
-**Aggregation Functions:**
-- Sum monthly to annual
-- Sum facility to account
-- Calculate weighted averages
+**Data Aggregation:**
+- Monthly data summed to annual totals
+- Facility data summed to account totals
+- Weighted averages calculated when appropriate
 
-**Comparison Functions:**
+**Comparison Capabilities:**
 - Year-over-year comparisons
 - Baseline vs. current comparisons
 - Budget vs. actual comparisons

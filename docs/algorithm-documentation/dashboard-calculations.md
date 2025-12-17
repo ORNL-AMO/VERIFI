@@ -6,9 +6,9 @@ The dashboard calculations module provides summary metrics and visualizations fo
 
 ## Account Overview Calculations
 
-### AccountOverviewClass
+### Account Overview
 
-Provides high-level summary for an entire account across all facilities.
+The account overview provides a high-level summary for an entire account across all facilities.
 
 **Key Metrics:**
 - Total energy use
@@ -115,9 +115,9 @@ Change: (25,000 - 26,500) / 26,500 × 100% = -5.7%
 
 ## Facility Overview Calculations
 
-### FacilityOverviewClass
+### Facility Overview
 
-Similar to account overview but for a single facility.
+The facility overview provides similar metrics but for a single facility.
 
 **Facility-Specific Metrics:**
 - Total energy and cost for facility
@@ -156,25 +156,18 @@ Total: 20,000 MMBtu
 
 ## Use and Cost Calculations
 
-### UseAndCostClass
+### Usage and Cost Metrics
 
-Detailed breakdown of usage and cost metrics.
+The system provides a detailed breakdown of usage and cost metrics.
 
-**Structure:**
-```
-{
-    energyUse: number,
-    energyCost: number,
-    energyUnit: string,
-    demandUsage: number,
-    demandCost: number,
-    totalVolume: number,
-    volumeUnit: string,
-    totalCost: number,
-    marketElectricityEmissions: number,
-    locationElectricityEmissions: number
-}
-```
+**Metrics Included:**
+- Energy use and cost
+- Energy units (MMBtu, kWh, etc.)
+- Demand usage and cost
+- Total volume and volume units
+- Total cost
+- Market-based electricity emissions
+- Location-based electricity emissions
 
 ### Cost Components
 
@@ -223,9 +216,9 @@ Emissions_intensity = Total_emissions / Total_energy
 
 ## Source Totals Calculations
 
-### SourceTotalsClass
+### Source Totals
 
-Aggregates metrics by utility source (electricity, natural gas, etc.).
+VERIFI aggregates metrics by utility source (electricity, natural gas, etc.).
 
 **For Each Source:**
 
@@ -275,16 +268,13 @@ Rank utility sources by total cost:
 
 ### Monthly Time Series
 
-Array of monthly data points for charting:
+Monthly data points tracked over time for trend analysis:
 
-```
-[
-    {date: '2023-01', energy: 2000, cost: 24000, emissions: 150},
-    {date: '2023-02', energy: 1800, cost: 21600, emissions: 135},
-    {date: '2023-03', energy: 1900, cost: 22800, emissions: 142},
-    ...
-]
-```
+**Example Monthly Data:**
+- January 2023: 2,000 MMBtu energy, $24,000 cost, 150 metric tons emissions
+- February 2023: 1,800 MMBtu energy, $21,600 cost, 135 metric tons emissions
+- March 2023: 1,900 MMBtu energy, $22,800 cost, 142 metric tons emissions
+- (continues for each month...)
 
 ### Cumulative Metrics
 

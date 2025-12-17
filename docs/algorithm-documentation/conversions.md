@@ -6,19 +6,14 @@ The conversions module provides comprehensive unit conversion capabilities acros
 
 ## Core Conversion Functionality
 
-### ConvertValue Class
+### Unit Conversion Process
 
-The `ConvertValue` class is the primary interface for unit conversions:
-
-```typescript
-new ConvertValue(value, fromUnit, toUnit)
-```
+VERIFI performs unit conversions to normalize data from different sources into consistent units for analysis and reporting.
 
 **Example:**
 ```
 Convert 1000 kWh to MMBtu:
-new ConvertValue(1000, 'kWh', 'MMBtu')
-// Returns: 3.412 MMBtu (approximately)
+1000 kWh = 3.412 MMBtu (approximately)
 ```
 
 ### Conversion Process
