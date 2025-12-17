@@ -141,6 +141,7 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   generateModels(autoSelect?: boolean) {
+    const previousSelectedModelId = this.group.selectedModelId; 
     this.loadingService.setLoadingMessage("Generating Regression Models...");
     this.loadingService.setLoadingStatus(true);
     setTimeout(() => {
@@ -158,6 +159,14 @@ export class RegressionModelMenuComponent implements OnInit {
         this.checkFailedValidationModels();
         this.hasLaterDate = false;
         this.group.dateModelsGenerated = new Date();
+
+        if(previousSelectedModelId) {
+          let previousModelExists = this.group.models.find(model => model.modelId === previousSelectedModelId);
+          if(previousModelExists) {
+            this.group.selectedModelId = previousSelectedModelId;
+          }
+        }
+
         if (autoSelect) {
           let minPValModel: JStatRegressionModel = _.maxBy(this.group.models, 'adjust_R2');
           if (minPValModel) {
@@ -194,7 +203,7 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   confirmUpdateModals() {
-    this.generateModels(true);
+    this.generateModels();
     this.closeUpdateModelsModal();
   }
 
