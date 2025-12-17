@@ -98,6 +98,7 @@ export class RegressionModelMenuComponent implements OnInit {
     });
 
     this.setUserDefinedDefaultData();
+    this.checkDateValidity();
   }
 
   ngOnDestroy() {
@@ -132,10 +133,18 @@ export class RegressionModelMenuComponent implements OnInit {
     }
   }
 
+  checkDateValidity() {
+    this.isDateRangeValid = this.checkDateRangeValidity();
+    this.isTwelveMonthSelected = this.checkTwelveMonthSelection();
+    this.allMeterReadingsPresent = this.validateMeterDataForSelectedDates();
+    this.allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates();
+  }
+
   async saveItem() {
     this.resetErrors();
     this.isFormChange = true;
     this.isUserDefinedViewVisible.emit(false);
+    this.checkDateValidity();
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, this.analysisItem);
     this.setNumVariableOptions();
@@ -324,20 +333,14 @@ export class RegressionModelMenuComponent implements OnInit {
 
   checkUserDefinedModelValues() {
     if (!this.group.userDefinedModel) {
-      this.isButtonDisabled = this.group.groupErrors.missingRegressionModelStartMonth || this.group.groupErrors.missingRegressionModelEndMonth || this.group.groupErrors.missingRegressionStartYear || this.group.groupErrors.missingRegressionEndYear ||
-        this.group.groupErrors.missingRegressionConstant || this.group.groupErrors.missingRegressionPredictorCoef;
+      this.isButtonDisabled = this.group.groupErrors.missingRegressionModelStartMonth || this.group.groupErrors.missingRegressionModelEndMonth || this.group.groupErrors.missingRegressionStartYear ||
+        this.group.groupErrors.missingRegressionEndYear || this.group.groupErrors.invalidModelDateSelection || this.group.groupErrors.missingRegressionConstant || this.group.groupErrors.missingRegressionPredictorCoef;
     }
   }
 
-  generateUserDefinedModel() {
-    this.isDateRangeValid = this.checkDateRangeValidity();
-    this.isTwelveMonthSelected = this.checkTwelveMonthSelection();
-    this.allMeterReadingsPresent = this.validateMeterDataForSelectedDates();
-    this.allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates();
-    if (this.allMeterReadingsPresent && this.allPredictorReadingsPresent && this.isDateRangeValid && this.isTwelveMonthSelected) {
-      this.userDefinedModelClicked.emit(true);
-      this.isUserDefinedViewVisible.emit(true);
-    }
+  async generateUserDefinedModel() {
+    this.userDefinedModelClicked.emit(true);
+    this.isUserDefinedViewVisible.emit(true);
   }
 
   validateMeterDataForSelectedDates() {

@@ -143,6 +143,7 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     missingRegressionStartYear: true,
     missingRegressionModelEndMonth: true,
     missingRegressionEndYear: true,
+    invalidModelDateSelection: true,
     missingRegressionModelSelection: true,
     missingRegressionPredictorCoef: true,
     invalidAverageBaseload: true,

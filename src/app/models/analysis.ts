@@ -274,6 +274,7 @@ export interface GroupErrors {
   missingRegressionStartYear: boolean,
   missingRegressionModelEndMonth: boolean,
   missingRegressionEndYear: boolean,
+  invalidModelDateSelection: boolean,
   missingRegressionModelSelection: boolean,
   missingRegressionPredictorCoef: boolean,
   noProductionVariables: boolean,

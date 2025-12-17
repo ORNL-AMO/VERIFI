@@ -10,10 +10,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-    selector: 'app-monthly-analysis-summary-table',
-    templateUrl: './monthly-analysis-summary-table.component.html',
-    styleUrls: ['./monthly-analysis-summary-table.component.css'],
-    standalone: false
+  selector: 'app-monthly-analysis-summary-table',
+  templateUrl: './monthly-analysis-summary-table.component.html',
+  styleUrls: ['./monthly-analysis-summary-table.component.css'],
+  standalone: false
 })
 export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   @Input()
@@ -57,6 +57,10 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   hasTransitionYear: boolean;
   reportLabel: 'Baseline Year' | 'Report Year' | 'Report & Model Year' | 'Baseline & Model Year' | 'Model Year';
   modelYear: number;
+  modelStartMonth: number;
+  modelStartYear: number;
+  modelEndMonth: number;
+  modelEndYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
 
   ngOnInit(): void {
@@ -72,6 +76,10 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.inReport) {
       this.setReportLabel();
     }
+    this.modelStartMonth = this.group.regressionModelStartMonth;
+    this.modelStartYear = this.group.regressionStartYear;
+    this.modelEndMonth = this.group.regressionModelEndMonth;
+    this.modelEndYear = this.group.regressionEndYear;
   }
 
   ngOnDestroy() {
@@ -153,10 +161,10 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
-    if(this.analysisTableColumns.savingsUnbanked){
+    if (this.analysisTableColumns.savingsUnbanked) {
       numImprovementColumns++;
     }
-    if(this.analysisTableColumns.bankedSavings){
+    if (this.analysisTableColumns.bankedSavings) {
       numImprovementColumns++;
     }
     // if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
@@ -236,5 +244,14 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.group && this.group.analysisType == 'regression') {
       this.modelYear = this.group.regressionModelYear;
     }
+  }
+
+  isModelYearMonth(date: Date): boolean {
+    if (this.modelStartMonth !== undefined && this.modelStartYear !== undefined && this.modelEndMonth !== undefined && this.modelEndYear !== undefined) {
+      let startDate: Date = new Date(this.modelStartYear, this.modelStartMonth, 1);
+      let endDate: Date = new Date(this.modelEndYear, this.modelEndMonth, 1);
+      return (date >= startDate && date <= endDate);
+    }
+    return false;
   }
 }
