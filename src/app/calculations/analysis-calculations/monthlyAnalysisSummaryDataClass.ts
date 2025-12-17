@@ -69,7 +69,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setModeledEnergy(monthlyGroupAnalysisClass.selectedGroup.analysisType, monthlyGroupAnalysisClass.predictorVariables, monthlyGroupAnalysisClass.baselineYearEnergyIntensity);
         this.setAnnualEnergyUse(monthlyGroupAnalysisClass.annualMeterDataUsage);
         this.setBaselineAdjustmentInput();
-        this.setModelYearDataAdjustment(monthlyGroupAnalysisClass.modelYear);
+        this.setModelYearDataAdjustment(monthlyGroupAnalysisClass);
         this.setDataAdjustment();
         this.setMonthlyAnalysisCalculatedValues(previousMonthsSummaryData, lastBankedMonthlyAnalysis);
     }
@@ -222,11 +222,33 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
 
-    setModelYearDataAdjustment(modelYear: number) {
+    setModelYearDataAdjustment(monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass) {
         this.modelYearDataAdjustment = 0;
         this.modelYearDataAdjustmentYearTotal = 0;
         if (this.group.hasDataAdjustement) {
-            let yearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == modelYear; })
+            let yearAdjustment: { year: number, amount: number };
+            if (monthlyGroupAnalysisClass.customModelYear) {
+                let startYearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == monthlyGroupAnalysisClass.customModelYear.startYear; })
+                let endYearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == monthlyGroupAnalysisClass.customModelYear.endYear; });
+                //use a weighted average of months in the start year and end year * amounts
+                //Total months = # months the model covers in start year + # months the model covers in end year
+                let totalMonths: number = (12 - monthlyGroupAnalysisClass.customModelYear.startMonth + 1) + monthlyGroupAnalysisClass.customModelYear.endMonth;
+                let startYearMonths: number = (12 - monthlyGroupAnalysisClass.customModelYear.startMonth + 1);
+                let startYearAmount: number = 0;
+                if (startYearAdjustment && startYearAdjustment.amount) {
+                    startYearAmount = startYearAdjustment.amount;
+                }
+                let endYearMonths: number = monthlyGroupAnalysisClass.customModelYear.endMonth;
+                let endYearAmount: number = 0;
+                if (endYearAdjustment && endYearAdjustment.amount) {
+                    endYearAmount = endYearAdjustment.amount;
+                }
+                let weightedAmount: number = ((startYearAmount * startYearMonths) + (endYearAmount * endYearMonths)) / totalMonths;
+                yearAdjustment = { year: 0, amount: weightedAmount };
+            } else {
+                yearAdjustment = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == monthlyGroupAnalysisClass.modelYear; })
+            }
+
             if (yearAdjustment && yearAdjustment.amount) {
                 this.modelYearDataAdjustment = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
                 this.modelYearDataAdjustmentYearTotal = yearAdjustment.amount;
