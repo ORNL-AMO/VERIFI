@@ -7,7 +7,11 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "standalone": false
+          "standalone": false,
+          "inlineTemplate": false,
+          "prefix": "app",
+          "style": "css",
+          "type": "component"
         },
         "@schematics/angular:pipe": {
           "standalone": false
@@ -27,7 +31,12 @@
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "./docs/algorithm-documentation/",
+                "output": "assets/docs/"
+              }
             ],
             "styles": [
               "src/styles/styles.css",
