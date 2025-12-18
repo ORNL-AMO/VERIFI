@@ -184,6 +184,11 @@ export class AnalysisFooterComponent implements OnInit {
         if (this.selectedGroup.groupErrors.hasErrors) {
           if (this.selectedGroup.groupErrors.missingRegressionConstant ||
             this.selectedGroup.groupErrors.missingRegressionModelYear ||
+            this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
+            this.selectedGroup.groupErrors.missingRegressionStartYear ||
+            this.selectedGroup.groupErrors.missingRegressionModelEndMonth ||
+            this.selectedGroup.groupErrors.missingRegressionEndYear ||
+            this.selectedGroup.groupErrors.invalidModelDateSelection ||
             this.selectedGroup.groupErrors.missingRegressionModelSelection ||
             this.selectedGroup.groupErrors.missingRegressionPredictorCoef) {
             this.disableContinue = true;

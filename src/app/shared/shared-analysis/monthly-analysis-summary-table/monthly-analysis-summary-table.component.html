@@ -131,7 +131,8 @@
                 <span class="fa fa-piggy-bank" *ngIf="data.isBanked && !data.isIntermediateBanked"></span>
                 <span class="fa fa-building-columns" *ngIf="data.savingsBanked"></span>
                 <span class="fa fa-paint-roller" *ngIf="data.isIntermediateBanked"></span>
-                <span class="fa fa-star" *ngIf="data.fiscalYear == modelYear"></span>
+                <span class="fa fa-star" *ngIf="group.userDefinedModel && data.fiscalYear == modelYear"></span>
+                <span class="fa fa-star" *ngIf="!group.userDefinedModel && isModelYearMonth(data.date)"></span>
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
