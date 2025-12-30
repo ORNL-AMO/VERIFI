@@ -372,7 +372,7 @@ export class DbChangesService {
     this.loadingService.addLoadingMessage("Updating Account Reports");
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Account Analysis Items");
+    this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
     this.loadingService.setCurrentLoadingIndex(++currIdx);
     this.loadingService.addLoadingMessage('Updating Account Analysis Items');

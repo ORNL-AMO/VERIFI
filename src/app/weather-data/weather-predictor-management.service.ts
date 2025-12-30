@@ -239,7 +239,7 @@ export class WeatherPredictorManagementService {
               } else if (weatherPredictor.weatherDataType == 'dryBulbTemp') {
                 newPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
               }
-              newPredictorData.weatherDataWarning = hasErrors != undefined;
+              newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
               if (newPredictorData.weatherDataWarning) {
                 this.hasWarning = true;
               }

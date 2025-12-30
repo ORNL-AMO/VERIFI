@@ -1,0 +1,66 @@
+<div class="d-flex flex-column">
+    <div class="d-flex justify-content-between">
+        <span class="bold larger">
+            Report Year: {{analysisItem?.reportYear | yearDisplay:selectedFacility.fiscalYear}}
+        </span>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <span class="bold larger">
+            Baseline Year: {{analysisItem?.baselineYear | yearDisplay:selectedFacility.fiscalYear}}
+        </span>
+        <span>
+            <span class="me-2 badge bg-dark" *ngIf="isBanked">
+                <span class="fa fa-piggy-bank banked-style"></span> Analysis Is Banked
+            </span>
+            <span class="badge bg-secondary" *ngIf="analysisItem?.energyIsSource">
+                Source Energy
+            </span>
+            <span class="badge bg-secondary" *ngIf="!analysisItem?.energyIsSource">
+                Site Energy
+            </span>
+        </span>
+
+    </div>
+
+    <hr>
+    <div *ngFor="let groupItem of groupItems; let index = index; let last = last;">
+        <div>
+            <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
+            <span class="bold larger">
+                {{groupItem.group.idbGroupId | groupName}}
+            </span>
+            <ng-template [ngIf]="!groupItem.group.groupErrors.hasErrors" [ngIfElse]="errorsBlock">
+                <span class="badge bg-secondary ms-2 pull-right">
+                    {{groupItem.group.analysisType | analysisTypeLabel }}
+                </span>
+                <ng-container *ngIf="groupItem.group.analysisType != 'skip'">
+                    <span class="badge bg-info ms-2 pull-right"
+                        *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+                </ng-container>
+            </ng-template>
+            <ng-template #errorsBlock>
+                <span class="badge bg-danger pull-right">Errors in group setup.</span>
+            </ng-template>
+
+        </div>
+        <div class="pt-2"
+            *ngIf="groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors">
+            Model Year: {{groupItem.group.regressionModelYear}}<br>
+            Modeled Energy = {{groupItem.regressionEquation}}<br>
+            <ng-container *ngIf="groupItem.group.userDefinedModel">
+                Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
+            </ng-container>
+            <ng-container *ngIf="!groupItem.group.userDefinedModel">
+                User defined model.
+            </ng-container>
+        </div>
+        <div class="p-0"
+            *ngIf="analysisItem?.hasBanking && groupItem.group.applyBanking && !groupItem.group.groupErrors.hasErrors">
+            <span class="badge bg-dark">
+                <span class="fa fa-piggy-bank banked-style"></span> Has Banked Savings
+            </span>
+        </div>
+        <hr>
+    </div>
+</div>

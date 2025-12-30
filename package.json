@@ -1,7 +1,7 @@
 {
   "name": "verifi",
   "description": "Application for analyzing utility usage",
-  "version": "0.14.3-beta",
+  "version": "0.14.5-beta",
   "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
@@ -100,7 +100,7 @@
     "zone.js": "0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "20.3.6",
+    "@angular-devkit/build-angular": "20.3.7",
     "@angular/cli": "20.3.6",
     "@angular/compiler-cli": "20.3.6",
     "@angular/language-service": "20.3.6",

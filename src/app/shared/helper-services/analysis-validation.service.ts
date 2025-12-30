@@ -6,14 +6,24 @@ import { CalanderizationService } from './calanderization.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalysisValidationService {
 
+  facilityMeterData: Array<IdbUtilityMeterData>;
+  facilityPredictorData: Array<IdbPredictorData>;
+
   constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService) { }
+    private calanderizationService: CalanderizationService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDataDbService: PredictorDataDbService) {
+  }
 
   getAnalysisItemErrors(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
@@ -63,6 +73,10 @@ export class AnalysisValidationService {
     let missingRegressionConstant: boolean = false;
     let missingRegressionModelYear: boolean = false;
     let missingRegressionModelStartMonth: boolean = false;
+    let missingRegressionStartYear: boolean = false;
+    let missingRegressionModelEndMonth: boolean = false;
+    let missingRegressionEndYear: boolean = false;
+    let invalidModelDateSelection: boolean = false;
     let missingRegressionModelSelection: boolean = false;
     let missingRegressionPredictorCoef: boolean = false;
     let invalidAverageBaseload: boolean = false;
@@ -74,14 +88,36 @@ export class AnalysisValidationService {
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
     let hasInvalidRegressionModel: boolean = false;
 
+    let isDateRangeValid: boolean = true;
+    let isTwelveMonthSelected: boolean = true;
+    let allMeterReadingsPresent: boolean = true;
+    let allPredictorReadingsPresent: boolean = true;
+    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
+
     let missingGroupMeters: boolean = groupMeters.length == 0;
     if (group.analysisType != 'absoluteEnergyConsumption' && group.analysisType != 'skipAnalysis' && group.analysisType != 'skip') {
       missingProductionVariables = this.checkMissingProductionVariables(group.predictorVariables);
       if (group.analysisType == 'regression') {
         missingRegressionConstant = this.checkValueValid(group.regressionConstant) == false;
         missingRegressionModelYear = this.checkValueValid(group.regressionModelYear) == false;
-        if(!group.userDefinedModel) {
+        if (!group.userDefinedModel) {
           missingRegressionModelStartMonth = this.checkValueValid(group.regressionModelStartMonth) == false;
+          missingRegressionStartYear = this.checkValueValid(group.regressionStartYear) == false;
+          missingRegressionModelEndMonth = this.checkValueValid(group.regressionModelEndMonth) == false;
+          missingRegressionEndYear = this.checkValueValid(group.regressionEndYear) == false;
+
+          isDateRangeValid = this.checkDateRangeValidity(group);
+          isTwelveMonthSelected = this.checkTwelveMonthSelection(group);
+          allMeterReadingsPresent = this.validateMeterDataForSelectedDates(group);
+          allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates(group);
+          
+          if (isDateRangeValid && isTwelveMonthSelected && allMeterReadingsPresent && allPredictorReadingsPresent) {
+            invalidModelDateSelection = false;
+          }
+          else {
+            invalidModelDateSelection = true;
+          }
         }
         for (let index = 0; index < group.predictorVariables.length; index++) {
           let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
@@ -125,12 +161,12 @@ export class AnalysisValidationService {
         if (!group.bankedAnalysisYear) {
           missingBankingAppliedYear = true;
         }
-        if(group.bankedAnalysisYear && group.newBaselineYear){
+        if (group.bankedAnalysisYear && group.newBaselineYear) {
           invalidBankingYears = (group.bankedAnalysisYear >= group.newBaselineYear);
         }
       }
     }
-    let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelStartMonth || missingRegressionModelSelection ||
+    let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelStartMonth || missingRegressionStartYear || missingRegressionModelEndMonth || missingRegressionEndYear || invalidModelDateSelection || missingRegressionModelSelection ||
       missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear || missingBankingAppliedYear ||
       invalidBankingYears);
     return {
@@ -139,6 +175,10 @@ export class AnalysisValidationService {
       missingRegressionConstant: missingRegressionConstant,
       missingRegressionModelYear: missingRegressionModelYear,
       missingRegressionModelStartMonth: missingRegressionModelStartMonth,
+      missingRegressionStartYear: missingRegressionStartYear,
+      missingRegressionModelEndMonth: missingRegressionModelEndMonth,
+      missingRegressionEndYear: missingRegressionEndYear,
+      invalidModelDateSelection: invalidModelDateSelection,
       missingRegressionModelSelection: missingRegressionModelSelection,
       missingRegressionPredictorCoef: missingRegressionPredictorCoef,
       invalidAverageBaseload: invalidAverageBaseload,
@@ -229,6 +269,78 @@ export class AnalysisValidationService {
       isChanged = true;
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
+  }
+
+  validateMeterDataForSelectedDates(group: AnalysisGroup) {
+    let month = group.regressionModelStartMonth;;
+    let year = group.regressionStartYear;
+    const endMonth = group.regressionModelEndMonth;
+    const endYear = group.regressionEndYear;
+
+    while (year < endYear || (year === endYear && month <= endMonth)) {
+      const dataPresent = this.facilityMeterData.some(meterData => {
+        const readDate = new Date(meterData.readDate);
+        return readDate.getFullYear() === year && readDate.getMonth() === month;
+      });
+      if (!dataPresent) {
+        return false;
+      }
+      month++;
+      if (month > 11) {
+        month = 0;
+        year++;
+      }
+    }
+    return true;
+  }
+
+  validatePredictorDataForSelectedDates(group: AnalysisGroup) {
+    let allPresent: boolean = true;
+    group.predictorVariables.forEach(variable => {
+      if (variable.productionInAnalysis) {
+        const variablePredictorData = this.facilityPredictorData.filter(predictor => predictor.predictorId === variable.id);
+
+        let month = group.regressionModelStartMonth;;
+        let year = group.regressionStartYear;
+        const endMonth = group.regressionModelEndMonth;
+        const endYear = group.regressionEndYear;
+
+        while (year < endYear || (year === endYear && month <= endMonth)) {
+          const dataPresent = variablePredictorData.some(predictorData => {
+            const readDate = new Date(predictorData.date);
+            return readDate.getFullYear() === year && readDate.getMonth() === month;
+          });
+          if (!dataPresent) {
+            allPresent = false;
+            break;
+          }
+          month++;
+          if (month > 11) {
+            month = 0;
+            year++;
+          }
+        }
+      }
+    });
+    return allPresent;
+  }
+
+  checkDateRangeValidity(group: AnalysisGroup) {
+    const startMonth = group.regressionModelStartMonth;
+    const startYear = group.regressionStartYear;
+    const endMonth = group.regressionModelEndMonth;
+    const endYear = group.regressionEndYear;
+    if (endYear < startYear) {
+      return false;
+    } else if (endYear === startYear && endMonth < startMonth) {
+      return false;
+    }
+    return true;
+  }
+
+  checkTwelveMonthSelection(group: AnalysisGroup) {
+    const totalMonths = (group.regressionEndYear - group.regressionStartYear) * 12 + (group.regressionModelEndMonth - group.regressionModelStartMonth) + 1;
+    return totalMonths >= 12;
   }
 
 }

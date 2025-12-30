@@ -197,7 +197,7 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importExistingFacility(backupFile: BackupFile) {
     //delete selected facility and data
-    await this.backupDataService.deleteFacilityData(this.overwriteFacility);
+    await this.dbChangesService.deleteFacility(this.overwriteFacility, this.selectedAccount);
     await this.importNewFacility(backupFile)
   }
 }

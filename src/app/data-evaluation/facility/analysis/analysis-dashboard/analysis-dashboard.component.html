@@ -1,5 +1,4 @@
 <div class="main-content p-0">
-    <app-analysis-dashboard-tabs *ngIf="hasEnergy && hasWater"></app-analysis-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
@@ -14,21 +13,6 @@
                     </div>
                 </div>
             </h4>
-            <div class="d-flex justify-content-between">
-                <div>
-                    <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
-                </div>
-                <div class="d-flex">
-                    <div class="pe-1">
-                        Show Details
-                    </div>
-                    <label class="switch mb-0" for="showDetail">
-                        <input class="checkbox" type="checkbox" id="showDetail" name="showDetail"
-                            [(ngModel)]="showDetail" (change)="saveShowDetails()">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </div>
         </div>
         <hr>
         <router-outlet></router-outlet>

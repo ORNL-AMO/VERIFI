@@ -624,7 +624,6 @@ export class UploadDataService {
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
-
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setCurrentLoadingIndex(6);
     this.loadingService.addLoadingMessage('Finishing Up');

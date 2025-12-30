@@ -12,6 +12,7 @@ import { UploadDataService } from 'src/app/data-management/data-management-impor
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
@@ -36,12 +37,15 @@ export class SubmitImportDataComponent {
       numUtilityData: 0
     };
   facilitySummaries: Array<ImportSummaryItem> = [];
+  displayUpdatePredictorModal: boolean = false;
+  dataSubmitted: boolean = false;
   constructor(
     private activatedRoute: ActivatedRoute,
     private dataManagementService: DataManagementService,
     private uploadDataService: UploadDataService,
     private router: Router,
     private accountDbService: AccountdbService,
+    private predictorDbService: PredictorDbService,
     private loadingService: LoadingService
   ) { }
 
@@ -68,7 +72,28 @@ export class SubmitImportDataComponent {
   }
 
   async submitImport() {
-    this.fileReference = await this.uploadDataService.submit(this.fileReference);
+    if (!this.dataSubmitted) {
+      this.fileReference = await this.uploadDataService.submit(this.fileReference);
+      let accountHasWeatherPredictors: boolean = this.checkAccountWeatherPredictors();
+      if (accountHasWeatherPredictors) {
+        this.dataSubmitted = true;
+      } else {
+        this.finishSubmit();
+      }
+    } else {
+      this.finishSubmit();
+    }
+  }
+
+  checkAccountWeatherPredictors(): boolean {
+    let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let weatherPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
+      return predictor.predictorType == 'Weather';
+    });
+    return weatherPredictors.length > 0;
+  }
+
+  finishSubmit() {
     let fileReferences: Array<FileReference> = this.dataManagementService.fileReferences.getValue();
     fileReferences = fileReferences.filter(fileRef => { return fileRef.id != this.fileReference.id });
     this.dataManagementService.fileReferences.next(fileReferences);
@@ -213,9 +238,6 @@ export class SubmitImportDataComponent {
       maxNewStartDate = new Date(maxNew.date);
     }
 
-
-
-
     return {
       predictor: predictor,
       existingReadings: existingReadings,
@@ -229,6 +251,14 @@ export class SubmitImportDataComponent {
         endDate: maxNewStartDate
       }
     }
+  }
+
+  openWeatherPredictorModal() {
+    this.displayUpdatePredictorModal = true;
+  }
+
+  hideWeatherPredictorModal() { 
+    this.displayUpdatePredictorModal = false;
   }
 }
 

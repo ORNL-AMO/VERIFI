@@ -25,6 +25,12 @@ export class MonthlyGroupAnalysisClass {
   annualMeterDataUsage: Array<{ year: number, usage: number }>;
   baselineYearEnergyIntensity: number;
   modelYear: number;
+  customModelYear: {
+    startMonth: number,
+    startYear: number,
+    endMonth: number,
+    endYear: number
+  }
   isNew: boolean;
 
   dataEndDate: Date;
@@ -51,7 +57,7 @@ export class MonthlyGroupAnalysisClass {
     this.bankedAnalysisDate = monthlyStartAndEndDate.bankedAnalysisDate;
     if (calculateAllMonthlyData) {
       let metersInGroup: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == this.selectedGroup.idbGroupId });
-      let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(metersInGroup);    
+      let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(metersInGroup);
       let lastPredictorEntry: IdbPredictorData = _.maxBy(this.groupPredictorData, (data: IdbPredictorData) => {
         return data.date;
       });
@@ -96,7 +102,7 @@ export class MonthlyGroupAnalysisClass {
 
   setBaselineYear() {
     this.baselineYear = getFiscalYear(this.baselineDate, this.facility);
-    if(this.bankedAnalysisDate){
+    if (this.bankedAnalysisDate) {
       this.bankedAnalysisYear = getFiscalYear(this.bankedAnalysisDate, this.facility);
     }
   }
@@ -151,7 +157,17 @@ export class MonthlyGroupAnalysisClass {
 
   setModelYear() {
     if (this.selectedGroup.analysisType == 'regression') {
-      this.modelYear = this.selectedGroup.regressionModelYear;
+      if (this.selectedGroup.userDefinedModel && this.selectedGroup.regressionStartYear && this.selectedGroup.regressionEndYear) {
+        this.customModelYear = {
+          startMonth: this.selectedGroup.regressionModelStartMonth,
+          startYear: this.selectedGroup.regressionStartYear,
+          endMonth: this.selectedGroup.regressionModelEndMonth,
+          endYear: this.selectedGroup.regressionEndYear
+        }
+        this.modelYear = this.selectedGroup.regressionEndYear;
+      } else {
+        this.modelYear = this.selectedGroup.regressionModelYear;
+      }
     } else {
       this.modelYear = this.analysisItem.baselineYear;
     }

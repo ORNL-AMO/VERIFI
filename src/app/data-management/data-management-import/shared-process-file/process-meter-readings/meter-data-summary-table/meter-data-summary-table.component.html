@@ -60,7 +60,7 @@
                         ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
                     </span>
 
-                    <span class="float-end" *ngIf="summary.newEntries > 0">
+                    <span class="float-end" *ngIf="readingDifferencesMap[summary.meterId]?.length > 0">
                         <i class="fa-solid fa-eye icon-style" (click)="openModal(summary)"></i>
                     </span>
                 </td>
@@ -141,14 +141,6 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-        <div *ngIf="comparisonSummaryWithDifferences.length === 0" class="text-center my-5">
-            <div
-                class="alert alert-info d-flex flex-column align-items-center justify-content-center py-4 rounded shadow-sm">
-                <i class="fa fa-info-circle fa-2x mb-2 text-primary"></i>
-                <div class="fw-bold fs-5 mb-1">No differences found between the existing and imported meter readings
-                </div>
             </div>
         </div>
     </div>
