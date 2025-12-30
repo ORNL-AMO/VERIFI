@@ -1,3 +1,13 @@
 .mdash{
     height: 33.6px;
 }
+
+.model-comparison{
+    top: 30px;
+    left: 10px;
+    width: calc(100vw - 20px);
+}
+
+.model-comparison .model-comparison-body{
+    overflow-y: auto;
+}

@@ -182,11 +182,17 @@
             </div>
         </div>
     </div>
+
+    <div class="mt-2" *ngIf="changedModel">
+        <div class="alert alert-warning d-flex justify-content-center align-items-center"> 
+            The selected model has changed. Click&nbsp;<a (click)="openModelComparisonModal()">here</a>&nbsp;to view the changes.
+        </div>
+    </div>
 </div>
 
 
 
-<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel}"></div>
+<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel || showModelComparison}"></div>
 <div class="popup" [class.open]="showUpdateModelsModal">
     <div class="popup-header">Are you sure you want to update the models?
         <button class="item-right" (click)="closeUpdateModelsModal()">x</button>
@@ -210,5 +216,137 @@
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelTogglePredictor()">Cancel</button>
         <button class="btn btn-success" (click)="confirmTogglePredictor()">Clear Models</button>
+    </div>
+</div>
+
+<div class="popup model-comparison" [class.open]="showModelComparison">
+    <div class="popup-header">Model Comparison
+        <button class="item-right" (click)="closeModal()">x</button>
+    </div>
+    <div class="popup-body model-comparison-body">
+        <div class="table-responsive" *ngIf="changedModel">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th>
+
+                        </th>
+                        <th>
+                            Model<br> Year
+                        </th>
+                        <th>
+                            Variable<br> p-Values
+                        </th>
+                        <th>
+                            R2
+                        </th>
+                        <th>
+                            Adjusted<br> R2
+                        </th>
+                        <th>
+                            Model<br> p-Value
+                        </th>
+                        <th>
+                            Formula
+                        </th>
+                        <th>
+                            Model Notes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td *ngIf="changedModel.oldModel">
+                            Old Model
+                        </td>
+                        <td>
+                            {{changedModel.oldModel.modelYear| yearDisplay:selectedFacility.fiscalYear}}
+                        </td>
+                        <td>
+                            <span *ngFor="let pVal of changedModel.oldModel.t.p; let index = index">
+                                <span class="no-break"
+                                    *ngIf="index != 0">{{changedModel.oldModel.predictorVariables[index-1].name}}:
+                                    {{pVal | number:'0.2-2'}}
+                                    <br>
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            {{changedModel.oldModel.R2| number:'0.3-3'}}
+                        </td>
+                        <td>
+                            {{changedModel.oldModel.adjust_R2| number:'0.3-3'}}
+                        </td>
+                        <td>
+                            {{changedModel.oldModel.modelPValue| number:'0.2-2'}}
+                        </td>
+                        <td>
+                            <span *ngFor="let coefVal of changedModel.oldModel.coef; let index = index;">
+                                <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
+                                <span *ngIf="index != 0">({{coefVal|
+                                    regressionNumber}}*{{changedModel.oldModel.predictorVariables[index-1].name}})</span>
+                                <span *ngIf="index != changedModel.oldModel.coef.length-1"> +</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span *ngFor="let notes of changedModel.oldModel.modelNotes">
+                                {{notes}}<br>
+                            </span>
+                            <span *ngIf="changedModel.oldModel.modelNotes.length == 0">
+                                &mdash;
+                            </span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="changedModel.newModel">
+                        <td>
+                            Updated Model
+                        </td>
+                        <td>
+                            {{changedModel.newModel.modelYear | yearDisplay:selectedFacility.fiscalYear}}
+                        </td>
+                        <td>
+                            <span *ngFor="let pVal of changedModel.newModel.t.p; let index = index">
+                                <span
+                                    *ngIf="index != 0">{{changedModel.newModel.predictorVariables[index-1].name}}:
+                                    {{pVal |
+                                    number:'0.2-2'}}
+                                    <br>
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            {{changedModel.newModel.R2| number:'0.3-3'}}
+                        </td>
+                        <td>
+                            {{changedModel.newModel.adjust_R2| number:'0.3-3'}}
+                        </td>
+                        <td>
+                            {{changedModel.newModel.modelPValue| number:'0.2-2'}}
+                        </td>
+                        <td>
+                            <span *ngFor="let coefVal of changedModel.newModel.coef; let index = index;">
+                                <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
+                                <span *ngIf="index != 0">({{coefVal|
+                                    regressionNumber}}*{{changedModel.newModel.predictorVariables[index-1].name}})</span>
+                                <span *ngIf="index != changedModel.newModel.coef.length-1"> +</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span *ngFor="let notes of changedModel.newModel.modelNotes">
+                                {{notes}}<br>
+                            </span>
+                            <span *ngIf="changedModel.newModel.modelNotes.length == 0">
+                                &mdash;
+                            </span>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
     </div>
 </div>

@@ -50,6 +50,8 @@ export class RegressionModelMenuComponent implements OnInit {
   months: Array<Month> = Months;
   isButtonDisabled: boolean = false;
   facilityMeterData: Array<IdbUtilityMeterData>;
+  changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
+  showModelComparison: boolean = false;
 
   @Output() userDefinedModelClicked = new EventEmitter<boolean>();
   @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
@@ -141,7 +143,8 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   generateModels(autoSelect?: boolean) {
-    const previousSelectedModelId = this.group.selectedModelId; 
+    const previousSelectedModelId = this.group.selectedModelId;
+    let previousSelectedModel = this.group?.models?.find(model => model.modelId === previousSelectedModelId);
     this.loadingService.setLoadingMessage("Generating Regression Models...");
     this.loadingService.setLoadingStatus(true);
     setTimeout(() => {
@@ -153,6 +156,8 @@ export class RegressionModelMenuComponent implements OnInit {
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion);
 
       this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
+
+      let newSelectedModel = this.group?.models.find(model => model.modelId === this.group.selectedModelId);
       if (this.group.models) {
         this.modelingError = false;
         this.checkHasValidModels();
@@ -160,11 +165,13 @@ export class RegressionModelMenuComponent implements OnInit {
         this.hasLaterDate = false;
         this.group.dateModelsGenerated = new Date();
 
-        if(previousSelectedModelId) {
+        if (previousSelectedModelId) {
           let previousModelExists = this.group.models.find(model => model.modelId === previousSelectedModelId);
-          if(previousModelExists) {
+          if (previousModelExists) {
             this.group.selectedModelId = previousSelectedModelId;
           }
+
+          this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
         }
 
         if (autoSelect) {
@@ -191,6 +198,28 @@ export class RegressionModelMenuComponent implements OnInit {
     }, 100)
   }
 
+  compareUpdatedModel(previousModel: JStatRegressionModel, newModel: JStatRegressionModel) {
+    this.changedModel = null;
+
+    if (previousModel && newModel) {
+      if (previousModel.R2 !== newModel.R2 || previousModel.adjust_R2 !== newModel.adjust_R2 || previousModel.modelPValue !== newModel.modelPValue ||
+        !_.isEqual(previousModel.coef, newModel.coef)) {
+        this.changedModel = {
+          modelId: previousModel.modelId,
+          oldModel: previousModel,
+          newModel: newModel
+        };
+      }
+    }
+  }
+
+  openModelComparisonModal() {
+    this.showModelComparison = true;
+  }
+
+  closeModal() {
+    this.showModelComparison = false;
+  }
 
   updateModels() {
     this.sharedDataService.modalOpen.next(true);
