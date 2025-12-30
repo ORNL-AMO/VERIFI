@@ -379,8 +379,6 @@ export class DbChangesService {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != facility.guid });
-      this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage('Updating Account Analysis Items (' + index + '/' + accountAnalysisItems.length + ')');
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
     this.loadingService.setCurrentLoadingIndex(++currIdx);
