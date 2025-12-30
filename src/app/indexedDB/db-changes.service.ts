@@ -348,7 +348,7 @@ export class DbChangesService {
     this.loadingService.setContext('delete-facility');
     this.loadingService.setTitle('Deleting Facility');
 
-    // Delete all info associated with account
+    // Delete all info associated with facility
     this.loadingService.setCurrentLoadingIndex(++currIdx);
     this.loadingService.addLoadingMessage("Deleting Facility Predictors");
     await this.predictorsDbServiceDeprecated.deleteAllFacilityPredictors(facility.guid);

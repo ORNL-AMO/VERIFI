@@ -71,6 +71,9 @@ export class HomePageComponent {
         } catch (err) {
           console.log(err);
           this.loadingService.clearLoadingMessages();
+          this.loadingService.setContext(undefined);
+          this.loadingService.setTitle('');
+          this.loadingService.isLoadingComplete.next(true);
           this.toastNotificationService.showToast('Error loading Example', 'Something has gone horribly wrong with the example data', 15000, false, 'alert-danger');
         }
       };

@@ -137,7 +137,7 @@ export class DataManagementHomeComponent {
   async showToast() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(selectedAccount, true);
-     let hasWarning =this.weatherPredictorManagementService.hasWarning;
+     let hasWarning = this.weatherPredictorManagementService.hasWarning;
     if (hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
     } else {

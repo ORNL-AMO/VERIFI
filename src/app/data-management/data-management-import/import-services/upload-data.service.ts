@@ -519,7 +519,7 @@ export class UploadDataService {
     this.importFileReference = fileReference;
     this.sharedDataService.modalOpen.next(true);
 
-    this.loadingService.setContext('submit-file-data')
+    this.loadingService.setContext('submit-file-data');
     this.loadingService.setTitle('Submitting File Data');
     this.loadingService.setCurrentLoadingIndex(0);
     this.loadingService.addLoadingMessage('Uploading Facilities');

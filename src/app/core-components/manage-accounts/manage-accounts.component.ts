@@ -97,6 +97,8 @@ export class ManageAccountsComponent {
       this.exportToExcelTemplateV3Service.exportFacilityData();
     } catch (err) {
       this.loadingService.clearLoadingMessages();
+      this.loadingService.setContext(undefined);
+      this.loadingService.setTitle('');
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to backup ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
     }
   }

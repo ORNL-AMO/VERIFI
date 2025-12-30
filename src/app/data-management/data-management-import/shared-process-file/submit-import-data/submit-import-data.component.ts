@@ -97,8 +97,6 @@ export class SubmitImportDataComponent {
     let fileReferences: Array<FileReference> = this.dataManagementService.fileReferences.getValue();
     fileReferences = fileReferences.filter(fileRef => { return fileRef.id != this.fileReference.id });
     this.dataManagementService.fileReferences.next(fileReferences);
-    // let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    // this.router.navigateByUrl('/data-management/' + account.guid + '/import-data')
   }
 
   setFacilitySummaries() {

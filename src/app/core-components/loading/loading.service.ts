@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 export class LoadingService {
   public loading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public loadingMessage: BehaviorSubject<string> = new BehaviorSubject<string>("Loading...");
-  public loadingList: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public loadingMessages: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
   public title: BehaviorSubject<string> = new BehaviorSubject<string>(undefined);
   public currentLoadingIndex: BehaviorSubject<number> = new BehaviorSubject<number>(0);

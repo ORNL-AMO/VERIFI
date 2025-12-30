@@ -67,8 +67,11 @@ export class ExportToExcelTemplateV3Service {
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
           this.loadingService.isLoadingComplete.next(true);
+        }).catch(error => {
+          console.error('Error exporting to Excel:', error);
+          this.loadingService.isLoadingComplete.next(true);
         });
-      })
+      });
     };
     request.send();
   }

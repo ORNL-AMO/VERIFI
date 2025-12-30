@@ -159,6 +159,9 @@ export class ImportBackupModalComponent implements OnInit {
     } catch (err) {
       console.log(err);
       this.loadingService.clearLoadingMessages();
+      this.loadingService.setContext(undefined);
+      this.loadingService.setTitle('');
+      this.loadingService.isLoadingComplete.next(true);
       this.toastNotificationService.showToast('Error importing backup', 'There was an error importing this data file.', 15000, false, 'alert-danger');
     }
   }
