@@ -5,9 +5,10 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
 import { Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
+import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-home-page',
@@ -20,8 +21,10 @@ export class HomePageComponent {
   showTestDataModal: boolean = false;
   accounts: Array<IdbAccount>;
   currentPageNumber: number = 1;
+  loadingSub: Subscription;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
+    private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
     private dbChangesService: DbChangesService) { }
 
@@ -32,12 +35,22 @@ export class HomePageComponent {
     this.accounts = _.orderBy(this.accounts, (account: IdbAccount) => {
       return new Date(account.modifiedDate).getTime();
     }, 'desc');
+
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context == 'load-example-data') {
+        this.navigateToAccount();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.loadingSub.unsubscribe();
   }
 
   loadTestData() {
     this.showTestDataModal = false;
-    this.loadingService.setLoadingMessage('Loading Example Data..');
-    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setContext('load-example-data');
+    this.loadingService.setTitle('Loading Example Data');
     var request = new XMLHttpRequest();
     request.open('GET', 'assets/example-data/ExampleAccount.json', true);
     request.responseType = 'blob';
@@ -48,21 +61,28 @@ export class HomePageComponent {
         try {
           let test = JSON.parse(JSON.stringify(reader.result));
           let tmpBackupFile: BackupFile = JSON.parse(test);
-          let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile);
+          let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);
           await this.dbChangesService.selectAccount(newAccount, false);
           let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
           this.accountDbService.allAccounts.next(allAccounts);
           await this.dbChangesService.selectAccount(newAccount, false);
-          this.loadingService.setLoadingStatus(false);
-          this.router.navigateByUrl('/data-evaluation/account');
+          this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
-          this.loadingService.setLoadingMessage('Something has gone horribly wrong with the example data..');
+          this.loadingService.clearLoadingMessages();
+          this.loadingService.setContext(undefined);
+          this.loadingService.setTitle('');
+          this.loadingService.isLoadingComplete.next(true);
+          this.toastNotificationService.showToast('Error loading Example', 'Something has gone horribly wrong with the example data', 15000, false, 'alert-danger');
         }
       };
     };
     request.send();
+  }
+
+  navigateToAccount() {
+    this.router.navigateByUrl('/data-evaluation/account');
   }
 
   openImportBackup() {

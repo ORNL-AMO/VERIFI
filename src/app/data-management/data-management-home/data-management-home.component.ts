@@ -17,6 +17,9 @@ import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-
 import { ActivatedRoute, Router } from '@angular/router';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-data-management-home',
@@ -61,6 +64,8 @@ export class DataManagementHomeComponent {
   totalTodoItems: number = 0;
   allTodoItems: Array<TodoItem> = [];
   hasInitialSetupItems: boolean;
+
+  loadingSub: Subscription;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -70,7 +75,10 @@ export class DataManagementHomeComponent {
     private weatherPredictorManagementService: WeatherPredictorManagementService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private loadingService: LoadingService,
+    private dbChangesService: DbChangesService,
+    private toastNotificationService: ToastNotificationsService
   ) {
 
   }
@@ -107,6 +115,12 @@ export class DataManagementHomeComponent {
       this.meterGroups = meterGroups;
       this.setTodoItems();
     });
+
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'updating-weather-predictors') {
+        this.showToast();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -117,6 +131,18 @@ export class DataManagementHomeComponent {
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
     this.meterGroupsSub.unsubscribe();
+    this.loadingSub.unsubscribe();
+  }
+
+  async showToast() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.selectAccount(selectedAccount, true);
+     let hasWarning = this.weatherPredictorManagementService.hasWarning;
+    if (hasWarning) {
+      this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
+    } else {
+      this.toastNotificationService.showToast("Weather Predictors Updated", "No gaps in data found while calculating weather predictors.", undefined, false, "alert-success")
+    }
   }
 
   setTodoItems() {

@@ -23,7 +23,6 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { checkSameMonth } from '../data-management/data-management-import/import-services/upload-helper-functions';
 
 
@@ -31,6 +30,8 @@ import { checkSameMonth } from '../data-management/data-management-import/import
   providedIn: 'root'
 })
 export class WeatherPredictorManagementService {
+
+  hasWarning: boolean = false;
 
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
@@ -41,9 +42,9 @@ export class WeatherPredictorManagementService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private loadingService: LoadingService,
     private dbChangesService: DbChangesService,
-    private facilityDbService: FacilitydbService,
-    private toastNotificationService: ToastNotificationsService
-  ) { }
+    private facilityDbService: FacilitydbService
+  ) {
+  }
 
   async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility): Promise<"success" | "error"> {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -177,14 +178,14 @@ export class WeatherPredictorManagementService {
     }
   }
 
-
   async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Updating Weather Predictors...');
+    this.loadingService.setContext('updating-weather-predictors');
+    this.loadingService.setTitle('Updating Weather Predictors');
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let results: "success" | "error" = "success";
-    let hasWarning: boolean = false;
+    this.hasWarning = false;
+    let index: number = -1;
     //iterate facility list
     for (let i = 0; i < facilityList.length; i++) {
       let facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
@@ -194,7 +195,9 @@ export class WeatherPredictorManagementService {
       //iterate weather predictors for facility
       for (let p = 0; p < facilityWeatherPredictors.length; p++) {
         let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
-        this.loadingService.setLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name + '...');
+        ++index;
+        this.loadingService.setCurrentLoadingIndex(index);
+        this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);
         //existing predictor data for this predictor
         let predictorData: Array<IdbPredictorData> = accountPredictorData.filter(data => {
           return data.predictorId == weatherPredictor.guid;
@@ -211,11 +214,15 @@ export class WeatherPredictorManagementService {
           if (!monthPredictorEntry) {
             monthPredictorEntry = getNewIdbPredictorData(weatherPredictor);
             //add predictor data
-            this.loadingService.setLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            index++;
+            this.loadingService.setCurrentLoadingIndex(index);
+            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
             let nextMonthsDate: Date = new Date(startDate)
             nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
             let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
-            this.loadingService.setLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            index++;
+            this.loadingService.setCurrentLoadingIndex(index);
+            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
@@ -234,7 +241,7 @@ export class WeatherPredictorManagementService {
               }
               newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
               if (newPredictorData.weatherDataWarning) {
-                hasWarning = true;
+                this.hasWarning = true;
               }
               await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
             }
@@ -246,15 +253,7 @@ export class WeatherPredictorManagementService {
         }
       }
     }
-
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(selectedAccount, true);
-    this.loadingService.setLoadingStatus(false);
-    if (hasWarning) {
-      this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
-    } else {
-      this.toastNotificationService.showToast("Weather Predictors Updated", "No gaps in data found while calculating weather predictors.", undefined, false, "alert-success")
-    }
+    this.loadingService.isLoadingComplete.next(true);
     return results;
   }
 }
