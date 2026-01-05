@@ -27,7 +27,7 @@
 
     <hr>
 
-    <div class="table-responsive" *ngIf="selectedGroup.models && selectedGroup.userDefinedModel">
+    <div class="table-responsive" *ngIf="generatedModels && generatedModels.length != 0 && selectedGroup.userDefinedModel">
 
         <table class="table table-sm table-hover utility-data table-bordered">
             <thead>
@@ -72,7 +72,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; 
+                <tr *ngFor="let model of generatedModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; 
                 let modelIndex = index;"
                     [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
                     <td class="text-center" *ngIf="!model.errorModeling">
