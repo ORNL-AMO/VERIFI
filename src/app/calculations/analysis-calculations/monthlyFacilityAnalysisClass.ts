@@ -171,7 +171,8 @@ export class MonthlyFacilityAnalysisClass {
                 twentyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.twentyPercentSavings),
                 twentyFivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.twentyFivePercentSavings),
                 thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
-                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings)
+                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings),
+                missingValueWarning: summaryDataItem.missingValueWarning
             }
         })
     }

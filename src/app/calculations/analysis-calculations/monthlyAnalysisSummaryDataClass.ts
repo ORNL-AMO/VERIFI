@@ -44,6 +44,8 @@ export class MonthlyAnalysisSummaryDataClass {
     baselineYear: number;
     bankedAnalysisYear: number;
     originalBaselineYearBaselineActualEnergyUse: number;
+
+    missingValueWarning: boolean;
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
@@ -53,6 +55,7 @@ export class MonthlyAnalysisSummaryDataClass {
         baselineActualSummaryData: Array<MonthlyAnalysisSummaryDataClass>
     ) {
         this.date = monthDate;
+        this.missingValueWarning = false;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
         this.isNew = facility.isNewFacility;
         this.baselineYear = monthlyGroupAnalysisClass.baselineYear;
@@ -164,6 +167,7 @@ export class MonthlyAnalysisSummaryDataClass {
             this.modeledEnergy = this.baselineActualEnergyUse;
         } else if (analysisType == 'energyIntensity') {
             this.modeledEnergy = this.calculateEnergyIntensityModeledEnergy(baselineYearEnergyIntensity);
+            this.isProductionDataMissing(predictorVariables);
         } else if (analysisType == 'modifiedEnergyIntensity') {
             this.modeledEnergy = this.calculateModifiedEnegyIntensityModeledEnergy(baselineYearEnergyIntensity);
         }
@@ -185,12 +189,25 @@ export class MonthlyAnalysisSummaryDataClass {
             modeledEnergy = modeledEnergy + (usageVal * variable.regressionCoefficient);
         });
         modeledEnergy = modeledEnergy + this.group.regressionConstant;
+        this.isPredictorDataMissing(predictorVariables);
         return modeledEnergy;
+    }
+
+    isPredictorDataMissing(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
+        this.missingValueWarning = predictorVariables.some(variable =>
+            !this.monthPredictorData.some(data => data.predictorId == variable.id)
+        );
     }
 
     calculateEnergyIntensityModeledEnergy(baselineEnergyIntensity: number): number {
         let totalProductionUsage: number = _.sum(this.productionUsage);
         return baselineEnergyIntensity * totalProductionUsage;
+    }
+
+    isProductionDataMissing(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
+        this.missingValueWarning = predictorVariables.filter(variable => variable.productionInAnalysis).some(variable =>
+            !this.monthPredictorData.some(data => data.predictorId == variable.id)
+        );
     }
 
     calculateModifiedEnegyIntensityModeledEnergy(baselineYearEnergyIntensity: number): number {

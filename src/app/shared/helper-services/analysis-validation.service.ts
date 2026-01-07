@@ -92,8 +92,8 @@ export class AnalysisValidationService {
     let isTwelveMonthSelected: boolean = true;
     let allMeterReadingsPresent: boolean = true;
     let allPredictorReadingsPresent: boolean = true;
-    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
+    this.facilityMeterData = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(analysisItem.facilityId);
+    this.facilityPredictorData = this.predictorDataDbService.getByFacilityId(analysisItem.facilityId);
 
     let missingGroupMeters: boolean = groupMeters.length == 0;
     if (group.analysisType != 'absoluteEnergyConsumption' && group.analysisType != 'skipAnalysis' && group.analysisType != 'skip') {
