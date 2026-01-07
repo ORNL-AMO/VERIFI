@@ -25,6 +25,7 @@ export class MonthlyFacilityAnalysisDataClass {
     dataAdjustment: number;
     modelYearDataAdjustment: number;
     isBanked: boolean;
+    missingValueWarning: boolean;
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
@@ -39,6 +40,7 @@ export class MonthlyFacilityAnalysisDataClass {
         this.setCurrentMonthData(allFacilityAnalysisData);
         this.setMonthPredictorData(facilityPredictorEntries);
         this.setPredictorUsage(facilityPredictorEntries, predictors);
+        this.setMissingPredictorWarning(predictors);
         this.setBaselineAdjustmentInput();
         this.setDataAdjustment();
         this.setModelYearDataAdjustment();
@@ -75,6 +77,12 @@ export class MonthlyFacilityAnalysisDataClass {
                 });
             });
         }
+    }
+
+    setMissingPredictorWarning(predictors: Array<IdbPredictor>) {
+        this.missingValueWarning = predictors.some(variable =>
+            !this.monthPredictorData.some(data => data.predictorId == variable.guid)
+        );
     }
 
     setFiscalYear(facility: IdbFacility) {

@@ -1,3 +1,10 @@
+<div class="alert alert-warning d-flex align-items-center justify-content-center p-2 mb-2"
+    *ngIf="isPredictorDataMissing">
+    <span class="fa fa-exclamation-triangle">&nbsp;&nbsp;</span>
+    Predictor data is missing for {{missingMonthCount}} months. Results may be
+    inaccurate as the missing values are assumed to be zero.
+    Please review the predictor entries.
+</div>
 <table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable
     [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
@@ -98,7 +105,7 @@
                     [ngClass]="{'active': orderDataField == 'savings'}">
                     Savings
                 </th>
-               <!--<th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
+                <!--<th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
                     (click)="setOrderDataField('percentSavingsComparedToBaseline')"
                     [ngClass]="{'active': orderDataField == 'percentSavingsComparedToBaseline'}">
                     % Savings
@@ -131,8 +138,8 @@
                 <span class="fa fa-piggy-bank" *ngIf="data.isBanked && !data.isIntermediateBanked"></span>
                 <span class="fa fa-building-columns" *ngIf="data.savingsBanked"></span>
                 <span class="fa fa-paint-roller" *ngIf="data.isIntermediateBanked"></span>
-                <span class="fa fa-star" *ngIf="group.userDefinedModel && data.fiscalYear == modelYear"></span>
-                <span class="fa fa-star" *ngIf="!group.userDefinedModel && isModelYearMonth(data.date)"></span>
+                <span class="fa fa-star" *ngIf="group?.userDefinedModel && data.fiscalYear == modelYear"></span>
+                <span class="fa fa-star" *ngIf="!group?.userDefinedModel && isModelYearMonth(data.date)"></span>
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
@@ -230,7 +237,8 @@
                     </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.bankedSavings">
-                    <ng-template [ngIf]="data.savingsBanked && !data.isIntermediateBanked" [ngIfElse]="bankedSavingsMdash">
+                    <ng-template [ngIf]="data.savingsBanked && !data.isIntermediateBanked"
+                        [ngIfElse]="bankedSavingsMdash">
                         <span [ngClass]="{'red': data.savingsBanked < 0}">
                             {{data.savingsBanked | customNumber}}
                         </span>
@@ -242,7 +250,8 @@
                     </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.savingsUnbanked">
-                    <ng-template [ngIf]="data.savingsUnbanked && !data.isIntermediateBanked" [ngIfElse]="unbankedSavingsMdash">
+                    <ng-template [ngIf]="data.savingsUnbanked && !data.isIntermediateBanked"
+                        [ngIfElse]="unbankedSavingsMdash">
                         <span [ngClass]="{'red': data.savingsUnbanked < 0}">
                             {{data.savingsUnbanked | customNumber}}
                         </span>
@@ -265,7 +274,7 @@
                         </span>
                     </ng-template>
                 </td>
-               <!--  <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
+                <!--  <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
                     <span *ngIf="data.percentSavingsComparedToBaseline"
                         [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
                         {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %

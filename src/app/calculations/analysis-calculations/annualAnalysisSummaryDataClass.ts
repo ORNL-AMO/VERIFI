@@ -39,6 +39,7 @@ export class AnnualAnalysisSummaryDataClass {
     baselineAdjustmentInput: number;
     isBanked: boolean;
     isIntermediateBanked: boolean;
+    missingPredictorValue: boolean;
     constructor(
         monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
         year: number,
@@ -67,6 +68,13 @@ export class AnnualAnalysisSummaryDataClass {
         this.setAnnualSavingsPercentImprovement();
         this.setCummulativeSavings(previousYearsSummaryData);
         this.setNewSavings();
+        this.setMissingPredictorValue(monthlyAnalysisSummaryData);
+    }
+
+    setMissingPredictorValue(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
+        this.missingPredictorValue = monthlyAnalysisSummaryData.some(data =>
+            data.date.getUTCFullYear() === this.year && data.missingValueWarning
+        );
     }
 
     setYearAnalysisSummaryData(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
@@ -231,7 +239,8 @@ export class AnnualAnalysisSummaryDataClass {
             isBanked: this.isBanked,
             isIntermediateBanked: this.isIntermediateBanked,
             savingsBanked: checkAnalysisValue(this.savingsBanked),
-            savingsUnbanked: checkAnalysisValue(this.savingsUnbanked)
+            savingsUnbanked: checkAnalysisValue(this.savingsUnbanked),
+            missingPredictorValue: this.missingPredictorValue
         }
     }
 

@@ -93,7 +93,8 @@ export interface MonthlyAnalysisSummaryData {
   twentyPercentSavings: number,
   twentyFivePercentSavings: number,
   thirtyPercentTarget: number,
-  thirtyPercentSavings: number
+  thirtyPercentSavings: number,
+  missingValueWarning: boolean
 }
 
 export interface AnnualAnalysisSummary {
@@ -120,7 +121,8 @@ export interface AnnualAnalysisSummary {
   // adjustedStar: number,
   // adjustedStarStar: number
   isBanked: boolean,
-  isIntermediateBanked: boolean
+  isIntermediateBanked: boolean,
+  missingPredictorValue: boolean
 }
 
 
