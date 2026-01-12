@@ -21,7 +21,6 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-
 @Component({
   selector: 'app-better-climate-report',
   templateUrl: './better-climate-report.component.html',
@@ -93,7 +92,7 @@ export class BetterClimateReportComponent {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.betterClimateReportUnfiltered = _.cloneDeep(data.betterClimateReport);

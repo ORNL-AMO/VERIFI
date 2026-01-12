@@ -1,261 +1,297 @@
 <div class="content-padding">
-    <h4>Analysis Setup</h4>
-    <div class="row" *ngIf="showInUseMessage">
-        <div class="col-12 alert alert-info text-center">
-            <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
-            This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
-            to the corresponding analysis items. Making changes to this analysis may effect the results of the account
-            analysis.
-        </div>
-    </div>
-    <form>
-        <div class="row">
-            <div class="col-6">
-                <div class="row form-group">
-                    <label class="col-5 col-form-label" for="analysisName">Name</label>
-                    <div class="col-7">
-                        <input class="form-control" type="text" id="analysisName" name="analysisName"
-                            [(ngModel)]="analysisItem.name" (input)="saveItem()">
-                    </div>
-                    <div class="col-12">
-                        <div class="alert alert-danger" *ngIf="analysisItem.setupErrors.missingName">
-                            Name Required
-                        </div>
-                    </div>
-                </div>
-                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
-                    <div class="form-group row">
-                        <label class="col-5 col-form-label">Analysis Boundary </label>
-                        <div class="col-7">
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
-                                    id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
-                                    (change)="setSiteSource()" [disabled]="disableForm || showInUseMessage">
-                                <label class="form-check-label" for="sourceEnergy">Source Energy</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
-                                    id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()"
-                                    [disabled]="disableForm || showInUseMessage">
-                                <label class="form-check-label" for="siteEnergy">Site Energy</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
-                        <div class="col-7">
-                            <select class="form-select" name="energyUnit" id="energyUnit"
-                                [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()" [disabled]="disableForm">
-                                <option *ngFor="let energyUnitOption of energyUnitOptions"
-                                    [ngValue]="energyUnitOption.value">
-                                    <span [innerHTML]="energyUnitOption.display"></span>
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </ng-container>
-                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">
-                    <div class="form-group row">
-                        <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
-                        <div class="col-7">
-                            <select class="form-select" name="waterUnit" id="waterUnit"
-                                [(ngModel)]="analysisItem.waterUnit" (change)="saveItem()" [disabled]="disableForm">
-                                <option *ngFor="let waterUnitOption of waterUnitOptions"
-                                    [ngValue]="waterUnitOption.value">
-                                    <span [innerHTML]="waterUnitOption.display"></span>
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </ng-container>
-                <div class="form-group row" *ngIf="facilityAnalysisItems.length > 0">
-
-                    <label class="col-5 col-form-label" for="hasBanking">Has Banking</label>
-
-                    <div class="col-6">
-                        <label class="switch" for="hasBanking">
-                            <input class="checkbox" type="checkbox" id="hasBanking" name="hasBanking"
-                                [(ngModel)]="analysisItem.hasBanking" (change)="changeHasBanking()"
-                                [disabled]="disableForm">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-                <!-- <div class="form-group row" *ngIf="analysisItem.hasBanking">
-                    <label class="col-5 col-form-label">Banked Analysis</label>
-                    <div class="col-7">
-                        <select [required]="analysisItem.hasBanking" class="form-select" id="bankedAnalysisItemId"
-                            name="bankedAnalysisItemId" [(ngModel)]="analysisItem.bankedAnalysisItemId"
-                            (change)="saveItem()" [disabled]="disableForm">
-                            <option *ngFor="let analysisItem of facilityAnalysisItems" [ngValue]="analysisItem.guid">
-                                {{analysisItem.name}}
-                            </option>
-                        </select>
-                    </div>
-                </div> -->
-            </div>
-            <div class="col-6">
-                <div class="form-group row">
-                    <label class="col-5 col-form-label">
-                        Baseline Year
-                    </label>
-                    <div class="col-7">
-                        <select required class="form-select" id="baselineYear" name="baselineYear"
-                            [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
-                            [disabled]="disableForm || showInUseMessage">
-                            <option *ngFor="let year of yearOptions" [ngValue]="year">
-                                {{year| yearDisplay: facility.fiscalYear}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="alert alert-warning text-center p-1" *ngIf="baselineYearWarning">
-                    {{baselineYearWarning}}
-                </div>
-                <div class="alert alert-danger text-center p-1"
-                    *ngIf="analysisItem.setupErrors.baselineYearAfterMeterDataEnd">
-                    Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
-                </div>
-                <div class="alert alert-danger text-center p-1"
-                    *ngIf="analysisItem.setupErrors.baselineYearBeforeMeterDataStart">
-                    Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
-                    starts.
-                </div>
-                <div class="form-group row">
-                    <label for="reportYear" class="col-5 col-form-label">
-                        Report Year
-                    </label>
-                    <div class="col-7">
-                        <select required class="form-select" name="reportYear" id="reportYear"
-                            [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
-                            [disabled]="disableForm || showInUseMessage">
-                            <option *ngFor="let year of reportYears" [ngValue]="year">{{year| yearDisplay:
-                                facility.fiscalYear}}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="alert alert-warning text-center p-1" *ngIf="showReportYearWarning">
-                    This facility does not have 12 months of data for the selected report year
-                    ({{analysisItem.reportYear}}). An analysis is intended to be run with complete years only. To see
-                    mid-year progress, please run a <a class="click-link" (click)="goToSavingsReport()">"Savings
-                        Report"</a> for an analysis conducted with a different report year.
-                </div>
-                <div class="form-group row">
-                    <label class="col-5 col-form-label">
-                        Reporting Year
-                    </label>
-                    <div class="col-7">
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" [(ngModel)]="facility.fiscalYear"
-                                value="calendarYear" name="calendarYear" id="calendarYear" disabled>
-                            <label class="form-check-label" for="calendarYear">Calendar Year</label>
-
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" for="nonCalendarYear"
-                                [(ngModel)]="facility.fiscalYear" value="nonCalendarYear" name="nonCalendarYear"
-                                id="nonCalendarYear" disabled>
-                            <label class="form-check-label">Fiscal Year</label>
-                        </div>
-                    </div>
-                </div>
-                <div *ngIf="facility.fiscalYear == 'nonCalendarYear'" class="form-group row">
-                    <label class="col-5 col-form-label">Start Month</label>
-                    <div class="col-7">
-                        <select class="form-select" id="startMonth" name="startMonth"
-                            [(ngModel)]="facility.fiscalYearMonth" disabled>
-                            <option *ngFor="let month of months" [ngValue]="month.monthNumValue">{{month.name}}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group row" *ngIf="facility.fiscalYear == 'nonCalendarYear'">
-                    <div class="col-12">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="fiscalYearCalendarEnd"
-                                id="fiscalYearCalendarEnd" [(ngModel)]="facility.fiscalYearCalendarEnd" disabled>
-                            <label class="form-check-label" for="fiscalYearCalanderEnd">FY is denoted by the calendar
-                                year in which it ends.</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="alert alert-info text-center p-1">
-                    Fields set in "<span class="fa fa-gear"></span> Settings" tab.
-                </div>
-            </div>
-        </div>
-    </form>
-    <app-select-banked-analysis *ngIf="analysisItem.hasBanking" [facilityAnalysisItems]="facilityAnalysisItems"
-        [analysisItem]="analysisItem" [facility]="facility" (emitSave)="saveItem()"
-        [disabled]="disableForm"></app-select-banked-analysis>
-
-
+  <h4>Analysis Setup</h4>
+  @if (showInUseMessage) {
     <div class="row">
-        <div class="col">
-            <hr>
-        </div>
+      <div class="col-12 alert alert-info text-center">
+        <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+        This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+        to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+        analysis.
+      </div>
     </div>
-    <div class="row" *ngIf="hasModelsGenerated">
-        <div class="col-12 alert alert-warning">
-            One or more groups have regression models generated. These settings were used to create the models and are
-            now locked.
-            <ul class="mb-0">
-                <li *ngIf="!showInUseMessage">
-                    <a class="click-link" (click)="showChangeReportYear()">To change the report year and keep your
-                        models click here.</a>
-                </li>
-                <li>
-                    <a class="click-link" (click)="showEnableForm()">To clear the models so that you can modify all
-                        settings click here</a>
-                </li>
-            </ul>
+  }
+  <form>
+    <div class="row">
+      <div class="col-6">
+        <div class="row form-group">
+          <label class="col-5 col-form-label" for="analysisName">Name</label>
+          <div class="col-7">
+            <input class="form-control" type="text" id="analysisName" name="analysisName"
+              [(ngModel)]="analysisItem.name" (input)="saveItem()">
+          </div>
+          <div class="col-12">
+            @if (analysisItem.setupErrors.missingName) {
+              <div class="alert alert-danger">
+                Name Required
+              </div>
+            }
+          </div>
         </div>
+        @if (analysisItem.analysisCategory == 'energy') {
+          <div class="form-group row">
+            <label class="col-5 col-form-label">Analysis Boundary </label>
+            <div class="col-7">
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
+                  id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
+                  (change)="setSiteSource()" [disabled]="disableForm || showInUseMessage">
+                <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
+                  id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()"
+                  [disabled]="disableForm || showInUseMessage">
+                <label class="form-check-label" for="siteEnergy">Site Energy</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
+            <div class="col-7">
+              <select class="form-select" name="energyUnit" id="energyUnit"
+                [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()" [disabled]="disableForm">
+                @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
+                  <option
+                    [ngValue]="energyUnitOption.value">
+                    <span [innerHTML]="energyUnitOption.display"></span>
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+        @if (analysisItem.analysisCategory == 'water') {
+          <div class="form-group row">
+            <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
+            <div class="col-7">
+              <select class="form-select" name="waterUnit" id="waterUnit"
+                [(ngModel)]="analysisItem.waterUnit" (change)="saveItem()" [disabled]="disableForm">
+                @for (waterUnitOption of waterUnitOptions; track waterUnitOption) {
+                  <option
+                    [ngValue]="waterUnitOption.value">
+                    <span [innerHTML]="waterUnitOption.display"></span>
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+        @if (facilityAnalysisItems.length > 0) {
+          <div class="form-group row">
+            <label class="col-5 col-form-label" for="hasBanking">Has Banking</label>
+            <div class="col-6">
+              <label class="switch" for="hasBanking">
+                <input class="checkbox" type="checkbox" id="hasBanking" name="hasBanking"
+                  [(ngModel)]="analysisItem.hasBanking" (change)="changeHasBanking()"
+                  [disabled]="disableForm">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        }
+        <!-- <div class="form-group row" *ngIf="analysisItem.hasBanking">
+        <label class="col-5 col-form-label">Banked Analysis</label>
+        <div class="col-7">
+          <select [required]="analysisItem.hasBanking" class="form-select" id="bankedAnalysisItemId"
+            name="bankedAnalysisItemId" [(ngModel)]="analysisItem.bankedAnalysisItemId"
+            (change)="saveItem()" [disabled]="disableForm">
+            <option *ngFor="let analysisItem of facilityAnalysisItems" [ngValue]="analysisItem.guid">
+              {{analysisItem.name}}
+            </option>
+          </select>
+        </div>
+      </div> -->
     </div>
+    <div class="col-6">
+      <div class="form-group row">
+        <label class="col-5 col-form-label">
+          Baseline Year
+        </label>
+        <div class="col-7">
+          <select required class="form-select" id="baselineYear" name="baselineYear"
+            [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
+            [disabled]="disableForm || showInUseMessage">
+            @for (year of yearOptions; track year) {
+              <option [ngValue]="year">
+              {{year| yearDisplay: facility.fiscalYear}}</option>
+            }
+          </select>
+        </div>
+      </div>
+      @if (baselineYearWarning) {
+        <div class="alert alert-warning text-center p-1">
+          {{baselineYearWarning}}
+        </div>
+      }
+      @if (analysisItem.setupErrors.baselineYearAfterMeterDataEnd) {
+        <div class="alert alert-danger text-center p-1"
+          >
+          Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
+        </div>
+      }
+      @if (analysisItem.setupErrors.baselineYearBeforeMeterDataStart) {
+        <div class="alert alert-danger text-center p-1"
+          >
+          Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
+          starts.
+        </div>
+      }
+      <div class="form-group row">
+        <label for="reportYear" class="col-5 col-form-label">
+          Report Year
+        </label>
+        <div class="col-7">
+          <select required class="form-select" name="reportYear" id="reportYear"
+            [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
+            [disabled]="disableForm || showInUseMessage">
+            @for (year of reportYears; track year) {
+              <option [ngValue]="year">{{year| yearDisplay:
+                facility.fiscalYear}}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+      @if (showReportYearWarning) {
+        <div class="alert alert-warning text-center p-1">
+          This facility does not have 12 months of data for the selected report year
+          ({{analysisItem.reportYear}}). An analysis is intended to be run with complete years only. To see
+          mid-year progress, please run a <a class="click-link" (click)="goToSavingsReport()">"Savings
+        Report"</a> for an analysis conducted with a different report year.
+      </div>
+    }
+    <div class="form-group row">
+      <label class="col-5 col-form-label">
+        Reporting Year
+      </label>
+      <div class="col-7">
+        <div class="form-check">
+          <input type="radio" class="form-check-input" [(ngModel)]="facility.fiscalYear"
+            value="calendarYear" name="calendarYear" id="calendarYear" disabled>
+          <label class="form-check-label" for="calendarYear">Calendar Year</label>
+
+        </div>
+        <div class="form-check">
+          <input type="radio" class="form-check-input" for="nonCalendarYear"
+            [(ngModel)]="facility.fiscalYear" value="nonCalendarYear" name="nonCalendarYear"
+            id="nonCalendarYear" disabled>
+          <label class="form-check-label">Fiscal Year</label>
+        </div>
+      </div>
+    </div>
+    @if (facility.fiscalYear == 'nonCalendarYear') {
+      <div class="form-group row">
+        <label class="col-5 col-form-label">Start Month</label>
+        <div class="col-7">
+          <select class="form-select" id="startMonth" name="startMonth"
+            [(ngModel)]="facility.fiscalYearMonth" disabled>
+            @for (month of months; track month) {
+              <option [ngValue]="month.monthNumValue">{{month.name}}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+    @if (facility.fiscalYear == 'nonCalendarYear') {
+      <div class="form-group row">
+        <div class="col-12">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="fiscalYearCalendarEnd"
+              id="fiscalYearCalendarEnd" [(ngModel)]="facility.fiscalYearCalendarEnd" disabled>
+            <label class="form-check-label" for="fiscalYearCalanderEnd">FY is denoted by the calendar
+            year in which it ends.</label>
+          </div>
+        </div>
+      </div>
+    }
+    <div class="alert alert-info text-center p-1">
+      Fields set in "<span class="fa fa-gear"></span> Settings" tab.
+    </div>
+  </div>
+</div>
+</form>
+@if (analysisItem.hasBanking) {
+  <app-select-banked-analysis [facilityAnalysisItems]="facilityAnalysisItems"
+    [analysisItem]="analysisItem" [facility]="facility" (emitSave)="saveItem()"
+  [disabled]="disableForm"></app-select-banked-analysis>
+}
+
+
+<div class="row">
+  <div class="col">
+    <hr>
+    </div>
+  </div>
+  @if (hasModelsGenerated) {
+    <div class="row">
+      <div class="col-12 alert alert-warning">
+        One or more groups have regression models generated. These settings were used to create the models and are
+        now locked.
+        <ul class="mb-0">
+          @if (!showInUseMessage) {
+            <li>
+              <a class="click-link" (click)="showChangeReportYear()">To change the report year and keep your
+              models click here.</a>
+            </li>
+          }
+          <li>
+            <a class="click-link" (click)="showEnableForm()">To clear the models so that you can modify all
+            settings click here</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  }
 </div>
 
 
 <div [ngClass]="{'windowOverlay': displayEnableForm || displayChangeReportYear}"></div>
 <div class="popup" [ngClass]="{'open': displayEnableForm}">
-    <div class="popup-header">Are you sure?
-        <button class="item-right" (click)="cancelEnableForm()">x</button>
-    </div>
-    <div class="popup-body">
-        Are you sure you want to clear the existing regression models in this analysis? This cannot be undone!
-        <hr>
-        <!-- <div class="row"> -->
-        <div class="col-12 alert alert-info text-center" *ngIf="showInUseMessage">
-            This analysis is used in one or more account analysis. Altering the models in this analysis may effect
-            the results of the corresponding account analysis.
+  <div class="popup-header">Are you sure?
+    <button class="item-right" (click)="cancelEnableForm()">x</button>
+  </div>
+  <div class="popup-body">
+    Are you sure you want to clear the existing regression models in this analysis? This cannot be undone!
+    <hr>
+      <!-- <div class="row"> -->
+      @if (showInUseMessage) {
+        <div class="col-12 alert alert-info text-center">
+          This analysis is used in one or more account analysis. Altering the models in this analysis may effect
+          the results of the corresponding account analysis.
         </div>
-        <!-- </div> -->
-    </div>
-    <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
-        <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
-    </div>
+      }
+    <!-- </div> -->
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
+    <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
+  </div>
 </div>
 
 
 <div class="popup" [ngClass]="{'open': displayChangeReportYear}">
-    <div class="popup-header">Select New Report Year
-        <button class="item-right" (click)="cancelChangeReportYear()">x</button>
+  <div class="popup-header">Select New Report Year
+    <button class="item-right" (click)="cancelChangeReportYear()">x</button>
+  </div>
+  <div class="popup-body">
+    <div class="form-group row">
+      <label for="reportYear" class="col-5 col-form-label">
+        Report Year
+      </label>
+      <div class="col-7">
+        <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="newReportYear">
+          @for (year of reportYears; track year) {
+            <option [ngValue]="year">{{year| yearDisplay:
+              facility.fiscalYear}}
+            </option>
+          }
+        </select>
+      </div>
     </div>
-    <div class="popup-body">
-        <div class="form-group row">
-            <label for="reportYear" class="col-5 col-form-label">
-                Report Year
-            </label>
-            <div class="col-7">
-                <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="newReportYear">
-                    <option *ngFor="let year of reportYears" [ngValue]="year">{{year| yearDisplay:
-                        facility.fiscalYear}}
-                    </option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelChangeReportYear()">Cancel</button>
-        <button class="btn action-btn" (click)="saveNewReportYear()">Update Report Year</button>
-    </div>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelChangeReportYear()">Cancel</button>
+    <button class="btn action-btn" (click)="saveNewReportYear()">Update Report Year</button>
+  </div>
 </div>

@@ -1,340 +1,360 @@
 <!--table grouped by year-->
-<ng-container *ngIf="performanceReportSetup.groupPerformanceByYear">
-    <table class="table utility-data table-sm table-bordered table-hover">
-        <thead class="sortable">
-            <tr class="table-mh">
-                <th colspan="2"></th>
-                <ng-container
-                    *ngFor="let data of performanceReport.annualFacilityData[0].annualData; let index = index;">
-                    <th class="text-center" [attr.colspan]="numberOfData">
-                        {{data.year}}
-                    </th>
-                    <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
-                        <th colspan="2">
-
-                        </th>
-                    </ng-container>
-                </ng-container>
-            </tr>
-            <tr>
-                <th (click)="setOrderDataField('facilityName', undefined)"
-                    [ngClass]="{'active': orderDataField == 'facilityName'}">
-                    Facility
-                </th>
-                <th (click)="setOrderDataField('state', undefined)" [ngClass]="{'active': orderDataField == 'state'}"
-                    class="text-center">
-                    State
-                </th>
-                <ng-container
-                    *ngFor="let data of performanceReport.annualFacilityData[0].annualData; let index = index;">
-                    <th *ngIf="performanceReportSetup.includeActual" (click)="setOrderDataField('actual', data.year)"
-                        [ngClass]="{'active': orderDataField == 'actual' && orderByYear == data.year}"
-                        class="text-center">
-                        Actual<br>
-                        (<span [innerHTML]="units | settingsLabel"></span>)
-                    </th>
-                    <th *ngIf="performanceReportSetup.includeAdjusted"
-                        (click)="setOrderDataField('adjusted', data.year)"
-                        [ngClass]="{'active': orderDataField == 'adjusted' && orderByYear == data.year}"
-                        class="text-center">
-                        Adjusted<br>
-                        (<span [innerHTML]="units | settingsLabel"></span>)
-                    </th>
-                    <th *ngIf="performanceReportSetup.includeSavings" (click)="setOrderDataField('savings', data.year)"
-                        [ngClass]="{'active': orderDataField == 'savings' && orderByYear == data.year}"
-                        class="text-center">
-                        Savings
-                    </th>
-                    <th *ngIf="performanceReportSetup.includeContribution"
-                        (click)="setOrderDataField('contribution', data.year)"
-                        [ngClass]="{'active': orderDataField == 'contribution' && orderByYear == data.year}"
-                        class="text-center">
-                        Contribution
-                    </th>
-                    <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
-                        <th (click)="setOrderDataField('changeInSavings', data.year)"
-                            [ngClass]="{'active': orderDataField == 'changeInSavings' && orderByYear == data.year}"
-                            class="text-center">
-                            Change in<br> Savings
-                        </th>
-                        <th (click)="setOrderDataField('changeInContribution', data.year)"
-                            [ngClass]="{'active': orderDataField == 'changeInContribution' && orderByYear == data.year}"
-                            class="text-center">
-                            Change in<br> Contribution
-                        </th>
-                    </ng-container>
-                </ng-container>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let facilityData of performanceReport.annualFacilityData">
-                <td>
-                    {{facilityData.facility.name}}
-                </td>
-                <td class="text-center">
-                    {{facilityData.facility.state}}
-                </td>
-                <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
-                    <td *ngIf="performanceReportSetup.includeActual" class="text-center fill-cell"
-                        [ngStyle]="{'background-size': data.actual | tableFill: performanceReport.facilityTotals[index].actual}">
-                        {{data.actual | customNumber}}
-                    </td>
-                    <td *ngIf="performanceReportSetup.includeAdjusted" class="text-center fill-cell"
-                        [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.facilityTotals[index].adjusted}">
-                        {{data.adjusted | customNumber}}
-                    </td>
-                    <td *ngIf="performanceReportSetup.includeSavings" class="text-center"
-                        [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
-                        {{data.savings | number:'1.0-2'}} %
-                    </td>
-                    <td *ngIf="performanceReportSetup.includeContribution" class="text-center"
-                        [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.facilityTotals[index].minContribution: performanceReport.facilityTotals[index].maxContribution}">
-                        {{data.contribution | number:'1.0-2'}} %
-                    </td>
-                    <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
-                        <td class="text-center"
-                            [ngStyle]="{'background-color': data.changeInSavings | tableCellShading:performanceReport.facilityTotals[index].minChangeInSavings: performanceReport.facilityTotals[index].maxChangeInSavings}">
-                            {{data.changeInSavings | number:'1.0-2'}} %
-                        </td>
-                        <td class="text-center"
-                            [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.facilityTotals[index].minChangeInContribution: performanceReport.facilityTotals[index].maxChangeInContribution}">
-                            {{data.changeInContribution | number:'1.0-2'}} %
-                        </td>
-                    </ng-container>
-                </ng-container>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>
-                    Totals
-                </th>
-                <th>
-
-                </th>
-                <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
-                    <th *ngIf="performanceReportSetup.includeActual" class="text-center fill-cell">
-                        {{data.actual | customNumber}}
-                    </th>
-                    <th *ngIf="performanceReportSetup.includeAdjusted" class="text-center fill-cell">
-                        {{data.adjusted | customNumber}}
-                    </th>
-                    <th *ngIf="performanceReportSetup.includeSavings" class="text-center">
-                        {{data.savings | number:'1.0-2'}} %
-                    </th>
-                    <th *ngIf="performanceReportSetup.includeContribution">
-
-                    </th>
-                    <ng-container *ngIf="index == performanceReport.facilityTotals.length-1">
-                        <th>
-
-                        </th>
-                        <th>
-
-                        </th>
-                    </ng-container>
-                </ng-container>
-            </tr>
-        </tfoot>
-    </table>
-</ng-container>
+@if (performanceReportSetup.groupPerformanceByYear) {
+  <table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
+      <tr class="table-mh">
+        <th colspan="2"></th>
+        @for (data of performanceReport.annualFacilityData[0].annualData; track data; let index = $index) {
+          <th class="text-center" [attr.colspan]="numberOfData">
+            {{data.year}}
+          </th>
+          @if (index == performanceReport.annualFacilityData[0].annualData.length-1) {
+            <th colspan="2">
+            </th>
+          }
+        }
+      </tr>
+      <tr>
+        <th (click)="setOrderDataField('facilityName', undefined)"
+          [ngClass]="{'active': orderDataField == 'facilityName'}">
+          Facility
+        </th>
+        <th (click)="setOrderDataField('state', undefined)" [ngClass]="{'active': orderDataField == 'state'}"
+          class="text-center">
+          State
+        </th>
+        @for (data of performanceReport.annualFacilityData[0].annualData; track data; let index = $index) {
+          @if (performanceReportSetup.includeActual) {
+            <th (click)="setOrderDataField('actual', data.year)"
+              [ngClass]="{'active': orderDataField == 'actual' && orderByYear == data.year}"
+              class="text-center">
+              Actual<br>
+              (<span [innerHTML]="units | settingsLabel"></span>)
+            </th>
+          }
+          @if (performanceReportSetup.includeAdjusted) {
+            <th
+              (click)="setOrderDataField('adjusted', data.year)"
+              [ngClass]="{'active': orderDataField == 'adjusted' && orderByYear == data.year}"
+              class="text-center">
+              Adjusted<br>
+              (<span [innerHTML]="units | settingsLabel"></span>)
+            </th>
+          }
+          @if (performanceReportSetup.includeSavings) {
+            <th (click)="setOrderDataField('savings', data.year)"
+              [ngClass]="{'active': orderDataField == 'savings' && orderByYear == data.year}"
+              class="text-center">
+              Savings
+            </th>
+          }
+          @if (performanceReportSetup.includeContribution) {
+            <th
+              (click)="setOrderDataField('contribution', data.year)"
+              [ngClass]="{'active': orderDataField == 'contribution' && orderByYear == data.year}"
+              class="text-center">
+              Contribution
+            </th>
+          }
+          @if (index == performanceReport.annualFacilityData[0].annualData.length-1) {
+            <th (click)="setOrderDataField('changeInSavings', data.year)"
+              [ngClass]="{'active': orderDataField == 'changeInSavings' && orderByYear == data.year}"
+              class="text-center">
+              Change in<br> Savings
+            </th>
+            <th (click)="setOrderDataField('changeInContribution', data.year)"
+              [ngClass]="{'active': orderDataField == 'changeInContribution' && orderByYear == data.year}"
+              class="text-center">
+              Change in<br> Contribution
+            </th>
+          }
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (facilityData of performanceReport.annualFacilityData; track facilityData) {
+        <tr>
+          <td>
+            {{facilityData.facility.name}}
+          </td>
+          <td class="text-center">
+            {{facilityData.facility.state}}
+          </td>
+          @for (data of facilityData.annualData; track data; let index = $index) {
+            @if (performanceReportSetup.includeActual) {
+              <td class="text-center fill-cell"
+                [ngStyle]="{'background-size': data.actual | tableFill: performanceReport.facilityTotals[index].actual}">
+                {{data.actual | customNumber}}
+              </td>
+            }
+            @if (performanceReportSetup.includeAdjusted) {
+              <td class="text-center fill-cell"
+                [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.facilityTotals[index].adjusted}">
+                {{data.adjusted | customNumber}}
+              </td>
+            }
+            @if (performanceReportSetup.includeSavings) {
+              <td class="text-center"
+                [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
+                {{data.savings | number:'1.0-2'}} %
+              </td>
+            }
+            @if (performanceReportSetup.includeContribution) {
+              <td class="text-center"
+                [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.facilityTotals[index].minContribution: performanceReport.facilityTotals[index].maxContribution}">
+                {{data.contribution | number:'1.0-2'}} %
+              </td>
+            }
+            @if (index == performanceReport.annualFacilityData[0].annualData.length-1) {
+              <td class="text-center"
+                [ngStyle]="{'background-color': data.changeInSavings | tableCellShading:performanceReport.facilityTotals[index].minChangeInSavings: performanceReport.facilityTotals[index].maxChangeInSavings}">
+                {{data.changeInSavings | number:'1.0-2'}} %
+              </td>
+              <td class="text-center"
+                [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.facilityTotals[index].minChangeInContribution: performanceReport.facilityTotals[index].maxChangeInContribution}">
+                {{data.changeInContribution | number:'1.0-2'}} %
+              </td>
+            }
+          }
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>
+          Totals
+        </th>
+        <th>
+        </th>
+        @for (data of performanceReport.facilityTotals; track data; let index = $index) {
+          @if (performanceReportSetup.includeActual) {
+            <th class="text-center fill-cell">
+              {{data.actual | customNumber}}
+            </th>
+          }
+          @if (performanceReportSetup.includeAdjusted) {
+            <th class="text-center fill-cell">
+              {{data.adjusted | customNumber}}
+            </th>
+          }
+          @if (performanceReportSetup.includeSavings) {
+            <th class="text-center">
+              {{data.savings | number:'1.0-2'}} %
+            </th>
+          }
+          @if (performanceReportSetup.includeContribution) {
+            <th>
+            </th>
+          }
+          @if (index == performanceReport.facilityTotals.length-1) {
+            <th>
+            </th>
+            <th>
+            </th>
+          }
+        }
+      </tr>
+    </tfoot>
+  </table>
+}
 
 <!--table grouped by data type-->
-<ng-container *ngIf="!performanceReportSetup.groupPerformanceByYear">
-    <table class="table utility-data table-sm table-bordered table-hover">
-        <thead class="sortable">
-            <tr class="table-mh">
-                <th colspan="2"></th>
-                <ng-container *ngIf="printBlock == 'all' || printBlock == 'actual'">
-                    <th *ngIf="performanceReportSetup.includeActual" class="text-center"
-                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                        Actual<br>
-                        (<span [innerHTML]="units | settingsLabel"></span>)
-                    </th>
-                </ng-container>
-                <ng-container *ngIf="printBlock == 'all' || printBlock == 'adjusted'">
-                    <th *ngIf="performanceReportSetup.includeAdjusted" class="text-center"
-                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                        Adjusted<br>
-                        (<span [innerHTML]="units | settingsLabel"></span>)
-                    </th>
-                </ng-container>
-                <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
-                    <th *ngIf="performanceReportSetup.includeSavings" class="text-center"
-                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                        Savings (%)
-                    </th>
-                </ng-container>
-                <ng-container *ngIf="printBlock == 'all' || printBlock == 'contribution'">
-                    <th *ngIf="performanceReportSetup.includeContribution" class="text-center"
-                        [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
-                        Contribution (%)
-                    </th>
-                </ng-container>
-                <th class="text-center" colspan="2">
-                    Change
-                </th>
-            </tr>
-            <tr>
-                <th (click)="setOrderDataField('facilityName', undefined)"
-                    [ngClass]="{'active': orderDataField == 'facilityName'}">
-                    Facility
-                </th>
-                <th (click)="setOrderDataField('state', undefined)" [ngClass]="{'active': orderDataField == 'state'}"
-                    class="text-center">
-                    State
-                </th>
-                <ng-container *ngIf="performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')">
-                    <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData">
-                        <th (click)="setOrderDataField('actual', data.year)"
-                            [ngClass]="{'active': orderDataField == 'actual' && orderByYear == data.year}"
-                            class="text-center">
-                            {{data.year}}
-                        </th>
-                    </ng-container>
-                </ng-container>
-                <ng-container *ngIf="performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')">
-                    <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData">
-                        <th (click)="setOrderDataField('adjusted', data.year)"
-                            [ngClass]="{'active': orderDataField == 'adjusted' && orderByYear == data.year}"
-                            class="text-center">
-                            {{data.year}}
-                        </th>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')">
-                    <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData">
-                        <th (click)="setOrderDataField('savings', data.year)"
-                            [ngClass]="{'active': orderDataField == 'savings' && orderByYear == data.year}"
-                            class="text-center">
-                            {{data.year}}
-                        </th>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')">
-                    <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData;">
-                        <th (click)="setOrderDataField('contribution', data.year)"
-                            [ngClass]="{'active': orderDataField == 'contribution' && orderByYear == data.year}"
-                            class="text-center">
-                            {{data.year}}
-                        </th>
-                    </ng-container>
-                </ng-container>
-                <th (click)="setOrderDataField('changeInSavings', performanceReport.reportYear)"
-                    [ngClass]="{'active': orderDataField == 'changeInSavings'}" class="text-center">
-                    Savings
-                </th>
-                <th (click)="setOrderDataField('changeInContribution', performanceReport.reportYear)"
-                    [ngClass]="{'active': orderDataField == 'changeInContribution'}" class="text-center">
-                    Contribution
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let facilityData of performanceReport.annualFacilityData">
-                <td>
-                    {{facilityData.facility.name}}
-                </td>
-                <td class="text-center">
-                    {{facilityData.facility.state}}
-                </td>
-                <ng-container *ngIf="performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')">
-                    <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
-                        <td class="text-center fill-cell"
-                            [ngStyle]="{'background-size': data.actual | tableFill: performanceReport.facilityTotals[index].actual}">
-                            {{data.actual | customNumber}}
-                        </td>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')">
-                    <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
-                        <td class="text-center fill-cell"
-                            [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.facilityTotals[index].adjusted}">
-                            {{data.adjusted | customNumber}}
-                        </td>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')">
-                    <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
-                        <td class="text-center"
-                            [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
-                            {{data.savings | number:'1.0-2'}} %
-                        </td>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')">
-                    <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
-                        <td class="text-center"
-                            [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.facilityTotals[index].minContribution: performanceReport.facilityTotals[index].maxContribution}">
-                            {{data.contribution | number:'1.0-2'}} %
-                        </td>
-                    </ng-container>
-                </ng-container>
-                <td class="text-center"
-                    [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInSavings | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInSavings: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInSavings}">
-                    {{facilityData.annualData[facilityData.annualData.length-1].changeInSavings | number:'1.0-2'}}
-                    %
-                </td>
-                <td class="text-center"
-                    [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInContribution: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInContribution}">
-                    {{facilityData.annualData[facilityData.annualData.length-1].changeInContribution | number:'1.0-2'}}
-                    %
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>
-                    Totals
-                </th>
-                <th>
-
-                </th>
-                <ng-container *ngIf="performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')">
-                    <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
-                        <th class="text-center fill-cell">
-                            {{data.actual | customNumber}}
-                        </th>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')">
-                    <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
-                        <th class="text-center fill-cell">
-                            {{data.adjusted | customNumber}}
-                        </th>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')">
-                    <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
-                        <th class="text-center">
-                            {{data.savings | number:'1.0-2'}} %
-                        </th>
-                    </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')">
-                    <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
-                        <th class="text-center">
-                            {{data.contribution | number:'1.0-2'}} %
-                        </th>
-                    </ng-container>
-                </ng-container>
-                <th class="text-center">
-                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInSavings |
-                    number:'1.0-2'}} %
-                </th>
-                <th class="text-center">
-                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution |
-                    number:'1.0-2'}} %
-                </th>
-            </tr>
-        </tfoot>
-    </table>
-</ng-container>
+@if (!performanceReportSetup.groupPerformanceByYear) {
+  <table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
+      <tr class="table-mh">
+        <th colspan="2"></th>
+        @if (printBlock == 'all' || printBlock == 'actual') {
+          @if (performanceReportSetup.includeActual) {
+            <th class="text-center"
+              [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+              Actual<br>
+              (<span [innerHTML]="units | settingsLabel"></span>)
+            </th>
+          }
+        }
+        @if (printBlock == 'all' || printBlock == 'adjusted') {
+          @if (performanceReportSetup.includeAdjusted) {
+            <th class="text-center"
+              [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+              Adjusted<br>
+              (<span [innerHTML]="units | settingsLabel"></span>)
+            </th>
+          }
+        }
+        @if (printBlock == 'all' || printBlock == 'savings') {
+          @if (performanceReportSetup.includeSavings) {
+            <th class="text-center"
+              [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+              Savings (%)
+            </th>
+          }
+        }
+        @if (printBlock == 'all' || printBlock == 'contribution') {
+          @if (performanceReportSetup.includeContribution) {
+            <th class="text-center"
+              [attr.colspan]="performanceReport.annualFacilityData[0].annualData.length">
+              Contribution (%)
+            </th>
+          }
+        }
+        <th class="text-center" colspan="2">
+          Change
+        </th>
+      </tr>
+      <tr>
+        <th (click)="setOrderDataField('facilityName', undefined)"
+          [ngClass]="{'active': orderDataField == 'facilityName'}">
+          Facility
+        </th>
+        <th (click)="setOrderDataField('state', undefined)" [ngClass]="{'active': orderDataField == 'state'}"
+          class="text-center">
+          State
+        </th>
+        @if (performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')) {
+          @for (data of performanceReport.annualFacilityData[0].annualData; track data) {
+            <th (click)="setOrderDataField('actual', data.year)"
+              [ngClass]="{'active': orderDataField == 'actual' && orderByYear == data.year}"
+              class="text-center">
+              {{data.year}}
+            </th>
+          }
+        }
+        @if (performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')) {
+          @for (data of performanceReport.annualFacilityData[0].annualData; track data) {
+            <th (click)="setOrderDataField('adjusted', data.year)"
+              [ngClass]="{'active': orderDataField == 'adjusted' && orderByYear == data.year}"
+              class="text-center">
+              {{data.year}}
+            </th>
+          }
+        }
+        @if (performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')) {
+          @for (data of performanceReport.annualFacilityData[0].annualData; track data) {
+            <th (click)="setOrderDataField('savings', data.year)"
+              [ngClass]="{'active': orderDataField == 'savings' && orderByYear == data.year}"
+              class="text-center">
+              {{data.year}}
+            </th>
+          }
+        }
+        @if (performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')) {
+          @for (data of performanceReport.annualFacilityData[0].annualData; track data) {
+            <th (click)="setOrderDataField('contribution', data.year)"
+              [ngClass]="{'active': orderDataField == 'contribution' && orderByYear == data.year}"
+              class="text-center">
+              {{data.year}}
+            </th>
+          }
+        }
+        <th (click)="setOrderDataField('changeInSavings', performanceReport.reportYear)"
+          [ngClass]="{'active': orderDataField == 'changeInSavings'}" class="text-center">
+          Savings
+        </th>
+        <th (click)="setOrderDataField('changeInContribution', performanceReport.reportYear)"
+          [ngClass]="{'active': orderDataField == 'changeInContribution'}" class="text-center">
+          Contribution
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (facilityData of performanceReport.annualFacilityData; track facilityData) {
+        <tr>
+          <td>
+            {{facilityData.facility.name}}
+          </td>
+          <td class="text-center">
+            {{facilityData.facility.state}}
+          </td>
+          @if (performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')) {
+            @for (data of facilityData.annualData; track data; let index = $index) {
+              <td class="text-center fill-cell"
+                [ngStyle]="{'background-size': data.actual | tableFill: performanceReport.facilityTotals[index].actual}">
+                {{data.actual | customNumber}}
+              </td>
+            }
+          }
+          @if (performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')) {
+            @for (data of facilityData.annualData; track data; let index = $index) {
+              <td class="text-center fill-cell"
+                [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.facilityTotals[index].adjusted}">
+                {{data.adjusted | customNumber}}
+              </td>
+            }
+          }
+          @if (performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')) {
+            @for (data of facilityData.annualData; track data; let index = $index) {
+              <td class="text-center"
+                [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
+                {{data.savings | number:'1.0-2'}} %
+              </td>
+            }
+          }
+          @if (performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')) {
+            @for (data of facilityData.annualData; track data; let index = $index) {
+              <td class="text-center"
+                [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.facilityTotals[index].minContribution: performanceReport.facilityTotals[index].maxContribution}">
+                {{data.contribution | number:'1.0-2'}} %
+              </td>
+            }
+          }
+          <td class="text-center"
+            [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInSavings | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInSavings: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInSavings}">
+            {{facilityData.annualData[facilityData.annualData.length-1].changeInSavings | number:'1.0-2'}}
+            %
+          </td>
+          <td class="text-center"
+            [ngStyle]="{'background-color': facilityData.annualData[facilityData.annualData.length-1].changeInContribution | tableCellShading:performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].minChangeInContribution: performanceReport.facilityTotals[performanceReport.annualFacilityData[0].annualData.length-1].maxChangeInContribution}">
+            {{facilityData.annualData[facilityData.annualData.length-1].changeInContribution | number:'1.0-2'}}
+            %
+          </td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>
+          Totals
+        </th>
+        <th>
+        </th>
+        @if (performanceReportSetup.includeActual && (printBlock == 'all' || printBlock == 'actual')) {
+          @for (data of performanceReport.facilityTotals; track data; let index = $index) {
+            <th class="text-center fill-cell">
+              {{data.actual | customNumber}}
+            </th>
+          }
+        }
+        @if (performanceReportSetup.includeAdjusted && (printBlock == 'all' || printBlock == 'adjusted')) {
+          @for (data of performanceReport.facilityTotals; track data; let index = $index) {
+            <th class="text-center fill-cell">
+              {{data.adjusted | customNumber}}
+            </th>
+          }
+        }
+        @if (performanceReportSetup.includeSavings && (printBlock == 'all' || printBlock == 'savings')) {
+          @for (data of performanceReport.facilityTotals; track data; let index = $index) {
+            <th class="text-center">
+              {{data.savings | number:'1.0-2'}} %
+            </th>
+          }
+        }
+        @if (performanceReportSetup.includeContribution && (printBlock == 'all' || printBlock == 'contribution')) {
+          @for (data of performanceReport.facilityTotals; track data; let index = $index) {
+            <th class="text-center">
+              {{data.contribution | number:'1.0-2'}} %
+            </th>
+          }
+        }
+        <th class="text-center">
+          {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInSavings |
+          number:'1.0-2'}} %
+        </th>
+        <th class="text-center">
+          {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution |
+          number:'1.0-2'}} %
+        </th>
+      </tr>
+    </tfoot>
+  </table>
+}

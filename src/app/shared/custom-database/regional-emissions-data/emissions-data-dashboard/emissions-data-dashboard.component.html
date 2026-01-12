@@ -1,147 +1,166 @@
 <div class="row mt-4">
-    <div class="col-9">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Manage Custom Electrical Emissions Factors</h5>
-                <p class="card-text">
-                    A database has been provided by VERIFI that pulls emissions output rates from eGrid Subregions based
-                    on the data found in the <a class="click-link" target="_blank"
-                        href="https://www.epa.gov/climateleadership/ghg-emission-factors-hub">EPA
-                        GHG Emissions Factors Hub</a>.
-                </p>
-                <hr>
-                <p class="card-text">
+  <div class="col-9">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Manage Custom Electrical Emissions Factors</h5>
+        <p class="card-text">
+          A database has been provided by VERIFI that pulls emissions output rates from eGrid Subregions based
+          on the data found in the <a class="click-link" target="_blank"
+          href="https://www.epa.gov/climateleadership/ghg-emission-factors-hub">EPA
+        GHG Emissions Factors Hub</a>.
+      </p>
+      <hr>
+        <p class="card-text">
 
 
-                    Use this section of VERIFI
-                    to create and manage
-                    custom emissions factors that can be used for calculations regarding local and market emissions.
-                </p>
-            </div>
-        </div>
+          Use this section of VERIFI
+          to create and manage
+          custom emissions factors that can be used for calculations regarding local and market emissions.
+        </p>
+      </div>
     </div>
-    <div class="col-3">
-        <div class="card add-card">
-            <div class="card-body" (click)="addNewItem()">
-                <h5 class="card-title text-center">
-                    Add New Emissions Subregion
-                </h5>
-                <div class="w-100 text-center">
-                    <span class="fa fa-plus-circle"></span>
-                </div>
-                <p class="card-text text-center">
-                    Create a custom subregion and corresponding emissions that can be used in any facility within this
-                    account.
-                </p>
-            </div>
+  </div>
+  <div class="col-3">
+    <div class="card add-card">
+      <div class="card-body" (click)="addNewItem()">
+        <h5 class="card-title text-center">
+          Add New Emissions Subregion
+        </h5>
+        <div class="w-100 text-center">
+          <span class="fa fa-plus-circle"></span>
         </div>
+        <p class="card-text text-center">
+          Create a custom subregion and corresponding emissions that can be used in any facility within this
+          account.
+        </p>
+      </div>
     </div>
+  </div>
 </div>
 <hr>
-<div class="row mt-2">
+  <div class="row mt-2">
 
-    <div class="col-4" *ngFor="let customEmissionsItem of customEmissionsItems">
+    @for (customEmissionsItem of customEmissionsItems; track customEmissionsItem) {
+      <div class="col-4">
         <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div class="emissions-title">
-                        <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-secondary me-2"
-                            *ngIf="customEmissionsItem.subregion != 'U.S. Average'"
-                            (click)="deleteItem(customEmissionsItem)"><span class="fa fa-trash"></span></button>
-                        <button class="btn btn-sm btn-secondary" (click)="editItem(customEmissionsItem)"><span
-                                class="fa fa-edit"></span></button>
-                    </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div class="emissions-title">
+                <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
+              </div>
+              <div>
+                @if (customEmissionsItem.subregion != 'U.S. Average') {
+                  <button class="btn btn-sm btn-secondary me-2"
+                    (click)="deleteItem(customEmissionsItem)"><span class="fa fa-trash"></span></button>
+                  }
+                  <button class="btn btn-sm btn-secondary" (click)="editItem(customEmissionsItem)"><span
+                  class="fa fa-edit"></span></button>
                 </div>
-                <hr>
-                <table class="table table-hover table-bordered table-sm"
-                    *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
+              </div>
+              <hr>
+                @if (customEmissionsItem.locationEmissionRates.length != 0) {
+                  <table class="table table-hover table-bordered table-sm"
+                    >
                     <thead>
-                        <tr>
-                            <th colspan="2">
-                                Location Emissions Rates
-                            </th>
-                        </tr>
-                        <tr>
-                            <th class="w-50">
-                                Year
-                            </th>
-                            <th class="w-50">
-                                Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
-                            </th>
-                        </tr>
+                      <tr>
+                        <th colspan="2">
+                          Location Emissions Rates
+                        </th>
+                      </tr>
+                      <tr>
+                        <th class="w-50">
+                          Year
+                        </th>
+                        <th class="w-50">
+                          Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                        </th>
+                      </tr>
                     </thead>
                     <tbody>
+                      @for (emissionRate of customEmissionsItem.locationEmissionRates  | orderBy: 'year': 'asc'; track emissionRate) {
                         <tr
-                            *ngFor="let emissionRate of customEmissionsItem.locationEmissionRates  | orderBy: 'year': 'asc'">
-                            <td>
-                                {{emissionRate.year}}
-                            </td>
-                            <td>
-                                {{emissionRate.co2Emissions | number}}
-                            </td>
+                          >
+                          <td>
+                            {{emissionRate.year}}
+                          </td>
+                          <td>
+                            {{emissionRate.co2Emissions | number}}
+                          </td>
                         </tr>
+                      }
                     </tbody>
-                </table>
-                <div class="alert alert-warning" *ngIf="customEmissionsItem.locationEmissionRates.length == 0">
+                  </table>
+                }
+                @if (customEmissionsItem.locationEmissionRates.length == 0) {
+                  <div class="alert alert-warning">
                     No Location Emissions Rates Found For Subregion
-                </div>
+                  </div>
+                }
                 <hr>
-                <table class="table table-hover table-bordered table-sm"
-                    *ngIf="customEmissionsItem.residualEmissionRates.length != 0">
-                    <thead>
+                  @if (customEmissionsItem.residualEmissionRates.length != 0) {
+                    <table class="table table-hover table-bordered table-sm"
+                      >
+                      <thead>
                         <tr>
-                            <th colspan="2">
-                                Residual Emissions Rates
-                            </th>
+                          <th colspan="2">
+                            Residual Emissions Rates
+                          </th>
                         </tr>
                         <tr>
-                            <th class="w-50">
-                                Year
-                            </th>
-                            <th class="w-50">
-                                Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
-                            </th>
+                          <th class="w-50">
+                            Year
+                          </th>
+                          <th class="w-50">
+                            Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                          </th>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            *ngFor="let emissionRate of customEmissionsItem.residualEmissionRates  | orderBy: 'year': 'asc'">
+                      </thead>
+                      <tbody>
+                        @for (emissionRate of customEmissionsItem.residualEmissionRates  | orderBy: 'year': 'asc'; track emissionRate) {
+                          <tr
+                            >
                             <td>
-                                {{emissionRate.year}}
+                              {{emissionRate.year}}
                             </td>
                             <td>
-                                {{emissionRate.co2Emissions | number}}
+                              {{emissionRate.co2Emissions | number}}
                             </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-warning" *ngIf="customEmissionsItem.residualEmissionRates.length == 0">
-                    No Residual Emissions Rates Found For Subregion
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                  @if (customEmissionsItem.residualEmissionRates.length == 0) {
+                    <div class="alert alert-warning">
+                      No Residual Emissions Rates Found For Subregion
+                    </div>
+                  }
                 </div>
+              </div>
             </div>
+          }
         </div>
-    </div>
-</div>
 
 
-<div [ngClass]="{'windowOverlay': itemToDelete}"></div>
-<div class="popup" [class.open]="itemToDelete">
-    <div class="popup-header">Delete Subregion {{itemToDelete?.subregion}}?
-        <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <div *ngIf="!deleteItemInUse" class="alert alert-danger">
-            Are you sure you want to delete this custom subgregion? This cannot be undone.
+        <div [ngClass]="{'windowOverlay': itemToDelete}"></div>
+        <div class="popup" [class.open]="itemToDelete">
+          <div class="popup-header">Delete Subregion {{itemToDelete?.subregion}}?
+            <button class="item-right" (click)="cancelDelete()">x</button>
+          </div>
+          <div class="popup-body">
+            @if (!deleteItemInUse) {
+              <div class="alert alert-danger">
+                Are you sure you want to delete this custom subgregion? This cannot be undone.
+              </div>
+            }
+            @if (deleteItemInUse) {
+              <div class="alert alert-danger">
+                The account currently uses this subregion. This subgregion cannot be deleted while it is in use.
+              </div>
+            }
+          </div>
+          <div class="popup-footer text-end">
+            <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+            <button class="btn btn-danger" [disabled]="deleteItemInUse" (click)="confirmDelete()">Confirm Delete</button>
+          </div>
         </div>
-        <div *ngIf="deleteItemInUse" class="alert alert-danger">
-            The account currently uses this subregion. This subgregion cannot be deleted while it is in use.
-        </div>
-    </div>
-    <div class="popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" [disabled]="deleteItemInUse" (click)="confirmDelete()">Confirm Delete</button>
-    </div>
-</div>

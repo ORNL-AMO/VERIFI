@@ -87,7 +87,7 @@ export class FacilityOverviewComponent implements OnInit {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.facilityOverviewService.facilityOverviewData.next(data.facilityOverviewData);

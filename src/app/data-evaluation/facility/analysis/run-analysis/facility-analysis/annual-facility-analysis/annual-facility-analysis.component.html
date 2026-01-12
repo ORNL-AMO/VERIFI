@@ -1,31 +1,43 @@
 <div class="d-flex justify-content-between mb-2">
-    <app-analysis-summary-table-filter [tableContext]="'annualFacility'" [analysisItem]="analysisItem"></app-analysis-summary-table-filter>
+  <app-analysis-summary-table-filter [tableContext]="'annualFacility'" [analysisItem]="analysisItem"></app-analysis-summary-table-filter>
 
-    <div class="btn-group">
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
-            <span class="fa fa-chevron-right"></span>
-            Table
-            <span class="fa fa-chevron-left"></span>
-        </button>
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
-            <span class="fa fa-chevron-right"></span>
-            Graph
-            <span class="fa fa-chevron-left"></span>
-        </button>
-    </div>
+  <div class="btn-group">
+    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+      <span class="fa fa-chevron-right"></span>
+      Table
+      <span class="fa fa-chevron-left"></span>
+    </button>
+    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+      <span class="fa fa-chevron-right"></span>
+      Graph
+      <span class="fa fa-chevron-left"></span>
+    </button>
+  </div>
 </div>
 
-<div class="w-100" *ngIf="calculating == false">
-    <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
+@if (calculating == false) {
+  <div class="w-100">
+    @if (dataDisplay == 'table') {
+      <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'">
-    </app-annual-analysis-summary-table>
-    <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
+      </app-annual-analysis-summary-table>
+    }
+    @if (dataDisplay == 'graph') {
+      <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">
-    </app-annual-analysis-summary-graph>
-    <app-annual-analysis-group-savings-table *ngIf="dataDisplay == 'table'" [groupSummaries]="groupSummaries"
-    [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-table>
-    <app-annual-analysis-group-savings-graph *ngIf="dataDisplay == 'graph'" [groupSummaries]="groupSummaries"
-    [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-graph>
-</div>
-<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Annual Results...'"
-    [error]="calculating == 'error'"></app-calculating-spinner>
+      </app-annual-analysis-summary-graph>
+    }
+    @if (dataDisplay == 'table') {
+      <app-annual-analysis-group-savings-table [groupSummaries]="groupSummaries"
+      [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-table>
+    }
+    @if (dataDisplay == 'graph') {
+      <app-annual-analysis-group-savings-graph [groupSummaries]="groupSummaries"
+      [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-graph>
+    }
+  </div>
+}
+@if (calculating != false) {
+  <app-calculating-spinner [message]="'Calculating Annual Results...'"
+  [error]="calculating == 'error'"></app-calculating-spinner>
+}
