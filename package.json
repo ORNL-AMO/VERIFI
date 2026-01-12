@@ -91,6 +91,7 @@
     "jstat": "1.9.5",
     "jszip": "3.10.1",
     "ngx-indexed-db": "21.0.0",
+    "ngx-markdown": "^20.1.0",
     "ngx-webstorage": "20.0.0",
     "plotly.js": "3.0.0",
     "rxjs": "7.8.1",
