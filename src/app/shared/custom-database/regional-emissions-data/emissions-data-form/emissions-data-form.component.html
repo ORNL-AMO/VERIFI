@@ -20,9 +20,11 @@
                                 [(ngModel)]="editCustomEmissions.subregion" name="subregion" required
                                 (input)="checkInvalid()" [ngClass]="{'ng-invalid': subregionInvalid}">
                         </div>
-                        <div *ngIf="subregionInvalid" class="alert alert-danger">
+                        @if (subregionInvalid) {
+                        <div class="alert alert-danger">
                             {{subregionInvalid}}
                         </div>
+                        }
                     </div>
                 </div>
 
@@ -37,19 +39,23 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12" *ngIf="editCustomEmissions.directEmissionsRate == false">
+            @if (editCustomEmissions.directEmissionsRate == false) {
+            <div class="col-12">
                 <p class="small fw-light pt-2">
                     <span class="fa fa-exclamation-circle"></span> The Emissions Rate displayed here is calculated using
                     AR5 GWP factors. If AR4 is selected in Company Settings then an emissions rate calculated
                     with AR4 GWP factors will be used in analysis and reports.
                 </p>
             </div>
-            <div class="col-12" *ngIf="editCustomEmissions.directEmissionsRate == true">
+            }
+            @if (editCustomEmissions.directEmissionsRate == true) {
+            <div class="col-12">
                 <p class="small fw-light pt-2">
                     <span class="fa fa-exclamation-circle"></span>Please enter the CO2e emissions rate using consistent
                     GWP factors for all sites in your portfolio
                 </p>
             </div>
+            }
             <hr>
             <div class="row">
                 <div class="col-6">
@@ -65,8 +71,7 @@
                     <div class="alert alert-danger" *ngIf="invalidLocation">
                         {{invalidLocation}}
                     </div>
-                    <ng-container
-                        *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates; let index = index;">
+                    @for (emissionRate of editCustomEmissions.locationEmissionRates; track emissionRate; let index = $index) {
 
                         <div class="row form-group">
                             <label class="col-5 col-form-label" for="{{'locationYear_'+index}}">Year</label>
@@ -126,13 +131,12 @@
                                     </div>
                                 </div>
                             </div>
-                        </ng-container>
+                        }
                         <div class="row form-group">
                             <label class="col-5 col-form-label" for="{{'locationCo2Emissions_'+index}}">Emissions
                                 Rate</label>
                             <div class="col-7">
-                                <ng-template [ngIf]="editCustomEmissions.directEmissionsRate"
-                                    [ngIfElse]="notDirectRateBlock">
+                                @if (editCustomEmissions.directEmissionsRate) {
                                     <div class="input-group">
                                         <input class="form-control" type="number"
                                             [(ngModel)]="emissionRate.co2Emissions"
@@ -143,27 +147,28 @@
                                             kg CO<sub>2</sub>/MWh
                                         </div>
                                     </div>
-                                </ng-template>
-                                <ng-template #notDirectRateBlock>
+                                } @else {
                                     <div class="text-center">
                                         {{emissionRate.co2Emissions}} kg CO<sub>2</sub>/MWh
                                     </div>
-                                </ng-template>
+                                }
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-12" *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
+                            @if (editCustomEmissions.locationEmissionRates.length != 1) {
+                            <div class="col-12">
                                 <button class="btn btn-secondary delete-button"
                                     (click)="deleteLocationEmissions(index)">
                                     <span class="fa fa-trash"></span>
                                 </button>
                             </div>
+                            }
                             <div class="col-12">
                                 <hr>
                             </div>
                         </div>
-                    </ng-container>
+                    }
                 </div>
                 <div class="col-6">
                     <div class="d-flex justify-content-between">
@@ -177,8 +182,7 @@
                     <div class="alert alert-danger" *ngIf="invalidResidual">
                         {{invalidResidual}}
                     </div>
-                    <ng-container
-                        *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates; let index = index;">
+                    @for (emissionRate of editCustomEmissions.residualEmissionRates; track emissionRate; let index = $index) {
 
                         <div class="row form-group">
                             <label class="col-5 col-form-label" for="{{'residualYear_'+index}}">Year</label>
@@ -238,13 +242,12 @@
                                     </div>
                                 </div>
                             </div>
-                        </ng-container>
+                        }
                         <div class="row form-group">
                             <label class="col-5 col-form-label" for="{{'residualCo2Emissions_'+index}}">Emissions
                                 Rate</label>
                             <div class="col-7">
-                                <ng-template [ngIf]="editCustomEmissions.directEmissionsRate"
-                                    [ngIfElse]="notDirectRateBlock">
+                                @if (editCustomEmissions.directEmissionsRate) {
                                     <div class="input-group">
                                         <input class="form-control" type="number"
                                             [(ngModel)]="emissionRate.co2Emissions"
@@ -255,27 +258,28 @@
                                             kg CO<sub>2</sub>/MWh
                                         </div>
                                     </div>
-                                </ng-template>
-                                <ng-template #notDirectRateBlock>
+                                } @else {
                                     <div class="text-center">
                                         {{emissionRate.co2Emissions}} kg CO<sub>2</sub>/MWh
                                     </div>
-                                </ng-template>
+                                }
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-12" *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
+                            @if (editCustomEmissions.residualEmissionRates.length != 1) {
+                            <div class="col-12">
                                 <button class="btn btn-secondary delete-button"
                                     (click)="deleteResidualEmissions(index)">
                                     <span class="fa fa-trash"></span>
                                 </button>
                             </div>
+                            }
                             <div class="col-12">
                                 <hr>
                             </div>
                         </div>
-                    </ng-container>
+                    }
                 </div>
             </div>
         </form>
