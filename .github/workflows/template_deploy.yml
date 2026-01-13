@@ -31,9 +31,4 @@ jobs:
           name: ${{ inputs.artifact-name }}
       - name: Deploy
         run: |
-          if [[ -n "${{ inputs.backup-dir }}" ]]; then
-            tar -czf ${{ inputs.backup-dir }}/${{ inputs.app-dir }}_$(date +%F)_${GITHUB_SHA::7}.tar.gz ${{ inputs.deploy-dir }}/${{ inputs.app-dir }}
-          fi
-          rm -rf ${{ inputs.deploy-dir }}/${{ inputs.app-dir }}/*
-          chgrp -R apache ./
-          mv -v ./* ${{ inputs.deploy-dir }}/${{ inputs.app-dir }}/
+          ls -lah

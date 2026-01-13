@@ -3,8 +3,9 @@ name: CI/CD
 on:
   push:
     branches:
-      - 'master'
-      - 'develop'
+      - "master"
+      - "develop"
+      - "issue-2179-ci-test"
   workflow_dispatch:
 
 jobs:
@@ -13,7 +14,7 @@ jobs:
     uses: ./.github/workflows/release_qa.yml
 
   web:
-    if: github.ref_name == 'develop' || github.ref_name == 'master'
+    if: github.ref_name == 'issue-2179-ci-test' || github.ref_name == 'master'
     uses: ./.github/workflows/release_web.yml
 
   desktop:

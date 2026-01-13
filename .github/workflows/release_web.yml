@@ -5,14 +5,14 @@ on:
 
 jobs:
   call_build:
-    if: github.ref_name == 'develop' || github.ref_name == 'master'
+    if: github.ref_name == 'issue-2179-ci-test' || github.ref_name == 'master'
     uses: ./.github/workflows/template_build.yml
     with:
       artifact-name: dist
       artifact-path: dist/verifi/browser
 
   call_deploy-dev:
-    if: github.ref_name == 'develop'
+    if: github.ref_name == 'issue-2179-ci-test'
     needs: call_build
     uses: ./.github/workflows/template_deploy.yml
     with:
