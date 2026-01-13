@@ -21,7 +21,6 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
-import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-regression-user-defined-model-inspection',
@@ -138,7 +137,7 @@ export class RegressionUserDefinedModelInspectionComponent {
     this.loadingService.setLoadingStatus(true);
     let groupCopy: AnalysisGroup = JSON.parse(JSON.stringify(this.selectedGroup));
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.inspectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummary.monthlyAnalysisSummaryData;

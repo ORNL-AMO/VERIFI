@@ -188,12 +188,6 @@ export class AnalysisService {
   }
 
   getRegressionsEquationFromModel(model: JStatRegressionModel): string {
-    //     <span *ngFor="let coefVal of model.coef; let index = index;">
-    //     <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
-    //     <span *ngIf="index != 0">({{coefVal|
-    //         customNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
-    //         *ngIf="index != model.coef.length-1"> +</span>
-    // </span>
     let regressionEquation: string = '';
     for (let i = 0; i < model.coef.length; i++) {
       regressionEquation = regressionEquation + model.coef[i].toLocaleString(undefined, { maximumSignificantDigits: 5 });

@@ -1,91 +1,109 @@
 <nav class="navbar navbar-expand-sm" #header>
-    <a class="navbar-brand" (click)="goHome()">VERIFI</a>
-    <span class="badge bg-secondary">v{{version}}</span>
+  <a class="navbar-brand" (click)="goHome()">VERIFI</a>
+  <span class="badge bg-secondary">v{{version}}</span>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="ps-2" *ngIf="updateAvailable && !updateError">
-            <button class="btn action-btn" (click)="toggleUpdateModal()">
-                <span class="fa fa-info-circle"></span>
-                Update Available!
-            </button>
-        </div>
-        <!-- <div class="ps-2" *ngIf="dataInitialized && activeAccount">
-            <app-search-bar></app-search-bar>
-        </div> -->
-
-
-        <div class="dropdown ms-auto" *ngIf="dataInitialized">
-            <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown"
-                aria-expanded="false"><span class="fa fa-building"></span>
-                {{activeAccount.name}}
-            </button>
-            <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic" data-bs-toggle="dropdown"
-                aria-expanded="false">Account Required
-            </button>
-            <ul class="dropdown-menu">
-                <li>
-                    <a *ngFor="let account of accountList| orderBy:'name':'asc'"
-                        [class.active]="activeAccount?.id === account.id" class="dropdown-item"
-                        (click)="switchAccount(account)"> {{account.name}}</a>
-                </li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
-                        Account</a></li>
-                <li><a class="dropdown-item" (click)="openBackupModal()"><i class="fa fa-upload"></i> Import Backup</a>
-                </li>
-                <li><a class="dropdown-item" (click)="goToManageAccounts()"><i class="fa fa-gears"></i> Manage
-                        Accounts</a>
-                </li>
-            </ul>
-        </div>
-        <div class="btn btn-group ms-2" *ngIf="dataInitialized && activeAccount && displayToggle">
-            <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
-                [ngClass]="{'active': !inDataEvaluation}"><span class="fa fa-database"></span> Data Management</button>
-            <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
-                [ngClass]="{'active': inDataEvaluation}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
-        </div>
-        <ng-container *ngIf="dataInitialized && activeAccount">
-            <ng-container *ngIf="!activeAccount.dataBackupFilePath">
-                <div class="ps-2">
-                    <button class="btn action-btn" (click)="backupAccount()">Backup Account
-                    </button>
-                </div>
-                <div class="ps-2">Last Backup: (<span *ngIf="activeAccount.lastBackup">{{activeAccount.lastBackup |
-                        date:'medium'}}</span><span *ngIf="!activeAccount.lastBackup">&mdash;</span>)
-                </div>
-            </ng-container>
-            <div class="ps-2" *ngIf="activeAccount.dataBackupFilePath">
-                <div class="badge" title="Automatic Account Backups Active"
-                    [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
-                    <span class="fa fa-file-arrow-down"></span>
-                </div>
-            </div>
-        </ng-container>
-        <!--Doesnt Show In Production-->
-        <div class="ps-2" *ngIf="!isProduction">
-            <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
-                Database
-            </button>
-            <button *ngIf="resetDatabase" class="btn btn-danger" (click)="deleteDatabase()">Are you sure
-                you want to reset the database?
-            </button>
-        </div>
-
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    @if (updateAvailable && !updateError) {
+    <div class="ps-2">
+      <button class="btn action-btn" (click)="toggleUpdateModal()">
+        <span class="fa fa-info-circle"></span>
+        Update Available!
+      </button>
     </div>
+    }
+    @if (dataInitialized) {
+    <div class="dropdown ms-auto">
+      @if (activeAccount) {
+      <button class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span
+          class="fa fa-building"></span>
+        {{activeAccount.name}}
+      </button>
+      }
+      @if (!activeAccount) {
+      <button class="btn action-btn dropdown-toggle italic" data-bs-toggle="dropdown" aria-expanded="false">Account
+        Required
+      </button>
+      }
+      <ul class="dropdown-menu">
+        <li>
+          @for (account of accountList| orderBy:'name':'asc'; track account) {
+          <a [class.active]="activeAccount?.id === account.id" class="dropdown-item" (click)="switchAccount(account)">
+            {{account.name}}</a>
+          }
+        </li>
+        <li>
+          <hr class="dropdown-divider">
+        </li>
+        <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
+            Account</a></li>
+        <li><a class="dropdown-item" (click)="openBackupModal()"><i class="fa fa-upload"></i> Import Backup</a>
+        </li>
+        <li><a class="dropdown-item" (click)="goToManageAccounts()"><i class="fa fa-gears"></i> Manage
+            Accounts</a>
+        </li>
+      </ul>
+    </div>
+    }
+    @if (dataInitialized && activeAccount && displayToggle) {
+    <div class="btn btn-group ms-2">
+      <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
+        [ngClass]="{'active': !inDataEvaluation}"><span class="fa fa-database"></span> Data Management</button>
+      <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
+        [ngClass]="{'active': inDataEvaluation}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
+    </div>
+    }
+    @if (dataInitialized && activeAccount) {
+    @if (!activeAccount.dataBackupFilePath) {
+    <div class="ps-2">
+      <button class="btn action-btn" (click)="backupAccount()">Backup Account
+      </button>
+    </div>
+    <div class="ps-2">Last Backup: (@if (activeAccount.lastBackup) {
+      <span>{{activeAccount.lastBackup |
+        date:'medium'}}</span>
+      }@if (!activeAccount.lastBackup) {
+      <span>&mdash;</span>
+      })
+    </div>
+    }
+    @if (activeAccount.dataBackupFilePath) {
+    <div class="ps-2">
+      <div class="badge" title="Automatic Account Backups Active"
+        [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
+        <span class="fa fa-file-arrow-down"></span>
+      </div>
+    </div>
+    }
+    }
+    <!--Doesnt Show In Production-->
+    @if (!isProduction) {
+    <div class="ps-2">
+      @if (!resetDatabase) {
+      <button class="btn btn-danger" (click)="toggleResetDatabase()">Reset
+        Database
+      </button>
+      }
+      @if (resetDatabase) {
+      <button class="btn btn-danger" (click)="deleteDatabase()">Are you sure
+        you want to reset the database?
+      </button>
+      }
+    </div>
+    }
+
+  </div>
 </nav>
 
 
 <div [ngClass]="{'windowOverlay': showUpdateModal}"></div>
 <div class="popup" [ngClass]="{'open': showUpdateModal}">
-    <div class="popup-header">Download Latest Version of VERIFI
-        <button class="item-right" (click)="toggleUpdateModal()">x</button>
-    </div>
-    <div class="popup-footer text-end pt-2">
-        <button class="btn btn-secondary" (click)="toggleUpdateModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="update()">
-            Download Update
-        </button>
-    </div>
+  <div class="popup-header">Download Latest Version of VERIFI
+    <button class="item-right" (click)="toggleUpdateModal()">x</button>
+  </div>
+  <div class="popup-footer text-end pt-2">
+    <button class="btn btn-secondary" (click)="toggleUpdateModal()">Cancel</button>
+    <button class="btn btn-primary" (click)="update()">
+      Download Update
+    </button>
+  </div>
 </div>

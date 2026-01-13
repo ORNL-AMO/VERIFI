@@ -1,25 +1,35 @@
-<ng-container *ngIf="!destroyToast">
-    <div class="card card-toast alert alert-info" [@toast]="showToast" *ngIf="deletingMessaging"
-        (mouseup)="finishDrag()" (drag)="mouseDown($event)">
-        <div class="card-header d-flex w-100 justify-content-between align-items-center">
-            <div>
-                <i class="fa fa-info-circle item-left me-2"></i>
-                {{deletingMessaging.message}}
-            </div>
-            <div>
-                <button type="button" class="btn" aria-label="Pause" (click)="togglePauseDelete()">
-                    <span *ngIf="!pauseDelete" class="fa fa-pause"></span>
-                    <span *ngIf="pauseDelete" class="fa fa-play"></span>
-                </button>
-            </div>
+@if (!destroyToast) {
+  @if (deletingMessaging) {
+    <div class="card card-toast alert alert-info" [@toast]="showToast"
+      (mouseup)="finishDrag()" (drag)="mouseDown($event)">
+      <div class="card-header d-flex w-100 justify-content-between align-items-center">
+        <div>
+          <i class="fa fa-info-circle item-left me-2"></i>
+          {{deletingMessaging.message}}
         </div>
-        <div class="card-body">
-            <div *ngIf="!pauseDelete" class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar bg-success" [ngStyle]="{'width.%': deletingMessaging.percent}"></div>
-            </div>
-            <p class="mb-0" *ngIf="pauseDelete">
-                Deleting of account paused. <a (click)="cancelDelete()">Cancel Delete</a>
-            </p>
+        <div>
+          <button type="button" class="btn" aria-label="Pause" (click)="togglePauseDelete()">
+            @if (!pauseDelete) {
+              <span class="fa fa-pause"></span>
+            }
+            @if (pauseDelete) {
+              <span class="fa fa-play"></span>
+            }
+          </button>
         </div>
+      </div>
+      <div class="card-body">
+        @if (!pauseDelete) {
+          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar bg-success" [ngStyle]="{'width.%': deletingMessaging.percent}"></div>
+          </div>
+        }
+        @if (pauseDelete) {
+          <p class="mb-0">
+            Deleting of account paused. <a (click)="cancelDelete()">Cancel Delete</a>
+          </p>
+        }
+      </div>
     </div>
-</ng-container>
+  }
+}

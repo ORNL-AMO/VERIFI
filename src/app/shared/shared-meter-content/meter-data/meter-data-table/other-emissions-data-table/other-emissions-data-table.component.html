@@ -1,96 +1,124 @@
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable
-    [ngClass]="{'copying-table': copyingTable}">
-    <thead class="sortable">
-        <tr class="table-mh">
-            <th></th>
-            <th colspan="3">
-                General Information
-            </th>
-            <th>
-                Emissions
-            </th>
-            <th *ngIf="numDetailedCharges > 0" [attr.colspan]="numDetailedCharges">
-                Detailed Charges
-            </th>
-            <th>
+  [ngClass]="{'copying-table': copyingTable}">
+  <thead class="sortable">
+    <tr class="table-mh">
+      <th></th>
+      <th colspan="3">
+        General Information
+      </th>
+      <th>
+        Emissions
+      </th>
+      @if (numDetailedCharges > 0) {
+        <th [attr.colspan]="numDetailedCharges">
+          Detailed Charges
+        </th>
+      }
+      <th>
 
-            </th>
+      </th>
+    </tr>
+    <tr>
+      @if (!copyingTable) {
+        <th class="input">
+          <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+        </th>
+      }
+      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+      class="row-year">Meter Read Date</th>
+      <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}">
+        Total Consumption<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
+      </th>
+      <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+      Cost</th>
+      @if (selectedMeter.scope == 5) {
+        <th (click)="setOrderDataField('fugitiveEmissions')"
+          [ngClass]="{'active': orderDataField == 'fugitiveEmissions'}">Total Fugitive <br>Emissions (tonne
+          CO<sub>2</sub>e)</th>
+        }
+        @if (selectedMeter.scope == 6) {
+          <th (click)="setOrderDataField('processEmissions')"
+            [ngClass]="{'active': orderDataField == 'processEmissions'}">Total Process <br>Emissions (tonne
+            CO<sub>2</sub>e)</th>
+          }
+          @for (charge of selectedMeter.charges; track charge) {
+            @if (charge.displayChargeInTable) {
+              <th (click)="setOrderDataField(charge.guid, 'amount')"
+                [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
+                {{ charge.name }} <br>(&dollar;)
+              </th>
+            }
+          }
+          @if (!copyingTable) {
+            <th>Actions</th>
+          }
         </tr>
-        <tr>
-            <th *ngIf="!copyingTable" class="input">
-                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
-            </th>
-            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
-                class="row-year">Meter Read Date</th>
-            <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}">
-                Total Consumption<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
-            </th>
-            <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
-                Cost</th>
-            <th *ngIf="selectedMeter.scope == 5" (click)="setOrderDataField('fugitiveEmissions')"
-                [ngClass]="{'active': orderDataField == 'fugitiveEmissions'}">Total Fugitive <br>Emissions (tonne
-                CO<sub>2</sub>e)</th>
-            <th *ngIf="selectedMeter.scope == 6" (click)="setOrderDataField('processEmissions')"
-                [ngClass]="{'active': orderDataField == 'processEmissions'}">Total Process <br>Emissions (tonne
-                CO<sub>2</sub>e)</th>
-            <ng-container *ngFor="let charge of selectedMeter.charges">
-                <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
-                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
-                    {{ charge.name }} <br>(&dollar;)
-                </th>
-            </ng-container>
-            <th *ngIf="!copyingTable">Actions</th>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider">
-        <tr
-            *ngFor="let meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-            <td *ngIf="!copyingTable" class="input">
+      </thead>
+      <tbody class="table-group-divider">
+        @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData) {
+          <tr
+            >
+            @if (!copyingTable) {
+              <td class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
-            </td>
+              </td>
+            }
             <td class="read-date">{{meterData.readDate | date}}</td>
             <td>
-                <span class="fa fa-asterisk" *ngIf="meterData.isEstimated"></span>
-                {{meterData.totalVolume | customNumber}}
+              @if (meterData.isEstimated) {
+                <span class="fa fa-asterisk"></span>
+              }
+              {{meterData.totalVolume | customNumber}}
             </td>
             <td>{{meterData.totalCost | customNumber:true}}</td>
-            <td *ngIf="selectedMeter.scope == 5">{{meterData.fugitiveEmissions | customNumber}}</td>
-            <td *ngIf="selectedMeter.scope == 6">{{meterData.processEmissions | customNumber}}</td>
-
-            <ng-container *ngFor="let meterCharge of selectedMeter.charges">
-                <td *ngIf="meterCharge.displayChargeInTable">
-                    {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+            @if (selectedMeter.scope == 5) {
+              <td>{{meterData.fugitiveEmissions | customNumber}}</td>
+            }
+            @if (selectedMeter.scope == 6) {
+              <td>{{meterData.processEmissions | customNumber}}</td>
+            }
+            @for (meterCharge of selectedMeter.charges; track meterCharge) {
+              @if (meterCharge.displayChargeInTable) {
+                <td>
+                  {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
                 </td>
-
-            </ng-container>
-            <td class="actions" *ngIf="!copyingTable">
+              }
+            }
+            @if (!copyingTable) {
+              <td class="actions">
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
-                        <i class="fa fa-pencil"></i>
-                    </button>
-                    <app-view-connect-bill [meterData]="meterData" *ngIf="isElectron"
-                        [selectedMeter]="selectedMeter"></app-view-connect-bill>
-                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
-                        <i class="fa fa-trash"></i>
-                    </button>
+                  <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                    <i class="fa fa-pencil"></i>
+                  </button>
+                  @if (isElectron) {
+                    <app-view-connect-bill [meterData]="meterData"
+                    [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                  }
+                  <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                    <i class="fa fa-trash"></i>
+                  </button>
                 </div>
-            </td>
-        </tr>
-    </tbody>
-</table>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
 
-<div class="d-flex w-100 justify-content-between">
-    <div class="d-flex">
+    <div class="d-flex w-100 justify-content-between">
+      <div class="d-flex">
         <div>
-            <button class="btn action-btn btn-sm" (click)="copyTable()">
-                <span class="fa fa-copy"></span> Copy Table
-            </button>
+          <button class="btn action-btn btn-sm" (click)="copyTable()">
+            <span class="fa fa-copy"></span> Copy Table
+          </button>
         </div>
-        <div class="ps-2" *ngIf="showEstimated">
+        @if (showEstimated) {
+          <div class="ps-2">
             <span class="fa fa-asterisk"></span> Indicates Estimated Reading
-        </div>
-    </div>
-    <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+          </div>
+        }
+      </div>
+      <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
         [maxSize]="5" [rotate]="true" aria-label="Pagination">
-    </ngb-pagination>
-</div>
+      </ngb-pagination>
+    </div>

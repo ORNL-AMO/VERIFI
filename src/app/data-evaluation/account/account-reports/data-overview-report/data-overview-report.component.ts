@@ -120,7 +120,7 @@ export class DataOverviewReportComponent {
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     if (typeof Worker !== 'undefined') {
-      this.facilitiesWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
+      this.facilitiesWorker = new Worker(new URL('../../../../web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
         if (!data.error) {
           dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
@@ -192,7 +192,7 @@ export class DataOverviewReportComponent {
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
 
     if (typeof Worker !== 'undefined') {
-      this.accountWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
+      this.accountWorker = new Worker(new URL('../../../../web-workers/account-overview.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.accountData.accountOverviewData = data.accountOverviewData;

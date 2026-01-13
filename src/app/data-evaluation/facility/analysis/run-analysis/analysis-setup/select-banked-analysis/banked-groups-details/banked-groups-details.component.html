@@ -1,43 +1,53 @@
-<div class="d-flex flex-column" *ngFor="let groupItem of groupItems; let index = index; let last = last;">
+@for (groupItem of groupItems; track groupItem; let index = $index; let last = $last) {
+  <div class="d-flex flex-column">
     <div>
-        <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
-        <span class="bold larger">
-            {{groupItem.group.idbGroupId | groupName}}
+      @if (groupItem.group.groupErrors.hasErrors) {
+        <span class="me-1 fa fa-exclamation-circle"></span>
+      }
+      <span class="bold larger">
+        {{groupItem.group.idbGroupId | groupName}}
+      </span>
+      @if (!groupItem.group.groupErrors.hasErrors) {
+        <span class="badge bg-secondary ms-2 pull-right">
+          {{groupItem.group.analysisType | analysisTypeLabel }}
         </span>
-        <ng-template [ngIf]="!groupItem.group.groupErrors.hasErrors" [ngIfElse]="errorsBlock">
-            <span class="badge bg-secondary ms-2 pull-right">
-                {{groupItem.group.analysisType | analysisTypeLabel }}
-            </span>
-            <ng-container *ngIf="groupItem.group.analysisType != 'skip'">
-                <span class="badge bg-info ms-2 pull-right"
-                    *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
-            </ng-container>
-        </ng-template>
-        <ng-template #errorsBlock>
-            <span class="badge bg-danger pull-right">Errors in group setup.</span>
-        </ng-template>
-
+        @if (groupItem.group.analysisType != 'skip') {
+          @for (predictor of groupItem.predictorVariables; track predictor) {
+            <span class="badge bg-info ms-2 pull-right"
+            >{{predictor.name}}</span>
+          }
+        }
+      } @else {
+        <span class="badge bg-danger pull-right">Errors in group setup.</span>
+      }
     </div>
-    <ng-container *ngIf="showDetail">
+    @if (showDetail) {
+      @if (groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors) {
         <div class="pt-2"
-            *ngIf="groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors">
-            Model Year: {{groupItem.group.regressionModelYear}}<br>
-            Modeled Energy = {{groupItem.regressionEquation}}<br>
-            <ng-container *ngIf="groupItem.group.userDefinedModel">
-                Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
-            </ng-container>
-            <ng-container *ngIf="!groupItem.group.userDefinedModel">
-                User defined model.
-            </ng-container>
+          >
+          Model Year: {{groupItem.group.regressionModelYear}}<br>
+          Modeled Energy = {{groupItem.regressionEquation}}<br>
+          @if (groupItem.group.userDefinedModel) {
+            Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
+          }
+          @if (!groupItem.group.userDefinedModel) {
+            User defined model.
+          }
         </div>
+      }
+      @if (analysisItem.hasBanking && groupItem.group.applyBanking && !groupItem.group.groupErrors.hasErrors) {
         <div class="p-0"
-            *ngIf="analysisItem.hasBanking && groupItem.group.applyBanking && !groupItem.group.groupErrors.hasErrors">
-            <span class="badge bg-dark">
-                <span class="fa fa-piggy-bank"></span> Has Banked Savings
-            </span>
+          >
+          <span class="badge bg-dark">
+            <span class="fa fa-piggy-bank"></span> Has Banked Savings
+          </span>
         </div>
-    </ng-container>
-    <div *ngIf="!last">
+      }
+    }
+    @if (!last) {
+      <div>
         <hr>
+        </div>
+      }
     </div>
-</div>
+  }

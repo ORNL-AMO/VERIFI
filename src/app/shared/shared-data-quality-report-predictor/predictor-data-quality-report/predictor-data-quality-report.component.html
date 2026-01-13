@@ -1,79 +1,92 @@
-<ng-template [ngIf]="!hasData" [ngIfElse]="hasDataTemplate">
-
-    <div class="text-center mt-5 no-meters">
-        <h5>No predictor entries found for this predictor.</h5>
-        <p>Please <i class="fa fa-plus"></i> Add New Predictor Entry or <i class="fa fa-upload"></i> Import multiple
-            predictor entries from
-            excel.
-        </p>
-        <div class="d-flex w-100 justify-content-center">
-            <div class="pe-1">
-                <button class="btn action-btn" (click)="predictorDataAdd()"><i class="fa fa-plus"></i> Add
-                    Predictor Data</button>
-            </div>
-            <div class="ps-1">
-                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-            </div>
-        </div>
-    </div>
-</ng-template>
-<ng-template #hasDataTemplate>
-    <ng-container *ngIf="showAlert">
-        <div
-            class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center">
-            <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"></i>
-            <div>
-                <span class="alert-message" *ngIf="outlierCount > 0">
-                    There is an issue in
-                    <span class="fw-bold text-danger">{{ outlierCount }}</span>
-                    reading<span *ngIf="outlierCount > 1">s</span>
-                    <br>
-                </span>
-                <span class="alert-message" *ngIf="datesList.length > 0">
-                    There <ng-container *ngIf="datesList.length == 1">is </ng-container>
-                    <ng-container *ngIf="datesList.length > 1">are </ng-container>
-                    <span class="fw-bold text-danger">{{ datesList.length}}</span>
-                    month<ng-container *ngIf="datesList.length > 1">s</ng-container>
-                    with multiple readings.
-                    <br>
-                </span>
-            </div>
-        </div>
-    </ng-container>
-    <h5>
-        <i class="fa fa-table me-2"></i>
-        Total Consumption Statistics
-    </h5>
-    <app-predictor-statistics-table [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
-        [stats]="stats"></app-predictor-statistics-table>
-    <hr>
-    <div class="row">
-        <div class="col-md-6 col-sm-12">
-            <h5>
-                <i class="fa fa-line-chart me-2"></i>
-                Predictor Time Series
-            </h5>
-            <app-predictor-timeseries-graph [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
-                [stats]="stats"></app-predictor-timeseries-graph>
-        </div>
-        <div class="col-md-6 col-sm-12">
-            <h5>
-                <i class="fa fa-chart-bar me-2"></i>
-                Distribution of Predictors
-            </h5>
-            <app-predictor-histogram-graph [predictorData]="predictorData"
-                [selectedPredictor]="selectedPredictor"></app-predictor-histogram-graph>
-        </div>
-    </div>
-
-    <div *ngIf="datesList.length > 0">
-        <hr>
-        <h5 class="mt-5">
-            <i class="fa fa-table me-2 mb-3"></i>
-            Months with multiple readings
-        </h5>
-        <span *ngFor="let date of datesList" class="badge bg-warning text-dark px-2 py-2 fs-5 me-2 mb-2 ms-3">
-            {{ date.monthYear }}
+@if (!hasData) {
+  <div class="text-center mt-5 no-meters">
+    <h5>No predictor entries found for this predictor.</h5>
+    <p>Please <i class="fa fa-plus"></i> Add New Predictor Entry or <i class="fa fa-upload"></i> Import multiple
+    predictor entries from
+    excel.
+  </p>
+  <div class="d-flex w-100 justify-content-center">
+    <div class="pe-1">
+      <button class="btn action-btn" (click)="predictorDataAdd()"><i class="fa fa-plus"></i> Add
+    Predictor Data</button>
+  </div>
+  <div class="ps-1">
+    <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+  </div>
+</div>
+</div>
+} @else {
+  @if (showAlert) {
+    <div
+      class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center">
+      <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"></i>
+      <div>
+        @if (outlierCount > 0) {
+          <span class="alert-message">
+            There is an issue in
+            <span class="fw-bold text-danger">{{ outlierCount }}</span>
+            reading@if (outlierCount > 1) {
+            <span>s</span>
+          }
+          <br>
+          </span>
+        }
+        @if (datesList.length > 0) {
+          <span class="alert-message">
+            There @if (datesList.length == 1) {
+            is
+          }
+          @if (datesList.length > 1) {
+            are
+          }
+          <span class="fw-bold text-danger">{{ datesList.length}}</span>
+          month@if (datesList.length > 1) {
+          s
+        }
+        with multiple readings.
+        <br>
         </span>
+      }
     </div>
-</ng-template>
+  </div>
+}
+<h5>
+  <i class="fa fa-table me-2"></i>
+  Total Consumption Statistics
+</h5>
+<app-predictor-statistics-table [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
+[stats]="stats"></app-predictor-statistics-table>
+<hr>
+  <div class="row">
+    <div class="col-md-6 col-sm-12">
+      <h5>
+        <i class="fa fa-line-chart me-2"></i>
+        Predictor Time Series
+      </h5>
+      <app-predictor-timeseries-graph [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
+      [stats]="stats"></app-predictor-timeseries-graph>
+    </div>
+    <div class="col-md-6 col-sm-12">
+      <h5>
+        <i class="fa fa-chart-bar me-2"></i>
+        Distribution of Predictors
+      </h5>
+      <app-predictor-histogram-graph [predictorData]="predictorData"
+      [selectedPredictor]="selectedPredictor"></app-predictor-histogram-graph>
+    </div>
+  </div>
+  @if (datesList.length > 0) {
+    <div>
+      <hr>
+        <h5 class="mt-5">
+          <i class="fa fa-table me-2 mb-3"></i>
+          Months with multiple readings
+        </h5>
+        @for (date of datesList; track date) {
+          <span class="badge bg-warning text-dark px-2 py-2 fs-5 me-2 mb-2 ms-3">
+            {{ date.monthYear }}
+          </span>
+        }
+      </div>
+    }
+  }
