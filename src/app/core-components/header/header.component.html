@@ -26,7 +26,7 @@
       }
       <ul class="dropdown-menu">
         <li>
-          @for (account of accountList| orderBy:'name':'asc'; track account) {
+          @for (account of accountList| orderBy:'name':'asc'; track account.guid) {
           <a [class.active]="activeAccount?.id === account.id" class="dropdown-item" (click)="switchAccount(account)">
             {{account.name}}</a>
           }

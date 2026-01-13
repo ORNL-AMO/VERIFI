@@ -115,7 +115,7 @@ export class EditUtilityBillComponent implements OnInit {
         false, [facility], this.eGridService.co2Emissions, customFuels,
         this.meterDataForm.controls.totalVolume.value, undefined, undefined,
         this.meterDataForm.controls.heatCapacity.value,
-        account.assessmentReportVersion);
+        account.assessmentReportVersion, []);
     } else {
       this.emissionsResults = getZeroEmissionsResults();
     }

@@ -10,3 +10,9 @@
     max-height: 93vh;
     overflow-y: auto;
 }
+
+.click-link span {
+    text-decoration: underline;
+    color: inherit;
+    cursor: pointer;
+}

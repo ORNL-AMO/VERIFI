@@ -60,7 +60,7 @@ export class DataApplicationMenuComponent implements OnInit {
     if (this.utilityMeterData.length > 2) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let calanderizedData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.meter], this.utilityMeterData, selectedFacility, false, undefined, [], [], [selectedFacility], account.assessmentReportVersion);
+      let calanderizedData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.meter], this.utilityMeterData, selectedFacility, false, undefined, [], [], [selectedFacility], account.assessmentReportVersion, []);
       this.monthlyData = calanderizedData[0].monthlyData;
       if (this.meter.meterReadingDataApplication == 'backward') {
         this.monthlyData = this.monthlyData.splice(0, 2);
