@@ -68,9 +68,11 @@
                         </div>
                     </div>
 
-                    <div class="alert alert-danger" *ngIf="invalidLocation">
+                    @if (invalidLocation) {
+                    <div class="alert alert-danger">
                         {{invalidLocation}}
                     </div>
+                    }
                     @for (emissionRate of editCustomEmissions.locationEmissionRates; track emissionRate; let index = $index) {
 
                         <div class="row form-group">
@@ -79,11 +81,13 @@
                                 <select class="form-select" [(ngModel)]="emissionRate.year"
                                     name="{{'locationYear_'+index}}" id="{{'locationYear_'+index}}"
                                     (change)="checkInvalid()" required>
-                                    <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                                    @for (year of years; track year) {
+                                    <option [ngValue]="year">{{year}}</option>
+                                    }
                                 </select>
                             </div>
                         </div>
-                        <ng-container *ngIf="!editCustomEmissions.directEmissionsRate">
+                        @if (!editCustomEmissions.directEmissionsRate) {
                             <div class="row form-group">
                                 <label class="col-5 col-form-label" for="{{'locationCO2_'+index}}">CO<sub>2</sub>
                                     Factor</label>
@@ -179,9 +183,11 @@
                             <a class="click-link" (click)="addResidualEmissionRate()">+Add Year</a>
                         </div>
                     </div>
-                    <div class="alert alert-danger" *ngIf="invalidResidual">
+                    @if (invalidResidual) {
+                    <div class="alert alert-danger">
                         {{invalidResidual}}
                     </div>
+                    }
                     @for (emissionRate of editCustomEmissions.residualEmissionRates; track emissionRate; let index = $index) {
 
                         <div class="row form-group">
@@ -190,11 +196,13 @@
                                 <select class="form-select" [(ngModel)]="emissionRate.year"
                                     name="{{'residualYear_'+index}}" id="{{'residualYear_'+index}}"
                                     (change)="checkInvalid()" required>
-                                    <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                                    @for (year of years; track year) {
+                                    <option [ngValue]="year">{{year}}</option>
+                                    }
                                 </select>
                             </div>
                         </div>
-                        <ng-container *ngIf="!editCustomEmissions.directEmissionsRate">
+                        @if (!editCustomEmissions.directEmissionsRate) {
                             <div class="row form-group">
                                 <label class="col-5 col-form-label" for="{{'residualCO2_'+index}}">CO<sub>2</sub>
                                     Factor</label>
