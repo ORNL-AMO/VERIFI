@@ -351,6 +351,13 @@ export class AppComponent {
   async initializeCustomGWPs(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom GWPs...';
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
+    for (let i = 0; i < customGWPs.length; i++) {
+      let updateGWP = this.updateDbEntryService.updateCustomGWP(customGWPs[i]);
+      if (updateGWP.isChanged) {
+        customGWPs[i] = updateGWP.customGWP;
+        await firstValueFrom(this.customGWPDbService.updateWithObservable(customGWPs[i]));
+      }
+    }
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 
