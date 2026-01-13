@@ -2,162 +2,141 @@
   Banked Group Savings
 </h5>
 @if (calculating != false) {
-  <div class="p-3">
-    <app-calculating-spinner [message]="'Calculating Banked Results...'"
+<div class="p-3">
+  <app-calculating-spinner [message]="'Calculating Banked Results...'"
     [error]="calculating == 'error'"></app-calculating-spinner>
-  </div>
+</div>
 }
 
 @if (calculating == false) {
-  <table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable>
-    <thead class="sortable">
-      <tr class="table-mh">
-        <th class="first-column"></th>
-        <th class="text-center th-3" colspan="2">
-          @if (bankedAnalysisItem.analysisCategory == 'energy') {
-            Energy (<span [innerHTML]="bankedAnalysisItem.energyUnit | settingsLabel"></span>)
-          }
-          @if (bankedAnalysisItem.analysisCategory == 'water') {
-            Consumption (<span [innerHTML]="bankedAnalysisItem.waterUnit | settingsLabel"></span>)
-          }
-        </th>
-        <th class="text-center th-3" colspan="3">
-          Incremental Improvement
-        </th>
-      </tr>
-      <tr>
-        <th class="period-column">
-          Year
-        </th>
-        <th>
-          Actual
-        </th>
-        <th>
-          Adjusted
-        </th>
-        <!-- <th>
+<table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable>
+  <thead class="sortable">
+    <tr class="table-mh">
+      <th class="first-column"></th>
+      <th class="text-center th-3" colspan="2">
+        @if (bankedAnalysisItem.analysisCategory == 'energy') {
+        Energy (<span [innerHTML]="bankedAnalysisItem.energyUnit | settingsLabel"></span>)
+        }
+        @if (bankedAnalysisItem.analysisCategory == 'water') {
+        Consumption (<span [innerHTML]="bankedAnalysisItem.waterUnit | settingsLabel"></span>)
+        }
+      </th>
+      <th class="text-center th-3" colspan="3">
+        Incremental Improvement
+      </th>
+    </tr>
+    <tr>
+      <th class="period-column">
+        Year
+      </th>
+      <th>
+        Actual
+      </th>
+      <th>
+        Adjusted
+      </th>
+      <!-- <th>
         Total<br>Baseline<br> Adjustment
       </th> -->
       <!-- <th>
       Savings
     </th> -->
-    <th>
-      Total Savings <br> % Improvement
-    </th>
-    <th>
-      Annual Savings <br> % Improvement
-    </th>
-    <th>
-      Cumulative <br> Savings
-    </th>
-  </tr>
-</thead>
-<tbody class="table-group-divider">
-  @for (summary of groupSummary.annualAnalysisSummaryData; track summary) {
-    @if (summary.year < selectedGroup.newBaselineYear || !selectedGroup.newBaselineYear) {
-      <tr>
-        <td>
-          @if (selectedGroup.bankedAnalysisYear >= summary.year) {
-            <span class="fa fa-piggy-bank"
-            ></span>
-          }
-          @if (selectedGroup.bankedAnalysisYear < summary.year) {
-            <span class="fa fa-paint-roller"></span>
+      <th>
+        Total Savings <br> % Improvement
+      </th>
+      <th>
+        Annual Savings <br> % Improvement
+      </th>
+      <th>
+        Cumulative <br> Savings
+      </th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    @for (summary of groupSummary.annualAnalysisSummaryData; track summary) {
+    @if (summary.year < selectedGroup.newBaselineYear || !selectedGroup.newBaselineYear) { <tr>
+      <td>
+        @if (selectedGroup.bankedAnalysisYear >= summary.year) {
+        <span class="fa fa-piggy-bank"></span>
+        }
+        @if (selectedGroup.bankedAnalysisYear < summary.year) { <span class="fa fa-paint-roller"></span>
           }
           @if (summary.year == modelYear) {
-            <span class="fa fa-star"></span>
+          <span class="fa fa-star"></span>
           }
           {{summary.year | yearDisplay: facility.fiscalYear}}
-        </td>
-        <td>
-          @if (summary.energyUse) {
-            <span [ngClass]="{'red': summary.energyUse < 0}">
-              {{summary.energyUse | customNumber}}
-            </span>
-          }
-          @if (!summary.energyUse) {
-            <span>
-              &mdash;
-            </span>
-          }
-        </td>
-        <td>
-          @if (summary.adjusted && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear) {
-            <span [ngClass]="{'red': summary.adjusted < 0}">
-              {{summary.adjusted | customNumber}}
-            </span>
-          } @else {
-            <span>
-              &mdash;
-            </span>
-          }
-        </td>
-        <!-- <td>
-        <span *ngIf="summary.baselineAdjustment" [ngClass]="{'red': summary.baselineAdjustment < 0}">
-          {{summary.baselineAdjustment | customNumber}}
+      </td>
+      <td>
+        @if (summary.energyUse) {
+        <span [ngClass]="{'red': summary.energyUse < 0}">
+          {{summary.energyUse | customNumber}}
         </span>
-        <span *ngIf="!summary.baselineAdjustment">
-          &mdash;
-        </span>
-      </td> -->
-      <!-- <td>
-      <ng-template [ngIf]="summary.savings && !summary.isIntermediateBanked" [ngIfElse]="savingsMdash">
-        <span [ngClass]="{'red': summary.savings < 0}">
-          {{summary.savings | customNumber}}
-        </span>
-      </ng-template>
-      <ng-template #savingsMdash>
+        }
+        @if (!summary.energyUse) {
         <span>
           &mdash;
         </span>
-      </ng-template>
-    </td> -->
-    <td>
-      @if (selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear) {
+        }
+      </td>
+      <td>
+        @if (summary.adjusted && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear)
+        {
+        <span [ngClass]="{'red': summary.adjusted < 0}">
+          {{summary.adjusted | customNumber}}
+        </span>
+        } @else {
+        <span>
+          &mdash;
+        </span>
+        }
+      </td>
+      <td>
+        @if (selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear) {
         @if (summary.totalSavingsPercentImprovement) {
-          <span
-            [ngClass]="{'red': summary.totalSavingsPercentImprovement < 0}">
-            {{summary.totalSavingsPercentImprovement | number:'1.0-2'}} %
-          </span>
+        <span [ngClass]="{'red': summary.totalSavingsPercentImprovement < 0}">
+          {{summary.totalSavingsPercentImprovement | number:'1.0-2'}} %
+        </span>
         }
         @if (!summary.totalSavingsPercentImprovement) {
-          <span>
-            &mdash;
-          </span>
+        <span>
+          &mdash;
+        </span>
         }
-      } @else {
+        } @else {
         {{bankedSavings | number:'1.0-2'}} %
-      }
-    </td>
-    <td>
-      @if (summary.annualSavingsPercentImprovement && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear) {
+        }
+      </td>
+      <td>
+        @if (summary.annualSavingsPercentImprovement && selectedGroup.bankedAnalysisYear >= summary.year ||
+        !selectedGroup.bankedAnalysisYear) {
         <span [ngClass]="{'red': summary.annualSavingsPercentImprovement < 0}">
           {{summary.annualSavingsPercentImprovement | number:'1.0-2'}} %
         </span>
-      } @else {
+        } @else {
         &mdash;
-      }
-    </td>
-    <td>
-      @if (summary.cummulativeSavings && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear) {
+        }
+      </td>
+      <td>
+        @if (summary.cummulativeSavings && selectedGroup.bankedAnalysisYear >= summary.year ||
+        !selectedGroup.bankedAnalysisYear) {
         <span [ngClass]="{'red': summary.cummulativeSavings < 0}">
           {{summary.cummulativeSavings | customNumber}}
         </span>
-      } @else {
+        } @else {
         &mdash;
+        }
+      </td>
+      </tr>
       }
-    </td>
-  </tr>
-}
-}
-</tbody>
+      }
+  </tbody>
 </table>
 <div class="d-flex w-100 justify-content-end hide-print">
   <div class="alert alert-info p-1">
     <span class="fa fa-piggy-bank"></span> Banked Analysis Year<br>
     <span class="fa fa-paint-roller"></span> Transition Year<br>
     @if (modelYear) {
-      <span class="fa fa-star"></span> Banked Model Year<br>
+    <span class="fa fa-star"></span> Banked Model Year<br>
     }
   </div>
 </div>

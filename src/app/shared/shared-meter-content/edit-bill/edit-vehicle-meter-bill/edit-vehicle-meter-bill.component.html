@@ -9,22 +9,22 @@
           [ngClass]="{'error': invalidDate}">
       </div>
       @if (meterDataForm.get('readDate').hasError('required')) {
-        <div class="alert alert-danger">Meter read date
-          is
+      <div class="alert alert-danger">Meter read date
+        is
         required</div>
       }
       @if (meterDataForm.get('readDate').hasError('maxDate')) {
-        <div class="alert alert-danger">Meter read date
-          exceeds
+      <div class="alert alert-danger">Meter read date
+        exceeds
         maximum read date.</div>
       }
       @if (meterDataForm.get('readDate').hasError('minDate')) {
-        <div class="alert alert-danger">Meter read date is
-          before
+      <div class="alert alert-danger">Meter read date is
+        before
         minimum read date.</div>
       }
       @if (invalidDate) {
-        <div class="alert alert-danger">Meter already has data entered for selected date</div>
+      <div class="alert alert-danger">Meter already has data entered for selected date</div>
       }
     </div>
     <div class="col-6">
@@ -46,78 +46,75 @@
         <span class="input-group-text" [innerHTML]="volumeUnit | settingsLabel"></span>
       </div>
       @if (meterDataForm.get('totalVolume').hasError('required')) {
-        <div class="alert alert-danger">Total fuel use
-          is
+      <div class="alert alert-danger">Total fuel use
+        is
         required</div>
       }
       @if (meterDataForm.get('totalVolume').hasError('min')) {
-        <div class="alert alert-danger">Can't be less than
-          0
-        </div>
+      <div class="alert alert-danger">Can't be less than
+        0
+      </div>
       }
       @if (meterDataForm.controls.totalVolume.value === 0) {
-        <div class="alert alert-warning">Total usage should
-          be
-          greater
+      <div class="alert alert-warning">Total usage should
+        be
+        greater
         than 0</div>
       }
     </div>
 
     @if (displayVehicleFuelEfficiency) {
-      <div class="col-md-6 col-sm-12">
-        <label for="vehicleFuelEfficiency">Fuel Efficiency <span class="required">*</span></label>
-        <div class="input-group mb-3">
-          <span class="input-group-text p-0">
-            @if (usingMeterFuelEfficiency) {
-              <button class="btn btn-sm" (click)="editFuelEfficiency()">
-                <span class="fa fa-edit"></span>
-              </button>
-            }
-            @if (!usingMeterFuelEfficiency) {
-              <button class="btn btn-sm" (click)="useMeterFuelEfficiency()">
-                <span class="fa fa-undo"></span>
-              </button>
-            }
-          </span>
-          <input id="vehicleFuelEfficiency" class="form-control" type="number"
-            formControlName="vehicleFuelEfficiency" onfocus="this.select();" min="0" max="999999999999999"
-            (input)="calculateTotalEnergyUse()">
-          <span class="input-group-text"><span
-          [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>/<span
-        [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
-      </span>
-    </div>
-    @if (meterDataForm.get('vehicleFuelEfficiency').hasError('required')) {
+    <div class="col-md-6 col-sm-12">
+      <label for="vehicleFuelEfficiency">Fuel Efficiency <span class="required">*</span></label>
+      <div class="input-group mb-3">
+        <span class="input-group-text p-0">
+          @if (usingMeterFuelEfficiency) {
+          <button class="btn btn-sm" (click)="editFuelEfficiency()">
+            <span class="fa fa-edit"></span>
+          </button>
+          }
+          @if (!usingMeterFuelEfficiency) {
+          <button class="btn btn-sm" (click)="useMeterFuelEfficiency()">
+            <span class="fa fa-undo"></span>
+          </button>
+          }
+        </span>
+        <input id="vehicleFuelEfficiency" class="form-control" type="number" formControlName="vehicleFuelEfficiency"
+          onfocus="this.select();" min="0" max="999999999999999" (input)="calculateTotalEnergyUse()">
+        <span class="input-group-text"><span [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>/<span
+            [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
+        </span>
+      </div>
+      @if (meterDataForm.get('vehicleFuelEfficiency').hasError('required')) {
       <div class="alert alert-danger">Fuel
         Efficiency
         is
-      required</div>
-    }
-    @if (meterDataForm.get('vehicleFuelEfficiency').hasError('min')) {
+        required</div>
+      }
+      @if (meterDataForm.get('vehicleFuelEfficiency').hasError('min')) {
       <div class="alert alert-danger">Can't be
         less than 0
       </div>
-    }
-    @if (!usingMeterFuelEfficiency) {
+      }
+      @if (!usingMeterFuelEfficiency) {
       <div class="alert alert-info">
         Custom fuel efficiency set for this reading. Click "<span class="fa fa-undo"></span>" to use the meter's
         average fuel efficiency.
       </div>
+      }
+    </div>
     }
-  </div>
-}
-@if (editMeter.vehicleCategory == 2) {
-  @if (editMeter.vehicleCollectionType == 2) {
+    @if (editMeter.vehicleCategory == 2) {
+    @if (editMeter.vehicleCollectionType == 2) {
     <div class="col-md-6 col-sm-12">
       <label for="totalFuelConsumption">Estimated Fuel Consumption</label>
       <div class="input-group mb-3">
-        <input id="totalFuelConsumption" class="form-control" type="number"
-          formControlName="totalFuelConsumption">
+        <input id="totalFuelConsumption" class="form-control" type="number" formControlName="totalFuelConsumption">
         <span class="input-group-text" [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
       </div>
     </div>
-  }
-  @if (editMeter.vehicleCollectionType == 1) {
+    }
+    @if (editMeter.vehicleCollectionType == 1) {
     <div class="col-md-6 col-sm-12">
       <label for="totalDistance">Estimated Distance</label>
       <div class="input-group mb-3">
@@ -125,89 +122,82 @@
         <span class="input-group-text" [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>
       </div>
     </div>
-  }
-}
-<div class="col-md-6 col-sm-12">
-  <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
-  <div class="input-group mb-3">
-    <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
-      onfocus="this.select();" max="999999999999999" (input)="setTotalEmissions()">
-    <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
+    }
+    }
+    <div class="col-md-6 col-sm-12">
+      <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
+      <div class="input-group mb-3">
+        <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
+          onfocus="this.select();" max="999999999999999" (input)="setTotalEmissions()">
+        <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
+      </div>
+      @if (meterDataForm.get('totalEnergyUse').hasError('required')) {
+      <div class="alert alert-danger">Total
+        energy use
+        is
+        required</div>
+      }
+    </div>
+    <div class="col-md-6 col-sm-12">
+      <table class="table table-sm table-bordered">
+        <tbody>
+          @if (!meterFuel.isBiofuel) {
+          <tr>
+            <th>
+              Carbon Emissions
+            </th>
+            <td>
+              {{emissionsValues.mobileCarbonEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+            </td>
+          </tr>
+          }
+          @if (meterFuel.isBiofuel) {
+          <tr>
+            <th>
+              Biogenic Emissions
+            </th>
+            <td>
+              {{emissionsValues.totalBiogenicEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+            </td>
+          </tr>
+          }
+          <tr>
+            <th>
+              Other Emissions
+            </th>
+            <td>
+              {{emissionsValues.otherScope2Emissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+            </td>
+          </tr>
+          <tr>
+            <th>
+              Total Emissions
+            </th>
+            <td>
+              {{emissionsValues.mobileTotalEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-  @if (meterDataForm.get('totalEnergyUse').hasError('required')) {
-    <div class="alert alert-danger">Total
-      energy use
-      is
-    required</div>
-  }
-  <!-- <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less
-  than 0
-</div>
-<div class="alert alert-warning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use
-  should
-  be
-greater than 0</div> -->
-</div>
-<div class="col-md-6 col-sm-12">
-  <table class="table table-sm table-bordered">
-    <tbody>
-      @if (!meterFuel.isBiofuel) {
-        <tr>
-          <th>
-            Carbon Emissions
-          </th>
-          <td>
-            {{emissionsValues.mobileCarbonEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
-          </td>
-        </tr>
-      }
-      @if (meterFuel.isBiofuel) {
-        <tr>
-          <th>
-            Biogenic Emissions
-          </th>
-          <td>
-            {{emissionsValues.totalBiogenicEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
-          </td>
-        </tr>
-      }
-      <tr>
-        <th>
-          Other Emissions
-        </th>
-        <td>
-          {{emissionsValues.otherScope2Emissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
-        </td>
-      </tr>
-      <tr>
-        <th>
-          Total Emissions
-        </th>
-        <td>
-          {{emissionsValues.mobileTotalEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-</div>
 
-<label for="totalCost">Total Cost</label>
-<div class="input-group mb-3">
-  <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();"
-    min="0" max="999999999999999">
-  <span class="input-group-text">$</span>
-</div>
-@if (meterDataForm.get('totalCost').hasError('required')) {
+  <label for="totalCost">Total Cost</label>
+  <div class="input-group mb-3">
+    <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();"
+      min="0" max="999999999999999">
+    <span class="input-group-text">$</span>
+  </div>
+  @if (meterDataForm.get('totalCost').hasError('required')) {
   <div class="alert alert-danger">Total cost is required
   </div>
-}
-@if (meterDataForm.get('totalCost').hasError('min')) {
+  }
+  @if (meterDataForm.get('totalCost').hasError('min')) {
   <div class="alert alert-danger">Can't be less than 0</div>
-}
-@if (meterDataForm.controls.totalCost.value === 0) {
+  }
+  @if (meterDataForm.controls.totalCost.value === 0) {
   <div class="alert alert-warning">Total cost should be greater
     than
-  0</div>
-}
+    0</div>
+  }
 </form>

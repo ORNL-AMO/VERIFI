@@ -1,8 +1,8 @@
 <form [formGroup]="betterPlantsReportForm">
   <div class="row">
     <div class="col-12">
-      <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
-        [field]="'selectAccountAnalysis'" [isFloatRight]="true">
+      <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'" [field]="'selectAccountAnalysis'"
+        [isFloatRight]="true">
       </app-label-with-tooltip>
       <div class="table-responsive">
         <table class="table table-sm table-hover table-bordered">
@@ -30,36 +30,34 @@
 
           <tbody class="table-group-divider">
             @for (analysisItem of accountAnalysisItems; track analysisItem) {
-              <tr>
-                <td class="text-center">
-                  <input type="radio" class="form-check-input" formControlName="analysisItemId"
-                    [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}"
-                    (change)="save()">
-                </td>
-                <td>
-                  {{analysisItem.name}}
-                </td>
-                <td>
-                  @if (analysisItem.analysisCategory == 'energy') {
-                    Energy
-                  }
-                  @if (analysisItem.analysisCategory == 'water') {
-                    Water
-                  }
-                </td>
-                <td>
-                  @for (facilityItem of analysisItem.facilityAnalysisItems; track facilityItem; let index = $index) {
-                    <span
-                      >
-                      @if (facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
-                        <span>
-                          {{facilityItem.facilityId | facilityName}}@if (index != analysisItem.facilityAnalysisItems.length-1) {
-                          <span
-                          >,</span>
-                        }
-                      </span>
+            <tr>
+              <td class="text-center">
+                <input type="radio" class="form-check-input" formControlName="analysisItemId"
+                  [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}" (change)="save()">
+              </td>
+              <td>
+                {{analysisItem.name}}
+              </td>
+              <td>
+                @if (analysisItem.analysisCategory == 'energy') {
+                Energy
+                }
+                @if (analysisItem.analysisCategory == 'water') {
+                Water
+                }
+              </td>
+              <td>
+                @for (facilityItem of analysisItem.facilityAnalysisItems; track facilityItem; let index = $index) {
+                <span>
+                  @if (facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
+                  <span>
+                    {{facilityItem.facilityId | facilityName}}@if (index != analysisItem.facilityAnalysisItems.length-1)
+                    {
+                    <span>,</span>
                     }
                   </span>
+                  }
+                </span>
                 }
               </td>
               <td>
@@ -69,140 +67,134 @@
                 <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
               </td>
             </tr>
-          }
-          @if (accountAnalysisItems.length == 0) {
+            }
+            @if (accountAnalysisItems.length == 0) {
             <tr>
               <td colspan="4" class="alert alert-warning">
                 No analysis items matching selected report year.
               </td>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    @if (baselineYearWarning) {
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (baselineYearWarning) {
       <div class="alert alert-warning text-center p-1">
         {{baselineYearWarning}}
       </div>
-    }
-
-    <!-- <div class="alert alert-danger" *ngIf="!reportOptions.analysisItemId">
-    Analysis Item Required
-  </div> -->
-</div>
-@if (selectedAnalysisItem) {
-  <div class="col-12">
-    <div class="form-group row">
-      <div class="col">
-        <hr>
+      }
+    </div>
+    @if (selectedAnalysisItem) {
+    <div class="col-12">
+      <div class="form-group row">
+        <div class="col">
+          <hr>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="includePerformanceTable"
-              name="includePerformanceTable" formControlName="includePerformanceTable"
-              (change)="save()">
+            <input class="form-check-input" type="checkbox" id="includePerformanceTable" name="includePerformanceTable"
+              formControlName="includePerformanceTable" (change)="save()">
             <label class="form-check-label semibold" for="includePerformanceTable">Include facility performance
-            table.</label>
+              table.</label>
           </div>
         </div>
       </div>
       @if (betterPlantsReportForm.controls.includePerformanceTable.value) {
-        <div class="form-group row">
-          <div class="col">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="includeFacilityNames"
-                name="includeFacilityNames" formControlName="includeFacilityNames" (change)="save()">
-              <label class="form-check-label semibold" for="includeFacilityNames">Include facility names
+      <div class="form-group row">
+        <div class="col">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="includeFacilityNames" name="includeFacilityNames"
+              formControlName="includeFacilityNames" (change)="save()">
+            <label class="form-check-label semibold" for="includeFacilityNames">Include facility names
               in performance table.</label>
-            </div>
           </div>
         </div>
+      </div>
       }
       <div class="form-group row">
         <div class="col">
           <hr>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="includeAllYears" name="includeAllYears"
-                formControlName="includeAllYears" (change)="save()">
-              <label class="form-check-label semibold" for="includeAllYears">Generate reports for every
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="includeAllYears" name="includeAllYears"
+              formControlName="includeAllYears" (change)="save()">
+            <label class="form-check-label semibold" for="includeAllYears">Generate reports for every
               year prior to report year.</label>
-            </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12">
-            <hr>
-              <app-label-with-tooltip [isSemiBold]="true" [label]="methodsUndertakenLabel"
-                [field]="'methodsUndertaken'" [labelId]="'baselineAdjustmentNotes'" [isFloatRight]="true">
-              </app-label-with-tooltip>
-              <!-- <label for="baselineAdjustmentNotes">{{methodsUndertakenLabel}}</label> -->
-              <textarea class="form-control" name="baselineAdjustmentNotes" id="baselineAdjustmentNotes"
-              formControlName="baselineAdjustmentNotes" (input)="save()"></textarea>
-            </div>
-          </div>
-          @if (selectedAnalysisItem.analysisCategory == 'water') {
-            <div class="row">
-              <div class="col-12">
-                <hr>
-                  <app-label-with-tooltip [isSemiBold]="true" [label]="methodologyNotesLabel"
-                    [field]="'methodsUndertaken'" [labelId]="'methodologyNotes'">
-                  </app-label-with-tooltip>
-                  <!-- <label for="baselineAdjustmentNotes">{{methodsUndertakenLabel}}</label> -->
-                  <textarea class="form-control" name="methodologyNotes" id="methodologyNotes"
-                  formControlName="methodologyNotes" (input)="save()"></textarea>
-                </div>
-              </div>
-            }
-            <div class="row">
-              <div class="col-12">
-                <hr>
-                  <app-label-with-tooltip [isSemiBold]="true" [label]="modificationNotesLabel"
-                    [field]="'methodsUndertaken'" [labelId]="'modificationNotes'" (input)="save()"
-                    [isFloatRight]="true">
-                  </app-label-with-tooltip>
-                  <!-- <label for="modificationNotes">{{modificationNotesLabel}}</label> -->
-                  <textarea class="form-control" name="modificationNotes" id="modificationNotes"
-                  formControlName="modificationNotes" (input)="save()"></textarea>
-                </div>
-              </div>
-              @if (selectedAnalysisItem.analysisCategory == 'water') {
-                <div class="row">
-                  <div class="col-12">
-                    <hr>
-                      <label class="semibold" for="baselineAdjustmentNotes">For partners using a single water
-                        intensity metric across
-                        all plants, water intensity or other metric used for tracking Water Savings Pilot
-                        goal
-                      (numeric value)</label>
-                    </div>
-                    <div class="col-6">
-                      <label>Baseline Year</label>
-                      <input type="number" class="form-control" name="baselineYearWaterPilotGoal"
-                        formControlName="baselineYearWaterPilotGoal" (input)="save()">
-                    </div>
-                    <div class="col-6">
-                      <label>Report Year</label>
-                      <input type="number" class="form-control" name="reportYearWaterPilotGoal"
-                        formControlName="reportYearWaterPilotGoal" (input)="save()">
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </form>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <hr>
+          <app-label-with-tooltip [isSemiBold]="true" [label]="methodsUndertakenLabel" [field]="'methodsUndertaken'"
+            [labelId]="'baselineAdjustmentNotes'" [isFloatRight]="true">
+          </app-label-with-tooltip>
+          <!-- <label for="baselineAdjustmentNotes">{{methodsUndertakenLabel}}</label> -->
+          <textarea class="form-control" name="baselineAdjustmentNotes" id="baselineAdjustmentNotes"
+            formControlName="baselineAdjustmentNotes" (input)="save()"></textarea>
+        </div>
+      </div>
+      @if (selectedAnalysisItem.analysisCategory == 'water') {
+      <div class="row">
+        <div class="col-12">
+          <hr>
+          <app-label-with-tooltip [isSemiBold]="true" [label]="methodologyNotesLabel" [field]="'methodsUndertaken'"
+            [labelId]="'methodologyNotes'">
+          </app-label-with-tooltip>
+          <!-- <label for="baselineAdjustmentNotes">{{methodsUndertakenLabel}}</label> -->
+          <textarea class="form-control" name="methodologyNotes" id="methodologyNotes"
+            formControlName="methodologyNotes" (input)="save()"></textarea>
+        </div>
+      </div>
+      }
+      <div class="row">
+        <div class="col-12">
+          <hr>
+          <app-label-with-tooltip [isSemiBold]="true" [label]="modificationNotesLabel" [field]="'methodsUndertaken'"
+            [labelId]="'modificationNotes'" (input)="save()" [isFloatRight]="true">
+          </app-label-with-tooltip>
+          <!-- <label for="modificationNotes">{{modificationNotesLabel}}</label> -->
+          <textarea class="form-control" name="modificationNotes" id="modificationNotes"
+            formControlName="modificationNotes" (input)="save()"></textarea>
+        </div>
+      </div>
+      @if (selectedAnalysisItem.analysisCategory == 'water') {
+      <div class="row">
+        <div class="col-12">
+          <hr>
+          <label class="semibold" for="baselineAdjustmentNotes">For partners using a single water
+            intensity metric across
+            all plants, water intensity or other metric used for tracking Water Savings Pilot
+            goal
+            (numeric value)</label>
+        </div>
+        <div class="col-6">
+          <label>Baseline Year</label>
+          <input type="number" class="form-control" name="baselineYearWaterPilotGoal"
+            formControlName="baselineYearWaterPilotGoal" (input)="save()">
+        </div>
+        <div class="col-6">
+          <label>Report Year</label>
+          <input type="number" class="form-control" name="reportYearWaterPilotGoal"
+            formControlName="reportYearWaterPilotGoal" (input)="save()">
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</form>
 
-        <div [ngClass]="{'windowOverlay': itemToEdit}"></div>
-        <div class="popup" [class.open]="itemToEdit">
-          @if (itemToEdit) {
-            <div class="popup-header">Go To: {{itemToEdit.name}}
-              <button class="item-right" (click)="cancelEditItem()">x</button>
-            </div>
-          }
-          <div class="popup-body">
-            <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
-            this screen.</p>
-          </div>
-          <div class="saveCancel popup-footer text-end">
-            <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
-            <button class="btn btn-outline" (click)="confirmEditItem()">Go To Analysis</button>
-          </div>
-        </div>
+<div [ngClass]="{'windowOverlay': itemToEdit}"></div>
+<div class="popup" [class.open]="itemToEdit">
+  @if (itemToEdit) {
+  <div class="popup-header">Go To: {{itemToEdit.name}}
+    <button class="item-right" (click)="cancelEditItem()">x</button>
+  </div>
+  }
+  <div class="popup-body">
+    <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
+      this screen.</p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
+    <button class="btn btn-outline" (click)="confirmEditItem()">Go To Analysis</button>
+  </div>
+</div>
