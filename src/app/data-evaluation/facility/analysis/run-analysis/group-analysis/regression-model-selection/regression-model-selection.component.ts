@@ -57,8 +57,11 @@ export class RegressionModelSelectionComponent implements OnInit {
     });
 
     this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
-      if (this.selectedGroup) {
+      if (this.selectedGroup && this.selectedGroup.idbGroupId) {
         this.generatedModels = generatedModelsPerGroup[this.selectedGroup.idbGroupId] || [];
+      }
+      else {
+        this.generatedModels = [];
       }
     });
 
