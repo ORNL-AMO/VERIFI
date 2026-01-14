@@ -119,6 +119,7 @@ export class DbChangesService {
       await this.setPredictorsV2(account);
       await this.setPredictorDataV2(account);
     }
+    await this.updateFacilityAnalysisSelectedItems();
   }
 
   selectFacility(facility: IdbFacility) {
@@ -147,13 +148,18 @@ export class DbChangesService {
   async setAccountAnalysisItems(account: IdbAccount, skipUpdates: boolean) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     if (!skipUpdates) {
-      let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllAccountAnalysisItems(account.guid);
       for (let i = 0; i < accountAnalysisItems.length; i++) {
         let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
         if (updateAnalysis.isChanged) {
           accountAnalysisItems[i] = updateAnalysis.analysisItem;
           await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
         };
+      }
+      let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
+      if (updateAccount.isChanged) {
+        account = updateAccount.account;
+        await this.updateAccount(account);
       }
     }
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
@@ -168,6 +174,13 @@ export class DbChangesService {
           analysisItems[i] = updateAnalysis.analysisItem;
           await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
         };
+      }
+      if(facility) {
+        let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, analysisItems);
+        if(updateFacility.isChanged){
+          facility = updateFacility.facility;
+          await this.updateFacilities(facility);
+        }
       }
     }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
@@ -418,6 +431,23 @@ export class DbChangesService {
         });
       }
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+    }
+  }
+
+  async updateFacilityAnalysisSelectedItems() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    for (let facility of facilities) {
+      let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
+      if (updateFacility.isChanged) {
+        facility = updateFacility.facility;
+        let onSelect: boolean = false;
+        if (selectedFacility && selectedFacility.id === facility.id) {
+          onSelect = true;
+        }
+        await this.updateFacilities(facility, onSelect);
+      }
     }
   }
 }

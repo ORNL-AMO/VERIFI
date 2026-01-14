@@ -61,7 +61,7 @@
         </thead>
         <tbody>
           @for (item of filteredAnalysisItems | orderBy: orderDataField: orderByDirection | slice:
-          ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track item) {
+          ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track item.guid) {
           <tr>
             <td class="text-center">
               @if (item.analysisCategory == 'energy') {
@@ -112,8 +112,12 @@
       </table>
     </div>
     <div class="d-flex justify-content-between align-items-center">
-      <div class="fw-bold icon-text">
-        <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
+      <div class="icon-text">
+        <span class="energy fa fa-circle-check"></span> Denotes selected energy analysis.<br>
+        <span class="water fa fa-circle-check"></span> Denotes selected water analysis.
+        <p class="fw-light pt-2 italic mb-0">
+          The selected analysis is used to track progress towards your goals and for reporting.
+        </p>
       </div>
       <div>
         <ngb-pagination [collectionSize]="(filteredAnalysisItems | orderBy: orderDataField: orderByDirection).length"

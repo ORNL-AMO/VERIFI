@@ -163,6 +163,8 @@ export class AppComponent {
           await this.dbChangesService.setPredictorsV2(account);
           await this.dbChangesService.setPredictorDataV2(account);
         }
+        await this.updateAccountAnalysisSelectedItems(account);
+        await this.updateFacilityAnalysisSelectedItems();
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
         this.setAppOpenNotifications();
@@ -362,6 +364,32 @@ export class AppComponent {
     if (localStorageFacilityId) {
       let facilityReport: IdbFacilityReport = accountFacilityReports.find(item => { return item.id == localStorageFacilityId });
       this.facilityReportsDbService.selectedReport.next(facilityReport);
+    }
+  }
+
+  async updateAccountAnalysisSelectedItems(account: IdbAccount) {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
+    let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
+    if (updateAccount.isChanged) {
+      account = updateAccount.account;
+      await this.dbChangesService.updateAccount(account);
+    }
+  }
+
+  async updateFacilityAnalysisSelectedItems() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    for (let facility of facilities) {
+      let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
+      if (updateFacility.isChanged) {
+        facility = updateFacility.facility;
+        let onSelect: boolean = false;
+        if (selectedFacility && selectedFacility.id === facility.id) {
+          onSelect = true;
+        }
+        await this.dbChangesService.updateFacilities(facility, onSelect);
+      }
     }
   }
 

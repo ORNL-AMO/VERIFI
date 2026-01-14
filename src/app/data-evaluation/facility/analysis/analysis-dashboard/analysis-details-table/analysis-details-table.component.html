@@ -62,7 +62,7 @@
         </thead>
         <tbody>
           @for (item of linkedItemsList | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) *
-          itemsPerPage): currentPageNumber * itemsPerPage; track item) {
+          itemsPerPage): currentPageNumber * itemsPerPage; track item.analysisItem.guid) {
           <tr>
             <td class="text-center">
               @if (item.analysisItem.analysisCategory == 'energy') {
@@ -100,27 +100,27 @@
             </td>
             <td>
               <div class="d-flex flex-wrap">
-                @for (linkedItem of item.linkedItems; track linkedItem) {
-                @if (linkedItem.bankedAnalysisId) {
+                @for (linkedItem of item.linkedItems; track linkedItem.guid) {
+                @if (linkedItem.type == 'bankedAnalysis') {
                 <button class="btn action-btn btn-sm m-1"
-                  (click)="openLinkedItemModal(linkedItem.bankedAnalysisId, 'bankedAnalysis')">
+                  (click)="openLinkedItemModal(linkedItem.guid, 'bankedAnalysis')">
                   <i class="fa fa-piggy-bank" title="Banked Analysis"></i>
-                  {{linkedItem.bankedAnalysisId |
+                  {{linkedItem.guid |
                   facilityAnalysisName}} (Banked)
                 </button>
                 }
-                @if (linkedItem.accountAnalysisId) {
+                @if (linkedItem.type == 'accountAnalysis') {
                 <button class="btn action-btn btn-sm m-1"
-                  (click)="openLinkedItemModal(linkedItem.accountAnalysisId, 'accountAnalysis')">
+                  (click)="openLinkedItemModal(linkedItem.guid, 'accountAnalysis')">
                   <i class="fa fa-building" title="Account Analysis"></i>
-                  {{linkedItem.accountAnalysisId |
+                  {{linkedItem.guid |
                   accountAnalysisName}}
                 </button>
                 }
-                @if (linkedItem.reportId) {
+                @if (linkedItem.type == 'facilityReport') {
                 <button class="btn action-btn btn-sm m-1"
-                  (click)="openLinkedItemModal(linkedItem.reportId, 'facilityReport')">
-                  <i class="fa fa-file" title="Analysis Report"></i> {{linkedItem.reportId |
+                  (click)="openLinkedItemModal(linkedItem.guid, 'facilityReport')">
+                  <i class="fa fa-file" title="Analysis Report"></i> {{linkedItem.guid |
                   facilityReportName}}
                 </button>
                 }
@@ -162,7 +162,7 @@
           <span class="energy fa fa-circle-check"></span> Denotes selected energy analysis.<br>
           <span class="water fa fa-circle-check"></span> Denotes selected water analysis.
           <p class="fw-light pt-2 italic mb-0">
-            The selected analysis is used to track progress towards your goals.
+            The selected analysis is used to track progress towards your goals and for reporting.
           </p>
         </div>
         @if (linkedItemsList.length > 0) {

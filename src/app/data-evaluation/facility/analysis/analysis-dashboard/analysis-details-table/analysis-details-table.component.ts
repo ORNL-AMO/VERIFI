@@ -52,16 +52,17 @@ export class AnalysisDetailsTableComponent {
   errorList: Array<{ year: number, category: string }> = [];
 
   linkedItems: Array<{
-    bankedAnalysisId: string,
-    reportId: string,
-    accountAnalysisId: string
+    guid: string,
+    type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport'
   }>;
 
   linkedItemsList: Array<{
     analysisItem: IdbAnalysisItem, linkedItems: Array<{
-      bankedAnalysisId: string,
-      reportId: string,
-      accountAnalysisId: string
+      // bankedAnalysisId: string,
+      // reportId: string,
+      // accountAnalysisId: string
+      guid: string,
+      type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport'
     }>
   }> = [];
   isBanked: boolean;
@@ -303,9 +304,8 @@ export class AnalysisDetailsTableComponent {
       this.linkedItems = new Array();
       if (analysisItem.hasBanking && analysisItem.bankedAnalysisItemId) {
         this.linkedItems.push({
-          bankedAnalysisId: analysisItem.bankedAnalysisItemId,
-          reportId: undefined,
-          accountAnalysisId: undefined
+          guid: analysisItem.bankedAnalysisItemId,
+          type: 'bankedAnalysis'
         });
       }
 
@@ -321,9 +321,8 @@ export class AnalysisDetailsTableComponent {
       facilityReportsItems.forEach(item => {
         if (item.facilityReportType == 'analysis' && item.analysisItemId == analysisItem.guid) {
           this.linkedItems.push({
-            bankedAnalysisId: undefined,
-            reportId: item.guid,
-            accountAnalysisId: undefined
+            guid: item.guid,
+            type: 'facilityReport'
           });
         }
       });
@@ -333,9 +332,8 @@ export class AnalysisDetailsTableComponent {
         accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
           if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == analysisItem.guid) {
             this.linkedItems.push({
-              bankedAnalysisId: undefined,
-              reportId: undefined,
-              accountAnalysisId: accountAnalysisItems[index].guid
+              guid: accountAnalysisItems[index].guid,
+              type: 'accountAnalysis'
             })
           }
         });
