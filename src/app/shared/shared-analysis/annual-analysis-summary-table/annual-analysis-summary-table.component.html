@@ -1,9 +1,9 @@
-@if (missingPredictorValue) {
-  <div class="alert alert-warning d-flex align-items-center justify-content-center p-2 mb-2"
-    >
-    <span class="fa fa-exclamation-triangle">&nbsp;&nbsp;</span>
-    Predictor data is missing. Please review the predictor entries.
-  </div>
+@if (missingYearList?.length > 0) {
+<div class="alert alert-warning d-flex align-items-center justify-content-center p-2 mb-2">
+  <span class="fa fa-exclamation-triangle">&nbsp;&nbsp;</span>
+  Predictor data is missing. The years with missing data are highlighted in the table below. Please review the predictor
+  entries.
+</div>
 }
 <table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable
   [ngClass]="{'copying-table': copyingTable}">
@@ -153,7 +153,7 @@
   </thead>
   <tbody class="table-group-divider">
     @for (summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection; track summary) {
-      <tr>
+      <tr [ngClass]="{'missing-month-row': missingYearList?.includes(summary.year)}">
         <td>
           @if (summary.isBanked && !summary.isIntermediateBanked) {
             <span class="fa fa-piggy-bank"></span>

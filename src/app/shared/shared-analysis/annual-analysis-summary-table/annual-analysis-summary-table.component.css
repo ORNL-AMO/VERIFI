@@ -13,3 +13,7 @@ tr.table-mh th.th-3 span{
 .note {
     font-size: 14px;
 }
+
+tr.missing-month-row > td {
+    background-color: #f7e3e3;
+}

@@ -49,7 +49,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   modelYear: number;
   modelStartYear: number;
   modelEndYear: number;
-  missingPredictorValue: boolean = false;
+  missingYearList: Array<number> = [];
+
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
 
@@ -66,7 +67,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     this.setModelYear();
     this.modelStartYear = this.group?.regressionStartYear;
     this.modelEndYear = this.group?.regressionEndYear;
-    this.missingPredictorValue = this.checkPredictorData();
+    this.checkPredictorData();
   }
 
   ngOnDestroy() {
@@ -74,10 +75,9 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   }
 
   checkPredictorData() {
-    if(this.annualAnalysisSummary) {
-      return this.annualAnalysisSummary.some(data => data.missingPredictorValue);
+    if (this.annualAnalysisSummary) {
+      this.missingYearList = this.annualAnalysisSummary.filter(data => data.missingPredictorValue).map(data => data.year);
     }
-    return false;
   }
 
   setPredictorVariables() {

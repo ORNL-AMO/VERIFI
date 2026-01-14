@@ -17,3 +17,7 @@ tr.table-mh th span{
 .period-column{
     width: 70px;
 }
+
+tr.missing-month-row > td {
+    background-color: #f7e3e3;
+}

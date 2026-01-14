@@ -1,9 +1,10 @@
-@if (isPredictorDataMissing) {
+@if (missingMonthList?.length > 0) {
 <div class="alert alert-warning d-flex align-items-center justify-content-center p-2 mb-2">
   <span class="fa fa-exclamation-triangle">&nbsp;&nbsp;</span>
-  Predictor data is missing for {{missingMonthCount}} months. Results may be
-  inaccurate as the missing values are assumed to be zero.
-  Please review the predictor entries.
+  Predictor data is missing for {{missingMonthList.length}} months.
+  Missing months are highlighted below.
+  Use "Choose Columns" to display predictors and identify missing data.
+  Results may be inaccurate as the missing values are assumed to be zero.
 </div>
 }
 <table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable
@@ -144,7 +145,8 @@
   <tbody class="table-group-divider">
     @for (data of monthlyAnalysisSummaryData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1)
     * itemsPerPage): currentPageNumber * itemsPerPage; track data) {
-    <tr [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
+    <tr [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date),
+      'missing-month-row': missingMonthList?.includes(data.date)}">
       <td class="no-wrap">
         @if (data.isBanked && !data.isIntermediateBanked) {
         <span class="fa fa-piggy-bank"></span>

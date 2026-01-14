@@ -61,8 +61,8 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   modelStartYear: number;
   modelEndMonth: number;
   modelEndYear: number;
-  isPredictorDataMissing: boolean = false;
-  missingMonthCount: number = 0;
+  missingMonthList: Array<Date> = [];
+
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
 
   ngOnInit(): void {
@@ -83,8 +83,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     this.modelEndMonth = this.group?.regressionModelEndMonth;
     this.modelEndYear = this.group?.regressionEndYear;
 
-    this.missingMonthCount = this.checkPredictorData();
-    this.isPredictorDataMissing = this.missingMonthCount > 0;
+    this.checkPredictorData();
   }
 
   ngOnDestroy() {
@@ -92,10 +91,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   checkPredictorData() {
-    if(this.monthlyAnalysisSummaryData) {
-      return this.monthlyAnalysisSummaryData.filter(data => data.missingValueWarning).length;
+   if (this.monthlyAnalysisSummaryData) {
+      this.missingMonthList = this.monthlyAnalysisSummaryData.filter(data => data.missingValueWarning).map(data => data.date);
     }
-    return 0;
   }
 
   setPredictorVariables() {
