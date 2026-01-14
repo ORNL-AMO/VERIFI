@@ -1,152 +1,208 @@
-<div class="row" *ngIf="showInUseMessage">
+@if (showInUseMessage) {
+  <div class="row">
     <div class="col-12 alert alert-info text-center">
-        <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
-        This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
-        to the corresponding analysis items. Making changes to this analysis may effect the results of the account
-        analysis.
+      <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+      This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+      to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+      analysis.
     </div>
-</div>
+  </div>
+}
 
-<ng-container *ngIf="!selectedInspectModel">
-    <ng-container *ngIf="selectedGroup.groupErrors?.hasInvalidRegressionModel">
-        <div class="alert alert-warning w-100 text-center">
-            The selected model is invalid.
-        </div>
-        <hr>
-    </ng-container>
-
-    <ng-container *ngIf="selectedGroup.groupErrors?.missingRegressionModelSelection">
-        <div class="alert alert-warning w-100 text-center">
-            Model selection required.
-        </div>
-        <hr>
-    </ng-container>
-    <app-regression-model-menu
-        (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
-        (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
-
+@if (!selectedInspectModel) {
+  @if (selectedGroup.groupErrors?.hasInvalidRegressionModel) {
+    <div class="alert alert-warning w-100 text-center">
+      The selected model is invalid.
+    </div>
     <hr>
-
-    <div class="table-responsive" *ngIf="generatedModels && generatedModels.length != 0 && selectedGroup.userDefinedModel">
-
-        <table class="table table-sm table-hover utility-data table-bordered">
-            <thead>
+    }
+    @if (selectedGroup.groupErrors?.missingRegressionModelSelection) {
+      <div class="alert alert-warning w-100 text-center">
+        Model selection required.
+      </div>
+      <hr>
+      }
+      <app-regression-model-menu
+        (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
+      (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
+      <hr>
+        @if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
+          <div class="table-responsive">
+            <table class="table table-sm table-hover utility-data table-bordered">
+              <thead>
                 <tr>
+                  <th>
+                    Select<br> Model
+                  </th>
+                  <th class="can-click" (click)="setOrderDataField('modelYear')"
+                    [ngClass]="{'active': orderDataField == 'modelYear'}">
+                    Model<br> Year
+                  </th>
+                  <th>
+                    Variable<br> p-Values
+                  </th>
+                  <th class="can-click" (click)="setOrderDataField('R2')"
+                    [ngClass]="{'active': orderDataField == 'R2'}">
+                    R2
+                  </th>
+                  <th class="can-click" (click)="setOrderDataField('adjust_R2')"
+                    [ngClass]="{'active': orderDataField == 'adjust_R2'}">
+                    Adjusted<br> R2
+                  </th>
+                  <th class="can-click" (click)="setOrderDataField('modelPValue')"
+                    [ngClass]="{'active': orderDataField == 'modelPValue'}">
+                    Model<br> p-Value
+                  </th>
+                  <th>
+                    Formula
+                  </th>
+                  <th>
+                    Model Notes
+                  </th>
+                  @if (showInvalid) {
                     <th>
-                        Select<br> Model
+                      Model Validation<br> Failures
                     </th>
-                    <th class="can-click" (click)="setOrderDataField('modelYear')"
-                        [ngClass]="{'active': orderDataField == 'modelYear'}">
-                        Model<br> Year
-                    </th>
+                  }
+                  @if (showFailedValidationModel) {
                     <th>
-                        Variable<br> p-Values
+                      Data Validation<br> Failures
                     </th>
-                    <th class="can-click" (click)="setOrderDataField('R2')"
-                        [ngClass]="{'active': orderDataField == 'R2'}">
-                        R2
-                    </th>
-                    <th class="can-click" (click)="setOrderDataField('adjust_R2')"
-                        [ngClass]="{'active': orderDataField == 'adjust_R2'}">
-                        Adjusted<br> R2
-                    </th>
-                    <th class="can-click" (click)="setOrderDataField('modelPValue')"
-                        [ngClass]="{'active': orderDataField == 'modelPValue'}">
-                        Model<br> p-Value
-                    </th>
-                    <th>
-                        Formula
-                    </th>
-                    <th>
-                        Model Notes
-                    </th>
-                    <th *ngIf="showInvalid">
-                        Model Validation<br> Failures
-                    </th>
-                    <th *ngIf="showFailedValidationModel">
-                        Data Validation<br> Failures
-                    </th>
-                    <th>
-
-                    </th>
+                  }
+                  <th>
+                  </th>
                 </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let model of generatedModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; 
-                let modelIndex = index;"
+              </thead>
+              <tbody>
+                @for (model of generatedModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; track model; let modelIndex = $index) {
+                  <tr
                     [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
-                    <td class="text-center" *ngIf="!model.errorModeling">
+                    @if (!model.errorModeling) {
+                      <td class="text-center">
                         <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
-                            [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
-                            id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()" title="Select this model">
-                    </td>
-                    <td *ngIf="!model.errorModeling">
+                          [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
+                          id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()" title="Select this model">
+                      </td>
+                    }
+                    @if (!model.errorModeling) {
+                      <td>
                         {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
-                    </td>
-                    <td *ngIf="!model.errorModeling">
-                        <span *ngFor="let pVal of model.t.p; let index = index">
-                            <span class="no-break" *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal
+                      </td>
+                    }
+                    @if (!model.errorModeling) {
+                      <td>
+                        @for (pVal of model.t.p; track pVal; let index = $index) {
+                          <span>
+                            @if (index != 0) {
+                              <span class="no-break">{{model.predictorVariables[index-1].name}}: {{pVal
                                 | number:'0.2-2'}}
                                 <br>
+                                </span>
+                              }
                             </span>
-                        </span>
-                    </td>
-                    <td *ngIf="!model.errorModeling">
-                        {{model.R2 | number:'0.3-3'}}
-                    </td>
-                    <td *ngIf="!model.errorModeling">
-                        {{model.adjust_R2| number:'0.3-3'}}
-                    </td>
-                    <td *ngIf="!model.errorModeling">
-                        {{model.modelPValue| number:'0.2-2'}}
-                    </td>
-                    <td *ngIf="!model.errorModeling">
-                        <span *ngFor="let coefVal of model.coef; let index = index;">
-                            <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
-                            <span *ngIf="index != 0">({{coefVal|
-                                regressionNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
-                                *ngIf="index != model.coef.length-1"> +</span>
-                        </span>
-                    </td>
-                    <td *ngIf="!model.errorModeling">
-                        <span *ngFor="let notes of model.modelNotes">
-                            {{notes}}<br>
-                        </span>
-                        <span *ngIf="model.modelNotes.length == 0">
-                            &mdash;
-                        </span>
-                    </td>
-                    <td *ngIf="showInvalid && !model.errorModeling">
-                        <span *ngIf="model.isValid">&mdash;</span>
-                        <span *ngFor="let notes of model.modelValidationNotes">
-                            {{notes}}<br>
-                        </span>
-                    </td>
-                    <td *ngIf="showFailedValidationModel && !model.errorModeling">
-                        <span *ngFor="let notes of model.dataValidationNotes">
-                            {{notes}}<br>
-                        </span>
-                        <span *ngIf="model.SEPValidationPass">&mdash;</span>
-                    </td>
-                    <!--error modeling-->
-                    <td class="alert-danger" *ngIf="model.errorModeling" colspan="10">
-                        There was an error when generating model for {{model.modelYear}}: <span class="pe-1"
-                            *ngFor="let variable of model.predictorVariables">{{variable.name}}</span>.
-                    </td>
-                    <td class="text-center">
+                          }
+                        </td>
+                      }
+                      @if (!model.errorModeling) {
+                        <td>
+                          {{model.R2 | number:'0.3-3'}}
+                        </td>
+                      }
+                      @if (!model.errorModeling) {
+                        <td>
+                          {{model.adjust_R2| number:'0.3-3'}}
+                        </td>
+                      }
+                      @if (!model.errorModeling) {
+                        <td>
+                          {{model.modelPValue| number:'0.2-2'}}
+                        </td>
+                      }
+                      @if (!model.errorModeling) {
+                        <td>
+                          @for (coefVal of model.coef; track coefVal; let index = $index) {
+                            <span>
+                              @if (index == 0) {
+                                <span>{{coefVal| regressionNumber}}</span>
+                              }
+                              @if (index != 0) {
+                                <span>({{coefVal|
+                                regressionNumber}}*{{model.predictorVariables[index-1].name}})</span>
+                                } @if (index != model.coef.length-1) {
+                                <span
+                                > +</span>
+                              }
+                            </span>
+                          }
+                        </td>
+                      }
+                      @if (!model.errorModeling) {
+                        <td>
+                          @for (notes of model.modelNotes; track notes) {
+                            <span>
+                              {{notes}}<br>
+                            </span>
+                          }
+                          @if (model.modelNotes.length == 0) {
+                            <span>
+                              &mdash;
+                            </span>
+                          }
+                        </td>
+                      }
+                      @if (showInvalid && !model.errorModeling) {
+                        <td>
+                          @if (model.isValid) {
+                            <span>&mdash;</span>
+                          }
+                          @for (notes of model.modelValidationNotes; track notes) {
+                            <span>
+                              {{notes}}<br>
+                            </span>
+                          }
+                        </td>
+                      }
+                      @if (showFailedValidationModel && !model.errorModeling) {
+                        <td>
+                          @for (notes of model.dataValidationNotes; track notes) {
+                            <span>
+                              {{notes}}<br>
+                            </span>
+                          }
+                          @if (model.SEPValidationPass) {
+                            <span>&mdash;</span>
+                          }
+                        </td>
+                      }
+                      <!--error modeling-->
+                      @if (model.errorModeling) {
+                        <td class="alert-danger" colspan="10">
+                          There was an error when generating model for {{model.modelYear}}: @for (variable of model.predictorVariables; track variable) {
+                          <span class="pe-1"
+                          >{{variable.name}}</span>
+                          }.
+                        </td>
+                      }
+                      <td class="text-center">
                         <button class="btn nav-btn" [ngClass]="{'btn-invalid': !model.SEPValidationPass}"
-                            (click)="inspectModel(model)" title="Inspect Model">
-                            <span class="fa fa-microscope" [ngClass]="{'text-danger': !model.SEPValidationPass}"></span>
+                          (click)="inspectModel(model)" title="Inspect Model">
+                          <span class="fa fa-microscope" [ngClass]="{'text-danger': !model.SEPValidationPass}"></span>
                         </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</ng-container>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
 
-<app-regression-model-inspection *ngIf="selectedInspectModel" [model]="selectedInspectModel"
-    (emitClose)="cancelInspectModel()" (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
+        @if (selectedInspectModel) {
+          <app-regression-model-inspection [model]="selectedInspectModel"
+          (emitClose)="cancelInspectModel()" (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
+        }
 
-<app-regression-user-defined-model-inspection
-    *ngIf="!selectedGroup.userDefinedModel && generateUserDefinedModel && showView"></app-regression-user-defined-model-inspection>
+        @if (!selectedGroup.userDefinedModel && generateUserDefinedModel && showView) {
+          <app-regression-user-defined-model-inspection
+          ></app-regression-user-defined-model-inspection>
+        }

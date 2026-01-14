@@ -1,10 +1,14 @@
-<div class="report" *ngIf="calculating != false">
+@if (calculating != false) {
+  <div class="report">
     <app-calculating-spinner [message]="'Calculating Banked Results...'"
-        [error]="calculating == 'error'"></app-calculating-spinner>
-</div>
+    [error]="calculating == 'error'"></app-calculating-spinner>
+  </div>
+}
 
 <div class="quick-report">
-    <app-group-analysis-report *ngIf="calculating == false" [groupSummary]="groupSummary"
-        [analysisItem]="bankedAnalysisItem" [facility]="facility"
-        [analysisReportSettings]="analysisReportSettings"></app-group-analysis-report>
+  @if (calculating == false) {
+    <app-group-analysis-report [groupSummary]="groupSummary"
+      [analysisItem]="bankedAnalysisItem" [facility]="facility"
+    [analysisReportSettings]="analysisReportSettings"></app-group-analysis-report>
+  }
 </div>

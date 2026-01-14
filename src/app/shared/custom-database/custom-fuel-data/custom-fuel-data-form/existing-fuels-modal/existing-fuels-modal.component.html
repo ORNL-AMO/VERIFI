@@ -1,123 +1,122 @@
 <div [ngClass]="{'windowOverlay': displayModal}"></div>
 <div class="popup" [class.open]="displayModal">
-    <div class="popup-header">Select Fuel
-        <button class="item-right" (click)="cancelSelectFuel()">x</button>
-    </div>
-    <div class="popup-body">
-        <div class="row justify-content-center">
-            <div class="col-3">
-                <label class="bold" for="isMobile">Fuel Types </label>
-                <div class="mb-3">
-                    <select name="isMobile" class="form-select" id="isMobile" type="text" [(ngModel)]="fuelType"
-                        (change)="changeFuelType()">
-                        <option [ngValue]="'stationaryGas'">Stationary Gas</option>
-                        <option [ngValue]="'stationaryLiquid'">Stationary Liquid</option>
-                        <option [ngValue]="'stationarySolid'">Stationary Solid</option>
-                        <option [ngValue]="'mobileHeavyDutyTruck'">Mobile Heavy Duty Truck</option>
-                        <option [ngValue]="'mobileBus'">Mobile Bus</option>
-                        <option [ngValue]="'mobileLightDutyTruck'">Mobile Light Duty Truck</option>
-                        <option [ngValue]="'mobileMotorcycle'">Mobile Motorcycle</option>
-                        <option [ngValue]="'mobileOffRoadAgricultural'">Mobile Off Road Agricultural</option>
-                        <option [ngValue]="'mobileOffRoadConstruction'">Mobile Off Road Construction</option>
-                        <option [ngValue]="'mobilePassangerCars'">Mobile Passanger Cars</option>
-                        <option [ngValue]="'mobileRail'">Mobile Rail</option>
-                        <option [ngValue]="'mobileTransportOnsite'">Mobile Transport Onsite</option>
-                        <option [ngValue]="'mobileWaterTransport'">Mobile Water Transport</option>
-                    </select>
-                </div>
-            </div>
+  <div class="popup-header">Select Fuel
+    <button class="item-right" (click)="cancelSelectFuel()">x</button>
+  </div>
+  <div class="popup-body">
+    <div class="row justify-content-center">
+      <div class="col-3">
+        <label class="bold" for="isMobile">Fuel Types </label>
+        <div class="mb-3">
+          <select name="isMobile" class="form-select" id="isMobile" type="text" [(ngModel)]="fuelType"
+            (change)="changeFuelType()">
+            <option [ngValue]="'stationaryGas'">Stationary Gas</option>
+            <option [ngValue]="'stationaryLiquid'">Stationary Liquid</option>
+            <option [ngValue]="'stationarySolid'">Stationary Solid</option>
+            <option [ngValue]="'mobileHeavyDutyTruck'">Mobile Heavy Duty Truck</option>
+            <option [ngValue]="'mobileBus'">Mobile Bus</option>
+            <option [ngValue]="'mobileLightDutyTruck'">Mobile Light Duty Truck</option>
+            <option [ngValue]="'mobileMotorcycle'">Mobile Motorcycle</option>
+            <option [ngValue]="'mobileOffRoadAgricultural'">Mobile Off Road Agricultural</option>
+            <option [ngValue]="'mobileOffRoadConstruction'">Mobile Off Road Construction</option>
+            <option [ngValue]="'mobilePassangerCars'">Mobile Passanger Cars</option>
+            <option [ngValue]="'mobileRail'">Mobile Rail</option>
+            <option [ngValue]="'mobileTransportOnsite'">Mobile Transport Onsite</option>
+            <option [ngValue]="'mobileWaterTransport'">Mobile Water Transport</option>
+          </select>
         </div>
-        <table class="table table-bordered table-sm table-hover">
-            <thead>
-                <tr>
-                    <th>
-                        Fuel Name
-                    </th>
-                    <th>
-                        HHV
-                    </th>
-                    <th>
-                        CO<sub>2</sub> Factor
-                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock1">
-                            (kg / gal)
-                        </ng-template>
-                        <ng-template #notMobileBlock1>
-                            (kg)
-                        </ng-template>
-                    </th>
-                    <th>
-                        CH<sub>4</sub> Factor
-                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock2">
-                            (g / gal)
-                        </ng-template>
-                        <ng-template #notMobileBlock2>
-                            (g)
-                        </ng-template>
-                    </th>
-                    <th>
-                        N<sub>2</sub>O Factor
-                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock3">
-                            (g / gal)
-                        </ng-template>
-                        <ng-template #notMobileBlock3>
-                            (g)
-                        </ng-template>
-                    </th>
-                    <th>
-                        Emissions Output Rate<br>
-                        <span>
-                            kg CO<sub>2</sub>e
-                        </span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let option of selectedFuelTypeOptions | orderBy: 'value'">
-                    <td class="ps-2">
-                        <a class="click-link" (click)="selectOption(option)">{{option.value}}</a>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.heatCapacityValue">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.heatCapacityValue">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.CO2">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.CO2">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.CH4">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.CH4">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.N2O">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.N2O">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.emissionsOutputRate">
-                            {{option.emissionsOutputRate}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.emissionsOutputRate">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+      </div>
     </div>
+    <table class="table table-bordered table-sm table-hover">
+      <thead>
+        <tr>
+          <th>
+            Fuel Name
+          </th>
+          <th>
+            HHV
+          </th>
+          <th>
+            CO<sub>2</sub> Factor
+            @if (isMobile) {
+              (kg / gal)
+            } @else {
+              (kg)
+            }
+          </th>
+          <th>
+            CH<sub>4</sub> Factor
+            @if (isMobile) {
+              (g / gal)
+            } @else {
+              (g)
+            }
+          </th>
+          <th>
+            N<sub>2</sub>O Factor
+            @if (isMobile) {
+              (g / gal)
+            } @else {
+              (g)
+            }
+          </th>
+          <th>
+            Emissions Output Rate<br>
+            <span>
+              kg CO<sub>2</sub>e
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (option of selectedFuelTypeOptions | orderBy: 'value'; track option) {
+          <tr>
+            <td class="ps-2">
+              <a class="click-link" (click)="selectOption(option)">{{option.value}}</a>
+            </td>
+            <td>
+              @if (option.heatCapacityValue) {
+                {{option| emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
+              }
+              @if (!option.heatCapacityValue) {
+                &mdash;
+              }
+            </td>
+            <td>
+              @if (option.CO2) {
+                {{option| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
+              }
+              @if (!option.CO2) {
+                &mdash;
+              }
+            </td>
+            <td>
+              @if (option.CH4) {
+                {{option| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
+              }
+              @if (!option.CH4) {
+                &mdash;
+              }
+            </td>
+            <td>
+              @if (option.N2O) {
+                {{option| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
+              }
+              @if (!option.N2O) {
+                &mdash;
+              }
+            </td>
+            <td>
+              @if (option.emissionsOutputRate) {
+                {{option.emissionsOutputRate}}
+              }
+              @if (!option.emissionsOutputRate) {
+                &mdash;
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </div>

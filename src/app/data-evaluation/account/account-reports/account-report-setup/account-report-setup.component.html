@@ -1,114 +1,148 @@
 <div class="wrapper main-content p-0">
-    <div class="content-padding">
-        <h4>{{reportType| accountReportType}} Report Setup</h4>
-        <form [formGroup]="setupForm">
-            <div class="row">
-                <div class="col-6">
-                    <div class="row form-group">
-                        <label class="col-5 col-form-label semibold" for="reportName">Name</label>
-                        <div class="col-7">
-                            <input class="form-control" type="text" id="reportName" name="reportName"
-                                formControlName="reportName" (input)="save()">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6"
-                    *ngIf="setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountEmissionFactors' && setupForm.controls.reportType.value != 'accountSavings'">
-                    <div class="row form-group"
-                        *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis' && setupForm.controls.reportType.value != 'accountSavings'">
-                        <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
-
-                        <div class="col-7">
-                            <select id="baselineYear" name="baselineYear" formControlName="baselineYear"
-                                class="form-select" required (change)="save()">
-                                <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay:
-                                    account.fiscalYear}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <label class="col-5 col-form-label semibold" for="reportName">Report Year</label>
-                        <div class="col-7">
-                            <select id="reportYear" name="reportYear" formControlName="reportYear" class="form-select"
-                                required (change)="save()">
-                                <option *ngFor="let year of reportYears" [ngValue]="year">{{year | yearDisplay:
-                                    account.fiscalYear}}</option>
-                            </select>
-                            <div class="alert alert-warning mt-2" *ngIf="showReportYearWarning">
-                                Your final year does not include 12 months of data. Please update to a year with
-                                complete data. To view mid-year progress, return to the reports dashboard and run a
-                                "Savings Report".
-                            </div>
-                        </div>
-                    </div>
-
-                    <div *ngIf="showYearErrorMsg">
-                        <span class="alert alert-danger">
-                            Report Year cannot be earlier than Baseline Year.
-                        </span>
-                    </div>
-                </div>
-                <div class="col-6"
-                    *ngIf="setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value == 'accountSavings' || setupForm.controls.reportType.value == 'accountEmissionFactors'">
-
-                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'accountSavings'">
-                        <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
-
-                        <div class="col-3">
-                            <select name="startMonth" formControlName="startMonth" class="form-select"
-                                (change)="save()">
-                                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
-                                    {{month.abbreviation}}</option>
-                            </select>
-                        </div>
-                        <div class="col-3">
-                            <select name="startYear" formControlName="startYear" class="form-select" (change)="save()">
-                                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <label class="col-5 col-form-label semibold" for="endMonth">End Date</label>
-                        <div class="col-3">
-                            <select name="endMonth" formControlName="endMonth" class="form-select" (change)="save()">
-                                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
-                                    {{month.abbreviation}}</option>
-                            </select>
-                        </div>
-                        <div class="col-3">
-                            <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
-                                <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <span class="alert alert-danger" *ngIf="errorMessage">
-                        {{errorMessage}}
-                    </span>
-                </div>
-                <div class="col-12">
-                    <hr>
-                </div>
+  <div class="content-padding">
+    <h4>{{reportType| accountReportType}} Report Setup</h4>
+    <form [formGroup]="setupForm">
+      <div class="row">
+        <div class="col-6">
+          <div class="row form-group">
+            <label class="col-5 col-form-label semibold" for="reportName">Name</label>
+            <div class="col-7">
+              <input class="form-control" type="text" id="reportName" name="reportName"
+                formControlName="reportName" (input)="save()">
             </div>
-        </form>
-        <ng-container *ngIf="setupForm.valid">
-            <app-better-plants-setup
-                *ngIf="setupForm.controls.reportType.value == 'betterPlants'"></app-better-plants-setup>
-            <app-data-overview-setup
-                *ngIf="setupForm.controls.reportType.value == 'dataOverview' && errorMessage.length <= 0"></app-data-overview-setup>
-            <app-performance-setup *ngIf="setupForm.controls.reportType.value == 'performance'"></app-performance-setup>
-            <app-better-climate-setup
-                *ngIf="setupForm.controls.reportType.value == 'betterClimate'"></app-better-climate-setup>
-            <app-analysis-report-setup
-                *ngIf="setupForm.controls.reportType.value == 'analysis'"></app-analysis-report-setup>
-            <app-account-savings-report-setup
-                *ngIf="setupForm.controls.reportType.value == 'accountSavings'"></app-account-savings-report-setup>
-        </ng-container>
-        <ng-container *ngIf="setupForm.valid == false || errorMessage.length > 0">
-            <div class="alert alert-warning text-center">
-                Additional report detail options will appear once report dates are selected.
+          </div>
+        </div>
+        @if (setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountEmissionFactors' && setupForm.controls.reportType.value != 'accountSavings') {
+          <div class="col-6"
+            >
+            @if (setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis' && setupForm.controls.reportType.value != 'accountSavings') {
+              <div class="row form-group"
+                >
+                <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
+                <div class="col-7">
+                  <select id="baselineYear" name="baselineYear" formControlName="baselineYear"
+                    class="form-select" required (change)="save()">
+                    @for (year of baselineYears; track year) {
+                      <option [ngValue]="year">{{year | yearDisplay:
+                      account.fiscalYear}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            }
+            <div class="row form-group">
+              <label class="col-5 col-form-label semibold" for="reportName">Report Year</label>
+              <div class="col-7">
+                <select id="reportYear" name="reportYear" formControlName="reportYear" class="form-select"
+                  required (change)="save()">
+                  @for (year of reportYears; track year) {
+                    <option [ngValue]="year">{{year | yearDisplay:
+                    account.fiscalYear}}</option>
+                  }
+                </select>
+                @if (showReportYearWarning) {
+                  <div class="alert alert-warning mt-2">
+                    Your final year does not include 12 months of data. Please update to a year with
+                    complete data. To view mid-year progress, return to the reports dashboard and run a
+                    "Savings Report".
+                  </div>
+                }
+              </div>
             </div>
-        </ng-container>
+            @if (showYearErrorMsg) {
+              <div>
+                <span class="alert alert-danger">
+                  Report Year cannot be earlier than Baseline Year.
+                </span>
+              </div>
+            }
+          </div>
+        }
+        @if (setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value == 'accountSavings' || setupForm.controls.reportType.value == 'accountEmissionFactors') {
+          <div class="col-6"
+            >
+            @if (setupForm.controls.reportType.value != 'accountSavings') {
+              <div class="row form-group">
+                <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
+                <div class="col-3">
+                  <select name="startMonth" formControlName="startMonth" class="form-select"
+                    (change)="save()">
+                    @for (month of months; track month) {
+                      <option class="pe-2" [ngValue]="month.monthNumValue">
+                      {{month.abbreviation}}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-3">
+                  <select name="startYear" formControlName="startYear" class="form-select" (change)="save()">
+                    @for (year of baselineYears; track year) {
+                      <option class="pe-2" [ngValue]="year">{{year}}
+                      </option>
+                    }
+                  </select>
+                </div>
+              </div>
+            }
+            <div class="row form-group">
+              <label class="col-5 col-form-label semibold" for="endMonth">End Date</label>
+              <div class="col-3">
+                <select name="endMonth" formControlName="endMonth" class="form-select" (change)="save()">
+                  @for (month of months; track month) {
+                    <option class="pe-2" [ngValue]="month.monthNumValue">
+                    {{month.abbreviation}}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-3">
+                <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
+                  @for (year of reportYears; track year) {
+                    <option class="pe-2" [ngValue]="year">{{year}}
+                    </option>
+                  }
+                </select>
+              </div>
+            </div>
+            @if (errorMessage) {
+              <span class="alert alert-danger">
+                {{errorMessage}}
+              </span>
+            }
+          </div>
+        }
+        <div class="col-12">
+          <hr>
+          </div>
+        </div>
+      </form>
+      @if (setupForm.valid) {
+        @if (setupForm.controls.reportType.value == 'betterPlants') {
+          <app-better-plants-setup
+          ></app-better-plants-setup>
+        }
+        @if (setupForm.controls.reportType.value == 'dataOverview' && errorMessage.length <= 0) {
+          <app-data-overview-setup
+          ></app-data-overview-setup>
+        }
+        @if (setupForm.controls.reportType.value == 'performance') {
+          <app-performance-setup></app-performance-setup>
+        }
+        @if (setupForm.controls.reportType.value == 'betterClimate') {
+          <app-better-climate-setup
+          ></app-better-climate-setup>
+        }
+        @if (setupForm.controls.reportType.value == 'analysis') {
+          <app-analysis-report-setup
+          ></app-analysis-report-setup>
+        }
+        @if (setupForm.controls.reportType.value == 'accountSavings') {
+          <app-account-savings-report-setup
+          ></app-account-savings-report-setup>
+        }
+      }
+      @if (setupForm.valid == false || errorMessage.length > 0) {
+        <div class="alert alert-warning text-center">
+          Additional report detail options will appear once report dates are selected.
+        </div>
+      }
     </div>
-</div>
+  </div>

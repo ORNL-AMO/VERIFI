@@ -1,16 +1,20 @@
-<ng-container *ngIf="utilityMeterData.length != 0 && utilityMeterGroups.length != 0">
-    <app-analysis-banner></app-analysis-banner>
-    <router-outlet></router-outlet>
-</ng-container>
-<div class="p-5" *ngIf="utilityMeterData.length == 0">
+@if (utilityMeterData.length != 0 && utilityMeterGroups.length != 0) {
+  <app-analysis-banner></app-analysis-banner>
+  <router-outlet></router-outlet>
+}
+@if (utilityMeterData.length == 0) {
+  <div class="p-5">
     <div class="alert alert-danger text-center">
-        No Meter Data Found! Go to <a (click)="goToUtilityData()">Utility Data</a> tab to add meter data.
+      No Meter Data Found! Go to <a (click)="goToUtilityData()">Utility Data</a> tab to add meter data.
     </div>
-</div>
+  </div>
+}
 
-<div class="p-5" *ngIf="utilityMeterData.length != 0  && utilityMeterGroups.length == 0">
+@if (utilityMeterData.length != 0  && utilityMeterGroups.length == 0) {
+  <div class="p-5">
     <div class="alert alert-danger text-center">
-        No Meter Groups Found! Go to <a (click)="goToMeterGroups()">Utility Data Analysis Groups</a> to set the meter
-        groups for analysis.
+      No Meter Groups Found! Go to <a (click)="goToMeterGroups()">Utility Data Analysis Groups</a> to set the meter
+      groups for analysis.
     </div>
-</div>
+  </div>
+}

@@ -53,7 +53,7 @@ export class MonthlyAnalysisSummaryClass {
             baselineYearEndDate.setFullYear(baselineYearEndDate.getFullYear() + 1);
             baselineActualSummaryData = new Array();
             while (baselineDate < baselineYearEndDate) {
-                let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, baselineActualSummaryData, this.facility, this.lastBankedMonthSummaryData, undefined)
+                let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, baselineActualSummaryData, this.facility, this.lastBankedMonthSummaryData, undefined);
                 baselineActualSummaryData.push(monthlyAnalysisSummaryDataClass);
                 let currentMonth: number = baselineDate.getUTCMonth()
                 let nextMonth: number = currentMonth + 1;
@@ -158,7 +158,8 @@ export class MonthlyAnalysisSummaryClass {
                 twentyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.twentyPercentSavings),
                 fifteenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fifteenPercentSavings),
                 thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.thirtyPercentTarget),
-                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.thirtyPercentSavings)
+                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.thirtyPercentSavings),
+                missingValueWarning: summaryDataItem.missingValueWarning
             }
         })
     }

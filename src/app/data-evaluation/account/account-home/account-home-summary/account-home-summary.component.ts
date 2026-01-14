@@ -9,6 +9,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
     selector: 'app-account-home-summary',
@@ -28,7 +29,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service
+    private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service,
+    private loadingService: LoadingService
     ) { }
 
   ngOnInit(): void {
@@ -53,6 +55,10 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
   exportData() {
+    this.loadingService.setContext('export-facilities-to-excel');
+    this.loadingService.setTitle('Exporting Facilities');
+    this.loadingService.setCurrentLoadingIndex(0);
+    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     this.exportToExcelV3TemplateService.exportFacilityData();
   }
 

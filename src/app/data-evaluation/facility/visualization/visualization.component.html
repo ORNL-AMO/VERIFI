@@ -1,12 +1,16 @@
-<div class="d-flex flex-column h-100" *ngIf="utilityMeterData.length != 0">
+@if (utilityMeterData.length != 0) {
+  <div class="d-flex flex-column h-100">
     <app-visualization-banner></app-visualization-banner>
     <div class="visualization-content">
-        <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
     </div>
-</div>
+  </div>
+}
 
-<div class="p-5" *ngIf="utilityMeterData.length == 0">
+@if (utilityMeterData.length == 0) {
+  <div class="p-5">
     <div class="alert alert-danger text-center">
-        No Meter Data Found! Go to Utility Data tab to add meter data.
+      No Meter Data Found! Go to Utility Data tab to add meter data.
     </div>
-</div>
+  </div>
+}

@@ -1,10 +1,10 @@
 <div class="d-flex justify-content-end pb-1">
     <button class="btn btn-sm btn-secondary" (click)="closeEmissionsRates()">&times;</button>
 </div>
-<ng-container *ngIf="selectedSubregionEmissions">
+@if (selectedSubregionEmissions) {
     <div class="d-flex flex-column">
-        <table class="table table-sm table-bordered mb-0"
-            *ngIf="selectedSubregionEmissions.locationEmissionRates.length != 0">
+        @if (selectedSubregionEmissions.locationEmissionRates.length != 0) {
+        <table class="table table-sm table-bordered mb-0">
             <thead>
                 <tr>
                     <th colspan="4">
@@ -16,8 +16,7 @@
                         [ngClass]="{'w-50': selectedSubregionEmissions.directEmissionsRate, 'w-25': !selectedSubregionEmissions.directEmissionsRate}">
                         Year
                     </th>
-                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
-                        [ngIfElse]="directEmissionsRateBlock">
+                    @if (!selectedSubregionEmissions.directEmissionsRate) {
                         <th class="w-25">
                             CO<sub>2</sub> <br>(kg CO<sub>2</sub>/MWh)
                         </th>
@@ -27,22 +26,20 @@
                         <th class="w-25">
                             N<sub>2</sub>O <br>(g N<sub>2</sub>O/MWh)
                         </th>
-                    </ng-template>
-                    <ng-template #directEmissionsRateBlock>
+                    } @else {
                         <th>
                             Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                         </th>
-                    </ng-template>
+                    }
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    *ngFor="let emissionRate of selectedSubregionEmissions.locationEmissionRates  | orderBy: 'year': 'asc'">
+                @for (emissionRate of selectedSubregionEmissions.locationEmissionRates  | orderBy: 'year': 'asc'; track emissionRate) {
+                <tr>
                     <td>
                         {{emissionRate.year}}
                     </td>
-                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
-                        [ngIfElse]="directEmissionsRateBlock2">
+                    @if (!selectedSubregionEmissions.directEmissionsRate) {
                         <td>
                             {{emissionRate.CO2 | number}}
                         </td>
@@ -52,21 +49,24 @@
                         <td>
                             {{emissionRate.N2O | number}}
                         </td>
-                    </ng-template>
-                    <ng-template #directEmissionsRateBlock2>
+                    } @else {
                         <td>
                             {{emissionRate.co2Emissions | number}}
                         </td>
-                    </ng-template>
+                    }
                 </tr>
+                }
             </tbody>
         </table>
-        <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.locationEmissionRates.length == 0">
+        }
+        @if (selectedSubregionEmissions.locationEmissionRates.length == 0) {
+        <div class="alert alert-warning">
             No location emissions found for this region.
         </div>
+        }
         <hr class="my-1">
-        <table class="table table-sm table-bordered"
-            *ngIf="selectedSubregionEmissions.residualEmissionRates.length != 0">
+        @if (selectedSubregionEmissions.residualEmissionRates.length != 0) {
+        <table class="table table-sm table-bordered">
             <thead>
                 <tr>
                     <th colspan="4">
@@ -78,8 +78,7 @@
                         [ngClass]="{'w-50': selectedSubregionEmissions.directEmissionsRate, 'w-25': !selectedSubregionEmissions.directEmissionsRate}">
                         Year
                     </th>
-                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
-                        [ngIfElse]="directEmissionsRateBlock">
+                    @if (!selectedSubregionEmissions.directEmissionsRate) {
                         <th class="w-25">
                             CO<sub>2</sub> <br>(kg CO<sub>2</sub>/MWh)
                         </th>
@@ -89,22 +88,20 @@
                         <th class="w-25">
                             N<sub>2</sub>O <br>(g N<sub>2</sub>O/MWh)
                         </th>
-                    </ng-template>
-                    <ng-template #directEmissionsRateBlock>
+                    } @else {
                         <th>
                             Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                         </th>
-                    </ng-template>
+                    }
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    *ngFor="let emissionRate of selectedSubregionEmissions.residualEmissionRates  | orderBy: 'year': 'asc'">
+                @for (emissionRate of selectedSubregionEmissions.residualEmissionRates  | orderBy: 'year': 'asc'; track emissionRate) {
+                <tr>
                     <td>
                         {{emissionRate.year}}
                     </td>
-                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
-                        [ngIfElse]="directEmissionsRateBlock2">
+                    @if (!selectedSubregionEmissions.directEmissionsRate) {
                         <td>
                             {{emissionRate.CO2 | number}}
                         </td>
@@ -114,17 +111,20 @@
                         <td>
                             {{emissionRate.N2O | number}}
                         </td>
-                    </ng-template>
-                    <ng-template #directEmissionsRateBlock2>
+                    } @else {
                         <td>
                             {{emissionRate.co2Emissions | number}}
                         </td>
-                    </ng-template>
+                    }
                 </tr>
+                }
             </tbody>
         </table>
-        <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.residualEmissionRates.length == 0">
+        }
+        @if (selectedSubregionEmissions.residualEmissionRates.length == 0) {
+        <div class="alert alert-warning">
             No residual emissions found for this region.
         </div>
+        }
     </div>
-</ng-container>
+}

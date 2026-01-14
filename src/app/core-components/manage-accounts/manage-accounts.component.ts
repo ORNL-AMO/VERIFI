@@ -25,6 +25,8 @@ export class ManageAccountsComponent {
   resetDatabase: boolean = false;
   allAccountsSub: Subscription;
   displayMoreHelp: boolean = false;
+  account: IdbAccount;
+  loadingSub: Subscription;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -39,10 +41,17 @@ export class ManageAccountsComponent {
       this.accounts = accounts;
       this.accountErrors = this.accounts.map(account => { return undefined });
     });
+
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'export-facilities-to-excel') {
+        this.showFacilityExportToast();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   async setAccounts() {
@@ -78,16 +87,24 @@ export class ManageAccountsComponent {
   }
 
   async exportToExcel(account: IdbAccount) {
-    this.loadingService.setLoadingMessage("Exporting Facilities...");
-    this.loadingService.setLoadingStatus(true);
+    this.account = account;
+    this.loadingService.setContext('export-facilities-to-excel');
+    this.loadingService.setTitle('Exporting Facilities');
+    this.loadingService.setCurrentLoadingIndex(0);
+    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     try {
       await this.dbChangesService.selectAccount(account, true);
       this.exportToExcelTemplateV3Service.exportFacilityData();
-      this.toastNotificationService.showToast(account.name + 'Backup Exported To Excel', undefined, undefined, false, 'alert-success');
     } catch (err) {
+      this.loadingService.clearLoadingMessages();
+      this.loadingService.setContext(undefined);
+      this.loadingService.setTitle('');
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to backup ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
     }
-    this.loadingService.setLoadingStatus(false);
+  }
+
+  showFacilityExportToast() {
+    this.toastNotificationService.showToast(this.account.name + ' Backup Exported To Excel', undefined, undefined, false, 'alert-success');
   }
 
   async goToAccount(account: IdbAccount, index: number) {

@@ -47,6 +47,9 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   hasBankedSavings: boolean;
   hasTransitionYear: boolean;
   modelYear: number;
+  modelStartYear: number;
+  modelEndYear: number;
+  missingPredictorValue: boolean = false;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
 
@@ -61,10 +64,20 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     });
     this.setHasBanked();
     this.setModelYear();
+    this.modelStartYear = this.group?.regressionStartYear;
+    this.modelEndYear = this.group?.regressionEndYear;
+    this.missingPredictorValue = this.checkPredictorData();
   }
 
   ngOnDestroy() {
     this.analysisTableColumnsSub.unsubscribe();
+  }
+
+  checkPredictorData() {
+    if(this.annualAnalysisSummary) {
+      return this.annualAnalysisSummary.some(data => data.missingPredictorValue);
+    }
+    return false;
   }
 
   setPredictorVariables() {
@@ -190,5 +203,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.group && this.group.analysisType == 'regression') {
       this.modelYear = this.group.regressionModelYear;
     }
+  }
+
+  isSummaryYear(year: number): boolean {
+    if( this.modelStartYear !== undefined && this.modelEndYear !== undefined) {
+      return (year >= this.modelStartYear && year <= this.modelEndYear);
+    }
+    return false;
   }
 }

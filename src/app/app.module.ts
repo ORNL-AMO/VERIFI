@@ -6,7 +6,8 @@ import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './core-components/header/header.component';
 import { CommonModule } from '@angular/common';
-import { PlotlyViaWindowModule } from 'angular-plotly.js';
+import { PlotlyModule } from 'angular-plotly.js';
+import * as PlotlyJS from 'plotly.js-dist-min';
 import { LoadingComponent } from './core-components/loading/loading.component';
 import { IndexedDBModule } from './indexedDB/indexed-db.module';
 import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
@@ -54,7 +55,7 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         AppRoutingModule,
         FormsModule,
         CommonModule,
-        PlotlyViaWindowModule,
+        PlotlyModule.forRoot(PlotlyJS),
         IndexedDBModule,
         StaticContentModule,
         BrowserAnimationsModule,

@@ -137,6 +137,18 @@ export class UpdateDbEntryService {
           group.regressionModelStartMonth = 0;
           isChanged = true;
         }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionStartYear == undefined){
+          group.regressionStartYear = analysisItem.baselineYear;
+          isChanged = true;
+        }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelEndMonth == undefined){
+          group.regressionModelEndMonth = 11;
+          isChanged = true;
+        }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionEndYear == undefined){
+          group.regressionEndYear = analysisItem.baselineYear;
+          isChanged = true;
+        }
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };

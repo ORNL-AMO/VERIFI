@@ -53,7 +53,7 @@ export class AccountAnalysisResultsComponent implements OnInit {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../web-workers/annual-account-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {

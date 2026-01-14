@@ -26,6 +26,7 @@ export class FacilitiesListComponent {
   orderOptions: Array<number> = [];
   facilityToDelete: IdbFacility;
   displayAddFacilityModal: boolean = false;
+  loadingSub: Subscription;
   constructor(private sharedDataService: SharedDataService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -43,11 +44,22 @@ export class FacilitiesListComponent {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
+
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'delete-facility') {
+        this.showFacilityDeletionToast();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.facilitiesSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
+    this.loadingSub.unsubscribe();
+  }
+
+  showFacilityDeletionToast() {
+    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
   }
 
   async addFacility() {

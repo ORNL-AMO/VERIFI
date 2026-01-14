@@ -98,7 +98,7 @@ export class FacilitySavingsReportResultsComponent {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/facility-savings-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../web-workers/facility-savings-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {

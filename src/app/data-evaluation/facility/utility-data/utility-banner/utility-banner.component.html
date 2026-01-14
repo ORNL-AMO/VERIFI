@@ -1,32 +1,36 @@
 <div class="utility banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">
-                <i class="fa fa-file-pen"></i>
-                Meter Management
-                <i class="fa fa-exclamation-circle" *ngIf="metersHaveErrors"></i>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">
-                <i class="fa fa-calendar-days"></i>
-                Monthly Data</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">
-                <i class="fa fa-layer-group"></i>
-                Analysis Groups</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">
-                <i class="fa fa-boxes-stacked"></i>
-                Predictors
-                <i class="fa fa-exclamation-triangle weather-update" *ngIf="predictorsNeedUpdate"></i>
-            </a>
-        </li>
-    </ul>
-    <div>
-        <button class="btn action-btn m-0" (click)="exportData()" title="Export Data"><span
-                class="fa fa-download"></span></button>
-    </div>
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">
+        <i class="fa fa-file-pen"></i>
+        Meter Management
+        @if (metersHaveErrors) {
+          <i class="fa fa-exclamation-circle"></i>
+        }
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">
+        <i class="fa fa-calendar-days"></i>
+      Monthly Data</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">
+        <i class="fa fa-layer-group"></i>
+      Analysis Groups</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">
+        <i class="fa fa-boxes-stacked"></i>
+        Predictors
+        @if (predictorsNeedUpdate) {
+          <i class="fa fa-exclamation-triangle weather-update"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div>
+    <button class="btn action-btn m-0" (click)="exportData()" title="Export Data"><span
+    class="fa fa-download"></span></button>
+  </div>
 </div>
