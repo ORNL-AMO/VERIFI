@@ -14,7 +14,6 @@ export interface IdbAccountAnalysisItem extends IdbEntry {
         facilityId: string,
         analysisItemId: string
     }>,
-    selectedYearAnalysis?: boolean,
     analysisCategory: AnalysisCategory,
     waterUnit: string,
     baselineYear: number,

@@ -18,7 +18,6 @@ export interface IdbAnalysisItem extends IdbEntry {
     waterUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean,
     baselineYear: number,
     hasBanking: boolean,
     bankedAnalysisItemId: string

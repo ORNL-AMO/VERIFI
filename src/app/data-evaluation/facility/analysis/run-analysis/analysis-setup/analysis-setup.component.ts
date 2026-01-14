@@ -91,18 +91,18 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisItem = this.analysisService.setDataAdjustments(this.analysisItem);
     this.setBaselineYearWarning();
     this.setReportYearWarning();
-    if (!this.baselineYearWarning) {
-      let allFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
-      let selectYearAnalysis: boolean = true;
-      allFacilityAnalysisItems.forEach(item => {
-        if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
-          selectYearAnalysis = false;
-        }
-      });
-      this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
-    } else {
-      this.analysisItem.selectedYearAnalysis = false;
-    }
+    // if (!this.baselineYearWarning) {
+    //   let allFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    //   let selectYearAnalysis: boolean = true;
+    //   allFacilityAnalysisItems.forEach(item => {
+    //     if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
+    //       selectYearAnalysis = false;
+    //     }
+    //   });
+    //   this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
+    // } else {
+    //   this.analysisItem.selectedYearAnalysis = false;
+    // }
     this.setReportYears();
     await this.saveItem();
   }

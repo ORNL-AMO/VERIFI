@@ -15,10 +15,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-    selector: 'app-select-facility-analysis-items',
-    templateUrl: './select-facility-analysis-items.component.html',
-    styleUrls: ['./select-facility-analysis-items.component.css'],
-    standalone: false
+  selector: 'app-select-facility-analysis-items',
+  templateUrl: './select-facility-analysis-items.component.html',
+  styleUrls: ['./select-facility-analysis-items.component.css'],
+  standalone: false
 })
 export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
@@ -144,33 +144,33 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
   async initializeSelectedFacilitiesItems() {
     if (!this.selectedAnalysisItem.facilityItemsInitialized) {
-      let findItemSelected = this.selectedAnalysisItem.facilityAnalysisItems.find(item => {
-        return item.analysisItemId != undefined;
-      });
-      if (!findItemSelected) {
-        let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-        this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-          let facilityItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => {
-            return (accountItem.reportYear == this.selectedAnalysisItem.reportYear
-              && accountItem.facilityId == item.facilityId
-              && accountItem.selectedYearAnalysis
-              && accountItem.baselineYear == this.selectedAnalysisItem.baselineYear
-              && accountItem.analysisCategory == this.selectedAnalysisItem.analysisCategory);
-          });
-          if (facilityItem) {
-            item.analysisItemId = facilityItem.guid;
-          } else {
-            item.analysisItemId = undefined;
-          }
-        });
-        this.selectedAnalysisItem.facilityItemsInitialized = true;
-        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-        this.selectedAnalysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.selectedAnalysisItem, analysisItems);
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        await this.dbChangesService.setAccountAnalysisItems(account, false);
-        this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
-      }
+      //   let findItemSelected = this.selectedAnalysisItem.facilityAnalysisItems.find(item => {
+      //     return item.analysisItemId != undefined;
+      //   });
+      //   if (!findItemSelected) {
+      //     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      //     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+      //       let facilityItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => {
+      //         return (accountItem.reportYear == this.selectedAnalysisItem.reportYear
+      //           && accountItem.facilityId == item.facilityId
+      //           && accountItem.selectedYearAnalysis
+      //           && accountItem.baselineYear == this.selectedAnalysisItem.baselineYear
+      //           && accountItem.analysisCategory == this.selectedAnalysisItem.analysisCategory);
+      //       });
+      //       if (facilityItem) {
+      //         item.analysisItemId = facilityItem.guid;
+      //       } else {
+      //         item.analysisItemId = undefined;
+      //       }
+      //     });
+      //     this.selectedAnalysisItem.facilityItemsInitialized = true;
+      //     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      //     this.selectedAnalysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.selectedAnalysisItem, analysisItems);
+      //     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
+      //     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      //     await this.dbChangesService.setAccountAnalysisItems(account, false);
+      //     this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
+      //   }
     }
   }
 

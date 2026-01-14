@@ -28,5 +28,7 @@ export interface AccountAndFacility {
     contactName: string,
     contactEmail: string,
     contactPhone: string,
-    color: string
+    color: string,
+    selectedEnergyAnalysisId?: string,
+    selectedWaterAnalysisId?: string
 }

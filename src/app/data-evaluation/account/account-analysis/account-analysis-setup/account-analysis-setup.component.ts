@@ -100,19 +100,20 @@ export class AccountAnalysisSetupComponent implements OnInit {
 
   async changeReportYear() {
     this.setBaselineYearWarning();
-    if (!this.baselineYearWarning) {
-      let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-      let selectYearAnalysis: boolean = true;
-      allAnalysisItems.forEach(item => {
-        if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
-          selectYearAnalysis = false;
-        }
-      });
-      this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
-    } else {
-      this.analysisItem.selectedYearAnalysis = false;
-    }
-    await this.saveItem();
+    //TODO: can change report year when a selected analysis?
+    // if (!this.baselineYearWarning) {
+    //   let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    //   let selectYearAnalysis: boolean = true;
+    //   allAnalysisItems.forEach(item => {
+    //     if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
+    //       selectYearAnalysis = false;
+    //     }
+    //   });
+    //   this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
+    // } else {
+    //   this.analysisItem.selectedYearAnalysis = false;
+    // }
+    // await this.saveItem();
   }
 
   setBaselineYearWarning() {

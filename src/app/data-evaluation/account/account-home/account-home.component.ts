@@ -62,8 +62,8 @@ export class AccountHomeComponent implements OnInit {
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val
-      this.accountHomeService.setLatestEnergyAnalysisItem();
-      this.accountHomeService.setLatestWaterAnalysisItem();
+      this.accountHomeService.setLatestEnergyAnalysisItem(this.account.selectedEnergyAnalysisId);
+      this.accountHomeService.setLatestWaterAnalysisItem(this.account.selectedWaterAnalysisId);
       if (this.accountHomeService.latestEnergyAnalysisItem) {
         this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
         this.setAnnualEnergyAnalysisSummary();

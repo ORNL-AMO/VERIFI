@@ -42,7 +42,7 @@ export class AccountEnergyReductionGoalComponent {
     this.latestSummarySub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
       this.latestAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && this.latestAnalysisItem?.selectedYearAnalysis) {
+      if (this.latestAnalysisSummary && this.latestAnalysisItem?.guid == this.account.selectedEnergyAnalysisId) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {
