@@ -47,12 +47,12 @@
             <label class="bold">Site/Source Energy</label>
             <div class="form-check">
                 <input type="radio" class="form-check-input" name="energyIsSource" [value]="true" id="sourceEnergy"
-                    [(ngModel)]="selectedAccount.energyIsSource" (change)="setAccountEnergyIsSource()">
+                    [(ngModel)]="selectedFacility.energyIsSource" (change)="setFacilityEnergyIsSource()">
                 <label class="form-check-label" for="sourceEnergy">Source Energy</label>
             </div>
             <div class="form-check">
                 <input type="radio" class="form-check-input" name="energyIsSource" [value]="false" id="siteEnergy"
-                    [(ngModel)]="selectedAccount.energyIsSource" (change)="setAccountEnergyIsSource()">
+                    [(ngModel)]="selectedFacility.energyIsSource" (change)="setFacilityEnergyIsSource()">
                 <label class="form-check-label" for="siteEnergy">Site Energy</label>
             </div>
         </li>

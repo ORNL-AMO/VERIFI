@@ -1,4 +1,3 @@
-  /* Fix dropdown menu clipping */
   .sticky-top,
   .banner-border,
   .utility.banner,
@@ -10,9 +9,6 @@
   .dropdown-menu {
     z-index: 2000 !important;
   }
-  /* .banner-border{
-    border-bottom: solid #145A32;
-  } */
 
 
   li.disabled:hover .navigation-warning {

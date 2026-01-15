@@ -48,7 +48,7 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
   }
 
-    setShowWater() {
+  setShowWater() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
@@ -58,7 +58,7 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.sharedDataService.openCreateReportModal.next(true);
   }
 
-  
+
   setHideTabText() {
     this.hideTabText = this.navTabs.nativeElement.offsetWidth < 400;
     this.hideAllText = this.navTabs.nativeElement.offsetWidth < 300;
