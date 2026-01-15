@@ -1,48 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { NavigationEnd, Router } from '@angular/router';
-import { AccountOverviewService } from '../account-overview.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { Month, Months } from 'src/app/shared/form-data/months';
-import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-    selector: 'app-account-overview-banner',
-    templateUrl: './account-overview-banner.component.html',
-    styleUrls: ['./account-overview-banner.component.css'],
-    standalone: false
+  selector: 'app-account-overview-banner',
+  templateUrl: './account-overview-banner.component.html',
+  styleUrls: ['./account-overview-banner.component.css'],
+  standalone: false
 })
 export class AccountOverviewBannerComponent implements OnInit {
 
+  @ViewChild('navTabs') navTabs: ElementRef;
   modalOpenSub: Subscription;
   modalOpen: boolean;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
-  routerSub: Subscription;
-  urlDisplay: 'energy' | 'emissions' | 'other';
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
   showWater: boolean;
 
-  minMonth: number;
-  minYear: number;
-  maxMonth: number;
-  maxYear: number;
-  months: Array<Month> = Months;
-  years: Array<number>;
-  errorMessage: string = '';
-  dateRangeSub: Subscription;
+
+  hideTabText: boolean = false;
+  hideAllText: boolean = false;
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
-    private router: Router,
-    private accountOverviewService: AccountOverviewService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -51,63 +35,20 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
       this.setShowWater();
-      this.setYears();
     });
+  }
 
-    this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
-      this.emissionsDisplay = val;
-    })
-
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setUrlString(this.router.url);
-      }
-    });
-    this.setUrlString(this.router.url);
-
-    this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
-      if (dateRange) {
-        this.minMonth = dateRange.startDate.getMonth();
-        this.minYear = dateRange.startDate.getFullYear();
-        this.maxMonth = dateRange.endDate.getMonth();
-        this.maxYear = dateRange.endDate.getFullYear();
-      }
-    });
+  ngAfterViewInit() {
+    this.setHideTabText();
+    this.cd.detectChanges();
   }
 
   ngOnDestroy() {
     this.modalOpenSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-    this.routerSub.unsubscribe();
-    this.emissionsDisplaySub.unsubscribe();
-    this.dateRangeSub.unsubscribe();
   }
 
-  setUrlString(url: string) {
-    if (url.includes('energy')) {
-      this.urlDisplay = 'energy';
-    } else if (url.includes('emissions')) {
-      this.urlDisplay = 'emissions';
-    } else {
-      this.urlDisplay = 'other';
-    }
-  }
-
-  async setAccountEnergyIsSource(energyIsSource: boolean) {
-    if (this.selectedAccount.energyIsSource != energyIsSource) {
-      this.selectedAccount.energyIsSource = energyIsSource;
-      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-      this.accountDbService.allAccounts.next(allAccounts);
-      this.accountDbService.selectedAccount.next(this.selectedAccount);
-    }
-  }
-
-  setEmissions(display: 'market' | 'location') {
-    this.accountOverviewService.emissionsDisplay.next(display);
-  }
-
-  setShowWater() {
+    setShowWater() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
@@ -117,30 +58,14 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.sharedDataService.openCreateReportModal.next(true);
   }
 
-  //date validation
-  setDate() {
-    let startDate: Date = new Date(this.minYear, this.minMonth, 1);
-    let endDate: Date = new Date(this.maxYear, this.maxMonth, 1);
- 
-    // compare start and end date
-    if (startDate.getTime() >= endDate.getTime()) {
-      this.errorMessage = 'Start date cannot be later than the end date';
-      return;
-    }
-
-    this.errorMessage = '';
-
-    // Proceed with valid date range
-    this.accountOverviewService.dateRange.next({
-      startDate: startDate,
-      endDate: endDate
-    });
+  
+  setHideTabText() {
+    this.hideTabText = this.navTabs.nativeElement.offsetWidth < 400;
+    this.hideAllText = this.navTabs.nativeElement.offsetWidth < 300;
   }
 
-  setYears() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let allYears: Array<number> = accountMeterData.flatMap(meterData => { return new Date(meterData.readDate).getFullYear() });
-    allYears = _.uniq(allYears);
-    this.years = _.orderBy(allYears, (year) => { return year }, 'desc');
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.setHideTabText();
   }
 }
