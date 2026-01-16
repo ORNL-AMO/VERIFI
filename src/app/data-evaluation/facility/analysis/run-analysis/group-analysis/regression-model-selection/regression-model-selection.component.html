@@ -26,7 +26,7 @@
         (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
       (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
       <hr>
-        @if (selectedGroup.models && selectedGroup.userDefinedModel) {
+        @if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
           <div class="table-responsive">
             <table class="table table-sm table-hover utility-data table-bordered">
               <thead>
@@ -74,7 +74,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; track model; let modelIndex = $index) {
+                @for (model of generatedModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; track model; let modelIndex = $index) {
                   <tr
                     [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
                     @if (!model.errorModeling) {

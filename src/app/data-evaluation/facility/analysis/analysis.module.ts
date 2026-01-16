@@ -34,6 +34,7 @@ import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/
 import { RegressionUserDefinedModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-user-defined-model-inspection/regression-user-defined-model-inspection.component';
 import { AnalysisDetailItemCardComponent } from './analysis-dashboard/analysis-detail-item-card/analysis-detail-item-card.component';
 import { AnalysisDetailsTableComponent } from './analysis-dashboard/analysis-details-table/analysis-details-table.component';
+import { RegressionModelComparison } from './run-analysis/group-analysis/regression-model-selection/regression-model-comparison/regression-model-comparison';
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { AnalysisDetailsTableComponent } from './analysis-dashboard/analysis-det
     BankedGroupResultsTableComponent,
     RegressionUserDefinedModelInspectionComponent,
     AnalysisDetailItemCardComponent,
-    AnalysisDetailsTableComponent
+    AnalysisDetailsTableComponent,
+    RegressionModelComparison
   ],
   imports: [
     CommonModule,

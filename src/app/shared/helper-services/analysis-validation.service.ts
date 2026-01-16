@@ -129,7 +129,7 @@ export class AnalysisValidationService {
           missingRegressionModelSelection = true;
         } else if (group.selectedModelId) {
           let model: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-          hasInvalidRegressionModel = model.isValid == false;
+          hasInvalidRegressionModel = model?.isValid == false;
         }
       } else {
         let hasProductionVariable: boolean = false;

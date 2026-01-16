@@ -55,6 +55,9 @@ export class RegressionModelMenuComponent implements OnInit {
   isDateRangeValid: boolean = true;
   isTwelveMonthSelected: boolean = true;
   facilityPredictorData: Array<IdbPredictorData>;
+  changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
+  showModelComparison: boolean = false;
+  generatedModels: Array<JStatRegressionModel>;
 
   @Output() userDefinedModelClicked = new EventEmitter<boolean>();
   @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
@@ -83,6 +86,7 @@ export class RegressionModelMenuComponent implements OnInit {
         this.checkUserDefinedModelValues();
         this.setNumVariableOptions();
         if (this.group.models && this.group.models.length != 0) {
+          this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.group.idbGroupId);
           this.checkModelData();
           this.checkHasValidModels();
           this.checkFailedValidationModels();
@@ -159,9 +163,11 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   changeModelType() {
+    this.generatedModels = undefined;
     this.group.models = undefined;
     this.group.selectedModelId = undefined;
     this.group.dateModelsGenerated = undefined;
+    this.analysisDbService.setGeneratedModelsForGroup(this.group.idbGroupId, this.generatedModels);
     if (this.group.userDefinedModel) {
       this.group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
@@ -173,6 +179,8 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   generateModels(autoSelect?: boolean) {
+    const previousSelectedModelId = this.group.selectedModelId;
+    let previousSelectedModel = this.group?.models?.find(model => model.modelId === previousSelectedModelId);
     this.loadingService.setLoadingMessage("Generating Regression Models...");
     this.loadingService.setLoadingStatus(true);
     setTimeout(() => {
@@ -182,16 +190,44 @@ export class RegressionModelMenuComponent implements OnInit {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion);
-
-      this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
-      if (this.group.models) {
+      this.generatedModels = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
+      this.analysisDbService.setGeneratedModelsForGroup(this.group.idbGroupId, this.generatedModels);
+      let newSelectedModel = this.generatedModels?.find(model => model.modelId === this.group.selectedModelId);
+      if (this.generatedModels) {
         this.modelingError = false;
         this.checkHasValidModels();
         this.checkFailedValidationModels();
         this.hasLaterDate = false;
         this.group.dateModelsGenerated = new Date();
+
+        if (previousSelectedModelId) {
+          let previousModelExists = this.generatedModels.find(model => model.modelId === previousSelectedModelId);
+          if (previousModelExists) {
+            this.group.selectedModelId = previousSelectedModelId;
+          }
+
+          this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
+        }
+
+        if (this.group.selectedModelId) {
+          const selectedModel = this.generatedModels.find(model => model.modelId === this.group.selectedModelId);
+          this.group.models = selectedModel ? [selectedModel] : [];
+          if(selectedModel) {
+            this.group.regressionConstant = selectedModel.coef[0];
+            this.group.regressionModelYear = selectedModel.modelYear;
+            this.group.predictorVariables.forEach(variable => {
+              let coefIndex: number = selectedModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
+              if (coefIndex != -1) {
+                variable.regressionCoefficient = selectedModel.coef[coefIndex + 1];
+              } else {
+                variable.regressionCoefficient = 0;
+              }
+            });
+          }
+        }
+
         if (autoSelect) {
-          let minPValModel: JStatRegressionModel = _.maxBy(this.group.models, 'adjust_R2');
+          let minPValModel: JStatRegressionModel = _.maxBy(this.generatedModels, 'adjust_R2');
           if (minPValModel) {
             this.group.selectedModelId = minPValModel.modelId;
             this.group.regressionConstant = minPValModel.coef[0];
@@ -205,6 +241,7 @@ export class RegressionModelMenuComponent implements OnInit {
               }
             });
           }
+          this.group.models = minPValModel ? [minPValModel] : [];
         }
       } else {
         this.modelingError = true;
@@ -214,6 +251,28 @@ export class RegressionModelMenuComponent implements OnInit {
     }, 100)
   }
 
+  compareUpdatedModel(previousModel: JStatRegressionModel, newModel: JStatRegressionModel) {
+    this.changedModel = null;
+
+    if (previousModel && newModel) {
+      if (previousModel.R2 !== newModel.R2 || previousModel.adjust_R2 !== newModel.adjust_R2 || previousModel.modelPValue !== newModel.modelPValue ||
+        !_.isEqual(previousModel.coef, newModel.coef)) {
+        this.changedModel = {
+          modelId: previousModel.modelId,
+          oldModel: previousModel,
+          newModel: newModel
+        };
+      }
+    }
+  }
+
+  openModelComparisonModal() {
+    this.showModelComparison = true;
+  }
+
+  closeModal() {
+    this.showModelComparison = false;
+  }
 
   updateModels() {
     this.sharedDataService.modalOpen.next(true);
@@ -226,12 +285,12 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   confirmUpdateModals() {
-    this.generateModels(true);
+    this.generateModels();
     this.closeUpdateModelsModal();
   }
 
   checkHasValidModels() {
-    this.noValidModels = this.group.models.find(model => { return model.isValid == true }) == undefined;
+    this.noValidModels = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
     if (!this.showInvalid && this.noValidModels) {
       this.showInvalid = true;
     }
@@ -243,7 +302,7 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   checkFailedValidationModels() {
-    this.noDataValidationModels = this.group.models.find(model => {
+    this.noDataValidationModels = this.generatedModels?.find(model => {
       if (model.SEPValidation) {
         return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
       } else {

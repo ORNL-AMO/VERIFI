@@ -11,6 +11,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { NavigationStart, Router } from '@angular/router';
 @Component({
   selector: 'app-regression-model-selection',
   templateUrl: './regression-model-selection.component.html',
@@ -32,16 +33,44 @@ export class RegressionModelSelectionComponent implements OnInit {
   showInUseMessage: boolean;
   generateUserDefinedModel: boolean;
   showView: boolean = true;
+  generatedModels: Array<JStatRegressionModel>;
+  generatedModelsPerGroupSub: Subscription;
+  routerSub: Subscription;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisValidationService: AnalysisValidationService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.selectedGroup = group;
+
+      this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.selectedGroup.idbGroupId);
+
+      if (!this.generatedModels?.length && this.selectedGroup?.models?.length) {
+        this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.selectedGroup.models);
+        this.generatedModels = this.selectedGroup.models;
+      }
+    });
+
+    this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
+      if (this.selectedGroup && this.selectedGroup.idbGroupId) {
+        this.generatedModels = generatedModelsPerGroup[this.selectedGroup.idbGroupId] || [];
+      }
+      else {
+        this.generatedModels = [];
+      }
+    });
+
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        if (!event.url.includes('/analysis/run-analysis/group-analysis')) {
+          this.analysisDbService.clearGeneratedModels();
+        }
+      }
     });
 
     this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
@@ -49,7 +78,8 @@ export class RegressionModelSelectionComponent implements OnInit {
     });
     this.showFailedDataValidationSub = this.analysisService.showFailedValidationModels.subscribe(val => {
       this.showFailedValidationModel = val;
-    })
+    });
+
     this.setShowInUseMessage();
 
   }
@@ -57,10 +87,12 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.selectedGroupSub.unsubscribe();
     this.showInvalidSub.unsubscribe();
     this.showFailedDataValidationSub.unsubscribe();
+    this.generatedModelsPerGroupSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   selectModel() {
-    let selectedModel: JStatRegressionModel = this.selectedGroup.models.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
+    let selectedModel: JStatRegressionModel = this.generatedModels.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
     this.selectedGroup.regressionConstant = selectedModel.coef[0];
     this.selectedGroup.regressionModelYear = selectedModel.modelYear;
     this.selectedGroup.predictorVariables.forEach(variable => {
@@ -71,7 +103,9 @@ export class RegressionModelSelectionComponent implements OnInit {
         variable.regressionCoefficient = 0;
       }
     });
+    this.selectedGroup.models = [selectedModel];
     this.saveItem();
+    this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.generatedModels);
   }
 
   async saveItem() {

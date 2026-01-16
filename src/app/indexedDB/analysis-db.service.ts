@@ -23,6 +23,8 @@ export class AnalysisDbService {
   facilityAnalysisItems: BehaviorSubject<Array<IdbAnalysisItem>>;
   selectedAnalysisItem: BehaviorSubject<IdbAnalysisItem>;
 
+  generatedModelsPerGroup: BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>;
+
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private predictorDbService: PredictorDbService,
@@ -36,6 +38,22 @@ export class AnalysisDbService {
         this.localStorageService.store('analysisItemId', analysisItem.id);
       }
     });
+    
+    this.generatedModelsPerGroup = new BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>({});
+  }
+
+  setGeneratedModelsForGroup(groupId: string, models: Array<JStatRegressionModel>) {
+    let modelsGenerated = { ...this.generatedModelsPerGroup.getValue() };
+    modelsGenerated[groupId] = models;
+    this.generatedModelsPerGroup.next(modelsGenerated);
+  }
+
+  getGeneratedModelsForGroup(groupId: string): Array<JStatRegressionModel> {
+    return this.generatedModelsPerGroup.getValue()[groupId] || [];
+  }
+
+  clearGeneratedModels() {
+    this.generatedModelsPerGroup.next({});
   }
 
   getInitialAnalysisItem(): number {

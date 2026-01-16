@@ -1,3 +1,7 @@
 :not(.no-meters) h5{
     border-bottom: solid;
 }
+
+.large{
+    font-size: 12px;
+}
