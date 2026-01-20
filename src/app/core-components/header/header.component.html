@@ -58,7 +58,7 @@
       <button class="btn action-btn" (click)="backupAccount()">Backup Account
       </button>
     </div>
-    <div class="ps-2">Last Backup: (@if (activeAccount.lastBackup) {
+    <div class="ps-2 last-backup">Last Backup: (@if (activeAccount.lastBackup) {
       <span>{{activeAccount.lastBackup |
         date:'medium'}}</span>
       }@if (!activeAccount.lastBackup) {
