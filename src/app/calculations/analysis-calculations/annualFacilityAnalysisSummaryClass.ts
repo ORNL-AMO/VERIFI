@@ -98,7 +98,8 @@ export class AnnualFacilityAnalysisSummaryClass {
                 isIntermediateBanked: false,
                 savingsBanked: checkAnalysisValue(summaryDataClass.savingsBanked),
                 savingsUnbanked: checkAnalysisValue(summaryDataClass.savingsUnbanked),
-                missingPredictorValue: summaryDataClass.missingPredictorValue
+                missingPredictorValue: summaryDataClass.missingPredictorValue,
+                missingPredictors: summaryDataClass.missingPredictors
             }
         })
     }

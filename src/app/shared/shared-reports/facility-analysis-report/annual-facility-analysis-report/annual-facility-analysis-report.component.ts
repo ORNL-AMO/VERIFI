@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -26,6 +26,12 @@ export class AnnualFacilityAnalysisReportComponent {
   print: boolean;
   printSub: Subscription;
   facilityReportSub: Subscription;
+  @Input()
+  groupSummaries: Array<{
+          group: AnalysisGroup,
+          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+      }>;
   constructor(private dataEvaluationService: DataEvaluationService,
     private facilityReportsDbService: FacilityReportsDbService
   ) { }

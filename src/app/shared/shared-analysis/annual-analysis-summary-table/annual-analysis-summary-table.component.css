@@ -17,3 +17,8 @@ tr.table-mh th.th-3 span{
 tr.missing-month-row > td {
     background-color: #f7e3e3;
 }
+
+.missing-predictor-cell {
+   display: inline-flex;
+   align-items: center;
+}

@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -38,6 +38,14 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   isGroupModelYear: boolean;
   @Input({ required: true })
   printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
+  @Input()
+  groupSummaries: Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+  }>;
+  @Input()
+  isAccount: boolean;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -91,9 +99,35 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   checkPredictorData() {
-   if (this.monthlyAnalysisSummaryData) {
+    if (this.monthlyAnalysisSummaryData) {
       this.missingMonthList = this.monthlyAnalysisSummaryData.filter(data => data.missingValueWarning).map(data => data.date);
     }
+  }
+
+  getPredictorVariableStatus(data: MonthlyAnalysisSummaryData, predictorVariable: AnalysisGroupPredictorVariable): { value: number | null, isMissing: boolean } {
+    if (this.group) {
+      const groupVariable = this.group.predictorVariables.find(variable => variable.id == predictorVariable.id);
+      if (groupVariable) {
+        const value = (groupVariable.productionInAnalysis && !data.missingPredictors.includes(predictorVariable.id)) ? data[predictorVariable.name] : null;
+        const isMissing = (value === null) && groupVariable.productionInAnalysis;
+        return { value, isMissing };
+      }
+    }
+    else if (this.groupSummaries && this.groupSummaries.length > 0) {
+      for (const summary of this.groupSummaries) {
+        for (const variable of summary.group.predictorVariables) {
+          if (variable.id === predictorVariable.id && variable.productionInAnalysis) {
+            const value = !data.missingPredictors.includes(variable.id) ? data[predictorVariable.name] : null;
+            const isMissing = value === null && data.missingValueWarning;
+            return { value, isMissing };
+          }
+          else if (variable.id === predictorVariable.id && !variable.productionInAnalysis) {
+            return { value: data[predictorVariable.name], isMissing: false };
+          }
+        }
+      }
+    }
+    return { value: null, isMissing: false };
   }
 
   setPredictorVariables() {

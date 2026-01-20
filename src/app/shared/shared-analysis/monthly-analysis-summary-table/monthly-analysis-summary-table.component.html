@@ -3,7 +3,9 @@
   <span class="fa fa-exclamation-triangle">&nbsp;&nbsp;</span>
   Predictor data is missing for {{missingMonthList.length}} months.
   Missing months are highlighted below.
-  Use "Choose Columns" to display predictors and identify missing data.
+  @if (!isAccount && !inReport) {
+  "Choose Columns" to display predictors and identify missing data.
+  }
   Results may be inaccurate as the missing values are assumed to be zero.
 </div>
 }
@@ -242,15 +244,15 @@
       @if (printBlock == 'all' || printBlock == 'predictors') {
       @for (predictorVariable of predictorColumns; track predictorVariable) {
       <td>
-        @if (data[predictorVariable.name]) {
-        <span>
-          {{data[predictorVariable.name] | customNumber}}
-        </span>
+        @let status = getPredictorVariableStatus(data, predictorVariable);
+        @if (status.value !== null && status.value !== 0) {
+        <span>{{status.value | customNumber}}</span>
         }
-        @if (!data[predictorVariable.name]) {
-        <span>
-          &mdash;
-        </span>
+        @else if (status.isMissing) {
+        <i class="fa fa-exclamation-circle text-danger" title="Missing Data"></i>
+        }
+        @else {
+        <span>&mdash;</span>
         }
       </td>
       }
