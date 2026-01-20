@@ -90,7 +90,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
 
   checkPredictorValueStatus(data: AnnualAnalysisSummary, predictorVariable: AnalysisGroupPredictorVariable): boolean {
     if (this.group) {
-      const groupVariable = this.group.predictorVariables.find(variable => variable.id == predictorVariable.id);
+      const groupVariable = this.group.predictorVariables.find(variable => variable.id === predictorVariable.id);
       if (groupVariable) {
         const value = !data.missingPredictors.includes(predictorVariable.id) ? data[predictorVariable.name] : null;
         const isMissing = (value === null);

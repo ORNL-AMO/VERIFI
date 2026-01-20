@@ -3,8 +3,9 @@
   <span class="fa fa-exclamation-triangle">&nbsp;&nbsp;</span>
   Predictor data is missing. The years with missing data are highlighted in the table below.  
   @if (!isAccount && !inReport) {
-   "Choose Columns" to display predictors and identify missing data.
-  } Please review the predictor
+   Use "Choose Columns" to display predictors and identify missing data.
+  } 
+  Please review the predictor
   entries.
 </div>
 }
@@ -207,11 +208,9 @@
       @if (analysisTableColumns.baselineAdjustmentForOther) {
       <td>
         @if (summary.baselineAdjustmentForOtherV2 && !summary.isIntermediateBanked) {
-        @if (summary.baselineAdjustmentForOtherV2 && !summary.isIntermediateBanked) {
         <span [ngClass]="{'red': summary.baselineAdjustmentForOtherV2 < 0}">
           {{summary.baselineAdjustmentForOtherV2 | customNumber}}
         </span>
-        }
         } @else {
         &mdash;
         }

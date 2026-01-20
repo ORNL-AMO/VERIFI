@@ -82,7 +82,7 @@ export class MonthlyAnalysisSummaryDataClass {
 
     checkMissingPredictors(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
         predictorVariables.forEach(variable => {
-            if (variable.productionInAnalysis && !this.monthPredictorData.some(data => (data.predictorId == variable.id))) {
+            if (variable.productionInAnalysis && !this.monthPredictorData.some(data => (data.predictorId === variable.id))) {
                 this.missingPredictors.push(variable.id);
             }
         });

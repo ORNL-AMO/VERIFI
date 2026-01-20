@@ -106,7 +106,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   getPredictorVariableStatus(data: MonthlyAnalysisSummaryData, predictorVariable: AnalysisGroupPredictorVariable): { value: number | null, isMissing: boolean } {
     if (this.group) {
-      const groupVariable = this.group.predictorVariables.find(variable => variable.id == predictorVariable.id);
+      const groupVariable = this.group.predictorVariables.find(variable => variable.id === predictorVariable.id);
       if (groupVariable) {
         const value = (groupVariable.productionInAnalysis && !data.missingPredictors.includes(predictorVariable.id)) ? data[predictorVariable.name] : null;
         const isMissing = (value === null) && groupVariable.productionInAnalysis;
