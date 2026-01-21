@@ -15,7 +15,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
-import { EquipmentTypes } from '../facility-energy-use-equipment-form/equipmentTypes';
+import { EquipmentTypes } from '../calculations/equipmentTypes';
 import { FacilityEnergyUseEquipmentFormService } from '../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 
 @Component({
@@ -176,4 +176,5 @@ export class FacilityEnergyUseEquipmentComponent {
     this.facilityEnergyUseEquipmentFormService.removeAllYearsFromUtilityDataForm(this.form);
     this.dataChanged = true;
   }
+  
 }

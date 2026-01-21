@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
-import { EquipmentTypes } from './equipmentTypes';
+import { EquipmentTypes } from '../calculations/equipmentTypes';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
@@ -11,6 +11,7 @@ import { AllSources, EnergySources, MeterSource } from 'src/app/models/constants
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService } from './facility-energy-use-equipment-form.service';
 import { calculateTotalEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
+import { getIncludedSources } from '../calculations/facilityEnergyUse';
 
 @Component({
   selector: 'app-facility-energy-use-equipment-form',
@@ -51,12 +52,15 @@ export class FacilityEnergyUseEquipmentFormComponent {
       this.utilityMeterGroups = groups.filter(group => { return group.groupType == 'Energy' });
       this.setLinkedMeterGroup();
     });
-    this.setIncludedSources();
   }
 
   ngOnDestroy() {
     this.utilityMeterGroupsSub.unsubscribe();
     this.utilityMetersSub.unsubscribe();
+  }
+
+  ngOnChanges() {
+    this.setIncludedSources();
   }
 
   openLinkMeterTable() {
@@ -137,15 +141,16 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   setIncludedSources() {
-    let sources: Array<{
-      source: MeterSource, controlName: string
-    }> = EnergySources.map(source => { return { source: source, controlName: source.replace(/\s+/g, '_') }; });
-    this.includedSources = [];
-    for (let source of sources) {
-      if (this.form.contains('utilityData_' + source.controlName)) {
-        this.includedSources.push(source);
-      }
-    }
+    // let sources: Array<{
+    //   source: MeterSource, controlName: string
+    // }> = EnergySources.map(source => { return { source: source, controlName: source.replace(/\s+/g, '_') }; });
+    // this.includedSources = [];
+    // for (let source of sources) {
+    //   if (this.form.contains('utilityData_' + source.controlName)) {
+    //     this.includedSources.push(source);
+    //   }
+    // }
+    this.includedSources = getIncludedSources(this.form);
     this.setAvailableSources();
   }
 
@@ -217,7 +222,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
       };
       if (utilityData) {
         let energyUseFormArray = utilityDataForm.controls.energyUse as FormArray;
-        if(energyUseFormArray){
+        if (energyUseFormArray) {
           energyUseFormArray.controls.forEach((energyUseGroup: FormGroup) => {
             if (!energyUseGroup.controls.overrideEnergyUse.value) {
               let operatingConditions = this.energyUseEquipment.operatingConditionsData.find(opCond => { return opCond.year == energyUseGroup.controls.year.value });

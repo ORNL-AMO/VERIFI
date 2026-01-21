@@ -4,7 +4,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EnergyEquipmentOperatingConditionsData, EquipmentType, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
-import { EquipmentTypes } from '../facility-energy-use-equipment-form/equipmentTypes';
+import { EquipmentTypes } from '../calculations/equipmentTypes';
 import { FormGroup } from '@angular/forms';
 import { FacilityEnergyUseEquipmentFormService } from '../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
