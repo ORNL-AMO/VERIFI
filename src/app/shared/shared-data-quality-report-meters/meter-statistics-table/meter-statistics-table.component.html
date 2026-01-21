@@ -1,158 +1,236 @@
-<div *ngIf="meterData && meterData.length > 0" class="container-fluid px-0">
+@if (meterData && meterData.length > 0) {
+  <div class="container-fluid px-0">
     <table class="table table-bordered rounded">
-        <thead>
-            <tr>
-                <th class="header"></th>
-                <th class="header">Minimum</th>
-                <th class="header">Maximum</th>
-                <th class="header">Average</th>
-                <th class="header">Median</th>
-                <th class="header">Median Absolute Deviation <br>(MAD)</th>
-                <th class="header">Median - 5 MAD</th>
-                <th class="header">Median + 5 MAD</th>
-                <th class="header">Number of Outliers</th>
+      <thead>
+        <tr>
+          <th class="header"></th>
+          <th class="header">Minimum</th>
+          <th class="header">Maximum</th>
+          <th class="header">Average</th>
+          <th class="header">Median</th>
+          <th class="header">Median Absolute Deviation <br>(MAD)</th>
+          <th class="header">Median - 5 MAD</th>
+          <th class="header">Median + 5 MAD</th>
+          <th class="header">Number of Outliers</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)) {
+          <tr class="align-middle">
+            <td>
+              Total Consumption ({{ unit }})
+            </td>
+            <td>
+              @if (energyStats.min !== null) {
+                <span>
+                  {{ energyStats.min | customNumber }}
+                </span>
+              }
+              @if (energyStats.min === null || isValueNaN(energyStats.min)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.max !== null) {
+                <span>
+                  {{ energyStats.max | customNumber }}
+                </span>
+              }
+              @if (energyStats.max === null || isValueNaN(energyStats.max)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.average !== null) {
+                <span>
+                  {{ energyStats.average | customNumber }}
+                </span>
+              }
+              @if (energyStats.average === null || isValueNaN(energyStats.average)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.median !== null) {
+                <span>
+                  {{ energyStats.median | customNumber }}
+                </span>
+              }
+              @if (energyStats.median === null || isValueNaN(energyStats.median)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.medianAbsDev !== null) {
+                <span>
+                  {{ energyStats.medianAbsDev | customNumber }}
+                </span>
+              }
+              @if (energyStats.medianAbsDev === null || isValueNaN(energyStats.medianAbsDev)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.medianminus2_5MAD !== null) {
+                <span>
+                  {{ energyStats.medianminus2_5MAD | customNumber }}
+                </span>
+              }
+              @if (energyStats.medianminus2_5MAD === null || isValueNaN(energyStats.medianminus2_5MAD)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.medianplus2_5MAD !== null) {
+                <span>
+                  {{ energyStats.medianplus2_5MAD | customNumber }}
+                </span>
+              }
+              @if (energyStats.medianplus2_5MAD === null || isValueNaN(energyStats.medianplus2_5MAD)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (energyStats.outliers !== null) {
+                <span>
+                  @if (energyStats.outliers > 0) {
+                    <span class="badge bg-warning text-dark px-2 py-1 fs-5">{{ energyStats.outliers }}</span>
+                  }
+                  @if (energyStats.outliers === 0) {
+                    <span class="badge bg-success px-2 py-1 fs-5">0</span>
+                  }
+                </span>
+              }
+              @if (energyStats.outliers === null || isValueNaN(energyStats.outliers)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+          </tr>
+        }
+        @if (costStats.average != 0 && !isValueNaN(costStats.average)) {
+          <tr class="align-middle">
+            <td>
+              Cost ($)
+            </td>
+            <td>
+              @if (costStats.min !== null) {
+                <span>
+                  {{ costStats.min | customNumber:true }}
+                </span>
+              }
+              @if (costStats.min === null || isValueNaN(costStats.min)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.max !== null) {
+                <span>
+                  {{ costStats.max | customNumber:true }}
+                </span>
+              }
+              @if (costStats.max === null || isValueNaN(costStats.max)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.average !== null) {
+                <span>
+                  {{ costStats.average | customNumber:true }}
+                </span>
+              }
+              @if (costStats.average === null || isValueNaN(costStats.average)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.median !== null) {
+                <span>
+                  {{ costStats.median | customNumber:true }}
+                </span>
+              }
+              @if (costStats.median === null || isValueNaN(costStats.median)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.medianAbsDev !== null) {
+                <span>
+                  {{ costStats.medianAbsDev | customNumber:true }}
+                </span>
+              }
+              @if (costStats.medianAbsDev === null || isValueNaN(costStats.medianAbsDev)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.medianminus2_5MAD !== null) {
+                <span>
+                  {{ costStats.medianminus2_5MAD | customNumber:true }}
+                </span>
+              }
+              @if (costStats.medianminus2_5MAD === null || isValueNaN(costStats.medianminus2_5MAD)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.medianplus2_5MAD !== null) {
+                <span>
+                  {{ costStats.medianplus2_5MAD | customNumber:true }}
+                </span>
+              }
+              @if (costStats.medianplus2_5MAD === null || isValueNaN(costStats.medianplus2_5MAD)) {
+                <span>
+                  &mdash;
+                </span>
+              }
+            </td>
+            <td>
+              @if (costStats.outliers !== null) {
+                <span>
+                  @if (costStats.outliers > 0) {
+                    <span class="badge bg-warning text-dark px-2 py-1 fs-5">{{ costStats.outliers }}</span>
+                  }
+                  @if (costStats.outliers === 0) {
+                    <span class="badge bg-success px-2 py-1 fs-5">0</span>
+                  }
+                </span>
+              }
+              @if (costStats.outliers === null || isValueNaN(costStats.outliers)) {
+                <span>
+                  &mdash;
+                </span>
+              }
             </tr>
-        </thead>
-        <tbody>
-            <tr class="align-middle" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
-                <td>
-                    Total Consumption ({{ unit }})
-                </td>
-                <td>
-                    <span *ngIf="energyStats.min !== null">
-                        {{ energyStats.min | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.min === null || isValueNaN(energyStats.min)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.max !== null">
-                        {{ energyStats.max | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.max === null || isValueNaN(energyStats.max)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.average !== null">
-                        {{ energyStats.average | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.average === null || isValueNaN(energyStats.average)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.median !== null">
-                        {{ energyStats.median | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.median === null || isValueNaN(energyStats.median)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.medianAbsDev !== null">
-                        {{ energyStats.medianAbsDev | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.medianAbsDev === null || isValueNaN(energyStats.medianAbsDev)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.medianminus2_5MAD !== null">
-                        {{ energyStats.medianminus2_5MAD | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.medianminus2_5MAD === null || isValueNaN(energyStats.medianminus2_5MAD)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.medianplus2_5MAD !== null">
-                        {{ energyStats.medianplus2_5MAD | customNumber }}
-                    </span>
-                    <span *ngIf="energyStats.medianplus2_5MAD === null || isValueNaN(energyStats.medianplus2_5MAD)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="energyStats.outliers !== null">
-                        <span *ngIf="energyStats.outliers > 0" class="badge bg-warning text-dark px-2 py-1 fs-5">{{ energyStats.outliers }}</span>
-                        <span *ngIf="energyStats.outliers === 0" class="badge bg-success px-2 py-1 fs-5">0</span>
-                    </span>
-                    <span *ngIf="energyStats.outliers === null || isValueNaN(energyStats.outliers)">
-                        &mdash;
-                    </span>
-                </td>
-            </tr>
-            <tr class="align-middle" *ngIf="costStats.average != 0 && !isValueNaN(costStats.average)">
-                <td>
-                    Cost ($)
-                </td>
-                <td>
-                    <span *ngIf="costStats.min !== null">
-                        {{ costStats.min | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.min === null || isValueNaN(costStats.min)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="costStats.max !== null">
-                        {{ costStats.max | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.max === null || isValueNaN(costStats.max)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="costStats.average !== null">
-                        {{ costStats.average | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.average === null || isValueNaN(costStats.average)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="costStats.median !== null">
-                        {{ costStats.median | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.median === null || isValueNaN(costStats.median)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="costStats.medianAbsDev !== null">
-                        {{ costStats.medianAbsDev | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.medianAbsDev === null || isValueNaN(costStats.medianAbsDev)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                    <span *ngIf="costStats.medianminus2_5MAD !== null">
-                        {{ costStats.medianminus2_5MAD | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.medianminus2_5MAD === null || isValueNaN(costStats.medianminus2_5MAD)">
-                        &mdash;
-                    </span>
-                </td>
-                 <td>
-                    <span *ngIf="costStats.medianplus2_5MAD !== null">
-                        {{ costStats.medianplus2_5MAD | customNumber:true }}
-                    </span>
-                    <span *ngIf="costStats.medianplus2_5MAD === null || isValueNaN(costStats.medianplus2_5MAD)">
-                        &mdash;
-                    </span>
-                </td>
-                <td>
-                   <span *ngIf="costStats.outliers !== null">
-                        <span *ngIf="costStats.outliers > 0" class="badge bg-warning text-dark px-2 py-1 fs-5">{{ costStats.outliers }}</span>
-                        <span *ngIf="costStats.outliers === 0" class="badge bg-success px-2 py-1 fs-5">0</span>
-                    </span>
-                    <span *ngIf="costStats.outliers === null || isValueNaN(costStats.outliers)">
-                        &mdash;
-                    </span>
-            </tr>
+          }
         </tbody>
-    </table>
-</div>
+      </table>
+    </div>
+  }

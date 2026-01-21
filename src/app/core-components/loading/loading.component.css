@@ -11,7 +11,55 @@ div#loading {
     opacity: 0;
     transition: .5s opacity;
 }
+
 #loading.open {
     top: calc(50% - 100px);
     opacity: 1;
+}
+
+#loading-info {
+    position: fixed;
+    top: -9999px;
+    left: 50%;
+    background-color: white;
+    box-shadow: 0px 0px 31px #0000002e;
+    z-index: 9999;
+    text-align: center;
+    padding: 20px;
+    width: 500px;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 1rem;
+    transition: .5s opacity;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#loading-info.open {
+    opacity: 1;
+    top: 50%;
+}
+
+.message-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 1rem;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.icon-style {
+    font-size: 1.2rem;
+}
+
+.message-text {
+    font-size: 1.1rem;
+    color: #212529;
+}
+
+.title-style {
+    font-size: 1.5rem;
 }

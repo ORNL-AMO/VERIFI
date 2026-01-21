@@ -93,7 +93,9 @@ export interface MonthlyAnalysisSummaryData {
   twentyPercentSavings: number,
   twentyFivePercentSavings: number,
   thirtyPercentTarget: number,
-  thirtyPercentSavings: number
+  thirtyPercentSavings: number,
+  missingValueWarning: boolean,
+  missingPredictors: Array<string>
 }
 
 export interface AnnualAnalysisSummary {
@@ -120,7 +122,9 @@ export interface AnnualAnalysisSummary {
   // adjustedStar: number,
   // adjustedStarStar: number
   isBanked: boolean,
-  isIntermediateBanked: boolean
+  isIntermediateBanked: boolean,
+  missingPredictorValue: boolean,
+  missingPredictors: Array<string>
 }
 
 
@@ -223,6 +227,9 @@ export interface AnalysisGroup {
   predictorVariables: Array<AnalysisGroupPredictorVariable>,
   regressionModelYear: number,
   regressionModelStartMonth: number,
+  regressionStartYear: number,
+  regressionModelEndMonth: number,
+  regressionEndYear: number,
   regressionConstant: number,
   groupErrors: GroupErrors,
   specifiedMonthlyPercentBaseload: boolean,
@@ -268,6 +275,10 @@ export interface GroupErrors {
   missingRegressionConstant: boolean,
   missingRegressionModelYear: boolean,
   missingRegressionModelStartMonth: boolean,
+  missingRegressionStartYear: boolean,
+  missingRegressionModelEndMonth: boolean,
+  missingRegressionEndYear: boolean,
+  invalidModelDateSelection: boolean,
   missingRegressionModelSelection: boolean,
   missingRegressionPredictorCoef: boolean,
   noProductionVariables: boolean,

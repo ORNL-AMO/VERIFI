@@ -1,6 +1,5 @@
 {
   "compileOnSave": false,
-  "enableIvy": false,
   "compilerOptions": {
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -8,24 +7,20 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "module": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
     "typeRoots": [
       "node_modules/@types"
-    ],
-    "lib": [
-      "ES2022",
-      "dom"
     ]
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "typeCheckHostBindings": false
   },
   "allowSyntheticDefaultImports":true
 }

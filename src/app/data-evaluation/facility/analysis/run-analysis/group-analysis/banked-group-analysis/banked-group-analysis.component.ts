@@ -94,7 +94,7 @@ export class BankedGroupAnalysisComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     // this.bankedAnalysisItem.reportYear = this.selectedGroup.bankedAnalysisYear;
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {

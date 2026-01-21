@@ -127,7 +127,7 @@ export class AccountHomeComponent implements OnInit {
 
 
     if (typeof Worker !== 'undefined') {
-      this.annualEnergyAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
+      this.annualEnergyAnalysisWorker = new Worker(new URL('../../../web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
         this.annualEnergyAnalysisWorker.terminate();
         if (!data.error) {
@@ -181,7 +181,7 @@ export class AccountHomeComponent implements OnInit {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
 
     if (typeof Worker !== 'undefined') {
-      this.annualWaterAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
+      this.annualWaterAnalysisWorker = new Worker(new URL('../../../web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
         this.annualWaterAnalysisWorker.terminate();
         if (!data.error) {
@@ -241,7 +241,7 @@ export class AccountHomeComponent implements OnInit {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
 
     if (typeof Worker !== 'undefined') {
-      this.accountOverviewWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
+      this.accountOverviewWorker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));
       this.accountOverviewWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.accountHomeService.accountOverviewData.next(data.accountOverviewData);

@@ -1,3 +1,8 @@
 .card-header{
     border-bottom: none;
 }
+
+.h4-text{
+    font-size: calc(1.275rem + .3vw);
+    margin-top: auto;
+}

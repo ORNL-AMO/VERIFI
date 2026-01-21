@@ -4,7 +4,9 @@ Content Container
   .wrapper {
     background-color: white;
     margin: 30px;
-    padding: 20px 30px 30px;
+    /* padding: 20px 30px 30px; */
+    padding-left: 15px;
+    padding-right: 15px;
   }
   .wrapper.help-panel {
     margin-left: 0px;

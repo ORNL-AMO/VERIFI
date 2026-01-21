@@ -1,252 +1,353 @@
 <table class="table utility-data table-sm table-bordered table-hover">
-    <thead>
-        <tr class="table-mh">
-            <th></th>
-            <th colspan="2">
-                Latest Month 
-                <br><span class="small" *ngIf="dateRange.endDate">
-                    ({{dateRange.endDate | date: 'MMM, y'}})</span>
-            </th>
-            <th colspan="2">
-                Previous Year
-                <br>
-                <span class="small" *ngIf="previousYear">({{previousYear | date: 'MMM, y'}})</span>
-            </th>
-            <th colspan="2">
-                Monthly Average
-                <br>
-                <span class="small" *ngIf="dateRange.startDate">
-                    ({{dateRange.startDate | date: 'MMM, y'}} -
-                    {{dateRange.endDate | date: 'MMM, y'}})</span>
-            </th>
+  <thead>
+    <tr class="table-mh">
+      <th></th>
+      <th colspan="2">
+        Latest Month
+        <br>@if (dateRange.endDate) {
+          <span class="small">
+          ({{dateRange.endDate | date: 'MMM, y'}})</span>
+        }
+      </th>
+      <th colspan="2">
+        Previous Year
+        <br>
+          @if (previousYear) {
+            <span class="small">({{previousYear | date: 'MMM, y'}})</span>
+          }
+        </th>
+        <th colspan="2">
+          Monthly Average
+          <br>
+            @if (dateRange.startDate) {
+              <span class="small">
+                ({{dateRange.startDate | date: 'MMM, y'}} -
+              {{dateRange.endDate | date: 'MMM, y'}})</span>
+            }
+          </th>
         </tr>
         <tr>
-            <th>Utility</th>
-            <th>Utility Use <br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)</th>
-            <th>Utility Cost</th>
-            <th>Utility Use <br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)</th>
-            <th>Utility Cost</th>
-            <th>Utility Use <br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)</th>
-            <th>Utility Cost</th>
+          <th>Utility</th>
+          <th>Utility Use <br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)</th>
+          <th>Utility Cost</th>
+          <th>Utility Use <br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)</th>
+          <th>Utility Cost</th>
+          <th>Utility Use <br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)</th>
+          <th>Utility Cost</th>
         </tr>
-    </thead>
-    <tbody class="table-group-divider">
-        <tr *ngFor="let useAndCost of sourcesUseAndCost">
+      </thead>
+      <tbody class="table-group-divider">
+        @for (useAndCost of sourcesUseAndCost; track useAndCost) {
+          <tr>
             <td>
-                {{useAndCost.source}}
+              {{useAndCost.source}}
             </td>
             <!--Last Month-->
             <td class="text-center">
-                <span *ngIf="useAndCost.end.energyUse">
-                    {{useAndCost.end.energyUse | customNumber}}
+              @if (useAndCost.end.energyUse) {
+                <span>
+                  {{useAndCost.end.energyUse | customNumber}}
                 </span>
-                <span *ngIf="!useAndCost.end.energyUse">
-                    &mdash;
+              }
+              @if (!useAndCost.end.energyUse) {
+                <span>
+                  &mdash;
                 </span>
+              }
             </td>
             <td class="text-center">
-                <span *ngIf="useAndCost.end.cost">
-                    {{useAndCost.end.cost | customNumber:true}}
+              @if (useAndCost.end.cost) {
+                <span>
+                  {{useAndCost.end.cost | customNumber:true}}
                 </span>
-                <span *ngIf="!useAndCost.end.cost">
-                    &mdash;
+              }
+              @if (!useAndCost.end.cost) {
+                <span>
+                  &mdash;
                 </span>
+              }
             </td>
-
             <!--Year prior-->
             <td>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.previousYear.energyUse">
-                            {{useAndCost.previousYear.energyUse | customNumber}}
-                        </span>
-                        <span *ngIf="!useAndCost.previousYear.energyUse">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.previousYear.energyUseChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.previousYear.energyUseChange < 0, 'bg-success': useAndCost.previousYear.energyUseChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCost.previousYear.energyUseChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCost.previousYear.energyUseChange < 0"></span>
-                            {{useAndCost.previousYear.energyUseChange | customNumber}}
-                        </span>
-                    </div>
+              <div class="d-flex w-100">
+                <div class="w-50 text-right pe-1 print-full">
+                  @if (useAndCost.previousYear.energyUse) {
+                    <span>
+                      {{useAndCost.previousYear.energyUse | customNumber}}
+                    </span>
+                  }
+                  @if (!useAndCost.previousYear.energyUse) {
+                    <span>
+                      &mdash;
+                    </span>
+                  }
                 </div>
+                <div class="w-50 ps-1 hide-print">
+                  @if (useAndCost.previousYear.energyUseChange) {
+                    <span class="small ps-2 badge"
+                      [ngClass]="{'bg-danger': useAndCost.previousYear.energyUseChange < 0, 'bg-success': useAndCost.previousYear.energyUseChange > 0}">
+                      @if (useAndCost.previousYear.energyUseChange > 0) {
+                        <span class="fa fa-chevron-down"></span>
+                      }
+                      @if (useAndCost.previousYear.energyUseChange < 0) {
+                        <span class="fa fa-chevron-up"></span>
+                      }
+                      {{useAndCost.previousYear.energyUseChange | customNumber}}
+                    </span>
+                  }
+                </div>
+              </div>
             </td>
             <td>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.previousYear.cost">
-                            {{useAndCost.previousYear.cost | customNumber:true}}
-                        </span>
-                        <span *ngIf="!useAndCost.previousYear.cost">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.previousYear.costChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.previousYear.costChange < 0, 'bg-success': useAndCost.previousYear.costChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCost.previousYear.costChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCost.previousYear.costChange < 0"></span>
-                            {{useAndCost.previousYear.costChange | customNumber:true}}
-                        </span>
-                    </div>
+              <div class="d-flex w-100">
+                <div class="w-50 text-right pe-1 print-full">
+                  @if (useAndCost.previousYear.cost) {
+                    <span>
+                      {{useAndCost.previousYear.cost | customNumber:true}}
+                    </span>
+                  }
+                  @if (!useAndCost.previousYear.cost) {
+                    <span>
+                      &mdash;
+                    </span>
+                  }
                 </div>
+                <div class="w-50 ps-1 hide-print">
+                  @if (useAndCost.previousYear.costChange) {
+                    <span class="small ps-2 badge"
+                      [ngClass]="{'bg-danger': useAndCost.previousYear.costChange < 0, 'bg-success': useAndCost.previousYear.costChange > 0}">
+                      @if (useAndCost.previousYear.costChange > 0) {
+                        <span class="fa fa-chevron-down"></span>
+                      }
+                      @if (useAndCost.previousYear.costChange < 0) {
+                        <span class="fa fa-chevron-up"></span>
+                      }
+                      {{useAndCost.previousYear.costChange | customNumber:true}}
+                    </span>
+                  }
+                </div>
+              </div>
             </td>
-
             <!--Average-->
             <td>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.average.energyUse">
-                            {{useAndCost.average.energyUse | customNumber}}
-                        </span>
-                        <span *ngIf="!useAndCost.average.energyUse">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.average.energyUseChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.average.energyUseChange < 0, 'bg-success': useAndCost.average.energyUseChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCost.average.energyUseChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCost.average.energyUseChange < 0"></span>
-                            {{useAndCost.average.energyUseChange | customNumber}}
-                        </span>
-                    </div>
+              <div class="d-flex w-100">
+                <div class="w-50 text-right pe-1 print-full">
+                  @if (useAndCost.average.energyUse) {
+                    <span>
+                      {{useAndCost.average.energyUse | customNumber}}
+                    </span>
+                  }
+                  @if (!useAndCost.average.energyUse) {
+                    <span>
+                      &mdash;
+                    </span>
+                  }
                 </div>
+                <div class="w-50 ps-1 hide-print">
+                  @if (useAndCost.average.energyUseChange) {
+                    <span class="small ps-2 badge"
+                      [ngClass]="{'bg-danger': useAndCost.average.energyUseChange < 0, 'bg-success': useAndCost.average.energyUseChange > 0}">
+                      @if (useAndCost.average.energyUseChange > 0) {
+                        <span class="fa fa-chevron-down"></span>
+                      }
+                      @if (useAndCost.average.energyUseChange < 0) {
+                        <span class="fa fa-chevron-up"></span>
+                      }
+                      {{useAndCost.average.energyUseChange | customNumber}}
+                    </span>
+                  }
+                </div>
+              </div>
             </td>
             <td>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.average.cost">
-                            {{useAndCost.average.cost | customNumber:true}}
-                        </span>
-                        <span *ngIf="!useAndCost.average.cost">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.average.costChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.average.costChange < 0, 'bg-success': useAndCost.average.costChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCost.average.costChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCost.average.costChange < 0"></span>
-                            {{useAndCost.average.costChange | customNumber:true}}
-                        </span>
-                    </div>
+              <div class="d-flex w-100">
+                <div class="w-50 text-right pe-1 print-full">
+                  @if (useAndCost.average.cost) {
+                    <span>
+                      {{useAndCost.average.cost | customNumber:true}}
+                    </span>
+                  }
+                  @if (!useAndCost.average.cost) {
+                    <span>
+                      &mdash;
+                    </span>
+                  }
                 </div>
+                <div class="w-50 ps-1 hide-print">
+                  @if (useAndCost.average.costChange) {
+                    <span class="small ps-2 badge"
+                      [ngClass]="{'bg-danger': useAndCost.average.costChange < 0, 'bg-success': useAndCost.average.costChange > 0}">
+                      @if (useAndCost.average.costChange > 0) {
+                        <span class="fa fa-chevron-down"></span>
+                      }
+                      @if (useAndCost.average.costChange < 0) {
+                        <span class="fa fa-chevron-up"></span>
+                      }
+                      {{useAndCost.average.costChange | customNumber:true}}
+                    </span>
+                  }
+                </div>
+              </div>
             </td>
-
-        </tr>
-    </tbody>
-    <tfoot>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
         <tr>
-            <th>
-                Total
-            </th>
-            <!--previous month-->
-            <th class="text-center">
-                <span *ngIf="useAndCostTotal.end.energyUse">
-                    {{useAndCostTotal.end.energyUse | customNumber}}
-                </span>
-                <span *ngIf="!useAndCostTotal.end.energyUse">
-                    &mdash;
-                </span>
-            </th>
-            <th class="text-center">
-                <span *ngIf="useAndCostTotal.end.cost">
-                    {{useAndCostTotal.end.cost | customNumber:true}}
-                </span>
-                <span *ngIf="!useAndCostTotal.end.cost">
-                    &mdash;
-                </span>
-            </th>
+          <th>
+            Total
+          </th>
+          <!--previous month-->
+          <th class="text-center">
+            @if (useAndCostTotal.end.energyUse) {
+              <span>
+                {{useAndCostTotal.end.energyUse | customNumber}}
+              </span>
+            }
+            @if (!useAndCostTotal.end.energyUse) {
+              <span>
+                &mdash;
+              </span>
+            }
+          </th>
+          <th class="text-center">
+            @if (useAndCostTotal.end.cost) {
+              <span>
+                {{useAndCostTotal.end.cost | customNumber:true}}
+              </span>
+            }
+            @if (!useAndCostTotal.end.cost) {
+              <span>
+                &mdash;
+              </span>
+            }
+          </th>
 
-            <!--year prior-->
-            <th>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.previousYear.energyUse">
-                            {{useAndCostTotal.previousYear.energyUse | customNumber}}
-                        </span>
-                        <span *ngIf="!useAndCostTotal.previousYear.energyUse">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.previousYear.energyUseChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.energyUseChange < 0, 'bg-success': useAndCostTotal.previousYear.energyUseChange > 0}">
-                            <span class="fa fa-chevron-down"
-                                *ngIf="useAndCostTotal.previousYear.energyUseChange > 0"></span>
-                            <span class="fa fa-chevron-up"
-                                *ngIf="useAndCostTotal.previousYear.energyUseChange < 0"></span>
-                            {{useAndCostTotal.previousYear.energyUseChange | customNumber}}
-                        </span>
-                    </div>
-                </div>
-            </th>
-            <th>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.previousYear.cost">
-                            {{useAndCostTotal.previousYear.cost | customNumber:true}}
-                        </span>
-                        <span *ngIf="!useAndCostTotal.previousYear.cost">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.previousYear.costChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.costChange < 0, 'bg-success': useAndCostTotal.previousYear.costChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCostTotal.previousYear.costChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCostTotal.previousYear.costChange < 0"></span>
-                            {{useAndCostTotal.previousYear.costChange | customNumber:true}}
-                        </span>
-                    </div>
-                </div>
-            </th>
+          <!--year prior-->
+          <th>
+            <div class="d-flex w-100">
+              <div class="w-50 text-right pe-1 print-full">
+                @if (useAndCostTotal.previousYear.energyUse) {
+                  <span>
+                    {{useAndCostTotal.previousYear.energyUse | customNumber}}
+                  </span>
+                }
+                @if (!useAndCostTotal.previousYear.energyUse) {
+                  <span>
+                    &mdash;
+                  </span>
+                }
+              </div>
+              <div class="w-50 ps-1 hide-print">
+                @if (useAndCostTotal.previousYear.energyUseChange) {
+                  <span class="small ps-2 badge"
+                    [ngClass]="{'bg-danger': useAndCostTotal.previousYear.energyUseChange < 0, 'bg-success': useAndCostTotal.previousYear.energyUseChange > 0}">
+                    @if (useAndCostTotal.previousYear.energyUseChange > 0) {
+                      <span class="fa fa-chevron-down"
+                      ></span>
+                    }
+                    @if (useAndCostTotal.previousYear.energyUseChange < 0) {
+                      <span class="fa fa-chevron-up"
+                      ></span>
+                    }
+                    {{useAndCostTotal.previousYear.energyUseChange | customNumber}}
+                  </span>
+                }
+              </div>
+            </div>
+          </th>
+          <th>
+            <div class="d-flex w-100">
+              <div class="w-50 text-right pe-1 print-full">
+                @if (useAndCostTotal.previousYear.cost) {
+                  <span>
+                    {{useAndCostTotal.previousYear.cost | customNumber:true}}
+                  </span>
+                }
+                @if (!useAndCostTotal.previousYear.cost) {
+                  <span>
+                    &mdash;
+                  </span>
+                }
+              </div>
+              <div class="w-50 ps-1 hide-print">
+                @if (useAndCostTotal.previousYear.costChange) {
+                  <span class="small ps-2 badge"
+                    [ngClass]="{'bg-danger': useAndCostTotal.previousYear.costChange < 0, 'bg-success': useAndCostTotal.previousYear.costChange > 0}">
+                    @if (useAndCostTotal.previousYear.costChange > 0) {
+                      <span class="fa fa-chevron-down"></span>
+                    }
+                    @if (useAndCostTotal.previousYear.costChange < 0) {
+                      <span class="fa fa-chevron-up"></span>
+                    }
+                    {{useAndCostTotal.previousYear.costChange | customNumber:true}}
+                  </span>
+                }
+              </div>
+            </div>
+          </th>
 
-            <!--average-->
-            <th>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.average.energyUse">
-                            {{useAndCostTotal.average.energyUse | customNumber}}
-                        </span>
-                        <span *ngIf="!useAndCostTotal.average.energyUse">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.average.energyUseChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.average.energyUseChange < 0, 'bg-success': useAndCostTotal.average.energyUseChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCostTotal.average.energyUseChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCostTotal.average.energyUseChange < 0"></span>
-                            {{useAndCostTotal.average.energyUseChange | customNumber}}
-                        </span>
-                    </div>
-                </div>
-            </th>
-            <th>
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.average.cost">
-                            {{useAndCostTotal.average.cost | customNumber:true}}
-                        </span>
-                        <span *ngIf="!useAndCostTotal.average.cost">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.average.costChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.average.costChange < 0, 'bg-success': useAndCostTotal.average.costChange > 0}">
-                            <span class="fa fa-chevron-down" *ngIf="useAndCostTotal.average.costChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCostTotal.average.costChange < 0"></span>
-                            {{useAndCostTotal.average.costChange | customNumber:true}}
-                        </span>
-                    </div>
-                </div>
-            </th>
+          <!--average-->
+          <th>
+            <div class="d-flex w-100">
+              <div class="w-50 text-right pe-1 print-full">
+                @if (useAndCostTotal.average.energyUse) {
+                  <span>
+                    {{useAndCostTotal.average.energyUse | customNumber}}
+                  </span>
+                }
+                @if (!useAndCostTotal.average.energyUse) {
+                  <span>
+                    &mdash;
+                  </span>
+                }
+              </div>
+              <div class="w-50 ps-1 hide-print">
+                @if (useAndCostTotal.average.energyUseChange) {
+                  <span class="small ps-2 badge"
+                    [ngClass]="{'bg-danger': useAndCostTotal.average.energyUseChange < 0, 'bg-success': useAndCostTotal.average.energyUseChange > 0}">
+                    @if (useAndCostTotal.average.energyUseChange > 0) {
+                      <span class="fa fa-chevron-down"></span>
+                    }
+                    @if (useAndCostTotal.average.energyUseChange < 0) {
+                      <span class="fa fa-chevron-up"></span>
+                    }
+                    {{useAndCostTotal.average.energyUseChange | customNumber}}
+                  </span>
+                }
+              </div>
+            </div>
+          </th>
+          <th>
+            <div class="d-flex w-100">
+              <div class="w-50 text-right pe-1 print-full">
+                @if (useAndCostTotal.average.cost) {
+                  <span>
+                    {{useAndCostTotal.average.cost | customNumber:true}}
+                  </span>
+                }
+                @if (!useAndCostTotal.average.cost) {
+                  <span>
+                    &mdash;
+                  </span>
+                }
+              </div>
+              <div class="w-50 ps-1 hide-print">
+                @if (useAndCostTotal.average.costChange) {
+                  <span class="small ps-2 badge"
+                    [ngClass]="{'bg-danger': useAndCostTotal.average.costChange < 0, 'bg-success': useAndCostTotal.average.costChange > 0}">
+                    @if (useAndCostTotal.average.costChange > 0) {
+                      <span class="fa fa-chevron-down"></span>
+                    }
+                    @if (useAndCostTotal.average.costChange < 0) {
+                      <span class="fa fa-chevron-up"></span>
+                    }
+                    {{useAndCostTotal.average.costChange | customNumber:true}}
+                  </span>
+                }
+              </div>
+            </div>
+          </th>
         </tr>
-    </tfoot>
-</table>
+      </tfoot>
+    </table>

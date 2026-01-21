@@ -1,66 +1,84 @@
-<div class="upload-banner banner d-flex justify-content-between w-100" *ngIf="inDashboard">
+@if (inDashboard) {
+  <div class="upload-banner banner d-flex justify-content-between w-100">
     <div class="banner-title">
-        <h3><span class="fa fa-temperature-half"></span> Weather Data</h3>
+      <h3><span class="fa fa-temperature-half"></span> Weather Data</h3>
     </div>
-</div>
+  </div>
+}
 
 <div class="wrapper main-content">
-    <h4>
-        Weather Data Used by VERIFI
-    </h4>
-    <p>
-        This page provides a detailed look of the weather data available for use by VERIFI. The weather data is pulled
-        from <a href="https://www.ncei.noaa.gov/" target="_blank">The National Centers for Environmental
-            Information</a>. If quality
-        data is found, VERIFI can automatically calculate heating and cooling degree days, average relative humidity and
-        average dry bulb temperature. The calculated weather data can
-        be used as predictor data for analysis.
-    </p>
-    <p>
-        For much more information on all things degree days, visit <a href="https://www.degreedays.net/"
-            target="_blank">https://www.degreedays.net/</a>
-    </p>
-    <p>
-        Average relative humidty and dry bulb temperature are calculated using a weighted average where the weights are
-        the number of minutes that a reading covers.
-    </p>
-    <hr>
-    <router-outlet></router-outlet>
+  <h4>
+    Weather Data Used by VERIFI
+  </h4>
+  <p>
+    This page provides a detailed look of the weather data available for use by VERIFI. The weather data is pulled
+    from <a href="https://www.ncei.noaa.gov/" target="_blank">The National Centers for Environmental
+  Information</a>. If quality
+  data is found, VERIFI can automatically calculate heating and cooling degree days, average relative humidity and
+  average dry bulb temperature. The calculated weather data can
+  be used as predictor data for analysis.
+</p>
+<p>
+  For much more information on all things degree days, visit <a href="https://www.degreedays.net/"
+target="_blank">https://www.degreedays.net/</a>
+</p>
+<p>
+  Average relative humidty and dry bulb temperature are calculated using a weighted average where the weights are
+  the number of minutes that a reading covers.
+</p>
+<hr>
+  <router-outlet></router-outlet>
 </div>
 
 <div [ngClass]="{'windowOverlay': applyToFacility}"></div>
 <div class="popup" [class.open]="applyToFacility">
-    <div class="popup-header">Create Weather Data Predictors
-        <button class="item-right" (click)="cancelApplyToFacility()">x</button>
-    </div>
-    <div class="popup-body">
-        <p *ngIf="weatherDataSelection == 'HDD'">Select the facility to create new heating degree day predictors using
-            the selected weather station and temperature threshold.</p>
-        <p *ngIf="weatherDataSelection == 'CDD'">Select the facility to create new cooling degree day predictors using
-            the selected weather station and temperature threshold.</p>
-        <p *ngIf="weatherDataSelection == 'degreeDays'">Select the facility to create new heating and cooling degree day
-            predictors using the selected weather station and temperature thresholds.</p>
-        <p *ngIf="weatherDataSelection == 'relativeHumidity'">Select the facility to create new relative humidity
-            predictors using the weighted average relative humidity of the selected station.</p>
-        <p *ngIf="weatherDataSelection == 'dryBulbTemp'">Select the facility to create new dry bulb temperature
-            predictors using the weighted average dry bulb temp of the selected station.</p>
-        <form>
-            <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility"
-                (change)="setFacilityData()">
-                <option *ngFor="let facility of facilities" [ngValue]="facility">{{facility.name}}</option>
-            </select>
-        </form>
-        <div class="alert alert-warning" *ngIf="facilityPredictorData?.length == 0 && facilityMeterData?.length != 0">
-            No facility predictor entries found. Entries will be created to match facility meter dates.
-        </div>
-        <div class="alert alert-danger" *ngIf="facilityMeterData?.length == 0">
-            No meter data found for this facility, predictors cannot be created.
-        </div>
-    </div>
-    <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelApplyToFacility()">Cancel</button>
-        <button class="btn action-btn" (click)="confirmCreate()"
-            [disabled]="!selectedFacility || facilityMeterData?.length == 0">Create
-            Predictors</button>
-    </div>
+  <div class="popup-header">Create Weather Data Predictors
+    <button class="item-right" (click)="cancelApplyToFacility()">x</button>
+  </div>
+  <div class="popup-body">
+    @if (weatherDataSelection == 'HDD') {
+      <p>Select the facility to create new heating degree day predictors using
+      the selected weather station and temperature threshold.</p>
+    }
+    @if (weatherDataSelection == 'CDD') {
+      <p>Select the facility to create new cooling degree day predictors using
+      the selected weather station and temperature threshold.</p>
+    }
+    @if (weatherDataSelection == 'degreeDays') {
+      <p>Select the facility to create new heating and cooling degree day
+      predictors using the selected weather station and temperature thresholds.</p>
+    }
+    @if (weatherDataSelection == 'relativeHumidity') {
+      <p>Select the facility to create new relative humidity
+      predictors using the weighted average relative humidity of the selected station.</p>
+    }
+    @if (weatherDataSelection == 'dryBulbTemp') {
+      <p>Select the facility to create new dry bulb temperature
+      predictors using the weighted average dry bulb temp of the selected station.</p>
+    }
+    <form>
+      <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility"
+        (change)="setFacilityData()">
+        @for (facility of facilities; track facility) {
+          <option [ngValue]="facility">{{facility.name}}</option>
+        }
+      </select>
+    </form>
+    @if (facilityPredictorData?.length == 0 && facilityMeterData?.length != 0) {
+      <div class="alert alert-warning">
+        No facility predictor entries found. Entries will be created to match facility meter dates.
+      </div>
+    }
+    @if (facilityMeterData?.length == 0) {
+      <div class="alert alert-danger">
+        No meter data found for this facility, predictors cannot be created.
+      </div>
+    }
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelApplyToFacility()">Cancel</button>
+    <button class="btn action-btn" (click)="confirmCreate()"
+      [disabled]="!selectedFacility || facilityMeterData?.length == 0">Create
+    Predictors</button>
+  </div>
 </div>

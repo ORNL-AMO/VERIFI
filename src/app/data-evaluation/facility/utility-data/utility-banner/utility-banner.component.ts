@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -39,7 +40,9 @@ export class UtilityBannerComponent implements OnInit {
     private predictorDataHelperService: PredictorDataHelperService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -68,6 +71,10 @@ export class UtilityBannerComponent implements OnInit {
   }
 
   exportData() {
+    this.loadingService.setContext('export-facilities-to-excel');
+    this.loadingService.setTitle('Exporting Facility');
+    this.loadingService.setCurrentLoadingIndex(0);
+    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     this.exportToExcelTemplateV3Service.exportFacilityData(this.facility.guid);
   }
 

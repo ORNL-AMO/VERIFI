@@ -88,7 +88,7 @@ export class PerformanceReportComponent {
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/performance-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../web-workers/performance-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.performanceReport = data.performanceReport;

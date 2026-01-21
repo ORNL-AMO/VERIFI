@@ -1,26 +1,34 @@
-<ng-container *ngIf="selectedReport">
-    <div class="report" [ngClass]="{'print': print}" *ngIf="analysisReportSetup.includeProblemsInformation">
-        <ng-container *ngIf="facilityDetails">
+@if (selectedReport) {
+  @if (analysisReportSetup.includeProblemsInformation) {
+    <div class="report" [ngClass]="{'print': print}">
+      @if (facilityDetails) {
         <app-analysis-problems-information [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-problems-information>
-        </ng-container>
+      }
     </div>
-
-    <div class="report" [ngClass]="{'print': print}" *ngIf="analysisReportSetup.includeExecutiveSummary">
-        <ng-container *ngIf="facilityDetails">
-            <app-analysis-facility-report [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
-        </ng-container>
+  }
+  @if (analysisReportSetup.includeExecutiveSummary) {
+    <div class="report" [ngClass]="{'print': print}">
+      @if (facilityDetails) {
+        <app-analysis-facility-report [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
+      }
     </div>
-
-     <div class="report" [ngClass]="{'print': print}" *ngIf="analysisReportSetup.includeDataValidationTables">
-        <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-data-validation-tables>
+  }
+  @if (analysisReportSetup.includeDataValidationTables) {
+    <div class="report" [ngClass]="{'print': print}">
+      <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-data-validation-tables>
     </div>
-</ng-container>
+  }
+}
 
 
-<div class="w-100 justify-content-center" *ngIf="!facilityDetails">
+@if (!facilityDetails) {
+  <div class="w-100 justify-content-center">
     <div class="pt-5">
-        <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
+      <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
     </div>
-</div>
+  </div>
+}
 
-<app-print-report-button *ngIf="facilityDetails.length > 0"></app-print-report-button>
+@if (facilityDetails.length > 0) {
+  <app-print-report-button></app-print-report-button>
+}

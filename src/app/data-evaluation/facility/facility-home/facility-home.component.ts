@@ -110,7 +110,7 @@ export class FacilityHomeComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.annualEnergyAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.annualEnergyAnalysisWorker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.setEnergyBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData)
@@ -167,7 +167,7 @@ export class FacilityHomeComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.annualWaterAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.annualWaterAnalysisWorker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.setWaterBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData);
@@ -218,7 +218,7 @@ export class FacilityHomeComponent implements OnInit {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.overviewWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
+      this.overviewWorker = new Worker(new URL('../../../web-workers/facility-overview.worker', import.meta.url));
       this.overviewWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.facilityHomeService.facilityOverviewData.next(data.facilityOverviewData);

@@ -8,6 +8,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
     selector: 'app-facility-settings',
@@ -20,30 +22,43 @@ export class FacilitySettingsComponent implements OnInit {
   showDeleteFacility: boolean = false;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
+  loadingSub: Subscription;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService
   ) { }
 
   ngOnInit() {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
     });
+
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'delete-facility') {
+        this.showFacilityDeletionToast();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
+  showFacilityDeletionToast() {
+    this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
+    this.router.navigateByUrl('/data-evaluation/account');
+  }
 
   async facilityDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
-    this.router.navigate(['/account']);
   }
 
   openDeleteFacility() {

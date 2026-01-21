@@ -1,41 +1,55 @@
 <div class="d-flex justify-content-between mb-2">
-    <div class="p-0">
-        <app-analysis-summary-table-filter [tableContext]="'monthAccount'" *ngIf="dataDisplay == 'table'"
-            [analysisItem]="accountAnalysisItem"></app-analysis-summary-table-filter>
-    </div>
+  <div class="p-0">
+    @if (dataDisplay == 'table') {
+      <app-analysis-summary-table-filter [tableContext]="'monthAccount'"
+      [analysisItem]="accountAnalysisItem"></app-analysis-summary-table-filter>
+    }
+  </div>
 
-    <div class="d-flex">
-        <!--Items Per Page-->
-        <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
-        <div class="btn-group ps-2">
-            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-                (click)="setDataDisplay('table')">
-                <span class="fa fa-chevron-right"></span>
-                Table
-                <span class="fa fa-chevron-left"></span>
-            </button>
-            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-                (click)="setDataDisplay('graph')">
-                <span class="fa fa-chevron-right"></span>
-                Graph
-                <span class="fa fa-chevron-left"></span>
-            </button>
-        </div>
+  <div class="d-flex">
+    <!--Items Per Page-->
+    @if (dataDisplay == 'table') {
+      <app-table-items-dropdown></app-table-items-dropdown>
+    }
+    <div class="btn-group ps-2">
+      <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
+        (click)="setDataDisplay('table')">
+        <span class="fa fa-chevron-right"></span>
+        Table
+        <span class="fa fa-chevron-left"></span>
+      </button>
+      <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
+        (click)="setDataDisplay('graph')">
+        <span class="fa fa-chevron-right"></span>
+        Graph
+        <span class="fa fa-chevron-left"></span>
+      </button>
     </div>
+  </div>
 </div>
-<div class="w-100 x-scroll" *ngIf="calculating == false">
-    <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
+@if (calculating == false) {
+  <div class="w-100 x-scroll">
+    @if (dataDisplay == 'graph') {
+      <app-monthly-analysis-summary-graph
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
         [facilityOrAccount]="account">
-    </app-monthly-analysis-summary-graph>
-    <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
-        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+      </app-monthly-analysis-summary-graph>
+    }
+    @if (dataDisplay == 'table') {
+      <app-monthly-analysis-summary-table
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem" [isAccount]="true"
         [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
-    </app-monthly-analysis-summary-table>
-    <app-monthly-analysis-summary-savings-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="accountAnalysisItem"
+      </app-monthly-analysis-summary-table>
+    }
+    @if (dataDisplay == 'graph') {
+      <app-monthly-analysis-summary-savings-graph [analysisItem]="accountAnalysisItem"
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [facilityOrAccount]="account">
-    </app-monthly-analysis-summary-savings-graph>
-</div>
+      </app-monthly-analysis-summary-savings-graph>
+    }
+  </div>
+}
 
-<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
-    [error]="calculating == 'error'"></app-calculating-spinner>
+@if (calculating != false) {
+  <app-calculating-spinner [message]="'Calculating Monthly Results...'"
+  [error]="calculating == 'error'"></app-calculating-spinner>
+}

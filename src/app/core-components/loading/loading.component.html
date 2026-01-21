@@ -1,5 +1,29 @@
 <div id="loading" [class.open]="loading">
-    <img class="loading" src="assets/images/Ripple-2s-84px-fff.gif">
-    <div class="loading_message" [hidden]="!loading">{{loadingMessage}}</div>
+  <img class="loading" src="assets/images/Ripple-2s-84px-fff.gif">
+  <div class="loading_message" [hidden]="!loading">{{loadingMessage}}</div>
 </div>
-<div [ngClass]="{'windowOverlay': loading}"></div>
+
+<div id="loading-info" [class.open]="loadingMessages?.length > 0">
+  @if (title) {
+    <div class="fw-bold title-style mb-3">{{ title }}</div>
+  }
+  <div class="p-4 bg-white rounded message-container">
+    @for (message of loadingMessages; track message; let i = $index) {
+      <div class="d-flex align-items-center mb-3">
+        @if (i < currentLoadingIndex || loadingComplete) {
+          <i class="fa fa-check-circle text-success me-2 icon-style"></i>
+        }
+        @if (i === currentLoadingIndex && !loadingComplete) {
+          <i class="fa fa-spinner fa-spin text-primary me-2 icon-style"></i>
+        }
+        <span class="fw-bold message-text">{{ message }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="d-flex justify-content-center">
+    <button class="btn btn-primary mt-4 text" [disabled]="!loadingComplete" (click)="onClose()">Done</button>
+  </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': loading || loadingMessages?.length > 0}"></div>

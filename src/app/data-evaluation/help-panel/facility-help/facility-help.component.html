@@ -1,7 +1,21 @@
-<app-facility-home-help *ngIf="helpURL == 'home'"></app-facility-home-help>
-<app-facility-overview-help *ngIf="helpURL == 'overview'"></app-facility-overview-help>
-<app-facility-settings-help *ngIf="helpURL == 'settings'"></app-facility-settings-help>
-<app-facility-utility-help *ngIf="helpURL == 'utility'"></app-facility-utility-help>
-<app-facility-visualization-help *ngIf="helpURL == 'visualization'"></app-facility-visualization-help>
-<app-facility-analysis-help *ngIf="helpURL == 'analysis'"></app-facility-analysis-help>
-<app-facility-reports-help *ngIf="helpURL == 'reports'"></app-facility-reports-help>
+@if (helpURL == 'home') {
+  <app-facility-home-help></app-facility-home-help>
+}
+@if (helpURL == 'overview') {
+  <app-facility-overview-help></app-facility-overview-help>
+}
+@if (helpURL == 'settings') {
+  <app-facility-settings-help></app-facility-settings-help>
+}
+@if (helpURL == 'utility') {
+  <app-facility-utility-help></app-facility-utility-help>
+}
+@if (helpURL == 'visualization') {
+  <app-facility-visualization-help></app-facility-visualization-help>
+}
+@if (helpURL == 'analysis') {
+  <app-facility-analysis-help></app-facility-analysis-help>
+}
+@if (helpURL == 'reports') {
+  <app-facility-reports-help></app-facility-reports-help>
+}

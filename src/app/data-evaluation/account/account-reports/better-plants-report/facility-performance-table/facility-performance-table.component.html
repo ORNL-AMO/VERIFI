@@ -1,34 +1,50 @@
 <div class="table-responsive">
-    <table class="table table-sm table-hover">
-        <thead>
-            <tr>
-                <th class="bold text-center">
-                    Energy Intensity<br>
-                    Performance Level
-                </th>
-                <th>
-                    Number of<br> Facilites
-                </th>
-                <th *ngIf="betterPlantsReportSetup.includeFacilityNames">
-                    Facilites
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let pLevel of performanceLevels">
-                <td class="text-center">
-                    {{pLevel.performanceVal}}
-                </td>
-                <td>
-                    <span *ngIf="pLevel.numberOfFacilites"> {{pLevel.numberOfFacilites}}</span>
-                    <span *ngIf="!pLevel.numberOfFacilites"> &mdash;</span>
-                </td>
-                <td *ngIf="betterPlantsReportSetup.includeFacilityNames">
-                    <span *ngIf="pLevel.numberOfFacilites"><span
-                            *ngFor="let facility of pLevel.facilities">{{facility.name}}<br></span></span>
-                    <span *ngIf="!pLevel.numberOfFacilites"> &mdash;</span>
-                </td>
-            </tr>
-        </tbody>
+  <table class="table table-sm table-hover">
+    <thead>
+      <tr>
+        <th class="bold text-center">
+          Energy Intensity<br>
+          Performance Level
+        </th>
+        <th>
+          Number of<br> Facilites
+        </th>
+        @if (betterPlantsReportSetup.includeFacilityNames) {
+          <th>
+            Facilites
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (pLevel of performanceLevels; track pLevel) {
+        <tr>
+          <td class="text-center">
+            {{pLevel.performanceVal}}
+          </td>
+          <td>
+            @if (pLevel.numberOfFacilites) {
+              <span> {{pLevel.numberOfFacilites}}</span>
+            }
+            @if (!pLevel.numberOfFacilites) {
+              <span> &mdash;</span>
+            }
+          </td>
+          @if (betterPlantsReportSetup.includeFacilityNames) {
+            <td>
+              @if (pLevel.numberOfFacilites) {
+                <span>@for (facility of pLevel.facilities; track facility) {
+                  <span
+                    >{{facility.name}}<br></span>
+                  }</span>
+                }
+                @if (!pLevel.numberOfFacilites) {
+                  <span> &mdash;</span>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
     </table>
-</div>
+  </div>
