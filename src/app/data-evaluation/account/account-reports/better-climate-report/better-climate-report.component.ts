@@ -158,7 +158,7 @@ export class BetterClimateReportComponent {
   }
 
   generateExcelReport() {
-    this.loadingService.setLoadingMessage('Generating Better Climate Excel Report...');
+    this.loadingService.setLoadingMessage('Generating Emissions Excel Report...');
     this.loadingService.setLoadingStatus(true);
     //export to excell method sets loading status to false upon completion or error.
     this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReportUnfiltered);
