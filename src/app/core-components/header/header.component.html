@@ -2,17 +2,17 @@
   <a class="navbar-brand" (click)="goHome()">VERIFI</a>
   <span class="badge bg-secondary">v{{version}}</span>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    @if (updateAvailable && !updateError) {
-    <div class="ps-2">
-      <button class="btn action-btn" (click)="toggleUpdateModal()">
-        <span class="fa fa-info-circle"></span>
-        Update Available!
-      </button>
-    </div>
-    }
-    @if (dataInitialized) {
-    <div class="dropdown ms-auto">
+  @if (updateAvailable && !updateError) {
+  <div class="ps-2">
+    <button class="btn action-btn" (click)="toggleUpdateModal()">
+      <span class="fa fa-info-circle"></span>
+      Update Available!
+    </button>
+  </div>
+  }
+  @if (dataInitialized) {
+  <div class="ms-auto">
+    <div class="dropdown">
       @if (activeAccount) {
       <button class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span
           class="fa fa-building"></span>
@@ -24,9 +24,9 @@
         Required
       </button>
       }
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu dropdown-menu-end ">
         <li>
-          @for (account of accountList| orderBy:'name':'asc'; track account) {
+          @for (account of accountList| orderBy:'name':'asc'; track account.guid) {
           <a [class.active]="activeAccount?.id === account.id" class="dropdown-item" (click)="switchAccount(account)">
             {{account.name}}</a>
           }
@@ -43,55 +43,54 @@
         </li>
       </ul>
     </div>
-    }
-    @if (dataInitialized && activeAccount && displayToggle) {
-    <div class="btn btn-group ms-2">
-      <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
-        [ngClass]="{'active': !inDataEvaluation}"><span class="fa fa-database"></span> Data Management</button>
-      <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
-        [ngClass]="{'active': inDataEvaluation}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
-    </div>
-    }
-    @if (dataInitialized && activeAccount) {
-    @if (!activeAccount.dataBackupFilePath) {
-    <div class="ps-2">
-      <button class="btn action-btn" (click)="backupAccount()">Backup Account
+  </div>
+  }
+  @if (dataInitialized && activeAccount && displayToggle) {
+  <div class="btn btn-group ms-2">
+    <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
+      [ngClass]="{'active': !inDataEvaluation}"><span class="fa fa-database"></span> Data Management</button>
+    <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
+      [ngClass]="{'active': inDataEvaluation}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
+  </div>
+  }
+  @if (dataInitialized && activeAccount) {
+  @if (!activeAccount.dataBackupFilePath) {
+  <div class="ps-2">
+      <button class="btn action-btn d-none d-md-inline" (click)="backupAccount()">Backup Account
       </button>
     </div>
-    <div class="ps-2 last-backup">Last Backup: (@if (activeAccount.lastBackup) {
+    <div class="ps-2 last-backup d-none d-md-inline">Last Backup: (@if (activeAccount.lastBackup) {
       <span>{{activeAccount.lastBackup |
         date:'medium'}}</span>
       }@if (!activeAccount.lastBackup) {
       <span>&mdash;</span>
       })
     </div>
-    }
-    @if (activeAccount.dataBackupFilePath) {
-    <div class="ps-2">
-      <div class="badge" title="Automatic Account Backups Active"
-        [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
-        <span class="fa fa-file-arrow-down"></span>
-      </div>
+  }
+  @if (activeAccount.dataBackupFilePath) {
+  <div class="ps-2">
+    <div class="badge" title="Automatic Account Backups Active"
+      [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
+      <span class="fa fa-file-arrow-down"></span>
     </div>
-    }
-    }
-    <!--Doesnt Show In Production-->
-    @if (!isProduction) {
-    <div class="ps-2">
-      @if (!resetDatabase) {
-      <button class="btn btn-danger" (click)="toggleResetDatabase()">Reset
-        Database
-      </button>
-      }
-      @if (resetDatabase) {
-      <button class="btn btn-danger" (click)="deleteDatabase()">Are you sure
-        you want to reset the database?
-      </button>
-      }
-    </div>
-    }
-
   </div>
+  }
+  }
+  <!--Doesnt Show In Production-->
+  @if (!isProduction) {
+  <div class="ps-2">
+    @if (!resetDatabase) {
+    <button class="btn btn-danger" (click)="toggleResetDatabase()">Reset
+      Database
+    </button>
+    }
+    @if (resetDatabase) {
+    <button class="btn btn-danger" (click)="deleteDatabase()">Are you sure
+      you want to reset the database?
+    </button>
+    }
+  </div>
+  }
 </nav>
 
 

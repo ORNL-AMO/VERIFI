@@ -6,7 +6,7 @@
   @if (hasTodoItems) {
     <ul class="list-group" [ngClass]="{'list-group-flush': totalTodoItems > 10}">
       <!--Other Todo Items-->
-      @for (item of toDoItems.otherItems; track item; let index = $index) {
+      @for (item of toDoItems.otherItems; track item.trackGuid; let index = $index) {
         <li class="list-group-item list-group-item-action bold"
           [routerLink]="item.url">
           {{item.label}}
@@ -14,7 +14,7 @@
       }
       <!--Items shown by facility-->
       @if (totalTodoItems > 10) {
-        @for (facilityItem of toDoItems.facilityTodoItems; track facilityItem; let facilityIndex = $index) {
+        @for (facilityItem of toDoItems.facilityTodoItems; track facilityItem.facility.guid; let facilityIndex = $index) {
           <li class="list-group-item bold">
             <span class="fa fa-industry" [ngStyle]="{'color': facilityItem.facility.color}"></span>
             {{facilityItem.facility.name}}
@@ -29,7 +29,7 @@
             Meter To Do Items: {{facilityItem.meterTodoItems.length}}
           </li>
           @if (facilityItem.showMeterItems) {
-            @for (meterItem of facilityItem.meterTodoItems; track meterItem; let meterIndex = $index) {
+            @for (meterItem of facilityItem.meterTodoItems; track meterItem.trackGuid; let meterIndex = $index) {
               <li class="list-group-item list-group-item-action"
                 [routerLink]="meterItem.url">
                 {{meterItem.label}}
@@ -43,7 +43,7 @@
             Predictor To Do Items: {{facilityItem.predictorTodoItems.length}}
           </li>
           @if (facilityItem.showPredictorItems) {
-            @for (predictorItem of facilityItem.predictorTodoItems; track predictorItem; let predictorIndex = $index) {
+            @for (predictorItem of facilityItem.predictorTodoItems; track predictorItem.trackGuid; let predictorIndex = $index) {
               <li class="list-group-item list-group-item-action"
                 [routerLink]="predictorItem.url">
                 @if (predictorItem.isWeather) {
@@ -55,7 +55,7 @@
           }
         }
       } @else {
-        @for (todoItem of allTodoItems; track todoItem; let meterIndex = $index) {
+        @for (todoItem of allTodoItems; track todoItem.trackGuid; let meterIndex = $index) {
           <li class="list-group-item list-group-item-action"
             [routerLink]="todoItem.url">
             <div class="p-0 bold">
