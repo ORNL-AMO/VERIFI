@@ -4,7 +4,7 @@
 <div class="scroll-x">
     <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
         [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-        [isReportYear]="false" [isBaselineYear]="true" [printBlock]="'all'"
+        [isReportYear]="false" [isBaselineYear]="true" [printBlock]="'all'" [group]="group"
         [isGroupModelYear]="modelYearIsBaselineYear">
     </app-monthly-analysis-summary-table>
 </div>
@@ -13,14 +13,14 @@
 <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
     [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
     [isReportYear]="false" [isBaselineYear]="true" [printBlock]="'consumption'"
-    [isGroupModelYear]="modelYearIsBaselineYear">
+    [isGroupModelYear]="modelYearIsBaselineYear" [group]="group">
 </app-monthly-analysis-summary-table>
 }
 @if(analysisReportSettings.analysisTableColumns | includeTable: 'predictors'){
 <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
     [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
     [isReportYear]="false" [isBaselineYear]="true" [printBlock]="'predictors'"
-    [isGroupModelYear]="modelYearIsBaselineYear">
+    [isGroupModelYear]="modelYearIsBaselineYear" [group]="group">
 </app-monthly-analysis-summary-table>
 }
 }
@@ -32,7 +32,7 @@
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="modelYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isGroupModelYear]="true" [printBlock]="'all'">
+                [isGroupModelYear]="true" [printBlock]="'all'" [group]="group">
             </app-monthly-analysis-summary-table>
         </div>
     } @else {
@@ -40,7 +40,7 @@
         <app-monthly-analysis-summary-table
             [monthlyAnalysisSummaryData]="modelYearAnalysisSummaryData" [analysisItem]="analysisItem"
             [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isGroupModelYear]="true"
-            [printBlock]="'consumption'">
+            [printBlock]="'consumption'" [group]="group">
         </app-monthly-analysis-summary-table>
         }
 
@@ -48,7 +48,7 @@
         <app-monthly-analysis-summary-table
             [monthlyAnalysisSummaryData]="modelYearAnalysisSummaryData" [analysisItem]="analysisItem"
             [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isGroupModelYear]="true"
-            [printBlock]="'predictors'">
+            [printBlock]="'predictors'" [group]="group">
         </app-monthly-analysis-summary-table>
         }
 
@@ -56,7 +56,7 @@
         <app-monthly-analysis-summary-table
             [monthlyAnalysisSummaryData]="modelYearAnalysisSummaryData" [analysisItem]="analysisItem"
             [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isGroupModelYear]="true"
-            [printBlock]="'savings'">
+            [printBlock]="'savings'" [group]="group">
         </app-monthly-analysis-summary-table>
         }
     }
@@ -70,7 +70,7 @@
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isReportYear]="true" [printBlock]="'all'" [isGroupModelYear]="modelYearIsReportYear">
+                [isReportYear]="true" [printBlock]="'all'" [isGroupModelYear]="modelYearIsReportYear" [group]="group">
             </app-monthly-analysis-summary-table>
         </div>
     } @else {
@@ -78,7 +78,7 @@
         <app-monthly-analysis-summary-table
             [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
             [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportYear]="true"
-            [isBaselineYear]="false" [printBlock]="'consumption'" [isGroupModelYear]="modelYearIsReportYear">
+            [isBaselineYear]="false" [printBlock]="'consumption'" [isGroupModelYear]="modelYearIsReportYear" [group]="group">
         </app-monthly-analysis-summary-table>
         }
 
@@ -86,7 +86,7 @@
         <app-monthly-analysis-summary-table
             [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
             [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportYear]="true"
-            [isBaselineYear]="false" [printBlock]="'predictors'" [isGroupModelYear]="modelYearIsReportYear">
+            [isBaselineYear]="false" [printBlock]="'predictors'" [isGroupModelYear]="modelYearIsReportYear" [group]="group">
         </app-monthly-analysis-summary-table>
         }
 
@@ -94,7 +94,7 @@
         <app-monthly-analysis-summary-table
             [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
             [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportYear]="true"
-            [isBaselineYear]="false" [printBlock]="'savings'" [isGroupModelYear]="modelYearIsReportYear">
+            [isBaselineYear]="false" [printBlock]="'savings'" [isGroupModelYear]="modelYearIsReportYear" [group]="group">
         </app-monthly-analysis-summary-table>
         }
     }

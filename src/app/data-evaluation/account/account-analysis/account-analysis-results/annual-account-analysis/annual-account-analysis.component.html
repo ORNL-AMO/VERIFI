@@ -24,7 +24,7 @@
 @if (calculating == false) {
   <div class="w-100 x-scroll">
     @if (dataDisplay == 'table') {
-      <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary"
+      <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary" [isAccount]="true"
         [analysisItem]="accountAnalysisItem" [accountOrFacility]="account" [printBlock]="'all'">
       </app-annual-analysis-summary-table>
     }

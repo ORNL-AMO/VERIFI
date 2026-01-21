@@ -37,7 +37,7 @@
     }
     @if (dataDisplay == 'table') {
       <app-monthly-analysis-summary-table
-        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
+        [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem" [isAccount]="true"
         [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
       </app-monthly-analysis-summary-table>
     }
