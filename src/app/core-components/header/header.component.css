@@ -58,7 +58,3 @@ a:not([href]).dropdown-item.active {
 .btn.action-btn.active .fa {
     color: white;
 }
-
-.navbar{
-    overflow-x: auto;
-}
