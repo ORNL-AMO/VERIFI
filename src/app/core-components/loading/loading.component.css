@@ -19,7 +19,7 @@ div#loading {
 
 #loading-info {
     position: fixed;
-    top: -50%;
+    top: -9999px;
     left: 50%;
     background-color: white;
     box-shadow: 0px 0px 31px #0000002e;

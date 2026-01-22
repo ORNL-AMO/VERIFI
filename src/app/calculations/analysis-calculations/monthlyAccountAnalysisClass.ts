@@ -172,7 +172,8 @@ export class MonthlyAccountAnalysisClass {
                 fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentSavings),
                 thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
                 thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings),
-                missingValueWarning: summaryDataItem.monthlyAnalysisCalculatedValues.missingValueWarning
+                missingValueWarning: summaryDataItem.monthlyAnalysisCalculatedValues.missingValueWarning,
+                missingPredictors: summaryDataItem.monthlyAnalysisCalculatedValues.missingPredictors
             }
         })
     }

@@ -46,6 +46,7 @@ export class MonthlyAnalysisSummaryDataClass {
     originalBaselineYearBaselineActualEnergyUse: number;
 
     missingValueWarning: boolean;
+    missingPredictors: Array<string>;
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
@@ -57,6 +58,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.date = monthDate;
         this.missingValueWarning = false;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
+        this.missingPredictors = [];
         this.isNew = facility.isNewFacility;
         this.baselineYear = monthlyGroupAnalysisClass.baselineYear;
         this.bankedAnalysisYear = monthlyGroupAnalysisClass.bankedAnalysisYear;
@@ -75,6 +77,15 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setModelYearDataAdjustment(monthlyGroupAnalysisClass);
         this.setDataAdjustment();
         this.setMonthlyAnalysisCalculatedValues(previousMonthsSummaryData, lastBankedMonthlyAnalysis);
+        this.checkMissingPredictors(monthlyGroupAnalysisClass.selectedGroup.predictorVariables);
+    }
+
+    checkMissingPredictors(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
+        predictorVariables.forEach(variable => {
+            if (variable.productionInAnalysis && !this.monthPredictorData.some(data => (data.predictorId === variable.id))) {
+                this.missingPredictors.push(variable.id);
+            }
+        });
     }
 
     setFiscalYear(facility: IdbFacility) {

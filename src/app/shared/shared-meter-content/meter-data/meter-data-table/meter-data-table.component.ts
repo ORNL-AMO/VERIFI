@@ -42,7 +42,7 @@ export class MeterDataTableComponent {
   duplicateReadingDates: Array<Date>;
   filteredMeterData: Array<IdbUtilityMeterData>;
   optionSelected: 'all' | 'estimated' = 'all';
-
+  hasEstimatedReadings: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -94,6 +94,9 @@ export class MeterDataTableComponent {
     }) != -1;
     this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
+    this.hasEstimatedReadings = this.meterData.findIndex(mData => {
+      return mData.isEstimated == true;
+    }) != -1;
   }
 
   uploadData() {

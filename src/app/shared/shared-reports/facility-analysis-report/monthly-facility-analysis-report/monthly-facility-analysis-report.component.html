@@ -15,7 +15,7 @@
   @if (analysisReportSettings.facilityMonthlyResultsTableBaselineYear) {
     @if (!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')) {
       <div class="scroll-x">
-        <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
+        <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [groupSummaries]="groupSummaries"
           [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
           [isBaselineYear]="true" [printBlock]="'all'">
         </app-monthly-analysis-summary-table>
@@ -23,14 +23,14 @@
     } @else {
       @if (analysisReportSettings.analysisTableColumns | includeTable: 'consumption') {
         <app-monthly-analysis-summary-table
-          [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [analysisItem]="analysisItem"
+          [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [analysisItem]="analysisItem" [groupSummaries]="groupSummaries"
           [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isBaselineYear]="true"
           [printBlock]="'consumption'">
         </app-monthly-analysis-summary-table>
       }
       @if (analysisReportSettings.analysisTableColumns | includeTable: 'predictors') {
         <app-monthly-analysis-summary-table
-          [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [analysisItem]="analysisItem"
+          [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [analysisItem]="analysisItem" [groupSummaries]="groupSummaries"
           [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isBaselineYear]="true"
           [printBlock]="'predictors'">
         </app-monthly-analysis-summary-table>
@@ -45,7 +45,7 @@
 @if (analysisReportSettings.facilityMonthlyResultsTableReportYear) {
   @if (!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')) {
     <div class="scroll-x">
-      <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
+      <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [groupSummaries]="groupSummaries"
         [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
         [isReportYear]="true" [printBlock]="'all'">
       </app-monthly-analysis-summary-table>
@@ -53,21 +53,21 @@
   } @else {
     @if (analysisReportSettings.analysisTableColumns | includeTable: 'consumption') {
       <app-monthly-analysis-summary-table
-        [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
+        [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem" [groupSummaries]="groupSummaries"
         [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportYear]="true"
         [printBlock]="'consumption'">
       </app-monthly-analysis-summary-table>
     }
     @if (analysisReportSettings.analysisTableColumns | includeTable: 'predictors') {
       <app-monthly-analysis-summary-table
-        [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
+        [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem" [groupSummaries]="groupSummaries"
         [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportYear]="true"
         [printBlock]="'predictors'">
       </app-monthly-analysis-summary-table>
     }
     @if (analysisReportSettings.analysisTableColumns | includeTable: 'savings') {
       <app-monthly-analysis-summary-table
-        [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
+        [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem" [groupSummaries]="groupSummaries"
         [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportYear]="true"
         [printBlock]="'savings'">
       </app-monthly-analysis-summary-table>

@@ -7,135 +7,129 @@
       <option [ngValue]="false">User Defined Model</option>
     </select>
     @if (group.userDefinedModel == true) {
-      <label class="bold">Max Variable Combinations</label>
-      <select required class="form-select" id="maxModelVariables" id="maxModelVariables"
-        [(ngModel)]="group.maxModelVariables" (change)="changeModelType()">
-        @for (option of numVariableOptions; track option) {
-          <option [ngValue]="option">{{option}}</option>
-        }
-      </select>
-      @if (group.maxModelVariables > 6) {
-        <div class="d-flex alert alert-warning">
-          Larger numbers of variable combinations will take longer to generate models.
-        </div>
+    <label class="bold">Max Variable Combinations</label>
+    <select required class="form-select" id="maxModelVariables" id="maxModelVariables"
+      [(ngModel)]="group.maxModelVariables" (change)="changeModelType()">
+      @for (option of numVariableOptions; track option) {
+      <option [ngValue]="option">{{option}}</option>
       }
+    </select>
+    @if (group.maxModelVariables > 6) {
+    <div class="d-flex alert alert-warning">
+      Larger numbers of variable combinations will take longer to generate models.
+    </div>
+    }
     }
     <div class="d-flex flex-fill justify-content-center align-items-center">
       @if (group.userDefinedModel) {
-        <div class="p-0">
-          @if (!group.models || group.models.length == 0) {
-            <div class="p-2">
-              <div class="alert alert-info">
-                Select production variables and click "Generate Models" to calculate regression models. A table
-                with detailed models will appear to select from.
-              </div>
-            </div>
-          }
-          @if (hasLaterDate) {
-            <div class="p-2">
-              <div class="alert alert-warning">
-                Data has been entered since these models were generated. You may want to update your models.
-              </div>
-            </div>
-          }
-          @if (modelingError) {
-            <div class="p-2">
-              <div class="alert alert-warning">
-                Something went wrong generating models. Make sure predictors are selected.
-              </div>
-            </div>
-          }
-          @if (noValidModels) {
-            <div class="p-2">
-              <div class="alert alert-danger">
-                No valid models found for selected production variables.
-              </div>
-            </div>
-          }
-          <div class="p-2 d-flex flex-column justify-content-center align-items-center">
-            <div class="p-0">
-              @if (!group.models || group.models.length == 0) {
-                <button class="mt-0 btn action-btn" (click)="generateModels(true)"
-                  >Generate
-                Models</button>
-              }
-            </div>
-            <div class="p-0">
-              @if (group.models && group.models.length != 0) {
-                <button class="mt-0 btn action-btn" (click)="updateModels()"
-                  >
-                Update Models</button>
-              }
-            </div>
-            @if (group.dateModelsGenerated) {
-              <div class="p-0">
-                Current Models Generated:
-                {{group.dateModelsGenerated | date:'short'}}
-              </div>
-            }
-          </div>
-          @if (group.models) {
-            <div class="d-flex">
-              <label class="show-models-label bold pe-3" for="showInvalid">
-                Show Statistically Invalid Models
-              </label>
-              <div>
-                <label class="switch" for="showInvalid">
-                  <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid"
-                    [(ngModel)]="showInvalid" (change)="saveInvalidChange()">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-            </div>
-          }
-          @if (group.models) {
-            <div class="d-flex">
-              <label class="show-models-label bold pe-3" for="showFailedValidationModel">
-                Show Models that fail Data Validation
-              </label>
-              <div>
-                <label class="switch" for="showFailedValidationModel">
-                  <input class="checkbox" type="checkbox" id="showFailedValidationModel"
-                    name="showFailedValidationModel" [(ngModel)]="showFailedValidationModel"
-                    (change)="saveFailedValidationChange()">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-            </div>
-          }
-        </div>
-      }
-      @if (!group.userDefinedModel) {
+      <div class="p-0">
+        @if (!generatedModels || generatedModels.length == 0) {
         <div class="p-2">
           <div class="alert alert-info">
-            Manually select production variables and define model coefficients and constants. Click below to
-            evaluate the model and data validity.
+            Select production variables and click "Generate Models" to calculate regression models. A table
+            with detailed models will appear to select from.
           </div>
-          <div class="d-flex flex-column justify-content-center align-items-center">
-            <div class="p-0">
-              <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled"
-              (click)="generateUserDefinedModel()">Evaluate Model</button>
-            </div>
+        </div>
+        }
+        @if (hasLaterDate) {
+        <div class="p-2">
+          <div class="alert alert-warning">
+            Data has been entered since these models were generated. You may want to update your models.
           </div>
-          @if (!isDateRangeValid) {
-            <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center"
-              >
-              End date must be after the start date. Please check the input values.
-            </div>
-          }
-          @if (!isTwelveMonthSelected && isDateRangeValid) {
-            <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center"
-              >
-              Model generation requires at least 12 months of data. Please check the input values.
-            </div>
-          }
-          @if (!allMeterReadingsPresent || !allPredictorReadingsPresent) {
-            <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center"
-              >
-              Data is missing within the provided date range. Please check the data.
-            </div>
+        </div>
+        }
+        @if (modelingError) {
+        <div class="p-2">
+          <div class="alert alert-warning">
+            Something went wrong generating models. Make sure predictors are selected.
+          </div>
+        </div>
+        }
+        @if (noValidModels) {
+        <div class="p-2">
+          <div class="alert alert-danger">
+            No valid models found for selected production variables.
+          </div>
+        </div>
+        }
+        <div class="p-2 d-flex flex-column justify-content-center align-items-center">
+          <div class="p-0">
+            @if (!generatedModels || generatedModels.length == 0) {
+            <button class="mt-0 btn action-btn" (click)="generateModels(true)">Generate
+              Models</button>
+            }
+          </div>
+          <div class="p-0">
+            @if (generatedModels && generatedModels.length != 0) {
+            <button class="mt-0 btn action-btn" (click)="updateModels()">
+              Update Models</button>
+            }
+          </div>
+          @if (group.dateModelsGenerated) {
+          <div class="p-0">
+            Current Models Generated:
+            {{group.dateModelsGenerated | date:'short'}}
+          </div>
           }
         </div>
+        @if (generatedModels) {
+        <div class="d-flex">
+          <label class="show-models-label bold pe-3" for="showInvalid">
+            Show Statistically Invalid Models
+          </label>
+          <div>
+            <label class="switch" for="showInvalid">
+              <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid"
+                (change)="saveInvalidChange()">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+        }
+        @if (generatedModels) {
+        <div class="d-flex">
+          <label class="show-models-label bold pe-3" for="showFailedValidationModel">
+            Show Models that fail Data Validation
+          </label>
+          <div>
+            <label class="switch" for="showFailedValidationModel">
+              <input class="checkbox" type="checkbox" id="showFailedValidationModel" name="showFailedValidationModel"
+                [(ngModel)]="showFailedValidationModel" (change)="saveFailedValidationChange()">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+        }
+      </div>
+      }
+      @if (!group.userDefinedModel) {
+      <div class="p-2">
+        <div class="alert alert-info">
+          Manually select production variables and define model coefficients and constants. Click below to
+          evaluate the model and data validity.
+        </div>
+        <div class="d-flex flex-column justify-content-center align-items-center">
+          <div class="p-0">
+            <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled"
+              (click)="generateUserDefinedModel()">Evaluate Model</button>
+          </div>
+        </div>
+        @if (!isDateRangeValid) {
+        <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
+          End date must be after the start date. Please check the input values.
+        </div>
+        }
+        @if (!isTwelveMonthSelected && isDateRangeValid) {
+        <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
+          Model generation requires at least 12 months of data. Please check the input values.
+        </div>
+        }
+        @if (!allMeterReadingsPresent || !allPredictorReadingsPresent) {
+        <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
+          Data is missing within the provided date range. Please check the data.
+        </div>
+        }
+      </div>
       }
     </div>
   </div>
@@ -153,10 +147,10 @@
       </div>
     </div>
     @for (predictor of group.predictorVariables; track predictor) {
-      <div class="row sub-column">
-        <div class="col-4">
-          {{predictor.name}}@if (predictor.unit) {
-          <span class="ps-1">({{predictor.unit}})</span>
+    <div class="row sub-column">
+      <div class="col-4">
+        {{predictor.name}}@if (predictor.unit) {
+        <span class="ps-1">({{predictor.unit}})</span>
         }
       </div>
       <div class="col-4">
@@ -169,31 +163,29 @@
       </div>
       <div class="col-4 mdash">
         @if (predictor.productionInAnalysis) {
-          <input class="form-control" type="number" step="any"
-            id="{{'regressionCoefficient_'+predictor.id}}" name="{{'regressionCoefficient_'+predictor.id}}"
-            [(ngModel)]="predictor.regressionCoefficient" required (input)="saveItem()"
-            [disabled]="group.userDefinedModel">
+        <input class="form-control" type="number" step="any" id="{{'regressionCoefficient_'+predictor.id}}"
+          name="{{'regressionCoefficient_'+predictor.id}}" [(ngModel)]="predictor.regressionCoefficient" required
+          (input)="saveItem()" [disabled]="group.userDefinedModel">
         }
         @if (!predictor.productionInAnalysis) {
-          <span class="bold ">&mdash;</span>
+        <span class="bold ">&mdash;</span>
         }
       </div>
     </div>
-  }
-  <div class="row mb-2 sub-column">
-    <div class="col-6">
-      <label for="regressionConstant">
-        Regression Constant
-      </label>
+    }
+    <div class="row mb-2 sub-column">
+      <div class="col-6">
+        <label for="regressionConstant">
+          Regression Constant
+        </label>
+      </div>
+      <div class="col-6">
+        <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
+          [(ngModel)]="group.regressionConstant" required (input)="saveItem()" [disabled]="group.userDefinedModel">
+      </div>
     </div>
-    <div class="col-6">
-      <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
-        [(ngModel)]="group.regressionConstant" required (input)="saveItem()"
-        [disabled]="group.userDefinedModel">
-    </div>
-  </div>
 
-  @if (group.userDefinedModel) {
+    @if (group.userDefinedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelYear">
@@ -204,13 +196,13 @@
         <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
           [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
           @for (year of yearOptions; track year) {
-            <option [ngValue]="year">{{year}}</option>
+          <option [ngValue]="year">{{year}}</option>
           }
         </select>
       </div>
     </div>
-  }
-  @if (!group.userDefinedModel) {
+    }
+    @if (!group.userDefinedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelStartMonth">
@@ -221,14 +213,14 @@
         <select required class="form-select" id="regressionModelStartMonth" id="regressionModelStartMonth"
           [(ngModel)]="group.regressionModelStartMonth" (change)="saveItem()">
           @for (month of months; track month) {
-            <option [ngValue]="month.monthNumValue">{{month.name}}
-            </option>
+          <option [ngValue]="month.monthNumValue">{{month.name}}
+          </option>
           }
         </select>
       </div>
     </div>
-  }
-  @if (!group.userDefinedModel) {
+    }
+    @if (!group.userDefinedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionStartYear">
@@ -239,13 +231,13 @@
         <select required class="form-select" id="regressionStartYear" id="regressionStartYear"
           [(ngModel)]="group.regressionStartYear" (change)="saveItem()">
           @for (year of yearOptions; track year) {
-            <option [ngValue]="year">{{year}}</option>
+          <option [ngValue]="year">{{year}}</option>
           }
         </select>
       </div>
     </div>
-  }
-  @if (!group.userDefinedModel) {
+    }
+    @if (!group.userDefinedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelEndMonth">
@@ -256,14 +248,14 @@
         <select required class="form-select" id="regressionModelEndMonth" id="regressionModelEndMonth"
           [(ngModel)]="group.regressionModelEndMonth" (change)="saveItem()">
           @for (month of months; track month) {
-            <option [ngValue]="month.monthNumValue">{{month.name}}
-            </option>
+          <option [ngValue]="month.monthNumValue">{{month.name}}
+          </option>
           }
         </select>
       </div>
     </div>
-  }
-  @if (!group.userDefinedModel) {
+    }
+    @if (!group.userDefinedModel) {
     <div class="row sub-column">
       <div class="col-6">
         <label for="regressionEndYear">
@@ -274,29 +266,40 @@
         <select required class="form-select" id="regressionEndYear" id="regressionEndYear"
           [(ngModel)]="group.regressionEndYear" (change)="saveItem()">
           @for (year of yearOptions; track year) {
-            <option [ngValue]="year">{{year}}</option>
+          <option [ngValue]="year">{{year}}</option>
           }
         </select>
       </div>
     </div>
-  }
-  <div class="row sub-column mt-2">
-    <div class="col-4">
-      <label for="regressionModelNotes">
-        Additional Model Notes
-      </label>
-    </div>
-    <div class="col-8">
-      <textarea class="form-control" name="regressionModelNotes" id="regressionModelNotes"
-      [(ngModel)]="group.regressionModelNotes" (input)="saveItem()"></textarea>
+    }
+    <div class="row sub-column mt-2">
+      <div class="col-4">
+        <label for="regressionModelNotes">
+          Additional Model Notes
+        </label>
+      </div>
+      <div class="col-8">
+        <textarea class="form-control" name="regressionModelNotes" id="regressionModelNotes"
+          [(ngModel)]="group.regressionModelNotes" (input)="saveItem()"></textarea>
+      </div>
     </div>
   </div>
+
+  @if (changedModel) {
+  <div class="mt-2">
+    <div class="alert alert-warning d-flex justify-content-center align-items-center">
+      The selected model has changed. Click&nbsp;
+      <a (click)="openModelComparisonModal()">here</a>
+      &nbsp;to view the changes.
+    </div>
+  </div>
+  }
 </div>
+
+
+
+<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel || showModelComparison}">
 </div>
-
-
-
-<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel}"></div>
 <div class="popup" [class.open]="showUpdateModelsModal">
   <div class="popup-header">Are you sure you want to update the models?
     <button class="item-right" (click)="closeUpdateModelsModal()">x</button>
@@ -322,3 +325,8 @@
     <button class="btn btn-success" (click)="confirmTogglePredictor()">Clear Models</button>
   </div>
 </div>
+
+@if(showModelComparison) {
+<app-regression-model-comparison [selectedFacility]="selectedFacility" [changedModel]="changedModel"
+  [showModelComparison]="showModelComparison" (close)="closeModal()"></app-regression-model-comparison>
+}
