@@ -45,50 +45,53 @@
                     </button>
                 </div>
             </div>
+            @let includedSources = form | energyUseFormIncludedSources;
             @for (includedSource of includedSources; track $index) {
+            @let sourceFormGroup = form | energyUseSourceFormGroup: includedSource;
             <hr>
-            <div class="form-group row mt-2">
-                <div class="d-flex w-100 justify-content-between">
-                    <div>
-                        <label class="col-12 col-form-label">
-                            <span class="badge me-1 larger"
-                                [ngStyle]="{'background-color': includedSource.source | meterSourceColor}">{{includedSource.source}}
-                                Data</span>
-                        </label>
-                    </div>
-                    <div>
-                        <button type="button" class="btn-close" aria-label="Close"
-                            (click)="removeUtilityType(includedSource)"></button>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group row" [formGroup]="$any(form.get('utilityData_' + includedSource.controlName))">
-                <label class="col-5 col-form-label" for="size_{{includedSource.controlName}}">
-                    {{ form.get('equipmentType').value | sizeLabel }}
-                </label>
-                <div class="col-7 ">
-                    <div class="input-group">
-                        <input id="size_{{includedSource.controlName}}" class="form-control" type="number"
-                            formControlName="size" onfocus="this.select();" min="0" (input)="calculateEnergyUse()">
-                        <select class="input-group-text" id="units_{{includedSource.controlName}}" name="units"
-                            formControlName="units" (change)="calculateEnergyUse()">
-                            <option *ngFor="let option of (includedSource.source | equipmentUnitOptions )"
-                                [ngValue]="option.value">
-                                <span [innerHTML]="option.value | settingsLabel"></span>
-                            </option>
-                        </select>
+            <form [formGroup]="sourceFormGroup">
+                <div class="form-group row mt-2">
+                    <div class="d-flex w-100 justify-content-between">
+                        <div>
+                            <label class="col-12 col-form-label">
+                                <span class="badge me-1 larger"
+                                    [ngStyle]="{'background-color': includedSource.source | meterSourceColor}">{{includedSource.source}}
+                                    Data</span>
+                            </label>
+                        </div>
+                        <div>
+                            <button type="button" class="btn-close" aria-label="Close"
+                                (click)="removeUtilityType(includedSource)"></button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group row" [formGroup]="$any(form.get('utilityData_' + includedSource.controlName))">
-                <label class="col-5 col-form-label" for="numberOfEquipment_{{includedSource.controlName}}">Number of
-                    Equipment</label>
-                <div class="col-7">
-                    <input id="numberOfEquipment_{{includedSource.controlName}}" class="form-control" type="number"
-                        formControlName="numberOfEquipment" onfocus="this.select();" min="0"
-                        (input)="calculateEnergyUse()">
+                <div class="form-group row">
+                    <label class="col-5 col-form-label" for="size_{{includedSource.controlName}}">
+                        {{ form.get('equipmentType').value | sizeLabel }}
+                    </label>
+                    <div class="col-7 ">
+                        <div class="input-group">
+                            <input id="size_{{includedSource.controlName}}" class="form-control" type="number"
+                                formControlName="size" onfocus="this.select();" min="0">
+                            <select class="input-group-text" id="units_{{includedSource.controlName}}" name="units"
+                                formControlName="units">
+                                <option *ngFor="let option of (includedSource.source | equipmentUnitOptions )"
+                                    [ngValue]="option.value">
+                                    <span [innerHTML]="option.value | settingsLabel"></span>
+                                </option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div class="form-group row">
+                    <label class="col-5 col-form-label" for="numberOfEquipment_{{includedSource.controlName}}">Number of
+                        Equipment</label>
+                    <div class="col-7">
+                        <input id="numberOfEquipment_{{includedSource.controlName}}" class="form-control" type="number"
+                            formControlName="numberOfEquipment" onfocus="this.select();" min="0">
+                    </div>
+                </div>
+            </form>
             @if(energyUseEquipment){
             <!--iterate energy use-->
             <div class="mt-3 mb-2">
@@ -107,7 +110,8 @@
                     </label>
                     <div class="col-7">
                         <div class="input-group">
-                            <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseGroup, utilityDataForm, includedSource.source)">
+                            <button class="btn action-btn input-group-text"
+                                (click)="toggleOverride(energyUseGroup, utilityDataForm, includedSource.source)">
                                 @if(energyUseGroup.controls.overrideEnergyUse.value){
                                 <span class="fa fa-calculator"></span>
                                 }@else {
@@ -127,6 +131,7 @@
             }
             }
             <hr>
+            @let availableSources = includedSources | energyUseFormAvailableSources;
             @if(availableSources.length > 0){
             <a class="click-link float-right" (click)="openAddUtilityModal()">
                 <span class="fa fa-plus me-1"></span>

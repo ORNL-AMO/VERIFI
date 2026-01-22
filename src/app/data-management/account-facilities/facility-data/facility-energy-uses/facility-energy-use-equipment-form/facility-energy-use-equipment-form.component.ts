@@ -36,9 +36,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
   showLinkMeterModal: boolean = false;
 
   linkedMeterGroup: IdbUtilityMeterGroup;
-  includedSources: Array<{ source: MeterSource, controlName: string }> = [];
   showUtilityTypeModal: boolean = false;
-  availableSources: Array<MeterSource>;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utiltiyMeterDbService: UtilityMeterdbService,
     private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService
@@ -57,10 +55,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
   ngOnDestroy() {
     this.utilityMeterGroupsSub.unsubscribe();
     this.utilityMetersSub.unsubscribe();
-  }
-
-  ngOnChanges() {
-    this.setIncludedSources();
   }
 
   openLinkMeterTable() {
@@ -105,58 +99,42 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   setUtilityTypes() {
-    let groupMeters: Array<IdbUtilityMeter> = this.utilityMeters.filter(meter => { return meter.groupId == this.linkedMeterGroup.guid; });
-    let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
-    sources = _.uniq(sources);
-    sources.forEach(source => {
-      if (!this.form.contains('utilityData_' + source.replace(/\s+/g, '_'))) {
-        let energyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean }> = [];
-        if (this.energyUseEquipment) {
-          this.energyUseEquipment.operatingConditionsData.forEach(opCond => {
-            energyUse.push({
-              year: opCond.year,
-              energyUse: 0,
-              overrideEnergyUse: false
-            });
-          });
-        }
-        this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, { energySource: source, size: 0, numberOfEquipment: 1, units: '', energyUse: energyUse });
-      }
-    });
-    //remove any that are not in the meter group
-    let formSources: Array<string> = [];
-    Object.keys(this.form.controls).forEach(controlName => {
-      if (controlName.startsWith('utilityData_')) {
-        let source: string = controlName.replace('utilityData_', '').replace(/_/g, ' ');
-        formSources.push(source);
-      }
-    });
-    formSources.forEach(formSource => {
-      if (!sources.includes(formSource as MeterSource)) {
-        //remove from form
-        this.form.removeControl('utilityData_' + formSource.replace(/\s+/g, '_'));
-      }
-    });
-    this.setIncludedSources();
-  }
-
-  setIncludedSources() {
-    // let sources: Array<{
-    //   source: MeterSource, controlName: string
-    // }> = EnergySources.map(source => { return { source: source, controlName: source.replace(/\s+/g, '_') }; });
-    // this.includedSources = [];
-    // for (let source of sources) {
-    //   if (this.form.contains('utilityData_' + source.controlName)) {
-    //     this.includedSources.push(source);
+    // let groupMeters: Array<IdbUtilityMeter> = this.utilityMeters.filter(meter => { return meter.groupId == this.linkedMeterGroup.guid; });
+    // let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
+    // sources = _.uniq(sources);
+    // sources.forEach(source => {
+    //   if (!this.form.contains('utilityData_' + source.replace(/\s+/g, '_'))) {
+    //     let energyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean }> = [];
+    //     if (this.energyUseEquipment) {
+    //       this.energyUseEquipment.operatingConditionsData.forEach(opCond => {
+    //         energyUse.push({
+    //           year: opCond.year,
+    //           energyUse: 0,
+    //           overrideEnergyUse: false
+    //         });
+    //       });
+    //     }
+    //     this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, { energySource: source, size: 0, numberOfEquipment: 1, units: '', energyUse: energyUse });
     //   }
-    // }
-    this.includedSources = getIncludedSources(this.form);
-    this.setAvailableSources();
+    // });
+    // //remove any that are not in the meter group
+    // let formSources: Array<string> = [];
+    // Object.keys(this.form.controls).forEach(controlName => {
+    //   if (controlName.startsWith('utilityData_')) {
+    //     let source: string = controlName.replace('utilityData_', '').replace(/_/g, ' ');
+    //     formSources.push(source);
+    //   }
+    // });
+    // formSources.forEach(formSource => {
+    //   if (!sources.includes(formSource as MeterSource)) {
+    //     //remove from form
+    //     this.form.removeControl('utilityData_' + formSource.replace(/\s+/g, '_'));
+    //   }
+    // });
   }
 
   removeUtilityType(sourceToRemove: { source: MeterSource, controlName: string }) {
-    this.facilityEnergyUseEquipmentFormService.removeUtilityDataFromForm(this.form, sourceToRemove.source);
-    this.setIncludedSources();
+    // this.facilityEnergyUseEquipmentFormService.removeUtilityDataFromForm(this.form, sourceToRemove.source);
   }
 
   openAddUtilityModal() {
@@ -167,72 +145,64 @@ export class FacilityEnergyUseEquipmentFormComponent {
     this.showUtilityTypeModal = false;
   }
 
-  setAvailableSources() {
-    let selectedSources: Array<MeterSource> = this.includedSources.map(sourceObj => { return sourceObj.source; });
-    this.availableSources = EnergySources.filter(source => {
-      return !selectedSources.includes(source);
-    });
-  }
-
   addUtilityType(sourceToAdd: MeterSource) {
-    let energyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean }> = [];
-    if (this.energyUseEquipment) {
-      this.energyUseEquipment.operatingConditionsData.forEach(opCond => {
-        energyUse.push({
-          year: opCond.year,
-          energyUse: 0,
-          overrideEnergyUse: false
-        });
-      });
-    }
-    this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, { energySource: sourceToAdd, size: 0, numberOfEquipment: 1, units: '', energyUse: energyUse });
-    this.setIncludedSources();
+    // let energyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean }> = [];
+    // if (this.energyUseEquipment) {
+    //   this.energyUseEquipment.operatingConditionsData.forEach(opCond => {
+    //     energyUse.push({
+    //       year: opCond.year,
+    //       energyUse: 0,
+    //       overrideEnergyUse: false
+    //     });
+    //   });
+    // }
+    // this.facilityEnergyUseEquipmentFormService.addUtilityDataToForm(this.form, { energySource: sourceToAdd, size: 0, numberOfEquipment: 1, units: '', energyUse: energyUse });
     this.closeAddUtilityModal();
   }
 
   toggleOverride(energyUseGroup: FormGroup, utilityDataForm: FormGroup, source: MeterSource) {
-    console.log(energyUseGroup);
-    energyUseGroup.controls.overrideEnergyUse.setValue(!energyUseGroup.controls.overrideEnergyUse.value);
-    if (!energyUseGroup.controls.overrideEnergyUse.value) {
-      energyUseGroup.controls.energyUse.disable();
-      let utilityData = {
-        energySource: source,
-        size: utilityDataForm.controls.size.value,
-        numberOfEquipment: utilityDataForm.controls.numberOfEquipment.value,
-        units: utilityDataForm.controls.units.value,
-        energyUse: []
-      };
-      let operatingConditions = this.energyUseEquipment.operatingConditionsData.find(opCond => { return opCond.year == energyUseGroup.controls.year.value });
-      let energyUse: number = calculateTotalEnergyUse(operatingConditions, utilityData);
-      energyUseGroup.controls.energyUse.setValue(energyUse);
-    } else {
-      energyUseGroup.controls.energyUse.enable();
-    }
+    // console.log(energyUseGroup);
+    // energyUseGroup.controls.overrideEnergyUse.setValue(!energyUseGroup.controls.overrideEnergyUse.value);
+    // if (!energyUseGroup.controls.overrideEnergyUse.value) {
+    //   energyUseGroup.controls.energyUse.disable();
+    //   let utilityData = {
+    //     energySource: source,
+    //     size: utilityDataForm.controls.size.value,
+    //     numberOfEquipment: utilityDataForm.controls.numberOfEquipment.value,
+    //     units: utilityDataForm.controls.units.value,
+    //     energyUse: []
+    //   };
+    //   let operatingConditions = this.energyUseEquipment.operatingConditionsData.find(opCond => { return opCond.year == energyUseGroup.controls.year.value });
+    //   let energyUse: number = calculateTotalEnergyUse(operatingConditions, utilityData);
+    //   energyUseGroup.controls.energyUse.setValue(energyUse);
+    // } else {
+    //   energyUseGroup.controls.energyUse.enable();
+    // }
   }
 
-  calculateEnergyUse() {
-    for (let sourceObj of this.includedSources) {
-      let utilityDataForm = this.form.controls['utilityData_' + sourceObj.controlName] as FormGroup;
-      let utilityData = {
-        energySource: sourceObj.source,
-        size: utilityDataForm.controls.size.value,
-        numberOfEquipment: utilityDataForm.controls.numberOfEquipment.value,
-        units: utilityDataForm.controls.units.value,
-        energyUse: []
-      };
-      if (utilityData) {
-        let energyUseFormArray = utilityDataForm.controls.energyUse as FormArray;
-        if (energyUseFormArray) {
-          energyUseFormArray.controls.forEach((energyUseGroup: FormGroup) => {
-            if (!energyUseGroup.controls.overrideEnergyUse.value) {
-              let operatingConditions = this.energyUseEquipment.operatingConditionsData.find(opCond => { return opCond.year == energyUseGroup.controls.year.value });
-              let energyUse: number = calculateTotalEnergyUse(operatingConditions, utilityData);
-              console.log(energyUse)
-              energyUseGroup.controls.energyUse.setValue(energyUse);
-            }
-          });
-        }
-      }
-    }
-  }
+  // calculateEnergyUse() {
+  //   for (let sourceObj of this.includedSources) {
+  //     let utilityDataForm = this.form.controls['utilityData_' + sourceObj.controlName] as FormGroup;
+  //     let utilityData = {
+  //       energySource: sourceObj.source,
+  //       size: utilityDataForm.controls.size.value,
+  //       numberOfEquipment: utilityDataForm.controls.numberOfEquipment.value,
+  //       units: utilityDataForm.controls.units.value,
+  //       energyUse: []
+  //     };
+  //     if (utilityData) {
+  //       let energyUseFormArray = utilityDataForm.controls.energyUse as FormArray;
+  //       if (energyUseFormArray) {
+  //         energyUseFormArray.controls.forEach((energyUseGroup: FormGroup) => {
+  //           if (!energyUseGroup.controls.overrideEnergyUse.value) {
+  //             let operatingConditions = this.energyUseEquipment.operatingConditionsData.find(opCond => { return opCond.year == energyUseGroup.controls.year.value });
+  //             let energyUse: number = calculateTotalEnergyUse(operatingConditions, utilityData);
+  //             console.log(energyUse)
+  //             energyUseGroup.controls.energyUse.setValue(energyUse);
+  //           }
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
 }

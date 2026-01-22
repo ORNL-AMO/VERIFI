@@ -1,0 +1,116 @@
+<form [formGroup]="equipmentDetailsForm">
+    <div class="row">
+        <div class="col-12">
+            <p class="bold">Equipment / System Information</p>
+            <div class="form-group row">
+                <label class="col-5 col-form-label" for="equipmentName">Name</label>
+                <div class="col-7">
+                    <input id="equipmentName" class="form-control" type="text" formControlName="name"
+                        onfocus="this.select();" minlength="0" maxlength="100">
+                    @let nameControl = equipmentDetailsForm.get('name');
+                    @if(nameControl.touched && nameControl.hasError('required')){
+                    <div class="alert alert-danger mt-1" *ngIf="nameControl.hasError('required')">Name is
+                        required</div>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <label class="col-sm-5 col-form-label" for="equipmentType">Industrial System</label>
+                <div class="col-sm-7">
+                    <select name="equipmentType" class="form-select" id="equipmentType" formControlName="equipmentType">
+                        <option *ngFor="let option of equipmentTypes" [ngValue]="option">
+                            {{option}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-5 col-form-label" for="equipmentNotes">Notes</label>
+                <div class="col-7">
+                    <textarea id="equipmentNotes" class="form-control" formControlName="notes" onfocus="this.select();"
+                        minlength="0" maxlength="500"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <label class="col-5 col-form-label">Connect Utility Meter Group</label>
+                <div class="col-7">
+                    <button class="btn action-btn" (click)="openLinkMeterTable()" type="button">
+                        <span class="fa fa-link"></span>
+                        @if(equipmentDetailsForm.controls.utilityMeterGroupId.value){
+                        {{ linkedMeterGroup?.name }}
+                        }@else{
+                        Select Meter Group
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<div [ngClass]="{'windowOverlay': showLinkMeterModal}"></div>
+<!--LINK METER TO ENERGY EQUIPMENT MODAL-->
+<div class="popup" [class.open]="showLinkMeterModal">
+    <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter Group to Equipment
+        <button class="item-right" (click)="cancelLinkMeterGroup()">x</button>
+    </div>
+    <div class="popup-body">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Meter Group Name</th>
+                    <th>Group Type</th>
+                    <th>Sources</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (meterGroup of utilityMeterGroups; track $index) {
+                <tr class="clickable" (click)="changeLinkedMeterGroup(meterGroup)">
+                    <td class="text-center">
+                        @if(meterGroup.guid == equipmentDetailsForm.controls.utilityMeterGroupId.value){
+                        <span class="fa fa-circle-check"></span>
+                        }@else{
+                        <span class="fa fa-circle"></span>
+                        }
+                    </td>
+                    <td>{{ meterGroup.name }}</td>
+                    <td>
+                        {{ meterGroup.groupType }}
+                    </td>
+                    <td>
+                        @let meterGroupSources = meterGroup.guid | meterGroupSourcesList: utilityMeters;
+
+                        @for(source of meterGroupSources; track $index) {
+                        <span class="badge me-1"
+                            [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
+                        }
+
+                        <!-- <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
+                            <ng-container *ngIf="meter.scope != 2">
+                                {{meter.fuel}}
+                            </ng-container>
+                            <ng-container *ngIf="meter.scope == 2">
+                                {{meter.vehicleFuel}}
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
+                            &mdash;
+                        </ng-container> -->
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-danger" (click)="cancelLinkMeterGroup()">Unlink Meter Group</button>
+        <button class="btn btn-success" (click)="closeLinkMeterGroup()"
+            [disabled]="!equipmentDetailsForm.controls.utilityMeterGroupId.value">Link Meter Group</button>
+    </div>
+</div>

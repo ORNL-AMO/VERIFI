@@ -8,71 +8,124 @@ import { EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/mod
 })
 export class FacilityEnergyUseEquipmentFormService {
 
+
+
   constructor(private formBuilder: FormBuilder) { }
 
-  getFormFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment, inSetup: boolean): FormGroup {
-    let requiredValidators: Array<ValidatorFn> = [];
-    if (!inSetup) {
-      requiredValidators.push(Validators.required);
-    }
+  getFormsFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): {
+    equipmentDetailsForm: FormGroup,
+    utilityDataForms: Array<{
+      energySource: MeterSource,
+      utilityDataForm: FormGroup,
+      energyUseForms: Array<FormGroup>
+    }>,
+    annualOperatingConditionsDataForms: Array<FormGroup>
+  } {
+    let equipmentDetailsForm: FormGroup = this.getEquipmentDetailsFromFromEnergyUseEquipment(equipment);
+    let utilityDataForms: Array<{
+      energySource: MeterSource,
+      utilityDataForm: FormGroup,
+      energyUseForms: Array<FormGroup>
+    }> = this.getUtilityDataFormsFromEnergyUseEquipment(equipment);
+    let annualOperatingConditionsDataForms: Array<FormGroup> = this.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(equipment);
+    return {
+      equipmentDetailsForm: equipmentDetailsForm,
+      utilityDataForms: utilityDataForms,
+      annualOperatingConditionsDataForms: annualOperatingConditionsDataForms
+    };
+  }
+
+  updateEnergyUseEquipmentFromForms(equipment: IdbFacilityEnergyUseEquipment,
+    equipmentDetailsForm: FormGroup,
+    utilityDataForms: Array<{ energySource: MeterSource, utilityDataForm: FormGroup, energyUseForms: Array<FormGroup> }>,
+    annualOperatingConditionsDataForms: Array<FormGroup>): IdbFacilityEnergyUseEquipment {
+    equipment = this.updateEnergyUseEquipmentDetailsFromForm(equipment, equipmentDetailsForm);
+    equipment = this.updateUtilityDataFromForms(equipment, utilityDataForms);
+    equipment = this.updateAnnualOperatingConditionsDataFromForms(equipment, annualOperatingConditionsDataForms);
+    return equipment;
+  }
+
+  getEquipmentDetailsFromFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): FormGroup {
     let equipmentFormGroup: FormGroup = this.formBuilder.group({
       name: [equipment.name, Validators.required],
       notes: [equipment.notes],
       equipmentType: [equipment.equipmentType],
       utilityMeterGroupId: [equipment.utilityMeterGroupId]
     });
-
-    equipment.utilityData.forEach((utilityData, index) => {
-      this.addUtilityDataToForm(equipmentFormGroup, utilityData);
-    })
     return equipmentFormGroup;
   }
 
-  updateEnergyUseEquipmentFromForm(equipment: IdbFacilityEnergyUseEquipment, form: FormGroup): IdbFacilityEnergyUseEquipment {
+  updateEnergyUseEquipmentDetailsFromForm(equipment: IdbFacilityEnergyUseEquipment, form: FormGroup): IdbFacilityEnergyUseEquipment {
     equipment.name = form.controls.name.value;
     equipment.notes = form.controls.notes.value;
     equipment.equipmentType = form.controls.equipmentType.value;
     equipment.utilityMeterGroupId = form.controls.utilityMeterGroupId.value;
-    //update utility data
-    let includedSources: Array<MeterSource> = [];
-    Object.keys(form.controls).forEach(controlName => {
-      if (controlName.startsWith('utilityData_')) {
-        let source: MeterSource = controlName.replace('utilityData_', '').replace(/_/g, ' ') as MeterSource;
-        includedSources.push(source);
-      }
+    return equipment;
+  }
+
+  getUtilityDataFormsFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): Array<{
+    energySource: MeterSource,
+    utilityDataForm: FormGroup,
+    energyUseForms: Array<FormGroup>
+  }> {
+    let utilityDataForms: Array<{
+      energySource: MeterSource,
+      utilityDataForm: FormGroup,
+      energyUseForms: Array<FormGroup>
+    }> = [];
+    equipment.utilityData.forEach((utilityData, index) => {
+      let utilityDataFormObj = this.getUtilityDataForm(utilityData);
+      utilityDataForms.push(utilityDataFormObj);
     });
-    //remove any utility data not included
-    equipment.utilityData = equipment.utilityData.filter(utilityData => {
-      return includedSources.includes(utilityData.energySource);
+    return utilityDataForms;
+  }
+
+  getUtilityDataForm(utilityData: EquipmentUtilityData): {
+    energySource: MeterSource,
+    utilityDataForm: FormGroup,
+    energyUseForms: Array<FormGroup>
+  } {
+    let utilityDataForm: FormGroup = this.formBuilder.group({
+      size: [utilityData.size, [Validators.required, Validators.min(0)]],
+      numberOfEquipment: [utilityData.numberOfEquipment, [Validators.required, Validators.min(1)]],
+      units: [utilityData.units, Validators.required]
     });
-    //add any new utility data
-    includedSources.forEach(source => {
-      let existingUtilityData = equipment.utilityData.find(utilityData => { return utilityData.energySource == source; });
-      if (!existingUtilityData) {
-        equipment.utilityData.push({
-          energySource: source,
-          size: 0,
-          numberOfEquipment: 1,
-          units: '',
-          energyUse: []
-        });
-      }
+    let energyUseForms: Array<FormGroup> = [];
+    utilityData.energyUse.forEach(energyUseData => {
+      let energyUseForm: FormGroup = this.formBuilder.group({
+        year: [energyUseData.year, Validators.required],
+        energyUse: [{ value: energyUseData.energyUse, disabled: energyUseData.overrideEnergyUse === false }, Validators.required],
+        overrideEnergyUse: [energyUseData.overrideEnergyUse, Validators.required]
+      });
+      energyUseForms.push(energyUseForm);
     });
-    //update utility data values from form
+    return {
+      energySource: utilityData.energySource,
+      utilityDataForm: utilityDataForm,
+      energyUseForms: energyUseForms
+    };
+  }
+
+  updateUtilityDataFromForms(equipment: IdbFacilityEnergyUseEquipment, utilityDataForms: Array<{
+    energySource: MeterSource,
+    utilityDataForm: FormGroup,
+    energyUseForms: Array<FormGroup>
+  }>): IdbFacilityEnergyUseEquipment {
     for (let i = 0; i < equipment.utilityData.length; i++) {
-      let utilityDataForm = form.controls['utilityData_' + equipment.utilityData[i].energySource.replace(/\s+/g, '_')] as FormGroup;
-      equipment.utilityData[i].size = utilityDataForm.controls.size.value;
-      equipment.utilityData[i].numberOfEquipment = utilityDataForm.controls.numberOfEquipment.value;
-      equipment.utilityData[i].units = utilityDataForm.controls.units.value;
-      equipment.utilityData[i].energyUse = [];
-      if (utilityDataForm.contains('energyUse')) {
-        let energyUseArray = utilityDataForm.controls.energyUse as FormArray;
-        for (let j = 0; j < energyUseArray.length; j++) {
-          let energyUseGroup = energyUseArray.at(j) as FormGroup;
+      let utilityDataFormObj = utilityDataForms.find(udf => { return udf.energySource == equipment.utilityData[i].energySource; });
+      if (utilityDataFormObj) {
+        let utilityDataForm: FormGroup = utilityDataFormObj.utilityDataForm;
+        equipment.utilityData[i].size = utilityDataForm.controls.size.value;
+        equipment.utilityData[i].numberOfEquipment = utilityDataForm.controls.numberOfEquipment.value;
+        equipment.utilityData[i].units = utilityDataForm.controls.units.value;
+        equipment.utilityData[i].energyUse = [];
+        let energyUseForms: Array<FormGroup> = utilityDataFormObj.energyUseForms;
+        for (let j = 0; j < energyUseForms.length; j++) {
+          let energyUseForm: FormGroup = energyUseForms[j];
           equipment.utilityData[i].energyUse.push({
-            year: energyUseGroup.controls.year.value,
-            energyUse: energyUseGroup.controls.energyUse.value,
-            overrideEnergyUse: energyUseGroup.controls.overrideEnergyUse.value
+            year: energyUseForm.controls.year.value,
+            energyUse: energyUseForm.controls.energyUse.value,
+            overrideEnergyUse: energyUseForm.controls.overrideEnergyUse.value
           });
         }
       }
@@ -80,74 +133,156 @@ export class FacilityEnergyUseEquipmentFormService {
     return equipment;
   }
 
-  addUtilityDataToForm(form: FormGroup, utilityData: EquipmentUtilityData = { energySource: 'Other', size: 0, numberOfEquipment: 1, units: '', energyUse: [] }) {
-    let utilityDataGroup: FormGroup = this.formBuilder.group({
-      size: [utilityData.size, [Validators.required, Validators.min(0)]],
-      numberOfEquipment: [utilityData.numberOfEquipment, [Validators.required, Validators.min(1)]],
-      units: [utilityData.units, Validators.required]
+  getAnnualOperatingConditionsFormsFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): Array<FormGroup> {
+    let operatingConditionsForms: Array<FormGroup> = [];
+    equipment.operatingConditionsData.forEach(operatingConditionsData => {
+      let operatingConditionsForm: FormGroup = this.formBuilder.group({
+        year: [operatingConditionsData.year, Validators.required],
+        dutyFactor: [operatingConditionsData.dutyFactor, [Validators.required, Validators.min(0), Validators.max(100)]],
+        efficiency: [operatingConditionsData.efficiency, [Validators.required, Validators.min(0), Validators.max(100)]],
+        hoursOfOperation: [operatingConditionsData.hoursOfOperation, [Validators.required, Validators.min(0)]],
+        loadFactor: [operatingConditionsData.loadFactor, [Validators.required, Validators.min(0), Validators.max(100)]]
+      });
+      operatingConditionsForms.push(operatingConditionsForm);
     });
+    return operatingConditionsForms;
+  }
 
-    if (utilityData.energyUse.length > 0) {
-      utilityDataGroup.addControl('energyUse', this.formBuilder.array(utilityData.energyUse.map(eu => {
-        const group = this.formBuilder.group({
-          year: [eu.year, Validators.required],
-          energyUse: [{ value: eu.energyUse, disabled: eu.overrideEnergyUse === false }, Validators.required],
-          overrideEnergyUse: [eu.overrideEnergyUse, Validators.required]
-        });
-        return group;
-      })));
+  updateAnnualOperatingConditionsDataFromForms(equipment: IdbFacilityEnergyUseEquipment, operatingConditionsForms: Array<FormGroup>): IdbFacilityEnergyUseEquipment {
+    equipment.operatingConditionsData = [];
+    for (let i = 0; i < operatingConditionsForms.length; i++) {
+      let operatingConditionsForm: FormGroup = operatingConditionsForms[i];
+      equipment.operatingConditionsData.push({
+        year: operatingConditionsForm.controls.year.value,
+        dutyFactor: operatingConditionsForm.controls.dutyFactor.value,
+        efficiency: operatingConditionsForm.controls.efficiency.value,
+        hoursOfOperation: operatingConditionsForm.controls.hoursOfOperation.value,
+        loadFactor: operatingConditionsForm.controls.loadFactor.value
+      });
     }
-
-    form.addControl('utilityData_' + utilityData.energySource.replace(/\s+/g, '_'), utilityDataGroup);
+    return equipment;
   }
 
-  removeUtilityDataFromForm(form: FormGroup, energySource: MeterSource) {
-    form.removeControl('utilityData_' + energySource.replace(/\s+/g, '_'));
-  }
+  // updateEnergyUseEquipmentFromForm(equipment: IdbFacilityEnergyUseEquipment, form: FormGroup): IdbFacilityEnergyUseEquipment {
+  //   equipment.name = form.controls.name.value;
+  //   equipment.notes = form.controls.notes.value;
+  //   equipment.equipmentType = form.controls.equipmentType.value;
+  //   equipment.utilityMeterGroupId = form.controls.utilityMeterGroupId.value;
+  //   //update utility data
+  //   let includedSources: Array<MeterSource> = [];
+  //   Object.keys(form.controls).forEach(controlName => {
+  //     if (controlName.startsWith('utilityData_')) {
+  //       let source: MeterSource = controlName.replace('utilityData_', '').replace(/_/g, ' ') as MeterSource;
+  //       includedSources.push(source);
+  //     }
+  //   });
+  //   //remove any utility data not included
+  //   equipment.utilityData = equipment.utilityData.filter(utilityData => {
+  //     return includedSources.includes(utilityData.energySource);
+  //   });
+  //   //add any new utility data
+  //   includedSources.forEach(source => {
+  //     let existingUtilityData = equipment.utilityData.find(utilityData => { return utilityData.energySource == source; });
+  //     if (!existingUtilityData) {
+  //       equipment.utilityData.push({
+  //         energySource: source,
+  //         size: 0,
+  //         numberOfEquipment: 1,
+  //         units: '',
+  //         energyUse: []
+  //       });
+  //     }
+  //   });
+  //   //update utility data values from form
+  //   for (let i = 0; i < equipment.utilityData.length; i++) {
+  //     let utilityDataForm = form.controls['utilityData_' + equipment.utilityData[i].energySource.replace(/\s+/g, '_')] as FormGroup;
+  //     equipment.utilityData[i].size = utilityDataForm.controls.size.value;
+  //     equipment.utilityData[i].numberOfEquipment = utilityDataForm.controls.numberOfEquipment.value;
+  //     equipment.utilityData[i].units = utilityDataForm.controls.units.value;
+  //     equipment.utilityData[i].energyUse = [];
+  //     if (utilityDataForm.contains('energyUse')) {
+  //       let energyUseArray = utilityDataForm.controls.energyUse as FormArray;
+  //       for (let j = 0; j < energyUseArray.length; j++) {
+  //         let energyUseGroup = energyUseArray.at(j) as FormGroup;
+  //         equipment.utilityData[i].energyUse.push({
+  //           year: energyUseGroup.controls.year.value,
+  //           energyUse: energyUseGroup.controls.energyUse.value,
+  //           overrideEnergyUse: energyUseGroup.controls.overrideEnergyUse.value
+  //         });
+  //       }
+  //     }
+  //   }
+  //   return equipment;
+  // }
 
-  addYearToUtilityDataForm(form: FormGroup, year: number) {
-    Object.keys(form.controls).forEach(controlName => {
-      if (controlName.startsWith('utilityData_')) {
-        let utilityDataForm = form.controls[controlName] as FormGroup;
-        if (utilityDataForm.contains('energyUse')) {
-          let energyUseArray = utilityDataForm.controls.energyUse as FormArray;
-          //TODO: calculate energy use
-          energyUseArray.push(this.formBuilder.group({
-            year: [year, Validators.required],
-            energyUse: [{ value: 0, disabled: true }, Validators.required],
-            overrideEnergyUse: [false, Validators.required]
-          }));
-        }
-      }
-    });
-  }
+  // addUtilityDataToForm(form: FormGroup, utilityData: EquipmentUtilityData = { energySource: 'Other', size: 0, numberOfEquipment: 1, units: '', energyUse: [] }) {
+  //   let utilityDataGroup: FormGroup = this.formBuilder.group({
+  //     size: [utilityData.size, [Validators.required, Validators.min(0)]],
+  //     numberOfEquipment: [utilityData.numberOfEquipment, [Validators.required, Validators.min(1)]],
+  //     units: [utilityData.units, Validators.required]
+  //   });
 
-  removeYearFromUtilityDataForm(form: FormGroup, year: number) {
-    Object.keys(form.controls).forEach(controlName => {
-      if (controlName.startsWith('utilityData_')) {
-        let utilityDataForm = form.controls[controlName] as FormGroup;
-        if (utilityDataForm.contains('energyUse')) {
-          let energyUseArray = utilityDataForm.controls.energyUse as FormArray;
-          let indexToRemove = energyUseArray.controls.findIndex(group => {
-            return (group as FormGroup).controls.year.value === year;
-          });
-          if (indexToRemove !== -1) {
-            energyUseArray.removeAt(indexToRemove);
-          }
-        }
-      }
-    });
-  }
+  //   if (utilityData.energyUse.length > 0) {
+  //     utilityDataGroup.addControl('energyUse', this.formBuilder.array(utilityData.energyUse.map(eu => {
+  //       const group = this.formBuilder.group({
+  //         year: [eu.year, Validators.required],
+  //         energyUse: [{ value: eu.energyUse, disabled: eu.overrideEnergyUse === false }, Validators.required],
+  //         overrideEnergyUse: [eu.overrideEnergyUse, Validators.required]
+  //       });
+  //       return group;
+  //     })));
+  //   }
 
-  removeAllYearsFromUtilityDataForm(form: FormGroup) {
-    Object.keys(form.controls).forEach(controlName => {
-      if (controlName.startsWith('utilityData_')) {
-        let utilityDataForm = form.controls[controlName] as FormGroup;
-        if (utilityDataForm.contains('energyUse')) {
-          utilityDataForm.removeControl('energyUse');
-        }
-      }
-    })
-  }
+  //   form.addControl('utilityData_' + utilityData.energySource.replace(/\s+/g, '_'), utilityDataGroup);
+  // }
+
+  // removeUtilityDataFromForm(form: FormGroup, energySource: MeterSource) {
+  //   form.removeControl('utilityData_' + energySource.replace(/\s+/g, '_'));
+  // }
+
+  // addYearToUtilityDataForm(form: FormGroup, year: number) {
+  //   Object.keys(form.controls).forEach(controlName => {
+  //     if (controlName.startsWith('utilityData_')) {
+  //       let utilityDataForm = form.controls[controlName] as FormGroup;
+  //       if (utilityDataForm.contains('energyUse')) {
+  //         let energyUseArray = utilityDataForm.controls.energyUse as FormArray;
+  //         //TODO: calculate energy use
+  //         energyUseArray.push(this.formBuilder.group({
+  //           year: [year, Validators.required],
+  //           energyUse: [{ value: 0, disabled: true }, Validators.required],
+  //           overrideEnergyUse: [false, Validators.required]
+  //         }));
+  //       }
+  //     }
+  //   });
+  // }
+
+  // removeYearFromUtilityDataForm(form: FormGroup, year: number) {
+  //   Object.keys(form.controls).forEach(controlName => {
+  //     if (controlName.startsWith('utilityData_')) {
+  //       let utilityDataForm = form.controls[controlName] as FormGroup;
+  //       if (utilityDataForm.contains('energyUse')) {
+  //         let energyUseArray = utilityDataForm.controls.energyUse as FormArray;
+  //         let indexToRemove = energyUseArray.controls.findIndex(group => {
+  //           return (group as FormGroup).controls.year.value === year;
+  //         });
+  //         if (indexToRemove !== -1) {
+  //           energyUseArray.removeAt(indexToRemove);
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
+
+  // removeAllYearsFromUtilityDataForm(form: FormGroup) {
+  //   Object.keys(form.controls).forEach(controlName => {
+  //     if (controlName.startsWith('utilityData_')) {
+  //       let utilityDataForm = form.controls[controlName] as FormGroup;
+  //       if (utilityDataForm.contains('energyUse')) {
+  //         utilityDataForm.removeControl('energyUse');
+  //       }
+  //     }
+  //   })
+  // }
 
 }

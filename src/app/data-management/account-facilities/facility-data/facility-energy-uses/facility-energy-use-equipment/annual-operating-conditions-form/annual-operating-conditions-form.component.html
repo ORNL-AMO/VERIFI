@@ -1,0 +1,47 @@
+<form [formGroup]="annualOperatingConditionsDataForm">
+    @let selectedYear = annualOperatingConditionsDataForm.controls.year.value;
+    <div class="row">
+        <div class="col">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <button class="btn-close" (click)="removeOperatingConditionsData()"></button>
+                </span>
+                <!-- {{data.year}} -->
+                <select class="form-select" formControlName="year" id="{{'year_'+selectedYear}}">
+                    @for (yearOption of yearOptions; track yearOption.year) {
+                    <option [value]="yearOption.year">
+                        {{yearOption.year}}</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="hoursOfOperation" min="0"
+                    id="{{'hoursOfOperation_'+selectedYear}}">
+                <span class="input-group-text">hrs</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
+                    id="{{'loadFactor_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="dutyFactor" min="0" max="100"
+                    id="{{'dutyFactor_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="efficiency" min="0" max="100"
+                    id="{{'efficiency_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+    </div>
+</form>

@@ -60,12 +60,12 @@ export class FacilityEnergyUsesGroupSetupComponent {
     let newGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
     newGroup.name = 'Group ' + (this.energyUseGroups.length + 1);
     let equipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup)
-    let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(equipment, true);
-    this.energyUseGroups.push({
-      ...newGroup,
-      numberOfEquipment: 1,
-      equipmentForms: [equipmentForm]
-    });
+    // let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(equipment, true);
+    // this.energyUseGroups.push({
+    //   ...newGroup,
+    //   numberOfEquipment: 1,
+    //   equipmentForms: [equipmentForm]
+    // });
   }
 
   nextGroup() {
@@ -91,32 +91,32 @@ export class FacilityEnergyUsesGroupSetupComponent {
         createdDate: group.createdDate
       };
       newGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newGroup));
-      for (let eqForm of group.equipmentForms) {
-        let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup);
-        newEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForm(newEquipment, eqForm);
-        newEquipment.energyUseGroupId = newGroup.guid;
-        let operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData> = [{
-          year: new Date().getFullYear(),
-          hoursOfOperation: 8760,
-          loadFactor: 100,
-          dutyFactor: 100,
-          efficiency: 100,
-        }];
-        newEquipment.operatingConditionsData = operatingConditionsData;
-        newEquipment.utilityData.forEach(uData => {
-          uData.energyUse = operatingConditionsData.map(eu => {
-            return {
-              year: eu.year,
-              //todo: Calculate energy use
-              energyUse: 0,
-              overrideEnergyUse: false
-            }
-          });
-          return uData;
+      // for (let eqForm of group.equipmentForms) {
+      //   let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup);
+      //   newEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForm(newEquipment, eqForm);
+      //   newEquipment.energyUseGroupId = newGroup.guid;
+      //   let operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData> = [{
+      //     year: new Date().getFullYear(),
+      //     hoursOfOperation: 8760,
+      //     loadFactor: 100,
+      //     dutyFactor: 100,
+      //     efficiency: 100,
+      //   }];
+      //   newEquipment.operatingConditionsData = operatingConditionsData;
+      //   newEquipment.utilityData.forEach(uData => {
+      //     uData.energyUse = operatingConditionsData.map(eu => {
+      //       return {
+      //         year: eu.year,
+      //         //todo: Calculate energy use
+      //         energyUse: 0,
+      //         overrideEnergyUse: false
+      //       }
+      //     });
+      //     return uData;
 
-        })
-        await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
-      }
+      //   })
+      //   await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
+      // }
     }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, this.facility);
@@ -127,16 +127,16 @@ export class FacilityEnergyUsesGroupSetupComponent {
   }
 
   addGroup() {
-    let newGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
-    newGroup.name = 'Group ' + (this.energyUseGroups.length + 1);
-    let equipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup);
-    let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(equipment, true);
-    this.energyUseGroups.push({
-      ...newGroup,
-      numberOfEquipment: 1,
-      equipmentForms: [equipmentForm]
-    });
-    this.nextGroup();
+    // let newGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
+    // newGroup.name = 'Group ' + (this.energyUseGroups.length + 1);
+    // let equipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup);
+    // let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(equipment, true);
+    // this.energyUseGroups.push({
+    //   ...newGroup,
+    //   numberOfEquipment: 1,
+    //   equipmentForms: [equipmentForm]
+    // });
+    // this.nextGroup();
   }
 
   removeEquipment(index: number) {
@@ -144,10 +144,10 @@ export class FacilityEnergyUsesGroupSetupComponent {
   }
 
   addEquipmentForm() {
-    let currentGroup = this.energyUseGroups[this.groupSetupIndex];
-    let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(currentGroup);
-    let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(newEquipment, true);
-    currentGroup.equipmentForms.push(equipmentForm);
-    currentGroup.numberOfEquipment = currentGroup.equipmentForms.length;
+    // let currentGroup = this.energyUseGroups[this.groupSetupIndex];
+    // let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(currentGroup);
+    // let equipmentForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getFormFromEnergyUseEquipment(newEquipment, true);
+    // currentGroup.equipmentForms.push(equipmentForm);
+    // currentGroup.numberOfEquipment = currentGroup.equipmentForms.length;
   }
 }
