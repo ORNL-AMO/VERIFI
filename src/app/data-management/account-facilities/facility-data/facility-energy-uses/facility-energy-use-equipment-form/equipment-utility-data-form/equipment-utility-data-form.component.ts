@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 
@@ -17,9 +17,13 @@ export class EquipmentUtilityDataFormComponent {
   energyUseForms: Array<FormGroup>;
   @Input({ required: true })
   equipmentDetailsForm: FormGroup;
+  @Output('emitRemoveUtilityType')
+  emitRemoveUtilityType: EventEmitter<void> = new EventEmitter<void>();
+  @Input()
+  inSetup: boolean = false;
 
   removeUtilityType() {
-
+    this.emitRemoveUtilityType.emit();
   }
 
   toggleOverride(energyUseForm: FormGroup) {

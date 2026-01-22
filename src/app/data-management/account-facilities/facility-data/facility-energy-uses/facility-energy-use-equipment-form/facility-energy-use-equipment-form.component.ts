@@ -10,7 +10,6 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { AllSources, EnergySources, MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { calculateTotalEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
-import { getIncludedSources } from '../calculations/facilityEnergyUse';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -35,6 +34,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
   utilityDataForms: Array<UtilityDataForm>;
   annualOperatingConditionsDataForms: Array<FormGroup>;
   private formSubscriptions = new Subscription();
+  showUtilityTypeModal: boolean = false;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -42,11 +42,9 @@ export class FacilityEnergyUseEquipmentFormComponent {
   ) { }
 
   ngOnInit() {
-    console.log(this.energyUseEquipment);
     this.setYearOptions();
     this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
     this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
-    console.log(this.utilityDataForms);
     this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
     this.subscribeToFormChanges();
   }
@@ -107,6 +105,21 @@ export class FacilityEnergyUseEquipmentFormComponent {
     console.log('calculate energy use');
   }
 
+  openAddUtilityModal() {
+    this.showUtilityTypeModal = true;
+  }
+
+  closeAddUtilityModal() {
+    this.showUtilityTypeModal = false;
+  }
+
+  addUtilityType(source: MeterSource) {
+    this.addSourceToUtilitydata(source);
+    this.subscribeToFormChanges();
+    this.saveChanges();
+    this.closeAddUtilityModal();
+  }
+
   setUtilityTypes() {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.equipmentDetailsForm.controls['utilityMeterGroupId'].value; });
@@ -114,31 +127,42 @@ export class FacilityEnergyUseEquipmentFormComponent {
     sources = _.uniq(sources);
     sources.forEach(source => {
       if (!this.utilityDataForms.find(udf => { return udf.energySource == source })) {
-        let years: Array<number> = this.annualOperatingConditionsDataForms.map(form => { return form.controls['year'].value });
-        let utilityData: EquipmentUtilityData = {
-          energySource: source,
-          size: 0,
-          numberOfEquipment: 1,
-          units: '',
-          energyUse: years.map(year => {
-            return {
-              year: year,
-              energyUse: 0,
-              overrideEnergyUse: false
-            };
-          })
-        };
-        let newForm: {
-          energySource: MeterSource,
-          utilityDataForm: FormGroup,
-          energyUseForms: Array<FormGroup>
-        } = this.facilityEnergyUseEquipmentFormService.getUtilityDataForm(utilityData);
-        this.utilityDataForms.push(newForm);
+        this.addSourceToUtilitydata(source)
       }
     });
     //remove any that are not in the meter group
     this.utilityDataForms = this.utilityDataForms.filter(udf => { return sources.includes(udf.energySource) });
     this.subscribeToFormChanges();
+    this.saveChanges();
+  }
+
+  addSourceToUtilitydata(source: MeterSource) {
+    let years: Array<number> = this.annualOperatingConditionsDataForms.map(form => { return form.controls['year'].value });
+    let utilityData: EquipmentUtilityData = {
+      energySource: source,
+      size: 0,
+      numberOfEquipment: 1,
+      units: '',
+      energyUse: years.map(year => {
+        return {
+          year: year,
+          energyUse: 0,
+          overrideEnergyUse: false
+        };
+      })
+    };
+    let newForm: {
+      energySource: MeterSource,
+      utilityDataForm: FormGroup,
+      energyUseForms: Array<FormGroup>
+    } = this.facilityEnergyUseEquipmentFormService.getUtilityDataForm(utilityData);
+    this.utilityDataForms.push(newForm);
+  }
+
+  removeUtilityType(energySource: MeterSource) {
+    this.utilityDataForms = this.utilityDataForms.filter(udf => { return udf.energySource != energySource });
+    this.subscribeToFormChanges();
+    this.saveChanges();
   }
 
   subscribeToFormChanges() {

@@ -7,10 +7,9 @@ import { EnergySources, MeterSource } from 'src/app/models/constantsAndTypes';
 })
 export class EnergyUseFormAvailableSourcesPipe implements PipeTransform {
 
-  transform(includedSources: Array<{ source: MeterSource }>): Array<MeterSource> {
-    let selectedSources: Array<MeterSource> = includedSources.map(sourceObj => { return sourceObj.source; });
+  transform(includedSources: Array<MeterSource>): Array<MeterSource> {
     return EnergySources.filter(source => {
-      return !selectedSources.includes(source);
+      return !includedSources.includes(source);
     });
   }
 

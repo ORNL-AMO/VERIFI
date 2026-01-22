@@ -1,7 +1,7 @@
 <form [formGroup]="equipmentDetailsForm">
     <div class="row">
         <div class="col-12">
-            <p class="bold">Equipment / System Information</p>
+            <p class="bold mb-0">Equipment / System Information</p>
             <div class="form-group row">
                 <label class="col-5 col-form-label" for="equipmentName">Name</label>
                 <div class="col-7">
@@ -9,7 +9,7 @@
                         onfocus="this.select();" minlength="0" maxlength="100">
                     @let nameControl = equipmentDetailsForm.get('name');
                     @if(nameControl.touched && nameControl.hasError('required')){
-                    <div class="alert alert-danger mt-1" *ngIf="nameControl.hasError('required')">Name is
+                    <div class="alert alert-danger mt-1">Name is
                         required</div>
                     }
                 </div>
