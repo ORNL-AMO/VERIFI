@@ -56,7 +56,7 @@ export interface IdbUtilityMeter {
     vehicleFuelEfficiency?: number,
     vehicleDistanceUnit?: string
     globalWarmingPotentialOption?: number,
-    globalWarmingPotential?: number,
+    // globalWarmingPotential?: number,
     sidebarOpen?: boolean,
     charges?: Array<MeterCharge>
 }

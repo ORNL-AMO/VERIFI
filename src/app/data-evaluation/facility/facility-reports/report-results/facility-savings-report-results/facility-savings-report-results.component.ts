@@ -128,7 +128,7 @@ export class FacilitySavingsReportResultsComponent {
       this.worker.postMessage(workerMessage);
     } else {
       // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let facilitySavingsReport: FacilitySavingsReport = new FacilitySavingsReport(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, accountPredictors, this.facilityReport);
       this.annualAnalysisSummaries = facilitySavingsReport.annualAnalysisSummaries;
       this.monthlyAnalysisSummaryData = facilitySavingsReport.monthlyAnalysisSummaryData;

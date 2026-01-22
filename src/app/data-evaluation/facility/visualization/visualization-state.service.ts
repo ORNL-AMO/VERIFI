@@ -45,7 +45,7 @@ export class VisualizationStateService {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility], account.assessmentReportVersion);
+    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility], account.assessmentReportVersion, []);
   }
 
   initilizeCorrelationPlotOptions() {

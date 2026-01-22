@@ -34,6 +34,7 @@ import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
 import { FacilityEnergyGroupsListPipe } from './facility-energy-groups-list.pipe';
 import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-list.pipe';
 import { MeterGroupSourcesListPipe } from './meter-group-sources-list.pipe';
+import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 
 @NgModule({
@@ -72,6 +73,7 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
     FacilityEnergyGroupsListPipe,
     FacilityEnergyEquipmentListPipe,
     MeterGroupSourcesListPipe,
+    GwpValueDisplayPipe,
     MeterGroupSourcePipe
   ],
   imports: [
@@ -112,6 +114,7 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
     FacilityEnergyGroupsListPipe,
     FacilityEnergyEquipmentListPipe,
     MeterGroupSourcesListPipe,
+    GwpValueDisplayPipe,
     MeterGroupSourcePipe
   ]
 })

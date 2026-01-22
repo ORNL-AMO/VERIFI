@@ -16,22 +16,24 @@ import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AssessmentReportVersion, IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-edit-meter-form',
-    templateUrl: './edit-meter-form.component.html',
-    styleUrls: ['./edit-meter-form.component.css'],
-    standalone: false
+  selector: 'app-edit-meter-form',
+  templateUrl: './edit-meter-form.component.html',
+  styleUrls: ['./edit-meter-form.component.css'],
+  standalone: false
 })
 export class EditMeterFormComponent implements OnInit {
-  @Input({required: true})
+  @Input({ required: true })
   meterForm: FormGroup;
   @Input()
   meterDataExists: boolean;
-  @Input({required: true})
+  @Input({ required: true })
   facility: IdbFacility;
 
-  globalWarmingPotentials: Array<GlobalWarmingPotential>;
+  globalWarmingPotentials: Array<GlobalWarmingPotential> = [];
   scopeOptions: Array<ScopeOption> = ScopeOptions;
   hasDifferentCollectionUnits: boolean;
   hasDifferentEmissions: boolean;
@@ -60,13 +62,18 @@ export class EditMeterFormComponent implements OnInit {
   waterDischargeTypes: Array<WaterDischargeType> = WaterDischargeTypes;
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
+
+  assessmentReportOption: AssessmentReportVersion = 'AR6';
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
     private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService) { }
+    private customGWPDbService: CustomGWPDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.assessmentReportOption = account.assessmentReportVersion;
     this.setGlobalWarmingPotentials();
   }
 
@@ -147,7 +154,6 @@ export class EditMeterFormComponent implements OnInit {
     this.setHeatCapacity();
     this.setSiteToSource();
     this.checkHasDifferentUnits();
-    this.setGlobalWarmingPotential();
     this.cd.detectChanges();
   }
 
@@ -237,8 +243,6 @@ export class EditMeterFormComponent implements OnInit {
     let refrigerationValidation: Array<ValidatorFn> = this.editMeterFormService.getGlobalWarmingPotentialValidation(this.meterForm.controls.scope.value);
     this.meterForm.controls.globalWarmingPotentialOption.setValidators(refrigerationValidation);
     this.meterForm.controls.globalWarmingPotentialOption.updateValueAndValidity();
-    this.meterForm.controls.globalWarmingPotential.setValidators(refrigerationValidation);
-    this.meterForm.controls.globalWarmingPotential.updateValueAndValidity();
   }
 
   setFuelTypeOptions(onChange: boolean) {
@@ -471,19 +475,6 @@ export class EditMeterFormComponent implements OnInit {
 
     this.meterForm.controls.vehicleDistanceUnit.setValidators(additionalVehicleValidation);
     this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
-  }
-
-  setGlobalWarmingPotential() {
-    if (this.meterForm.controls.scope.value == 5 || this.meterForm.controls.scope.value == 6) {
-      let globalWarmingPotential: GlobalWarmingPotential = this.globalWarmingPotentials.find(potential => {
-        return potential.value == this.meterForm.controls.globalWarmingPotentialOption.value;
-      });
-      if (globalWarmingPotential) {
-        let conversionHelper: number = new ConvertValue(1, 'kg', this.meterForm.controls.startingUnit.value).convertedValue;
-        let convertedGWP: number = globalWarmingPotential.gwp / conversionHelper;
-        this.meterForm.controls.globalWarmingPotential.patchValue(convertedGWP);
-      }
-    }
   }
 
   setGlobalWarmingPotentials() {

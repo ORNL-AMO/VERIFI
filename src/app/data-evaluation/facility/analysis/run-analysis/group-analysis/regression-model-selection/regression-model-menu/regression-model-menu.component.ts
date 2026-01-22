@@ -189,7 +189,7 @@ export class RegressionModelMenuComponent implements OnInit {
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion, []);
       this.generatedModels = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
       this.analysisDbService.setGeneratedModelsForGroup(this.group.idbGroupId, this.generatedModels);
       let newSelectedModel = this.generatedModels?.find(model => model.modelId === this.group.selectedModelId);

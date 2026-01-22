@@ -3,365 +3,339 @@
     <div class="col-lg-7 col-md-12 col-sm-12">
       <p class="bold">Meter Information</p>
       <div>
-        <app-label-with-tooltip [label]="'Name'" [field]="'meterName'" [labelId]="'meterName'"
-          [isRequired]="true" [isFloatRight]="true">
+        <app-label-with-tooltip [label]="'Name'" [field]="'meterName'" [labelId]="'meterName'" [isRequired]="true"
+          [isFloatRight]="true">
         </app-label-with-tooltip>
         <div class="mb-3">
-          <input id="meterName" class="form-control" type="text" formControlName="name"
-            onfocus="this.select();" minlength="0" maxlength="100">
+          <input id="meterName" class="form-control" type="text" formControlName="name" onfocus="this.select();"
+            minlength="0" maxlength="100">
         </div>
         @if (meterForm.get('name').hasError('required')) {
-          <div class="alert alert-danger">Meter name is
+        <div class="alert alert-danger">Meter name is
           required</div>
         }
       </div>
 
       <div class="row">
         <div class="col-6">
-          <app-label-with-tooltip [label]="'Source'" [field]="'source'" [labelId]="'source'"
-            [isRequired]="true" [isFloatRight]="true">
+          <app-label-with-tooltip [label]="'Source'" [field]="'source'" [labelId]="'source'" [isRequired]="true"
+            [isFloatRight]="true">
           </app-label-with-tooltip>
           <!-- <label for="source">Source <span class="required">*</span> </label> -->
           <div class="mb-3">
-            <select class="form-select" id="source" type="text" formControlName="source"
-              (change)="changeSource()">
+            <select class="form-select" id="source" type="text" formControlName="source" (change)="changeSource()">
               @for (sourceOption of sourceOptions; track sourceOption) {
-                <option [ngValue]="sourceOption">{{sourceOption}}
-                </option>
+              <option [ngValue]="sourceOption">{{sourceOption}}
+              </option>
               }
             </select>
           </div>
           @if (meterForm.get('source').hasError('required')) {
-            <div class="alert-danger alert">Source is
+          <div class="alert-danger alert">Source is
             required</div>
           }
         </div>
         @if (displayScope) {
-          <div class="col-6">
-            <label for="scope">Scope</label>
-            <div class="mb-3">
-              <select class="form-select" id="scope" type="text" formControlName="scope"
-                (change)="changeScope()">
-                @for (scopeOption of scopeOptions; track scopeOption) {
-                  <option [ngValue]="scopeOption.value">
-                    {{scopeOption.scope}}: {{scopeOption.optionLabel}}
-                  </option>
-                }
-              </select>
-            </div>
+        <div class="col-6">
+          <label for="scope">Scope</label>
+          <div class="mb-3">
+            <select class="form-select" id="scope" type="text" formControlName="scope" (change)="changeScope()">
+              @for (scopeOption of scopeOptions; track scopeOption) {
+              <option [ngValue]="scopeOption.value">
+                {{scopeOption.scope}}: {{scopeOption.optionLabel}}
+              </option>
+              }
+            </select>
           </div>
+        </div>
         }
         <!--non-mobile-->
         @if (meterForm.controls.scope.value != 2) {
-          <div class="col-6">
-            <!-- <label for="startingUnit">Collection Unit <span class="required">*</span> </label> -->
-            <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'"
-              [labelId]="'startingUnit'" [isRequired]="true" [isFloatRight]="true">
-            </app-label-with-tooltip>
-            <div class="mb-3">
-              <select class="form-select" id="startingUnit" type="text" formControlName="startingUnit"
-                (change)="changeCollectionUnit()">
-                @for (startingUnitOption of startingUnitOptions; track startingUnitOption) {
-                  <option
-                    [ngValue]="startingUnitOption.value">
-                    <span [innerHTML]="startingUnitOption.display"></span>
-                  </option>
-                }
-              </select>
-            </div>
-            @if (meterForm.get('startingUnit').hasError('required')) {
-              <div class="alert-danger alert">
-                Starting
-                unit is
-              required</div>
-            }
-            @if (hasDifferentCollectionUnits || (hasDifferentEnergyUnits && collectionUnitIsEnergy)) {
-              <div class="alert alert-warning"
-                >
-                Units selected differ from the facility settings.
-              </div>
-            }
+        <div class="col-6">
+          <!-- <label for="startingUnit">Collection Unit <span class="required">*</span> </label> -->
+          <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'" [labelId]="'startingUnit'"
+            [isRequired]="true" [isFloatRight]="true">
+          </app-label-with-tooltip>
+          <div class="mb-3">
+            <select class="form-select" id="startingUnit" type="text" formControlName="startingUnit"
+              (change)="changeCollectionUnit()">
+              @for (startingUnitOption of startingUnitOptions; track startingUnitOption) {
+              <option [ngValue]="startingUnitOption.value">
+                <span [innerHTML]="startingUnitOption.display"></span>
+              </option>
+              }
+            </select>
           </div>
-          @if (isEnergyMeter && !collectionUnitIsEnergy) {
-            <div class="col-6">
-              <label for="energyUnit">Energy Unit <span class="required">*</span> </label>
-              <div class="mb-3">
-                <select class="form-select" id="energyUnit" type="text" formControlName="energyUnit"
-                  (change)="changeEnergyUnit()">
-                  @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
-                    <option
-                      [ngValue]="energyUnitOption.value">
-                      <span [innerHTML]="energyUnitOption.display"></span>
-                    </option>
-                  }
-                </select>
-              </div>
-              @if (meterForm.get('energyUnit').hasError('required')) {
-                <div class="alert-danger alert">Energy
-                  unit
-                  is
-                required</div>
-              }
-              @if (hasDifferentEnergyUnits) {
-                <div class="alert alert-warning">
-                  Units selected differ from the facility settings.
-                </div>
-              }
-            </div>
+          @if (meterForm.get('startingUnit').hasError('required')) {
+          <div class="alert-danger alert">
+            Starting
+            unit is
+            required</div>
           }
-          @if (meterForm.controls.source.value == 'Electricity') {
-            <div class="col-6">
-              <label for="demandUnit">Demand Unit </label>
-              <!-- <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'"
+          @if (hasDifferentCollectionUnits || (hasDifferentEnergyUnits && collectionUnitIsEnergy)) {
+          <div class="alert alert-warning">
+            Units selected differ from the facility settings.
+          </div>
+          }
+        </div>
+        @if (isEnergyMeter && !collectionUnitIsEnergy) {
+        <div class="col-6">
+          <label for="energyUnit">Energy Unit <span class="required">*</span> </label>
+          <div class="mb-3">
+            <select class="form-select" id="energyUnit" type="text" formControlName="energyUnit"
+              (change)="changeEnergyUnit()">
+              @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
+              <option [ngValue]="energyUnitOption.value">
+                <span [innerHTML]="energyUnitOption.display"></span>
+              </option>
+              }
+            </select>
+          </div>
+          @if (meterForm.get('energyUnit').hasError('required')) {
+          <div class="alert-danger alert">Energy
+            unit
+            is
+            required</div>
+          }
+          @if (hasDifferentEnergyUnits) {
+          <div class="alert alert-warning">
+            Units selected differ from the facility settings.
+          </div>
+          }
+        </div>
+        }
+        @if (meterForm.controls.source.value == 'Electricity') {
+        <div class="col-6">
+          <label for="demandUnit">Demand Unit </label>
+          <!-- <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'"
               [labelId]="'startingUnit'" [isRequired]="true" [isFloatRight]="true">
             </app-label-with-tooltip> -->
-            <div class="mb-3">
-              <select class="form-select" id="demandUnit" type="text" formControlName="demandUnit"
-                (change)="changeCollectionUnit()">
-                @for (demandUnitOption of demandUnitOptions; track demandUnitOption) {
-                  <option
-                    [ngValue]="demandUnitOption.value">
-                    <span [innerHTML]="demandUnitOption.display"></span>
-                  </option>
-                }
-              </select>
-            </div>
+          <div class="mb-3">
+            <select class="form-select" id="demandUnit" type="text" formControlName="demandUnit"
+              (change)="changeCollectionUnit()">
+              @for (demandUnitOption of demandUnitOptions; track demandUnitOption) {
+              <option [ngValue]="demandUnitOption.value">
+                <span [innerHTML]="demandUnitOption.display"></span>
+              </option>
+              }
+            </select>
           </div>
+        </div>
         }
         @if (displaySiteToSource) {
-          <div class="col-6">
-            <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'"
-              [labelId]="'siteToSource'" [isRequired]="true"
-            [isFloatRight]="true"></app-label-with-tooltip>
-            <!-- <label for="siteToSource">Site to source <span class="required">*</span> </label> -->
-            <div class="mb-3">
-              <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
-                onfocus="this.select();" min="0" max="999999999999999">
-            </div>
-            @if (meterForm.get('siteToSource').hasError('required')) {
-              <div class="alert-danger alert">Site
-                to
-                source
-              is required</div>
-            }
-            @if (meterForm.controls.siteToSource.value === 0) {
-              <div class="alert-warning alert">Site to
-                source
-              should be greater than 0</div>
-            }
+        <div class="col-6">
+          <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'" [labelId]="'siteToSource'"
+            [isRequired]="true" [isFloatRight]="true"></app-label-with-tooltip>
+          <!-- <label for="siteToSource">Site to source <span class="required">*</span> </label> -->
+          <div class="mb-3">
+            <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
+              onfocus="this.select();" min="0" max="999999999999999">
           </div>
+          @if (meterForm.get('siteToSource').hasError('required')) {
+          <div class="alert-danger alert">Site
+            to
+            source
+            is required</div>
+          }
+          @if (meterForm.controls.siteToSource.value === 0) {
+          <div class="alert-warning alert">Site to
+            source
+            should be greater than 0</div>
+          }
+        </div>
         }
         @if (displayPhase) {
-          <div class="col-6">
-            <label for="phase">Phase <span class="required">*</span> </label>
-            <div class="mb-3">
-              <select class="form-select" id="phase" type="text" formControlName="phase"
-                (change)="changePhase();">
-                <option [ngValue]="'Solid'">Solid</option>
-                <option [ngValue]="'Liquid'">Liquid</option>
-                <option [ngValue]="'Gas'">Gas</option>
-              </select>
-            </div>
-            @if (meterForm.get('phase').hasError('required')) {
-              <div class="alert-danger alert">Phase is
-              required</div>
-            }
+        <div class="col-6">
+          <label for="phase">Phase <span class="required">*</span> </label>
+          <div class="mb-3">
+            <select class="form-select" id="phase" type="text" formControlName="phase" (change)="changePhase();">
+              <option [ngValue]="'Solid'">Solid</option>
+              <option [ngValue]="'Liquid'">Liquid</option>
+              <option [ngValue]="'Gas'">Gas</option>
+            </select>
           </div>
+          @if (meterForm.get('phase').hasError('required')) {
+          <div class="alert-danger alert">Phase is
+            required</div>
+          }
+        </div>
         }
         @if (displayFuel) {
-          <div class="col-6">
-            <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
-            <div class="mb-3">
-              <select class="form-select" id="energySource" type="text" formControlName="fuel"
-                (change)="changeFuel()">
-                @for (fuelOption of fuelTypeOptions; track fuelOption) {
-                  <option [ngValue]="fuelOption.value">
-                    {{fuelOption.value}}
-                  </option>
-                }
-              </select>
-            </div>
-            @if (meterForm.get('fuel').hasError('required')) {
-              <div class="alert-danger alert">Fuel type is
-              required</div>
-            }
+        <div class="col-6">
+          <label for="energySource">{{energySourceLabel}} <span class="required">*</span> </label>
+          <div class="mb-3">
+            <select class="form-select" id="energySource" type="text" formControlName="fuel" (change)="changeFuel()">
+              @for (fuelOption of fuelTypeOptions; track fuelOption) {
+              <option [ngValue]="fuelOption.value">
+                {{fuelOption.value}}
+              </option>
+              }
+            </select>
           </div>
+          @if (meterForm.get('fuel').hasError('required')) {
+          <div class="alert-danger alert">Fuel type is
+            required</div>
+          }
+        </div>
         }
         @if (displayWaterIntakeTypes) {
-          <div class="col-6">
-            <label for="waterIntakeType">Water Intake Type <span class="required">*</span> </label>
-            <div class="mb-3">
-              <select class="form-select" id="waterIntakeType" type="text"
-                formControlName="waterIntakeType">
-                @for (waterType of waterIntakeTypes; track waterType) {
-                  <option [ngValue]="waterType">
-                    {{waterType}}
-                  </option>
-                }
-              </select>
-            </div>
-            @if (meterForm.get('waterIntakeType').hasError('required')) {
-              <div class="alert-danger alert">
-                Water
-                Intake type is
-              required</div>
-            }
+        <div class="col-6">
+          <label for="waterIntakeType">Water Intake Type <span class="required">*</span> </label>
+          <div class="mb-3">
+            <select class="form-select" id="waterIntakeType" type="text" formControlName="waterIntakeType">
+              @for (waterType of waterIntakeTypes; track waterType) {
+              <option [ngValue]="waterType">
+                {{waterType}}
+              </option>
+              }
+            </select>
           </div>
+          @if (meterForm.get('waterIntakeType').hasError('required')) {
+          <div class="alert-danger alert">
+            Water
+            Intake type is
+            required</div>
+          }
+        </div>
         }
         @if (displayWaterDischargeTypes) {
-          <div class="col-6">
-            <label for="waterDischargeType">Water Discharge Type <span class="required">*</span> </label>
-            <div class="mb-3">
-              <select class="form-select" id="waterDischargeType" type="text"
-                formControlName="waterDischargeType">
-                @for (waterType of waterDischargeTypes; track waterType) {
-                  <option [ngValue]="waterType">
-                    {{waterType}}
-                  </option>
-                }
-              </select>
-            </div>
-            @if (meterForm.get('waterDischargeType').hasError('required')) {
-              <div class="alert-danger alert"
-                >
-                Water
-                Discharge type is
-              required</div>
-            }
+        <div class="col-6">
+          <label for="waterDischargeType">Water Discharge Type <span class="required">*</span> </label>
+          <div class="mb-3">
+            <select class="form-select" id="waterDischargeType" type="text" formControlName="waterDischargeType">
+              @for (waterType of waterDischargeTypes; track waterType) {
+              <option [ngValue]="waterType">
+                {{waterType}}
+              </option>
+              }
+            </select>
           </div>
+          @if (meterForm.get('waterDischargeType').hasError('required')) {
+          <div class="alert-danger alert">
+            Water
+            Discharge type is
+            required</div>
+          }
+        </div>
         }
         @if (displayHeatCapacity) {
-          <div class="col-6">
-            <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
-            <div class="input-group mb-3">
-              <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
-                onfocus="this.select();">
-              <span class="input-group-text"><span
-              [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>/<span
-            [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
-          </span>
-        </div>
-        @if (meterForm.get('heatCapacity').hasError('required')) {
+        <div class="col-6">
+          <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
+          <div class="input-group mb-3">
+            <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
+              onfocus="this.select();">
+            <span class="input-group-text"><span
+                [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>/<span
+                [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+            </span>
+          </div>
+          @if (meterForm.get('heatCapacity').hasError('required')) {
           <div class="alert-danger alert">Heat
             capacity is
-          required</div>
-        }
-        @if (meterForm.get('heatCapacity').hasError('min')) {
+            required</div>
+          }
+          @if (meterForm.get('heatCapacity').hasError('min')) {
           <div class="alert-danger alert">Value
             can't be
             less
-          than 0</div>
-        }
-        @if (meterForm.controls.heatCapacity.value === 0) {
+            than 0</div>
+          }
+          @if (meterForm.controls.heatCapacity.value === 0) {
           <div class="alert-warning alert">Heat
             capacity
-          should be greater than 0</div>
+            should be greater than 0</div>
+          }
+        </div>
         }
-      </div>
-    }
-    @if (meterForm.controls.scope.value == 5 || meterForm.controls.scope.value == 6) {
-      <div class="col-6"
-        >
-        @if (meterForm.controls.scope.value == 5) {
-          <label
-            for="globalWarmingPotentialOption">Refrigeration Charge <span class="required">*</span>
+        @if (meterForm.controls.scope.value == 5 || meterForm.controls.scope.value == 6) {
+        <div class="col-6">
+          @if (meterForm.controls.scope.value == 5) {
+          <label for="globalWarmingPotentialOption">Refrigeration Charge <span class="required">*</span>
           </label>
-        }
-        @if (meterForm.controls.scope.value == 6) {
+          }
+          @if (meterForm.controls.scope.value == 6) {
           <label for="globalWarmingPotentialOption">Process
             Emissions <span class="required">*</span> </label>
           }
           <div class="mb-3">
             <select class="form-select" id="globalWarmingPotentialOption" type="text"
-              formControlName="globalWarmingPotentialOption" (change)="setGlobalWarmingPotential()">
+              formControlName="globalWarmingPotentialOption">
               @for (gwp of globalWarmingPotentials; track gwp) {
-                <option [ngValue]="gwp.value">
-                  <span [innerHTML]="gwp.display"></span>
-                </option>
+              <option [ngValue]="gwp.value">
+                <span [innerHTML]="gwp.display"></span>
+              </option>
               }
             </select>
           </div>
           @if (meterForm.controls.scope.value == 5) {
-            @if (meterForm.get('globalWarmingPotentialOption').hasError('required')) {
-              <div class="alert-danger alert"
-                >Refrigeration
-                charge is
-              required</div>
-            }
+          @if (meterForm.get('globalWarmingPotentialOption').hasError('required')) {
+          <div class="alert-danger alert">Refrigeration
+            charge is
+            required</div>
+          }
           }
           @if (meterForm.controls.scope.value == 6) {
-            @if (meterForm.get('globalWarmingPotentialOption').hasError('required')) {
-              <div class="alert-danger alert"
-                >Process
-                emissions is
-              required</div>
-            }
+          @if (meterForm.get('globalWarmingPotentialOption').hasError('required')) {
+          <div class="alert-danger alert">Process
+            emissions is
+            required</div>
+          }
           }
         </div>
-      }
-      @if (meterForm.controls.scope.value == 5 || meterForm.controls.scope.value == 6) {
-        <div class="col-6"
-          >
+        }
+        @if (meterForm.controls.scope.value == 5 || meterForm.controls.scope.value == 6) {
+        <div class="col-6">
           <label for="globalWarmingPotential">Global Warming Potential <span class="required">*</span>
-        </label>
-        <div class="input-group mb-3">
-          <input id="globalWarmingPotential" class="form-control" type="number"
-            formControlName="globalWarmingPotential" onfocus="this.select();">
-          <span class="input-group-text">kg/<span
-          [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
-        </span>
+          </label>
+          <div class="input-group mb-3">
+            {{meterForm.controls.globalWarmingPotentialOption.value |
+            gwpValueDisplay:assessmentReportOption:meterForm.controls.startingUnit.value:globalWarmingPotentials |
+            number:'1.0-4'}}
+            kg/<span [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+          </div>
+        </div>
+        }
+        @if (selectedFuelTypeOption) {
+        <div class="col-6">
+          <app-emissions-details-table [selectedFuelTypeOption]="selectedFuelTypeOption"
+            [meterForm]="meterForm"></app-emissions-details-table>
+        </div>
+        }
+        }
       </div>
-      @if (meterForm.get('globalWarmingPotential').hasError('required')) {
-        <div class="alert-danger alert"
-          >Global Warming
-          Potential
-        is required</div>
+      @if (meterForm.controls.scope.value == 2) {
+      <app-vehicle-form [meterForm]="meterForm" [facility]="facility"></app-vehicle-form>
+      }
+      @if (meterDataExists && !changingUnits) {
+      <p class="alert alert-warning"> Data
+        found for this
+        meter. Meter setup values should not be changed after entering meter readings. Calculations are done
+        based off of these values. <a (click)="enableChangeUnits()">Click here to change values if
+          necessary.</a>
+      </p>
+      }
+      @if (changingUnits) {
+      <p class="alert alert-warning">
+        Data found for this meter. Be careful changing the collection values, <b>amount entered in meter
+          readings
+          will not be altered.</b>
+      </p>
       }
     </div>
-  }
-  @if (selectedFuelTypeOption) {
-    <div class="col-6">
-      <app-emissions-details-table [selectedFuelTypeOption]="selectedFuelTypeOption"
-      [meterForm]="meterForm"></app-emissions-details-table>
-    </div>
-  }
-}
-</div>
-@if (meterForm.controls.scope.value == 2) {
-  <app-vehicle-form [meterForm]="meterForm"
-  [facility]="facility"></app-vehicle-form>
-}
-@if (meterDataExists && !changingUnits) {
-  <p class="alert alert-warning"> Data
-    found for this
-    meter. Meter setup values should not be changed after entering meter readings. Calculations are done
-    based off of these values. <a (click)="enableChangeUnits()">Click here to change values if
-  necessary.</a>
-</p>
-}
-@if (changingUnits) {
-  <p class="alert alert-warning">
-    Data found for this meter. Be careful changing the collection values, <b>amount entered in meter
-    readings
-  will not be altered.</b>
-</p>
-}
-</div>
-<div class="col-lg-5 col-md-12 col-sm-12">
-  <app-other-information-form [meterForm]="meterForm"></app-other-information-form>
-</div>
-<hr>
-  <div class="col-lg-7 col-md-12 col-sm-12">
-    <app-meter-charges-form [meterForm]="meterForm"
-    [meterSource]="meterForm.controls.source.value"></app-meter-charges-form>
-  </div>
-  @if (meterForm.controls.source.value == 'Electricity') {
     <div class="col-lg-5 col-md-12 col-sm-12">
-      <app-additional-electricity-options-form [meterForm]="meterForm"
-        [displayIncludeEnergy]="displayIncludeEnergy" [displayRetainRecs]="displayRetainRecs"
-        (emitChangeAgreementType)="changeAgreementType()"
-      (emitSetIncludeEnergy)="setIncludeEnergy()"></app-additional-electricity-options-form>
+      <app-other-information-form [meterForm]="meterForm"></app-other-information-form>
     </div>
-  }
-</div>
+    <hr>
+    <div class="col-lg-7 col-md-12 col-sm-12">
+      <app-meter-charges-form [meterForm]="meterForm"
+        [meterSource]="meterForm.controls.source.value"></app-meter-charges-form>
+    </div>
+    @if (meterForm.controls.source.value == 'Electricity') {
+    <div class="col-lg-5 col-md-12 col-sm-12">
+      <app-additional-electricity-options-form [meterForm]="meterForm" [displayIncludeEnergy]="displayIncludeEnergy"
+        [displayRetainRecs]="displayRetainRecs" (emitChangeAgreementType)="changeAgreementType()"
+        (emitSetIncludeEnergy)="setIncludeEnergy()"></app-additional-electricity-options-form>
+    </div>
+    }
+  </div>
 </form>

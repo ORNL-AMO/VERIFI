@@ -142,7 +142,7 @@ export class EditVehicleMeterBillComponent {
       this.emissionsValues = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,
         this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value,
-        account.assessmentReportVersion);
+        account.assessmentReportVersion, []);
     } else {
       this.emissionsValues = getZeroEmissionsResults();
     }
