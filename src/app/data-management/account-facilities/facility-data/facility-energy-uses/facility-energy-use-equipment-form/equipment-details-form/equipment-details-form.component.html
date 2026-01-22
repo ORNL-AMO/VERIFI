@@ -71,7 +71,7 @@
                 @for (meterGroup of utilityMeterGroups; track $index) {
                 <tr class="clickable" (click)="changeLinkedMeterGroup(meterGroup)">
                     <td class="text-center">
-                        @if(meterGroup.guid == equipmentDetailsForm.controls.utilityMeterGroupId.value){
+                        @if(meterGroup.guid == linkedMeterGroupId){
                         <span class="fa fa-circle-check"></span>
                         }@else{
                         <span class="fa fa-circle"></span>
@@ -110,7 +110,7 @@
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-danger" (click)="cancelLinkMeterGroup()">Unlink Meter Group</button>
-        <button class="btn btn-success" (click)="closeLinkMeterGroup()"
-            [disabled]="!equipmentDetailsForm.controls.utilityMeterGroupId.value">Link Meter Group</button>
+        <button class="btn btn-success" (click)="closeLinkMeterGroup()" [disabled]="!linkedMeterGroupId">Link Meter
+            Group</button>
     </div>
 </div>

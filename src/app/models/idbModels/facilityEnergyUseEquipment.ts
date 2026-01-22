@@ -25,7 +25,14 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         utilityMeterGroupId: '',
         name: '',
         notes: '',
-        operatingConditionsData: [],
+        operatingConditionsData: [{
+            //needs to be last full year of data
+            year: new Date().getFullYear(),
+            hoursOfOperation: 8760,
+            loadFactor: 100,
+            dutyFactor: 100,
+            efficiency: 100,
+        }],
         equipmentType: 'Other',
         utilityData: [],
     }

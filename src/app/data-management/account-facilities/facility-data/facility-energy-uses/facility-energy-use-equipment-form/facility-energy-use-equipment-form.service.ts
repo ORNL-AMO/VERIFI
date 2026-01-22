@@ -1,32 +1,30 @@
 import { Injectable } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+
+export interface UtilityDataForm {
+  energySource: MeterSource,
+  utilityDataForm: FormGroup,
+  energyUseForms: Array<FormGroup>
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class FacilityEnergyUseEquipmentFormService {
 
-
-
-  constructor(private formBuilder: FormBuilder) { }
+  constructor(private formBuilder: FormBuilder) {
+  }
 
   getFormsFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): {
     equipmentDetailsForm: FormGroup,
-    utilityDataForms: Array<{
-      energySource: MeterSource,
-      utilityDataForm: FormGroup,
-      energyUseForms: Array<FormGroup>
-    }>,
+    utilityDataForms: Array<UtilityDataForm>,
     annualOperatingConditionsDataForms: Array<FormGroup>
   } {
     let equipmentDetailsForm: FormGroup = this.getEquipmentDetailsFromFromEnergyUseEquipment(equipment);
-    let utilityDataForms: Array<{
-      energySource: MeterSource,
-      utilityDataForm: FormGroup,
-      energyUseForms: Array<FormGroup>
-    }> = this.getUtilityDataFormsFromEnergyUseEquipment(equipment);
+    let utilityDataForms: Array<UtilityDataForm> = this.getUtilityDataFormsFromEnergyUseEquipment(equipment);
     let annualOperatingConditionsDataForms: Array<FormGroup> = this.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(equipment);
     return {
       equipmentDetailsForm: equipmentDetailsForm,
@@ -37,7 +35,7 @@ export class FacilityEnergyUseEquipmentFormService {
 
   updateEnergyUseEquipmentFromForms(equipment: IdbFacilityEnergyUseEquipment,
     equipmentDetailsForm: FormGroup,
-    utilityDataForms: Array<{ energySource: MeterSource, utilityDataForm: FormGroup, energyUseForms: Array<FormGroup> }>,
+    utilityDataForms: Array<UtilityDataForm>,
     annualOperatingConditionsDataForms: Array<FormGroup>): IdbFacilityEnergyUseEquipment {
     equipment = this.updateEnergyUseEquipmentDetailsFromForm(equipment, equipmentDetailsForm);
     equipment = this.updateUtilityDataFromForms(equipment, utilityDataForms);
@@ -63,16 +61,8 @@ export class FacilityEnergyUseEquipmentFormService {
     return equipment;
   }
 
-  getUtilityDataFormsFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): Array<{
-    energySource: MeterSource,
-    utilityDataForm: FormGroup,
-    energyUseForms: Array<FormGroup>
-  }> {
-    let utilityDataForms: Array<{
-      energySource: MeterSource,
-      utilityDataForm: FormGroup,
-      energyUseForms: Array<FormGroup>
-    }> = [];
+  getUtilityDataFormsFromEnergyUseEquipment(equipment: IdbFacilityEnergyUseEquipment): Array<UtilityDataForm> {
+    let utilityDataForms: Array<UtilityDataForm> = [];
     equipment.utilityData.forEach((utilityData, index) => {
       let utilityDataFormObj = this.getUtilityDataForm(utilityData);
       utilityDataForms.push(utilityDataFormObj);
@@ -80,11 +70,7 @@ export class FacilityEnergyUseEquipmentFormService {
     return utilityDataForms;
   }
 
-  getUtilityDataForm(utilityData: EquipmentUtilityData): {
-    energySource: MeterSource,
-    utilityDataForm: FormGroup,
-    energyUseForms: Array<FormGroup>
-  } {
+  getUtilityDataForm(utilityData: EquipmentUtilityData): UtilityDataForm {
     let utilityDataForm: FormGroup = this.formBuilder.group({
       size: [utilityData.size, [Validators.required, Validators.min(0)]],
       numberOfEquipment: [utilityData.numberOfEquipment, [Validators.required, Validators.min(1)]],
@@ -106,29 +92,24 @@ export class FacilityEnergyUseEquipmentFormService {
     };
   }
 
-  updateUtilityDataFromForms(equipment: IdbFacilityEnergyUseEquipment, utilityDataForms: Array<{
-    energySource: MeterSource,
-    utilityDataForm: FormGroup,
-    energyUseForms: Array<FormGroup>
-  }>): IdbFacilityEnergyUseEquipment {
-    for (let i = 0; i < equipment.utilityData.length; i++) {
-      let utilityDataFormObj = utilityDataForms.find(udf => { return udf.energySource == equipment.utilityData[i].energySource; });
-      if (utilityDataFormObj) {
-        let utilityDataForm: FormGroup = utilityDataFormObj.utilityDataForm;
-        equipment.utilityData[i].size = utilityDataForm.controls.size.value;
-        equipment.utilityData[i].numberOfEquipment = utilityDataForm.controls.numberOfEquipment.value;
-        equipment.utilityData[i].units = utilityDataForm.controls.units.value;
-        equipment.utilityData[i].energyUse = [];
-        let energyUseForms: Array<FormGroup> = utilityDataFormObj.energyUseForms;
-        for (let j = 0; j < energyUseForms.length; j++) {
-          let energyUseForm: FormGroup = energyUseForms[j];
-          equipment.utilityData[i].energyUse.push({
-            year: energyUseForm.controls.year.value,
-            energyUse: energyUseForm.controls.energyUse.value,
-            overrideEnergyUse: energyUseForm.controls.overrideEnergyUse.value
-          });
-        }
+  updateUtilityDataFromForms(equipment: IdbFacilityEnergyUseEquipment, utilityDataForms: Array<UtilityDataForm>): IdbFacilityEnergyUseEquipment {
+    equipment.utilityData = [];
+    for (let utilityDataFormObj of utilityDataForms) {
+      let utilityData: EquipmentUtilityData = {
+        energySource: utilityDataFormObj.energySource,
+        size: utilityDataFormObj.utilityDataForm.controls.size.value,
+        numberOfEquipment: utilityDataFormObj.utilityDataForm.controls.numberOfEquipment.value,
+        units: utilityDataFormObj.utilityDataForm.controls.units.value,
+        energyUse: []
+      };
+      for (let energyUseForm of utilityDataFormObj.energyUseForms) {
+        utilityData.energyUse.push({
+          year: energyUseForm.controls.year.value,
+          energyUse: energyUseForm.controls.energyUse.value,
+          overrideEnergyUse: energyUseForm.controls.overrideEnergyUse.value
+        });
       }
+      equipment.utilityData.push(utilityData);
     }
     return equipment;
   }

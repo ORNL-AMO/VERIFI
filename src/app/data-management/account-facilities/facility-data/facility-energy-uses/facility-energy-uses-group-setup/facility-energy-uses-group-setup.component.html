@@ -10,15 +10,16 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             @if(groupSetupIndex == 0) {
-            <button class="btn action-btn" (click)="initEnergyUseGroups()"><i class="fa fa-refresh"></i> Start Over</button>
+            <button class="btn action-btn" (click)="initEnergyUseGroups()"><i class="fa fa-refresh"></i> Start
+                Over</button>
             }@else{
             <button class="btn action-btn" (click)="previousGroup()"><i class="fa fa-arrow-left"></i> Previous
                 Group</button>
             }
         </div>
         <div>
-            @let formsValid = energyUseGroups[groupSetupIndex].equipmentForms | formsValid;
-            @let disableNext = !formsValid || !energyUseGroups[groupSetupIndex].name;
+            @let formsInvalid = energyUseGroups[groupSetupIndex].equipment | energyUseEquipmentInvalid;
+            @let disableNext = formsInvalid || !energyUseGroups[groupSetupIndex].name;
             @if(groupSetupIndex == energyUseGroups.length - 1) {
             <button class="btn action-btn me-1" (click)="addGroup()" [disabled]="disableNext"><i class="fa fa-plus"></i>
                 Add Group</button>
@@ -56,7 +57,7 @@
         </div>
     </div>
     <div class="row">
-        @for (eqForm of energyUseGroups[groupSetupIndex].equipmentForms; track $index) {
+        @for (equipment of energyUseGroups[groupSetupIndex].equipment; track $index) {
         <div class="col-6 mb-2 mt-2">
             <div class="card">
                 <div class="card-header bg-card-header">
@@ -64,7 +65,7 @@
                         <div class="color-white">
                             &#35;{{$index + 1}}.
                         </div>
-                        @if(energyUseGroups[groupSetupIndex].equipmentForms.length > 1) {
+                        @if(energyUseGroups[groupSetupIndex].equipment.length > 1) {
                         <div>
                             <button class="btn-close" (click)="removeEquipment($index)">
                             </button>
@@ -73,7 +74,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <app-facility-energy-use-equipment-form [form]="eqForm">
+                    <app-facility-energy-use-equipment-form [energyUseEquipment]="equipment" [inSetup]="true" (emitChanged)="dataChanged($event)">
                     </app-facility-energy-use-equipment-form>
                 </div>
             </div>

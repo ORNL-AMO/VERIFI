@@ -9,7 +9,7 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
-import { FacilityEnergyUseEquipmentFormService } from '../../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
+import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../facility-energy-use-equipment-form.service';
 
 @Component({
   selector: 'app-equipment-details-form',
@@ -21,11 +21,7 @@ export class EquipmentDetailsFormComponent {
   @Input({ required: true })
   equipmentDetailsForm: FormGroup;
   @Input({ required: true })
-  utilityDataForms: Array<{
-    energySource: MeterSource,
-    utilityDataForm: FormGroup,
-    energyUseForms: Array<FormGroup>
-  }>;
+  utilityDataForms: Array<UtilityDataForm>;
   @Input({ required: true })
   annualOperatingConditionsDataForms: Array<FormGroup>;
 
@@ -91,11 +87,13 @@ export class EquipmentDetailsFormComponent {
     this.linkedMeterGroup = this.utilityMeterGroups.find(group => {
       return group.guid == this.linkedMeterGroupId;
     });
-    this.equipmentDetailsForm.patchValue({
-      utilityMeterGroupId: this.linkedMeterGroupId
-    });
+    if (this.linkedMeterGroupId != this.equipmentDetailsForm.controls['utilityMeterGroupId'].value) {
+      this.equipmentDetailsForm.patchValue({
+        utilityMeterGroupId: this.linkedMeterGroupId
+      });
+    }
     // if (this.linkedMeterGroup) {
-      // this.setUtilityTypes();
+    // this.setUtilityTypes();
     // }
   }
 

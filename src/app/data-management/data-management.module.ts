@@ -75,9 +75,10 @@ import { EnergyUseFormIncludedSourcesPipe } from './account-facilities/facility-
 import { EnergyUseSourceFormGroupPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-source-form-group.pipe';
 import { OrderEquipmentEnergyUsePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/order-equipment-energy-use.pipe';
 import { YearOptionsFilterPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/year-options-filter.pipe';
-import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/equipment-details-form/equipment-details-form.component';
-import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/equipment-utility-data-form/equipment-utility-data-form.component';
-import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/annual-operating-conditions-form/annual-operating-conditions-form.component';
+import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-utility-data-form/equipment-utility-data-form.component';
+import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
+import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-details-form/equipment-details-form.component';
+import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-equipment-invalid.pipe';
 
 @NgModule({
   declarations: [
@@ -144,7 +145,8 @@ import { AnnualOperatingConditionsFormComponent } from './account-facilities/fac
     EnergyUseSourceFormGroupPipe,
     EquipmentDetailsFormComponent,
     EquipmentUtilityDataFormComponent,
-    AnnualOperatingConditionsFormComponent
+    AnnualOperatingConditionsFormComponent,
+    EnergyUseEquipmentInvalidPipe
   ],
   imports: [
     CommonModule,

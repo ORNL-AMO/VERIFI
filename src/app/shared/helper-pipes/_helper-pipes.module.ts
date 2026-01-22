@@ -33,7 +33,6 @@ import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
 import { FacilityEnergyGroupsListPipe } from './facility-energy-groups-list.pipe';
 import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-list.pipe';
-import { FormsValidPipe } from './forms-valid.pipe';
 import { MeterGroupSourcesListPipe } from './meter-group-sources-list.pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 
@@ -72,7 +71,6 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
     ChargeTypeLabelPipe,
     FacilityEnergyGroupsListPipe,
     FacilityEnergyEquipmentListPipe,
-    FormsValidPipe,
     MeterGroupSourcesListPipe,
     MeterGroupSourcePipe
   ],
@@ -113,7 +111,6 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
     ChargeTypeLabelPipe,
     FacilityEnergyGroupsListPipe,
     FacilityEnergyEquipmentListPipe,
-    FormsValidPipe,
     MeterGroupSourcesListPipe,
     MeterGroupSourcePipe
   ]
