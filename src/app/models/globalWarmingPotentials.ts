@@ -283,27 +283,27 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         label: 'R-401A',
         display: 'R-401A',
         blend: '53% HCFC-22 , 34% HCFC-124 , 13% HFC-152a',
-        gwp_ar4: 16,
-        gwp_ar5: 16,
-        gwp_ar6: 16
+        gwp_ar4: 16.12,
+        gwp_ar5: 17.94,
+        gwp_ar6: 21.32
     },
     {
         value: 31,
         label: 'R-401B',
         display: 'R-401B',
         blend: '61% HCFC-22 , 28% HCFC-124 , 11% HFC-152a',
-        gwp_ar4: 14,
-        gwp_ar5: 14,
-        gwp_ar6: 14
+        gwp_ar4: 13.64,
+        gwp_ar5: 15.18,
+        gwp_ar6: 18.04
     },
     {
         value: 32,
         label: 'R-401C',
         display: 'R-401C',
         blend: '33% HCFC-22 , 52% HCFC-124 , 15% HFC-152a',
-        gwp_ar4: 19,
-        gwp_ar5: 19,
-        gwp_ar6: 19
+        gwp_ar4: 18.6,
+        gwp_ar5: 20.7,
+        gwp_ar6: 24.6
     },
     {
         value: 33,
@@ -311,26 +311,35 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         display: 'R-402A',
         blend: '38% HCFC-22 , 6% HFC-125 , 2% propane',
         gwp_ar4: 2100,
-        gwp_ar5: 2100,
-        gwp_ar6: 2100
+        gwp_ar5: 1902,
+        gwp_ar6: 2244
     },
     {
         value: 34,
         label: 'R-402B',
         display: 'R-402B',
-        blend: '6% HCFC-22 , 38% HFC-125 , 2% propane',
+        blend: '60% HCFC-22 , 38% HFC-125 , 2% propane',
         gwp_ar4: 1330,
-        gwp_ar5: 1330,
-        gwp_ar6: 1330
+        gwp_ar5: 1204.6,
+        gwp_ar6: 1421.2
+    },
+    {
+        value: 340,
+        label: 'R-403B',
+        display: 'R-403B',
+        blend: '56% HCFC-22 , 39% HFC-125 , 5% propane',
+        gwp_ar4: 1960,
+        gwp_ar5: 1775.2,
+        gwp_ar6: 2094.4
     },
     {
         value: 35,
         label: 'R-404A',
         display: 'R-404A',
         blend: '44% HFC-125 , 4% HFC-134a , 52% HFC 143a',
-        gwp_ar4: 3922,
-        gwp_ar5: 3922,
-        gwp_ar6: 3922
+        gwp_ar4: 3921.6,
+        gwp_ar5: 3942.8,
+        gwp_ar6: 4278
     },
     {
         value: 36,
@@ -346,54 +355,54 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         label: 'R-407A',
         display: 'R-407A',
         blend: '20% HFC-32 , 40% HFC-125 , 40% HFC-134a',
-        gwp_ar4: 2107,
-        gwp_ar5: 2107,
-        gwp_ar6: 2107
+        gwp_ar4: 2047,
+        gwp_ar5: 1863.4,
+        gwp_ar6: 2262.2
     },
     {
         value: 38,
         label: 'R-407B',
         display: 'R-407B',
         blend: '10% HFC-32 , 70% HFC-125 , 20% HFC-134a',
-        gwp_ar4: 2804,
-        gwp_ar5: 2804,
-        gwp_ar6: 2804
+        gwp_ar4: 2773.5,
+        gwp_ar5: 2516.7,
+        gwp_ar6: 3001.1
     },
     {
         value: 39,
         label: 'R-407C',
         display: 'R-407C',
         blend: '23% HFC-32 , 25% HFC-125 , 52% HFC-134a',
-        gwp_ar4: 1774,
-        gwp_ar5: 1774,
-        gwp_ar6: 1774
+        gwp_ar4: 1704.85,
+        gwp_ar5: 1555.21,
+        gwp_ar6: 1907.93
     },
     {
         value: 40,
         label: 'R-407D',
         display: 'R-407D',
         blend: '15% HFC-32 , 15% HFC-125 , 70% HFC-134a',
-        gwp_ar4: 1627,
-        gwp_ar5: 1627,
-        gwp_ar6: 1627
+        gwp_ar4: 1582.25,
+        gwp_ar5: 1442.05,
+        gwp_ar6: 1747.65
     },
     {
         value: 41,
         label: 'R-407E',
         display: 'R-407E',
         blend: '25% HFC-32 , 15% HFC-125 , 60% HFC-134a',
-        gwp_ar4: 1552,
-        gwp_ar5: 1552,
-        gwp_ar6: 1552
+        gwp_ar4: 1476.75,
+        gwp_ar5: 1349.75,
+        gwp_ar6: 1671.75
     },
     {
         value: 42,
         label: 'R-408A',
         display: 'R-408A',
         blend: '47% HCFC-22 , 7% HFC-125 , 46% HFC 143a',
-        gwp_ar4: 2301,
-        gwp_ar5: 2301,
-        gwp_ar6: 2301
+        gwp_ar4: 2301.2,
+        gwp_ar5: 2429.9,
+        gwp_ar6: 2934.4
     },
     {
         value: 43,
@@ -409,36 +418,45 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         label: 'R-410A',
         display: 'R-410A',
         blend: '50% HFC-32 , 50% HFC-125',
-        gwp_ar4: 2088,
-        gwp_ar5: 2088,
-        gwp_ar6: 2088
+        gwp_ar4: 1937.5,
+        gwp_ar5: 1773.5,
+        gwp_ar6: 2255.5
+    },
+    {
+        value: 440,
+        label: 'R-410B',
+        display: 'R-410B',
+        blend: '45% HFC-32 , 55% HFC-125',
+        gwp_ar4: 2093.75,
+        gwp_ar5: 1913.15,
+        gwp_ar6: 2403.95
     },
     {
         value: 45,
         label: 'R-411A',
         display: 'R-411A',
-        blend: '87.5% HCFC-22 , 11 HFC-152a , 1.5% propylene',
-        gwp_ar4: 14,
-        gwp_ar5: 14,
-        gwp_ar6: 14
+        blend: '87.5% HCFC-22 , 11% HFC-152a , 1.5% propylene',
+        gwp_ar4: 13.64,
+        gwp_ar5: 15.18,
+        gwp_ar6: 18.04
     },
     {
         value: 46,
         label: 'R-411B',
         display: 'R-411B',
         blend: '94% HCFC-22 , 3% HFC-152a , 3% propylene',
-        gwp_ar4: 4,
-        gwp_ar5: 4,
-        gwp_ar6: 4
+        gwp_ar4: 3.72,
+        gwp_ar5: 4.14,
+        gwp_ar6: 4.92
     },
     {
         value: 47,
         label: 'R-413A',
         display: 'R-413A',
         blend: '88% HFC-134a , 9% PFC-218 , 3% isobutane',
-        gwp_ar4: 2053,
-        gwp_ar5: 2053,
-        gwp_ar6: 2053
+        gwp_ar4: 2053.1,
+        gwp_ar5: 1954,
+        gwp_ar6: 2182.5
     },
     {
         value: 48,
@@ -464,80 +482,80 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         display: 'R-417A',
         blend: '46.6% HFC-125 , 5% HFC-134a , 3.4% butane',
         gwp_ar4: 2346,
-        gwp_ar5: 2346,
-        gwp_ar6: 2346
+        gwp_ar5: 2127.22,
+        gwp_ar6: 2507.84
     },
     {
         value: 51,
         label: 'R-422A',
         display: 'R-422A',
         blend: '85.1% HFC-125 , 11.5% HFC-134a , 3.4% isobutane',
-        gwp_ar4: 2346,
-        gwp_ar5: 2346,
-        gwp_ar6: 2346
+        gwp_ar4: 3142.95,
+        gwp_ar5: 2847.17,
+        gwp_ar6: 3358.69
     },
     {
         value: 52,
         label: 'R-422D',
         display: 'R-422D',
         blend: '65.1% HFC-125 , 31.5% HFC-134a , 3.4% isobutane',
-        gwp_ar4: 2729,
-        gwp_ar5: 2729,
-        gwp_ar6: 2729
+        gwp_ar4: 2728.95,
+        gwp_ar5: 2473.17,
+        gwp_ar6: 2916.69
     },
     {
         value: 53,
         label: 'R-423A',
         display: 'R-423A',
         blend: '47.5% HFC-227ea , 52.5% HFC-134a',
-        gwp_ar4: 2280,
-        gwp_ar5: 2280,
-        gwp_ar6: 2280
+        gwp_ar4: 2280.25,
+        gwp_ar5: 2273.75,
+        gwp_ar6: 2513.25
     },
     {
         value: 54,
         label: 'R-424A',
         display: 'R-424A',
         blend: '50.5% HFC-125, 47% HFC-134a, 2.5% butane/pentane',
-        gwp_ar4: 2440,
-        gwp_ar5: 2440,
-        gwp_ar6: 2440
+        gwp_ar4: 2439.6,
+        gwp_ar5: 2211.85,
+        gwp_ar6: 2607.8
     },
     {
         value: 55,
         label: 'R-426A',
         display: 'R-426A',
         blend: '5.1% HFC-125, 93% HFC-134a, 1.9% butane/pentane',
-        gwp_ar4: 1508,
-        gwp_ar5: 1508,
-        gwp_ar6: 1508
+        gwp_ar4: 1508.4,
+        gwp_ar5: 1370.67,
+        gwp_ar6: 1613.64
     },
     {
         value: 56,
         label: 'R-428A',
         display: 'R-428A',
         blend: '77.5% HFC-125 , 2% HFC-143a , 1.9% isobutane',
-        gwp_ar4: 3607,
-        gwp_ar5: 3607,
-        gwp_ar6: 3607
+        gwp_ar4: 2741.1,
+        gwp_ar5: 2482.75,
+        gwp_ar6: 2929.1
     },
     {
         value: 57,
         label: 'R-434A',
         display: 'R-434A',
         blend: '63.2% HFC-125, 16% HFC-134a, 18% HFC-143a, 2.8% isobutane',
-        gwp_ar4: 3245,
-        gwp_ar5: 3245,
-        gwp_ar6: 3245
+        gwp_ar4: 3245.4,
+        gwp_ar5: 3075.44,
+        gwp_ar6: 3654.28
     },
     {
         value: 58,
         label: 'R-500',
         display: 'R-500',
         blend: '73.8% CFC-12 , 26.2% HFC-152a , 48.8% HCFC-22',
-        gwp_ar4: 32,
-        gwp_ar5: 32,
-        gwp_ar6: 32
+        gwp_ar4: 915.768,
+        gwp_ar5: 895.036,
+        gwp_ar6: 999.448
     },
     {
         value: 59,
@@ -553,9 +571,9 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         label: 'R-504',
         display: 'R-504',
         blend: '48.2% HFC-32 , 51.8% CFC-115',
-        gwp_ar4: 325,
-        gwp_ar5: 325,
-        gwp_ar6: 325
+        gwp_ar4: 180.75,
+        gwp_ar5: 187.714,
+        gwp_ar6: 371.622
     },
     {
         value: 61,
@@ -564,7 +582,7 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         blend: '5% HFC-125 , 5% HFC143a',
         gwp_ar4: 3985,
         gwp_ar5: 3985,
-        gwp_ar6: 3985
+        gwp_ar6: 4775
     },
     {
         value: 62,
@@ -572,8 +590,8 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         display: 'R-508A',
         blend: '39% HFC-23 , 61% PFC-116',
         gwp_ar4: 13214,
-        gwp_ar5: 13214,
-        gwp_ar6: 13214
+        gwp_ar5: 11607,
+        gwp_ar6: 13258
     },
     {
         value: 63,
@@ -581,7 +599,119 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
         display: 'R-508B',
         blend: '46% HFC-23 , 54% PFC-116',
         gwp_ar4: 13396,
-        gwp_ar5: 13396,
-        gwp_ar6: 13396
+        gwp_ar5: 11698,
+        gwp_ar6: 13412
+    },
+    {
+        value: 64,
+        label: 'HFO-1123',
+        display: 'HFO-1123',
+        gwp_ar4: .005,
+        gwp_ar5: .005,
+        gwp_ar6: .005
+    },
+    {
+        value: 65,
+        label: 'HFO-1123a',
+        display: 'HFO-1123a',
+        gwp_ar4: .052,
+        gwp_ar5: .052,
+        gwp_ar6: .052
+    },
+    {
+        value: 66,
+        label: 'HFO-1141',
+        display: 'HFO-1141',
+        gwp_ar4: .024,
+        gwp_ar5: .024,
+        gwp_ar6: .024
+    },
+    {
+        value: 67,
+        label: 'HFO-1225ye(Z)',
+        display: 'HFO-1225ye(Z)',
+        gwp_ar4: .344,
+        gwp_ar5: .344,
+        gwp_ar6: .344
+    },
+    {
+        value: 68,
+        label: 'HFO-1225ye(E)',
+        display: 'HFO-1225ye(E)',
+        gwp_ar4: .118,
+        gwp_ar5: .118,
+        gwp_ar6: .118
+    },
+    {
+        value: 69,
+        label: 'HFO-1234ze(Z)',
+        display: 'HFO-1234ze(Z)',
+        gwp_ar4: .315,
+        gwp_ar5: .315,
+        gwp_ar6: .315
+    },
+    {
+        value: 70,
+        label: 'HFO-1234ze(E)',
+        display: 'HFO-1234ze(E)',
+        gwp_ar4: 1.37,
+        gwp_ar5: 1.37,
+        gwp_ar6: 1.37
+    },
+    {
+        value: 71,
+        label: 'HFO-1234yf',
+        display: 'HFO-1234yf',
+        gwp_ar4: .501,
+        gwp_ar5: .501,
+        gwp_ar6: .501
+    },
+    {
+        value: 72,
+        label: 'HFO-1136mzz(E)',
+        display: 'HFO-1136mzz(E)',
+        gwp_ar4: 18,
+        gwp_ar5: 18,
+        gwp_ar6: 18
+    },
+    {
+        value: 73,
+        label: 'HFO-1336zz(Z)',
+        display: 'HFO-1336zz(Z)',
+        gwp_ar4: 2.08,
+        gwp_ar5: 2.08,
+        gwp_ar6: 2.08
+    },
+    {
+        value: 74,
+        label: 'HFO-1243zf',
+        display: 'HFO-1243zf',
+        gwp_ar4: .261,
+        gwp_ar5: .261,
+        gwp_ar6: .261
+    },
+    {
+        value: 75,
+        label: 'HFO-1345zfc',
+        display: 'HFO-1345zfc',
+        gwp_ar4: .182,
+        gwp_ar5: .182,
+        gwp_ar6: .182
+    },
+    {
+        value: 76,
+        label: 'HFO-1438ezy(E)',
+        display: 'HFO-1438ezy(E)',
+        gwp_ar4: 8.22,
+        gwp_ar5: 8.22,
+        gwp_ar6: 8.22
+    },
+    {
+        value: 77,
+        label: 'HFO-1447fz',
+        display: 'HFO-1447fz',
+        gwp_ar4: .24,
+        gwp_ar5: .24,
+        gwp_ar6: .24
     }
 ]
