@@ -7,7 +7,7 @@ import { FacilitySavingsReport } from "../calculations/savings-report-calculatio
 
 addEventListener('message', ({ data }) => {
     try {
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, { energyIsSource: data.analysisItem.energyIsSource, neededUnits: getNeededUnits(data.analysisItem) }, [], [], [data.facility], data.assessmentReportVersion);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, { energyIsSource: data.analysisItem.energyIsSource, neededUnits: getNeededUnits(data.analysisItem) }, [], [], [data.facility], data.assessmentReportVersion, []);
         let annualAnalysisSummaryClass: FacilitySavingsReport = new FacilitySavingsReport(data.analysisItem, data.facility, calanderizedMeters, data.accountPredictorEntries, data.accountPredictors, data.report);
 
         postMessage({

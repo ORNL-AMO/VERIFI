@@ -15,6 +15,8 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-other-emissions-data-table',
@@ -60,7 +62,8 @@ export class OtherEmissionsDataTableComponent {
     private customFuelDbService: CustomFuelDbService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
-    private electronService: ElectronService) {
+    private electronService: ElectronService,
+    private customGwpDbService: CustomGWPDbService) {
 
   }
 
@@ -147,8 +150,10 @@ export class OtherEmissionsDataTableComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let customGWPs: Array<IdbCustomGWP> = this.customGwpDbService.accountCustomGWPs.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.heatCapacity, account.assessmentReportVersion);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [],
+        customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.heatCapacity, account.assessmentReportVersion, customGWPs);
       dataItem.processEmissions = emissionsValues.processEmissions;
       dataItem.fugitiveEmissions = emissionsValues.fugitiveEmissions;
     })

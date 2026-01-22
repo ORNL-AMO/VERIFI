@@ -15,7 +15,7 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     deleteAccount?: boolean,
     sidebarFacilitiesOpen?: boolean,
     isBetterPlantsPartner?: boolean,
-    assessmentReportVersion?: 'AR4' | 'AR5',
+    assessmentReportVersion?: AssessmentReportVersion,
     sidebarCustomDataOpen?: boolean,
     toDoListOutdatedDays?: number
 }
@@ -80,6 +80,8 @@ export function getNewIdbAccount(): IdbAccount {
         archiveOption: 'skip',
         isSharedBackupFile: false,
         color: undefined,
-        assessmentReportVersion: 'AR5'
+        assessmentReportVersion: 'AR6'
     }
 }
+
+export type AssessmentReportVersion = 'AR4' | 'AR5' | 'AR6';

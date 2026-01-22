@@ -8,6 +8,9 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbCustomFuel } from "src/app/models/idbModels/customFuel";
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from "src/app/models/globalWarmingPotentials";
+import { AssessmentReportVersion } from "src/app/models/idbModels/account";
+import { IdbCustomGWP } from "src/app/models/idbModels/customGWP";
 
 export function getEmissions(meter: IdbUtilityMeter,
     energyUse: number,
@@ -21,14 +24,18 @@ export function getEmissions(meter: IdbUtilityMeter,
     vehicleCollectionUnit: string,
     vehicleDistanceUnit: string,
     hhvOrFuelEfficiency: number,
-    assessmentReportVersion: 'AR4' | 'AR5'): EmissionsResults {
+    assessmentReportVersion: AssessmentReportVersion,
+    customGWPs: Array<IdbCustomGWP>): EmissionsResults {
     let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
 
     let CH4_Multiplier: number = 25;
     let N2O_Multiplier: number = 298;
     if (assessmentReportVersion == 'AR5') {
-        CH4_Multiplier = 28;
+        CH4_Multiplier = 30;
         N2O_Multiplier = 265;
+    } else if (assessmentReportVersion == 'AR6') {
+        CH4_Multiplier = 29.8;
+        N2O_Multiplier = 273;
     }
 
 
@@ -177,13 +184,18 @@ export function getEmissions(meter: IdbUtilityMeter,
             mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
         }
     } else if (meter.source == 'Other') {
+        let gwps: Array<GlobalWarmingPotential> = customGWPs.map(customGWP => {
+            return { ...customGWP };
+        });
+        let globalWarmingPotentialOptions: Array<GlobalWarmingPotential> = GlobalWarmingPotentials.map(gwpOption => { return { ...gwpOption } }).concat(gwps);
+        let globalWarmingPotential: number = getGlobalWarmingPotential(meter.globalWarmingPotentialOption, assessmentReportVersion, meter.startingUnit, globalWarmingPotentialOptions);
         //Fugitive or process
         if (meter.scope == 5) {
             //fugitive emissions
-            fugitiveEmissions = totalVolume * meter.globalWarmingPotential / 1000;
+            fugitiveEmissions = totalVolume * globalWarmingPotential / 1000;
         } else if (meter.scope == 6) {
             //process emissions
-            processEmissions = totalVolume * meter.globalWarmingPotential / 1000;
+            processEmissions = totalVolume * globalWarmingPotential / 1000;
         }
     } else if (meter.source == 'Other Energy') {
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
@@ -385,5 +397,26 @@ export function calculateTotalEmissions(energyUse: number, emissionsRate: Emissi
     } else {
         let totalEmissions: number = (energyUse * emissionsRate.co2Emissions * ghgMultiplier) / 1000
         return totalEmissions;
+    }
+}
+
+
+export function getGlobalWarmingPotential(globalWarmingPotentialOption: number,
+    assessmentReportVersion: AssessmentReportVersion,
+    startingUnit: string,
+    globalWarmingPotentials: Array<GlobalWarmingPotential>): number {
+    let gwpValue: GlobalWarmingPotential = globalWarmingPotentials.find(gwp => { return gwp.value == globalWarmingPotentialOption; });
+    if (gwpValue) {
+        let globalWarmingPotential: number = gwpValue.gwp_ar4;
+        if (assessmentReportVersion == 'AR5') {
+            globalWarmingPotential = gwpValue.gwp_ar5;
+        } else if (assessmentReportVersion == 'AR6') {
+            globalWarmingPotential = gwpValue.gwp_ar6;
+        }
+        let conversionHelper: number = new ConvertValue(1, 'kg', startingUnit).convertedValue;
+        let convertedGWP: number = globalWarmingPotential / conversionHelper;
+        return convertedGWP;
+    } else {
+        return 0;
     }
 }

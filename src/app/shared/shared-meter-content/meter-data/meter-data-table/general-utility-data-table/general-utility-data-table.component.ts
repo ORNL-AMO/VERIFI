@@ -195,7 +195,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels,
+        dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion, []);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });
   }

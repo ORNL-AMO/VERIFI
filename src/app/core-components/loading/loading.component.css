@@ -13,7 +13,7 @@ div#loading {
 }
 
 #loading.open {
-    top: calc(50% - 100px);
+    top: 50%;
     opacity: 1;
 }
 

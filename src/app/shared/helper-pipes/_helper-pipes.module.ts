@@ -31,6 +31,7 @@ import { InvalidMeterPipe } from './invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
 import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
+import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 
 @NgModule({
@@ -66,6 +67,7 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
     FacilityItemPipe,
     ReportDatePipe,
     ChargeTypeLabelPipe,
+    GwpValueDisplayPipe,
     MeterGroupSourcePipe
   ],
   imports: [
@@ -103,6 +105,7 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
     FacilityItemPipe,
     ReportDatePipe,
     ChargeTypeLabelPipe,
+    GwpValueDisplayPipe,
     MeterGroupSourcePipe
   ]
 })

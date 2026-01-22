@@ -68,7 +68,7 @@ export class PredictorDataHelperService {
       return meter.meterReadingDataApplication != 'fullYear';
     });
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion);
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion, []);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
       return cMeter.monthlyData;
     });
@@ -88,7 +88,7 @@ export class PredictorDataHelperService {
       return meter.meterReadingDataApplication != 'fullYear';
     });
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion);
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion, []);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
       return cMeter.monthlyData;
     });

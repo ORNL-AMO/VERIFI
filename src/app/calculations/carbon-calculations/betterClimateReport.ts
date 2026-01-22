@@ -9,6 +9,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbCustomFuel } from "src/app/models/idbModels/customFuel";
+import { IdbCustomGWP } from "src/app/models/idbModels/customGWP";
 
 export class BetterClimateReport {
 
@@ -19,13 +20,14 @@ export class BetterClimateReport {
     facilityMaxMins: Array<BetterClimateFacilityMaxMin>;
     constructor(account: IdbAccount, accountFacilities: Array<IdbFacility>, accountMeters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
         co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number, customFuels: Array<IdbCustomFuel>,
-        betterClimateReportSetup: BetterClimateReportSetup) {
+        betterClimateReportSetup: BetterClimateReportSetup,
+        customGWPs: Array<IdbCustomGWP>) {
         let selectedFacilities: Array<IdbFacility> = this.getSelectedFacilities(betterClimateReportSetup, accountFacilities);
         let selectedMeters: Array<IdbUtilityMeter> = this.getSelectedMeters(betterClimateReportSetup, accountMeters);
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
         account.energyIsSource = false;
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(selectedMeters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' }, co2Emissions, customFuels, selectedFacilities, account.assessmentReportVersion);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(selectedMeters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' }, co2Emissions, customFuels, selectedFacilities, account.assessmentReportVersion, customGWPs);
         this.setPortfolioYearDetails(calanderizedMeters, selectedFacilities, emissionsDisplay, emissionsGoal);
         this.setAnnualFacilitiesSummaries(calanderizedMeters, selectedFacilities, emissionsDisplay);
         this.setFacilityMaxMins();

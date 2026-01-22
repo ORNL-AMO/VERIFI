@@ -18,6 +18,8 @@ export function getNewAccountCustomGWP(selectedAccount: IdbAccount): IdbCustomGW
         value: Math.floor(Math.random() * 50000),
         label: undefined,
         display: undefined,
-        gwp: undefined
+        gwp_ar4: undefined,
+        gwp_ar5: undefined,
+        gwp_ar6: undefined
     }
 }
