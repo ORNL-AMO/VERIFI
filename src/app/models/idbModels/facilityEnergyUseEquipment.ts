@@ -15,7 +15,7 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     utilityData: Array<EquipmentUtilityData>
 }
 
-export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup): IdbFacilityEnergyUseEquipment {
+export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup, latestYear: number): IdbFacilityEnergyUseEquipment {
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {
         ...idbEntry,
@@ -27,7 +27,7 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         notes: '',
         operatingConditionsData: [{
             //needs to be last full year of data
-            year: new Date().getFullYear(),
+            year: latestYear,
             hoursOfOperation: 8760,
             loadFactor: 100,
             dutyFactor: 100,

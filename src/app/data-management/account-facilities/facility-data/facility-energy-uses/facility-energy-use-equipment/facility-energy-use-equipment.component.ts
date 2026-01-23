@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -10,16 +9,10 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EnergyEquipmentOperatingConditionsData, EquipmentType, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
 import { EquipmentTypes } from '../calculations/equipmentTypes';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 
 @Component({
   selector: 'app-facility-energy-use-equipment',
@@ -41,10 +34,7 @@ export class FacilityEnergyUseEquipmentComponent {
     private loadingService: LoadingService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private toastNotificationsService: ToastNotificationsService,
-    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService
+    private toastNotificationsService: ToastNotificationsService
   ) {
   }
 
@@ -84,7 +74,6 @@ export class FacilityEnergyUseEquipmentComponent {
 
   async deleteEquipment() {
     this.showDeleteEquipment = false;
-    // this.form.markAsPristine();
     this.loadingService.setLoadingMessage('Deleting Energy Use Equipment...')
     this.loadingService.setLoadingStatus(true);
     //delete equipment

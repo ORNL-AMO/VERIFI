@@ -1,6 +1,18 @@
 <h4>
-    {{facility.name}} Energy Use Groups Setup
+    <div class="d-flex justify-content-between">
+        <div class="h4 mb-0 mt-auto">
+            {{facility.name}} Energy Use Groups Setup
+
+        </div>
+        <div class="ps-1">
+            <button class="btn btn-secondary" (click)="leaveGroupSetup()">
+                <span class="fa fa-times"></span>
+                Leave Group Setup
+            </button>
+        </div>
+    </div>
 </h4>
+
 
 <div>
     <h5 class="text-center mb-0">Setting up group {{groupSetupIndex + 1}} of {{energyUseGroups.length}}</h5>
@@ -74,11 +86,41 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <app-facility-energy-use-equipment-form [energyUseEquipment]="equipment" [inSetup]="true" (emitChanged)="dataChanged($event)">
+                    <app-facility-energy-use-equipment-form [energyUseEquipment]="equipment" [inSetup]="true"
+                        (emitChanged)="dataChanged($event)">
                     </app-facility-energy-use-equipment-form>
                 </div>
             </div>
         </div>
         }
+    </div>
+    @if(energyUseGroups.length > 1) {
+    <hr>
+    <div class="d-flex justify-content-end">
+        <div>
+            <button class="btn btn-danger" (click)="openDeleteGroupModal()">
+                <span class="fa fa-trash"></span>
+                Delete Group
+            </button>
+        </div>
+    </div>
+    }
+</div>
+
+
+<div [ngClass]="{'windowOverlay': showDeleteGroupModal}"></div>
+<div class="popup" [class.open]="showDeleteGroupModal">
+    <div class="popup-header">Delete Energy Use Group: {{energyUseGroups[groupSetupIndex].name}}
+        <button class="item-right" (click)="closeDeleteGroupModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this energy use group, you are also deleting all of the energy use group data and
+            equipment associated with
+            it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeDeleteGroupModal()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDeleteGroup()">Delete</button>
     </div>
 </div>

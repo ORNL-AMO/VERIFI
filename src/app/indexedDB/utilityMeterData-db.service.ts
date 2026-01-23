@@ -81,4 +81,13 @@ export class UtilityMeterDatadbService {
         let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return accountMeterDataEntries.filter(meterData => { return meterData.facilityId == facilityId });
     }
+
+    getStartEndYearsForFacility(facilityId: string): { startYear: number, endYear: number } {
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.getFacilityMeterDataByFacilityGuid(facilityId);
+        let dates: Array<Date> = facilityMeterData.map(meterData => { return new Date(meterData.readDate) });
+        let years: Array<number> = dates.map(date => { return date.getFullYear() });
+        let startYear: number = _.min(years);
+        let endYear: number = _.max(years);
+        return { startYear: startYear, endYear: endYear };
+    }
 }

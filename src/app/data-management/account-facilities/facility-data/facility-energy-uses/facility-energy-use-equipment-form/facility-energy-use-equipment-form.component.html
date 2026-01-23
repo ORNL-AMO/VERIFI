@@ -22,8 +22,8 @@
         <span class="fa fa-plus"></span> Add Utility Type
     </a>
 </div>
-<hr>
 @if(!inSetup) {
+<hr>
 <div class="row">
     <div class="col-12">
         <p class="bold">Operating Conditions Data</p>
@@ -45,7 +45,8 @@
                 Efficiency (%)
             </div>
         </div>
-        @for (annualOperatingConditionsDataForm of annualOperatingConditionsDataForms | orderEquipmentEnergyUseForms; track $index) {
+        @for (annualOperatingConditionsDataForm of annualOperatingConditionsDataForms | orderEquipmentEnergyUseForms;
+        track $index) {
         <app-annual-operating-conditions-form [annualOperatingConditionsDataForm]="annualOperatingConditionsDataForm"
             (emitRemoveOperatingConditionsData)="removeOperatingConditionsData(annualOperatingConditionsDataForm)">
         </app-annual-operating-conditions-form>

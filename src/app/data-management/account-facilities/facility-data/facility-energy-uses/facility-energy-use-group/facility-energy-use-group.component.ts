@@ -16,6 +16,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -43,7 +44,8 @@ export class FacilityEnergyUseGroupComponent {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private toastNotificationsService: ToastNotificationsService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) {
   }
 
@@ -123,8 +125,9 @@ export class FacilityEnergyUseGroupComponent {
     return of(true);
   }
 
-  async addEquipment() {
-    let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup);
+  async addEquipment() {    
+    let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.energyUseGroup.facilityId);
+    let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, facilityMeterDataYears.endYear);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();

@@ -1,17 +1,12 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormArray, FormGroup } from '@angular/forms';
-import { EnergyEquipmentOperatingConditionsData, EquipmentType, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
-import { EquipmentTypes } from '../calculations/equipmentTypes';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Subscription } from 'rxjs';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AllSources, EnergySources, MeterSource } from 'src/app/models/constantsAndTypes';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
-import { calculateTotalEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { distinctUntilChanged } from 'rxjs/operators';
 
@@ -36,18 +31,30 @@ export class FacilityEnergyUseEquipmentFormComponent {
   private formSubscriptions = new Subscription();
   showUtilityTypeModal: boolean = false;
   showAddOperatingConditionsModal: boolean = false;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(
     private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }
 
   ngOnInit() {
+    console.log('init')
     this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
     this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
     this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
     this.setYearOptions();
     this.subscribeToFormChanges();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['energyUseEquipment'] && !changes['energyUseEquipment'].firstChange) {
+      console.log('changes detected');
+      this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
+      this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
+      this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
+      this.setYearOptions();
+      this.subscribeToFormChanges();
+    }
   }
 
   addOperatingConditionsYear(year: number) {
@@ -73,13 +80,8 @@ export class FacilityEnergyUseEquipmentFormComponent {
   setYearOptions() {
     this.yearOptions = new Array();
     let currentYears: Array<number> = this.annualOperatingConditionsDataForms.map(form => { return form.controls['year'].value });
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let dates: Array<Date> = facilityMeterData.map(meterData => { return new Date(meterData.readDate) });
-    let years: Array<number> = dates.map(date => { return date.getFullYear() });
-    years = _.uniq(years);
-    let startYear: number = _.min(years);
-    let endYear: number = _.max(years);
-    for (let year = startYear; year <= endYear; year++) {
+    let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.energyUseEquipment.facilityId);
+    for (let year = facilityMeterDataYears.startYear; year <= facilityMeterDataYears.endYear; year++) {
       if (!currentYears.includes(year)) {
         this.yearOptions.push(year);
       }
