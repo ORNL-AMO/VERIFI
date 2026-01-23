@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -13,28 +13,26 @@ import * as _ from 'lodash';
 export class AnnualOperatingConditionsFormComponent {
   @Input({ required: true })
   annualOperatingConditionsDataForm: FormGroup;
+  @Output()
+  emitRemoveOperatingConditionsData: EventEmitter<void> = new EventEmitter<void>();
 
   yearOptions: Array<{ year: number, selected: boolean }>
+  showRemoveOperatingConditionsModal: boolean = false;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit() {
-    this.setYearOptions();
   }
 
-  setYearOptions() {
-    this.yearOptions = new Array();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let dates: Array<Date> = facilityMeterData.map(meterData => { return new Date(meterData.readDate) });
-    let years: Array<number> = dates.map(date => { return date.getFullYear() });
-    years = _.uniq(years);
-    let startYear: number = _.min(years);
-    let endYear: number = _.max(years);
-    for (let year = startYear; year <= endYear; year++) {
-      this.yearOptions.push({ year: year, selected: true });
-    }
+  openRemoveOperatingConditionsModal() {
+    this.showRemoveOperatingConditionsModal = true;
   }
 
-  removeOperatingConditionsData() {
+  closeRemoveOperatingConditionsModal() {
+    this.showRemoveOperatingConditionsModal = false;
+  }
 
+  confirmRemoveOperatingConditionsData() {
+    this.closeRemoveOperatingConditionsModal();
+    this.emitRemoveOperatingConditionsData.emit();
   }
 }

@@ -29,12 +29,13 @@ export class FacilityEnergyUseEquipmentFormComponent {
   @Input()
   inSetup: boolean = false;
 
-  yearOptions: Array<{ year: number, selected: boolean }>
+  yearOptions: Array<number> = []
   equipmentDetailsForm: FormGroup;
   utilityDataForms: Array<UtilityDataForm>;
   annualOperatingConditionsDataForms: Array<FormGroup>;
   private formSubscriptions = new Subscription();
   showUtilityTypeModal: boolean = false;
+  showAddOperatingConditionsModal: boolean = false;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -42,44 +43,36 @@ export class FacilityEnergyUseEquipmentFormComponent {
   ) { }
 
   ngOnInit() {
-    this.setYearOptions();
     this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
     this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
     this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
+    this.setYearOptions();
     this.subscribeToFormChanges();
   }
 
-  addOperatingConditionsData() {
-    for (let yearOption of this.yearOptions) {
-      if (yearOption.selected) {
-        this.energyUseEquipment.operatingConditionsData.push({
-          year: yearOption.year,
-          hoursOfOperation: 8760,
-          loadFactor: 100,
-          dutyFactor: 100,
-          efficiency: 100
-        });
-      }
-    }
-  }
-
-  addOperatingConditionsYear() {
-    // let currentYears: Array<number> = this.energyUseEquipment.operatingConditionsData.map(data => { return data.year });
-    // let availableYears: Array<{ year: number }> = this.yearOptions.filter(yearOption => { return !currentYears.includes(yearOption.year) });
-    // let year: number = availableYears[0].year;
-    // this.energyUseEquipment.operatingConditionsData.push({
-    //   year: year,
-    //   hoursOfOperation: 8760,
-    //   loadFactor: 100,
-    //   dutyFactor: 100,
-    //   efficiency: 100
-    // });
-    //add year to utility data energy use
-    // this.facilityEnergyUseEquipmentFormService.addYearToUtilityDataForm(this.form, year);
+  addOperatingConditionsYear(year: number) {
+    let newOperatingConditionsData: EnergyEquipmentOperatingConditionsData = {
+      year: year,
+      hoursOfOperation: 8760,
+      loadFactor: 100,
+      dutyFactor: 100,
+      efficiency: 100
+    };
+    let newForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getOperatingConditionsYearForm(newOperatingConditionsData);
+    this.annualOperatingConditionsDataForms.push(newForm);
+    this.utilityDataForms.forEach(udf => {
+      let energyUseForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getEnergyUseForm({ year: year, energyUse: 0, overrideEnergyUse: false });
+      udf.energyUseForms.push(energyUseForm);
+    });
+    this.subscribeToFormChanges();
+    this.saveChanges();
+    this.closeAddOperatingConditionsModal();
+    this.setYearOptions();
   }
 
   setYearOptions() {
     this.yearOptions = new Array();
+    let currentYears: Array<number> = this.annualOperatingConditionsDataForms.map(form => { return form.controls['year'].value });
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let dates: Array<Date> = facilityMeterData.map(meterData => { return new Date(meterData.readDate) });
     let years: Array<number> = dates.map(date => { return date.getFullYear() });
@@ -87,22 +80,21 @@ export class FacilityEnergyUseEquipmentFormComponent {
     let startYear: number = _.min(years);
     let endYear: number = _.max(years);
     for (let year = startYear; year <= endYear; year++) {
-      this.yearOptions.push({ year: year, selected: true });
+      if (!currentYears.includes(year)) {
+        this.yearOptions.push(year);
+      }
     }
   }
 
-  removeOperatingConditionsData(data: EnergyEquipmentOperatingConditionsData) {
-    // this.energyUseEquipment.operatingConditionsData = this.energyUseEquipment.operatingConditionsData.filter(d => d.year !== data.year);
-    // this.facilityEnergyUseEquipmentFormService.removeYearFromUtilityDataForm(this.form, data.year);
-  }
-
-  clearData() {
-    // this.energyUseEquipment.operatingConditionsData = [];
-    // this.facilityEnergyUseEquipmentFormService.removeAllYearsFromUtilityDataForm(this.form);
-  }
-
-  calculateEnergyUse() {
-    console.log('calculate energy use');
+  removeOperatingConditionsData(dataForm: FormGroup) {
+    let yearToRemove: number = dataForm.controls['year'].value;
+    this.annualOperatingConditionsDataForms = this.annualOperatingConditionsDataForms.filter(form => { return form.controls['year'].value != yearToRemove });
+    this.utilityDataForms.forEach(udf => {
+      udf.energyUseForms = udf.energyUseForms.filter(euf => { return euf.controls['year'].value != yearToRemove });
+    });
+    this.subscribeToFormChanges();
+    this.setYearOptions();
+    this.saveChanges();
   }
 
   openAddUtilityModal() {
@@ -197,6 +189,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   saveChanges() {
+    this.facilityEnergyUseEquipmentFormService.calculateEnergyUse(this.utilityDataForms, this.annualOperatingConditionsDataForms);
     this.energyUseEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForms(
       this.energyUseEquipment,
       this.equipmentDetailsForm,
@@ -204,5 +197,13 @@ export class FacilityEnergyUseEquipmentFormComponent {
       this.annualOperatingConditionsDataForms
     );
     this.emitChanged.emit(this.energyUseEquipment);
+  }
+
+  openAddOperatingConditionsModal() {
+    this.showAddOperatingConditionsModal = true;
+  }
+
+  closeAddOperatingConditionsModal() {
+    this.showAddOperatingConditionsModal = false;
   }
 }

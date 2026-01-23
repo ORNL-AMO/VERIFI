@@ -46,7 +46,7 @@
     <label class="col-5 bold">Year</label>
     <label class="col-7 bold">Energy Use</label>
 </div>
-@for(energyUseForm of energyUseForms; track energyUseForm) {
+@for(energyUseForm of energyUseForms | orderEquipmentEnergyUseForms; track energyUseForm) {
 <form [formGroup]="energyUseForm">
     <div class="row">
         <label class="col-5 col-form-label">

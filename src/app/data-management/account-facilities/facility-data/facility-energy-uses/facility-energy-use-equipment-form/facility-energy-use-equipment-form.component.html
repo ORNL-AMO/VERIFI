@@ -7,7 +7,9 @@
 @for(utilityDataFormGroup of utilityDataForms; track utilityDataFormGroup.energySource) {
 <app-equipment-utility-data-form [energySource]="utilityDataFormGroup.energySource"
     [utilityDataForm]="utilityDataFormGroup.utilityDataForm" [energyUseForms]="utilityDataFormGroup.energyUseForms"
-    [equipmentDetailsForm]="equipmentDetailsForm" (emitRemoveUtilityType)="removeUtilityType(utilityDataFormGroup.energySource)"></app-equipment-utility-data-form>
+    [equipmentDetailsForm]="equipmentDetailsForm"
+    (emitRemoveUtilityType)="removeUtilityType(utilityDataFormGroup.energySource)"
+    [inSetup]="inSetup"></app-equipment-utility-data-form>
 }
 }@else {
 <p class="fw-light italic">
@@ -43,38 +45,27 @@
                 Efficiency (%)
             </div>
         </div>
-        @for (annualOperatingConditionsDataForm of annualOperatingConditionsDataForms; track $index) {
-        <app-annual-operating-conditions-form [annualOperatingConditionsDataForm]="annualOperatingConditionsDataForm">
+        @for (annualOperatingConditionsDataForm of annualOperatingConditionsDataForms | orderEquipmentEnergyUseForms; track $index) {
+        <app-annual-operating-conditions-form [annualOperatingConditionsDataForm]="annualOperatingConditionsDataForm"
+            (emitRemoveOperatingConditionsData)="removeOperatingConditionsData(annualOperatingConditionsDataForm)">
         </app-annual-operating-conditions-form>
         }
         <div class="d-flex justify-content-end">
             <div>
                 @if(annualOperatingConditionsDataForms.length < yearOptions.length) { <a class="click-link"
-                    (click)="addOperatingConditionsYear()"><span class="fa fa-plus"></span> Add Year</a>
+                    (click)="openAddOperatingConditionsModal()"><span class="fa fa-plus"></span> Add Year</a>
                     }
-            </div>
-            <div class="border-left ms-2 ps-2">
-                <a class="click-link danger" (click)="clearData()">Clear Data</a>
             </div>
         </div>
         }@else {
         <div class="d-flex justify-content-center flex-column align-items-center">
-            <p class="text-center bold">No operating conditions data found for this equipment.<br>
-                Which years would you like to include for operating conditions data collection?
+            <p class="text-center bold">No operating conditions data found for this equipment.
             </p>
-            <div class="d-flex flex-wrap justify-content-center mt-2 mb-4">
-                @for (yearOption of yearOptions; track $index) {
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="year-{{yearOption.year}}"
-                        [(ngModel)]="yearOption.selected" />
-                    <label class="form-check-label" for="year-{{yearOption.year}}">{{yearOption.year}}</label>
-                </div>
-                }
-            </div>
         </div>
         <div class="d-flex w-100 justify-content-center">
             <div class="pe-1">
-                <button class="btn action-btn" (click)="addOperatingConditionsData()"><i class="fa fa-plus"></i> Add
+                <button class="btn action-btn" (click)="openAddOperatingConditionsModal()"><i class="fa fa-plus"></i>
+                    Add
                     Operating Conditions Data</button>
             </div>
         </div>
@@ -86,7 +77,7 @@
 
 
 
-<div [ngClass]="{'windowOverlay': showUtilityTypeModal}"></div>
+<div [ngClass]="{'windowOverlay': showUtilityTypeModal || showAddOperatingConditionsModal}"></div>
 <div class="popup" [class.open]="showUtilityTypeModal">
     <div class="popup-header"><span class="fa fa-plus"></span> Add Utility Type to Equipment
         <button class="item-right" (click)="closeAddUtilityModal()">x</button>
@@ -98,8 +89,24 @@
         <div class="p-1">
             <button class="btn" (click)="addUtilityType(source)" type="button"
                 [ngStyle]="{'background-color': source | meterSourceColor}">
-                <span class="fa fa-plus me-1"></span>
+                <span class="fa fa-plus"></span>
                 {{source}}
+            </button>
+        </div>
+        }
+    </div>
+</div>
+
+<div class="popup" [class.open]="showAddOperatingConditionsModal">
+    <div class="popup-header"><span class="fa fa-plus"></span> Add Year of Operating Conditions Data
+        <button class="item-right" (click)="closeAddOperatingConditionsModal()">x</button>
+    </div>
+    <div class="popup-body d-flex flex-wrap justify-content-center">
+        @for (yearOption of yearOptions; track yearOption) {
+        <div class="p-1">
+            <button class="btn action-btn" (click)="addOperatingConditionsYear(yearOption)" type="button">
+                <span class="fa fa-plus"></span>
+                {{yearOption}}
             </button>
         </div>
         }

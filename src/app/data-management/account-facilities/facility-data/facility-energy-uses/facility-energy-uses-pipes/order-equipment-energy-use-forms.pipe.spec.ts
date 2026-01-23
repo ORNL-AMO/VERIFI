@@ -1,4 +1,4 @@
-import { OrderEquipmentEnergyUsePipe } from './order-equipment-energy-use.pipe';
+import { OrderEquipmentEnergyUsePipe } from './order-equipment-energy-use-forms.pipe';
 
 describe('OrderEquipmentEnergyUsePipe', () => {
   it('create an instance', () => {

@@ -4,15 +4,10 @@
         <div class="col">
             <div class="input-group">
                 <span class="input-group-text">
-                    <button class="btn-close" (click)="removeOperatingConditionsData()"></button>
+                    <button class="btn-close" (click)="openRemoveOperatingConditionsModal()"></button>
                 </span>
-                <!-- {{data.year}} -->
-                <select class="form-select" formControlName="year" id="{{'year_'+selectedYear}}">
-                    @for (yearOption of yearOptions; track yearOption.year) {
-                    <option [value]="yearOption.year">
-                        {{yearOption.year}}</option>
-                    }
-                </select>
+                <input class="form-control disabled" type="number" formControlName="year" min="0"
+                    id="{{'year_'+selectedYear}}">
             </div>
         </div>
         <div class="col">
@@ -45,3 +40,22 @@
         </div>
     </div>
 </form>
+
+
+<div [ngClass]="{'windowOverlay': showRemoveOperatingConditionsModal}"></div>
+<div class="popup" [class.open]="showRemoveOperatingConditionsModal">
+    <div class="popup-header">Remove Year of Operating Conditions Data
+        <button class="item-right" (click)="closeRemoveOperatingConditionsModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>
+            Are you sure you want to remove the operating conditions data for
+            {{annualOperatingConditionsDataForm.controls.year.value}}? This will also remove the energy use data
+            associated with this year.
+        </p>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary small me-2" (click)="closeRemoveOperatingConditionsModal()">Cancel</button>
+        <button class="btn btn-danger small" (click)="confirmRemoveOperatingConditionsData()">Remove</button>
+    </div>
+</div>

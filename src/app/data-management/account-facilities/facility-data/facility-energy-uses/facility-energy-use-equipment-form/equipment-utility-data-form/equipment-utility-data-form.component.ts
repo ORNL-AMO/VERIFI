@@ -30,8 +30,10 @@ export class EquipmentUtilityDataFormComponent {
     energyUseForm.patchValue({
       overrideEnergyUse: !energyUseForm.controls.overrideEnergyUse.value
     });
-    if (!energyUseForm.controls.overrideEnergyUse.value) {
-      //calculate
+    if (energyUseForm.controls.overrideEnergyUse.value) {
+      energyUseForm.controls.energyUse.enable();
+    } else {
+      energyUseForm.controls.energyUse.disable();
     }
   }
 }

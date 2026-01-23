@@ -51,7 +51,11 @@ export interface EquipmentUtilityData {
     size: number,
     numberOfEquipment: number,
     units: string,
-    energyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean}>
+    energyUse: Array<EquipmentUtilityDataEnergyUse>
+}
+
+export interface EquipmentUtilityDataEnergyUse {
+    year: number, energyUse: number, overrideEnergyUse: boolean
 }
 
 export type EquipmentType = "Pump" | "Fan" | "Process Heating" | "Compressed Air" | "Steam" |

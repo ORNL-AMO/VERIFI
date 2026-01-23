@@ -73,7 +73,7 @@ import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/fac
 import { EnergyUseFormAvailableSourcesPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-form-available-sources.pipe';
 import { EnergyUseFormIncludedSourcesPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-form-included-sources.pipe';
 import { EnergyUseSourceFormGroupPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-source-form-group.pipe';
-import { OrderEquipmentEnergyUsePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/order-equipment-energy-use.pipe';
+import { OrderEquipmentEnergyUseFormsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/order-equipment-energy-use-forms.pipe';
 import { YearOptionsFilterPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/year-options-filter.pipe';
 import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-utility-data-form/equipment-utility-data-form.component';
 import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
@@ -135,7 +135,7 @@ import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-dat
     FacilityEnergyUsesComponent,
     FacilityEnergyUsesGroupSetupComponent,
     FacilityEnergyUseEquipmentFormComponent,
-    OrderEquipmentEnergyUsePipe,
+    OrderEquipmentEnergyUseFormsPipe,
     YearOptionsFilterPipe,
     FacilityEnergyUsesSummaryComponent,
     FacilityEnergyUsesGroupSummaryComponent,
