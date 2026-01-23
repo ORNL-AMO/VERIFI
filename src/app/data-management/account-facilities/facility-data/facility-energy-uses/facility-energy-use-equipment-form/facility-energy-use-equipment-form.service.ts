@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { calculateTotalEquipmentEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
@@ -167,16 +168,8 @@ export class FacilityEnergyUseEquipmentFormService {
           let year: number = energyUseForm.controls.year.value;
           let operatingConditions: FormGroup = annualOperatingConditionsDataForms.find(form => { return form.controls.year.value == year });
           if (operatingConditions && operatingConditions.valid) {
-            let dutyFactor: number = operatingConditions.controls.dutyFactor.value / 100;
-            let efficiency: number = operatingConditions.controls.efficiency.value / 100;
-            let hoursOfOperation: number = operatingConditions.controls.hoursOfOperation.value;
-            let loadFactor: number = operatingConditions.controls.loadFactor.value / 100;
-            let size: number = utilityDataFormObj.utilityDataForm.controls.size.value;
-            let numberOfEquipment: number = utilityDataFormObj.utilityDataForm.controls.numberOfEquipment.value;
             //Example calculation (Electric Motor): Energy Use (kWh) = Size (kW) x Number of Motors x Load Factor x Duty Factor x Hours of Operation / Efficiency
-            //TODO: handle units.
-            let calculatedEnergyUse: number = (size * numberOfEquipment * loadFactor * dutyFactor * hoursOfOperation) / efficiency;
-            // let roundedEnergyUse: number = Number(calculatedEnergyUse.toFixed(3));
+            let calculatedEnergyUse: number = calculateTotalEquipmentEnergyUse(operatingConditions.value, utilityDataFormObj.utilityDataForm.value);
             energyUseForm.patchValue({
               energyUse: calculatedEnergyUse
             }, { emitEvent: false });

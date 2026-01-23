@@ -55,7 +55,8 @@ export class FacilityEnergyUsesSummaryComponent {
   }
 
   setEnergyFootprintFacility() {
-    this.energyFootprintFacility = new EnergyFootprintFacility(this.facility, this.facilityEnergyUseGroups, this.facilityEnergyUseEquipment);
-    console.log(this.energyFootprintFacility)
+    if (this.facilityEnergyUseGroups?.length > 0 && this.facilityEnergyUseEquipment?.length > 0) {
+      this.energyFootprintFacility = new EnergyFootprintFacility(this.facility, this.facilityEnergyUseGroups, this.facilityEnergyUseEquipment);
+    }
   }
 }

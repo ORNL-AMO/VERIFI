@@ -38,23 +38,21 @@ export class FacilityEnergyUseEquipmentFormComponent {
   ) { }
 
   ngOnInit() {
-    console.log('init')
-    this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
-    this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
-    this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
-    this.setYearOptions();
-    this.subscribeToFormChanges();
+    this.initFormData();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['energyUseEquipment'] && !changes['energyUseEquipment'].firstChange) {
-      console.log('changes detected');
+      this.initFormData();
+    }
+  }
+
+  initFormData(){
       this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
       this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
       this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
       this.setYearOptions();
       this.subscribeToFormChanges();
-    }
   }
 
   addOperatingConditionsYear(year: number) {

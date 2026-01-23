@@ -8,670 +8,373 @@
       </a>
     </div>
     <div class="ps-1 w-100" [hidden]="!sidebarOpen">
-        <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/home'" [routerLinkActive]="['active']"
-            [routerLinkActiveOptions]="{ exact: true }">
-            <h5 class="ps-2 mb-0">
-                <span class="fa fa-list-check"></span>
-                {{account.name}}
-            </h5>
-        </a>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/account-setup'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                <span class="fa fa-gear"></span>
-                Corporate Settings
-            </a>
-        </div>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/import-data/upload-files'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                <span class="fa fa-upload"></span>
-                Data Upload
-            </a>
-        </div>
-        <ng-container *ngFor="let fileReference of fileReferences">
-            <div class="sidebar-section">
-                <div class="ps-2 pe-2 nav-item">
-                    <ng-template [ngIf]="fileReference.isTemplate" [ngIfElse]="nonTemplateBlock">
-                        <a class="nav-link"
-                            [routerLink]="'/data-management/'+account.guid+'/import-data/process-template-file/' +fileReference.id"
-                            [routerLinkActive]="['active']">
-                            <span class="fa fa-file"></span>
-                            {{fileReference.name}}
-                        </a>
-                    </ng-template>
-                    <ng-template #nonTemplateBlock>
-                        <a class="nav-link"
-                            [routerLink]="'/data-management/'+account.guid+'/import-data/process-general-file/' +fileReference.id"
-                            [routerLinkActive]="['active']">
-                            <span class="fa fa-file"></span>
-                            {{fileReference.name}}
-                        </a>
-                    </ng-template>
-                </div>
-            </div>
-        </ng-container>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" (click)="toggleFacilitiesOpen()"
-                [ngClass]="{'active': url | sidebarItemActive: 'facilities-folder'}">
-                <span class="fa"
-                    [ngClass]="{'fa-chevron-down': account.sidebarFacilitiesOpen, 'fa-chevron-right': !account.sidebarFacilitiesOpen}"></span>
-                Facilities
-            </a>
-        </div>
-        <div class="sidebar-section facilities-section" *ngIf="account.sidebarFacilitiesOpen">
-            <div class="ps-2 nav-item">
-                <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities'"
-                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                    <span class="fa fa-list"></span>
-                    Manage Facilities
-                </a>
-            </div>
-            <ng-container *ngFor="let facility of facilities | dataManagementSidebarFacilitiesList">
-                <div class="ps-2 nav-item">
-                    <a class="nav-link" (click)="toggleFacilityOpen(facility)"
-                        [ngClass]="{'active': url | sidebarItemActive: 'facility': facility.guid}">
-                        <span class="fa"
-                            [ngClass]="{'fa-chevron-down': facility.sidebarOpen, 'fa-chevron-right': !facility.sidebarOpen}"></span>
-                        <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
-                        {{facility.name}}
-                    </a>
-                </div>
-                <div class="sidebar-section" *ngIf="facility.sidebarOpen">
-                    <div class="ps-2 nav-item">
-                        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid"
-                            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                            <span class="fa fa-gear"></span> Facility Settings
-                        </a>
-                    </div>
-                    <div class="ps-2 nav-item">
-                        <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)"
-                            [ngClass]="{'active': url | sidebarItemActive: 'meters-folder': facility.guid}">
-                            <span class="fa"
-                                [ngClass]="{'fa-chevron-down': facility.sidebarMetersOpen, 'fa-chevron-right': !facility.sidebarMetersOpen}"></span>
-                            Meters
-                        </a>
-                    </div>
-                    <div class="sidebar-section" *ngIf="facility.sidebarMetersOpen">
-                        <div class="ps-2 nav-item">
-                            <a class="nav-link"
-                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters'"
-                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                <span class="fa fa-list"></span> Manage Meters
-                            </a>
-                        </div>
-                        <div class="ps-2 nav-item">
-                            <a class="nav-link"
-                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meter-grouping'"
-                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                <span class="fa fa-layer-group"></span> Meter Grouping
-                            </a>
-                        </div>
-                        <ng-container *ngFor="let meter of facility.guid | facilityMetersList:accountMeters">
-                            <div class="ps-2 nav-item">
-                                <a class="nav-link" (click)="toggleMeterOpen(meter)"
-                                    [ngClass]="{'active': url | sidebarItemActive: 'meter': meter.guid}">
-                                    <span class="fa"
-                                        [ngClass]="{'fa-chevron-down': meter.sidebarOpen, 'fa-chevron-right': !meter.sidebarOpen}"></span>
-                                    {{meter.name}}
-                                </a>
-                            </div>
-                            <div class="sidebar-section" *ngIf="meter.sidebarOpen">
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid"
-                                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                        <span class="fa fa-gear"></span> Meter Settings
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-data'"
-                                        [routerLinkActive]="['active']">
-                                        <span class="fa fa-table"></span> Meter Readings
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/data-quality-report'"
-                                        [routerLinkActive]="['active']">
-                                        <span class="fa fa-clipboard-check"
-                                            [ngClass]="meter | meterDataQualityStatus: accountMeterData: false"></span>
-                                        Meter Data Quality Report
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-monthly-data'"
-                                        [routerLinkActive]="['active']">
-                                        <span class="fa fa-calendar-days"></span> Meter Monthly Data
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item" *ngIf="meter.charges.length > 0">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-charges-visualization'"
-                                        [routerLinkActive]="['active']">
-                                        <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill
-                                        Inspection
-                                    </a>
-                                </div>
-                            </div>
-                        </ng-container>
-                    </div>
-                    <div class="ps-2 nav-item">
-                        <a class="nav-link" (click)="toggleFacilityPredictorsOpen(facility)"
-                            [ngClass]="{'active': url | sidebarItemActive: 'predictors-folder': facility.guid}">
-                            <span class="fa"
-                                [ngClass]="{'fa-chevron-down': facility.sidebarPredictorsOpen, 'fa-chevron-right': !facility.sidebarPredictorsOpen}"></span>
-                            Predictors
-                        </a>
-                    </div>
-                    <div class="sidebar-section" *ngIf="facility.sidebarPredictorsOpen">
-                        <div class="ps-2 nav-item">
-                            <a class="nav-link"
-                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors'"
-                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                <span class="fa fa-list"></span> Manage Predictors
-                            </a>
-                        </div>
-                        <ng-container *ngFor="let predictor of facility.guid | facilityPredictorList:accountPredictors">
-                            <div class="ps-2 nav-item">
-                                <a class="nav-link" (click)="togglePredictorOpen(predictor)"
-                                    [ngClass]="{'active': url | sidebarItemActive: 'predictor': predictor.guid}">
-                                    <span class="fa"
-                                        [ngClass]="{'fa-chevron-down': predictor.sidebarOpen, 'fa-chevron-right': !predictor.sidebarOpen}"></span>
-                                    {{predictor.name}}
-                                </a>
-                            </div>
-                            <div class="sidebar-section" *ngIf="predictor.sidebarOpen">
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid"
-                                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                        <span class="fa fa-gear"></span> Predictor Settings
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/predictor-data'"
-                                        [routerLinkActive]="['active']">
-                                        <span class="fa fa-table"></span> Predictor Data
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/data-quality-report'"
-                                        [routerLinkActive]="['active']">
-                                        <span class="fa fa-clipboard-check"
-                                            [ngClass]="predictor | predictorDataQualityStatus: accountPredictorData: false"></span>
-                                        Predictor Data Quality Report
-                                    </a>
-                                </div>
-                            </div>
-                        </ng-container>
-                    </div>
-                    <div class="ps-2 nav-item">
-                        <a class="nav-link" (click)="toggleFacilityEnergyUsesOpen(facility)"
-                            [ngClass]="{'active': url | sidebarItemActive: 'energy-uses-folder': facility.guid}">
-                            <span class="fa"
-                                [ngClass]="{'fa-chevron-down': facility.sidebarEnergyUsesOpen, 'fa-chevron-right': !facility.sidebarEnergyUsesOpen}"></span>
-                            Energy Uses
-                        </a>
-                    </div>
-                    <div class="sidebar-section" *ngIf="facility.sidebarEnergyUsesOpen">
-                        <div class="ps-2 nav-item">
-                            <a class="nav-link"
-                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses'"
-                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                <span class="fa fa-list"></span> Manage Energy Uses Groups
-                            </a>
-                        </div>
-                        <div class="ps-2 nav-item">
-                            <a class="nav-link"
-                                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/summary'"
-                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                <span class="fa fa-chart-simple"></span> Energy Uses Summary
-                            </a>
-                        </div>
-                        <ng-container
-                            *ngFor="let energyUseGroup of facility.guid | facilityEnergyGroupsList:accountEnergyUseGroups">
-                            <div class="ps-2 nav-item">
-                                <a class="nav-link" (click)="toggleEnergyUseGroupOpen(energyUseGroup)"
-                                    [ngClass]="{'active': url | sidebarItemActive: 'energy-use': energyUseGroup.guid}">
-                                    <span class="fa"
-                                        [ngClass]="{'fa-chevron-down': energyUseGroup.sidebarOpen, 'fa-chevron-right': !energyUseGroup.sidebarOpen}"></span>
-                                    {{energyUseGroup.name}}
-                                </a>
-                            </div>
-                            <div class="sidebar-section" *ngIf="energyUseGroup.sidebarOpen">
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
-                                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                        <span class="fa fa-gear"></span> Group Settings
-                                    </a>
-                                </div>
-                                <div class="ps-2 nav-item">
-                                    <a class="nav-link"
-                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/summary'"
-                                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                        <span class="fa fa-chart-simple"></span> Group Summary
-                                    </a>
-                                </div>
-                                <ng-container
-                                    *ngFor="let energyUseEquipment of energyUseGroup.guid | facilityEnergyEquipmentList:accountEnergyUseEquipment">
-                                    <div class="ps-2 nav-item">
-                                        <a class="nav-link"
-                                            [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/equipment/'+energyUseEquipment.guid"
-                                            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                            <span class="fa fa-plug"></span> {{energyUseEquipment.name}}
-                                        </a>
-                                    </div>
-
-                                </ng-container>
-
-                            </div>
-                        </ng-container>
-
-                    </div>
-                </div>
-            </ng-container>
-        </div>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" (click)="toggleCustomDataOpen()">
-                <span class="fa"
-                    [ngClass]="{'fa-chevron-down': account.sidebarCustomDataOpen, 'fa-chevron-right': !account.sidebarCustomDataOpen}"></span>
-                Custom Database Items
-            </a>
-        </div>
-        <div class="sidebar-section facilities-section" *ngIf="account.sidebarCustomDataOpen">
-            <div class="ps-2 nav-item">
-                <a class="nav-link"
-                    [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-grid-factors'"
-                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                    <span class="fa fa-list"></span>
-                    Grid Factors
-                </a>
-            </div>
-            <div class="ps-2 nav-item">
-                <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-fuels'"
-                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                    <span class="fa fa-list"></span>
-                    Fuels
-                </a>
-            </div>
-            <div class="ps-2 nav-item">
-                <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-gwps'"
-                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                    <span class="fa fa-list"></span>
-                    Global Warming Potentials
-                </a>
-            </div>
-        </div>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/weather-data'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-temperature-half"></span>
-                Weather Data
-            </a>
-        </div>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-evaluation/account'" [routerLinkActive]="['active']"
-                [routerLinkActiveOptions]="{ exact: true }">
-                <span class="fa fa-chart-simple"></span>
-                Data Evaluation
-            </a>
-        </div>
-        <div class="p-2 w-100">
-            <hr class="my-1">
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
-                    class="fa fa-question"></i> <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Help</span> </a>
-
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a title="About" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/about'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
-                    class="fa fa-info-circle"></i> <span [hidden]="!sidebarOpen" class="ps-2 nav-label">About</span></a>
-
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a title="Feedback" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/feedback'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i>
-                <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Feedback</span></a>
-
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a title="Acknowledgments" class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/acknowledgments'" [routerLinkActive]="['active']"
-                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
-                <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Acknowledgments</span></a>
-
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a title="Privacy" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/privacy'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
-                    class="fa fa-shield-halved"></i>
-                <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Privacy</span></a>
-        </div>
-    </div>
-    <div class="p-2 w-100">
-      <hr class="my-1">
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/import-data/upload-files'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-        <span class="fa fa-upload"></span>
-        Data Upload
-      </a>
-    </div>
-    @for (fileReference of fileReferences; track fileReference.id) {
-    <div class="sidebar-section">
-      <div class="ps-2 pe-2 nav-item">
-        @if (fileReference.isTemplate) {
-        <a class="nav-link"
-          [routerLink]="'/data-management/'+account.guid+'/import-data/process-template-file/' +fileReference.id"
-          [routerLinkActive]="['active']">
-          <span class="fa fa-file"></span>
-          {{fileReference.name}}
-        </a>
-        } @else {
-        <a class="nav-link"
-          [routerLink]="'/data-management/'+account.guid+'/import-data/process-general-file/' +fileReference.id"
-          [routerLinkActive]="['active']">
-          <span class="fa fa-file"></span>
-          {{fileReference.name}}
-        </a>
-        }
-      </div>
-    </div>
-    }
-    <div class="p-2 w-100">
-      <hr class="my-1">
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a class="nav-link" (click)="toggleFacilitiesOpen()"
-        [ngClass]="{'active': url | sidebarItemActive: 'facilities-folder'}">
-        <span class="fa"
-          [ngClass]="{'fa-chevron-down': account.sidebarFacilitiesOpen, 'fa-chevron-right': !account.sidebarFacilitiesOpen}"></span>
-        Facilities
-      </a>
-    </div>
-    @if (account.sidebarFacilitiesOpen) {
-    <div class="sidebar-section facilities-section">
-      <div class="ps-2 nav-item">
-        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities'"
-          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-          <span class="fa fa-list"></span>
-          Manage Facilities
-        </a>
-      </div>
-      @for (facility of facilities | dataManagementSidebarFacilitiesList; track facility.guid) {
-      <div class="ps-2 nav-item">
-        <a class="nav-link" (click)="toggleFacilityOpen(facility)"
-          [ngClass]="{'active': url | sidebarItemActive: 'facility': facility.guid}">
-          <span class="fa"
-            [ngClass]="{'fa-chevron-down': facility.sidebarOpen, 'fa-chevron-right': !facility.sidebarOpen}"></span>
-          <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
-          {{facility.name}}
-        </a>
-      </div>
-      @if (facility.sidebarOpen) {
-      <div class="sidebar-section">
-        <div class="ps-2 nav-item">
-          <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid"
-            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-            <span class="fa fa-gear"></span> Facility Settings
-          </a>
-        </div>
-        <div class="ps-2 nav-item">
-          <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)"
-            [ngClass]="{'active': url | sidebarItemActive: 'meters-folder': facility.guid}">
-            <span class="fa"
-              [ngClass]="{'fa-chevron-down': facility.sidebarMetersOpen, 'fa-chevron-right': !facility.sidebarMetersOpen}"></span>
-            Meters
-          </a>
-        </div>
-        @if (facility.sidebarMetersOpen) {
-        <div class="sidebar-section">
-          <div class="ps-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters'"
-              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-              <span class="fa fa-list"></span> Manage Meters
-            </a>
-          </div>
-          <div class="ps-2 nav-item">
-            <a class="nav-link"
-              [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meter-grouping'"
-              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-              <span class="fa fa-layer-group"></span> Meter Grouping
-            </a>
-          </div>
-          @for (meter of facility.guid | facilityMetersList:accountMeters; track meter.guid) {
-          <div class="ps-2 nav-item">
-            <a class="nav-link" (click)="toggleMeterOpen(meter)"
-              [ngClass]="{'active': url | sidebarItemActive: 'meter': meter.guid}">
-              <span class="fa"
-                [ngClass]="{'fa-chevron-down': meter.sidebarOpen, 'fa-chevron-right': !meter.sidebarOpen}"></span>
-              {{meter.name}}
-            </a>
-          </div>
-          @if (meter.sidebarOpen) {
-          <div class="sidebar-section">
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                <span class="fa fa-gear"></span> Meter Settings
-              </a>
-            </div>
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-data'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-table"></span> Meter Readings
-              </a>
-            </div>
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/data-quality-report'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-clipboard-check"
-                  [ngClass]="meter | meterDataQualityStatus: accountMeterData: false"></span>
-                Meter Data Quality Report
-              </a>
-            </div>
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-monthly-data'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-calendar-days"></span> Meter Monthly Data
-              </a>
-            </div>
-            @if (meter.charges.length > 0) {
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-charges-visualization'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill Inspection
-              </a>
-            </div>
-            }
-          </div>
-          }
-          }
-        </div>
-        }
-        <div class="ps-2 nav-item">
-          <a class="nav-link" (click)="toggleFacilityPredictorsOpen(facility)"
-            [ngClass]="{'active': url | sidebarItemActive: 'predictors-folder': facility.guid}">
-            <span class="fa"
-              [ngClass]="{'fa-chevron-down': facility.sidebarPredictorsOpen, 'fa-chevron-right': !facility.sidebarPredictorsOpen}"></span>
-            Predictors
-          </a>
-        </div>
-        @if (facility.sidebarPredictorsOpen) {
-        <div class="sidebar-section">
-          <div class="ps-2 nav-item">
-            <a class="nav-link"
-              [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors'"
-              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-              <span class="fa fa-list"></span> Manage Predictors
-            </a>
-          </div>
-          @for (predictor of facility.guid | facilityPredictorList:accountPredictors; track predictor.guid) {
-          <div class="ps-2 nav-item">
-            <a class="nav-link" (click)="togglePredictorOpen(predictor)"
-              [ngClass]="{'active': url | sidebarItemActive: 'predictor': predictor.guid}">
-              <span class="fa"
-                [ngClass]="{'fa-chevron-down': predictor.sidebarOpen, 'fa-chevron-right': !predictor.sidebarOpen}"></span>
-              {{predictor.name}}
-            </a>
-          </div>
-          @if (predictor.sidebarOpen) {
-          <div class="sidebar-section">
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                <span class="fa fa-gear"></span> Predictor Settings
-              </a>
-            </div>
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/predictor-data'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-table"></span> Predictor Data
-              </a>
-            </div>
-            <div class="ps-2 nav-item">
-              <a class="nav-link"
-                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/data-quality-report'"
-                [routerLinkActive]="['active']">
-                <span class="fa fa-clipboard-check"
-                  [ngClass]="predictor | predictorDataQualityStatus: accountPredictorData: false"></span>
-                Predictor Data Quality Report
-              </a>
-            </div>
-          </div>
-          }
-          }
-        </div>
-        }
-      </div>
-      }
-      }
-    </div>
-    }
-    <div class="p-2 w-100">
-      <hr class="my-1">
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a class="nav-link" (click)="toggleCustomDataOpen()">
-        <span class="fa"
-          [ngClass]="{'fa-chevron-down': account.sidebarCustomDataOpen, 'fa-chevron-right': !account.sidebarCustomDataOpen}"></span>
-        Custom Database Items
-      </a>
-    </div>
-    @if (account.sidebarCustomDataOpen) {
-    <div class="sidebar-section facilities-section">
-      <div class="ps-2 nav-item">
-        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-grid-factors'"
-          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-          <span class="fa fa-list"></span>
-          Grid Factors
-        </a>
-      </div>
-      <div class="ps-2 nav-item">
-        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-fuels'"
-          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-          <span class="fa fa-list"></span>
-          Fuels
-        </a>
-      </div>
-      <div class="ps-2 nav-item">
-        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-gwps'"
-          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-          <span class="fa fa-list"></span>
-          Global Warming Potentials
-        </a>
-      </div>
-    </div>
-    }
-    <div class="p-2 w-100">
-      <hr class="my-1">
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/weather-data'"
-        [routerLinkActive]="['active']">
-        <span class="fa fa-temperature-half"></span>
-        Weather Data
-      </a>
-    </div>
-    <div class="p-2 w-100">
-      <hr class="my-1">
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a class="nav-link" [routerLink]="'/data-evaluation/account'" [routerLinkActive]="['active']"
+      <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/home'" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }">
-        <span class="fa fa-chart-simple"></span>
-        Data Evaluation
+        <h5 class="ps-2 mb-0">
+          <span class="fa fa-list-check"></span>
+          {{account.name}}
+        </h5>
       </a>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/account-setup'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+          <span class="fa fa-gear"></span>
+          Corporate Settings
+        </a>
+      </div>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/import-data/upload-files'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+          <span class="fa fa-upload"></span>
+          Data Upload
+        </a>
+      </div>
+      <ng-container *ngFor="let fileReference of fileReferences">
+        <div class="sidebar-section">
+          <div class="ps-2 pe-2 nav-item">
+            <ng-template [ngIf]="fileReference.isTemplate" [ngIfElse]="nonTemplateBlock">
+              <a class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/import-data/process-template-file/' +fileReference.id"
+                [routerLinkActive]="['active']">
+                <span class="fa fa-file"></span>
+                {{fileReference.name}}
+              </a>
+            </ng-template>
+            <ng-template #nonTemplateBlock>
+              <a class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/import-data/process-general-file/' +fileReference.id"
+                [routerLinkActive]="['active']">
+                <span class="fa fa-file"></span>
+                {{fileReference.name}}
+              </a>
+            </ng-template>
+          </div>
+        </div>
+      </ng-container>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a class="nav-link" (click)="toggleFacilitiesOpen()"
+          [ngClass]="{'active': url | sidebarItemActive: 'facilities-folder'}">
+          <span class="fa"
+            [ngClass]="{'fa-chevron-down': account.sidebarFacilitiesOpen, 'fa-chevron-right': !account.sidebarFacilitiesOpen}"></span>
+          Facilities
+        </a>
+      </div>
+      <div class="sidebar-section facilities-section" *ngIf="account.sidebarFacilitiesOpen">
+        <div class="ps-2 nav-item">
+          <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities'"
+            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="fa fa-list"></span>
+            Manage Facilities
+          </a>
+        </div>
+        <ng-container *ngFor="let facility of facilities | dataManagementSidebarFacilitiesList">
+          <div class="ps-2 nav-item">
+            <a class="nav-link" (click)="toggleFacilityOpen(facility)"
+              [ngClass]="{'active': url | sidebarItemActive: 'facility': facility.guid}">
+              <span class="fa"
+                [ngClass]="{'fa-chevron-down': facility.sidebarOpen, 'fa-chevron-right': !facility.sidebarOpen}"></span>
+              <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
+              {{facility.name}}
+            </a>
+          </div>
+          <div class="sidebar-section" *ngIf="facility.sidebarOpen">
+            <div class="ps-2 nav-item">
+              <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                <span class="fa fa-gear"></span> Facility Settings
+              </a>
+            </div>
+            <div class="ps-2 nav-item">
+              <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)"
+                [ngClass]="{'active': url | sidebarItemActive: 'meters-folder': facility.guid}">
+                <span class="fa"
+                  [ngClass]="{'fa-chevron-down': facility.sidebarMetersOpen, 'fa-chevron-right': !facility.sidebarMetersOpen}"></span>
+                Meters
+              </a>
+            </div>
+            <div class="sidebar-section" *ngIf="facility.sidebarMetersOpen">
+              <div class="ps-2 nav-item">
+                <a class="nav-link"
+                  [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters'"
+                  [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <span class="fa fa-list"></span> Manage Meters
+                </a>
+              </div>
+              <div class="ps-2 nav-item">
+                <a class="nav-link"
+                  [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meter-grouping'"
+                  [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <span class="fa fa-layer-group"></span> Meter Grouping
+                </a>
+              </div>
+              <ng-container *ngFor="let meter of facility.guid | facilityMetersList:accountMeters">
+                <div class="ps-2 nav-item">
+                  <a class="nav-link" (click)="toggleMeterOpen(meter)"
+                    [ngClass]="{'active': url | sidebarItemActive: 'meter': meter.guid}">
+                    <span class="fa"
+                      [ngClass]="{'fa-chevron-down': meter.sidebarOpen, 'fa-chevron-right': !meter.sidebarOpen}"></span>
+                    {{meter.name}}
+                  </a>
+                </div>
+                <div class="sidebar-section" *ngIf="meter.sidebarOpen">
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid"
+                      [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                      <span class="fa fa-gear"></span> Meter Settings
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-data'"
+                      [routerLinkActive]="['active']">
+                      <span class="fa fa-table"></span> Meter Readings
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/data-quality-report'"
+                      [routerLinkActive]="['active']">
+                      <span class="fa fa-clipboard-check"
+                        [ngClass]="meter | meterDataQualityStatus: accountMeterData: false"></span>
+                      Meter Data Quality Report
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-monthly-data'"
+                      [routerLinkActive]="['active']">
+                      <span class="fa fa-calendar-days"></span> Meter Monthly Data
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item" *ngIf="meter.charges.length > 0">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-charges-visualization'"
+                      [routerLinkActive]="['active']">
+                      <span class="fa fa-magnifying-glass-dollar"></span> Meter Utility Bill
+                      Inspection
+                    </a>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+            <div class="ps-2 nav-item">
+              <a class="nav-link" (click)="toggleFacilityPredictorsOpen(facility)"
+                [ngClass]="{'active': url | sidebarItemActive: 'predictors-folder': facility.guid}">
+                <span class="fa"
+                  [ngClass]="{'fa-chevron-down': facility.sidebarPredictorsOpen, 'fa-chevron-right': !facility.sidebarPredictorsOpen}"></span>
+                Predictors
+              </a>
+            </div>
+            <div class="sidebar-section" *ngIf="facility.sidebarPredictorsOpen">
+              <div class="ps-2 nav-item">
+                <a class="nav-link"
+                  [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors'"
+                  [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <span class="fa fa-list"></span> Manage Predictors
+                </a>
+              </div>
+              <ng-container *ngFor="let predictor of facility.guid | facilityPredictorList:accountPredictors">
+                <div class="ps-2 nav-item">
+                  <a class="nav-link" (click)="togglePredictorOpen(predictor)"
+                    [ngClass]="{'active': url | sidebarItemActive: 'predictor': predictor.guid}">
+                    <span class="fa"
+                      [ngClass]="{'fa-chevron-down': predictor.sidebarOpen, 'fa-chevron-right': !predictor.sidebarOpen}"></span>
+                    {{predictor.name}}
+                  </a>
+                </div>
+                <div class="sidebar-section" *ngIf="predictor.sidebarOpen">
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid"
+                      [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                      <span class="fa fa-gear"></span> Predictor Settings
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/predictor-data'"
+                      [routerLinkActive]="['active']">
+                      <span class="fa fa-table"></span> Predictor Data
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/data-quality-report'"
+                      [routerLinkActive]="['active']">
+                      <span class="fa fa-clipboard-check"
+                        [ngClass]="predictor | predictorDataQualityStatus: accountPredictorData: false"></span>
+                      Predictor Data Quality Report
+                    </a>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+            <div class="ps-2 nav-item">
+              <a class="nav-link" (click)="toggleFacilityEnergyUsesOpen(facility)"
+                [ngClass]="{'active': url | sidebarItemActive: 'energy-uses-folder': facility.guid}">
+                <span class="fa"
+                  [ngClass]="{'fa-chevron-down': facility.sidebarEnergyUsesOpen, 'fa-chevron-right': !facility.sidebarEnergyUsesOpen}"></span>
+                Energy Uses
+              </a>
+            </div>
+            <div class="sidebar-section" *ngIf="facility.sidebarEnergyUsesOpen">
+              <div class="ps-2 nav-item">
+                <a class="nav-link"
+                  [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses'"
+                  [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <span class="fa fa-list"></span> Manage Energy Uses Groups
+                </a>
+              </div>
+              <div class="ps-2 nav-item">
+                <a class="nav-link"
+                  [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/summary'"
+                  [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <span class="fa fa-chart-simple"></span> Energy Uses Summary
+                </a>
+              </div>
+              <ng-container
+                *ngFor="let energyUseGroup of facility.guid | facilityEnergyGroupsList:accountEnergyUseGroups">
+                <div class="ps-2 nav-item">
+                  <a class="nav-link" (click)="toggleEnergyUseGroupOpen(energyUseGroup)"
+                    [ngClass]="{'active': url | sidebarItemActive: 'energy-use': energyUseGroup.guid}">
+                    <span class="fa"
+                      [ngClass]="{'fa-chevron-down': energyUseGroup.sidebarOpen, 'fa-chevron-right': !energyUseGroup.sidebarOpen}"></span>
+                    {{energyUseGroup.name}}
+                  </a>
+                </div>
+                <div class="sidebar-section" *ngIf="energyUseGroup.sidebarOpen">
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
+                      [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                      <span class="fa fa-gear"></span> Group Settings
+                    </a>
+                  </div>
+                  <div class="ps-2 nav-item">
+                    <a class="nav-link"
+                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/summary'"
+                      [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                      <span class="fa fa-chart-simple"></span> Group Summary
+                    </a>
+                  </div>
+                  <ng-container
+                    *ngFor="let energyUseEquipment of energyUseGroup.guid | facilityEnergyEquipmentList:accountEnergyUseEquipment">
+                    <div class="ps-2 nav-item">
+                      <a class="nav-link"
+                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/equipment/'+energyUseEquipment.guid"
+                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                        <span class="fa fa-plug"></span> {{energyUseEquipment.name}}
+                      </a>
+                    </div>
+
+                  </ng-container>
+
+                </div>
+              </ng-container>
+
+            </div>
+          </div>
+        </ng-container>
+      </div>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a class="nav-link" (click)="toggleCustomDataOpen()">
+          <span class="fa"
+            [ngClass]="{'fa-chevron-down': account.sidebarCustomDataOpen, 'fa-chevron-right': !account.sidebarCustomDataOpen}"></span>
+          Custom Database Items
+        </a>
+      </div>
+      <div class="sidebar-section facilities-section" *ngIf="account.sidebarCustomDataOpen">
+        <div class="ps-2 nav-item">
+          <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-grid-factors'"
+            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="fa fa-list"></span>
+            Grid Factors
+          </a>
+        </div>
+        <div class="ps-2 nav-item">
+          <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-fuels'"
+            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="fa fa-list"></span>
+            Fuels
+          </a>
+        </div>
+        <div class="ps-2 nav-item">
+          <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-gwps'"
+            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="fa fa-list"></span>
+            Global Warming Potentials
+          </a>
+        </div>
+      </div>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/weather-data'"
+          [routerLinkActive]="['active']">
+          <span class="fa fa-temperature-half"></span>
+          Weather Data
+        </a>
+      </div>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a class="nav-link" [routerLink]="'/data-evaluation/account'" [routerLinkActive]="['active']"
+          [routerLinkActiveOptions]="{ exact: true }">
+          <span class="fa fa-chart-simple"></span>
+          Data Evaluation
+        </a>
+      </div>
+      <div class="p-2 w-100">
+        <hr class="my-1">
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i>
+          <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Help</span> </a>
+
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a title="About" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/about'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i>
+          <span [hidden]="!sidebarOpen" class="ps-2 nav-label">About</span></a>
+
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a title="Feedback" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/feedback'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i>
+          <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Feedback</span></a>
+
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a title="Acknowledgments" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/acknowledgments'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
+          <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Acknowledgments</span></a>
+
+      </div>
+      <div class="ps-2 pe-2 nav-item">
+        <a title="Privacy" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/privacy'"
+          [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
+            class="fa fa-shield-halved"></i>
+          <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Privacy</span></a>
+      </div>
     </div>
     <div class="p-2 w-100">
       <hr class="my-1">
     </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span
-          [hidden]="!sidebarOpen" class="ps-2 nav-label">Help</span> </a>
-
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a title="About" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/about'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i>
-        <span [hidden]="!sidebarOpen" class="ps-2 nav-label">About</span></a>
-
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a title="Feedback" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/feedback'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i>
-        <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Feedback</span></a>
-
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a title="Acknowledgments" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/acknowledgments'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
-        <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Acknowledgments</span></a>
-
-    </div>
-    <div class="ps-2 pe-2 nav-item">
-      <a title="Privacy" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/privacy'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-shield-halved"></i>
-        <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Privacy</span></a>
-    </div>
-  </div>
-  <div class="p-2 w-100">
-    <hr class="my-1">
   </div>
 </div>

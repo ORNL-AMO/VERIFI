@@ -1,5 +1,6 @@
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { EquipmentType } from "src/app/models/idbModels/facilityEnergyUseEquipment";
+import { PowerUnitOptions, UnitOption, VolumeLiquidOptions } from "src/app/shared/unitOptions";
 
 // export type UtilityType = 'Electricity' | 'Natural Gas' | 'Other Fuels' | 'Water' | 'Waste Water' | 'Steam' | 'Compressed Air';
 
@@ -34,6 +35,16 @@ export function getUtilityTypesForEquipmentType(equipmentType: EquipmentType): A
 
     }
 }
+
+export function getUnitOptionsForUtilityType(utilityType: MeterSource): Array<UnitOption> {
+    if (utilityType == 'Electricity' || utilityType == 'Natural Gas') {
+        return [...PowerUnitOptions];
+    } else if (utilityType == 'Other Fuels' || utilityType == 'Other Energy') {
+        return [...PowerUnitOptions, ...VolumeLiquidOptions];
+    }
+    return [];
+}
+
 
 // export const EquipmentTypeOptions:
 //     Array<{

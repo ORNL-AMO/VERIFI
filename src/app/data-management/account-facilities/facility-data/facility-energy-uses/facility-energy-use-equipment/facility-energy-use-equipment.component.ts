@@ -45,6 +45,7 @@ export class FacilityEnergyUseEquipmentComponent {
       if (energyUseEquipment) {
         //create copy
         this.energyUseEquipment = _.cloneDeep(energyUseEquipment);
+        this.dataChanged = false;
       } else {
         this.goToGroupList();
       }

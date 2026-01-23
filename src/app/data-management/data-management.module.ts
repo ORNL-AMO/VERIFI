@@ -79,6 +79,8 @@ import { EquipmentUtilityDataFormComponent } from './account-facilities/facility
 import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
 import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-details-form/equipment-details-form.component';
 import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-equipment-invalid.pipe';
+import { EnergyUseUnitPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-unit.pipe';
+import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/convert-energy-use-result.pipe';
 
 @NgModule({
   declarations: [
@@ -146,7 +148,9 @@ import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-dat
     EquipmentDetailsFormComponent,
     EquipmentUtilityDataFormComponent,
     AnnualOperatingConditionsFormComponent,
-    EnergyUseEquipmentInvalidPipe
+    EnergyUseEquipmentInvalidPipe,
+    EnergyUseUnitPipe,
+    ConvertEnergyUseResultPipe
   ],
   imports: [
     CommonModule,
