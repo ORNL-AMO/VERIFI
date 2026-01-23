@@ -35,4 +35,13 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
+    scrollbar-color: #ff6000;
+}
+ 
+.nav-tabs::-webkit-scrollbar {
+    height: 6px;
+}
+.nav-tabs::-webkit-scrollbar-thumb {
+    background: #ff6000;
+    border-radius: 4px;
 }
