@@ -30,3 +30,48 @@
 h4 .mt-auto, h4 .mt-auto i.fa-microscope{
     font-size: 22px !important;
 }
+
+.btn-compare {
+    background-color: #1a3861;
+    color: white;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.popup-compare {
+  top: 10px;
+  left: 10px;
+  width: calc(100vw - 20px)
+}
+
+.analysis-card-row > div {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #e6e3e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 1rem;
+}
+
+.title {
+    font-size: 20px;
+}
+
+.card-title {
+    font-size: 14px;
+}
+
+.bg-water {
+    background-color: #86c2d8;
+    color: #000;
+    font-size: 11px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
+.bg-energy {
+    background-color: #b28f60;
+    color: #000;
+    font-size: 11px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
