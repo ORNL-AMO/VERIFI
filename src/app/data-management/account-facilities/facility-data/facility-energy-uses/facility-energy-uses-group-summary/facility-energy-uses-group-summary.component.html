@@ -1,1 +1,41 @@
-<p>facility-energy-uses-group-summary works!</p>
+<h4>{{energyUseGroup.name}} Summary</h4>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+            @for (groupData of energyFootprintGroup.equipmentAnnualEnergyUse[0].annualEnergyUse; track $index) {
+            <th colspan="2">
+                {{groupData.year}}
+            </th>
+            }
+        </tr>
+        <tr>
+            <th>Equipment</th>
+            @for (groupData of energyFootprintGroup.equipmentAnnualEnergyUse[0].annualEnergyUse; track $index) {
+            <th>Energy Use</th>
+            <th>% of Total</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (groupData of energyFootprintGroup.equipmentAnnualEnergyUse; track $index){
+        <tr>
+            <td>{{groupData.equipmentGuid | facilityEnergyEquipmentName: facilityEnergyUseEquipment}}</td>
+            @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
+            <td>{{annualEnergyUse.energyUse| number:'1.0-2'}}</td>
+            <td>{{annualEnergyUse.percentOfTotal| number:'1.0-2'}}</td>
+            }
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Total</th>
+            @for (groupData of energyFootprintGroup.totalAnnualEnergyUse; track $index) {
+            <th>{{groupData.energyUse | number:'1.0-2'}}</th>
+            <th>&mdash;</th>
+            }
+        </tr>
+    </tfoot>
+</table>

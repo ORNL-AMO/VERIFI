@@ -53,7 +53,8 @@
         <label class="col-5 col-form-label">
             {{energyUseForm.controls.year.value}}
         </label>
-        <div class="col-4">
+        @let unitsDifferent = (calculatedEnergyUnit !== facilityUnits);
+        <div [ngClass]="{'col-4': unitsDifferent, 'col-7': !unitsDifferent}">
             <div class="input-group">
                 <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseForm)">
                     @if(energyUseForm.controls.overrideEnergyUse.value){
@@ -67,6 +68,7 @@
                 </span>
             </div>
         </div>
+        @if(unitsDifferent){
         <div class="col-3">
             <div class="input-group">
                 @let convertedEnergyUse = energyUseForm.controls.energyUse.value | convertEnergyUseResult:
@@ -76,6 +78,7 @@
                 </span>
             </div>
         </div>
+        }
     </div>
 </form>
 }
