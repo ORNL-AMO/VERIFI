@@ -46,10 +46,10 @@
                         Energy Source
                     </th>
                     <th class="w-25">
-                        Total Size/Capacity
+                        Utility Types
                     </th>
                     <th class="w-25">
-                        Units
+                        Notes
                     </th>
                 </tr>
             </thead>
@@ -61,15 +61,18 @@
                             {{equipment.name}}
                         </a>
                     </td>
-                    <!-- <td>
-                        {{equipment.energySource}}
+                    <td>
+                        {{equipment.equipmentType}}
                     </td>
                     <td>
-                        {{equipment.size}}
+                        @for(utilityData of equipment.utilityData; track $index){
+                        <span class="badge me-1"
+                            [ngStyle]="{'background-color': utilityData.energySource | meterSourceColor}">{{utilityData.energySource}}</span>
+                        }
                     </td>
                     <td>
-                        {{equipment.units}}
-                    </td> -->
+                        {{equipment.notes}}
+                    </td>
                 </tr>
                 }
             </tbody>

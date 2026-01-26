@@ -43,6 +43,7 @@ export class EnergyFootprintGroup {
             });
             let annualEnergyUse: Array<{ year: number, energyUse: number, percentOfTotal: number }> = new Array();
             uniqueYears.forEach(year => {
+                //TODO: if no data for year, find nearest previous year
                 let energyUseDataForYear: Array<{ year: number, energyUse: number }> = equipmentEnergyUseData.filter(data => data.year == year);
                 let totalEnergyUseForYear: number = 0;
                 energyUseDataForYear.forEach(eu => {
@@ -81,7 +82,7 @@ export class EnergyFootprintGroup {
         });
     }
 
-    orderResults(){
+    orderResults() {
         this.totalAnnualEnergyUse = _.sortBy(this.totalAnnualEnergyUse, 'year', 'desc');
         this.equipmentAnnualEnergyUse.forEach(equipData => {
             equipData.annualEnergyUse = _.sortBy(equipData.annualEnergyUse, 'year', 'desc');
