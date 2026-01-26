@@ -98,6 +98,10 @@
     <hr>
     <div class="d-flex justify-content-end">
         <div>
+            <button class="btn action-btn me-2" (click)="addEquipmentForm()"><i class="fa fa-plus"></i> Add
+                Equipment/System to {{energyUseGroups[groupSetupIndex].name}}</button>
+        </div>
+        <div>
             <button class="btn btn-danger" (click)="openDeleteGroupModal()">
                 <span class="fa fa-trash"></span>
                 Delete Group

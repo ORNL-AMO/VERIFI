@@ -175,7 +175,9 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   confirmDeleteGroup() {
     let groupToDelete: Array<IdbFacilityEnergyUseGroup> = this.energyUseGroups.splice(this.groupSetupIndex, 1);
-    this.groupsIdsToDelete.push(groupToDelete[0]);
+    if (groupToDelete[0].id) {
+      this.groupsIdsToDelete.push(groupToDelete[0]);
+    }
     if (this.groupSetupIndex > 0) {
       this.groupSetupIndex--;
     }

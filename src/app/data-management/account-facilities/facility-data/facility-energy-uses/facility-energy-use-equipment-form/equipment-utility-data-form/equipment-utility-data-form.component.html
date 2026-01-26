@@ -2,13 +2,11 @@
     <div class="form-group row mt-2">
         <div class="d-flex w-100 justify-content-between">
             <div>
-                <label class="col-12 col-form-label">
-                    <span class="badge me-1 larger"
-                        [ngStyle]="{'background-color': energySource | meterSourceColor}">{{energySource}}
-                        Data</span>
-                </label>
+                <span class="badge me-1 badge-text"
+                    [ngStyle]="{'background-color': energySource | meterSourceColor}">{{energySource}}
+                    Data</span>
             </div>
-            <div>
+            <div class="mt-auto">
                 <button type="button" class="btn-close" aria-label="Close" (click)="removeUtilityType()"></button>
             </div>
         </div>
@@ -38,7 +36,7 @@
         </div>
     </div>
 </form>
-@if(!inSetup){
+<!-- @if(!inSetup){ -->
 <div class="mt-3 mb-2">
     <p class="bold">Energy Use Data</p>
 </div>
@@ -54,7 +52,7 @@
             {{energyUseForm.controls.year.value}}
         </label>
         @let unitsDifferent = (calculatedEnergyUnit !== facilityUnits);
-        <div [ngClass]="{'col-4': unitsDifferent, 'col-7': !unitsDifferent}">
+        <div [ngClass]="{'col-4': unitsDifferent, 'col-7': !unitsDifferent || inSetup}">
             <div class="input-group">
                 <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseForm)">
                     @if(energyUseForm.controls.overrideEnergyUse.value){
@@ -69,7 +67,7 @@
             </div>
         </div>
         @if(unitsDifferent){
-        <div class="col-3">
+        <div class="col-3" [ngClass]="{'col-7 ms-auto': inSetup}">
             <div class="input-group">
                 @let convertedEnergyUse = energyUseForm.controls.energyUse.value | convertEnergyUseResult:
                 calculatedEnergyUnit : facilityUnits;
@@ -81,5 +79,5 @@
         }
     </div>
 </form>
-}
+<!-- } -->
 }

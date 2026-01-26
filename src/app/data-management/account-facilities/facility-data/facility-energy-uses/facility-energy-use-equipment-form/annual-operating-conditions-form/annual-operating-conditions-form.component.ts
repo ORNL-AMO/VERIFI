@@ -15,8 +15,9 @@ export class AnnualOperatingConditionsFormComponent {
   annualOperatingConditionsDataForm: FormGroup;
   @Output()
   emitRemoveOperatingConditionsData: EventEmitter<void> = new EventEmitter<void>();
+  @Input()
+  inSetup: boolean = false;
 
-  yearOptions: Array<{ year: number, selected: boolean }>
   showRemoveOperatingConditionsModal: boolean = false;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 

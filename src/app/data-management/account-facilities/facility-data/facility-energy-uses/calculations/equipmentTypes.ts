@@ -37,12 +37,13 @@ export function getUtilityTypesForEquipmentType(equipmentType: EquipmentType): A
 }
 
 export function getUnitOptionsForUtilityType(utilityType: MeterSource): Array<UnitOption> {
-    if (utilityType == 'Electricity' || utilityType == 'Natural Gas') {
-        return [...PowerUnitOptions];
-    } else if (utilityType == 'Other Fuels' || utilityType == 'Other Energy') {
-        return [...PowerUnitOptions, ...VolumeLiquidOptions];
-    }
-    return [];
+    // if (utilityType == 'Electricity' || utilityType == 'Natural Gas') {
+    //     return [...PowerUnitOptions];
+    // } else if (utilityType == 'Other Fuels' || utilityType == 'Other Energy') {
+    //     return [...PowerUnitOptions, ...VolumeLiquidOptions];
+    // }
+    // return [];
+    return [...PowerUnitOptions]
 }
 
 
