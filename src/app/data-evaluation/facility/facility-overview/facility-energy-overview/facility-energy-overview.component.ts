@@ -26,12 +26,14 @@ export class FacilityEnergyOverviewComponent implements OnInit {
   utilityUseAndCostSub: Subscription;
   facilityOverviewData: FacilityOverviewData;
   facilityOverviewDataSub: Subscription;
+  energyIsSource: boolean;
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facilityId = val.guid;
       this.energyUnit = val.energyUnit;
+      this.energyIsSource = val.energyIsSource;
     });
 
     this.calculatingSub = this.facilityOverviewService.calculating.subscribe(val => {
