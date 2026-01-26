@@ -36,6 +36,8 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +56,8 @@ export class BackupDataService {
     private predictorDbService: PredictorDbService,
     private predictorsDbServiceDeprecated: PredictordbServiceDeprecated,
     private facilityReportsDbService: FacilityReportsDbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService) { }
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) { }
 
 
   backupAccount(downloadAsZip?: boolean) {
@@ -81,6 +84,7 @@ export class BackupDataService {
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       facilityReports: this.facilityReportsDbService.accountFacilityReports.getValue(),
       facilityEnergyUseGroups: this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue(),
+      facilityEnergyUseEquipment: this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue(),
       facility: undefined,
       backupFileType: "Account",
       origin: "VERIFI",
@@ -106,7 +110,7 @@ export class BackupDataService {
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => { return meter.facilityId == facility.guid });
     facilityAnalysisItems = this.trimAnalysisModels(facilityAnalysisItems);
-    
+
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(meter => { return meter.facilityId == facility.guid });
 
@@ -118,6 +122,9 @@ export class BackupDataService {
 
     let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue();
     let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = accountEnergyUseGroups.filter(group => { return group.facilityId == facility.guid });
+
+    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue();
+    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(equipment => { return equipment.facilityId == facility.guid });
 
     let backupFile: BackupFile = {
       account: undefined,
@@ -137,6 +144,7 @@ export class BackupDataService {
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       facilityReports: facilityReports,
       facilityEnergyUseGroups: facilityEnergyUseGroups,
+      facilityEnergyUseEquipment: facilityEnergyUseEquipment,
       backupFileType: "Facility",
       origin: "VERIFI",
       timeStamp: new Date(),
@@ -499,14 +507,34 @@ export class BackupDataService {
 
     //facility energy use groups
     this.loadingService.setLoadingMessage('Adding Facility Energy Use Groups...');
+    let facilityEnergyUseGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilityEnergyUseGroups?.length; i++) {
       let facilityEnergyUseGroup: IdbFacilityEnergyUseGroup = backupFile.facilityEnergyUseGroups[i];
-      facilityEnergyUseGroup.guid = this.getGUID();
+      let newId: string = this.getGUID();
+      facilityEnergyUseGroupGUIDs.push({
+        oldId: facilityEnergyUseGroup.guid,
+        newId: newId
+      });
       delete facilityEnergyUseGroup.id;
+      facilityEnergyUseGroup.guid = newId;
       facilityEnergyUseGroup.accountId = accountGUIDs.newId;
       facilityEnergyUseGroup.facilityId = this.getNewId(facilityEnergyUseGroup.facilityId, facilityGUIDs);
       await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(facilityEnergyUseGroup));
     }
+
+    //facility energy use equipment
+    this.loadingService.setLoadingMessage('Adding Facility Energy Use Equipment...');
+    for (let i = 0; i < backupFile.facilityEnergyUseEquipment?.length; i++) {
+      let facilityEnergyUseEquipment: IdbFacilityEnergyUseEquipment = backupFile.facilityEnergyUseEquipment[i];
+      facilityEnergyUseEquipment.guid = this.getGUID();
+      delete facilityEnergyUseEquipment.id;
+      facilityEnergyUseEquipment.accountId = accountGUIDs.newId;
+      facilityEnergyUseEquipment.facilityId = this.getNewId(facilityEnergyUseEquipment.facilityId, facilityGUIDs);
+      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
+      facilityEnergyUseEquipment.utilityMeterGroupId = this.getNewId(facilityEnergyUseEquipment.utilityMeterGroupId, meterGroupGUIDs);
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
+    }
+
 
     return newAccount;
   }
@@ -762,13 +790,32 @@ export class BackupDataService {
 
     //facility energy use groups
     this.loadingService.setLoadingMessage('Adding Facility Energy Use Groups...');
+    let facilityEnergyUseGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilityEnergyUseGroups?.length; i++) {
       let facilityEnergyUseGroup: IdbFacilityEnergyUseGroup = backupFile.facilityEnergyUseGroups[i];
-      facilityEnergyUseGroup.guid = this.getGUID();
+      let newGUID: string = this.getGUID();
+      facilityEnergyUseGroupGUIDs.push({
+        newId: newGUID,
+        oldId: facilityEnergyUseGroup.guid
+      });
       delete facilityEnergyUseGroup.id;
+      facilityEnergyUseGroup.guid = newGUID;
       facilityEnergyUseGroup.accountId = accountGUID;
       facilityEnergyUseGroup.facilityId = newFacilityGUID;
       await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(facilityEnergyUseGroup));
+    }
+
+    //facility energy use equipment
+    this.loadingService.setLoadingMessage('Adding Facility Energy Use Equipment...');
+    for (let i = 0; i < backupFile.facilityEnergyUseEquipment?.length; i++) {
+      let facilityEnergyUseEquipment: IdbFacilityEnergyUseEquipment = backupFile.facilityEnergyUseEquipment[i];
+      facilityEnergyUseEquipment.guid = this.getGUID();
+      delete facilityEnergyUseEquipment.id;
+      facilityEnergyUseEquipment.accountId = accountGUID;
+      facilityEnergyUseEquipment.facilityId = newFacilityGUID;
+      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
+      facilityEnergyUseEquipment.utilityMeterGroupId = this.getNewId(facilityEnergyUseEquipment.utilityMeterGroupId, meterGroupGUIDs);
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
     }
 
     return newFacility;
@@ -873,6 +920,7 @@ export interface BackupFile {
   dataBackupId: string,
   facilityReports: Array<IdbFacilityReport>,
   facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>
+  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>
 }
 
 
