@@ -82,7 +82,9 @@ export class AnnualAccountAnalysisSummaryClass {
                 isBanked: false,
                 isIntermediateBanked: false,
                 savingsBanked: checkAnalysisValue(summaryDataClass.savingsBanked),
-                savingsUnbanked: checkAnalysisValue(summaryDataClass.savingsUnbanked)
+                savingsUnbanked: checkAnalysisValue(summaryDataClass.savingsUnbanked),
+                missingPredictorValue: summaryDataClass.missingPredictorValue,
+                missingPredictors: summaryDataClass.missingPredictors
             }
         })
     }

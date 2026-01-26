@@ -128,8 +128,8 @@ export class ElectronBackupFileComponent {
         this.automaticBackupsService.overwriteFile();
       } else if (this.overwriteOption == 'updateAccount') {
         this.showModal = false;
-        this.loadingService.setLoadingMessage('Overwriting account. This may take a moment.');
-        this.loadingService.setLoadingStatus(true);
+        this.loadingService.setContext('electron-overwrite-account');
+        this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.pauseDelete.next(true);
         this.account.deleteAccount = true;
         await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
@@ -139,7 +139,7 @@ export class ElectronBackupFileComponent {
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;
         let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
+        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1);
         newAccount.dataBackupFilePath = backupPath;
         newAccount.sharedFileAuthor = sharedFileAuthor;
         newAccount.isSharedBackupFile = isSharedBackupFile;
@@ -148,8 +148,9 @@ export class ElectronBackupFileComponent {
         await this.dbChangesService.selectAccount(newAccount, false);
         this.deleteDataService.pauseDelete.next(false);
         this.deleteDataService.gatherAndDelete();
-        this.loadingService.setLoadingStatus(false);
         needUpdate = false;
+
+        this.loadingService.isLoadingComplete.next(true);
       }
     }
 

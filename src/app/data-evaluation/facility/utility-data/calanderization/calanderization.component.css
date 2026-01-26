@@ -13,8 +13,9 @@
 }
 
 .content-padding{
-    padding: 20px 30px;
-    height: calc(100vh - 290px);
+    padding-left: 15px;
+    padding-right: 15px;
+    height: calc(100vh - 293px);
     overflow-y: auto;
 
 }
@@ -42,6 +43,7 @@ a:not([href]){
 
 .nav-link{
     font-weight: 600;
+    white-space: nowrap;
 }
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
@@ -50,4 +52,19 @@ a:not([href]){
 
 .nav-tabs .nav-link i.fa{
     color: white;
+}
+.nav-tabs{
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-color: #ff6000;
+}
+ 
+.nav-tabs::-webkit-scrollbar {
+    height: 6px;
+}
+.nav-tabs::-webkit-scrollbar-thumb {
+    background: #ff6000;
+    border-radius: 4px;
 }

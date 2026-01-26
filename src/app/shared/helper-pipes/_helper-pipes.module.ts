@@ -31,6 +31,8 @@ import { InvalidMeterPipe } from './invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
 import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
+import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
+import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 
 @NgModule({
   declarations: [
@@ -64,7 +66,9 @@ import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
     InvalidMeterPipe,
     FacilityItemPipe,
     ReportDatePipe,
-    ChargeTypeLabelPipe
+    ChargeTypeLabelPipe,
+    GwpValueDisplayPipe,
+    MeterGroupSourcePipe
   ],
   imports: [
     CommonModule
@@ -100,7 +104,9 @@ import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
     InvalidMeterPipe,
     FacilityItemPipe,
     ReportDatePipe,
-    ChargeTypeLabelPipe
+    ChargeTypeLabelPipe,
+    GwpValueDisplayPipe,
+    MeterGroupSourcePipe
   ]
 })
 export class HelperPipesModule { }

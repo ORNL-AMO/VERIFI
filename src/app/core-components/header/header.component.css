@@ -28,6 +28,11 @@ a:not([href]).dropdown-item.active {
 
 .btn {
     margin: 0px;
+    white-space: nowrap;
+}
+
+.last-backup{
+    white-space: nowrap;
 }
 
 .dropdown-menu {

@@ -1,22 +1,38 @@
-<ng-container *ngIf="!destroyToast">
-  <div class="card card-toast alert" [@toast]="showToast" *ngIf="toastNotification"
-    [ngClass]="toastNotification.toastClass">
-    <div class="card-header">
-      <i *ngIf="toastNotification.toastClass === 'alert-success'" class="fa fa-check-circle item-left me-2"></i>
-      <i *ngIf="toastNotification.toastClass === 'alert-warning'" class="fa fa-exclamation-circle item-left me-2"></i>
-      <i *ngIf="toastNotification.toastClass === 'alert-info'" class="fa fa-info-circle item-left me-2"></i>
-      <i *ngIf="toastNotification.toastClass === 'alert-danger'" class="fa fa-times-circle item-left me-2"></i>
-      {{toastNotification.title}}
-      <!-- <button class="close item-right" (click)="closeToast()">&times;</button> -->
-      <button type="button" class="btn-close" aria-label="Close" (click)="closeToast()"></button>
+@if (!destroyToast) {
+  @if (toastNotification) {
+    <div class="card card-toast alert" [@toast]="showToast"
+      [ngClass]="toastNotification.toastClass">
+      <div class="card-header">
+        @if (toastNotification.toastClass === 'alert-success') {
+          <i class="fa fa-check-circle item-left me-2"></i>
+        }
+        @if (toastNotification.toastClass === 'alert-warning') {
+          <i class="fa fa-exclamation-circle item-left me-2"></i>
+        }
+        @if (toastNotification.toastClass === 'alert-info') {
+          <i class="fa fa-info-circle item-left me-2"></i>
+        }
+        @if (toastNotification.toastClass === 'alert-danger') {
+          <i class="fa fa-times-circle item-left me-2"></i>
+        }
+        {{toastNotification.title}}
+        <!-- <button class="close item-right" (click)="closeToast()">&times;</button> -->
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeToast()"></button>
+      </div>
+      @if (toastNotification.body) {
+        <div class="card-body">
+          <p class="card-text" [innerHTML]="toastNotification.body"></p>
+        </div>
+      }
+      @if (toastNotification.showDisableFooter) {
+        <div class="card-footer text-end">
+          <!-- <hr> -->
+          <a class="click-link" (click)="disable()">Disable</a>
+        </div>
+      }
     </div>
-    <div class="card-body" *ngIf="toastNotification.body">
-      <p class="card-text" [innerHTML]="toastNotification.body"></p>
-    </div>
-    <div class="card-footer text-end" *ngIf="toastNotification.showDisableFooter">
-      <!-- <hr> -->
-      <a class="click-link" (click)="disable()">Disable</a>
-    </div>
-  </div>
-</ng-container>
-<canvas *ngIf="!destroyToast && toastNotification?.confetti" class="confetti-canvas" #canvasElement></canvas>
+  }
+}
+@if (!destroyToast && toastNotification?.confetti) {
+  <canvas class="confetti-canvas" #canvasElement></canvas>
+}

@@ -1,36 +1,40 @@
-<div class="report" *ngIf="calculating != false">
+@if (calculating != false) {
+  <div class="report">
     <app-calculating-spinner [message]="'Calculating Annual Results...'"
-        [error]="calculating == 'error'"></app-calculating-spinner>
-</div>
+    [error]="calculating == 'error'"></app-calculating-spinner>
+  </div>
+}
 
 
-<div class="w-100" [ngClass]="{'quick-report': inQuickReport}" *ngIf="calculating == false">
+@if (calculating == false) {
+  <div class="w-100" [ngClass]="{'quick-report': inQuickReport}">
     <!--annual facility-->
-    <ng-container *ngIf="analysisReportSettings.facilityAnnualResults">
-        <app-annual-facility-analysis-report [analysisItem]="analysisItem"
-            [annualAnalysisSummaries]="annualAnalysisSummaries" [facility]="facility"
-            [analysisReportSettings]="analysisReportSettings"></app-annual-facility-analysis-report>
-        <div class="report-spacer-container">
-            <hr>
+    @if (analysisReportSettings.facilityAnnualResults) {
+      <app-annual-facility-analysis-report [analysisItem]="analysisItem"
+        [annualAnalysisSummaries]="annualAnalysisSummaries" [facility]="facility" [groupSummaries]="groupSummaries"
+      [analysisReportSettings]="analysisReportSettings"></app-annual-facility-analysis-report>
+      <div class="report-spacer-container">
+        <hr>
         </div>
-    </ng-container>
-    <!--monthly facility-->
-    <ng-container *ngIf="analysisReportSettings.facilityMonthlyResults">
+      }
+      <!--monthly facility-->
+      @if (analysisReportSettings.facilityMonthlyResults) {
         <app-monthly-facility-analysis-report [analysisItem]="analysisItem" [facility]="facility"
-            [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
-            [analysisReportSettings]="analysisReportSettings"></app-monthly-facility-analysis-report>
+          [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries"
+        [analysisReportSettings]="analysisReportSettings"></app-monthly-facility-analysis-report>
         <div class="report-spacer-container">
-            <hr>
-        </div>
-    </ng-container>
-    <!--group reports-->
-    <ng-container *ngIf="analysisReportSettings.groupReports">
-        <ng-container *ngFor="let groupSummary of groupSummaries; let i = index">
+          <hr>
+          </div>
+        }
+        <!--group reports-->
+        @if (analysisReportSettings.groupReports) {
+          @for (groupSummary of groupSummaries; track groupSummary; let i = $index) {
             <app-group-analysis-report [groupSummary]="groupSummary" [analysisItem]="analysisItem" [facility]="facility"
-                [analysisReportSettings]="analysisReportSettings" [isFirstGroup]="i === 0"></app-group-analysis-report>
+            [analysisReportSettings]="analysisReportSettings" [isFirstGroup]="i === 0"></app-group-analysis-report>
             <div class="report-spacer-container">
-                <hr>
-            </div>
-        </ng-container>
-    </ng-container>
-</div>
+              <hr>
+              </div>
+            }
+          }
+        </div>
+      }

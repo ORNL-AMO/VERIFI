@@ -30,6 +30,14 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   group: AnalysisGroup;
   @Input({ required: false })
   latestMonthSummary: MonthlyAnalysisSummaryData;
+  @Input({ required: false })
+  groupSummaries: Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+  }>;
+  @Input()
+  isAccount: boolean;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -47,6 +55,10 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   hasBankedSavings: boolean;
   hasTransitionYear: boolean;
   modelYear: number;
+  modelStartYear: number;
+  modelEndYear: number;
+  missingYearList: Array<number> = [];
+
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
 
@@ -61,10 +73,43 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     });
     this.setHasBanked();
     this.setModelYear();
+    this.modelStartYear = this.group?.regressionStartYear;
+    this.modelEndYear = this.group?.regressionEndYear;
+    this.checkPredictorData();
   }
 
   ngOnDestroy() {
     this.analysisTableColumnsSub.unsubscribe();
+  }
+
+  checkPredictorData() {
+    if (this.annualAnalysisSummary) {
+      this.missingYearList = this.annualAnalysisSummary.filter(data => data.missingPredictorValue).map(data => data.year);
+    }
+  }
+
+  checkPredictorValueStatus(data: AnnualAnalysisSummary, predictorVariable: AnalysisGroupPredictorVariable): boolean {
+    if (this.group) {
+      const groupVariable = this.group.predictorVariables.find(variable => variable.id === predictorVariable.id);
+      if (groupVariable) {
+        const value = !data.missingPredictors.includes(predictorVariable.id) ? data[predictorVariable.name] : null;
+        const isMissing = (value === null);
+        return isMissing;
+      }
+    }
+    else if (this.groupSummaries && this.groupSummaries.length > 0) {
+      for (const summary of this.groupSummaries) {
+        for (const variable of summary.group.predictorVariables) {
+          if (variable.id === predictorVariable.id) {
+            if (data.missingPredictors.includes(variable.id) && data.missingPredictorValue) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+    return false;
   }
 
   setPredictorVariables() {
@@ -190,5 +235,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.group && this.group.analysisType == 'regression') {
       this.modelYear = this.group.regressionModelYear;
     }
+  }
+
+  isSummaryYear(year: number): boolean {
+    if (this.modelStartYear !== undefined && this.modelEndYear !== undefined) {
+      return (year >= this.modelStartYear && year <= this.modelEndYear);
+    }
+    return false;
   }
 }

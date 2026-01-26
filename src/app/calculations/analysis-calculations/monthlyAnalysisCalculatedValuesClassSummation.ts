@@ -43,6 +43,8 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     fivePercentSavings: number;
     thirtyPercentTarget: number;
     thirtyPercentSavings: number;
+    missingValueWarning: boolean;
+    missingPredictors: Array<string>;
     constructor(
         currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
         baselineAdjustmentForNew: number,
@@ -78,8 +80,17 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setFivePercentSavings();
         this.setThirtyPercentTarget();
         this.setThirtyPercentSavings();
+        this.setMissingValueWarning(currentMonthData);
+        this.setMissingPredictors(currentMonthData);
     }
 
+    setMissingValueWarning(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
+        this.missingValueWarning = currentMonthData.some(data => data.missingValueWarning == true);
+    }
+
+    setMissingPredictors(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
+        this.missingPredictors = _.uniq(currentMonthData.flatMap(data => data.missingPredictors));
+    }
 
     initializeYearToDateValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
         this.summaryDataIndex = previousMonthsValues.length;

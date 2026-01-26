@@ -12,6 +12,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -72,7 +73,7 @@ export class EditElectricityBillComponent implements OnInit {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, account.assessmentReportVersion);
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, account.assessmentReportVersion, []);
       this.totalLocationEmissions = emissionsValues.locationElectricityEmissions;
       this.totalMarketEmissions = emissionsValues.marketElectricityEmissions;
       this.RECs = emissionsValues.RECs;

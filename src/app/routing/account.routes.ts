@@ -11,7 +11,6 @@ import { AccountOverviewComponent } from "src/app/data-evaluation/account/accoun
 import { CostsOverviewComponent } from "src/app/data-evaluation/account/account-overview/costs-overview/costs-overview.component";
 import { EmissionsOverviewComponent } from "src/app/data-evaluation/account/account-overview/emissions-overview/emissions-overview.component";
 import { EnergyOverviewComponent } from "src/app/data-evaluation/account/account-overview/energy-overview/energy-overview.component";
-import { OtherUtilityOverviewComponent } from "src/app/data-evaluation/account/account-overview/other-utility-overview/other-utility-overview.component";
 import { WaterOverviewComponent } from "src/app/data-evaluation/account/account-overview/water-overview/water-overview.component";
 import { AccountReportSetupComponent } from "src/app/data-evaluation/account/account-reports/account-report-setup/account-report-setup.component";
 import { AccountReportsDashboardComponent } from "src/app/data-evaluation/account/account-reports/account-reports-dashboard/account-reports-dashboard.component";
@@ -59,9 +58,7 @@ export const AccountRoutes: Route = {
                 { path: 'energy', component: EnergyOverviewComponent },
                 { path: 'costs', component: CostsOverviewComponent },
                 { path: 'emissions', component: EmissionsOverviewComponent },
-                { path: 'water', component: WaterOverviewComponent },
-                { path: 'other', component: OtherUtilityOverviewComponent },
-
+                { path: 'water', component: WaterOverviewComponent }
             ]
         },
         {

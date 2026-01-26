@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { FacilityReportsService } from '../../facility-reports.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -19,6 +18,8 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-facility-overview-report-results',
@@ -52,7 +53,8 @@ export class FacilityOverviewReportResultsComponent {
     private customFuelDbService: CustomFuelDbService,
     private eGridService: EGridService,
     private accountDbService: AccountdbService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private customGWPDbService: CustomGWPDbService
   ) {
 
   }
@@ -80,6 +82,7 @@ export class FacilityOverviewReportResultsComponent {
     this.calculating = true;
     this.facility = this.facilityDbService.getFacilityById(this.facilityReport.facilityId);
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (this.overviewReportSettings.includeAllMeterData == false) {
       let includeGroupIds: Array<string> = [];
       this.overviewReportSettings.includedGroups.forEach(group => {
@@ -99,7 +102,7 @@ export class FacilityOverviewReportResultsComponent {
     }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.facilityOverviewData = data.facilityOverviewData;
@@ -121,14 +124,12 @@ export class FacilityOverviewReportResultsComponent {
         inOverview: false,
         co2Emissions: this.eGridService.co2Emissions,
         customFuels: customFuels,
+        customGWPs: customGWPs,
         assessmentReportVersion: account.assessmentReportVersion
       });
-
-
-
     } else {
       // Web Workers are not supported in this environment.
-      this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false, { energyIsSource: this.overviewReportSettings.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [this.facility], account.assessmentReportVersion);
+      this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false, { energyIsSource: this.overviewReportSettings.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [this.facility], account.assessmentReportVersion, customGWPs);
       this.facilityOverviewData = new FacilityOverviewData(this.calanderizedMeters, this.dateRange, this.facility);
       this.utilityUseAndCost = new UtilityUseAndCost(this.calanderizedMeters, this.dateRange);
       this.calculating = false;

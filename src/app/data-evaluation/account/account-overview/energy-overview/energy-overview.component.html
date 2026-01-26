@@ -1,94 +1,148 @@
-<ng-container *ngIf="calculating == false">
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0">Facility Utility Usage</h4>
+@if (calculating == false) {
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">
+          <div class="d-flex justify-content-between">
+            <div class="h4-text">
+              Facility Utility Usage
+            </div>
+            <div class="text-center mt-auto">
+              {{dateRange.startDate | date:'MMM yyyy'}} - {{dateRange.endDate | date:'MMM yyyy'}}<br>
+              @if(selectedAccount.energyIsSource){
+              Source Energy
+              }@else {
+              Site Energy
+              }
+            </div>
+          </div>
+        </h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+            <app-data-overview-map [dataType]="'energyUse'"
+              [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"></app-data-overview-map>
+            <hr>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <app-facilities-usage-table [dataType]="'energyUse'"
+              [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
+              [accountOverviewData]="accountOverviewData"
+              [energyUnit]="selectedAccount.energyUnit"></app-facilities-usage-table>
+          </div>
+          <div class="col-6">
+            <app-facility-usage-donut [dataType]="'energyUse'"
+              [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
+              [energyUnit]="selectedAccount.energyUnit"></app-facility-usage-donut>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <app-account-utility-usage-table [accountOverviewData]="accountOverviewData"
+              [energyUnit]="selectedAccount.energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-table>
+          </div>
+          <div class="col-6">
+            <app-account-utility-usage-donut [accountOverviewData]="accountOverviewData"
+              [energyUnit]="selectedAccount.energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-donut>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">
 
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <app-data-overview-map [dataType]="'energyUse'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"></app-data-overview-map>
-                            <hr>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6">
-                            <app-facilities-usage-table [dataType]="'energyUse'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
-                                [accountOverviewData]="accountOverviewData"
-                                [energyUnit]="energyUnit"></app-facilities-usage-table>
-                        </div>
-                        <div class="col-6">
-                            <app-facility-usage-donut [dataType]="'energyUse'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
-                                [energyUnit]="energyUnit"></app-facility-usage-donut>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6">
-                            <app-account-utility-usage-table [accountOverviewData]="accountOverviewData"
-                                [energyUnit]="energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-table>
-                        </div>
-                        <div class="col-6">
-                            <app-account-utility-usage-donut [accountOverviewData]="accountOverviewData"
-                                [energyUnit]="energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-donut>
-                        </div>
-                    </div>
-                </div>
+          <div class="d-flex justify-content-between">
+            <div class="h4-text">
+              Utility Use and Cost
             </div>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0">Utility Use and Cost</h4>
-                </div>
-                <div class="card-body">
-                    <app-utility-consumption-table [dataType]="'energyUse'"
-                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
-                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
-                        [previousYear]="utilityUseAndCost.previousYear" [dateRange]="dateRange"
-                        [energyUnit]="energyUnit"></app-utility-consumption-table>
-                </div>
+            <div class="text-center mt-auto">
+              @if(selectedAccount.energyIsSource){
+              Source Energy
+              }@else {
+              Site Energy
+              }
             </div>
-        </div>
+          </div>
+        </h4>
+      </div>
+      <div class="card-body">
+        <app-utility-consumption-table [dataType]="'energyUse'" [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
+          [useAndCostTotal]="utilityUseAndCost.energyTotal" [previousYear]="utilityUseAndCost.previousYear"
+          [dateRange]="dateRange" [energyUnit]="selectedAccount.energyUnit"></app-utility-consumption-table>
+      </div>
     </div>
-    <hr>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0">Utility Usage</h4>
-                </div>
-                <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart [dataType]="'energyUse'"
-                        [calanderizedMeters]="accountOverviewData.calanderizedMeters" [energyUnit]="energyUnit"
-                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
-                </div>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">
+          <div class="d-flex justify-content-between">
+            <div class="h4-text">
+              Utility Usage
             </div>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0">Monthly Utility Usage</h4>
-                </div>
-                <div class="card-body">
-                    <app-monthly-utility-usage-line-chart [dataType]="'energyUse'"
-                        [yearMonthData]="accountOverviewData.energyYearMonthData"></app-monthly-utility-usage-line-chart>
-                </div>
+            <div class="text-center mt-auto">
+              {{dateRange.startDate | date:'MMM yyyy'}} - {{dateRange.endDate | date:'MMM yyyy'}}<br>
+              @if(selectedAccount.energyIsSource){
+              Source Energy
+              }@else {
+              Site Energy
+              }
             </div>
-        </div>
+          </div>
+        </h4>
+      </div>
+      <div class="card-body">
+        <app-facilities-usage-stacked-bar-chart [dataType]="'energyUse'"
+          [calanderizedMeters]="accountOverviewData.calanderizedMeters" [energyUnit]="selectedAccount.energyUnit"
+          [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
+      </div>
     </div>
-</ng-container>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">
+          <div class="d-flex justify-content-between">
+            <div class="h4-text">
+              Monthly Utility Usage
+            </div>
+            <div class="text-center mt-auto">
+              @if(selectedAccount.energyIsSource){
+              Source Energy
+              }@else {
+              Site Energy
+              }
+            </div>
+          </div>
+        </h4>
+      </div>
+      <div class="card-body">
+        <app-monthly-utility-usage-line-chart [dataType]="'energyUse'"
+          [yearMonthData]="accountOverviewData.energyYearMonthData"></app-monthly-utility-usage-line-chart>
+      </div>
+    </div>
+  </div>
+</div>
+}
 
 
-<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Data Overview...'"
-    [error]="calculating == 'error'"></app-calculating-spinner>
+@if (calculating != false) {
+<app-calculating-spinner [message]="'Calculating Data Overview...'"
+  [error]="calculating == 'error'"></app-calculating-spinner>
+}

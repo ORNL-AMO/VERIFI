@@ -225,7 +225,7 @@ export class UploadDataV2Service {
             this.setMeterUnits(excelMeter, meter, facility);
             if (meter.scope == 5 || meter.scope == 6) {
               let parseGWPData = this.parseGlobalWarmingPotentials(excelMeter, meter.startingUnit);
-              meter.globalWarmingPotential = parseGWPData.globalWarmingPotential;
+              // meter.globalWarmingPotential = parseGWPData.globalWarmingPotential;
               meter.globalWarmingPotentialOption = parseGWPData.globalWarmingPotentialOption;
             }
           }
@@ -563,22 +563,22 @@ export class UploadDataV2Service {
     return;
   }
 
-  parseGlobalWarmingPotentials(excelMeter: any, startingUnit: string): { globalWarmingPotentialOption: number, globalWarmingPotential: number } {
+  parseGlobalWarmingPotentials(excelMeter: any, startingUnit: string): { globalWarmingPotentialOption: number } {
     let excelGWPOption: string = excelMeter['Fuel or Emission'];
 
     let selectedGWPOption: GlobalWarmingPotential = GlobalWarmingPotentials.find(gwpOption => {
       return gwpOption.label == excelGWPOption;
     });
     if (selectedGWPOption) {
-      let conversionHelper: number = new ConvertValue(1, 'kg', startingUnit).convertedValue;
-      let convertedGWP: number = selectedGWPOption.gwp / conversionHelper;
+      // let conversionHelper: number = new ConvertValue(1, 'kg', startingUnit).convertedValue;
+      // let convertedGWP: number = selectedGWPOption.gwp / conversionHelper;
       return {
-        globalWarmingPotential: convertedGWP,
+        // globalWarmingPotential: convertedGWP,
         globalWarmingPotentialOption: selectedGWPOption.value
       }
     }
     return {
-      globalWarmingPotential: undefined,
+      // globalWarmingPotential: undefined,
       globalWarmingPotentialOption: undefined
     }
   }

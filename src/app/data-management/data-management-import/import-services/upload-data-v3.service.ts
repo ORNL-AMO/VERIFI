@@ -405,7 +405,7 @@ export class UploadDataV3Service {
             });
             if (gwpOption) {
               meter.globalWarmingPotentialOption = gwpOption.value;
-              meter.globalWarmingPotential = gwpOption.gwp;
+              // meter.globalWarmingPotential = gwpOption.gwp;
             }
           }
           meter.startingUnit = checkImportStartingUnit(excelMeter['Unit (COLLECTION)'], meter.source, meter.phase, meter.fuel, meter.scope);

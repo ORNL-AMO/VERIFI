@@ -52,7 +52,13 @@ export class RegressionModelsService {
             });
             model['predictorVariables'] = modelPredictorVariables;
             model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
-            model['modelId'] = Math.random().toString(36).substr(2, 9);
+
+            let modelId: string = '';
+            let predictorVariableIds: string = '';
+            const sortedVariableIds = variableIdCombo.slice().sort();
+            predictorVariableIds = sortedVariableIds.join('_');
+            modelId = analysisGroup.idbGroupId + '_' + predictorVariableIds + '_' + startYear;
+            model['modelId'] = modelId;
             model['modelPValue'] = model.f.pvalue;
             model['errorModeling'] = false;
             //Remove unused JSTAT data from model

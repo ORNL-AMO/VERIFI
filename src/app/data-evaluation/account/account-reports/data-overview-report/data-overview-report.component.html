@@ -1,20 +1,29 @@
-<div class="report" [ngClass]="{'print': print}"
-    *ngIf="overviewReport && !calculatingAccounts && !calculatingFacilities">
-    <app-data-overview-account-report *ngIf="overviewReport.includeAccountReport" [overviewReport]="overviewReport"
-        [accountData]="accountData"></app-data-overview-account-report>
+@if (overviewReport && !calculatingAccounts && !calculatingFacilities) {
+  <div class="report" [ngClass]="{'print': print}"
+    >
+    @if (overviewReport.includeAccountReport) {
+      <app-data-overview-account-report [overviewReport]="overviewReport"
+      [accountData]="accountData"></app-data-overview-account-report>
+    }
+    @if (overviewReport.includeFacilityReports) {
+      @for (dataOverviewFacility of facilitiesData; track dataOverviewFacility) {
+        <app-data-overview-facility-report
+          [dataOverviewFacility]="dataOverviewFacility"
+        [overviewReport]="overviewReport"></app-data-overview-facility-report>
+      }
+    }
+  </div>
+}
 
-    <ng-container *ngIf="overviewReport.includeFacilityReports">
-        <app-data-overview-facility-report *ngFor="let dataOverviewFacility of facilitiesData"
-            [dataOverviewFacility]="dataOverviewFacility"
-            [overviewReport]="overviewReport"></app-data-overview-facility-report>
-    </ng-container>
-</div>
-
-<div class="w-100 justify-content-center" *ngIf="calculatingFacilities || calculatingAccounts">
+@if (calculatingFacilities || calculatingAccounts) {
+  <div class="w-100 justify-content-center">
     <div class="pt-5">
-        <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
+      <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
     </div>
-</div>
+  </div>
+}
 
-<app-print-report-button
-    *ngIf="overviewReport && !calculatingAccounts && !calculatingFacilities"></app-print-report-button>
+@if (overviewReport && !calculatingAccounts && !calculatingFacilities) {
+  <app-print-report-button
+  ></app-print-report-button>
+}

@@ -1,65 +1,85 @@
 <div class="table-responsive">
-    <table class="table utility-data table-sm table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>Meter</th>
-                <th>Utility</th>
-                <th>Group</th>
-                <th *ngIf="dataType =='energyUse'">Utility Usage <br>(<span
-                        [innerHTML]="energyUnit | settingsLabel"></span>)
-                </th>
-                <th *ngIf="dataType =='water'">Consumption <br>(<span [innerHTML]="waterUnit | settingsLabel"></span>)
-                </th>
-                <th>Utility Cost</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr *ngFor="let overviewMeter of facilityOverviewMeters | orderBy: orderByValue">
-                <td>
-                    {{overviewMeter.meter.name}}
-                </td>
-                <td>
-                    {{overviewMeter.meter.source}}
-                </td>
-                <td>
-                    {{overviewMeter.meter.groupId | groupName}}
-                </td>
-                <td *ngIf="dataType =='energyUse'">
-                    {{overviewMeter.totalUsage | customNumber}}
-                </td>
-                <td *ngIf="dataType =='water'">
-                    {{overviewMeter.totalUsage | customNumber}}
-                </td>
-                <td>
-                    {{overviewMeter.totalCost | customNumber:true }}
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>
-                    Total
-                </th>
-                <th>
-                </th>
-                <th>
-                </th>
-                <th *ngIf="dataType =='energyUse'">
-                    {{facilityOverviewData.totalEnergyUsage | customNumber}}
-                </th>
-                <th *ngIf="dataType == 'energyUse'">
-                    {{facilityOverviewData.totalEnergyCost | customNumber:true }}
-                </th>
-                <th *ngIf="dataType =='water'">
-                    {{facilityOverviewData.totalWaterConsumption | customNumber}}
-                </th>
-                <th *ngIf="dataType == 'water'">
-                    {{facilityOverviewData.totalWaterCost | customNumber:true }}
-                </th>
-                <th *ngIf="dataType == 'cost'">
-                    {{facilityOverviewData.totalFacilityCost | customNumber:true }}
-                </th>
-            </tr>
-        </tfoot>
-    </table>
+  <table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Meter</th>
+        <th>Utility</th>
+        <th>Group</th>
+        @if (dataType =='energyUse') {
+          <th>Utility Usage <br>(<span
+          [innerHTML]="energyUnit | settingsLabel"></span>)
+        </th>
+      }
+      @if (dataType =='water') {
+        <th>Consumption <br>(<span [innerHTML]="waterUnit | settingsLabel"></span>)
+      </th>
+    }
+    <th>Utility Cost</th>
+  </tr>
+</thead>
+<tbody class="table-group-divider">
+  @for (overviewMeter of facilityOverviewMeters | orderBy: orderByValue; track overviewMeter) {
+    <tr>
+      <td>
+        {{overviewMeter.meter.name}}
+      </td>
+      <td>
+        {{overviewMeter.meter.source}}
+      </td>
+      <td>
+        {{overviewMeter.meter.groupId | groupName}}
+      </td>
+      @if (dataType =='energyUse') {
+        <td>
+          {{overviewMeter.totalUsage | customNumber}}
+        </td>
+      }
+      @if (dataType =='water') {
+        <td>
+          {{overviewMeter.totalUsage | customNumber}}
+        </td>
+      }
+      <td>
+        {{overviewMeter.totalCost | customNumber:true }}
+      </td>
+    </tr>
+  }
+</tbody>
+<tfoot>
+  <tr>
+    <th>
+      Total
+    </th>
+    <th>
+    </th>
+    <th>
+    </th>
+    @if (dataType =='energyUse') {
+      <th>
+        {{facilityOverviewData.totalEnergyUsage | customNumber}}
+      </th>
+    }
+    @if (dataType == 'energyUse') {
+      <th>
+        {{facilityOverviewData.totalEnergyCost | customNumber:true }}
+      </th>
+    }
+    @if (dataType =='water') {
+      <th>
+        {{facilityOverviewData.totalWaterConsumption | customNumber}}
+      </th>
+    }
+    @if (dataType == 'water') {
+      <th>
+        {{facilityOverviewData.totalWaterCost | customNumber:true }}
+      </th>
+    }
+    @if (dataType == 'cost') {
+      <th>
+        {{facilityOverviewData.totalFacilityCost | customNumber:true }}
+      </th>
+    }
+  </tr>
+</tfoot>
+</table>
 </div>

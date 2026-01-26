@@ -63,14 +63,14 @@ export class EditMeterFormService {
       vehicleFuelEfficiency: [meter.vehicleFuelEfficiency, additionalVehicleValidation],
       vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation],
       globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, globalWarmingPotentialValidation],
-      globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation],
+      // globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation],
       demandUnit: [meter.demandUnit],
       chargesArray: chargesArray
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
     // }
-    form.controls.globalWarmingPotential.disable();
+    // form.controls.globalWarmingPotential.disable();
     return form;
   }
 
@@ -105,7 +105,7 @@ export class EditMeterFormService {
     meter.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
     meter.vehicleDistanceUnit = form.controls.vehicleDistanceUnit.value;
     meter.globalWarmingPotentialOption = form.controls.globalWarmingPotentialOption.value;
-    meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
+    // meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
     meter.demandUnit = form.controls.demandUnit.value;
     //set multipliers
     meter = this.setMultipliers(meter);

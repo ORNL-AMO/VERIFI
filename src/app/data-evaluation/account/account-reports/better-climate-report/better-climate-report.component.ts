@@ -21,7 +21,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 @Component({
   selector: 'app-better-climate-report',
   templateUrl: './better-climate-report.component.html',
@@ -53,7 +54,8 @@ export class BetterClimateReportComponent {
     private customFuelDbService: CustomFuelDbService,
     private betterClimateExcelWriterService: BetterClimateExcelWriterService,
     private loadingService: LoadingService,
-    private dataEvaluationService: DataEvaluationService) { }
+    private dataEvaluationService: DataEvaluationService,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -92,8 +94,9 @@ export class BetterClimateReportComponent {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.betterClimateReportUnfiltered = _.cloneDeep(data.betterClimateReport);
@@ -116,12 +119,14 @@ export class BetterClimateReportComponent {
         emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay,
         emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent,
         customFuels: customFuels,
-        betterClimateReportSetup: this.selectedReport.betterClimateReportSetup
+        betterClimateReportSetup: this.selectedReport.betterClimateReportSetup,
+        customGWPs: customGWPs
       });
     } else {
       // Web Workers are not supported in this environment
       let betterClimateReport: BetterClimateReport = new BetterClimateReport(this.account, accountFacilities, accountMeters, accountMeterData, this.selectedReport.baselineYear, this.selectedReport.reportYear,
-        this.eGridService.co2Emissions, this.selectedReport.betterClimateReportSetup.emissionsDisplay, this.account.sustainabilityQuestions.greenhouseReductionPercent, customFuels, this.selectedReport.betterClimateReportSetup);
+        this.eGridService.co2Emissions, this.selectedReport.betterClimateReportSetup.emissionsDisplay,
+        this.account.sustainabilityQuestions.greenhouseReductionPercent, customFuels, this.selectedReport.betterClimateReportSetup, customGWPs);
       this.betterClimateReportUnfiltered = _.cloneDeep(betterClimateReport);
       this.betterClimateReport = this.filterIntermediateYears(betterClimateReport);
       this.calculating = false;
@@ -159,7 +164,7 @@ export class BetterClimateReportComponent {
   }
 
   generateExcelReport() {
-    this.loadingService.setLoadingMessage('Generating Better Climate Excel Report...');
+    this.loadingService.setLoadingMessage('Generating Emissions Excel Report...');
     this.loadingService.setLoadingStatus(true);
     //export to excell method sets loading status to false upon completion or error.
     this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReportUnfiltered);

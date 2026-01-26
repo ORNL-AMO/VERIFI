@@ -98,7 +98,7 @@ export class FacilitySavingsReportResultsComponent {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/facility-savings-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../web-workers/facility-savings-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {
@@ -128,7 +128,7 @@ export class FacilitySavingsReportResultsComponent {
       this.worker.postMessage(workerMessage);
     } else {
       // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let facilitySavingsReport: FacilitySavingsReport = new FacilitySavingsReport(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, accountPredictors, this.facilityReport);
       this.annualAnalysisSummaries = facilitySavingsReport.annualAnalysisSummaries;
       this.monthlyAnalysisSummaryData = facilitySavingsReport.monthlyAnalysisSummaryData;

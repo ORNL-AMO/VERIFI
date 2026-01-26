@@ -7,7 +7,7 @@ import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calcula
 import { getFiscalYear, getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
-import { IdbAccount } from "src/app/models/idbModels/account";
+import { AssessmentReportVersion, IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
@@ -70,7 +70,7 @@ export class MonthlyAccountAnalysisClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>,
-        assessmentReportVersion: 'AR4' | 'AR5') {
+        assessmentReportVersion: AssessmentReportVersion) {
         this.monthlyFacilityAnalysisClasses = new Array();
         this.facilitySummaries = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -78,7 +78,7 @@ export class MonthlyAccountAnalysisClass {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
-                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, assessmentReportVersion);
+                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, assessmentReportVersion, []);
                 let monthlyFacilityAnalysisClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(
                     analysisItem,
                     facility,
@@ -171,7 +171,9 @@ export class MonthlyAccountAnalysisClass {
                 tenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentSavings),
                 fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentSavings),
                 thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
-                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings)
+                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings),
+                missingValueWarning: summaryDataItem.monthlyAnalysisCalculatedValues.missingValueWarning,
+                missingPredictors: summaryDataItem.monthlyAnalysisCalculatedValues.missingPredictors
             }
         })
     }

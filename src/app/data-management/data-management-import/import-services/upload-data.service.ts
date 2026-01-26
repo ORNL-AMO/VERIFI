@@ -44,6 +44,8 @@ export class UploadDataService {
   fileReferences: Array<FileReference>;
   allFilesSet: BehaviorSubject<boolean>;
   uploadMeters: Array<IdbUtilityMeter>;
+
+  importFileReference: FileReference;
   constructor(private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
@@ -65,7 +67,6 @@ export class UploadDataService {
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
   }
-
 
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
     let isTemplate: TemplateVersion = this.checkSheetNamesForTemplate(workBook.SheetNames);
@@ -515,11 +516,14 @@ export class UploadDataService {
 
 
   async submit(fileReference: FileReference): Promise<FileReference> {
+    this.importFileReference = fileReference;
     this.sharedDataService.modalOpen.next(true);
-    this.loadingService.setLoadingMessage('Submitting File Data..');
-    this.loadingService.setLoadingStatus(true);
 
-    this.loadingService.setLoadingMessage('Uploading Facilities..');
+    this.loadingService.setContext('submit-file-data');
+    this.loadingService.setTitle('Submitting File Data');
+    this.loadingService.setCurrentLoadingIndex(0);
+    this.loadingService.addLoadingMessage('Uploading Facilities');
+
     for (let i = 0; i < fileReference.importFacilities.length; i++) {
       let facility: IdbFacility = fileReference.importFacilities[i];
       if (facility.id) {
@@ -529,7 +533,8 @@ export class UploadDataService {
       }
     }
 
-    this.loadingService.setLoadingMessage('Uploading Meters..');
+    this.loadingService.setCurrentLoadingIndex(1);
+    this.loadingService.addLoadingMessage('Uploading Meters');
     for (let i = 0; i < fileReference.meters.length; i++) {
       let meter: IdbUtilityMeter = fileReference.meters[i];
       if (!meter.skipImport) {
@@ -541,13 +546,15 @@ export class UploadDataService {
       }
     }
 
-    this.loadingService.setLoadingMessage('Creating Meter Groups..');
+    this.loadingService.setCurrentLoadingIndex(2);
+    this.loadingService.addLoadingMessage('Creating Meter Groups');
     for (let i = 0; i < fileReference.newMeterGroups.length; i++) {
       let meterGroup: IdbUtilityMeterGroup = fileReference.newMeterGroups[i];
       await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(meterGroup));
     }
 
-    this.loadingService.setLoadingMessage('Uploading Meter Data...');
+    this.loadingService.setCurrentLoadingIndex(3);
+    this.loadingService.addLoadingMessage('Uploading Meter Data');
     for (let i = 0; i < fileReference.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = fileReference.meterData[i];
       let meter: IdbUtilityMeter = fileReference.meters.find(meter => { return meter.guid == meterData.meterId })
@@ -581,7 +588,8 @@ export class UploadDataService {
       }
     }
 
-    this.loadingService.setLoadingMessage('Uploading Predictors..');
+    this.loadingService.setCurrentLoadingIndex(4);
+    this.loadingService.addLoadingMessage('Uploading Predictors');
     for (let i = 0; i < fileReference.predictors.length; i++) {
       let predictor: IdbPredictor = fileReference.predictors[i];
       if (predictor.id) {
@@ -598,7 +606,8 @@ export class UploadDataService {
         await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
       }
     }
-    this.loadingService.setLoadingMessage('Uploading Predictor Data..');
+    this.loadingService.setCurrentLoadingIndex(5);
+    this.loadingService.addLoadingMessage('Uploading Predictor Data');
     for (let i = 0; i < fileReference.predictorData.length; i++) {
       let predictorData: IdbPredictorData = fileReference.predictorData[i];
       if (predictorData.id) {
@@ -616,12 +625,18 @@ export class UploadDataService {
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.loadingService.setLoadingMessage('Finishing Up...');
-    await this.dbChangesService.selectAccount(selectedAccount, false)
+    this.loadingService.setCurrentLoadingIndex(6);
+    this.loadingService.addLoadingMessage('Finishing Up');
+    await this.dbChangesService.selectAccount(selectedAccount, false);
     fileReference.dataSubmitted = true;
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast(fileReference.name + ' Data Submitted', 'The data has been added to the selected account. You may continue to use the upload data wizard to process additional files.', undefined, false, "alert-success");
-    this.sharedDataService.modalOpen.next(false);
+    this.importFileReference = fileReference;
+    this.loadingService.isLoadingComplete.next(true);
     return fileReference;
   }
+
+  navigate() {
+    this.toastNotificationService.showToast(this.importFileReference.name + ' Data Submitted', 'The data has been added to the selected account. You may continue to use the upload data wizard to process additional files.', undefined, false, "alert-success");
+    this.sharedDataService.modalOpen.next(false);
+  }
+
 }

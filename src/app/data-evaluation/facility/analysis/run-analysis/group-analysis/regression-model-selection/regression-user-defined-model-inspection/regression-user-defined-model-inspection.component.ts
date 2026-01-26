@@ -21,7 +21,6 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
-import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-regression-user-defined-model-inspection',
@@ -138,7 +137,7 @@ export class RegressionUserDefinedModelInspectionComponent {
     this.loadingService.setLoadingStatus(true);
     let groupCopy: AnalysisGroup = JSON.parse(JSON.stringify(this.selectedGroup));
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.inspectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummary.monthlyAnalysisSummaryData;
@@ -164,7 +163,7 @@ export class RegressionUserDefinedModelInspectionComponent {
       });
     } else {
       // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
       this.calculating = false;
@@ -198,22 +197,20 @@ export class RegressionUserDefinedModelInspectionComponent {
           }
         }
 
-        const index = this.inspectedMonthlyAnalysisSummaryData.findIndex(data => {
-          const dateObject = data.date;
-          return (
-            dateObject.getMonth() === this.selectedGroup.regressionModelStartMonth &&
-            dateObject.getFullYear() === this.selectedGroup.regressionModelYear
-          );
-        });
+        const startMonth = this.selectedGroup.regressionModelStartMonth;;
+        const startYear = this.selectedGroup.regressionStartYear;
+        const endMonth = this.selectedGroup.regressionModelEndMonth;
+        const endYear = this.selectedGroup.regressionEndYear;
 
         let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = [];
-        if (index != -1) {
-          for (let i = 0; i < 12; i++) {
-            const indexToAdd = index + i;
-            if (indexToAdd < this.inspectedMonthlyAnalysisSummaryData.length) {
-              potentialModelYearData.push(this.inspectedMonthlyAnalysisSummaryData[indexToAdd]);
-            }
-          }
+        if(this.inspectedMonthlyAnalysisSummaryData) {
+          potentialModelYearData = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
+            const date = data.date;
+            return(
+              (date.getFullYear() > startYear || (date.getFullYear() == startYear && date.getMonth() >= startMonth)) &&
+              (date.getFullYear() < endYear || (date.getFullYear() == endYear && date.getMonth() <= endMonth))
+            );
+          });
         }
 
         var trace2 = {

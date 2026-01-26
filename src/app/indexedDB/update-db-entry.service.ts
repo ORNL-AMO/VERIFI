@@ -13,6 +13,7 @@ import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { getGUID } from '../shared/sharedHelperFunctions';
 import { ChargeCostUnit, MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { IdbCustomGWP } from '../models/idbModels/customGWP';
 
 @Injectable({
   providedIn: 'root'
@@ -135,6 +136,18 @@ export class UpdateDbEntryService {
         }
         if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelStartMonth == undefined){
           group.regressionModelStartMonth = 0;
+          isChanged = true;
+        }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionStartYear == undefined){
+          group.regressionStartYear = analysisItem.baselineYear;
+          isChanged = true;
+        }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelEndMonth == undefined){
+          group.regressionModelEndMonth = 11;
+          isChanged = true;
+        }
+        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionEndYear == undefined){
+          group.regressionEndYear = analysisItem.baselineYear;
           isChanged = true;
         }
       });
@@ -371,5 +384,17 @@ export class UpdateDbEntryService {
       report: report,
       isChanged: isChanged
     }
+  }
+
+  updateCustomGWP(customGWP: IdbCustomGWP): { customGWP: IdbCustomGWP, isChanged: boolean } {
+    let isChanged: boolean = false;
+    if(customGWP.gwp_ar4 == undefined && customGWP['gwp'] != undefined){
+      customGWP.gwp_ar4 = customGWP['gwp'];
+      customGWP.gwp_ar5 = customGWP['gwp'];
+      customGWP.gwp_ar6 = customGWP['gwp'];
+      delete customGWP['gwp'];
+      isChanged = true;
+    }
+    return { customGWP: customGWP, isChanged: isChanged };
   }
 }

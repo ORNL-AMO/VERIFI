@@ -4,17 +4,18 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
-    selector: 'app-energy-overview',
-    templateUrl: './energy-overview.component.html',
-    styleUrls: ['./energy-overview.component.css'],
-    standalone: false
+  selector: 'app-energy-overview',
+  templateUrl: './energy-overview.component.html',
+  styleUrls: ['./energy-overview.component.css'],
+  standalone: false
 })
 export class EnergyOverviewComponent implements OnInit {
 
   calculatingSub: Subscription;
   calculating: boolean | 'error';
-  energyUnit: string;
+  selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
 
   accountOverviewDataSub: Subscription;
@@ -27,9 +28,7 @@ export class EnergyOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      if (val) {
-        this.energyUnit = val.energyUnit;
-      }
+      this.selectedAccount = val;
     });
     this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
       this.calculating = val;

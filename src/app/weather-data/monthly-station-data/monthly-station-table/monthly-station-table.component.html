@@ -1,97 +1,125 @@
 <div class="d-flex w-100 justify-content-end pb-2">
-    <app-table-items-dropdown></app-table-items-dropdown>
+  <app-table-items-dropdown></app-table-items-dropdown>
 </div>
 <table class="table utility-data table-sm table-bordered table-hover" #dataTable
-    [ngClass]="{'copying-table': copyingTable}">
-    <thead class="sortable">
-        <tr>
-            <th (click)="setOrderDataField('time')" [ngClass]="{'active': orderDataField == 'time'}">
-                Date</th>
-            <th (click)="setOrderDataField('minutesBetween')"
-                [ngClass]="{'active': orderDataField == 'minutesBetween'}">
-                Reading<br> Minutes</th>
-            <th (click)="setOrderDataField('percentOfDay')" [ngClass]="{'active': orderDataField == 'percentOfDay'}">%
-                of Day</th>
-            <th (click)="setOrderDataField('dryBulbTemp')" [ngClass]="{'active': orderDataField == 'dryBulbTemp'}"
-                *ngIf="weatherDataSelection != 'relativeHumidity'">Dry<br> Bulb Temp</th>
+  [ngClass]="{'copying-table': copyingTable}">
+  <thead class="sortable">
+    <tr>
+      <th (click)="setOrderDataField('time')" [ngClass]="{'active': orderDataField == 'time'}">
+      Date</th>
+      <th (click)="setOrderDataField('minutesBetween')"
+        [ngClass]="{'active': orderDataField == 'minutesBetween'}">
+        Reading<br> Minutes</th>
+        <th (click)="setOrderDataField('percentOfDay')" [ngClass]="{'active': orderDataField == 'percentOfDay'}">%
+        of Day</th>
+        @if (weatherDataSelection != 'relativeHumidity') {
+          <th (click)="setOrderDataField('dryBulbTemp')" [ngClass]="{'active': orderDataField == 'dryBulbTemp'}"
+            >Dry<br> Bulb Temp</th>
+          }
+          @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
             <th (click)="setOrderDataField('heatingDegreeDay')"
-                [ngClass]="{'active': orderDataField == 'heatingDegreeDay'}"
-                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">Heating Degree<br> Days
+              [ngClass]="{'active': orderDataField == 'heatingDegreeDay'}"
+              >Heating Degree<br> Days
             </th>
+          }
+          @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
             <th (click)="setOrderDataField('coolingDegreeDay')"
-                [ngClass]="{'active': orderDataField == 'coolingDegreeDay'}"
-                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree<br> Days
+              [ngClass]="{'active': orderDataField == 'coolingDegreeDay'}"
+              >Cooling Degree<br> Days
             </th>
+          }
+          @if (weatherDataSelection == 'relativeHumidity') {
             <th (click)="setOrderDataField('relativeHumidity')"
-                [ngClass]="{'active': orderDataField == 'relativeHumidity'}"
-                *ngIf="weatherDataSelection == 'relativeHumidity'">Relative <br>Humidity</th>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider">
-        <tr *ngFor="let summaryData of detailedDegreeDays | orderDegreeDayDetails: orderDataField:orderByDirection| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
-            [ngClass]="{'alert alert-danger': summaryData.gapInData}">
-            <td>
-                <span class="fa fa-exclamation-circle" *ngIf="summaryData.gapInData"></span>
+              [ngClass]="{'active': orderDataField == 'relativeHumidity'}"
+              >Relative <br>Humidity</th>
+            }
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          @for (summaryData of detailedDegreeDays | orderDegreeDayDetails: orderDataField:orderByDirection| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track summaryData) {
+            <tr
+              [ngClass]="{'alert alert-danger': summaryData.gapInData}">
+              <td>
+                @if (summaryData.gapInData) {
+                  <span class="fa fa-exclamation-circle"></span>
+                }
                 {{summaryData.time | date:'short'}}
-            </td>
-            <td>
+              </td>
+              <td>
                 {{summaryData.minutesBetween | number}}
-            </td>
-            <td>
+              </td>
+              <td>
                 {{summaryData.percentOfDay * 100 | number}}
-            </td>
-            <td *ngIf="weatherDataSelection != 'relativeHumidity'">
-                {{summaryData.dryBulbTemp | number}} &#8457;
-            </td>
-            <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
-                {{summaryData.heatingDegreeDay | number}}
-            </td>
-            <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
-                {{summaryData.coolingDegreeDay | number}}
-            </td>
-            <td *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{summaryData.relativeHumidity | number:'1.0-1'}} &percnt;
-            </td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
+              </td>
+              @if (weatherDataSelection != 'relativeHumidity') {
+                <td>
+                  {{summaryData.dryBulbTemp | number}} &#8457;
+                </td>
+              }
+              @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+                <td>
+                  {{summaryData.heatingDegreeDay | number}}
+                </td>
+              }
+              @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+                <td>
+                  {{summaryData.coolingDegreeDay | number}}
+                </td>
+              }
+              @if (weatherDataSelection == 'relativeHumidity') {
+                <td>
+                  {{summaryData.relativeHumidity | number:'1.0-1'}} &percnt;
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
             <th>
-                Total
+              Total
             </th>
             <th>
-                {{detailedDegreeDays | degreeDayTotal: 'minutesBetween' | number}}
-                ({{detailedDegreeDays | degreeDayTotal:'days'| number:'1.0-1'}} days)
+              {{detailedDegreeDays | degreeDayTotal: 'minutesBetween' | number}}
+              ({{detailedDegreeDays | degreeDayTotal:'days'| number:'1.0-1'}} days)
             </th>
             <th>
 
             </th>
-            <th *ngIf="weatherDataSelection != 'relativeHumidity'">
+            @if (weatherDataSelection != 'relativeHumidity') {
+              <th>
                 {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &#8457;
-            </th>
-            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
+              </th>
+            }
+            @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+              <th>
                 {{detailedDegreeDays | degreeDayTotal: 'heatingDegreeDay' | number}}
-            </th>
-            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
+              </th>
+            }
+            @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+              <th>
                 {{detailedDegreeDays | degreeDayTotal: 'coolingDegreeDay' | number}}
-            </th>
-            <th *ngIf="weatherDataSelection == 'relativeHumidity'">
+              </th>
+            }
+            @if (weatherDataSelection == 'relativeHumidity') {
+              <th>
                 {{detailedDegreeDays | degreeDayTotal: 'relativeHumidity' | number:'1.0-4'}} &percnt;
-            </th>
-        </tr>
-    </tfoot>
-</table>
+              </th>
+            }
+          </tr>
+        </tfoot>
+      </table>
 
-<div class="d-flex justify-content-between">
-    <div class="w-100">
-        <button class="btn action-btn btn-sm" (click)="copyTable()">
+      <div class="d-flex justify-content-between">
+        <div class="w-100">
+          <button class="btn action-btn btn-sm" (click)="copyTable()">
             <span class="fa fa-copy"></span> Copy Table
-        </button>
-    </div>
+          </button>
+        </div>
 
-    <div class="d-flex w-100 justify-content-end">
-        <ngb-pagination [collectionSize]="detailedDegreeDays.length" [(page)]="currentPageNumber"
+        <div class="d-flex w-100 justify-content-end">
+          <ngb-pagination [collectionSize]="detailedDegreeDays.length" [(page)]="currentPageNumber"
             [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
-        </ngb-pagination>
-    </div>
-</div>
+          </ngb-pagination>
+        </div>
+      </div>

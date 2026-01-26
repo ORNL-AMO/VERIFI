@@ -22,6 +22,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -56,7 +58,8 @@ export class DataOverviewReportComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService,
-    private dataEvaluationService: DataEvaluationService) {
+    private dataEvaluationService: DataEvaluationService,
+    private customGWPDbService: CustomGWPDbService) {
 
   }
 
@@ -119,8 +122,9 @@ export class DataOverviewReportComponent {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (typeof Worker !== 'undefined') {
-      this.facilitiesWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
+      this.facilitiesWorker = new Worker(new URL('../../../../web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
         if (!data.error) {
           dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
@@ -148,14 +152,15 @@ export class DataOverviewReportComponent {
         inOverview: false,
         co2Emissions: this.eGridService.co2Emissions,
         customFuels: customFuels,
-        assessmentReportVersion: this.account.assessmentReportVersion
+        assessmentReportVersion: this.account.assessmentReportVersion,
+        customGWPs: customGWPs
       });
 
 
 
     } else {
       // Web Workers are not supported in this environment.
-      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [facility], this.account.assessmentReportVersion);
+      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [facility], this.account.assessmentReportVersion, customGWPs);
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -188,11 +193,11 @@ export class DataOverviewReportComponent {
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
 
     if (typeof Worker !== 'undefined') {
-      this.accountWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
+      this.accountWorker = new Worker(new URL('../../../../web-workers/account-overview.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.accountData.accountOverviewData = data.accountOverviewData;
@@ -216,11 +221,12 @@ export class DataOverviewReportComponent {
         account: this.account,
         energyIsSource: this.overviewReport.energyIsSource,
         co2Emissions: this.eGridService.co2Emissions,
-        customFuels: customFuels
+        customFuels: customFuels,
+        customGWPs: customGWPs,
       });
     } else {
       // Web Workers are not supported in this environment.
-      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, includedFacilities, this.account.assessmentReportVersion);
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, includedFacilities, this.account.assessmentReportVersion, customGWPs);
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;

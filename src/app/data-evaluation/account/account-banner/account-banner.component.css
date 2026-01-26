@@ -1,3 +1,30 @@
-.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-link.active i.fa,
+.nav-tabs .nav-link.active .nav-text {
     color: #ff6000;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-tabs .nav-text {
+    color: white;
+}
+
+
+.hide-tab-text .nav.nav-tabs .nav-text {
+    display: none;
+}
+
+.hide-tab-text .nav.nav-tabs .nav-link.active .nav-text,
+.hide-tab-text .nav.nav-tabs .nav-link:hover .nav-text {
+    display: inline;
+}
+
+.hide-all-text.hide-tab-text .nav.nav-tabs .nav-link.active .nav-text,
+.hide-all-text.hide-tab-text .nav.nav-tabs .nav-link:hover .nav-text {
+    display: none;
 }
