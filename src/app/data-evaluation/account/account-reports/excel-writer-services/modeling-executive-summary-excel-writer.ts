@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { FacilityGroupAnalysisItem } from '../analysis-report/analysis-report.component';
 import * as ExcelJS from 'exceljs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -207,7 +206,7 @@ export class ModelingExecutiveSummaryExcelWriter {
         valueStr = this.getRegressionNumberString(coefVal);
         coefIndex++;
       }
-      else if (coefIndex !== 0) {
+      else {
         valueStr = valueStr + ' + (' + this.getRegressionNumberString(coefVal) + '*' + item.selectedModel.predictorVariables[coefIndex - 1].name + ')';
         coefIndex++;
       }
@@ -219,5 +218,6 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (isNaN(num) == false && num != null) {
       return (num).toLocaleString(undefined, { maximumSignificantDigits: 3, minimumSignificantDigits: 3 });
     }
+    return '';
   }
 }
