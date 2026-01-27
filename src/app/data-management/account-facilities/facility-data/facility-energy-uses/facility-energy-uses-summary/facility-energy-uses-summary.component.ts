@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -30,8 +29,7 @@ export class FacilityEnergyUsesSummaryComponent {
 
   constructor(private facilityDbService: FacilitydbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private router: Router
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
   ) { }
 
   ngOnInit() {
@@ -41,9 +39,6 @@ export class FacilityEnergyUsesSummaryComponent {
     this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
       this.facilityEnergyUseGroups = groups;
     });
-    // this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
-    //   this.itemsPerPage = val;
-    // });
     this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
       this.facilityEnergyUseEquipment = equipment;
       this.setEnergyFootprintFacility();
@@ -60,9 +55,5 @@ export class FacilityEnergyUsesSummaryComponent {
     if (this.facilityEnergyUseGroups?.length > 0 && this.facilityEnergyUseEquipment?.length > 0) {
       this.energyFootprintFacility = new EnergyFootprintFacility(this.facility, this.facilityEnergyUseGroups, this.facilityEnergyUseEquipment);
     }
-  }
-
-  goToGroup(groupId: string) {
-    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + groupId + '/summary');
   }
 }

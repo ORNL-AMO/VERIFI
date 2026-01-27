@@ -1,0 +1,50 @@
+@let energyFootprintGroupOrdered = energyFootprintGroup | orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
+<table class="table table-bordered utility-data">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            @for (groupData of energyFootprintGroupOrdered.totalAnnualEnergyUse; track $index) {
+            <th colspan="2">
+                {{groupData.year}}
+            </th>
+            }
+        </tr>
+        <tr>
+            <th (click)="setOrderDataField('equipmentName', orderByYear)"
+                [ngClass]="{'active': orderByField == 'equipmentName'}">Equipment</th>
+
+            @for (groupData of energyFootprintGroupOrdered.totalAnnualEnergyUse; track $index) {
+            <th (click)="setOrderDataField('energyUse', groupData.year)"
+                [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupData.year}">Energy Use <span
+                    class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
+            <th (click)="setOrderDataField('percentOfTotal', groupData.year)"
+                [ngClass]="{'active': orderByField == 'percentOfTotal' && orderByYear == groupData.year}">% of Group
+                Total</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (groupData of energyFootprintGroupOrdered.equipmentAnnualEnergyUse; track $index){
+        <tr>
+            <td>
+                <a class="click-link" (click)="goToEquipment(groupData.equipmentGuid)">
+                    {{groupData.equipmentName}}
+                </a>
+            </td>
+            @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
+            <td>{{annualEnergyUse.energyUse| number:'1.0-2'}}</td>
+            <td>{{annualEnergyUse.percentOfTotal| number:'1.0-2'}}</td>
+            }
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Total</th>
+            @for (groupData of energyFootprintGroupOrdered.totalAnnualEnergyUse; track $index) {
+            <th>{{groupData.energyUse | number:'1.0-2'}}</th>
+            <th>&mdash;</th>
+            }
+        </tr>
+    </tfoot>
+</table>

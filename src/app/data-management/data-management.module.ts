@@ -66,7 +66,6 @@ import { FacilityEnergyUsesGroupSetupComponent } from './account-facilities/faci
 import { FacilityEnergyUseEquipmentFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/facility-energy-use-equipment-form.component';
 import { FacilityEnergyUsesSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary.component';
 import { FacilityEnergyUsesGroupSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component';
-import { FacilityEnergyUsesTimeSeriesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-time-series/facility-energy-uses-time-series.component';
 import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/utility-type-options.pipe';
 import { SizeLabelPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/size-label.pipe';
 import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/equipment-unit-options.pipe';
@@ -81,6 +80,10 @@ import { EquipmentDetailsFormComponent } from './account-facilities/facility-dat
 import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-equipment-invalid.pipe';
 import { EnergyUseUnitPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-unit.pipe';
 import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/convert-energy-use-result.pipe';
+import { FacilityEnergyUsesSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary-table/facility-energy-uses-summary-table.component';
+import { OrderFacilityEnergyUsesSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary-table/order-facility-energy-uses-summary-table.pipe';
+import { FacilityEnergyUsesGroupSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/facility-energy-uses-group-summary-table.component';
+import { OrderFacilityEnergyUsesGroupSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/order-facility-energy-uses-group-summary-table.pipe';
 
 @NgModule({
   declarations: [
@@ -141,7 +144,6 @@ import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/f
     YearOptionsFilterPipe,
     FacilityEnergyUsesSummaryComponent,
     FacilityEnergyUsesGroupSummaryComponent,
-    FacilityEnergyUsesTimeSeriesComponent,
     EnergyUseFormAvailableSourcesPipe,
     EnergyUseFormIncludedSourcesPipe,
     EnergyUseSourceFormGroupPipe,
@@ -150,7 +152,11 @@ import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/f
     AnnualOperatingConditionsFormComponent,
     EnergyUseEquipmentInvalidPipe,
     EnergyUseUnitPipe,
-    ConvertEnergyUseResultPipe
+    ConvertEnergyUseResultPipe,
+    FacilityEnergyUsesSummaryTableComponent,
+    OrderFacilityEnergyUsesSummaryTablePipe,
+    FacilityEnergyUsesGroupSummaryTableComponent,
+    OrderFacilityEnergyUsesGroupSummaryTablePipe
   ],
   imports: [
     CommonModule,

@@ -10,7 +10,7 @@ export class EnergyFootprintGroup {
     groupName: string;
     groupId: string;
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
-    equipmentAnnualEnergyUse: Array<{ equipmentGuid: string, annualEnergyUse: Array<{ year: number, energyUse: number, percentOfTotal: number }> }> = [];
+    equipmentAnnualEnergyUse: Array<{ equipmentGuid: string, equipmentName: string, annualEnergyUse: Array<{ year: number, energyUse: number, percentOfTotal: number }> }> = [];
     totalAnnualEnergyUse: Array<{ year: number, energyUse: number }> = [];
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility) {
@@ -57,7 +57,7 @@ export class EnergyFootprintGroup {
                 });
                 annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear, percentOfTotal: 0 });
             });
-            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, annualEnergyUse: annualEnergyUse });
+            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse });
         });
     }
 
