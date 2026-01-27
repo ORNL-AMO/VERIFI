@@ -36,6 +36,10 @@ import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
 import { UploadDataFootprintToolService } from './upload-data-footprint-tool.service';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Injectable({
   providedIn: 'root'
@@ -64,7 +68,9 @@ export class UploadDataService {
     private dbChangesService: DbChangesService,
     private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
     private uploadDataV3Service: UploadDataV3Service,
-    private uploadDataFootprintToolService: UploadDataFootprintToolService) {
+    private uploadDataFootprintToolService: UploadDataFootprintToolService,
+    private facilityEnergyUseGroupDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -667,6 +673,29 @@ export class UploadDataService {
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
+
+    this.loadingService.setCurrentLoadingIndex(6);
+    this.loadingService.addLoadingMessage('Uploading Energy Use Groups');
+    for (let i = 0; i < fileReference.facilityEnergyUseGroups.length; i++) {
+      let energyUseGroup: IdbFacilityEnergyUseGroup = fileReference.facilityEnergyUseGroups[i];
+      if (energyUseGroup.id) {
+        await firstValueFrom(this.facilityEnergyUseGroupDbService.updateWithObservable(energyUseGroup));
+      } else {
+        await firstValueFrom(this.facilityEnergyUseGroupDbService.addWithObservable(energyUseGroup));
+      }
+    }
+
+    this.loadingService.setCurrentLoadingIndex(7);
+    this.loadingService.addLoadingMessage('Uploading Energy Use Equipment');
+    for (let i = 0; i < fileReference.facilityEnergyUseEquipment.length; i++) {
+      let energyUseEquipment: IdbFacilityEnergyUseEquipment = fileReference.facilityEnergyUseEquipment[i];
+      if (energyUseEquipment.id) {
+        await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(energyUseEquipment));
+      } else {
+        await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(energyUseEquipment));
+      }
+    }
+
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setCurrentLoadingIndex(6);
     this.loadingService.addLoadingMessage('Finishing Up');

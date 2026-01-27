@@ -115,24 +115,6 @@ export const power = {
         display: '(GJ/hr)'
       }
       , to_anchor: 372.506136
-    },
-    thermshr: {
-      name: {
-        singular: 'Therm per hour',
-        plural: 'Therms per hour',
-        display: '(Therm/hr)'
-      },
-      // 1 Therm = 100,000 Btu
-      to_anchor: 100000 / 2544.43
-    },
-    dekathermshr: {
-      name: {
-        singular: 'Dekatherm per hour',
-        plural: 'Dekatherms per hour',
-        display: '(Dth/hr)'
-      },
-      // 1 Dekatherm = 1,000,000 Btu
-      to_anchor: 1000000 / 2544.43
     }
   },
   _anchors: {

@@ -61,6 +61,7 @@ import { FacilityEnergyUsesSummaryComponent } from "../data-management/account-f
 import { FacilityEnergyUsesGroupSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component";
 import { FootprintUploadSelectFacilityComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component";
 import { FootprintUploadProcessEnergyUseGroupsComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-process-energy-use-groups/footprint-upload-process-energy-use-groups.component";
+import { FootprintUploadProcessEnergyUseEquipmentComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-process-energy-use-equipment/footprint-upload-process-energy-use-equipment.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -117,7 +118,7 @@ export const DataManagementRoutes: Route = {
                         { path: '', pathMatch: 'full', redirectTo: 'select-facility' },
                         { path: 'select-facility', component: FootprintUploadSelectFacilityComponent },
                         { path: 'confirm-groups', component: FootprintUploadProcessEnergyUseGroupsComponent },
-                        { path: 'confirm-equipment', component: FootprintUploadProcessEnergyUseGroupsComponent },
+                        { path: 'confirm-equipment', component: FootprintUploadProcessEnergyUseEquipmentComponent },
                         { path: 'review-and-submit', component: SubmitImportDataComponent }
                     ]
                 }

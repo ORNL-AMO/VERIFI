@@ -5,6 +5,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference } from '../../import-services/upload-data-models';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { UploadDataFootprintToolService } from '../../import-services/upload-data-footprint-tool.service';
 
 @Component({
   selector: 'app-footprint-upload-select-facility',
@@ -14,15 +15,14 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class FootprintUploadSelectFacilityComponent {
 
-
   facilities: Array<IdbFacility>;
   fileReferences: Array<FileReference>;
   fileReferenceSub: Subscription;
   fileReference: FileReference;
   paramsSub: Subscription;
-
   constructor(private facilityDbService: FacilitydbService,
-    private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService) { }
+    private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
+    private uploadDataFootprintToolService: UploadDataFootprintToolService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
@@ -38,5 +38,9 @@ export class FootprintUploadSelectFacilityComponent {
   ngOnDestroy(): void {
     this.fileReferenceSub.unsubscribe();
     this.paramsSub.unsubscribe();
+  }
+
+  setSelectedFacility() {
+    this.fileReference = this.uploadDataFootprintToolService.setSelectedFacility(this.fileReference);
   }
 }
