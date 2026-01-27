@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -29,7 +30,8 @@ export class FacilityEnergyUsesSummaryComponent {
 
   constructor(private facilityDbService: FacilitydbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -58,5 +60,9 @@ export class FacilityEnergyUsesSummaryComponent {
     if (this.facilityEnergyUseGroups?.length > 0 && this.facilityEnergyUseEquipment?.length > 0) {
       this.energyFootprintFacility = new EnergyFootprintFacility(this.facility, this.facilityEnergyUseGroups, this.facilityEnergyUseEquipment);
     }
+  }
+
+  goToGroup(groupId: string) {
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + groupId + '/summary');
   }
 }

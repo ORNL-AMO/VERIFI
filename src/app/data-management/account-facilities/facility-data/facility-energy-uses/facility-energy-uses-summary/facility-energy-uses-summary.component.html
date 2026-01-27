@@ -2,6 +2,57 @@
     {{facility.name}} Energy Use Summary
 </h4>
 @if(energyFootprintFacility){
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+            @for (total of energyFootprintFacility.totals; track $index) {
+            <th colspan="2">
+                {{total.year}}
+            </th>
+            }
+        </tr>
+        <tr>
+            <th>Equipment</th>
+            @for (total of energyFootprintFacility.totals; track $index) {
+            <th>Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
+            <th>% of Facility Total</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (groupData of energyFootprintFacility.footprintGroupSummaries; track $index){
+        <tr>
+            <td>
+                <a class="click-link" (click)="goToGroup(groupData.groupId)">
+                    {{groupData.groupName}}
+                </a>
+            </td>
+            @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
+            <td>{{annualEnergyUse.totalEnergyUse| number:'1.0-2'}}</td>
+            <td>{{annualEnergyUse.percentOfFacilityUse| number:'1.0-2'}}</td>
+            }
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Total</th>
+            @for (total of energyFootprintFacility.totals; track $index) {
+            <th>{{total.totalEnergyUse | number:'1.0-2'}}</th>
+            <th>&mdash;</th>
+            }
+        </tr>
+    </tfoot>
+</table>
+
+
+
+
+
+
+
 <!-- <app-facility-energy-uses-time-series
     [energyFootprintFacility]="energyFootprintFacility"></app-facility-energy-uses-time-series>
 

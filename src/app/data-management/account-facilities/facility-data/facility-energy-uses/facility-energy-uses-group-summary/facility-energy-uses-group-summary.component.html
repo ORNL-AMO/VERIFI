@@ -13,15 +13,19 @@
         <tr>
             <th>Equipment</th>
             @for (groupData of energyFootprintGroup.equipmentAnnualEnergyUse[0].annualEnergyUse; track $index) {
-            <th>Energy Use</th>
-            <th>% of Total</th>
+            <th>Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
+            <th>% of Group Total</th>
             }
         </tr>
     </thead>
     <tbody>
         @for (groupData of energyFootprintGroup.equipmentAnnualEnergyUse; track $index){
         <tr>
-            <td>{{groupData.equipmentGuid | facilityEnergyEquipmentName: facilityEnergyUseEquipment}}</td>
+            <td>
+                <a class="click-link" (click)="goToEquipment(groupData.equipmentGuid)">
+                    {{groupData.equipmentGuid | facilityEnergyEquipmentName: facilityEnergyUseEquipment}}
+                </a>
+            </td>
             @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
             <td>{{annualEnergyUse.energyUse| number:'1.0-2'}}</td>
             <td>{{annualEnergyUse.percentOfTotal| number:'1.0-2'}}</td>

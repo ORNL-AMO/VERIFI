@@ -8,12 +8,14 @@ import { ConvertValue } from "../conversions/convertValue";
 export class EnergyFootprintGroup {
 
     groupName: string;
+    groupId: string;
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
     equipmentAnnualEnergyUse: Array<{ equipmentGuid: string, annualEnergyUse: Array<{ year: number, energyUse: number, percentOfTotal: number }> }> = [];
     totalAnnualEnergyUse: Array<{ year: number, energyUse: number }> = [];
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility) {
         this.groupName = group.name;
+        this.groupId = group.guid;
         this.groupEquipment = equipment.filter(equip => equip.energyUseGroupId == group.guid);
         this.setEquipmentAnnualEnergyUse(facility);
         this.setAnnualEnergyUse();
@@ -30,12 +32,16 @@ export class EnergyFootprintGroup {
         this.groupEquipment.forEach(equip => {
             let equipmentEnergyUseData: Array<{ year: number, energyUse: number, percentOfTotal: number }> = new Array();
             equip.utilityData.forEach(ud => {
+                let siteToSource: number = 1;
                 let energyUseUnits: string = getEnergyUseUnit(ud.units);
+                if(ud.energySource == 'Electricity' && energyUseUnits != 'MMBtu'){
+                    siteToSource = 3;
+                }
                 ud.energyUse.forEach(eu => {
                     let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facilityUnits).convertedValue;
                     equipmentEnergyUseData.push({
                         year: eu.year,
-                        energyUse: convertedEnergyUse,
+                        energyUse: convertedEnergyUse * siteToSource,
                         percentOfTotal: 0
                     })
                 });

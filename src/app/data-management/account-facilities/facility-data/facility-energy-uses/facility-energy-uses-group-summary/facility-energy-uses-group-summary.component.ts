@@ -50,7 +50,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.facilitySub.unsubscribe();
     this.facilityEnergyUseEquipmentSub.unsubscribe();
   }
@@ -61,6 +61,11 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   }
 
   setEnergyFootprintGroup() {
-    this.energyFootprintGroup = new EnergyFootprintGroup(this.energyUseGroup, this.facilityEnergyUseEquipment, this.facility);
+    this.energyFootprintGroup = new EnergyFootprintGroup(this.energyUseGroup, this.facilityEnergyUseEquipment, this.facility); ``
+  }
+
+  goToEquipment(equipmentGuid: string) {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + equipmentGuid);
   }
 }
