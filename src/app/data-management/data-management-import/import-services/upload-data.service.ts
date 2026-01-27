@@ -35,6 +35,7 @@ import { UtilityMeterDataService } from '../../../shared/shared-meter-content/ut
 import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
+import { UploadDataFootprintToolService } from './upload-data-footprint-tool.service';
 
 @Injectable({
   providedIn: 'root'
@@ -62,7 +63,8 @@ export class UploadDataService {
     private utilityMeterDataService: UtilityMeterDataService,
     private dbChangesService: DbChangesService,
     private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
-    private uploadDataV3Service: UploadDataV3Service) {
+    private uploadDataV3Service: UploadDataV3Service,
+    private uploadDataFootprintToolService: UploadDataFootprintToolService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -94,7 +96,9 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: [],
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: [],
+        facilityEnergyUseGroups: []
       };
     }
     else if (isTemplate == 'ETH') {
@@ -128,7 +132,40 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: templateData.newGroups,
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: templateData.energyUseEquipment,
+        facilityEnergyUseGroups: templateData.energyUseGroups
+      };
+    } else if (isTemplate == 'Footprint-tool') {
+      console.log('parsing footprint tool template');
+      // let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
+      return {
+        name: file.name,
+        file: file,
+        dataSubmitted: false,
+        id: Math.random().toString(36).substr(2, 9),
+        workbook: workBook,
+        isTemplate: false,
+        isTreasureHuntTemplate: false,
+        isFootprintToolTemplate: true,
+        selectedWorksheetName: undefined,
+        selectedWorksheetData: [],
+        columnGroups: [],
+        meterFacilityGroups: [],
+        predictorFacilityGroups: [],
+        headerMap: [],
+        importFacilities: templateData.importFacilities,
+        meters: templateData.importMeters,
+        meterData: templateData.meterData,
+        predictors: templateData.predictors,
+        predictorData: templateData.predictorData,
+        skipExistingReadingsMeterIds: [],
+        skipExistingPredictorFacilityIds: [],
+        newMeterGroups: templateData.newGroups,
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: templateData.energyUseEquipment,
+        facilityEnergyUseGroups: templateData.energyUseGroups
       };
     }
     else {
@@ -161,7 +198,9 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: templateData.newGroups,
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: [],
+        facilityEnergyUseGroups: []
       };
     }
   }
@@ -185,6 +224,8 @@ export class UploadDataService {
       return "ETH";
     } else if (sheetNames.includes("V3")) {
       return "V3";
+    } else if (sheetNames.includes("Energy Consumption") && sheetNames.includes("Energy Uses") && sheetNames.includes("Relevant Variables")) {
+      return "Footprint-tool";
     } else {
       return "Non-template";
     }
@@ -199,6 +240,8 @@ export class UploadDataService {
       return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook);
     } else if (templateVersion == "V3") {
       return this.uploadDataV3Service.parseTemplate(workbook);
+    } else if (templateVersion == "Footprint-tool") {
+      return this.uploadDataFootprintToolService.parseTemplate(workbook);
     }
   }
 
