@@ -4,7 +4,9 @@
 @if(energyFootprintFacility){
 <app-facility-energy-uses-summary-table [energyFootprintFacility]="energyFootprintFacility" [facility]="facility">
 </app-facility-energy-uses-summary-table>
-
+<hr>
+<app-facility-energy-uses-summary-chart [energyFootprintFacility]="energyFootprintFacility" [facility]="facility">
+</app-facility-energy-uses-summary-chart>
 }@else{
 <!--TODO: Message with link to manage energy use groups-->
 <p>No energy use data available.</p>

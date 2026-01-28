@@ -1,16 +1,25 @@
 import { IdbFacility } from "src/app/models/idbModels/facility";
-import { EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
+import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import * as _ from 'lodash';
 import { getEnergyUseUnit } from "./energyFootprintCalculations";
 import { ConvertValue } from "../conversions/convertValue";
+import { MeterSource } from "src/app/models/constantsAndTypes";
 
 export class EnergyFootprintGroup {
 
     groupName: string;
     groupId: string;
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
-    equipmentAnnualEnergyUse: Array<{ equipmentGuid: string, equipmentName: string, annualEnergyUse: Array<{ year: number, energyUse: number, percentOfTotal: number }> }> = [];
+    equipmentAnnualEnergyUse: Array<{ 
+        equipmentGuid: string, 
+        equipmentName: string, 
+        annualEnergyUse: Array<{ 
+            year: number, 
+            energyUse: number, 
+            percentOfTotal: number 
+        }>  
+    }> = [];
     totalAnnualEnergyUse: Array<{ year: number, energyUse: number }> = [];
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility) {
