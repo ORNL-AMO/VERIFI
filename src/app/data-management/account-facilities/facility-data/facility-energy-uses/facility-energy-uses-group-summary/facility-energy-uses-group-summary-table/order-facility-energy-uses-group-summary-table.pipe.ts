@@ -1,16 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
 import * as _ from 'lodash';
+import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
 @Pipe({
   name: 'orderFacilityEnergyUsesGroupSummaryTable',
   standalone: false,
 })
 export class OrderFacilityEnergyUsesGroupSummaryTablePipe implements PipeTransform {
 
-  transform(energyFootprintGroup: EnergyFootprintGroup, year: number, orderByField: string, orderByDir: 'asc' | 'desc'): EnergyFootprintGroup {
-    if (energyFootprintGroup && energyFootprintGroup.equipmentAnnualEnergyUse) {
+  transform(energyUsesGroupSummary: EnergyUsesGroupSummary, year: number, orderByField: string, orderByDir: 'asc' | 'desc'): EnergyUsesGroupSummary {
+    if (energyUsesGroupSummary && energyUsesGroupSummary.equipmentAnnualEnergyUse) {
       if (orderByField != 'equipmentName') {
-        energyFootprintGroup.equipmentAnnualEnergyUse = _.orderBy(energyFootprintGroup.equipmentAnnualEnergyUse, [(equip) => {
+        energyUsesGroupSummary.equipmentAnnualEnergyUse = _.orderBy(energyUsesGroupSummary.equipmentAnnualEnergyUse, [(equip) => {
           let yearData = equip.annualEnergyUse.find(annualUse => annualUse.year == year);
           if (yearData) {
             if (orderByField == 'energyUse') {
@@ -22,10 +23,10 @@ export class OrderFacilityEnergyUsesGroupSummaryTablePipe implements PipeTransfo
           return 0;
         }], [orderByDir]);
       } else {
-        energyFootprintGroup.equipmentAnnualEnergyUse = _.orderBy(energyFootprintGroup.equipmentAnnualEnergyUse, ['equipmentName'], [orderByDir]);
+        energyUsesGroupSummary.equipmentAnnualEnergyUse = _.orderBy(energyUsesGroupSummary.equipmentAnnualEnergyUse, ['equipmentName'], [orderByDir]);
       }
     }
-    return energyFootprintGroup;
+    return energyUsesGroupSummary;
   }
 
 }

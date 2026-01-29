@@ -4,11 +4,10 @@ import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facility
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { Subscription } from 'rxjs';
-
+import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
 
 @Component({
   selector: 'app-facility-energy-uses-group-summary',
@@ -20,7 +19,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
 
   facilityEnergyUseEquipmentSub: Subscription;
   facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
-  energyFootprintGroup: EnergyFootprintGroup;
+  energyUsesGroupSummary: EnergyUsesGroupSummary;
   energyUseGroup: IdbFacilityEnergyUseGroup;
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -61,7 +60,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   }
 
   setEnergyFootprintGroup() {
-    this.energyFootprintGroup = new EnergyFootprintGroup(this.energyUseGroup, this.facilityEnergyUseEquipment, this.facility); ``
+    this.energyUsesGroupSummary = new EnergyUsesGroupSummary(this.energyUseGroup, this.facilityEnergyUseEquipment, this.facility);
   }
 
   goToEquipment(equipmentGuid: string) {

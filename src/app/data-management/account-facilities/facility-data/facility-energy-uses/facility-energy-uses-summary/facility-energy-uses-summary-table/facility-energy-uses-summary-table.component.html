@@ -1,10 +1,10 @@
-@let energyFootprintFacilityOrdered = energyFootprintFacility |
+@let energyUsesFacilitySummaryOrdered = energyUsesFacilitySummary |
 orderFacilityEnergyUsesSummaryTable:orderByYear:orderByField:orderByDir;
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
             <th></th>
-            @for (total of energyFootprintFacilityOrdered.totals; track $index) {
+            @for (total of energyUsesFacilitySummaryOrdered.totals; track $index) {
             <th colspan="2">
                 {{total.year}}
             </th>
@@ -13,7 +13,7 @@ orderFacilityEnergyUsesSummaryTable:orderByYear:orderByField:orderByDir;
         <tr>
             <th (click)="setOrderDataField('groupName', orderByYear)"
                 [ngClass]="{'active': orderByField == 'groupName'}">Group</th>
-            @for (total of energyFootprintFacilityOrdered.totals; track $index) {
+            @for (total of energyUsesFacilitySummaryOrdered.totals; track $index) {
             <th (click)="setOrderDataField('totalEnergyUse', total.year)"
                 [ngClass]="{'active': orderByField == 'totalEnergyUse' && orderByYear == total.year}">
                 Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
@@ -24,7 +24,7 @@ orderFacilityEnergyUsesSummaryTable:orderByYear:orderByField:orderByDir;
         </tr>
     </thead>
     <tbody>
-        @for (groupData of energyFootprintFacilityOrdered.footprintGroupSummaries; track $index){
+        @for (groupData of energyUsesFacilitySummaryOrdered.footprintGroupSummaries; track $index){
         <tr>
             <td>
                 <a class="click-link" (click)="goToGroup(groupData.groupId)">
@@ -43,7 +43,7 @@ orderFacilityEnergyUsesSummaryTable:orderByYear:orderByField:orderByDir;
     <tfoot>
         <tr>
             <th>Total</th>
-            @for (total of energyFootprintFacilityOrdered.totals; track $index) {
+            @for (total of energyUsesFacilitySummaryOrdered.totals; track $index) {
             <th>{{total.totalEnergyUse | number:'1.0-2'}}</th>
             <th>&mdash;</th>
             }

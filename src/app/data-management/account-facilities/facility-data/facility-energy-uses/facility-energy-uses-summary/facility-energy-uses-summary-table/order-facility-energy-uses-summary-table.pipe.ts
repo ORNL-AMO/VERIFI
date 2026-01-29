@@ -1,16 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
 import * as _ from 'lodash';
+import { EnergyUsesFacilitySummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
 @Pipe({
   name: 'orderFacilityEnergyUsesSummaryTable',
   standalone: false,
 })
 export class OrderFacilityEnergyUsesSummaryTablePipe implements PipeTransform {
 
-  transform(energyFootprintFacility: EnergyFootprintFacility, year: number, orderByField: string, orderByDir: 'asc' | 'desc'): EnergyFootprintFacility {
-    if (energyFootprintFacility && energyFootprintFacility.footprintGroupSummaries) {
+  transform(energyUsesFacilitySummary: EnergyUsesFacilitySummary, year: number, orderByField: string, orderByDir: 'asc' | 'desc'): EnergyUsesFacilitySummary {
+    if (energyUsesFacilitySummary && energyUsesFacilitySummary.footprintGroupSummaries) {
       if (orderByField != 'groupName') {
-        energyFootprintFacility.footprintGroupSummaries = _.orderBy(energyFootprintFacility.footprintGroupSummaries, [(group) => {
+        energyUsesFacilitySummary.footprintGroupSummaries = _.orderBy(energyUsesFacilitySummary.footprintGroupSummaries, [(group) => {
           let yearData = group.annualEnergyUse.find(annualUse => annualUse.year == year);
           if (yearData) {
             if (orderByField == 'totalEnergyUse') {
@@ -21,12 +21,12 @@ export class OrderFacilityEnergyUsesSummaryTablePipe implements PipeTransform {
           }
           return 0;
         }], [orderByDir]);
-        return energyFootprintFacility;
+        return energyUsesFacilitySummary;
       } else {
-        energyFootprintFacility.footprintGroupSummaries = _.orderBy(energyFootprintFacility.footprintGroupSummaries, ['groupName'], [orderByDir]);
+        energyUsesFacilitySummary.footprintGroupSummaries = _.orderBy(energyUsesFacilitySummary.footprintGroupSummaries, ['groupName'], [orderByDir]);
       }
     }
-    return energyFootprintFacility;
+    return energyUsesFacilitySummary;
   }
 
 }

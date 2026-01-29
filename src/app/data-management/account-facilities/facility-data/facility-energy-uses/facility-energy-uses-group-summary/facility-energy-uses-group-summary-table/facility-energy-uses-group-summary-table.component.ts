@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
+import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Component({
   selector: 'app-facility-energy-uses-group-summary-table',
@@ -12,7 +11,7 @@ import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facility
 })
 export class FacilityEnergyUsesGroupSummaryTableComponent {
   @Input({ required: true })
-  energyFootprintGroup: EnergyFootprintGroup;
+  energyUsesGroupSummary: EnergyUsesGroupSummary;
   @Input({ required: true })
   facility: IdbFacility;
 
@@ -25,7 +24,7 @@ export class FacilityEnergyUsesGroupSummaryTableComponent {
 
 
   goToEquipment(equipmentGuid: string) {
-    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyFootprintGroup.groupId + '/equipment/' + equipmentGuid);
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyUsesGroupSummary.groupId + '/equipment/' + equipmentGuid);
   }
 
   setOrderDataField(str: string, year: number) {

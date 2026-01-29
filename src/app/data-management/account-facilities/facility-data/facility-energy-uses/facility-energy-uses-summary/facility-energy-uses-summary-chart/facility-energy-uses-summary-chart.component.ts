@@ -1,7 +1,6 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { title } from 'node:process';
-import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
+import { EnergyUsesFacilitySummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -12,7 +11,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class FacilityEnergyUsesSummaryChartComponent {
   @Input({ required: true })
-  energyFootprintFacility: EnergyFootprintFacility;
+  energyUsesFacilitySummary: EnergyUsesFacilitySummary;
   @Input({ required: true })
   facility: IdbFacility;
 
@@ -26,8 +25,8 @@ export class FacilityEnergyUsesSummaryChartComponent {
     this.drawChart()
   }
 
-  ngOnChanges(changes: SimpleChanges){
-    if(changes['energyFootprintFacility'] && !changes['energyFootprintFacility'].firstChange){
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['energyUsesFacilitySummary'] && !changes['energyUsesFacilitySummary'].firstChange) {
       this.drawChart();
     }
   }
@@ -36,10 +35,9 @@ export class FacilityEnergyUsesSummaryChartComponent {
   drawChart() {
     // Prepare x-axis (years) from the totals array (all years in order)
     // Ensure years are sorted and unique integers
-    const years = (this.energyFootprintFacility?.totals?.map(t => t.year) || []).sort((a, b) => a - b);
-
+    const years = (this.energyUsesFacilitySummary?.totals?.map(t => t.year) || []).sort((a, b) => a - b);
     // Prepare traces for each group
-    const data = (this.energyFootprintFacility?.footprintGroupSummaries || []).map(groupSummary => {
+    const data = (this.energyUsesFacilitySummary?.footprintGroupSummaries || []).map(groupSummary => {
       // Ensure annualEnergyUse is sorted by year to match x-axis
       const annuals = years.map(year => {
         const found = groupSummary.annualEnergyUse.find(a => a.year === year);
@@ -59,7 +57,7 @@ export class FacilityEnergyUsesSummaryChartComponent {
 
     var layout = {
       showlegend: true,
-      title:{
+      title: {
         text: `Energy Use Summary for ${this.facility.name}`,
       },
       yaxis: {

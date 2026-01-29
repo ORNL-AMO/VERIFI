@@ -248,7 +248,7 @@
                 <a class="nav-link"
                   [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/footprint'"
                   [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                  <span class="fa fa-shoe-prints"></span> Energy Uses Footprint
+                  <span class="fa fa-paw"></span> Energy Uses Footprint
                 </a>
               </div>
               @for(energyUseGroup of energyUseGroups; track energyUseGroup.guid){
@@ -282,7 +282,7 @@
                   <a class="nav-link"
                     [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/footprint'"
                     [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                    <span class="fa fa-shoe-prints"></span> Group Footprint
+                    <span class="fa fa-paw"></span> Group Footprint
                   </a>
                 </div>
                 @for(energyUseEquipment of groupEquipment; track energyUseEquipment.guid){

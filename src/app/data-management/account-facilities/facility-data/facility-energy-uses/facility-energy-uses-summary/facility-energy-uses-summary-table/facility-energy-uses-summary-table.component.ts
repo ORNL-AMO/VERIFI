@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
+import { EnergyUsesFacilitySummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -11,7 +11,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class FacilityEnergyUsesSummaryTableComponent {
   @Input({ required: true })
-  energyFootprintFacility: EnergyFootprintFacility;
+  energyUsesFacilitySummary: EnergyUsesFacilitySummary;
   @Input({ required: true })
   facility: IdbFacility;
 
