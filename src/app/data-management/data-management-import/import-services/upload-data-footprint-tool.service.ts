@@ -113,7 +113,7 @@ export class UploadDataFootprintToolService {
               // let unitPerYearCol = this.getNextExcelColumn(energyConsumptionCol);
               // let overrideEnergyUseCol = this.getNextExcelColumn(unitPerYearCol);
               utilityEnergyUse.push({ year: year, energyUse: 0, overrideEnergyUse: false })
-            } 
+            }
           });
 
           equipment.utilityData = [{
@@ -189,9 +189,12 @@ export class UploadDataFootprintToolService {
       let existingGroup: IdbFacilityEnergyUseGroup = facilityEnergyUseGroups.find(facilityGroup => { return facilityGroup.name.toLowerCase() == group.name.toLowerCase() });
       if (existingGroup) {
         group.id = existingGroup.id;
+        let oldGuid = group.guid;
+        group.guid = existingGroup.guid;
         //check equipment exists
         fileReference.facilityEnergyUseEquipment.forEach(equipment => {
-          if (equipment.energyUseGroupId == group.guid) {
+          if (equipment.energyUseGroupId == oldGuid) {
+            equipment.energyUseGroupId = existingGroup.guid;
             let groupEquipment: Array<IdbFacilityEnergyUseEquipment> = facilityEnergyUseEquipment.filter(facilityEquipment => { return facilityEquipment.energyUseGroupId == existingGroup.guid });
             let existingEquipment: IdbFacilityEnergyUseEquipment = groupEquipment.find(equip => { return equip.name.toLowerCase() == equipment.name.toLowerCase() });
             if (existingEquipment) {
