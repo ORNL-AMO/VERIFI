@@ -35,10 +35,6 @@ export class DataManagementImportNavigationService {
     } else if (currentNavOption == 'meter-readings' && fileReference.isTemplate) {
       this.goToPage('confirm-predictors', fileReference);
     } else if (currentNavOption == 'select-facility') {
-      this.goToPage('confirm-groups', fileReference);
-    } else if (currentNavOption == 'confirm-groups') {
-      this.goToPage('confirm-equipment', fileReference);
-    } else if (currentNavOption == 'confirm-equipment') {
       this.goToPage('review-and-submit', fileReference);
     }
   }
@@ -72,12 +68,8 @@ export class DataManagementImportNavigationService {
       this.goToPage('meter-readings', fileReference)
     } else if (currentNavOption == 'select-facility') {
       this.goToPage('upload-files', fileReference)
-    } else if (currentNavOption == 'confirm-groups') {
+    } else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
       this.goToPage('select-facility', fileReference)
-    } else if (currentNavOption == 'confirm-equipment') {
-      this.goToPage('confirm-groups', fileReference)
-    } else if(currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate){
-      this.goToPage('confirm-equipment', fileReference)
     }
   }
 
@@ -129,12 +121,8 @@ export class DataManagementImportNavigationService {
     //footprint tool
     else if (currentNavOption == 'select-facility') {
       optionValues = ['upload-files'];
-    } else if (currentNavOption == 'confirm-groups') {
-      optionValues = ['upload-files', 'select-facility'];
-    } else if (currentNavOption == 'confirm-equipment') {
-      optionValues = ['upload-files', 'select-facility', 'confirm-groups'];
     } else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
-      optionValues = ['upload-files', 'select-facility', 'confirm-groups', 'confirm-equipment'];
+      optionValues = ['upload-files', 'select-facility'];
     }
     return optionValues.map(opVal => {
       return this.getGoToOption(opVal)
@@ -165,9 +153,7 @@ export type GoToOptionValue = 'upload-files' |
   'confirm-predictors' |
   'predictor-data' |
   'review-and-submit' |
-  'select-facility' |
-  'confirm-groups' |
-  'confirm-equipment';
+  'select-facility';
 
 export const GoToOptionLabels = {
   'upload-files': 'Upload Files',
@@ -181,7 +167,5 @@ export const GoToOptionLabels = {
   'confirm-predictors': 'Confirm Predictors',
   'predictor-data': 'Predictor Data',
   'review-and-submit': 'Review and Submit',
-  'select-facility': 'Select Facility',
-  'confirm-groups': 'Confirm Groups',
-  'confirm-equipment': 'Confirm Equipment'
+  'select-facility': 'Select Facility'
 }

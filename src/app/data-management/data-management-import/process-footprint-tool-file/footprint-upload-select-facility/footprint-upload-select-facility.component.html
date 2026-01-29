@@ -15,14 +15,14 @@
                         </div>
                     </div>
                 </h4>
-                <p>
-                    Select the facility you would like to import energy use data into from the footprint tool file.
+                <p class="text-center bold">
+                    Select the facility you would like to import energy uses data into from the footprint tool file.
                 </p>
                 <div class="d-flex w-100 justify-content-center">
                     <select class="form-select w-50" [(ngModel)]="fileReference.selectedFacilityId"
                         (change)="setSelectedFacility()">
                         <option [ngValue]="null">-- Select Facility --</option>
-                        @for (facility of facilities; track facility) {
+                        @for (facility of facilities; track facility.guid) {
                         <option [ngValue]="facility.guid">{{facility.name}}</option>
                         }
                     </select>
