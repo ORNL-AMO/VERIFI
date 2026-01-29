@@ -88,6 +88,8 @@ import { ProcessFootprintToolFileComponent } from './data-management-import/proc
 import { FootprintUploadSelectFacilityComponent } from './data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component';
 import { FacilityEnergyUsesSummaryChartComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary-chart/facility-energy-uses-summary-chart.component';
 import { FacilityEnergyUsesGroupSummaryChartComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary-chart/facility-energy-uses-group-summary-chart.component';
+import { FacilityEnergyUsesGroupFootprintComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint.component';
+import { FacilityEnergyUsesFootprintComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-footprint/facility-energy-uses-footprint.component';
 
 @NgModule({
   declarations: [
@@ -165,7 +167,9 @@ import { FacilityEnergyUsesGroupSummaryChartComponent } from './account-faciliti
     FootprintUploadSelectFacilityComponent,
     FacilityEnergyUsesSummaryChartComponent,
     FacilityEnergyUsesGroupSummaryChartComponent,
-    FootprintUploadSelectFacilityComponent
+    FootprintUploadSelectFacilityComponent,
+    FacilityEnergyUsesGroupFootprintComponent,
+    FacilityEnergyUsesFootprintComponent
   ],
   imports: [
     CommonModule,

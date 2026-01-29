@@ -60,6 +60,8 @@ import { FacilityEnergyUsesGroupSetupComponent } from "../data-management/accoun
 import { FacilityEnergyUsesSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary.component";
 import { FacilityEnergyUsesGroupSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component";
 import { FootprintUploadSelectFacilityComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component";
+import { FacilityEnergyUsesGroupFootprintComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint.component";
+import { FacilityEnergyUsesFootprintComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-footprint/facility-energy-uses-footprint.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -244,6 +246,14 @@ export const DataManagementRoutes: Route = {
                                 {
                                     path: ':id/summary',
                                     component: FacilityEnergyUsesGroupSummaryComponent
+                                },
+                                {
+                                    path: ':id/footprint',
+                                    component: FacilityEnergyUsesGroupFootprintComponent
+                                },
+                                {
+                                    path: 'footprint',
+                                    component: FacilityEnergyUsesFootprintComponent
                                 }
                             ]
                         },

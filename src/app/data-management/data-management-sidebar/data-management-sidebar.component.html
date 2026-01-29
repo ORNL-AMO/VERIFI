@@ -235,6 +235,8 @@
                   <span class="fa fa-list"></span> Manage Energy Uses Groups
                 </a>
               </div>
+              @let energyUseGroups = facility.guid | facilityEnergyGroupsList:accountEnergyUseGroups;
+              @if(energyUseGroups.length > 0){
               <div class="ps-2 nav-item">
                 <a class="nav-link"
                   [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/summary'"
@@ -242,46 +244,61 @@
                   <span class="fa fa-chart-simple"></span> Energy Uses Summary
                 </a>
               </div>
-              <ng-container
-                *ngFor="let energyUseGroup of facility.guid | facilityEnergyGroupsList:accountEnergyUseGroups">
+              <div class="ps-2 nav-item">
+                <a class="nav-link"
+                  [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/footprint'"
+                  [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                  <span class="fa fa-shoe-prints"></span> Energy Uses Footprint
+                </a>
+              </div>
+              @for(energyUseGroup of energyUseGroups; track energyUseGroup.guid){
+              <div class="ps-2 nav-item">
+                <a class="nav-link" (click)="toggleEnergyUseGroupOpen(energyUseGroup)"
+                  [ngClass]="{'active': url | sidebarItemActive: 'energy-use': energyUseGroup.guid}">
+                  <span class="fa"
+                    [ngClass]="{'fa-chevron-down': energyUseGroup.sidebarOpen, 'fa-chevron-right': !energyUseGroup.sidebarOpen}"></span>
+                  {{energyUseGroup.name}}
+                </a>
+              </div>
+              @if(energyUseGroup.sidebarOpen){
+              <div class="sidebar-section">
                 <div class="ps-2 nav-item">
-                  <a class="nav-link" (click)="toggleEnergyUseGroupOpen(energyUseGroup)"
-                    [ngClass]="{'active': url | sidebarItemActive: 'energy-use': energyUseGroup.guid}">
-                    <span class="fa"
-                      [ngClass]="{'fa-chevron-down': energyUseGroup.sidebarOpen, 'fa-chevron-right': !energyUseGroup.sidebarOpen}"></span>
-                    {{energyUseGroup.name}}
+                  <a class="nav-link"
+                    [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-gear"></span> Group Settings
                   </a>
                 </div>
-                <div class="sidebar-section" *ngIf="energyUseGroup.sidebarOpen">
-                  <div class="ps-2 nav-item">
-                    <a class="nav-link"
-                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
-                      [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                      <span class="fa fa-gear"></span> Group Settings
-                    </a>
-                  </div>
-                  <div class="ps-2 nav-item">
-                    <a class="nav-link"
-                      [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/summary'"
-                      [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                      <span class="fa fa-chart-simple"></span> Group Summary
-                    </a>
-                  </div>
-                  <ng-container
-                    *ngFor="let energyUseEquipment of energyUseGroup.guid | facilityEnergyEquipmentList:accountEnergyUseEquipment">
-                    <div class="ps-2 nav-item">
-                      <a class="nav-link"
-                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/equipment/'+energyUseEquipment.guid"
-                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                        <span class="fa fa-plug"></span> {{energyUseEquipment.name}}
-                      </a>
-                    </div>
-
-                  </ng-container>
-
+                @let groupEquipment = energyUseGroup.guid | facilityEnergyEquipmentList:accountEnergyUseEquipment;
+                @if(groupEquipment.length > 0){
+                <div class="ps-2 nav-item">
+                  <a class="nav-link"
+                    [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/summary'"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-chart-simple"></span> Group Summary
+                  </a>
                 </div>
-              </ng-container>
-
+                <div class="ps-2 nav-item">
+                  <a class="nav-link"
+                    [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/footprint'"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-shoe-prints"></span> Group Footprint
+                  </a>
+                </div>
+                @for(energyUseEquipment of groupEquipment; track energyUseEquipment.guid){
+                <div class="ps-2 nav-item">
+                  <a class="nav-link"
+                    [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/equipment/'+energyUseEquipment.guid"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-plug"></span> {{energyUseEquipment.name}}
+                  </a>
+                </div>
+                }
+                }
+              </div>
+              }
+              }
+              }
             </div>
           </div>
         </ng-container>
