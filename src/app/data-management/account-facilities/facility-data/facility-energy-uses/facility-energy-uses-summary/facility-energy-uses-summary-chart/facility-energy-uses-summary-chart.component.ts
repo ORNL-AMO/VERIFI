@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { title } from 'node:process';
 import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
@@ -24,6 +24,12 @@ export class FacilityEnergyUsesSummaryChartComponent {
 
   ngAfterViewInit() {
     this.drawChart()
+  }
+
+  ngOnChanges(changes: SimpleChanges){
+    if(changes['energyFootprintFacility'] && !changes['energyFootprintFacility'].firstChange){
+      this.drawChart();
+    }
   }
 
 

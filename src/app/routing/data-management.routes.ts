@@ -234,6 +234,10 @@ export const DataManagementRoutes: Route = {
                                     component: FacilityEnergyUsesSummaryComponent
                                 },
                                 {
+                                    path: 'footprint',
+                                    component: FacilityEnergyUsesFootprintComponent
+                                },
+                                {
                                     path: ':id',
                                     component: FacilityEnergyUseGroupComponent,
                                     canDeactivate: [canDeactivateGuard]
@@ -250,10 +254,6 @@ export const DataManagementRoutes: Route = {
                                 {
                                     path: ':id/footprint',
                                     component: FacilityEnergyUsesGroupFootprintComponent
-                                },
-                                {
-                                    path: 'footprint',
-                                    component: FacilityEnergyUsesFootprintComponent
                                 }
                             ]
                         },

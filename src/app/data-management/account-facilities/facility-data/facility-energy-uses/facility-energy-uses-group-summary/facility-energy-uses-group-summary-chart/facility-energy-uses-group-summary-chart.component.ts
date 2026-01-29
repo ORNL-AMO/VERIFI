@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -25,6 +25,11 @@ export class FacilityEnergyUsesGroupSummaryChartComponent {
     this.drawChart()
   }
 
+  ngOnChanges(changes: SimpleChanges){
+    if(changes['energyFootprintGroup'] && !changes['energyFootprintGroup'].firstChange){
+      this.drawChart();
+    }
+  }
 
   drawChart() {
     // Prepare x-axis (years) from the totals array (all years in order)
