@@ -16,11 +16,11 @@
           </div>
         </h4>
         @if(!dataSubmitted){
-          <div class="d-flex w-100 justify-content-between pt-2 pb-2">
-            <div class="me-2 w-75">
-              <p class="mb-0 fw-light">
-                The below content will be imported into the selected account. Items marked with an <span
-              class="fa fa-asterisk"></span> currently exist in the account and will be updated on
+        <div class="d-flex w-100 justify-content-between pt-2 pb-2">
+          <div class="me-2 w-75">
+            <p class="mb-0 fw-light">
+              The below content will be imported into the selected account. Items marked with an <span
+                class="fa fa-asterisk"></span> currently exist in the account and will be updated on
               import.
             </p>
           </div>
@@ -30,6 +30,8 @@
             </button>
           </div>
         </div>
+        @if(!fileReference.isFootprintToolTemplate){
+        <!--non footprint summary-->
         <div class="row">
           <div class="col-12">
             <table class="table table-bordered table-sm table-hover">
@@ -65,159 +67,215 @@
 
         <div class="row">
           @for (summary of facilitySummaries; track summary) {
-            <div class="col-12">
-              <h5>
-                <i class="fa fa-industry" [ngStyle]="{color: summary.facility.color}"></i>
-                {{summary.facility.name}}
-              </h5>
-              <table class="table table-bordered table-sm table-hover">
-                <tbody>
-                  @if (summary.existingMeters.length > 0 || summary.newMeters.length > 0) {
-                    <tr>
-                      <th class="bg-dark">
-                        Meters
-                      </th>
-                      <th class="bg-dark">
-                        Existing Readings
-                      </th>
-                      <th class="bg-dark">
-                        New Readings
-                      </th>
-                    </tr>
-                    @if (summary.existingMeters.length > 0) {
-                      @for (meterSummary of summary.existingMeters; track meterSummary) {
-                        <tr>
-                          <td class="ps-3">
-                            {{meterSummary.meter.name}} <span class="fa fa-asterisk"></span>
-                          </td>
-                          <td>
-                            {{meterSummary.existingReadings.length}}
-                            @if (meterSummary.existingDateRange.startDate) {
-                              <span>
-                                ({{meterSummary.existingDateRange.startDate | date}} -
-                                {{meterSummary.existingDateRange.endDate | date}})
-                              </span>
-                            }
-                          </td>
-                          <td>
-                            {{meterSummary.newReadings.length}}
-                            @if (meterSummary.newDateRange.startDate) {
-                              <span>
-                                ({{meterSummary.newDateRange.startDate | date}} -
-                                {{meterSummary.newDateRange.endDate | date}})
-                              </span>
-                            }
-                          </td>
-                        </tr>
-                      }
+          <div class="col-12">
+            <h5>
+              <i class="fa fa-industry" [ngStyle]="{color: summary.facility.color}"></i>
+              {{summary.facility.name}}
+            </h5>
+            <table class="table table-bordered table-sm table-hover">
+              <tbody>
+                @if (summary.existingMeters.length > 0 || summary.newMeters.length > 0) {
+                <tr>
+                  <th class="bg-dark">
+                    Meters
+                  </th>
+                  <th class="bg-dark">
+                    Existing Readings
+                  </th>
+                  <th class="bg-dark">
+                    New Readings
+                  </th>
+                </tr>
+                @if (summary.existingMeters.length > 0) {
+                @for (meterSummary of summary.existingMeters; track meterSummary) {
+                <tr>
+                  <td class="ps-3">
+                    {{meterSummary.meter.name}} <span class="fa fa-asterisk"></span>
+                  </td>
+                  <td>
+                    {{meterSummary.existingReadings.length}}
+                    @if (meterSummary.existingDateRange.startDate) {
+                    <span>
+                      ({{meterSummary.existingDateRange.startDate | date}} -
+                      {{meterSummary.existingDateRange.endDate | date}})
+                    </span>
                     }
-                    @if (summary.newMeters.length > 0) {
-                      @for (meterSummary of summary.newMeters; track meterSummary) {
-                        <tr>
-                          <td class="ps-3">
-                            {{meterSummary.meter.name}}
-                          </td>
-                          <td>
-                            &mdash;
-                          </td>
-                          <td>
-                            {{meterSummary.newReadings.length}}
-                            @if (meterSummary.newDateRange.startDate) {
-                              <span>
-                                ({{meterSummary.newDateRange.startDate | date}} -
-                                {{meterSummary.newDateRange.endDate | date}})
-                              </span>
-                            }
-                          </td>
-                        </tr>
-                      }
+                  </td>
+                  <td>
+                    {{meterSummary.newReadings.length}}
+                    @if (meterSummary.newDateRange.startDate) {
+                    <span>
+                      ({{meterSummary.newDateRange.startDate | date}} -
+                      {{meterSummary.newDateRange.endDate | date}})
+                    </span>
                     }
-                  }
-                  @if (summary.existingPredictors.length > 0 || summary.newPredictors.length > 0) {
-                    <tr>
-                      <th class="bg-dark">
-                        Predictors
-                      </th>
-                      <th class="bg-dark">
-                        Existing Readings
-                      </th>
-                      <th class="bg-dark">
-                        New Readings
-                      </th>
-                    </tr>
-                    @if (summary.existingPredictors.length > 0) {
-                      @for (predictorSummary of summary.existingPredictors; track predictorSummary) {
-                        <tr>
-                          <td class="ps-3">
-                            {{predictorSummary.predictor.name}} <span class="fa fa-asterisk"></span>
-                          </td>
-                          <td>
-                            {{predictorSummary.existingReadings.length}}
-                            @if (predictorSummary.existingDateRange.startDate) {
-                              <span>
-                                ({{predictorSummary.existingDateRange.startDate | date}} -
-                                {{predictorSummary.existingDateRange.endDate | date}})
-                              </span>
-                            }
-                          </td>
-                          <td>
-                            {{predictorSummary.newReadings.length}}
-                            @if (predictorSummary.newDateRange.startDate) {
-                              <span>
-                                ({{predictorSummary.newDateRange.startDate | date}} -
-                                {{predictorSummary.newDateRange.endDate | date}})
-                              </span>
-                            }
-                          </td>
-                        </tr>
-                      }
+                  </td>
+                </tr>
+                }
+                }
+                @if (summary.newMeters.length > 0) {
+                @for (meterSummary of summary.newMeters; track meterSummary) {
+                <tr>
+                  <td class="ps-3">
+                    {{meterSummary.meter.name}}
+                  </td>
+                  <td>
+                    &mdash;
+                  </td>
+                  <td>
+                    {{meterSummary.newReadings.length}}
+                    @if (meterSummary.newDateRange.startDate) {
+                    <span>
+                      ({{meterSummary.newDateRange.startDate | date}} -
+                      {{meterSummary.newDateRange.endDate | date}})
+                    </span>
                     }
-                    @if (summary.newPredictors.length > 0) {
-                      @for (predictorSummary of summary.newPredictors; track predictorSummary) {
-                        <tr>
-                          <td class="ps-3">
-                            {{predictorSummary.predictor.name}}
-                          </td>
-                          <td>
-                            &mdash;
-                          </td>
-                          <td>
-                            {{predictorSummary.newReadings.length}}
-                            @if (predictorSummary.newDateRange.startDate) {
-                              <span>
-                                ({{predictorSummary.newDateRange.startDate | date}} -
-                                {{predictorSummary.newDateRange.endDate | date}})
-                              </span>
-                            }
-                          </td>
-                        </tr>
-                      }
+                  </td>
+                </tr>
+                }
+                }
+                }
+                @if (summary.existingPredictors.length > 0 || summary.newPredictors.length > 0) {
+                <tr>
+                  <th class="bg-dark">
+                    Predictors
+                  </th>
+                  <th class="bg-dark">
+                    Existing Readings
+                  </th>
+                  <th class="bg-dark">
+                    New Readings
+                  </th>
+                </tr>
+                @if (summary.existingPredictors.length > 0) {
+                @for (predictorSummary of summary.existingPredictors; track predictorSummary) {
+                <tr>
+                  <td class="ps-3">
+                    {{predictorSummary.predictor.name}} <span class="fa fa-asterisk"></span>
+                  </td>
+                  <td>
+                    {{predictorSummary.existingReadings.length}}
+                    @if (predictorSummary.existingDateRange.startDate) {
+                    <span>
+                      ({{predictorSummary.existingDateRange.startDate | date}} -
+                      {{predictorSummary.existingDateRange.endDate | date}})
+                    </span>
                     }
-                  }
-                </tbody>
-              </table>
-              <hr>
-              </div>
+                  </td>
+                  <td>
+                    {{predictorSummary.newReadings.length}}
+                    @if (predictorSummary.newDateRange.startDate) {
+                    <span>
+                      ({{predictorSummary.newDateRange.startDate | date}} -
+                      {{predictorSummary.newDateRange.endDate | date}})
+                    </span>
+                    }
+                  </td>
+                </tr>
+                }
+                }
+                @if (summary.newPredictors.length > 0) {
+                @for (predictorSummary of summary.newPredictors; track predictorSummary) {
+                <tr>
+                  <td class="ps-3">
+                    {{predictorSummary.predictor.name}}
+                  </td>
+                  <td>
+                    &mdash;
+                  </td>
+                  <td>
+                    {{predictorSummary.newReadings.length}}
+                    @if (predictorSummary.newDateRange.startDate) {
+                    <span>
+                      ({{predictorSummary.newDateRange.startDate | date}} -
+                      {{predictorSummary.newDateRange.endDate | date}})
+                    </span>
+                    }
+                  </td>
+                </tr>
+                }
+                }
+                }
+              </tbody>
+            </table>
+            <hr>
+          </div>
+          }
+        </div>
+        }@else {
+        <!--footprint tool import summary table-->
+        <table class="table table-bordered table-sm table-hover">
+          <thead>
+            <tr>
+              <th>
+                Energy Use Group
+              </th>
+              <th>
+                Number of Equipment
+              </th>
+              <th>
+                New/Existing
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (energyUseGroup of fileReference.facilityEnergyUseGroups; track energyUseGroup.guid) {
+            @let energyUseEquipment = energyUseGroup.guid |
+            facilityEnergyEquipmentList:fileReference.facilityEnergyUseEquipment;
+            <tr>
+              <td class="bold">
+                {{energyUseGroup.name}}
+              </td>
+              <td>
+                {{energyUseEquipment.length}}
+              </td>
+              <td>
+                @if(energyUseGroup.id) {
+                Existing
+                } @else {
+                New
+                }
+              </td>
+            </tr>
+            @if(energyUseEquipment.length != 0) {
+            @for(equipment of energyUseEquipment; track equipment.guid) {
+            <tr>
+              <td class="ps-3" colspan="2">
+                <span class="fa fa-plug"></span>
+                {{equipment.name}}
+              </td>
+              <td>
+                @if(equipment.id) {
+                Existing
+                } @else {
+                New
+                }
+              </td>
+            </tr>
             }
+            }
+            }
+          </tbody>
+        </table>
+        }
+        }@else {
+        <div class="d-flex w-100 flex-column">
+          <div class="alert alert-success">
+            Data has been successfully uploaded to the account! Use the button below to update weather
+            predictor data. If you do not want to do this now, you can update predictors from the
+            account todo list at anytime.
           </div>
-          }@else {
-          <div class="d-flex w-100 flex-column">
-            <div class="alert alert-success">
-              Data has been successfully uploaded to the account! Use the button below to update weather
-              predictor data. If you do not want to do this now, you can update predictors from the
-              account todo list at anytime.
-            </div>
-            <div class="w-100 text-center">
-              <button class="btn btn-outline mb-2" (click)="openWeatherPredictorModal()">
-                <span class="fa fa-temperature-half"></span>
-                Update Weather Predictors
-              </button>
-              <button class="btn btn-outline mb-2 ms-2" (click)="finishSubmit()">
-                <span class="fa fa-refresh"></span>
-                Upload Another File
-              </button>
-            </div>
+          <div class="w-100 text-center">
+            <button class="btn btn-outline mb-2" (click)="openWeatherPredictorModal()">
+              <span class="fa fa-temperature-half"></span>
+              Update Weather Predictors
+            </button>
+            <button class="btn btn-outline mb-2 ms-2" (click)="finishSubmit()">
+              <span class="fa fa-refresh"></span>
+              Upload Another File
+            </button>
           </div>
+        </div>
         }
       </div>
     </div>
@@ -225,11 +283,11 @@
 </div>
 
 @if(!dataSubmitted){
-  <app-data-management-import-footer [fileReference]="fileReference" [navOption]="'review-and-submit'"
+<app-data-management-import-footer [fileReference]="fileReference" [navOption]="'review-and-submit'"
   (emitSubmit)="submitImport()"></app-data-management-import-footer>
 }
 
 @if (displayUpdatePredictorModal) {
-  <app-update-weather-predictors-modal
-  (emitClose)="hideWeatherPredictorModal()" [fileReference]="fileReference"></app-update-weather-predictors-modal>
+<app-update-weather-predictors-modal (emitClose)="hideWeatherPredictorModal()"
+  [fileReference]="fileReference"></app-update-weather-predictors-modal>
 }

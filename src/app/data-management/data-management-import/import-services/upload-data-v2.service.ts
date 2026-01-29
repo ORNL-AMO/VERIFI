@@ -49,7 +49,10 @@ export class UploadDataV2Service {
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
       let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
       let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
-      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
+      return {
+        importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: importPredictors, predictorData: importPredictorData,
+        meterData: importMeterData, newGroups: importMetersAndGroups.newGroups, energyUseEquipment: [], energyUseGroups: []
+      }
     }
   }
 
