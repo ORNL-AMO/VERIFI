@@ -1,4 +1,5 @@
-@let energyFootprintGroupOrdered = energyFootprintGroup | orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
+@let energyFootprintGroupOrdered = energyFootprintGroup |
+orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
@@ -32,8 +33,10 @@
                 </a>
             </td>
             @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
-            <td>{{annualEnergyUse.energyUse| number:'1.0-2'}}</td>
-            <td>{{annualEnergyUse.percentOfTotal| number:'1.0-2'}}</td>
+            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
+                {{annualEnergyUse.energyUse| number:'1.0-2'}}</td>
+            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
+                {{annualEnergyUse.percentOfTotal| number:'1.0-2'}}</td>
             }
         </tr>
         }
