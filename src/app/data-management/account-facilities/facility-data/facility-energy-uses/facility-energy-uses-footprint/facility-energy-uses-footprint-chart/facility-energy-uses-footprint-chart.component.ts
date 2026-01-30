@@ -1,26 +1,27 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
+import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facility-energy-uses-group-footprint-chart',
+  selector: 'app-facility-energy-uses-footprint-chart',
   standalone: false,
-  templateUrl: './facility-energy-uses-group-footprint-chart.component.html',
-  styleUrl: './facility-energy-uses-group-footprint-chart.component.css',
+  templateUrl: './facility-energy-uses-footprint-chart.component.html',
+  styleUrl: './facility-energy-uses-footprint-chart.component.css',
 })
-export class FacilityEnergyUsesGroupFootprintChartComponent {
+export class FacilityEnergyUsesFootprintChartComponent {
   @Input({ required: true })
-  energyFootprintGroup: EnergyFootprintGroup;
+  energyFootprintFacility: EnergyFootprintFacility;
   @Input({ required: true })
   facility: IdbFacility;
   @Input({ required: true })
   chartType: 'source' | 'meterGroup';
   @Input()
-  source: MeterSource;
-  @Input()
   groupId: string;
+  @Input()
+  source: MeterSource;
+
 
   @ViewChild('summaryChart', { static: false }) summaryChart: ElementRef;
 
@@ -33,7 +34,10 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['energyFootprintGroup'] && !changes['energyFootprintGroup'].firstChange) {
+    if (changes['energyFootprintFacility'] && !changes['energyFootprintFacility'].firstChange) {
+      this.drawChart();
+    }
+    if (changes['chartType'] && !changes['chartType'].firstChange) {
       this.drawChart();
     }
   }
@@ -47,40 +51,38 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
   }
 
   drawSourceChart() {
-    if (this.summaryChart && this.energyFootprintGroup) {
-      // Only show the first source for now (can be extended to allow user selection)
-      const sources = this.energyFootprintGroup.includedSourcesAnnualResults || [];
-      if (!sources.length) return;
-      const sourceResult = sources.find(s => s.source === this.source);
-      const years = Array.from(new Set(sourceResult.annualSourceResults.map(r => r.year))).sort((a, b) => a - b);
-      const equipmentNames = Array.from(new Set(sourceResult.annualSourceResults.flatMap(r => r.equipmentEnergyUse.map(e => e.equipmentName))));
+    if (this.summaryChart && this.energyFootprintFacility) {
+      let sourceResult = this.energyFootprintFacility.includedSourcesAnnualResults.find(s => s.source == this.source);
+      if (!sourceResult) { return; }
 
-      // Prepare traces for each equipment (horizontal bar)
-      const traces = equipmentNames.map(equipmentName => {
+      // Ensure years are sorted and unique integers
+      const years = (sourceResult.annualTotals?.map(t => t.year) || []).sort((a, b) => a - b);
+      // Prepare traces for each group (horizontal bar)
+      const traces = sourceResult.groupResults.map(equipmentSummary => {
         const x = years.map(year => {
-          const yearResult = sourceResult.annualSourceResults.find(r => r.year === year);
+          const yearResult = equipmentSummary.annualSourceResults.find(r => r.year === year);
           if (!yearResult) return 0;
-          const eq = yearResult.equipmentEnergyUse.find(e => e.equipmentName === equipmentName);
-          return eq ? eq.energyUse : 0;
+          const totalEquipmentUse = yearResult.equipmentEnergyUse.reduce((sum, e) => sum + (e.energyUse || 0), 0);
+          return totalEquipmentUse;
         });
         return {
           y: years.map(y => y.toString()),
           x: x,
-          name: equipmentName,
+          name: equipmentSummary.groupName,
           orientation: 'h',
           type: 'bar',
           marker: { color: undefined },
-          hovertemplate: `${equipmentName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+          hovertemplate: `${equipmentSummary.groupName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
           visible: undefined
         };
       });
 
       // Prepare trace for unaccounted energy use
       const unaccountedX = years.map(year => {
-        const yearResult = sourceResult.annualSourceResults.find(r => r.year === year);
+        const yearResult = sourceResult.annualTotals.find(r => r.year === year);
         if (!yearResult) return 0;
-        const total = yearResult.totalSourceEnergyUse || 0;
-        const equipmentTotal = yearResult.equipmentEnergyUse.reduce((sum, e) => sum + (e.energyUse || 0), 0);
+        const total = yearResult.totalFacilityEnergyUse || 0;
+        const equipmentTotal = yearResult.totalEquipmentEnergyUse || 0;
         return Math.max(0, total - equipmentTotal);
       });
       traces.push({
@@ -94,11 +96,11 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
         visible: 'legendonly',
       });
 
-       const layout = {
+      const layout = {
         barmode: 'stack',
         showlegend: true,
         title: {
-          text: `${this.source} Energy Use by Equipment`,
+          text: `${this.source} Energy Use by Equipment Group`,
         },
         xaxis: {
           title: {
@@ -130,32 +132,27 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
   }
 
   drawMeterGroupChart() {
+    if (this.summaryChart && this.energyFootprintFacility) {
+      let groupResult = this.energyFootprintFacility.meterGroupsAnnualResults.find(g => g.meterGroupId == this.groupId);
+      if (!groupResult) { return; }
 
-    if (this.summaryChart && this.energyFootprintGroup) {
-      // Only show the selected meter group (by groupId)
-      const meterGroups = this.energyFootprintGroup.meterGroupsAnnualResults || [];
-      if (!meterGroups.length) return;
-      const groupResult = meterGroups.find(g => g.meterGroupId === this.groupId);
-      if (!groupResult) return;
-      const years = Array.from(new Set(groupResult.annualResults.map(r => r.year))).sort((a, b) => a - b);
-      const equipmentNames = Array.from(new Set(groupResult.annualResults.flatMap(r => r.equipmentEnergyUse.map(e => e.equipmentName))));
-
-      // Prepare traces for each equipment (horizontal bar)
-      const traces = equipmentNames.map(equipmentName => {
+      // Ensure years are sorted and unique integers
+      const years = (groupResult.annualResults?.map(t => t.year) || []).sort((a, b) => a - b);
+      // Prepare traces for each group (horizontal bar)
+      const traces = groupResult.energyUseGroupAnnualResults.map(equipmentSummary => {
         const x = years.map(year => {
-          const yearResult = groupResult.annualResults.find(r => r.year === year);
+          const yearResult = equipmentSummary.annualResults.find(r => r.year === year);
           if (!yearResult) return 0;
-          const eq = yearResult.equipmentEnergyUse.find(e => e.equipmentName === equipmentName);
-          return eq ? eq.energyUse : 0;
+          return yearResult.energyUse || 0;
         });
         return {
           y: years.map(y => y.toString()),
           x: x,
-          name: equipmentName,
+          name: equipmentSummary.groupName,
           orientation: 'h',
           type: 'bar',
           marker: { color: undefined },
-          hovertemplate: `${equipmentName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+          hovertemplate: `${equipmentSummary.groupName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
           visible: undefined
         };
       });
@@ -165,7 +162,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
         const yearResult = groupResult.annualResults.find(r => r.year === year);
         if (!yearResult) return 0;
         const total = yearResult.includedMetersEnergyUse || 0;
-        const equipmentTotal = yearResult.equipmentEnergyUse.reduce((sum, e) => sum + (e.energyUse || 0), 0);
+        const equipmentTotal = yearResult.totalEquipmentEnergyUse || 0;
         return Math.max(0, total - equipmentTotal);
       });
       traces.push({
@@ -183,7 +180,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
         barmode: 'stack',
         showlegend: true,
         title: {
-          text: `${groupResult.meterGroupName} Energy Use by Equipment`,
+          text: `${groupResult.meterGroupName} Energy Use by Equipment Group`,
         },
         xaxis: {
           title: {
@@ -212,6 +209,6 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
       };
       this.plotlyService.newPlot(this.summaryChart.nativeElement, traces, layout, config);
     }
-
   }
+
 }

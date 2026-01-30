@@ -1,28 +1,39 @@
-<h4>{{energyUseGroup?.name}} Footprint</h4>
+@if(energyFootprintGroup.meterGroupsAnnualResults.length > 0){
+<h4>{{energyUseGroup?.name}} Footprint By Meter Groups</h4>
+<app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
+    [tableType]="'meterGroup'">
+</app-facility-energy-uses-group-footprint-table>
+<hr>
+<div class="row justify-content-center">
+    @for(groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
+    <div class="col-12">
+        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
+            [facility]="facility" [chartType]="'meterGroup'"
+            [groupId]="groupResult.meterGroupId"></app-facility-energy-uses-group-footprint-chart>
+    </div>
+    @if($index < energyFootprintGroup.meterGroupsAnnualResults.length - 1){ <hr>
+        }
+        }
+</div>
+}@else {
+<h4>{{energyUseGroup?.name}} Footprint Utility Source</h4>
+<div class="alert alert-warning text-center">
+    No meter groups have been linked to the equipment in this energy use group. Data below is being compared to the
+    entire
+    facility.
+</div>
 <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
     [tableType]="'source'">
 </app-facility-energy-uses-group-footprint-table>
+<hr>
 <div class="row justify-content-center">
     @for(sourceResult of energyFootprintGroup.includedSourcesAnnualResults; track $index){
-    <div class="col">
+    <div class="col-12">
         <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
             [facility]="facility" [chartType]="'source'"
             [source]="sourceResult.source"></app-facility-energy-uses-group-footprint-chart>
     </div>
     }
 </div>
-<hr>
-@if(energyFootprintGroup.meterGroupsAnnualResults.length > 0){
-<app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
-    [tableType]="'meterGroup'">
-</app-facility-energy-uses-group-footprint-table>
-<div class="row justify-content-center">
-    @for(groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
-    <div class="col">
-        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
-            [facility]="facility" [chartType]="'meterGroup'"
-            [groupId]="groupResult.meterGroupId"></app-facility-energy-uses-group-footprint-chart>
-    </div>
-    }
-</div>
+
 }

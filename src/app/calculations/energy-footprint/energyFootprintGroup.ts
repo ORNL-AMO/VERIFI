@@ -7,6 +7,7 @@ import { ConvertValue } from "../conversions/convertValue";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
+import { AnnualFootprintGroupSourceResult } from "./energyFootprintModels";
 
 export class EnergyFootprintGroup {
 
@@ -18,25 +19,33 @@ export class EnergyFootprintGroup {
     meterGroups: Array<{ guid: string, name: string }>;
     includedSourcesAnnualResults: Array<{
         source: MeterSource,
-        annualSourceResults: Array<AnnualFootprintGroupSourceResult>
+        annualSourceResults: Array<AnnualFootprintGroupSourceResult>,
+        equipmentAnnualResults: Array<{
+            equipmentGuid: string,
+            equipmentName: string,
+            annualResults: Array<{
+                year: number,
+                energyUse: number,
+                percentOfTotal: number
+            }>
+        }>;
     }> = [];
 
     meterGroupsAnnualResults: Array<{
         meterGroupId: string,
         meterGroupName: string,
-        annualResults: Array<AnnualFootprintGroupSourceResult>
-        // {
-        //     year: number,
-        //     totalEquipmentEnergyUse: number,
-        //     equipmentEnergyUse: Array<{
-        //         equipmentGuid: string,
-        //         equipmentName: string,
-        //         energyUse: number,
-        //         percentOfTotal: number
-        //     }>,
-        //     percentOfTotalEnergyUse: number
-        // }>
+        annualResults: Array<AnnualFootprintGroupSourceResult>,
+        equipmentAnnualResults: Array<{
+            equipmentGuid: string,
+            equipmentName: string,
+            annualResults: Array<{
+                year: number,
+                energyUse: number,
+                percentOfTotal: number
+            }>
+        }>;
     }> = [];
+
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility,
         calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroups: Array<IdbUtilityMeterGroup>
@@ -50,7 +59,7 @@ export class EnergyFootprintGroup {
 
         this.setIncludedSources();
         this.setIncludedSourcesAnnualResults(groupCalanderizedMeters, years, facility, calanderizedMeters);
-        this.setMeterGroupsAnnualResults(groupCalanderizedMeters, years, facility);
+        this.setMeterGroupsAnnualResults(calanderizedMeters, years, facility);
         this.orderResults();
     }
 
@@ -132,9 +141,55 @@ export class EnergyFootprintGroup {
                     equipmentEnergyUse: equipmentEnergyUse
                 });
             });
+
+            let equipmentAnnualResults: Array<{
+                equipmentGuid: string,
+                equipmentName: string,
+                annualResults: Array<{
+                    year: number,
+                    energyUse: number,
+                    percentOfTotal: number
+                }>
+            }> = new Array();
+            this.groupEquipment.forEach(equip => {
+                let equipmentInSource: boolean = false;
+                equip.utilityData.forEach(ud => {
+                    if (ud.energySource == source) {
+                        equipmentInSource = true;
+                    }
+                });
+                if (equipmentInSource) {
+                    let equipAnnualResults: Array<{
+                        year: number,
+                        energyUse: number,
+                        percentOfTotal: number
+                    }> = new Array();
+                    annualSourceResults.forEach(asr => {
+                        let equipEnergyUseData = asr.equipmentEnergyUse.find(eu => eu.equipmentGuid == equip.guid);
+                        let energyUse: number = 0;
+                        let percentOfTotal: number = 0;
+                        if (equipEnergyUseData) {
+                            energyUse = equipEnergyUseData.energyUse;
+                            percentOfTotal = (energyUse / asr.totalSourceEnergyUse) * 100;
+                        }
+                        equipAnnualResults.push({
+                            year: asr.year,
+                            energyUse: energyUse,
+                            percentOfTotal: percentOfTotal
+                        });
+                    });
+                    equipmentAnnualResults.push({
+                        equipmentGuid: equip.guid,
+                        equipmentName: equip.name,
+                        annualResults: equipAnnualResults
+                    });
+                }
+            });
+
             this.includedSourcesAnnualResults.push({
                 source: source,
-                annualSourceResults: annualSourceResults
+                annualSourceResults: annualSourceResults,
+                equipmentAnnualResults: equipmentAnnualResults
             });
         });
     }
@@ -143,17 +198,6 @@ export class EnergyFootprintGroup {
         this.meterGroupsAnnualResults = new Array();
         this.meterGroups.forEach(meterGroup => {
             let annualResults: Array<AnnualFootprintGroupSourceResult> = new Array();
-            // {
-            //     year: number,
-            //     totalEquipmentEnergyUse: number,
-            //     equipmentEnergyUse: Array<{
-            //         equipmentGuid: string,
-            //         equipmentName: string,
-            //         energyUse: number,
-            //         percentOfTotal: number
-            //     }>,
-            //     percentOfTotalEnergyUse: number
-            // }> = new Array();
             years.forEach(year => {
                 let groupMeters: Array<CalanderizedMeter> = groupCalanderizedMeters.filter(cm => cm.meter.groupId == meterGroup.guid);
                 let monthlyDataForGroupAndYear: Array<MonthlyData> = groupMeters.flatMap(cm => cm.monthlyData.filter(md => md.year == year));
@@ -204,14 +248,52 @@ export class EnergyFootprintGroup {
                     percentIncludedEnergyUse: percentIncludedEnergyUse
                 });
             });
+
+            let equipmentAnnualResults: Array<{
+                equipmentGuid: string,
+                equipmentName: string,
+                annualResults: Array<{
+                    year: number,
+                    energyUse: number,
+                    percentOfTotal: number
+                }>
+            }> = new Array();
+            this.groupEquipment.forEach(equip => {
+                if (equip.utilityMeterGroupId == meterGroup.guid) {
+                    let equipAnnualResults: Array<{
+                        year: number,
+                        energyUse: number,
+                        percentOfTotal: number
+                    }> = new Array();
+                    annualResults.forEach(ar => {
+                        let equipEnergyUseData = ar.equipmentEnergyUse.find(eu => eu.equipmentGuid == equip.guid);
+                        let energyUse: number = 0;
+                        let percentOfTotal: number = 0;
+                        if (equipEnergyUseData) {
+                            energyUse = equipEnergyUseData.energyUse;
+                            percentOfTotal = (energyUse / ar.includedMetersEnergyUse) * 100;
+                        }
+                        equipAnnualResults.push({
+                            year: ar.year,
+                            energyUse: energyUse,
+                            percentOfTotal: percentOfTotal
+                        });
+                    });
+                    equipmentAnnualResults.push({
+                        equipmentGuid: equip.guid,
+                        equipmentName: equip.name,
+                        annualResults: equipAnnualResults
+                    });
+                }
+            });
             this.meterGroupsAnnualResults.push({
                 meterGroupId: meterGroup.guid,
                 meterGroupName: meterGroup.name,
-                annualResults: annualResults
+                annualResults: annualResults,
+                equipmentAnnualResults: equipmentAnnualResults
             });
         });
     }
-
 
     orderResults() {
         this.includedSourcesAnnualResults.forEach(sourceResults => {
@@ -232,26 +314,16 @@ export class EnergyFootprintGroup {
                 let cMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.groupId == equip.utilityMeterGroupId);
                 let cMeterIds: Array<string> = cMeters.map(cm => cm.meter.guid);
                 groupMetersIds = groupMetersIds.concat(cMeterIds);
+            } else {
+                this.meterGroups.push({ guid: '', name: 'Ungrouped' });
             }
         });
         let uniqueGroupMeterIds: Array<string> = _.uniq(groupMetersIds);
         let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => uniqueGroupMeterIds.includes(cm.meter.guid));
         this.meterGroups = _.uniqBy(this.meterGroups, 'guid');
+        if (this.meterGroups.length == 1 && this.meterGroups[0].guid == '') {
+            this.meterGroups = [];
+        }
         return groupMeters;
     }
-}
-
-export interface AnnualFootprintGroupSourceResult {
-    year: number,
-    includedMetersEnergyUse: number,
-    totalSourceEnergyUse: number,
-    totalEquipmentEnergyUse: number,
-    percentIncludedEnergyUse: number,
-    percentTotalEnergyUse: number,
-    equipmentEnergyUse: Array<{
-        equipmentGuid: string,
-        equipmentName: string,
-        energyUse: number,
-        percentOfTotal: number
-    }>,
 }
