@@ -27,8 +27,9 @@ orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
     <tbody>
         @for (groupData of energyUsesGroupSummaryOrdered.equipmentAnnualEnergyUse; track $index){
         <tr>
-            <td>
+            <td class="nowrap">
                 <a class="click-link" (click)="goToEquipment(groupData.equipmentGuid)">
+                    <span class="fa fa-plug"></span>
                     {{groupData.equipmentName}}
                 </a>
             </td>

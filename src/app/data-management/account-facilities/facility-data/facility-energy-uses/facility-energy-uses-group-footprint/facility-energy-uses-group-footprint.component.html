@@ -1,5 +1,33 @@
-@if(energyFootprintGroup.meterGroupsAnnualResults.length > 0){
-<h4>{{energyUseGroup?.name}} Footprint By Meter Groups</h4>
+<h4>
+    <div class="d-flex w-100 justify-content-between align-items-center">
+        <div class="h4 mt-auto mb-0">
+            {{energyUseGroup?.name}} Footprint
+        </div>
+        <div class="d-flex">
+            <button class="btn action-btn" (click)="goToFacilityFootprint()">
+                <span class="fa fa-paw"></span>
+                View Facility Footprint
+            </button>
+        </div>
+
+        <div class="d-flex">
+            <label class="switch" for="dataType">
+                <input class="checkbox" type="checkbox" id="dataType" [(ngModel)]="dataTypeMeterGroup" name="dataType">
+                <span class="slider round"></span>
+            </label>
+            <div class="ps-1 my-auto">
+                Show by Meter Group
+            </div>
+        </div>
+    </div>
+</h4>
+@let dataType = dataTypeMeterGroup ? 'meterGroup' : 'source';
+@if(dataType == 'meterGroup'){
+@if(energyFootprintGroup.meterGroupsAnnualResults.length == 0){
+<div class="alert alert-warning text-center">
+    No meter groups have been linked to the equipment in this energy use group.
+</div>
+}@else{
 <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
     [tableType]="'meterGroup'">
 </app-facility-energy-uses-group-footprint-table>
@@ -15,13 +43,8 @@
         }
         }
 </div>
+}
 }@else {
-<h4>{{energyUseGroup?.name}} Footprint Utility Source</h4>
-<div class="alert alert-warning text-center">
-    No meter groups have been linked to the equipment in this energy use group. Data below is being compared to the
-    entire
-    facility.
-</div>
 <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
     [tableType]="'source'">
 </app-facility-energy-uses-group-footprint-table>

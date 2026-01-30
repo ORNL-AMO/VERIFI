@@ -13,9 +13,13 @@ td.nowrap {
 }
 
 td{
-    background-color: #bfc9ca;
+    /* background-color: #bfc9ca; */
 }
 
 td:not(:first-child) {
     text-align: right;
+}
+
+.fa.fa-chevron-right, .fa.fa-chevron-down {
+    color: white;
 }

@@ -50,8 +50,10 @@
         @for(equipmentResult of sourceResult.equipmentAnnualResults; track $index){
         <tr>
             <td class="ps-3 nowrap">
-                <span class="fa fa-plug"></span>
-                {{equipmentResult.equipmentName}}
+                <a class="click-link" (click)="goToEquipment(equipmentResult.equipmentGuid)">
+                    <span class="fa fa-plug"></span>
+                    {{equipmentResult.equipmentName}}
+                </a>
             </td>
             @for(annualResult of equipmentResult.annualResults; track $index){
             <td class="fill-cell" [ngStyle]="{'background-size': annualResult.percentOfTotal + '% 100%'}">

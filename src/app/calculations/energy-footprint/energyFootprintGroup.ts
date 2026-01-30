@@ -13,6 +13,7 @@ export class EnergyFootprintGroup {
 
     groupName: string;
     groupId: string;
+    color: string;
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
     includedSources: Array<MeterSource>;
 
@@ -23,6 +24,7 @@ export class EnergyFootprintGroup {
         equipmentAnnualResults: Array<{
             equipmentGuid: string,
             equipmentName: string,
+            color: string
             annualResults: Array<{
                 year: number,
                 energyUse: number,
@@ -38,6 +40,7 @@ export class EnergyFootprintGroup {
         equipmentAnnualResults: Array<{
             equipmentGuid: string,
             equipmentName: string,
+            color: string,
             annualResults: Array<{
                 year: number,
                 energyUse: number,
@@ -52,6 +55,7 @@ export class EnergyFootprintGroup {
     ) {
         this.groupName = group.name;
         this.groupId = group.guid;
+        this.color = group.color;
         this.groupEquipment = equipment.filter(equip => equip.energyUseGroupId == group.guid);
         let groupCalanderizedMeters: Array<CalanderizedMeter> = this.getGroupCalanderizedMeters(calanderizedMeters, utilityMeterGroups);
         let years: Array<number> = this.groupEquipment.flatMap(equip => equip.operatingConditionsData.map(data => data.year));
@@ -145,6 +149,7 @@ export class EnergyFootprintGroup {
             let equipmentAnnualResults: Array<{
                 equipmentGuid: string,
                 equipmentName: string,
+                color: string,
                 annualResults: Array<{
                     year: number,
                     energyUse: number,
@@ -181,6 +186,7 @@ export class EnergyFootprintGroup {
                     equipmentAnnualResults.push({
                         equipmentGuid: equip.guid,
                         equipmentName: equip.name,
+                        color: equip.color,
                         annualResults: equipAnnualResults
                     });
                 }
@@ -252,6 +258,7 @@ export class EnergyFootprintGroup {
             let equipmentAnnualResults: Array<{
                 equipmentGuid: string,
                 equipmentName: string,
+                color: string,
                 annualResults: Array<{
                     year: number,
                     energyUse: number,
@@ -282,6 +289,7 @@ export class EnergyFootprintGroup {
                     equipmentAnnualResults.push({
                         equipmentGuid: equip.guid,
                         equipmentName: equip.name,
+                        color: equip.color,
                         annualResults: equipAnnualResults
                     });
                 }

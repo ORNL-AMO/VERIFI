@@ -71,7 +71,7 @@ export class FacilityEnergyUsesFootprintChartComponent {
           name: equipmentSummary.groupName,
           orientation: 'h',
           type: 'bar',
-          marker: { color: undefined },
+          marker: { color: equipmentSummary.color || undefined },
           hovertemplate: `${equipmentSummary.groupName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
           visible: undefined
         };
@@ -151,7 +151,7 @@ export class FacilityEnergyUsesFootprintChartComponent {
           name: equipmentSummary.groupName,
           orientation: 'h',
           type: 'bar',
-          marker: { color: undefined },
+          marker: { color: equipmentSummary.color || undefined },
           hovertemplate: `${equipmentSummary.groupName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
           visible: undefined
         };

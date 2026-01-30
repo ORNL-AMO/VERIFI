@@ -31,6 +31,7 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   energyUseGroup: IdbFacilityEnergyUseGroup;
   facility: IdbFacility;
   facilitySub: Subscription;
+  dataTypeMeterGroup: boolean = false;
   constructor(private activatedRoute: ActivatedRoute,
     private facilityDbService: FacilitydbService,
     private router: Router,
@@ -66,8 +67,7 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   }
 
   goToGroupList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses');
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
   }
 
   setEnergyFootprintGroup() {
@@ -79,7 +79,10 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   }
 
   goToEquipment(equipmentGuid: string) {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + equipmentGuid);
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + equipmentGuid);
+  }
+
+  goToFacilityFootprint(){
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/footprint');
   }
 }

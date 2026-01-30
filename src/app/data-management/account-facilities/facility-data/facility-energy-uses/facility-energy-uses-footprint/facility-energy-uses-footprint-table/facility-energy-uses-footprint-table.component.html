@@ -34,7 +34,9 @@
     <tbody>
         @for (sourceResult of energyFootprintFacility.includedSourcesAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap">
+            <td class="nowrap" (click)="toggleCollapseGroup($index)">
+                <span class="fa"
+                    [ngClass]="{'fa-chevron-right': !sourceResult.showGroupResults, 'fa-chevron-down': sourceResult.showGroupResults}"></span>
                 {{sourceResult.source}}
             </td>
             @for(annualEnergyUse of sourceResult.annualTotals; track $index){
@@ -45,6 +47,7 @@
                 {{annualEnergyUse.percentOfFacilityUse| number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        @if(sourceResult.showGroupResults){
         @for(groupResult of sourceResult.groupResults; track $index){
         <tr>
             <td class="ps-3 nowrap">
@@ -62,6 +65,7 @@
                 {{annualResult.percentTotalEnergyUse | number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        }
         }
         }
     </tbody>

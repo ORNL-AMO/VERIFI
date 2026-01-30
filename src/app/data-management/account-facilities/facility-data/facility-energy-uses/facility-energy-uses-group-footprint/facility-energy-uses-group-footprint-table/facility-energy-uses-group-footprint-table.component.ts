@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -25,7 +26,9 @@ export class FacilityEnergyUsesGroupFootprintTableComponent {
 
   meters: Array<IdbUtilityMeter>;
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService){}
+  constructor(private utilityMeterDbService: UtilityMeterdbService,
+    private router: Router
+  ){}
 
   ngOnInit(){
     this.meters = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facility.guid);
@@ -42,5 +45,9 @@ export class FacilityEnergyUsesGroupFootprintTableComponent {
       this.orderByField = str;
       this.orderByYear = year;
     }
+  }
+
+  goToEquipment(equipmentGuid: string) {
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyFootprintGroup.groupId + '/equipment/' + equipmentGuid);
   }
 }

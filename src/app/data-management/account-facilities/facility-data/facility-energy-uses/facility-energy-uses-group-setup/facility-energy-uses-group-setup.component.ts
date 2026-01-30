@@ -104,7 +104,8 @@ export class FacilityEnergyUsesGroupSetupComponent {
         sidebarOpen: false,
         modifiedDate: group.modifiedDate,
         createdDate: group.createdDate,
-        id: group.id
+        id: group.id,
+        color: group.color
       };
       if (!newGroup.id) {
         delete newGroup.id;

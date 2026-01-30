@@ -42,4 +42,8 @@ export class FacilityEnergyUsesFootprintTableComponent {
     let facilityEnergyUseGroup: IdbFacilityEnergyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupGuid);
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + facilityEnergyUseGroup.guid + '/footprint');
   }
+
+  toggleCollapseGroup(index: number) {
+    this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults = !this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults;
+  }
 }

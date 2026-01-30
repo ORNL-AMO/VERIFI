@@ -53,24 +53,26 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
       if (!sources.length) return;
       const sourceResult = sources.find(s => s.source === this.source);
       const years = Array.from(new Set(sourceResult.annualSourceResults.map(r => r.year))).sort((a, b) => a - b);
-      const equipmentNames = Array.from(new Set(sourceResult.annualSourceResults.flatMap(r => r.equipmentEnergyUse.map(e => e.equipmentName))));
+      const equipmentGuid = Array.from(new Set(sourceResult.annualSourceResults.flatMap(r => r.equipmentEnergyUse.map(e => e.equipmentGuid))));
 
       // Prepare traces for each equipment (horizontal bar)
-      const traces = equipmentNames.map(equipmentName => {
+      const traces = equipmentGuid.map(guid => {
         const x = years.map(year => {
           const yearResult = sourceResult.annualSourceResults.find(r => r.year === year);
           if (!yearResult) return 0;
-          const eq = yearResult.equipmentEnergyUse.find(e => e.equipmentName === equipmentName);
+          const eq = yearResult.equipmentEnergyUse.find(e => e.equipmentGuid === guid);
           return eq ? eq.energyUse : 0;
         });
+        let equipment = this.energyFootprintGroup.groupEquipment.find(e => e.guid === guid);
+
         return {
           y: years.map(y => y.toString()),
           x: x,
-          name: equipmentName,
+          name: equipment?.name || 'Unknown',
           orientation: 'h',
           type: 'bar',
-          marker: { color: undefined },
-          hovertemplate: `${equipmentName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+          marker: { color: equipment?.color || undefined },
+          hovertemplate: `${equipment?.name || 'Unknown'}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
           visible: undefined
         };
       });
@@ -138,24 +140,25 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
       const groupResult = meterGroups.find(g => g.meterGroupId === this.groupId);
       if (!groupResult) return;
       const years = Array.from(new Set(groupResult.annualResults.map(r => r.year))).sort((a, b) => a - b);
-      const equipmentNames = Array.from(new Set(groupResult.annualResults.flatMap(r => r.equipmentEnergyUse.map(e => e.equipmentName))));
+      const equipmentGuids = Array.from(new Set(groupResult.annualResults.flatMap(r => r.equipmentEnergyUse.map(e => e.equipmentGuid))));
 
       // Prepare traces for each equipment (horizontal bar)
-      const traces = equipmentNames.map(equipmentName => {
+      const traces = equipmentGuids.map(guid => {
         const x = years.map(year => {
           const yearResult = groupResult.annualResults.find(r => r.year === year);
           if (!yearResult) return 0;
-          const eq = yearResult.equipmentEnergyUse.find(e => e.equipmentName === equipmentName);
+          const eq = yearResult.equipmentEnergyUse.find(e => e.equipmentGuid === guid);
           return eq ? eq.energyUse : 0;
         });
+        let equipment = this.energyFootprintGroup.groupEquipment.find(e => e.guid === guid);
         return {
           y: years.map(y => y.toString()),
           x: x,
-          name: equipmentName,
+          name: equipment?.name || 'Unknown',
           orientation: 'h',
           type: 'bar',
           marker: { color: undefined },
-          hovertemplate: `${equipmentName}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+          hovertemplate: `${equipment?.name || 'Unknown'}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
           visible: undefined
         };
       });

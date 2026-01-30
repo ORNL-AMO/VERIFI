@@ -13,9 +13,11 @@ export class EnergyFootprintFacility {
     footprintGroups: Array<EnergyFootprintGroup> = [];
     includedSourcesAnnualResults: Array<{
         source: MeterSource,
+        showGroupResults: boolean,
         groupResults: Array<{
             groupName: string,
             groupId: string,
+            color: string,
             annualSourceResults: Array<AnnualFootprintGroupSourceResult>
         }>
         annualTotals: Array<{
@@ -33,6 +35,7 @@ export class EnergyFootprintFacility {
         energyUseGroupAnnualResults: Array<{
             groupGuid: string,
             groupName: string,
+            color: string,
             annualResults: Array<{
                 year: number,
                 energyUse: number,
@@ -66,6 +69,7 @@ export class EnergyFootprintFacility {
             let groupResults: Array<{
                 groupName: string,
                 groupId: string,
+                color: string,
                 annualSourceResults: Array<AnnualFootprintGroupSourceResult>
             }> = new Array();
             this.footprintGroups.forEach(group => {
@@ -91,6 +95,7 @@ export class EnergyFootprintFacility {
                     groupResults.push({
                         groupName: group.groupName,
                         groupId: group.groupId,
+                        color: group.color,
                         annualSourceResults: sourceResult.annualSourceResults
                     });
                 }
@@ -125,6 +130,7 @@ export class EnergyFootprintFacility {
             }
             this.includedSourcesAnnualResults.push({
                 source: source,
+                showGroupResults: false,
                 groupResults: groupResults,
                 annualTotals: annualTotals
             });
@@ -146,6 +152,7 @@ export class EnergyFootprintFacility {
                 energyUseGroupAnnualResults: Array<{
                     groupGuid: string,
                     groupName: string,
+                    color: string,
                     annualResults: Array<{
                         year: number,
                         energyUse: number,
@@ -215,6 +222,7 @@ export class EnergyFootprintFacility {
                     meterGroupResult.energyUseGroupAnnualResults.push({
                         groupGuid: group.groupId,
                         groupName: group.groupName,
+                        color: group.color,
                         annualResults: ftgAnnualResults,
                     })
                 }
