@@ -1,5 +1,5 @@
 import { MeterSource } from "../constantsAndTypes";
-import { IdbFacilityEnergyUseGroup } from "./facilityEnergyUseGroups";
+import { IdbFacilityEnergyUseGroup, getRandomFlatHexColor } from "./facilityEnergyUseGroups";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
@@ -12,7 +12,8 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     notes: string,
     operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData>,
     equipmentType: EquipmentType,
-    utilityData: Array<EquipmentUtilityData>
+    utilityData: Array<EquipmentUtilityData>,
+    color: string
 }
 
 export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup, latestYear: number): IdbFacilityEnergyUseEquipment {
@@ -35,6 +36,7 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         }],
         equipmentType: 'Other',
         utilityData: [],
+        color: getRandomFlatHexColor()
     }
 }
 

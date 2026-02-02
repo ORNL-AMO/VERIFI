@@ -62,10 +62,10 @@ import { FacilityEnergyUseGroupManagementComponent } from './account-facilities/
 import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
 import { FacilityEnergyUsesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component';
-import { FacilityEnergyUsesGroupSetupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component';
-import { FacilityEnergyUseEquipmentFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/facility-energy-use-equipment-form.component';
-import { FacilityEnergyUsesSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary.component';
-import { FacilityEnergyUsesGroupSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component';
+import { FacilityEnergyUsesGroupSetupComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component';
+import { FacilityEnergyUseEquipmentFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/facility-energy-use-equipment-form.component';
+import { FacilityEnergyUsesSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary.component';
+import { FacilityEnergyUsesGroupSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component';
 import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/utility-type-options.pipe';
 import { SizeLabelPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/size-label.pipe';
 import { EquipmentUnitOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/equipment-unit-options.pipe';
@@ -74,18 +74,30 @@ import { EnergyUseFormIncludedSourcesPipe } from './account-facilities/facility-
 import { EnergyUseSourceFormGroupPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-source-form-group.pipe';
 import { OrderEquipmentEnergyUseFormsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/order-equipment-energy-use-forms.pipe';
 import { YearOptionsFilterPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/year-options-filter.pipe';
-import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-utility-data-form/equipment-utility-data-form.component';
-import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
-import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-details-form/equipment-details-form.component';
+import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-utility-data-form/equipment-utility-data-form.component';
+import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
+import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/equipment-details-form.component';
 import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-equipment-invalid.pipe';
 import { EnergyUseUnitPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-unit.pipe';
 import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/convert-energy-use-result.pipe';
-import { FacilityEnergyUsesSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary-table/facility-energy-uses-summary-table.component';
-import { OrderFacilityEnergyUsesSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-summary/facility-energy-uses-summary-table/order-facility-energy-uses-summary-table.pipe';
-import { FacilityEnergyUsesGroupSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/facility-energy-uses-group-summary-table.component';
-import { OrderFacilityEnergyUsesGroupSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/order-facility-energy-uses-group-summary-table.pipe';
+import { FacilityEnergyUsesSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-table/facility-energy-uses-summary-table.component';
+import { OrderFacilityEnergyUsesSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-table/order-facility-energy-uses-summary-table.pipe';
+import { FacilityEnergyUsesGroupSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/facility-energy-uses-group-summary-table.component';
+import { OrderFacilityEnergyUsesGroupSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/order-facility-energy-uses-group-summary-table.pipe';
 import { ProcessFootprintToolFileComponent } from './data-management-import/process-footprint-tool-file/process-footprint-tool-file.component';
 import { FootprintUploadSelectFacilityComponent } from './data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component';
+import { FacilityEnergyUsesSummaryChartComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-chart/facility-energy-uses-summary-chart.component';
+import { FacilityEnergyUsesGroupSummaryChartComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary-chart/facility-energy-uses-group-summary-chart.component';
+import { FacilityEnergyUsesGroupFootprintComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint.component';
+import { FacilityEnergyUsesFootprintComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint.component';
+import { FacilityEnergyUsesGroupFootprintTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/facility-energy-uses-group-footprint-table.component';
+import { FacilityEnergyUsesGroupFootprintChartComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-chart/facility-energy-uses-group-footprint-chart.component';
+import { FacilityEnergyUsesFootprintTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint-table/facility-energy-uses-footprint-table.component';
+import { FacilityEnergyUsesFootprintChartComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint-chart/facility-energy-uses-footprint-chart.component';
+import { OrderFacilityEnergyUsesFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint-table/order-facility-energy-uses-footprint-table-by-source.pipe';
+import { OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint-table/order-facility-energy-uses-footprint-table-by-meter-group.pipe';
+import { OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-meter-group.pipe';
+import { OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-source.pipe';
 
 @NgModule({
   declarations: [
@@ -160,7 +172,20 @@ import { FootprintUploadSelectFacilityComponent } from './data-management-import
     FacilityEnergyUsesGroupSummaryTableComponent,
     OrderFacilityEnergyUsesGroupSummaryTablePipe,
     ProcessFootprintToolFileComponent,
-    FootprintUploadSelectFacilityComponent
+    FootprintUploadSelectFacilityComponent,
+    FacilityEnergyUsesSummaryChartComponent,
+    FacilityEnergyUsesGroupSummaryChartComponent,
+    FootprintUploadSelectFacilityComponent,
+    FacilityEnergyUsesGroupFootprintComponent,
+    FacilityEnergyUsesFootprintComponent,
+    FacilityEnergyUsesGroupFootprintTableComponent,
+    FacilityEnergyUsesGroupFootprintChartComponent,
+    FacilityEnergyUsesFootprintTableComponent,
+    FacilityEnergyUsesFootprintChartComponent,
+    OrderFacilityEnergyUsesFootprintTableBySourcePipe,
+    OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe,
+    OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe,
+    OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe
   ],
   imports: [
     CommonModule,

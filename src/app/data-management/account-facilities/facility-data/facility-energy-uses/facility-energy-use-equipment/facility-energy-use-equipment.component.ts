@@ -9,10 +9,9 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EquipmentType, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
-import { EquipmentTypes } from '../calculations/equipmentTypes';
 
 @Component({
   selector: 'app-facility-energy-use-equipment',
@@ -22,7 +21,6 @@ import { EquipmentTypes } from '../calculations/equipmentTypes';
 })
 export class FacilityEnergyUseEquipmentComponent {
 
-  equipmentTypes: Array<EquipmentType> = EquipmentTypes;
   energyUseEquipment: IdbFacilityEnergyUseEquipment;
   showDeleteEquipment: boolean = false;
   dataChanged: boolean = false;

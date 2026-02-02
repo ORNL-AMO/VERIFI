@@ -1,0 +1,95 @@
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { PlotlyService } from 'angular-plotly.js';
+import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+
+@Component({
+  selector: 'app-facility-energy-uses-group-summary-chart',
+  standalone: false,
+  templateUrl: './facility-energy-uses-group-summary-chart.component.html',
+  styleUrl: './facility-energy-uses-group-summary-chart.component.css',
+})
+export class FacilityEnergyUsesGroupSummaryChartComponent {
+  @Input({ required: true })
+  energyUsesGroupSummary: EnergyUsesGroupSummary;
+  @Input({ required: true })
+  facility: IdbFacility;
+
+  @ViewChild('summaryChart', { static: false }) summaryChart: ElementRef;
+
+  constructor(private plotlyService: PlotlyService) {
+
+  }
+
+  ngAfterViewInit() {
+    this.drawChart()
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['energyUsesGroupSummary'] && !changes['energyUsesGroupSummary'].firstChange) {
+      this.drawChart();
+    }
+  }
+
+  drawChart() {
+    if (this.summaryChart) {
+      // Prepare x-axis (years) from the totals array (all years in order)
+      // Ensure years are sorted and unique integers
+      const years = (this.energyUsesGroupSummary?.totalAnnualEnergyUse?.map(t => t.year) || []).sort((a, b) => a - b);
+
+      // Prepare traces for each group
+      const data = (this.energyUsesGroupSummary?.equipmentAnnualEnergyUse || []).map(equipmentSummary => {
+        // Ensure annualEnergyUse is sorted by year to match x-axis
+        const annuals = years.map(year => {
+          const found = equipmentSummary.annualEnergyUse.find(a => a.year === year);
+          return found ? found.energyUse : 0;
+        });
+        return {
+          x: years,
+          y: annuals,
+          name: equipmentSummary.equipmentName,
+          stackgroup: 'one',
+          mode: 'lines',
+          line: { shape: 'linear' },
+          type: 'scatter',
+          hovertemplate: '%{y:.2f} Energy Use<extra>%{fullData.name}</extra>'
+        };
+      });
+
+      var layout = {
+        showlegend: true,
+        title: {
+          text: `Energy Use Summary for ${this.energyUsesGroupSummary.groupName}`,
+        },
+        yaxis: {
+          title: {
+            text: `Total Energy Use <br>${this.facility.energyUnit}`,
+          },
+          automargin: true,
+        },
+        xaxis: {
+          automargin: true,
+          title: {
+            text: 'Year'
+          },
+          tickmode: 'linear',
+          dtick: 1,
+          tickformat: 'd', // integer format
+          type: 'linear',
+        },
+        legend: {
+          // orientation: "h"
+        },
+        clickmode: "none",
+        // margin: { t: 10 },
+      };
+      let config = {
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
+        displaylogo: false,
+        responsive: true,
+      };
+      this.plotlyService.newPlot(this.summaryChart.nativeElement, data, layout, config);
+    }
+  }
+}

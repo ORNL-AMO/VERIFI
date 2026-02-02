@@ -1,3 +1,4 @@
+import { FlatEnergyUseColors } from "src/app/shared/utilityColors";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbFacilityEnergyUseGroup extends IdbEntry {
@@ -5,7 +6,8 @@ export interface IdbFacilityEnergyUseGroup extends IdbEntry {
     accountId: string,
     name: string,
     sidebarOpen: boolean,
-    notes: string
+    notes: string,
+    color: string
 }
 
 export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: string): IdbFacilityEnergyUseGroup {
@@ -16,6 +18,12 @@ export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: s
         accountId: accountId,
         name: 'Energy Use Group',
         sidebarOpen: true,
-        notes: ''
+        notes: '',
+        color: getRandomFlatHexColor()
     }
+}
+
+export function getRandomFlatHexColor(): string {
+    const randomIndex = Math.floor(Math.random() * FlatEnergyUseColors.length);
+    return FlatEnergyUseColors[randomIndex];
 }

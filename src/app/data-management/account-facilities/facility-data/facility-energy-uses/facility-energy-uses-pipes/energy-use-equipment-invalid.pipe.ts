@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
+import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../setup/facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { FormGroup } from '@angular/forms';
 
