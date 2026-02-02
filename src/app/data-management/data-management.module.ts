@@ -96,6 +96,8 @@ import { FacilityEnergyUsesFootprintTableComponent } from './account-facilities/
 import { FacilityEnergyUsesFootprintChartComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-footprint/facility-energy-uses-footprint-chart/facility-energy-uses-footprint-chart.component';
 import { OrderFacilityEnergyUsesFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-footprint/facility-energy-uses-footprint-table/order-facility-energy-uses-footprint-table-by-source.pipe';
 import { OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-footprint/facility-energy-uses-footprint-table/order-facility-energy-uses-footprint-table-by-meter-group.pipe';
+import { OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-meter-group.pipe';
+import { OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-source.pipe';
 
 @NgModule({
   declarations: [
@@ -181,7 +183,9 @@ import { OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe } from './account
     FacilityEnergyUsesFootprintTableComponent,
     FacilityEnergyUsesFootprintChartComponent,
     OrderFacilityEnergyUsesFootprintTableBySourcePipe,
-    OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe
+    OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe,
+    OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe,
+    OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe
   ],
   imports: [
     CommonModule,

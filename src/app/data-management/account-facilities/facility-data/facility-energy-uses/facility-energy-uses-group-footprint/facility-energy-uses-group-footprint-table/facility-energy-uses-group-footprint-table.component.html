@@ -1,10 +1,11 @@
 @if(tableType == 'source'){
-<!-- <h5>Energy Use Footprint by Source</h5> -->
+@let orderAnnualResults = energyFootprintGroup.includedSourcesAnnualResults|
+orderFacilityEnergyUsesGroupFootprintTableBySource:orderByField:orderByYear:orderByDir;
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
             <th></th>
-            @for (annualSourceResult of energyFootprintGroup.includedSourcesAnnualResults[0].annualSourceResults; track
+            @for (annualSourceResult of orderAnnualResults[0].annualSourceResults; track
             $index) {
             <th colspan="3">
                 {{annualSourceResult.year}}
@@ -15,7 +16,7 @@
             <th (click)="setOrderDataField('name', orderByYear)"
                 [ngClass]="{'active': orderByField == 'name'}">Source</th>
 
-            @for (sourceResult of energyFootprintGroup.includedSourcesAnnualResults[0].annualSourceResults; track
+            @for (sourceResult of orderAnnualResults[0].annualSourceResults; track
             $index) {
             <th (click)="setOrderDataField('energyUse', sourceResult.year)"
                 [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == sourceResult.year}">
@@ -33,9 +34,9 @@
         </tr>
     </thead>
     <tbody>
-        @for (sourceResult of energyFootprintGroup.includedSourcesAnnualResults; track $index){
+        @for (sourceResult of orderAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap clickable" (click)="toggleCollapseEquipment($index)">
+            <td class="nowrap clickable" (click)="toggleCollapseEquipmentSource(sourceResult.source)">
                 <span class="fa"
                     [ngClass]="{'fa-chevron-right': !sourceResult.showEquipmentResults, 'fa-chevron-down': sourceResult.showEquipmentResults}"></span>
                 {{sourceResult.source}}
@@ -74,11 +75,13 @@
     </tbody>
 </table>
 }@else {
+@let orderedMeterGroupResults = energyFootprintGroup.meterGroupsAnnualResults|
+orderFacilityEnergyUsesGroupFootprintTableByMeterGroup:orderByField:orderByYear:orderByDir;
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
             <th colspan="2"></th>
-            @for (annualSourceResult of energyFootprintGroup.meterGroupsAnnualResults[0].annualResults; track
+            @for (annualSourceResult of orderedMeterGroupResults[0].annualResults; track
             $index) {
             <th colspan="3">
                 {{annualSourceResult.year}}
@@ -92,7 +95,7 @@
                 Sources
             </th>
 
-            @for (groupResult of energyFootprintGroup.meterGroupsAnnualResults[0].annualResults; track
+            @for (groupResult of orderedMeterGroupResults[0].annualResults; track
             $index) {
             <th (click)="setOrderDataField('energyUse', groupResult.year)"
                 [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupResult.year}">
@@ -110,9 +113,9 @@
         </tr>
     </thead>
     <tbody>
-        @for (groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
+        @for (groupResult of orderedMeterGroupResults; track $index){
         <tr class="section-row">
-            <td class="nowrap clickable" (click)="toggleCollapseEquipment($index)">
+            <td class="nowrap clickable" (click)="toggleCollapseEquipmentGroup(groupResult.meterGroupId)">
                 <span class="fa"
                     [ngClass]="{'fa-chevron-right': !groupResult.showEquipmentResults, 'fa-chevron-down': groupResult.showEquipmentResults}"></span>
                 {{groupResult.meterGroupName}}

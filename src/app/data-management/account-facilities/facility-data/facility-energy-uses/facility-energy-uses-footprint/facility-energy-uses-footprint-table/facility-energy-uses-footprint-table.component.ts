@@ -20,7 +20,7 @@ export class FacilityEnergyUsesFootprintTableComponent {
   @Input({ required: true })
   tableType: 'source' | 'meterGroup';
 
-  orderByField: string = 'equipmentName';
+  orderByField: string = 'name';
   orderByDir: 'asc' | 'desc' = 'asc';
   orderByYear: number;
 

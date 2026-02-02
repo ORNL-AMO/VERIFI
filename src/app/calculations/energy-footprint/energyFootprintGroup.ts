@@ -7,7 +7,7 @@ import { ConvertValue } from "../conversions/convertValue";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
-import { AnnualFootprintGroupSourceResult, FootprintAnnualResult, FootprintEquipmentAnnualResult } from "./energyFootprintModels";
+import { AnnualFootprintGroupSourceResult, FootprintAnnualResult, FootprintEquipmentAnnualResult, FootprintGroupIncludedSourcesAnnualResult, FootprintGroupMeterGroupAnnualResult } from "./energyFootprintModels";
 
 export class EnergyFootprintGroup {
 
@@ -18,21 +18,8 @@ export class EnergyFootprintGroup {
     includedSources: Array<MeterSource>;
 
     meterGroups: Array<{ guid: string, name: string }>;
-    includedSourcesAnnualResults: Array<{
-        source: MeterSource,
-        annualSourceResults: Array<AnnualFootprintGroupSourceResult>,
-        showEquipmentResults: boolean,
-        equipmentAnnualResults: Array<FootprintEquipmentAnnualResult>;
-    }> = [];
-
-    meterGroupsAnnualResults: Array<{
-        meterGroupId: string,
-        meterGroupName: string,
-        annualResults: Array<AnnualFootprintGroupSourceResult>,
-        showEquipmentResults: boolean,
-        equipmentAnnualResults: Array<FootprintEquipmentAnnualResult>
-    }> = [];
-
+    includedSourcesAnnualResults: Array<FootprintGroupIncludedSourcesAnnualResult> = [];
+    meterGroupsAnnualResults: Array<FootprintGroupMeterGroupAnnualResult> = [];
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility,
         calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroups: Array<IdbUtilityMeterGroup>

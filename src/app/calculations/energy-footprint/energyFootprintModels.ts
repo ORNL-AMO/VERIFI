@@ -39,6 +39,14 @@ export interface IncludedSourcesAnnualResult {
     annualTotals: Array<FootprintAnnualResult>
 }
 
+export interface FootprintGroupIncludedSourcesAnnualResult {
+    source: MeterSource,
+    annualSourceResults: Array<AnnualFootprintGroupSourceResult>,
+    showEquipmentResults: boolean,
+    equipmentAnnualResults: Array<FootprintEquipmentAnnualResult>;
+
+}
+
 export interface MeterGroupAnnualResult {
     meterGroupId: string,
     meterGroupName: string,
@@ -50,4 +58,12 @@ export interface MeterGroupAnnualResult {
         color: string,
         annualResults: Array<FootprintAnnualResult>
     }>;
+}
+
+export interface FootprintGroupMeterGroupAnnualResult {
+    meterGroupId: string,
+    meterGroupName: string,
+    annualResults: Array<AnnualFootprintGroupSourceResult>,
+    showEquipmentResults: boolean,
+    equipmentAnnualResults: Array<FootprintEquipmentAnnualResult>
 }

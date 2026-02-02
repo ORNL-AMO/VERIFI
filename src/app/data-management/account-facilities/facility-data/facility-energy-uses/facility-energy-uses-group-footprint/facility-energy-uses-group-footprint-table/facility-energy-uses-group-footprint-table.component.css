@@ -13,21 +13,24 @@ td.nowrap {
     font-weight: bold;
 }
 
-td{
-    /* background-color: #bfc9ca; */
-}
-
 td:not(:first-child) {
     text-align: right;
 }
-.fa.fa-chevron-right, .fa.fa-chevron-down {
+.fa.fa-chevron-right,
+.fa.fa-chevron-down {
     color: white;
 }
 
-td.clickable {
+td.clickable,
+.sortable th {
     cursor: pointer;
 }
 
-td.clickable:hover{
+td.clickable:hover,
+.sortable th:hover {
+    text-decoration: underline;
+}
+
+th.active {
     text-decoration: underline;
 }
