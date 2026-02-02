@@ -32,6 +32,7 @@ export class EnergyFootprintFacility {
         meterGroupId: string,
         meterGroupName: string,
         annualResults: Array<AnnualFootprintGroupSourceResult>,
+        showGroupResults: boolean,
         energyUseGroupAnnualResults: Array<{
             groupGuid: string,
             groupName: string,
@@ -149,6 +150,7 @@ export class EnergyFootprintFacility {
                 meterGroupId: string,
                 meterGroupName: string,
                 annualResults: Array<AnnualFootprintGroupSourceResult>,
+                showGroupResults: boolean,
                 energyUseGroupAnnualResults: Array<{
                     groupGuid: string,
                     groupName: string,
@@ -162,6 +164,7 @@ export class EnergyFootprintFacility {
             } = {
                 meterGroupId: meterGroup.guid,
                 meterGroupName: meterGroup.name,
+                showGroupResults: false,
                 annualResults: new Array(),
                 energyUseGroupAnnualResults: new Array(),
             };

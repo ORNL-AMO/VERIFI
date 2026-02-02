@@ -71,6 +71,12 @@
     </tbody>
 </table>
 }@else if(tableType == 'meterGroup'){
+@if(!energyFootprintFacility.meterGroupsAnnualResults || energyFootprintFacility.meterGroupsAnnualResults.length == 0){
+<div class="alert alert-warning">
+    No equipment has been connected to a meter group. Please connect equipment to meter groups to view energy use broken down by
+    meter group.
+</div>
+}@else{
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
@@ -107,7 +113,9 @@
     <tbody>
         @for (meterGroupResult of energyFootprintFacility.meterGroupsAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap">
+            <td class="nowrap" (click)="toggleCollapseGroup($index)">
+                <span class="fa"
+                    [ngClass]="{'fa-chevron-right': !meterGroupResult.showGroupResults, 'fa-chevron-down': meterGroupResult.showGroupResults}"></span>
                 {{meterGroupResult.meterGroupName}}
             </td>
             @for(annualEnergyUse of meterGroupResult.annualResults; track $index){
@@ -118,6 +126,7 @@
                 {{annualEnergyUse.percentIncludedEnergyUse| number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        @if(meterGroupResult.showGroupResults){
         @for(groupResult of meterGroupResult.energyUseGroupAnnualResults; track $index){
         <tr>
             <td class="ps-3 nowrap">
@@ -137,6 +146,8 @@
         </tr>
         }
         }
+        }
     </tbody>
 </table>
+}
 }

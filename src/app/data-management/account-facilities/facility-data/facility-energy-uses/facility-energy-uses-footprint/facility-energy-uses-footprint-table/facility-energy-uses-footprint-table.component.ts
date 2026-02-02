@@ -44,6 +44,10 @@ export class FacilityEnergyUsesFootprintTableComponent {
   }
 
   toggleCollapseGroup(index: number) {
-    this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults = !this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults;
+    if (this.tableType == 'source') {
+      this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults = !this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults;
+    } else {
+      this.energyFootprintFacility.meterGroupsAnnualResults[index].showGroupResults = !this.energyFootprintFacility.meterGroupsAnnualResults[index].showGroupResults;
+    }
   }
 }

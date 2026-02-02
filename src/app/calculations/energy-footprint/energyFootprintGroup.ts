@@ -306,9 +306,15 @@ export class EnergyFootprintGroup {
     orderResults() {
         this.includedSourcesAnnualResults.forEach(sourceResults => {
             sourceResults.annualSourceResults = _.sortBy(sourceResults.annualSourceResults, 'year', 'desc');
+            sourceResults.equipmentAnnualResults.forEach(equipResults => {
+                equipResults.annualResults = _.sortBy(equipResults.annualResults, 'year', 'desc');
+            });
         });
         this.meterGroupsAnnualResults.forEach(meterGroupResults => {
             meterGroupResults.annualResults = _.sortBy(meterGroupResults.annualResults, 'year', 'desc');
+            meterGroupResults.equipmentAnnualResults.forEach(equipResults => {
+                equipResults.annualResults = _.sortBy(equipResults.annualResults, 'year', 'desc');
+            });
         });
     }
 
