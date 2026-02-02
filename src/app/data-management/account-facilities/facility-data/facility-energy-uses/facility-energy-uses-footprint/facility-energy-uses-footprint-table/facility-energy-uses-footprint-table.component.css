@@ -2,17 +2,18 @@ td.fill-cell {
     background-image: linear-gradient(to right, #CB4335 0%, #CB4335 100%);
     background-repeat: no-repeat;
 }
+
 td.nowrap {
     white-space: nowrap;
-} 
+}
 
-.section-row td{
+.section-row td {
     background-color: #34495e;
     color: #fff;
     font-weight: bold;
 }
 
-td{
+td {
     /* background-color: #bfc9ca; */
 }
 
@@ -20,15 +21,21 @@ td:not(:first-child) {
     text-align: right;
 }
 
-.fa.fa-chevron-right, .fa.fa-chevron-down {
+.fa.fa-chevron-right,
+.fa.fa-chevron-down {
     color: white;
 }
 
-td.clickable {
+td.clickable,
+.sortable th {
     cursor: pointer;
+}
+
+td.clickable:hover,
+.sortable th:hover {
     text-decoration: underline;
 }
 
-td.clickable:hover{
+th.active {
     text-decoration: underline;
 }

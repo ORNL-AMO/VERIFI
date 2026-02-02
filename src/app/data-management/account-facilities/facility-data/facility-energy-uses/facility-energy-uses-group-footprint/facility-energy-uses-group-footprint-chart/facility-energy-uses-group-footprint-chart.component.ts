@@ -81,7 +81,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
       const unaccountedX = years.map(year => {
         const yearResult = sourceResult.annualSourceResults.find(r => r.year === year);
         if (!yearResult) return 0;
-        const total = yearResult.totalSourceEnergyUse || 0;
+        const total = yearResult.totalEnergyUse || 0;
         const equipmentTotal = yearResult.equipmentEnergyUse.reduce((sum, e) => sum + (e.energyUse || 0), 0);
         return Math.max(0, total - equipmentTotal);
       });
@@ -167,7 +167,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
       const unaccountedX = years.map(year => {
         const yearResult = groupResult.annualResults.find(r => r.year === year);
         if (!yearResult) return 0;
-        const total = yearResult.includedMetersEnergyUse || 0;
+        const total = yearResult.totalEnergyUse || 0;
         const equipmentTotal = yearResult.equipmentEnergyUse.reduce((sum, e) => sum + (e.energyUse || 0), 0);
         return Math.max(0, total - equipmentTotal);
       });

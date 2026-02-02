@@ -1,11 +1,10 @@
+import { MeterSource } from "src/app/models/constantsAndTypes"
 
 export interface AnnualFootprintGroupSourceResult {
     year: number,
-    includedMetersEnergyUse: number,
-    totalSourceEnergyUse: number,
-    totalEquipmentEnergyUse: number,
-    percentIncludedEnergyUse: number,
-    percentTotalEnergyUse: number,
+    energyUse: number,
+    totalEnergyUse: number,
+    percentOfTotal: number,
     equipmentEnergyUse: Array<{
         equipmentGuid: string,
         equipmentName: string,
@@ -24,5 +23,31 @@ export interface FootprintEquipmentAnnualResult {
 export interface FootprintAnnualResult {
     year: number,
     energyUse: number,
+    totalEnergyUse?: number,
     percentOfTotal: number
+}
+
+export interface IncludedSourcesAnnualResult {
+    source: MeterSource,
+    showGroupResults: boolean,
+    groupResults: Array<{
+        groupName: string,
+        groupId: string,
+        color: string,
+        annualSourceResults: Array<AnnualFootprintGroupSourceResult>
+    }>
+    annualTotals: Array<FootprintAnnualResult>
+}
+
+export interface MeterGroupAnnualResult {
+    meterGroupId: string,
+    meterGroupName: string,
+    annualResults: Array<AnnualFootprintGroupSourceResult>,
+    showGroupResults: boolean,
+    energyUseGroupAnnualResults: Array<{
+        groupGuid: string,
+        groupName: string,
+        color: string,
+        annualResults: Array<FootprintAnnualResult>
+    }>;
 }

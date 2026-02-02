@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 
@@ -43,11 +44,17 @@ export class FacilityEnergyUsesFootprintTableComponent {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + facilityEnergyUseGroup.guid + '/footprint');
   }
 
-  toggleCollapseGroup(index: number) {
-    if (this.tableType == 'source') {
-      this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults = !this.energyFootprintFacility.includedSourcesAnnualResults[index].showGroupResults;
-    } else {
-      this.energyFootprintFacility.meterGroupsAnnualResults[index].showGroupResults = !this.energyFootprintFacility.meterGroupsAnnualResults[index].showGroupResults;
+  toggleCollapseGroup(groupId: string) {
+    let groupResult = this.energyFootprintFacility.meterGroupsAnnualResults.find(g => g.meterGroupId == groupId);
+    if (groupResult) {
+      groupResult.showGroupResults = !groupResult.showGroupResults;
+    }
+  }
+
+  toggleCollapseSource(source: MeterSource){
+    let sourceResult = this.energyFootprintFacility.includedSourcesAnnualResults.find(s => s.source == source);
+    if(sourceResult){
+      sourceResult.showGroupResults = !sourceResult.showGroupResults;
     }
   }
 }

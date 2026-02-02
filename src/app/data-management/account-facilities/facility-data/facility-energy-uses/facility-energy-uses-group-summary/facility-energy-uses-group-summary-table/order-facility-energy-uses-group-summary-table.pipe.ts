@@ -1,5 +1,4 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
 import * as _ from 'lodash';
 import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
 @Pipe({

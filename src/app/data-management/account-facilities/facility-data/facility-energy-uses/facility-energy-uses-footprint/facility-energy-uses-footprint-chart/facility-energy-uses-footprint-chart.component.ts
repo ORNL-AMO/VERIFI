@@ -81,8 +81,8 @@ export class FacilityEnergyUsesFootprintChartComponent {
       const unaccountedX = years.map(year => {
         const yearResult = sourceResult.annualTotals.find(r => r.year === year);
         if (!yearResult) return 0;
-        const total = yearResult.totalFacilityEnergyUse || 0;
-        const equipmentTotal = yearResult.totalEquipmentEnergyUse || 0;
+        const total = yearResult.totalEnergyUse || 0;
+        const equipmentTotal = yearResult.energyUse || 0;
         return Math.max(0, total - equipmentTotal);
       });
       traces.push({
@@ -161,8 +161,8 @@ export class FacilityEnergyUsesFootprintChartComponent {
       const unaccountedX = years.map(year => {
         const yearResult = groupResult.annualResults.find(r => r.year === year);
         if (!yearResult) return 0;
-        const total = yearResult.includedMetersEnergyUse || 0;
-        const equipmentTotal = yearResult.totalEquipmentEnergyUse || 0;
+        const total = yearResult.totalEnergyUse || 0;
+        const equipmentTotal = yearResult.energyUse || 0;
         return Math.max(0, total - equipmentTotal);
       });
       traces.push({

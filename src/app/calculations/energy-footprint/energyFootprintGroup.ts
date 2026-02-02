@@ -41,12 +41,12 @@ export class EnergyFootprintGroup {
         this.groupId = group.guid;
         this.color = group.color;
         this.groupEquipment = equipment.filter(equip => equip.energyUseGroupId == group.guid);
-        let groupCalanderizedMeters: Array<CalanderizedMeter> = this.getGroupCalanderizedMeters(calanderizedMeters, utilityMeterGroups);
         let years: Array<number> = this.groupEquipment.flatMap(equip => equip.operatingConditionsData.map(data => data.year));
         years = _.uniq(years);
 
         this.setIncludedSources();
-        this.setIncludedSourcesAnnualResults(groupCalanderizedMeters, years, facility, calanderizedMeters);
+        this.setIncludedSourcesAnnualResults(years, facility, calanderizedMeters);
+        this.setMeterGroups(calanderizedMeters, utilityMeterGroups);
         this.setMeterGroupsAnnualResults(calanderizedMeters, years, facility);
         this.orderResults();
     }
@@ -58,21 +58,14 @@ export class EnergyFootprintGroup {
         this.includedSources = _.uniq(this.includedSources);
     }
 
-    setIncludedSourcesAnnualResults(groupCalanderizedMeters: Array<CalanderizedMeter>, years: Array<number>, facility: IdbFacility, allCalanderizedMeters: Array<CalanderizedMeter>) {
+    setIncludedSourcesAnnualResults(years: Array<number>, facility: IdbFacility, allCalanderizedMeters: Array<CalanderizedMeter>) {
         this.includedSourcesAnnualResults = new Array();
         this.includedSources.forEach(source => {
             let annualSourceResults: Array<AnnualFootprintGroupSourceResult> = new Array();
             years.forEach(year => {
-
-                let sourceMeters: Array<CalanderizedMeter> = groupCalanderizedMeters.filter(cm => cm.meter.source == source);
-                let monthlyDataForSourceAndYear: Array<MonthlyData> = sourceMeters.flatMap(cm => cm.monthlyData.filter(md => md.year == year));
-                let includedMetersEnergyUse: number = _.sumBy(monthlyDataForSourceAndYear, (mData: MonthlyData) => { return mData.energyUse; });
-
                 let totalSourceMeters: Array<CalanderizedMeter> = allCalanderizedMeters.filter(cm => cm.meter.source == source);
                 let totalMonthlyDataForSourceAndYear: Array<MonthlyData> = totalSourceMeters.flatMap(cm => cm.monthlyData.filter(md => md.year == year));
                 let totalSourceEnergyUse: number = _.sumBy(totalMonthlyDataForSourceAndYear, (mData: MonthlyData) => { return mData.energyUse; });
-
-
                 let equipmentEnergyUse: Array<{
                     equipmentGuid: string,
                     equipmentName: string,
@@ -111,21 +104,15 @@ export class EnergyFootprintGroup {
                     }
                     ed.percentOfTotal = percentOfTotal;
                 });
-                let percentIncludedEnergyUse: number = 0;
-                if (includedMetersEnergyUse != 0) {
-                    percentIncludedEnergyUse = (equipmentEnergyUseForYear / includedMetersEnergyUse) * 100;
-                }
                 let percentTotalEnergyUse: number = 0;
                 if (totalSourceEnergyUse != 0) {
                     percentTotalEnergyUse = (equipmentEnergyUseForYear / totalSourceEnergyUse) * 100;
                 }
                 annualSourceResults.push({
                     year: year,
-                    includedMetersEnergyUse: includedMetersEnergyUse,
-                    totalSourceEnergyUse: totalSourceEnergyUse,
-                    totalEquipmentEnergyUse: equipmentEnergyUseForYear,
-                    percentIncludedEnergyUse: percentIncludedEnergyUse,
-                    percentTotalEnergyUse: percentTotalEnergyUse,
+                    totalEnergyUse: totalSourceEnergyUse,
+                    energyUse: equipmentEnergyUseForYear,
+                    percentOfTotal: percentTotalEnergyUse,
                     equipmentEnergyUse: equipmentEnergyUse
                 });
             });
@@ -146,7 +133,7 @@ export class EnergyFootprintGroup {
                         let percentOfTotal: number = 0;
                         if (equipEnergyUseData) {
                             energyUse = equipEnergyUseData.energyUse;
-                            percentOfTotal = (energyUse / asr.totalSourceEnergyUse) * 100;
+                            percentOfTotal = (energyUse / asr.totalEnergyUse) * 100;
                         }
                         equipAnnualResults.push({
                             year: asr.year,
@@ -218,12 +205,10 @@ export class EnergyFootprintGroup {
                 }
                 annualResults.push({
                     year: year,
-                    totalEquipmentEnergyUse: equipmentEnergyUseForYear,
+                    energyUse: equipmentEnergyUseForYear,
                     equipmentEnergyUse: equipmentEnergyUseData,
-                    percentTotalEnergyUse: 0,
-                    includedMetersEnergyUse: includedMetersEnergyUse,
-                    totalSourceEnergyUse: 0,
-                    percentIncludedEnergyUse: percentIncludedEnergyUse
+                    totalEnergyUse: includedMetersEnergyUse,
+                    percentOfTotal: percentIncludedEnergyUse
                 });
             });
 
@@ -241,7 +226,7 @@ export class EnergyFootprintGroup {
                         let percentOfTotal: number = 0;
                         if (equipEnergyUseData) {
                             energyUse = equipEnergyUseData.energyUse;
-                            percentOfTotal = (energyUse / ar.includedMetersEnergyUse) * 100;
+                            percentOfTotal = (energyUse / ar.totalEnergyUse) * 100;
                         }
                         equipAnnualResults.push({
                             year: ar.year,
@@ -282,7 +267,7 @@ export class EnergyFootprintGroup {
         });
     }
 
-    getGroupCalanderizedMeters(calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroups: Array<IdbUtilityMeterGroup>): Array<CalanderizedMeter> {
+    setMeterGroups(calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroups: Array<IdbUtilityMeterGroup>) {
         let groupMetersIds: Array<string> = new Array();
         this.meterGroups = new Array();
         this.groupEquipment.forEach(equip => {
@@ -296,12 +281,9 @@ export class EnergyFootprintGroup {
                 this.meterGroups.push({ guid: '', name: 'Ungrouped' });
             }
         });
-        let uniqueGroupMeterIds: Array<string> = _.uniq(groupMetersIds);
-        let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => uniqueGroupMeterIds.includes(cm.meter.guid));
         this.meterGroups = _.uniqBy(this.meterGroups, 'guid');
         if (this.meterGroups.length == 1 && this.meterGroups[0].guid == '') {
             this.meterGroups = [];
         }
-        return groupMeters;
     }
 }

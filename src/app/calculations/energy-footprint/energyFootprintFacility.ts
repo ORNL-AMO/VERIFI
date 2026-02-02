@@ -6,44 +6,14 @@ import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
 import { MeterSource } from "src/app/models/constantsAndTypes";
-import { AnnualFootprintGroupSourceResult } from "./energyFootprintModels";
+import { AnnualFootprintGroupSourceResult, FootprintAnnualResult, IncludedSourcesAnnualResult, MeterGroupAnnualResult } from "./energyFootprintModels";
 
 export class EnergyFootprintFacility {
 
     footprintGroups: Array<EnergyFootprintGroup> = [];
-    includedSourcesAnnualResults: Array<{
-        source: MeterSource,
-        showGroupResults: boolean,
-        groupResults: Array<{
-            groupName: string,
-            groupId: string,
-            color: string,
-            annualSourceResults: Array<AnnualFootprintGroupSourceResult>
-        }>
-        annualTotals: Array<{
-            totalEquipmentEnergyUse: number,
-            totalFacilityEnergyUse: number,
-            percentOfFacilityUse: number,
-            year: number
-        }>
-    }>;
+    includedSourcesAnnualResults: Array<IncludedSourcesAnnualResult>;
 
-    meterGroupsAnnualResults: Array<{
-        meterGroupId: string,
-        meterGroupName: string,
-        annualResults: Array<AnnualFootprintGroupSourceResult>,
-        showGroupResults: boolean,
-        energyUseGroupAnnualResults: Array<{
-            groupGuid: string,
-            groupName: string,
-            color: string,
-            annualResults: Array<{
-                year: number,
-                energyUse: number,
-                percentOfTotal: number
-            }>
-        }>;
-    }> = [];
+    meterGroupsAnnualResults: Array<MeterGroupAnnualResult> = [];
     constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
         calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroups: Array<IdbUtilityMeterGroup>) {
         this.setEnergyFootprintGroups(facility, energyUseGroups, equipment, calanderizedMeters, utilityMeterGroups);
@@ -82,11 +52,9 @@ export class EnergyFootprintFacility {
                         if (!sourceResultYears.includes(year)) {
                             sourceResult.annualSourceResults.push({
                                 year: year,
-                                includedMetersEnergyUse: 0,
-                                totalSourceEnergyUse: 0,
-                                totalEquipmentEnergyUse: 0,
-                                percentIncludedEnergyUse: 0,
-                                percentTotalEnergyUse: 0,
+                                energyUse: 0,
+                                totalEnergyUse: 0,
+                                percentOfTotal: 0,
                                 equipmentEnergyUse: [],
                             });
                         }
@@ -102,19 +70,14 @@ export class EnergyFootprintFacility {
                 }
             });
             //calculate annual totals
-            let annualTotals: Array<{
-                totalEquipmentEnergyUse: number,
-                totalFacilityEnergyUse: number,
-                percentOfFacilityUse: number,
-                year: number
-            }> = new Array();
+            let annualTotals: Array<FootprintAnnualResult> = new Array();
             if (groupResults.length > 0) {
                 years.forEach(year => {
                     let totalEquipmentEnergyUse: number = 0;
                     groupResults.forEach(gr => {
                         let yearResult = gr.annualSourceResults.find(r => r.year == year);
                         if (yearResult) {
-                            totalEquipmentEnergyUse += yearResult.totalEquipmentEnergyUse;
+                            totalEquipmentEnergyUse += yearResult.energyUse;
                         }
                     });
                     let totalSourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.source == source);
@@ -122,9 +85,9 @@ export class EnergyFootprintFacility {
                     let totalSourceEnergyUse: number = _.sumBy(totalMonthlyDataForSourceAndYear, (mData: MonthlyData) => { return mData.energyUse; });
                     let percentOfFacilityUse: number = totalSourceEnergyUse > 0 ? (totalEquipmentEnergyUse / totalSourceEnergyUse) * 100 : 0;
                     annualTotals.push({
-                        totalEquipmentEnergyUse: totalEquipmentEnergyUse,
-                        totalFacilityEnergyUse: totalSourceEnergyUse,
-                        percentOfFacilityUse: percentOfFacilityUse,
+                        energyUse: totalEquipmentEnergyUse,
+                        totalEnergyUse: totalSourceEnergyUse,
+                        percentOfTotal: percentOfFacilityUse,
                         year: year
                     });
                 });
@@ -146,22 +109,7 @@ export class EnergyFootprintFacility {
 
         this.meterGroupsAnnualResults = new Array();
         uniqueMeterGroups.forEach(meterGroup => {
-            let meterGroupResult: {
-                meterGroupId: string,
-                meterGroupName: string,
-                annualResults: Array<AnnualFootprintGroupSourceResult>,
-                showGroupResults: boolean,
-                energyUseGroupAnnualResults: Array<{
-                    groupGuid: string,
-                    groupName: string,
-                    color: string,
-                    annualResults: Array<{
-                        year: number,
-                        energyUse: number,
-                        percentOfTotal: number
-                    }>
-                }>;
-            } = {
+            let meterGroupResult: MeterGroupAnnualResult = {
                 meterGroupId: meterGroup.guid,
                 meterGroupName: meterGroup.name,
                 showGroupResults: false,
@@ -179,36 +127,41 @@ export class EnergyFootprintFacility {
                         if (yearIndex != -1) {
                             //update existing year result
                             let yearResults: Array<AnnualFootprintGroupSourceResult> = footprintToolGroupAnnualResults.filter(r => r.year == year);
-                            let totalEquipmentEnergyUse: number = _.sumBy(yearResults, (yearResult: AnnualFootprintGroupSourceResult) => { return yearResult.totalEquipmentEnergyUse });
-                            meterGroupResult.annualResults[yearIndex].totalEquipmentEnergyUse += totalEquipmentEnergyUse;
-                            meterGroupResult.annualResults[yearIndex].percentIncludedEnergyUse = meterGroupResult.annualResults[yearIndex].includedMetersEnergyUse > 0 ?
-                                (meterGroupResult.annualResults[yearIndex].totalEquipmentEnergyUse / meterGroupResult.annualResults[yearIndex].includedMetersEnergyUse) * 100 : 0;
+                            let totalEquipmentEnergyUse: number = _.sumBy(yearResults, (yearResult: AnnualFootprintGroupSourceResult) => { return yearResult.energyUse });
+                            meterGroupResult.annualResults[yearIndex].energyUse += totalEquipmentEnergyUse;
+                            meterGroupResult.annualResults[yearIndex].percentOfTotal = meterGroupResult.annualResults[yearIndex].totalEnergyUse > 0 ?
+                                (meterGroupResult.annualResults[yearIndex].energyUse / meterGroupResult.annualResults[yearIndex].totalEnergyUse) * 100 : 0;
 
                         } else {
                             let yearResults: Array<AnnualFootprintGroupSourceResult> = footprintToolGroupAnnualResults.filter(r => r.year == year);
-                            let totalEquipmentEnergyUse: number = _.sumBy(yearResults, (yearResult: AnnualFootprintGroupSourceResult) => { return yearResult.totalEquipmentEnergyUse });
-                            //
-                            let totalSourceEnergyUse: number = 0;
-                            let includedMetersEnergyUse: number = yearResults[0].includedMetersEnergyUse;
-                            let percentTotalEnergyUse: number = 0;
-                            let percentIncludedEnergyUse: number = includedMetersEnergyUse > 0 ? (totalEquipmentEnergyUse / includedMetersEnergyUse) * 100 : 0;
-                            meterGroupResult.annualResults.push({
-                                year: year,
-                                includedMetersEnergyUse: includedMetersEnergyUse,
-                                totalSourceEnergyUse: totalSourceEnergyUse,
-                                totalEquipmentEnergyUse: totalEquipmentEnergyUse,
-                                percentIncludedEnergyUse: percentIncludedEnergyUse,
-                                percentTotalEnergyUse: percentTotalEnergyUse,
-                                equipmentEnergyUse: [],
-                            });
+                            if (yearResults.length != 0) {
+                                let totalEquipmentEnergyUse: number = _.sumBy(yearResults, (yearResult: AnnualFootprintGroupSourceResult) => { return yearResult.energyUse });
+                                let includedMetersEnergyUse: number = yearResults[0].totalEnergyUse;
+                                let percentOfTotal: number = includedMetersEnergyUse > 0 ? (totalEquipmentEnergyUse / includedMetersEnergyUse) * 100 : 0;
+                                meterGroupResult.annualResults.push({
+                                    year: year,
+                                    totalEnergyUse: includedMetersEnergyUse,
+                                    energyUse: totalEquipmentEnergyUse,
+                                    percentOfTotal: percentOfTotal,
+                                    equipmentEnergyUse: [],
+                                });
+                            }else{
+                                meterGroupResult.annualResults.push({
+                                    year: year,
+                                    totalEnergyUse: 0,
+                                    energyUse: 0,
+                                    percentOfTotal: 0,
+                                    equipmentEnergyUse: [],
+                                });
+                            }
                         }
 
                     });
                     let ftgAnnualResults = footprintToolGroupAnnualResults.map(yearResult => {
                         return {
                             year: yearResult.year,
-                            energyUse: yearResult.totalEquipmentEnergyUse,
-                            percentOfTotal: yearResult.percentIncludedEnergyUse
+                            energyUse: yearResult.energyUse,
+                            percentOfTotal: yearResult.percentOfTotal
                         }
                     });
                     //check missing year
