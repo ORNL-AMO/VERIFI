@@ -20,3 +20,14 @@ td{
 td:not(:first-child) {
     text-align: right;
 }
+.fa.fa-chevron-right, .fa.fa-chevron-down {
+    color: white;
+}
+
+td.clickable {
+    cursor: pointer;
+}
+
+td.clickable:hover{
+    text-decoration: underline;
+}

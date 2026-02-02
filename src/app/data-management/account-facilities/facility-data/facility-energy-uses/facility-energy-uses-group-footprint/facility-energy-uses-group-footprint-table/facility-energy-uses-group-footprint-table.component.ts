@@ -50,4 +50,12 @@ export class FacilityEnergyUsesGroupFootprintTableComponent {
   goToEquipment(equipmentGuid: string) {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyFootprintGroup.groupId + '/equipment/' + equipmentGuid);
   }
+
+  toggleCollapseEquipment(index: number) {
+    if (this.tableType == 'source') {
+      this.energyFootprintGroup.includedSourcesAnnualResults[index].showEquipmentResults = !this.energyFootprintGroup.includedSourcesAnnualResults[index].showEquipmentResults;
+    } else {
+      this.energyFootprintGroup.meterGroupsAnnualResults[index].showEquipmentResults = !this.energyFootprintGroup.meterGroupsAnnualResults[index].showEquipmentResults;
+    }
+  }
 }

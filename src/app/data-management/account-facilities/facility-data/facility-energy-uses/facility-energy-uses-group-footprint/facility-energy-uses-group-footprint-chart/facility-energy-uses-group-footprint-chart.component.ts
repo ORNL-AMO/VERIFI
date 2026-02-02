@@ -72,7 +72,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
           orientation: 'h',
           type: 'bar',
           marker: { color: equipment?.color || undefined },
-          hovertemplate: `${equipment?.name || 'Unknown'}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+          hovertemplate: `%{x:,.0f} ${this.facility?.energyUnit || ''} - ${equipment?.name || 'Unknown'}<extra></extra>`,
           visible: undefined
         };
       });
@@ -92,7 +92,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
         orientation: 'h',
         type: 'bar',
         marker: { color: '#b0b0b0' },
-        hovertemplate: `Unaccounted: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+        hovertemplate: `%{x:,.0f} ${this.facility?.energyUnit || ''} - Unaccounted<extra></extra>`,
         visible: 'legendonly',
       });
 
@@ -158,7 +158,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
           orientation: 'h',
           type: 'bar',
           marker: { color: undefined },
-          hovertemplate: `${equipment?.name || 'Unknown'}: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+          hovertemplate: `%{x:,.0f} ${this.facility?.energyUnit || ''} - ${equipment?.name || 'Unknown'}<extra></extra>`,
           visible: undefined
         };
       });
@@ -178,7 +178,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
         orientation: 'h',
         type: 'bar',
         marker: { color: '#b0b0b0' },
-        hovertemplate: `Unaccounted: %{x:.2f} ${this.facility?.energyUnit || ''}<extra></extra>`,
+        hovertemplate: `%{x:,.0f} ${this.facility?.energyUnit || ''} - Unaccounted<extra></extra>`,
         visible: 'legendonly',
       });
 

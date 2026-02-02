@@ -23,3 +23,12 @@ td:not(:first-child) {
 .fa.fa-chevron-right, .fa.fa-chevron-down {
     color: white;
 }
+
+td.clickable {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+td.clickable:hover{
+    text-decoration: underline;
+}

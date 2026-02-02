@@ -7,7 +7,7 @@ import { ConvertValue } from "../conversions/convertValue";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
-import { AnnualFootprintGroupSourceResult } from "./energyFootprintModels";
+import { AnnualFootprintGroupSourceResult, FootprintAnnualResult, FootprintEquipmentAnnualResult } from "./energyFootprintModels";
 
 export class EnergyFootprintGroup {
 
@@ -21,32 +21,16 @@ export class EnergyFootprintGroup {
     includedSourcesAnnualResults: Array<{
         source: MeterSource,
         annualSourceResults: Array<AnnualFootprintGroupSourceResult>,
-        equipmentAnnualResults: Array<{
-            equipmentGuid: string,
-            equipmentName: string,
-            color: string
-            annualResults: Array<{
-                year: number,
-                energyUse: number,
-                percentOfTotal: number
-            }>
-        }>;
+        showEquipmentResults: boolean,
+        equipmentAnnualResults: Array<FootprintEquipmentAnnualResult>;
     }> = [];
 
     meterGroupsAnnualResults: Array<{
         meterGroupId: string,
         meterGroupName: string,
         annualResults: Array<AnnualFootprintGroupSourceResult>,
-        equipmentAnnualResults: Array<{
-            equipmentGuid: string,
-            equipmentName: string,
-            color: string,
-            annualResults: Array<{
-                year: number,
-                energyUse: number,
-                percentOfTotal: number
-            }>
-        }>;
+        showEquipmentResults: boolean,
+        equipmentAnnualResults: Array<FootprintEquipmentAnnualResult>
     }> = [];
 
 
@@ -146,16 +130,7 @@ export class EnergyFootprintGroup {
                 });
             });
 
-            let equipmentAnnualResults: Array<{
-                equipmentGuid: string,
-                equipmentName: string,
-                color: string,
-                annualResults: Array<{
-                    year: number,
-                    energyUse: number,
-                    percentOfTotal: number
-                }>
-            }> = new Array();
+            let equipmentAnnualResults: Array<FootprintEquipmentAnnualResult> = new Array();
             this.groupEquipment.forEach(equip => {
                 let equipmentInSource: boolean = false;
                 equip.utilityData.forEach(ud => {
@@ -164,11 +139,7 @@ export class EnergyFootprintGroup {
                     }
                 });
                 if (equipmentInSource) {
-                    let equipAnnualResults: Array<{
-                        year: number,
-                        energyUse: number,
-                        percentOfTotal: number
-                    }> = new Array();
+                    let equipAnnualResults: Array<FootprintAnnualResult> = new Array();
                     annualSourceResults.forEach(asr => {
                         let equipEnergyUseData = asr.equipmentEnergyUse.find(eu => eu.equipmentGuid == equip.guid);
                         let energyUse: number = 0;
@@ -195,7 +166,8 @@ export class EnergyFootprintGroup {
             this.includedSourcesAnnualResults.push({
                 source: source,
                 annualSourceResults: annualSourceResults,
-                equipmentAnnualResults: equipmentAnnualResults
+                equipmentAnnualResults: equipmentAnnualResults,
+                showEquipmentResults: false
             });
         });
     }
@@ -255,16 +227,7 @@ export class EnergyFootprintGroup {
                 });
             });
 
-            let equipmentAnnualResults: Array<{
-                equipmentGuid: string,
-                equipmentName: string,
-                color: string,
-                annualResults: Array<{
-                    year: number,
-                    energyUse: number,
-                    percentOfTotal: number
-                }>
-            }> = new Array();
+            let equipmentAnnualResults: Array<FootprintEquipmentAnnualResult> = new Array();
             this.groupEquipment.forEach(equip => {
                 if (equip.utilityMeterGroupId == meterGroup.guid) {
                     let equipAnnualResults: Array<{
@@ -298,7 +261,8 @@ export class EnergyFootprintGroup {
                 meterGroupId: meterGroup.guid,
                 meterGroupName: meterGroup.name,
                 annualResults: annualResults,
-                equipmentAnnualResults: equipmentAnnualResults
+                equipmentAnnualResults: equipmentAnnualResults,
+                showEquipmentResults: false
             });
         });
     }

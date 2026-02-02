@@ -13,3 +13,16 @@ export interface AnnualFootprintGroupSourceResult {
         percentOfTotal: number
     }>,
 }
+
+export interface FootprintEquipmentAnnualResult {
+    equipmentGuid: string,
+    equipmentName: string,
+    color: string,
+    annualResults: Array<FootprintAnnualResult>
+}
+
+export interface FootprintAnnualResult {
+    year: number,
+    energyUse: number,
+    percentOfTotal: number
+}

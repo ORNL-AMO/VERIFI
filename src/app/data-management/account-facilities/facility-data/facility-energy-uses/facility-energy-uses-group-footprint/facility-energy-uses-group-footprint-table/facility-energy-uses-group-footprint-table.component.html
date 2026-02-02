@@ -35,7 +35,9 @@
     <tbody>
         @for (sourceResult of energyFootprintGroup.includedSourcesAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap">
+            <td class="nowrap clickable" (click)="toggleCollapseEquipment($index)">
+                <span class="fa"
+                    [ngClass]="{'fa-chevron-right': !sourceResult.showEquipmentResults, 'fa-chevron-down': sourceResult.showEquipmentResults}"></span>
                 {{sourceResult.source}}
             </td>
             @for(annualEnergyUse of sourceResult.annualSourceResults; track $index){
@@ -47,6 +49,7 @@
                 {{annualEnergyUse.percentTotalEnergyUse| number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        @if(sourceResult.showEquipmentResults){
         @for(equipmentResult of sourceResult.equipmentAnnualResults; track $index){
         <tr>
             <td class="ps-3 nowrap">
@@ -65,6 +68,7 @@
                 {{annualResult.percentOfTotal | number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        }
         }
         }
     </tbody>
@@ -108,7 +112,9 @@
     <tbody>
         @for (groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap">
+            <td class="nowrap clickable" (click)="toggleCollapseEquipment($index)">
+                <span class="fa"
+                    [ngClass]="{'fa-chevron-right': !groupResult.showEquipmentResults, 'fa-chevron-down': groupResult.showEquipmentResults}"></span>
                 {{groupResult.meterGroupName}}
             </td>
             <td class="nowrap">

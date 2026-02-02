@@ -34,7 +34,7 @@
     <tbody>
         @for (sourceResult of energyFootprintFacility.includedSourcesAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap" (click)="toggleCollapseGroup($index)">
+            <td class="nowrap clickable" (click)="toggleCollapseGroup($index)">
                 <span class="fa"
                     [ngClass]="{'fa-chevron-right': !sourceResult.showGroupResults, 'fa-chevron-down': sourceResult.showGroupResults}"></span>
                 {{sourceResult.source}}
@@ -113,7 +113,7 @@
     <tbody>
         @for (meterGroupResult of energyFootprintFacility.meterGroupsAnnualResults; track $index){
         <tr class="section-row">
-            <td class="nowrap" (click)="toggleCollapseGroup($index)">
+            <td class="nowrap clickable" (click)="toggleCollapseGroup($index)">
                 <span class="fa"
                     [ngClass]="{'fa-chevron-right': !meterGroupResult.showGroupResults, 'fa-chevron-down': meterGroupResult.showGroupResults}"></span>
                 {{meterGroupResult.meterGroupName}}
