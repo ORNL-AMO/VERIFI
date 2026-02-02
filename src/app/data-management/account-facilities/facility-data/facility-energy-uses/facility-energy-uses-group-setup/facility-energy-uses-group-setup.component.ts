@@ -2,9 +2,8 @@ import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { EquipmentType, getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
-import { EquipmentTypes } from '../calculations/equipmentTypes';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
@@ -29,7 +28,6 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   energyUseGroups: Array<IdbFacilityEnergyUseGroup & { equipment: Array<IdbFacilityEnergyUseEquipment> }>;
   groupSetupIndex: number = 0;
-  equipmentTypes: Array<EquipmentType> = EquipmentTypes;
 
   groupsIdsToDelete: Array<IdbFacilityEnergyUseGroup> = [];
   showDeleteGroupModal: boolean = false;

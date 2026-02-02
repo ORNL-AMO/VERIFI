@@ -1,15 +1,14 @@
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { EquipmentTypes } from '../../calculations/equipmentTypes';
-import { EquipmentType, EquipmentUtilityData } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { EquipmentTypes } from './equipmentTypes';
+import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { Subscription } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
-import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../facility-energy-use-equipment-form.service';
+import { UtilityDataForm } from '../facility-energy-use-equipment-form.service';
 
 @Component({
   selector: 'app-equipment-details-form',
@@ -38,9 +37,7 @@ export class EquipmentDetailsFormComponent {
   linkedMeterGroupId: string;
 
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utiltiyMeterDbService: UtilityMeterdbService,
-    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
-    private cd: ChangeDetectorRef
+    private utiltiyMeterDbService: UtilityMeterdbService
   ) { }
 
   ngOnInit() {

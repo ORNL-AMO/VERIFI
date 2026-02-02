@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { getUtilityTypesForEquipmentType } from '../calculations/equipmentTypes';
+import { getUtilityTypesForEquipmentType } from '../facility-energy-use-equipment-form/equipment-details-form/equipmentTypes';
 
 @Pipe({
   name: 'utilityTypeOptions',

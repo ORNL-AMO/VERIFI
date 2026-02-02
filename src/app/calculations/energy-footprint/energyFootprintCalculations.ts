@@ -1,6 +1,4 @@
-import { getUnitOptionsForUtilityType } from "src/app/data-management/account-facilities/facility-data/facility-energy-uses/calculations/equipmentTypes";
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
-import { UnitOption } from "src/app/shared/unitOptions";
 
 export function setEnergyFootprintEnergyUse(energyUseEquipment: IdbFacilityEnergyUseEquipment) {
     energyUseEquipment.operatingConditionsData.forEach(operatingConditionYear => {
