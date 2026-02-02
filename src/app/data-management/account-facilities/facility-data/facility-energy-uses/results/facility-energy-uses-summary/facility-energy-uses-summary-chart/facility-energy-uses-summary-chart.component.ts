@@ -51,7 +51,8 @@ export class FacilityEnergyUsesSummaryChartComponent {
         mode: 'lines',
         line: { shape: 'linear' },
         type: 'scatter',
-        hovertemplate: '%{y:.2f} Energy Use<extra>%{fullData.name}</extra>'
+        hovertemplate: '%{y:.2f} Energy Use<extra>%{fullData.name}</extra>',
+        marker: { color: groupSummary.groupColor }
       };
     });
 

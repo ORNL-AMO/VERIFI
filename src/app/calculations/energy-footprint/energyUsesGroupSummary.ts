@@ -9,9 +9,11 @@ export class EnergyUsesGroupSummary {
     groupName: string;
     groupId: string;
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
+    groupColor: string;
     equipmentAnnualEnergyUse: Array<{
         equipmentGuid: string,
         equipmentName: string,
+        equipmentColor: string,
         annualEnergyUse: Array<{
             year: number,
             energyUse: number,
@@ -25,6 +27,7 @@ export class EnergyUsesGroupSummary {
         this.groupName = group.name;
         this.groupId = group.guid;
         this.groupEquipment = equipment.filter(equip => equip.energyUseGroupId == group.guid);
+        this.groupColor = group.color;
         let years: Array<number> = this.groupEquipment.flatMap(equip => equip.operatingConditionsData.map(data => data.year));
         years = _.uniq(years);
         this.setEquipmentAnnualEnergyUse(facility, years);
@@ -57,6 +60,7 @@ export class EnergyUsesGroupSummary {
             let annualEnergyUse: Array<{ year: number, energyUse: number, percentOfTotal: number }> = new Array();
             years.forEach(year => {
                 //TODO: if no data for year, find nearest previous year
+                //need to handle removing/shutting down equipment
                 let energyUseDataForYear: Array<{ year: number, energyUse: number }> = equipmentEnergyUseData.filter(data => data.year == year);
                 let totalEnergyUseForYear: number = 0;
                 energyUseDataForYear.forEach(eu => {
@@ -64,7 +68,7 @@ export class EnergyUsesGroupSummary {
                 });
                 annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear, percentOfTotal: 0 });
             });
-            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse });
+            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse, equipmentColor: equip.color});
         });
     }
 
@@ -101,9 +105,9 @@ export class EnergyUsesGroupSummary {
     }
 
     orderResults() {
-        this.totalAnnualEnergyUse = _.sortBy(this.totalAnnualEnergyUse, 'year', 'desc');
+        this.totalAnnualEnergyUse = _.sortBy(this.totalAnnualEnergyUse, 'year', 'asc');
         this.equipmentAnnualEnergyUse.forEach(equipData => {
-            equipData.annualEnergyUse = _.sortBy(equipData.annualEnergyUse, 'year', 'desc');
+            equipData.annualEnergyUse = _.sortBy(equipData.annualEnergyUse, 'year', 'asc');
         });
     }
 }
