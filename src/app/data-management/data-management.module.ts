@@ -62,8 +62,8 @@ import { FacilityEnergyUseGroupManagementComponent } from './account-facilities/
 import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
 import { FacilityEnergyUsesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component';
-import { FacilityEnergyUsesGroupSetupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component';
-import { FacilityEnergyUseEquipmentFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/facility-energy-use-equipment-form.component';
+import { FacilityEnergyUsesGroupSetupComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component';
+import { FacilityEnergyUseEquipmentFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/facility-energy-use-equipment-form.component';
 import { FacilityEnergyUsesSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary.component';
 import { FacilityEnergyUsesGroupSummaryComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component';
 import { UtilityTypeOptionsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/utility-type-options.pipe';
@@ -74,9 +74,9 @@ import { EnergyUseFormIncludedSourcesPipe } from './account-facilities/facility-
 import { EnergyUseSourceFormGroupPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-source-form-group.pipe';
 import { OrderEquipmentEnergyUseFormsPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/order-equipment-energy-use-forms.pipe';
 import { YearOptionsFilterPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/year-options-filter.pipe';
-import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-utility-data-form/equipment-utility-data-form.component';
-import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
-import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment-form/equipment-details-form/equipment-details-form.component';
+import { EquipmentUtilityDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-utility-data-form/equipment-utility-data-form.component';
+import { AnnualOperatingConditionsFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/annual-operating-conditions-form/annual-operating-conditions-form.component';
+import { EquipmentDetailsFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/equipment-details-form.component';
 import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-equipment-invalid.pipe';
 import { EnergyUseUnitPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-unit.pipe';
 import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/convert-energy-use-result.pipe';

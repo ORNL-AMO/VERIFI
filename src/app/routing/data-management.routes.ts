@@ -56,7 +56,7 @@ import { FacilityEnergyUseGroupComponent } from "../data-management/account-faci
 import { FacilityEnergyUseGroupManagementComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component";
 import { FacilityEnergyUseEquipmentComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component";
 import { FacilityEnergyUsesComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component";
-import { FacilityEnergyUsesGroupSetupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component";
+import { FacilityEnergyUsesGroupSetupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component";
 import { FacilityEnergyUsesSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary.component";
 import { FacilityEnergyUsesGroupSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component";
 import { FootprintUploadSelectFacilityComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component";
