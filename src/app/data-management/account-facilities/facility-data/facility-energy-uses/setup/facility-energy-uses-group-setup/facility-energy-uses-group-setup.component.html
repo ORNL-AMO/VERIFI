@@ -100,12 +100,14 @@
             <button class="btn action-btn me-2" (click)="addEquipmentForm()"><i class="fa fa-plus"></i> Add
                 Equipment/System to {{energyUseGroups[groupSetupIndex].name}}</button>
         </div>
+        @if(energyUseGroups.length > 1) {
         <div>
             <button class="btn btn-danger" (click)="openDeleteGroupModal()">
                 <span class="fa fa-trash"></span>
                 Delete Group
             </button>
         </div>
+        }
     </div>
 </div>
 
