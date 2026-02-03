@@ -44,7 +44,7 @@ export class EnergyUsesGroupSummary {
             equip.utilityData.forEach(ud => {
                 let siteToSource: number = 1;
                 let energyUseUnits: string = getEnergyUseUnit(ud.units);
-                if (ud.energySource == 'Electricity' && energyUseUnits != 'MMBtu') {
+                if (ud.energySource == 'Electricity' && facility.energyIsSource) {
                     siteToSource = 3;
                 }
                 ud.energyUse.forEach(eu => {

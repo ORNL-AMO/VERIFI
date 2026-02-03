@@ -13,8 +13,8 @@ orderFacilityEnergyUsesGroupFootprintTableBySource:orderByField:orderByYear:orde
             }
         </tr>
         <tr class="table-mh">
-            <th (click)="setOrderDataField('name', orderByYear)"
-                [ngClass]="{'active': orderByField == 'name'}">Source</th>
+            <th (click)="setOrderDataField('name', orderByYear)" [ngClass]="{'active': orderByField == 'name'}">Source
+            </th>
 
             @for (sourceResult of orderAnnualResults[0].annualSourceResults; track
             $index) {
@@ -89,8 +89,8 @@ orderFacilityEnergyUsesGroupFootprintTableByMeterGroup:orderByField:orderByYear:
             }
         </tr>
         <tr class="table-mh">
-            <th (click)="setOrderDataField('name', orderByYear)"
-                [ngClass]="{'active': orderByField == 'name'}">Meter Group</th>
+            <th (click)="setOrderDataField('name', orderByYear)" [ngClass]="{'active': orderByField == 'name'}">Meter
+                Group</th>
             <th>
                 Sources
             </th>
@@ -134,11 +134,14 @@ orderFacilityEnergyUsesGroupFootprintTableByMeterGroup:orderByField:orderByYear:
                 {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        @if(groupResult.showEquipmentResults){
         @for(equipmentResult of groupResult.equipmentAnnualResults; track $index){
         <tr>
             <td class="ps-3 nowrap" colspan="2">
-                <span class="fa fa-plug"></span>
-                {{equipmentResult.equipmentName}}
+                <a class="click-link" (click)="goToEquipment(equipmentResult.equipmentGuid)">
+                    <span class="fa fa-plug"></span>
+                    {{equipmentResult.equipmentName}}
+                </a>
             </td>
             @for(annualResult of equipmentResult.annualResults; track $index){
             <td class="fill-cell" [ngStyle]="{'background-size': annualResult.percentOfTotal + '% 100%'}">
@@ -150,6 +153,7 @@ orderFacilityEnergyUsesGroupFootprintTableByMeterGroup:orderByField:orderByYear:
                 {{annualResult.percentOfTotal | number:'1.0-0'}}&percnt;</td>
             }
         </tr>
+        }
         }
         }
     </tbody>

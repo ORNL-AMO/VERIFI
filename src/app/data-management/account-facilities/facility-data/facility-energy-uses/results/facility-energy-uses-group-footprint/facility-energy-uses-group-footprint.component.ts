@@ -46,9 +46,11 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   ngOnInit() {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
+      this.setEnergyFootprintGroup();
     });
     this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
       this.facilityEnergyUseEquipment = equipment;
+      this.setEnergyFootprintGroup();
     });
     this.activatedRoute.params.subscribe(params => {
       let groupId: string = params['id'];
@@ -71,18 +73,20 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   }
 
   setEnergyFootprintGroup() {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facility.guid);
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false, { energyIsSource: false, neededUnits: 'MMBtu' }, [], [], [this.facility], 'AR6', []);
-    let utilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.facility.guid);
-    this.energyFootprintGroup = new EnergyFootprintGroup(this.energyUseGroup, this.facilityEnergyUseEquipment, this.facility, calanderizedMeters, utilityMeterGroups);
+    if (this.facility && this.facilityEnergyUseEquipment && this.energyUseGroup) {
+      let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facility.guid);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false, { energyIsSource: false, neededUnits: 'MMBtu' }, [], [], [this.facility], 'AR6', []);
+      let utilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.facility.guid);
+      this.energyFootprintGroup = new EnergyFootprintGroup(this.energyUseGroup, this.facilityEnergyUseEquipment, this.facility, calanderizedMeters, utilityMeterGroups);
+    }
   }
 
   goToEquipment(equipmentGuid: string) {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + equipmentGuid);
   }
 
-  goToFacilityFootprint(){
+  goToFacilityFootprint() {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/footprint');
   }
 }

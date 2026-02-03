@@ -66,7 +66,7 @@ export class EnergyFootprintGroup {
                                 if (eu.year == year) {
                                     let energyUseUnits: string = getEnergyUseUnit(ud.units);
                                     let siteToSource: number = 1;
-                                    if (ud.energySource == 'Electricity' && energyUseUnits != 'MMBtu') {
+                                    if (ud.energySource == 'Electricity' && facility.energyIsSource) {
                                         siteToSource = 3;
                                     }
                                     let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facility.energyUnit).convertedValue;
@@ -163,7 +163,7 @@ export class EnergyFootprintGroup {
                                 if (eu.year == year) {
                                     let energyUseUnits: string = getEnergyUseUnit(ud.units);
                                     let siteToSource: number = 1;
-                                    if (ud.energySource == 'Electricity' && energyUseUnits != 'MMBtu') {
+                                    if (ud.energySource == 'Electricity' && facility.energyIsSource) {
                                         siteToSource = 3;
                                     }
                                     let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facility.energyUnit).convertedValue;
