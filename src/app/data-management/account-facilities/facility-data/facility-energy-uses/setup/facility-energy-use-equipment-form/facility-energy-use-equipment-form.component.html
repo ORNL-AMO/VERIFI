@@ -61,6 +61,13 @@ track $index) {
     [inSetup]="true">
 </app-annual-operating-conditions-form>
 }
+<div class="d-flex justify-content-end">
+    <div>
+        @if(annualOperatingConditionsDataForms.length < yearOptions.length) { <a class="click-link"
+            (click)="openAddOperatingConditionsModal()"><span class="fa fa-plus"></span> Add Year</a>
+            }
+    </div>
+</div>
 }
 <hr>
 <p class="bold mb-0">

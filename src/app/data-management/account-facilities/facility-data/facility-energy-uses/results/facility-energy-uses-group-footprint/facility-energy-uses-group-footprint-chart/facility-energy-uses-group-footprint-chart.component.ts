@@ -157,7 +157,7 @@ export class FacilityEnergyUsesGroupFootprintChartComponent {
           name: equipment?.name || 'Unknown',
           orientation: 'h',
           type: 'bar',
-          marker: { color: undefined },
+          marker: { color: equipment.color },
           hovertemplate: `%{x:,.0f} ${this.facility?.energyUnit || ''} - ${equipment?.name || 'Unknown'}<extra></extra>`,
           visible: undefined
         };

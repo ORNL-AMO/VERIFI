@@ -2,3 +2,25 @@ td.fill-cell {
     background-image: linear-gradient(to right, rgba(241, 196, 15, 1) 0%, rgba(241, 196, 15, 1) 100%);
     background-repeat: no-repeat;
 }
+
+.table.utility-data tfoot .table-mh th, .table.utility-data tfoot .table-mh th span {
+    background-color: #2c386b;
+    color: #ffffff;
+}
+
+td.clickable,
+.sortable th {
+    cursor: pointer;
+}
+
+td.clickable:hover,
+.sortable th:hover {
+    text-decoration: underline;
+}
+
+th.active {
+    text-decoration: underline;
+}
+td:not(:first-child), tfoot .table-mh th:not(:first-child) {
+    text-align: right;
+}
