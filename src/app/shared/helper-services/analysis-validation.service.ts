@@ -111,7 +111,7 @@ export class AnalysisValidationService {
           isTwelveMonthSelected = this.checkTwelveMonthSelection(group);
           allMeterReadingsPresent = this.validateMeterDataForSelectedDates(group);
           allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates(group);
-          
+
           if (isDateRangeValid && isTwelveMonthSelected && allMeterReadingsPresent && allPredictorReadingsPresent) {
             invalidModelDateSelection = false;
           }
@@ -307,8 +307,8 @@ export class AnalysisValidationService {
 
         while (year < endYear || (year === endYear && month <= endMonth)) {
           const dataPresent = variablePredictorData.some(predictorData => {
-            const readDate = new Date(predictorData.date);
-            return readDate.getFullYear() === year && readDate.getMonth() === month;
+            // const readDate = new Date(predictorData.date);
+            return predictorData.year === year && predictorData.month === month;
           });
           if (!dataPresent) {
             allPresent = false;

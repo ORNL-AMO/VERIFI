@@ -98,7 +98,7 @@ export class BackupDataService {
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => { return meter.facilityId == facility.guid });
     facilityAnalysisItems = this.trimAnalysisModels(facilityAnalysisItems);
-    
+
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(meter => { return meter.facilityId == facility.guid });
 
@@ -294,7 +294,8 @@ export class BackupDataService {
                 return predictor.id == newPredictor.guid
               });
               let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-              newIdbPredictorData.date = this.getImportDate(oldEntry.date);
+              newIdbPredictorData.month = oldEntry.date.getMonth() + 1;
+              newIdbPredictorData.year = oldEntry.date.getFullYear();
               newIdbPredictorData.amount = oldEntryPredictor.amount;
               newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
               newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
@@ -335,7 +336,11 @@ export class BackupDataService {
         delete predictorData.id;
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUIDs.newId;
-        predictorData.date = this.getImportDate(predictorData.date);
+        if(predictorData['date']){
+          predictorData.month = predictorData['date'].getMonth() + 1;
+          predictorData.year = predictorData['date'].getFullYear();
+          delete predictorData['date'];
+        }
         predictorData.facilityId = this.getNewId(predictorData.facilityId, facilityGUIDs);
         predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
@@ -585,7 +590,9 @@ export class BackupDataService {
               return predictor.id == newPredictor.guid
             });
             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-            newIdbPredictorData.date = this.getImportDate(oldEntry.date);
+            // newIdbPredictorData.dateStr = this.getImportDateString(oldEntry.date);
+            newIdbPredictorData.month = oldEntry.date.getMonth() + 1;
+            newIdbPredictorData.year = oldEntry.date.getFullYear();
             newIdbPredictorData.amount = oldEntryPredictor.amount;
             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;

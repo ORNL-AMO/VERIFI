@@ -21,7 +21,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '../form-data/naics-data';
 import { ChargesTypes, MeterChargeType } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 
@@ -793,10 +793,10 @@ export class ExportToExcelTemplateV3Service {
         month: number,
         year: number
       }> = facilityPredictorData.flatMap(pData => {
-        let pDate: Date = new Date(pData.date);
+        // let pDate: Date = new Date(pData.date);
         return {
-          month: pDate.getMonth(),
-          year: pDate.getFullYear()
+          month: pData.month,
+          year: pData.year
         }
       });
       predictorDates = _.uniqBy(predictorDates, (pDate: { month: number, year: number }) => {
@@ -815,7 +815,7 @@ export class ExportToExcelTemplateV3Service {
         facilityPredictors.forEach(predictor => {
           alpha = this.getNextAlpha(alpha);
           let reading: IdbPredictorData = facilityPredictorData.find(pData => {
-            return checkSameMonth(new Date(pData.date), new Date(pDate.year, pDate.month, 1)) && pData.predictorId == predictor.guid;
+            return checkSameMonthPredictorData(pData, new Date(pDate.year, pDate.month, 1)) && pData.predictorId == predictor.guid;
           });
           if (reading) {
             worksheet.getCell(alpha + rowIndex).value = reading.amount;

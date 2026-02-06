@@ -56,8 +56,7 @@ export class MonthlyFacilityAnalysisDataClass {
 
     setMonthPredictorData(facilityPredictorEntries: Array<IdbPredictorData>) {
         this.monthPredictorData = facilityPredictorEntries.filter(predictorData => {
-            let predictorDate: Date = new Date(predictorData.date);
-            return predictorDate.getUTCFullYear() == this.date.getUTCFullYear() && predictorDate.getUTCMonth() == this.date.getUTCMonth();
+            return predictorData.year == this.date.getFullYear() && (predictorData.month - 1) == this.date.getMonth();
         });
     }
 

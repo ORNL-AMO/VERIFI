@@ -23,6 +23,7 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
+import { getDateFromPredictorData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -110,16 +111,16 @@ export class EditPredictorComponent {
     if (this.predictor.predictorType == 'Weather') {
       if (this.addOrEdit == 'edit' && needsWeatherDataUpdate) {
         let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
-        let predictorDates: Array<Date> = predictorData.map(pData => { return new Date(pData.date) })
+        let predictorDates: Array<Date> = predictorData.map(pData => { return getDateFromPredictorData(pData) })
         let minDate: Date = _.min(predictorDates);
         let maxDate: Date = _.max(predictorDates);
         let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, minDate, maxDate, ['humidity']);
         if (parsedData != 'error') {
           for (let i = 0; i < predictorData.length; i++) {
             if (!predictorData[i].weatherOverride) {
-              let entryDate: Date = new Date(predictorData[i].date);
+              // let entryDate: Date = new Date(predictorData[i].date);
               this.loadingService.setLoadingMessage('Updating Weather Predictors: (' + i + '/' + predictorData.length + ')');
-              let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
+              let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, predictorData[i].month - 1, predictorData[i].year, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
                 return degreeDay.gapInData == true
               });
@@ -176,7 +177,8 @@ export class EditPredictorComponent {
             return degreeDay.gapInData == true
           });
           let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
-          newPredictorData.date = newDate;
+          newPredictorData.year = newDate.getFullYear();
+          newPredictorData.month = newDate.getMonth() + 1;
           newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
           newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));

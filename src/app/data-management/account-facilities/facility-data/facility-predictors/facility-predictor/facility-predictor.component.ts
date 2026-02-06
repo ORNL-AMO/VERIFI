@@ -16,15 +16,16 @@ import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
-import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
+import { getDateFromPredictorData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -143,15 +144,17 @@ export class FacilityPredictorComponent {
           let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
             return degreeDay.gapInData == true
           });
-          let predictorExists: IdbPredictorData = predictorData.find(p => { return checkSameMonth(new Date(p.date), newDate) });
+          let predictorExists: IdbPredictorData = predictorData.find(pData => { return checkSameMonthPredictorData(pData, newDate) });
           if (!predictorExists) {
             let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
-            newPredictorData.date = newDate;
+            newPredictorData.month = newDate.getMonth() + 1;
+            newPredictorData.year = newDate.getFullYear();
             newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
             newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
             await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
           } else {
-            predictorExists.date = newDate;
+            predictorExists.month = newDate.getMonth() + 1;
+            predictorExists.year = newDate.getFullYear();
             predictorExists.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
             predictorExists.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
             await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorExists));
@@ -165,8 +168,8 @@ export class FacilityPredictorComponent {
       let startDateFilter: Date = new Date(this.firstMeterReading);
       let endDateFilter: Date = new Date(this.latestMeterReading);
       let filterData: Array<IdbPredictorData> = predictorData.filter(pData => {
-        let pDataDate: Date = new Date(pData.date);
-        return (pDataDate < startDateFilter || pDataDate > endDateFilter);
+        let pDataDate: Date = getDateFromPredictorData(pData);
+        return (pDataDate.getTime() < startDateFilter.getTime() || pDataDate.getTime() > endDateFilter.getTime());
       });
       for (let i = 0; i < filterData.length; i++) {
         await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(filterData[i].id))

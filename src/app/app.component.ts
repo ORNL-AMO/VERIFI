@@ -44,6 +44,7 @@ import { IdbFacilityReport } from './models/idbModels/facilityReport';
 import { SurveyService } from './shared/helper-services/survey.service';
 import { ApplicationInstanceData } from './models/idbModels/applicationInstanceData';
 import { ApplicationInstanceDbService } from './indexedDB/application-instance-db.service';
+import { MigrateDatesService } from './indexedDB/migrate-dates.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -91,7 +92,8 @@ export class AppComponent {
     private dbChangesService: DbChangesService,
     private facilityReportsDbService: FacilityReportsDbService,
     private surveyService: SurveyService,
-    private applicationInstanceDbService: ApplicationInstanceDbService) {
+    private applicationInstanceDbService: ApplicationInstanceDbService,
+    private migrateDatesService: MigrateDatesService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -119,6 +121,11 @@ export class AppComponent {
       }
     });
     this.inDataManagement = this.router.url.includes('data-management');
+  }
+
+  async migrateDates() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.migrateDatesService.migrateDates(account);
   }
 
   async initializeData() {

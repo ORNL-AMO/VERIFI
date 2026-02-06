@@ -438,8 +438,7 @@ export class RegressionModelMenuComponent implements OnInit {
 
         while (year < endYear || (year === endYear && month <= endMonth)) {
           const dataPresent = variablePredictorData.some(predictorData => {
-            const readDate = new Date(predictorData.date);
-            return readDate.getFullYear() === year && readDate.getMonth() === month;
+            return predictorData.year === year && predictorData.month - 1 === month;
           });
           if (!dataPresent) {
             allPresent = false;

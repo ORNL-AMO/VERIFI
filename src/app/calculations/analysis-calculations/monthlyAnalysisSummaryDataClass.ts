@@ -106,8 +106,7 @@ export class MonthlyAnalysisSummaryDataClass {
 
     setMonthPredictorData(groupPredictorData: Array<IdbPredictorData>) {
         this.monthPredictorData = groupPredictorData.filter(predictorData => {
-            let predictorDate: Date = new Date(predictorData.date);
-            return predictorDate.getUTCFullYear() == this.date.getUTCFullYear() && predictorDate.getUTCMonth() == this.date.getUTCMonth();
+            return predictorData.year == this.date.getFullYear() && (predictorData.month - 1) == this.date.getMonth();
         });
     }
 

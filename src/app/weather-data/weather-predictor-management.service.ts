@@ -23,7 +23,7 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { checkSameMonth } from '../data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '../data-management/data-management-import/import-services/upload-helper-functions';
 
 
 @Injectable({
@@ -139,7 +139,8 @@ export class WeatherPredictorManagementService {
         });
         if (cddPredictor) {
           let newCddPredictorData: IdbPredictorData = getNewIdbPredictorData(cddPredictor);
-          newCddPredictorData.date = new Date(entryDate);
+          newCddPredictorData.month = entryDate.getMonth() + 1;
+          newCddPredictorData.year = entryDate.getFullYear();
           newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
           newCddPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newCddPredictorData));
@@ -147,7 +148,8 @@ export class WeatherPredictorManagementService {
 
         if (hddPredictor) {
           let newHddPredictorData: IdbPredictorData = getNewIdbPredictorData(hddPredictor);
-          newHddPredictorData.date = new Date(entryDate);
+          newHddPredictorData.month = entryDate.getMonth() + 1;
+          newHddPredictorData.year = entryDate.getFullYear();
           newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
           newHddPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newHddPredictorData));
@@ -155,7 +157,8 @@ export class WeatherPredictorManagementService {
 
         if (relativeHumidityPredictor) {
           let newRHPredictorData: IdbPredictorData = getNewIdbPredictorData(relativeHumidityPredictor);
-          newRHPredictorData.date = new Date(entryDate);
+          newRHPredictorData.month = entryDate.getMonth() + 1;
+          newRHPredictorData.year = entryDate.getFullYear();
           newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
           newRHPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newRHPredictorData));
@@ -163,7 +166,8 @@ export class WeatherPredictorManagementService {
 
         if (dryBulbTempPredictor) {
           let newDryBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dryBulbTempPredictor);
-          newDryBulbTempPredictorData.date = new Date(entryDate);
+          newDryBulbTempPredictorData.month = entryDate.getMonth() + 1;
+          newDryBulbTempPredictorData.year = entryDate.getFullYear();
           newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
           newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newDryBulbTempPredictorData));
@@ -209,7 +213,7 @@ export class WeatherPredictorManagementService {
         while (startDate < endDate) {
           let entryDate: Date = new Date(startDate);
           let monthPredictorEntry: IdbPredictorData = predictorData.find(data => {
-            return checkSameMonth(new Date(data.date), entryDate);
+            return checkSameMonthPredictorData(data, entryDate);
           });
           if (!monthPredictorEntry) {
             monthPredictorEntry = getNewIdbPredictorData(weatherPredictor);
@@ -229,7 +233,8 @@ export class WeatherPredictorManagementService {
                 return degreeDay.gapInData == true
               });
               let newPredictorData: IdbPredictorData = getNewIdbPredictorData(weatherPredictor);
-              newPredictorData.date = new Date(entryDate);
+              newPredictorData.month = entryDate.getMonth() + 1;
+              newPredictorData.year = entryDate.getFullYear();
               if (weatherPredictor.weatherDataType == 'HDD') {
                 newPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
               } else if (weatherPredictor.weatherDataType == 'CDD') {

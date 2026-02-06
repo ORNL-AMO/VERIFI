@@ -7,6 +7,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { AnalysisGroupPredictorVariable } from "src/app/models/analysis";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { getDateFromPredictorData, getLatestPredictorData } from "src/app/shared/dateHelperFunctions";
 
 export class MonthlyGroupAnalysisClass {
 
@@ -58,11 +59,9 @@ export class MonthlyGroupAnalysisClass {
     if (calculateAllMonthlyData) {
       let metersInGroup: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == this.selectedGroup.idbGroupId });
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(metersInGroup);
-      let lastPredictorEntry: IdbPredictorData = _.maxBy(this.groupPredictorData, (data: IdbPredictorData) => {
-        return data.date;
-      });
-      if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
-        this.endDate = new Date(lastPredictorEntry.date);
+      let lastPredictorEntry: IdbPredictorData = getLatestPredictorData(this.groupPredictorData);
+      if (lastPredictorEntry && lastBill.date.getTime() > getDateFromPredictorData(lastPredictorEntry).getTime()) {
+        this.endDate = new Date(lastPredictorEntry.year, lastPredictorEntry.month - 1, 1);
       } else {
         this.endDate = new Date(lastBill.date);
       }

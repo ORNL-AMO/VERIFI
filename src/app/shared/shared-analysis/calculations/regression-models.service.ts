@@ -9,6 +9,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -159,8 +161,7 @@ export class RegressionModelsService {
       }
       endog.push(energyConsumption);
       let monthPredictorData: Array<IdbPredictorData> = facilityPredictorData.filter(pData => {
-        let dataDate: Date = new Date(pData.date);
-        return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return checkSameMonthPredictorData(pData, startDate);
       });
 
       //need 1 for constants
@@ -175,9 +176,9 @@ export class RegressionModelsService {
         usageArr.push(totalUsage);
       });
       exog.push(usageArr);
-      let currentMonth: number = startDate.getUTCMonth()
+      let currentMonth: number = startDate.getMonth()
       let nextMonth: number = currentMonth + 1;
-      startDate = new Date(startDate.getUTCFullYear(), nextMonth, 1);
+      startDate = new Date(startDate.getFullYear(), nextMonth, 1);
     }
 
     return {
@@ -316,7 +317,8 @@ export class RegressionModelsService {
     let reportYearPredictorData: Array<IdbPredictorData> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorData> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = getFiscalYear(new Date(facilityPredictorData[i].date), facility);
+      let predictorDate: Date = getDateFromPredictorData(facilityPredictorData[i])
+      let fiscalYear: number = getFiscalYear(predictorDate, facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }

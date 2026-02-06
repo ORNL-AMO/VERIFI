@@ -14,6 +14,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getDateFromPredictorData, getLatestPredictorData } from '../dateHelperFunctions';
 
 @Injectable({
   providedIn: 'root'
@@ -51,11 +52,9 @@ export class PredictorDataHelperService {
 
   getLastPredictorReadingDate(predictor: IdbPredictor): Date {
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
-    let latestPredictorData: IdbPredictorData = _.maxBy(predictorData, (pData: IdbPredictorData) => {
-      return new Date(pData.date);
-    })
+    let latestPredictorData: IdbPredictorData = getLatestPredictorData(predictorData);
     if (latestPredictorData) {
-      let predictorDate: Date = new Date(latestPredictorData.date);
+      let predictorDate: Date = getDateFromPredictorData(latestPredictorData);
       return predictorDate;
     }
     return undefined;

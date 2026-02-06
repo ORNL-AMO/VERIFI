@@ -1,3 +1,4 @@
+import { getDateFromPredictorData } from "src/app/shared/dateHelperFunctions";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbPredictor } from "./predictor";
 
@@ -8,21 +9,26 @@ export interface IdbPredictorData extends IdbEntry {
     accountId: string,
     predictorId: string,
     amount: number,
-    date: Date,
+    month: number,
+    year: number,
+    // dateStr: string,
+    // date: Date,
     checked?: boolean,
     weatherDataWarning: boolean,
     weatherOverride: boolean,
-    notes?: string
+    notes?: string,
+    migratedDates?: boolean
 }
 
 export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: Array<IdbPredictorData>): IdbPredictorData {
     let pDate: Date = new Date();
     if (existingData) {
         let latestEntry: IdbPredictorData = _.maxBy(existingData, (pData: IdbPredictorData) => {
-            return new Date(pData.date);
+            let pDataDate: Date = getDateFromPredictorData(pData);
+            return pDataDate.getTime();
         });
         if (latestEntry) {
-            pDate = new Date(latestEntry.date);
+            pDate = getDateFromPredictorData(latestEntry);
             pDate.setMonth(pDate.getMonth() + 1);
         }
     }
@@ -33,7 +39,9 @@ export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: A
         accountId: predictor.accountId,
         predictorId: predictor.guid,
         amount: undefined,
-        date: pDate,
+        month: pDate.getMonth() + 1,
+        year: pDate.getFullYear(),
+        // dateStr: getStringFromDate(pDate),
         checked: false,
         weatherDataWarning: false,
         weatherOverride: false,

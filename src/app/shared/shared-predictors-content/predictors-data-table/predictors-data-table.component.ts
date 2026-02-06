@@ -19,6 +19,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
@@ -273,7 +274,7 @@ export class PredictorsDataTableComponent {
           this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
         }
       }
-      let entryDate: Date = new Date(predictorEntry.date);
+      let entryDate: Date = getDateFromPredictorData(predictorEntry);
       this.weatherDataService.selectedYear = entryDate.getFullYear();
       this.weatherDataService.selectedDate = entryDate;
       this.weatherDataService.selectedMonth = entryDate;

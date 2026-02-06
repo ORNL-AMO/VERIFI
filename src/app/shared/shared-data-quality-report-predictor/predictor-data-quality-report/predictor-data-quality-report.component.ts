@@ -3,6 +3,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getPredictorStatistics, PredictorStatistics } from '../predictorDataQualityStatistics';
 import { Router } from '@angular/router';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-predictor-data-quality-report',
@@ -43,7 +44,7 @@ export class PredictorDataQualityReportComponent {
   checkMultipleReadings() {
     let dateCount: { [key: string]: number } = {};
     this.predictorData.forEach(data => {
-      let date = new Date(data.date);
+      let date = getDateFromPredictorData(data);
       let month = date.toLocaleString('default', { month: 'short' });
       let year = date.getFullYear();
       let monthYear = `${month}, ${year}`;

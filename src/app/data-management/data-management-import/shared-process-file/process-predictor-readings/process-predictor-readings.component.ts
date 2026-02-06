@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-process-predictor-readings',
@@ -59,17 +60,17 @@ export class ProcessPredictorReadingsComponent {
       const existingPredictorReadings = this.predictorDataDbService.accountPredictorData.getValue().filter(data => (data.predictorId === newData.predictorId && data.facilityId === newData.facilityId));
 
       existingPredictorReadings.forEach(oldData => {
-        const oldDateObj = new Date(oldData.date);
-        const newDateObj = new Date(newData.date);
-        const existingDateStr = oldDateObj.getFullYear() + '-' + (oldDateObj.getMonth() + 1) + '-' + oldDateObj.getDate();
-        const newDateStr = newDateObj.getFullYear() + '-' + (newDateObj.getMonth() + 1) + '-' + newDateObj.getDate();
+        // const oldDateObj = new Date(oldData.date);
+        // const newDateObj = new Date(newData.date);
+        // const existingDateStr = oldData.dateStr;
+        // const newDateStr = newData.dateStr;
 
-        if (existingDateStr === newDateStr) {
+        if (oldData.month == newData.month && oldData.year == newData.year) {
           let difference: number = Math.abs(newData.amount - oldData.amount);
           let percentageDifference: number = (oldData.amount !== 0) ? (difference / oldData.amount * 100) : null;
           if (difference !== 0) {
             this.readingDifferencesMap[key].push({
-              readDate: new Date(newData.date),
+              readDate: getDateFromPredictorData(newData),
               oldReading: oldData.amount,
               newReading: newData.amount,
               difference: difference,
@@ -125,15 +126,15 @@ export class ProcessPredictorReadingsComponent {
           let existingStart: Date;
           let existingEnd: Date;
           if (existingData.length != 0) {
-            existingStart = _.minBy(existingData, (pData: IdbPredictorData) => { return pData.date }).date
-            existingEnd = _.maxBy(existingData, (pData: IdbPredictorData) => { return pData.date }).date
+            existingStart = getEarliestPredictorDataDate(existingData);
+            existingEnd = getLatestPredictorDataDate(existingData);
           }
 
           let newStart: Date;
           let newEnd: Date;
           if (newPredictorData.length != 0) {
-            newStart = _.minBy(newPredictorData, (pData: IdbPredictorData) => { return pData.date }).date
-            newEnd = _.maxBy(newPredictorData, (pData: IdbPredictorData) => { return pData.date }).date
+            newStart = getEarliestPredictorDataDate(newPredictorData);
+            newEnd = getLatestPredictorDataDate(newPredictorData);
           }
           dataSummaries.push({
             facilityName: facility.name,

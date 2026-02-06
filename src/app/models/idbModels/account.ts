@@ -18,6 +18,7 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     assessmentReportVersion?: AssessmentReportVersion,
     sidebarCustomDataOpen?: boolean,
     toDoListOutdatedDays?: number
+    migratedDates?: boolean
 }
 
 export function getNewIdbAccount(): IdbAccount {

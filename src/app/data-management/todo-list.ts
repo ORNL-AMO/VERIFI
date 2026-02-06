@@ -7,6 +7,7 @@ import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
 import * as _ from 'lodash';
 import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup";
+import { getDateFromPredictorData, getLatestPredictorData } from "../shared/dateHelperFunctions";
 
 export function getTodoList(account: IdbAccount,
     facilities: Array<IdbFacility>,
@@ -191,8 +192,8 @@ function setPredictorTodoItems(predictor: IdbPredictor,
             trackGuid: predictor.guid
         });
     } else {
-        let latestReading: IdbPredictorData = _.maxBy(predictorDataForFacility, (data: IdbPredictorData) => new Date(data.date).getTime());
-        let readingDate: Date = new Date(latestReading.date);
+        let latestReading: IdbPredictorData = getLatestPredictorData(predictorDataForFacility);
+        let readingDate: Date = getDateFromPredictorData(latestReading);
         // Set readingDate to end of the month
         readingDate = new Date(readingDate.getFullYear(), readingDate.getMonth() + 1, 0);
         //

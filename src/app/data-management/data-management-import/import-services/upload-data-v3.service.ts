@@ -10,7 +10,7 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
@@ -27,6 +27,7 @@ import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/
 import { WaterDischargeTypes, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -970,7 +971,7 @@ export class UploadDataV3Service {
                 let predictorValue: number = excelPredictorData['Predictor ' + i + ' Value'];
                 if (isNaN(predictorValue) == false) {
                   let existingPredictorData: IdbPredictorData = facilityPredictorData.find(pData => {
-                    return facilityPredictor.guid == pData.predictorId && checkSameMonth(new Date(pData.date), readDate)
+                    return facilityPredictor.guid == pData.predictorId && checkSameMonthPredictorData(pData, readDate)
                   });
                   if (existingPredictorData) {
                     let predictorDataCopy: IdbPredictorData = _.cloneDeep(existingPredictorData);
@@ -978,7 +979,8 @@ export class UploadDataV3Service {
                     importPredictorData.push(predictorDataCopy);
                   } else {
                     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(facilityPredictor);
-                    newPredictorData.date = readDate;
+                    // newPredictorData.date = readDate;
+                    newPredictorData = setPredictorDateDataFromDate(newPredictorData, readDate);
                     newPredictorData.amount = predictorValue;
                     importPredictorData.push(newPredictorData);
                   }

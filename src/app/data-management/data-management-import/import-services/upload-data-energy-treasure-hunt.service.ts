@@ -379,28 +379,32 @@ export class UploadDataEnergyTreasureHuntService {
         let pd1: number = worksheet['D' + index]?.v;
         if (pd1) {
           let pd1Data: IdbPredictorData = getNewIdbPredictorData(predictor1)
-          pd1Data.date = date;
+          pd1Data.month = date.getMonth() + 1;
+          pd1Data.year = date.getFullYear();
           pd1Data.amount = pd1;
           productionData1.push(pd1Data);
         }
         let pd2: number = worksheet['E' + index]?.v;
         if (pd2) {
           let pd2Data: IdbPredictorData = getNewIdbPredictorData(predictor2)
-          pd2Data.date = date;
+          pd2Data.month = date.getMonth() + 1;
+          pd2Data.year = date.getFullYear();
           pd2Data.amount = pd2;
           productionData2.push(pd2Data);
         }
         let pd3: number = worksheet['F' + index]?.v;
         if (pd3) {
           let pd3Data: IdbPredictorData = getNewIdbPredictorData(predictor3)
-          pd3Data.date = date;
+          pd3Data.month = date.getMonth() + 1;
+          pd3Data.year = date.getFullYear();
           pd3Data.amount = pd3;
           productionData3.push(pd3Data);
         }
         let totalHours: number = worksheet['H' + index]?.v;
         if (totalHours) {
           let totalHoursData: IdbPredictorData = getNewIdbPredictorData(predictorTotalHours)
-          totalHoursData.date = date;
+          totalHoursData.month = date.getMonth() + 1;
+          totalHoursData.year = date.getFullYear();
           totalHoursData.amount = totalHours;
           productionDataTotalHours.push(totalHoursData);
         }

@@ -12,8 +12,11 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     facilityId: string,
     accountId: string,
     //data
+    readDateStr?: string,
     readDate: Date,
     dbDate?: Date,
+    
+    
     totalVolume?: number,
     totalEnergyUse: number,
     totalCost: number,

@@ -26,7 +26,7 @@ import { PredictorDbService } from '../../../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../../../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../../../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../../../models/idbModels/predictorData';
-import { checkSameDay, checkSameMonth } from './upload-helper-functions';
+import { checkSameDay, checkSameMonthPredictorData } from './upload-helper-functions';
 import { LoadingService } from '../../../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../../../core-components/toast-notifications/toast-notifications.service';
 import { SharedDataService } from '../../../shared/helper-services/shared-data.service';
@@ -35,6 +35,7 @@ import { UtilityMeterDataService } from '../../../shared/shared-meter-content/ut
 import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
+import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions';
 
 @Injectable({
   providedIn: 'root'
@@ -423,7 +424,6 @@ export class UploadDataService {
     return utilityData;
   }
 
-
   parseExcelPredictorsData(fileReference: FileReference): { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
@@ -459,7 +459,7 @@ export class UploadDataService {
             if (!isNaN(readDate.valueOf())) {
               if (predictor) {
                 let existingPredictorData: IdbPredictorData = facilityPredictorData.find(entry => {
-                  return checkSameMonth(new Date(entry.date), readDate) && predictor.guid == entry.predictorId;
+                  return checkSameMonthPredictorData(entry, readDate) && predictor.guid == entry.predictorId;
                 });
                 if (existingPredictorData) {
                   existingPredictorData.amount = Number(dataRow[predictorItem.value]);
@@ -467,7 +467,7 @@ export class UploadDataService {
                 } else {
                   let newPredictorData: IdbPredictorData = getNewIdbPredictorData(predictor);
                   newPredictorData.amount = Number(dataRow[predictorItem.value]);
-                  newPredictorData.date = new Date(readDate);
+                  newPredictorData = setPredictorDateDataFromDate(newPredictorData, readDate);
                   predictorData.push(newPredictorData);
                 }
               }
