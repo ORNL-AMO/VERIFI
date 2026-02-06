@@ -252,7 +252,12 @@ export class BackupDataService {
       meterData.accountId = accountGUIDs.newId;
       meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
-      meterData.readDate = this.getImportDate(meterData.readDate);
+      if (meterData['readDate']) {
+        meterData.year = new Date(meterData['readDate']).getFullYear();
+        meterData.month = new Date(meterData['readDate']).getMonth() + 1;
+        meterData.day = new Date(meterData['readDate']).getDate();
+        delete meterData['readDate'];
+      }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
@@ -336,7 +341,7 @@ export class BackupDataService {
         delete predictorData.id;
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUIDs.newId;
-        if(predictorData['date']){
+        if (predictorData['date']) {
           predictorData.month = predictorData['date'].getMonth() + 1;
           predictorData.year = predictorData['date'].getFullYear();
           delete predictorData['date'];
@@ -534,7 +539,12 @@ export class BackupDataService {
       meterData.accountId = accountGUID;
       meterData.facilityId = newFacilityGUID;
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
-      meterData.readDate = this.getImportDate(meterData.readDate);
+      if (meterData['readDate']) {
+        meterData.year = new Date(meterData['readDate']).getFullYear();
+        meterData.month = new Date(meterData['readDate']).getMonth() + 1;
+        meterData.day = new Date(meterData['readDate']).getDate();
+        delete meterData['readDate'];
+      }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
@@ -718,24 +728,24 @@ export class BackupDataService {
     return newFacility;
   }
 
-  getImportDate(date: Date): Date {
-    //date imported with timestap cause problems.
-    if (typeof date.getMonth === 'function') {
-      return date;
-    } else {
-      let readDateString: string = String(date);
-      //remove time stamp
-      let newString: string = readDateString.split('T')[0];
-      //Format: YYYY-MM-DD
-      let yearMonthDate: Array<string> = newString.split('-');
-      //Month 0 indexed (-1)
-      if (yearMonthDate.length == 3) {
-        return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
-      } else {
-        return date;
-      }
-    }
-  }
+  // getImportDate(date: Date): Date {
+  //   //date imported with timestap cause problems.
+  //   if (typeof date.getMonth === 'function') {
+  //     return date;
+  //   } else {
+  //     let readDateString: string = String(date);
+  //     //remove time stamp
+  //     let newString: string = readDateString.split('T')[0];
+  //     //Format: YYYY-MM-DD
+  //     let yearMonthDate: Array<string> = newString.split('-');
+  //     //Month 0 indexed (-1)
+  //     if (yearMonthDate.length == 3) {
+  //       return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
+  //     } else {
+  //       return date;
+  //     }
+  //   }
+  // }
 
   getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {
     return {

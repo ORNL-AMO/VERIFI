@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DatePipe } from 'node_modules/@angular/common/types/_common_module-chunk';
+import { DatePipe } from '@angular/common';
 import { getDateFromPredictorData } from '../dateHelperFunctions';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 

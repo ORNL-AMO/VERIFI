@@ -65,7 +65,7 @@ export function filterYearPredictorData(predictorData: Array<IdbPredictorData>, 
 export function filterYearMeterData(meterData: Array<MonthlyData>, year: number, facility: IdbFacility): Array<MonthlyData> {
     if (facility.fiscalYear == 'calendarYear') {
         return meterData.filter(meterDataItem => {
-            return new Date(meterDataItem.date).getUTCFullYear() == year;
+            return new Date(meterDataItem.date).getFullYear() == year;
         });
     } else {
         return meterData.filter(meterDataItem => {

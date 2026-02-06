@@ -115,10 +115,10 @@ export class UtilityMeterDataService {
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
     //need to use date string for calander to work in form
     let dateString: string;
-    if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
+    if (isNaN(meterData.year) == false && isNaN(meterData.month) == false && isNaN(meterData.day) == false) {
       let datePipe: DatePipe = new DatePipe(navigator.language);
       let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
-      dateString = datePipe.transform(meterData.readDate, stringFormat);
+      dateString = datePipe.transform(new Date(meterData.year, meterData.month - 1, meterData.day), stringFormat);
     }
 
     let chargesArray: FormArray = this.formBuilder.array(meterData.charges ? meterData.charges.map(charge => {
@@ -144,9 +144,10 @@ export class UtilityMeterDataService {
 
 
   updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
-    //UTC date is one day behind from form
     let formDate: Date = new Date(form.controls.readDate.value)
-    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
+    meterData.year = formDate.getFullYear();
+    meterData.month = formDate.getMonth() + 1;
+    meterData.day = formDate.getDate();
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
     meterData.totalRealDemand = form.controls.totalRealDemand.value;
@@ -181,10 +182,10 @@ export class UtilityMeterDataService {
   getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean, source: MeterSource): FormGroup {
     //need to use date string for calander to work in form 
     let dateString: string;
-    if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
+    if (isNaN(meterData.year) == false && isNaN(meterData.month) == false && isNaN(meterData.day) == false) {
       let datePipe: DatePipe = new DatePipe(navigator.language);
       let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
-      dateString = datePipe.transform(meterData.readDate, stringFormat);
+      dateString = datePipe.transform(new Date(meterData.year, meterData.month - 1, meterData.day), stringFormat);
     }
     let totalVolumeValidators: Array<ValidatorFn> = [];
     if (displayVolumeInput) {
@@ -233,9 +234,10 @@ export class UtilityMeterDataService {
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
-    //UTC date is one day behind from form
     let formDate: Date = new Date(form.controls.readDate.value)
-    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
+    meterData.year = formDate.getFullYear();
+    meterData.month = formDate.getMonth() + 1;
+    meterData.day = formDate.getDate();
     meterData.totalVolume = form.controls.totalVolume.value;
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;

@@ -108,7 +108,7 @@ export class MonthlyGroupAnalysisClass {
 
   setAnnualMeterDataUsage() {
     this.annualMeterDataUsage = new Array();
-    for (let year = this.baselineYear; year <= this.endDate.getUTCFullYear(); year++) {
+    for (let year = this.baselineYear; year <= this.endDate.getFullYear(); year++) {
       let yearMeterData: Array<MonthlyData> = this.groupMonthlyData.filter(data => { return data.year == year });
       if (this.analysisItem.analysisCategory == 'energy') {
         let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyUse });

@@ -272,15 +272,14 @@ export class AnalysisValidationService {
   }
 
   validateMeterDataForSelectedDates(group: AnalysisGroup) {
-    let month = group.regressionModelStartMonth;;
+    let month = group.regressionModelStartMonth;
     let year = group.regressionStartYear;
     const endMonth = group.regressionModelEndMonth;
     const endYear = group.regressionEndYear;
 
     while (year < endYear || (year === endYear && month <= endMonth)) {
       const dataPresent = this.facilityMeterData.some(meterData => {
-        const readDate = new Date(meterData.readDate);
-        return readDate.getFullYear() === year && readDate.getMonth() === month;
+        return meterData.year === year && meterData.month === month;
       });
       if (!dataPresent) {
         return false;
@@ -307,7 +306,6 @@ export class AnalysisValidationService {
 
         while (year < endYear || (year === endYear && month <= endMonth)) {
           const dataPresent = variablePredictorData.some(predictorData => {
-            // const readDate = new Date(predictorData.date);
             return predictorData.year === year && predictorData.month === month;
           });
           if (!dataPresent) {

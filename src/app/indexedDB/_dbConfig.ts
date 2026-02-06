@@ -55,7 +55,6 @@ export const dbConfig: DBConfig = {
       { name: 'meterId', keypath: 'meterId', options: { unique: false } },
       { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
       { name: 'accountId', keypath: 'accountId', options: { unique: false } },
-      { name: 'readDate', keypath: 'readDate', options: { unique: false } },
       { name: 'unit', keypath: 'unit', options: { unique: false } },
       { name: 'totalEnergyUse', keypath: 'totalEnergyUse', options: { unique: false } },
       { name: 'totalCost', keypath: 'totalCost', options: { unique: false } },

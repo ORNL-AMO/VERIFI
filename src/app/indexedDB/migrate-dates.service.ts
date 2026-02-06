@@ -5,6 +5,7 @@ import { IdbAccount } from '../models/idbModels/account';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { firstValueFrom } from 'rxjs';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 // import { getStringFromDate } from '../shared/dateHelperFunctions';
 
 @Injectable({
@@ -17,11 +18,15 @@ export class MigrateDatesService {
   ) { }
 
   async migrateDates(account: IdbAccount) {
-    let accountMeterData = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     for (let meterData of accountMeterData) {
-      if (meterData['readDate'] && !meterData.readDateStr) {
+      if (meterData['readDate'] && !meterData.migratedDates) {
         // Format date as YYYY-MM-DD
         // meterData.readDateStr = getStringFromDate(meterData['readDate']);
+        meterData.month = meterData['readDate'].getMonth() + 1;
+        meterData.year = meterData['readDate'].getFullYear();
+        meterData.day = meterData['readDate'].getDate();
+        meterData.migratedDates = true;
         delete meterData['readDate'];
         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
       }

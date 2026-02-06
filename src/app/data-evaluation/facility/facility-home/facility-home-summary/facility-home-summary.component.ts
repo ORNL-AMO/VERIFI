@@ -13,6 +13,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { getDateFromMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -65,7 +66,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   setFacilityStatus() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
+    this.lastBill = getLatestMeterData(facilityMeterData);
     this.setMeterReadingsNeeded();
     this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
     this.setEnergyAnalysisNeeded();
@@ -79,7 +80,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let currentDate: Date = new Date();
     currentDate.setMonth(currentDate.getMonth() - 1);
     if (this.lastBill) {
-      let lastBillDate: Date = new Date(this.lastBill.readDate);
+      let lastBillDate: Date = getDateFromMeterData(this.lastBill);
       if (lastBillDate < currentDate) {
         this.meterReadingsNeeded = true;
       } else {

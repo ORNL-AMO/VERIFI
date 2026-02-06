@@ -5,7 +5,7 @@ import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facilit
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterCharge, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
@@ -510,7 +510,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+          dbDataPoint.year = readDate.getFullYear();
+          dbDataPoint.month = readDate.getMonth() - 1;
+          dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalEnergyUse = totalUsage;
           dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Actual Demand']);
           dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
@@ -540,7 +542,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Higher Heating Value']);
           let totalVolume: number = 0;
@@ -585,7 +589,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.day = readDate.getDate();
           let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
           if (fuelEff) {
             dbDataPoint.vehicleFuelEfficiency = fuelEff;
@@ -625,7 +631,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Energy Factor']);
           let totalVolume: number = 0;
@@ -671,7 +679,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           dbDataPoint.totalVolume = totalUsage;
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
@@ -698,7 +708,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           dbDataPoint.totalVolume = totalUsage;
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
@@ -826,8 +838,7 @@ export class UploadDataV3Service {
   getExistingDbEntry(utilityMeterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter, readDate: Date): IdbUtilityMeterData {
     return utilityMeterData.find(meterDataItem => {
       if (meterDataItem.meterId == meter.guid) {
-        let dateItemDate: Date = new Date(meterDataItem.readDate);
-        return checkSameDay(dateItemDate, readDate);
+        return checkSameDate(readDate, meterDataItem);
       } else {
         return false;
       }

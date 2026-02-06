@@ -158,7 +158,7 @@ export class VehicleDataTableComponent {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit,
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, dataItem.year, false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit,
         this.selectedMeter.vehicleDistanceUnit, dataItem.vehicleFuelEfficiency, account.assessmentReportVersion, []);
       dataItem.mobileBiogenicEmissions = emissionsValues.mobileBiogenicEmissions;
       dataItem.mobileCarbonEmissions = emissionsValues.mobileCarbonEmissions;

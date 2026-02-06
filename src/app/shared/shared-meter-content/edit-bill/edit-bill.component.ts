@@ -16,6 +16,7 @@ import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/i
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { getDateFromMeterData, setMeterDataDateFromDate } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-edit-bill',
@@ -131,8 +132,9 @@ export class EditBillComponent implements OnInit {
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
-    this.editMeterData.readDate = new Date(meterDataToSave.readDate);
-    this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
+    let nextDate: Date = getDateFromMeterData(meterDataToSave);
+    nextDate.setMonth(nextDate.getMonth() + 1);
+    this.editMeterData = setMeterDataDateFromDate(this.editMeterData, nextDate);
     this.setMeterDataForm();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "alert-success");

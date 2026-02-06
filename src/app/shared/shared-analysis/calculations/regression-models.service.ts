@@ -9,7 +9,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
@@ -151,7 +151,7 @@ export class RegressionModelsService {
     while (startDate < endDate) {
       let monthData: Array<MonthlyData> = allMeterData.filter(data => {
         let dataDate: Date = new Date(data.date);
-        return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return checkSameMonth(dataDate, startDate);
       });
       let energyConsumption: number;
       if (analysisCategory == 'energy') {

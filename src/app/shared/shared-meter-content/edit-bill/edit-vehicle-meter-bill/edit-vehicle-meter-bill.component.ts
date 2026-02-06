@@ -11,7 +11,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
@@ -124,9 +124,9 @@ export class EditVehicleMeterBillComponent {
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
-      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
+      // let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
       let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
-      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
+      if (checkSameDate(changeDate, this.editMeterData)) {
         this.invalidDate = false;
       } else {
         this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;

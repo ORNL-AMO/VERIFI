@@ -14,7 +14,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { getEarliestPredictorDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
+import { getEarliestMeterData, getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterData, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-submit-import-data',
@@ -159,14 +159,8 @@ export class SubmitImportDataComponent {
     let minExistingStartDate: Date;
     let maxExistingStartDate: Date;
     if (existingReadings.length > 0) {
-      let minExisting: IdbUtilityMeterData = _.minBy(existingReadings, (data: IdbUtilityMeterData) => {
-        return new Date(data.readDate);
-      });
-      minExistingStartDate = new Date(minExisting.readDate);
-      let maxExisting: IdbUtilityMeterData = _.maxBy(existingReadings, (data: IdbUtilityMeterData) => {
-        return new Date(data.readDate);
-      });
-      maxExistingStartDate = new Date(maxExisting.readDate);
+      minExistingStartDate = getEarliestMeterDataDate(existingReadings);
+      maxExistingStartDate = getLatestMeterDataDate(existingReadings);
     }
     let newReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(mData => {
       return mData.meterId == meter.guid && mData.id == undefined
@@ -174,14 +168,8 @@ export class SubmitImportDataComponent {
     let minNewStartDate: Date;
     let maxNewStartDate: Date;
     if (newReadings.length > 0) {
-      let minNew: IdbUtilityMeterData = _.minBy(newReadings, (data: IdbUtilityMeterData) => {
-        return new Date(data.readDate);
-      });
-      minNewStartDate = new Date(minNew.readDate);
-      let maxNew: IdbUtilityMeterData = _.maxBy(newReadings, (data: IdbUtilityMeterData) => {
-        return new Date(data.readDate);
-      });
-      maxNewStartDate = new Date(maxNew.readDate);
+      minNewStartDate = getEarliestMeterDataDate(newReadings);
+      maxNewStartDate = getLatestMeterDataDate(newReadings);
     }
     return {
       meter: meter,

@@ -127,9 +127,9 @@ export class MonthlyFacilityAnalysisClass {
                 this.facilityPredictors
             );
             this.facilityMonthSummaries.push(monthSummary);
-            let currentMonth: number = monthDate.getUTCMonth()
+            let currentMonth: number = monthDate.getMonth()
             let nextMonth: number = currentMonth + 1;
-            monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
+            monthDate = new Date(monthDate.getFullYear(), nextMonth, 1);
         }
     }
 

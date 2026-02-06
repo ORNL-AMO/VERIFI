@@ -149,19 +149,19 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
 export function getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAccount): number {
     date = new Date(date);
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
-        return date.getUTCFullYear();
+        return date.getFullYear();
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
-            if (date.getUTCMonth() >= facilityOrAccount.fiscalYearMonth) {
-                return date.getUTCFullYear() + 1;
+            if (date.getMonth() >= facilityOrAccount.fiscalYearMonth) {
+                return date.getFullYear() + 1;
             } else {
-                return date.getUTCFullYear();
+                return date.getFullYear();
             }
         } else {
-            if (date.getUTCMonth() >= facilityOrAccount.fiscalYearMonth) {
-                return date.getUTCFullYear();
+            if (date.getMonth() >= facilityOrAccount.fiscalYearMonth) {
+                return date.getFullYear();
             } else {
-                return date.getUTCFullYear() - 1;
+                return date.getFullYear() - 1;
             }
         }
     }

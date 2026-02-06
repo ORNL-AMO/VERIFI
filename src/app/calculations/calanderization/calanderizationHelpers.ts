@@ -7,40 +7,40 @@ import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { getDateFromMeterData, getLatestMeterData } from "src/app/shared/dateHelperFunctions";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     //set to the 5th to not conflict
     let previousMonth: Date = new Date();
-    previousMonth.setUTCFullYear(year, month - 1, 5);
-    let previousMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(previousMonth.getUTCMonth(), previousMonth.getUTCFullYear(), meterReadings);
+    previousMonth.setFullYear(year, month - 1, 5);
+    let previousMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(previousMonth.getMonth(), previousMonth.getFullYear(), meterReadings);
     if (previousMonthReadings.length == 0) {
-        return getPreviousMonthsBill(previousMonth.getUTCMonth(), previousMonth.getUTCFullYear(), meterReadings);
+        return getPreviousMonthsBill(previousMonth.getMonth(), previousMonth.getFullYear(), meterReadings);
     } else if (previousMonthReadings.length == 1) {
         return previousMonthReadings[0]
     } else {
-        let latestReading: IdbUtilityMeterData = _.maxBy(previousMonthReadings, (reading) => { return new Date(reading.readDate) });
+        let latestReading: IdbUtilityMeterData = getLatestMeterData(meterReadings);
         return latestReading;
     }
 }
 
 export function getCurrentMonthsReadings(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-    let currentMonthReadings: Array<IdbUtilityMeterData> = _.filter(meterReadings, (reading) => {
-        let readingDate: Date = new Date(reading.readDate);
-        return (month == readingDate.getUTCMonth() && year == readingDate.getUTCFullYear());
+    let currentMonthReadings: Array<IdbUtilityMeterData> = _.filter(meterReadings, (reading: IdbUtilityMeterData) => {
+        return (month == reading.month - 1 && year == reading.year);
     });
-    return _.orderBy(currentMonthReadings, (data) => { return new Date(data.readDate) });
+    return _.orderBy(currentMonthReadings, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data) });
 }
 
 export function getNextMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     let nextMonth: Date = new Date();
     nextMonth.setFullYear(year, month + 1, 5);
-    let nextMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(nextMonth.getUTCMonth(), nextMonth.getUTCFullYear(), meterReadings);
+    let nextMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(nextMonth.getMonth(), nextMonth.getFullYear(), meterReadings);
     if (nextMonthReadings.length == 0) {
-        return getNextMonthsBill(nextMonth.getUTCMonth(), nextMonth.getUTCFullYear(), meterReadings);
+        return getNextMonthsBill(nextMonth.getMonth(), nextMonth.getFullYear(), meterReadings);
     } else if (nextMonthReadings.length == 1) {
         return nextMonthReadings[0]
     } else {
-        let latestReading: IdbUtilityMeterData = _.minBy(nextMonthReadings, (reading) => { return new Date(reading.readDate) });
+        let latestReading: IdbUtilityMeterData = _.minBy(nextMonthReadings, (reading: IdbUtilityMeterData) => { return getDateFromMeterData(reading) });
         return latestReading;
     }
 }

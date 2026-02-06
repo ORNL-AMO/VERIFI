@@ -7,7 +7,7 @@ import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
 import * as _ from 'lodash';
 import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup";
-import { getDateFromPredictorData, getLatestPredictorData } from "../shared/dateHelperFunctions";
+import { getDateFromMeterData, getDateFromPredictorData, getLatestMeterData, getLatestPredictorData } from "../shared/dateHelperFunctions";
 
 export function getTodoList(account: IdbAccount,
     facilities: Array<IdbFacility>,
@@ -159,8 +159,8 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
         }
 
 
-        let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
-        let readingDate: Date = new Date(latestReading.readDate);
+        let latestReading: IdbUtilityMeterData = getLatestMeterData(meterDataForMeter);
+        let readingDate: Date = getDateFromMeterData(latestReading);
 
         if (latestReading && readingDate.getTime() < (new Date().getTime() - outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
             const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');

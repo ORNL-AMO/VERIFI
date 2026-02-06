@@ -135,7 +135,7 @@ export class FacilityOverviewComponent implements OnInit {
           let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
           let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
           let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
-          let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+          let minDate: Date = new Date(maxDate.getMonth() - 1, maxDate.getMonth(), 1);
           minDate.setMonth(minDate.getMonth() + 1);
           this.dateRange = {
             endDate: maxDate,

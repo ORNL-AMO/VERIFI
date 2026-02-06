@@ -7,6 +7,7 @@ import { ConvertValue } from "../conversions/convertValue";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { GroupMonthlyAnalysisRollupValues } from './groupMonthlyAnalysisRollupValuesClass';
+import { checkSameMonth } from "src/app/data-management/data-management-import/import-services/upload-helper-functions";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -113,7 +114,7 @@ export class MonthlyAnalysisSummaryDataClass {
     setMonthMeterData(allMonthlyData: Array<MonthlyData>) {
         this.monthMeterData = allMonthlyData.filter(data => {
             let meterDataDate: Date = new Date(data.date);
-            return meterDataDate.getUTCFullYear() == this.date.getUTCFullYear() && meterDataDate.getUTCMonth() == this.date.getUTCMonth();
+            return checkSameMonth(meterDataDate, this.date);
         });
     }
 

@@ -158,30 +158,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     }
   }
 
-  checkError(readDate: Date): string {
-    let readDateItem: Date = new Date(readDate);
-    // if (this.meterListItem.errorDate) {
-    //   if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
-    //     return 'alert-danger';
-    //   }
-    // } else if (this.meterListItem.warningDate) {
-    //   if (readDateItem.getUTCFullYear() == this.meterListItem.warningDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.warningDate.getUTCMonth()) {
-    //     return 'alert-warning';
-    //   }
-    // } else if (this.meterListItem.missingMonth) {
-    //   let testDate1: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() - 1);
-    //   let testDate2: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() + 1);
-    //   if (testDate1.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate1.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
-    //     return 'alert-warning';
-    //   }
-    //   if (testDate2.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate2.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
-    //     return 'alert-warning';
-    //   }
-    // }
-    return undefined;
-  }
-
-
   copyTable() {
     this.copyingTable = true;
     setTimeout(() => {
@@ -195,7 +171,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels,
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, dataItem.year, false, [facility], this.eGridService.co2Emissions, customFuels,
         dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion, []);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });

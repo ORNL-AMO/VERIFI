@@ -86,7 +86,7 @@
                     <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
                   </td>
                 }
-                <td class="read-date">{{meterData.readDate | date}}</td>
+                <td class="read-date">{{meterData | displayMeterDataDate}}</td>
                 <td>
                   @if (meterData.isEstimated) {
                     <span class="fa fa-asterisk"></span>

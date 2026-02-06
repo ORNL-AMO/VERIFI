@@ -21,7 +21,7 @@ import { IdbAccount } from '../../../models/idbModels/account';
 import { IdbFacility } from '../../../models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '../../../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../../../models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../../../models/idbModels/utilityMeterData';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../../../models/idbModels/utilityMeterData';
 import { PredictorDbService } from '../../../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../../../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../../../models/idbModels/predictor';
@@ -393,13 +393,14 @@ export class UploadDataService {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
           if (!isNaN(readDate.valueOf())) {
             let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
-              return accountDataItem.facilityId == meter.facilityId && checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
+              return accountDataItem.facilityId == meter.facilityId && checkSameDate(readDate, accountDataItem) && accountDataItem.meterId == meter.guid;
             })
             if (!dataItem) {
               dataItem = getNewIdbUtilityMeterData(meter, []);
             }
-            dataItem.readDate = readDate;
-
+            dataItem.year = readDate.getFullYear();
+            dataItem.month = readDate.getMonth() + 1;
+            dataItem.day = readDate.getDate();
             let totalVolume: number = 0;
             let energyUse: number = 0;
             let totalConsumption: number = dataRow[meter.importWizardName];

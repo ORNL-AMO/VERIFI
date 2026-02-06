@@ -33,7 +33,8 @@ import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
 import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
-import { DisplayPredictorDataDatePipe } from './display-predictor-data-date-pipe';
+import { DisplayPredictorDataDatePipe } from './display-predictor-data-date.pipe';
+import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
 
 @NgModule({
   declarations: [
@@ -70,7 +71,8 @@ import { DisplayPredictorDataDatePipe } from './display-predictor-data-date-pipe
     ChargeTypeLabelPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
-    DisplayPredictorDataDatePipe
+    DisplayPredictorDataDatePipe,
+    DisplayMeterDataDatePipe
   ],
   imports: [
     CommonModule
@@ -109,7 +111,8 @@ import { DisplayPredictorDataDatePipe } from './display-predictor-data-date-pipe
     ChargeTypeLabelPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
-    DisplayPredictorDataDatePipe
+    DisplayPredictorDataDatePipe,
+    DisplayMeterDataDatePipe
   ]
 })
 export class HelperPipesModule { }

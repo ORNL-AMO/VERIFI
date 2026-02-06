@@ -6,6 +6,7 @@ import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalcu
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 
 export class MonthlyFacilityAnalysisDataClass {
 
@@ -50,7 +51,7 @@ export class MonthlyFacilityAnalysisDataClass {
     setCurrentMonthData(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.currentMonthData = allFacilityAnalysisData.filter(summaryData => {
             let summaryDataDate: Date = new Date(summaryData.date);
-            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && summaryDataDate.getUTCFullYear() == this.date.getUTCFullYear();
+            return checkSameMonth(summaryDataDate, this.date);
         });
     }
 

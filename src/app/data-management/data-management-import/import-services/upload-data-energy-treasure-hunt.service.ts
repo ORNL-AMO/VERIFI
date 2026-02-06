@@ -7,10 +7,10 @@ import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameDay, getCountryCode, getState, getZip } from './upload-helper-functions';
+import { getCountryCode, getState, getZip } from './upload-helper-functions';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 
@@ -169,7 +169,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(electricConsumptionMeter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = siteEnergy;
           meterReading.totalCost = cost;
           meterReading.totalBilledDemand = demandUsage;
@@ -197,7 +199,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(ngConsumptionMeter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = siteEnergy;
           meterReading.totalCost = cost;
           meterData.push(meterReading)
@@ -225,7 +229,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = siteEnergy;
           meterReading.totalCost = cost;
           meterData.push(meterReading)
@@ -252,7 +258,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = siteEnergy;
           meterReading.totalCost = cost;
           meterData.push(meterReading)
@@ -282,7 +290,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = 0;
           meterReading.totalVolume = consumption;
           meterReading.totalCost = cost;
@@ -311,7 +321,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = 0;
           meterReading.totalVolume = consumption;
           meterReading.totalCost = cost;
@@ -339,7 +351,9 @@ export class UploadDataEnergyTreasureHuntService {
         if (date) {
           //check existing
           let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-          meterReading.readDate = date;
+          meterReading.year = date.getFullYear();
+          meterReading.month = date.getMonth() + 1;
+          meterReading.day = date.getDate();
           meterReading.totalEnergyUse = 0;
           meterReading.totalVolume = consumption;
           meterData.push(meterReading)
@@ -443,8 +457,7 @@ export class UploadDataEnergyTreasureHuntService {
   getExistingDbEntry(utilityMeterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter, readDate: Date): IdbUtilityMeterData {
     return utilityMeterData.find(meterDataItem => {
       if (meterDataItem.meterId == meter.guid) {
-        let dateItemDate: Date = new Date(meterDataItem.readDate);
-        return checkSameDay(dateItemDate, readDate);
+        return checkSameDate(readDate, meterDataItem);
       } else {
         return false;
       }

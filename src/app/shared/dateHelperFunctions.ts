@@ -1,46 +1,9 @@
 //HELPER FUNCTIONS FOR DATES
-//dates are stored as string in format YYYY-MM-DD
-
 import { IdbPredictorData } from "../models/idbModels/predictorData";
 import * as _ from 'lodash';
+import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
 
-// export function getStringFromDate(date: Date): string {
-//     let year = date.getFullYear();
-//     let month = (date.getMonth() + 1).toString().padStart(2, '0');
-//     let day = date.getDate().toString().padStart(2, '0');
-//     return `${year}-${month}-${day}`;
-// }
-
-// export function getMonthFromDateString(dateStr: string): number {
-//     let month: number = parseInt(dateStr.split('-')[1]);
-//     return month;
-// }
-
-// export function getDayFromDateString(dateStr: string): number {
-//     let day: number = parseInt(dateStr.split('-')[2]);
-//     return day;
-// }
-
-// export function getYearFromDateString(dateStr: string): number {
-//     let year: number = parseInt(dateStr.split('-')[0]);
-//     return year;
-// }
-
-// export function getUTCDateFromDateString(dateStr: string): Date {
-//     let year: number = getYearFromDateString(dateStr);
-//     let month: number = getMonthFromDateString(dateStr);
-//     let day: number = getDayFromDateString(dateStr);
-//     return new Date(Date.UTC(year, month - 1, day));
-// }
-
-// export function getDateFromString(dateStr: string): Date {
-//     let year: number = getYearFromDateString(dateStr);
-//     let month: number = getMonthFromDateString(dateStr);
-//     let day: number = getDayFromDateString(dateStr);
-//     return new Date(year, month - 1, day);
-// }
-
-
+//PREDICTOR DATA FUNCTIONS
 export function getDateFromPredictorData(predictorData: IdbPredictorData): Date {
     return new Date(predictorData.year, predictorData.month - 1, 1);
 }
@@ -80,6 +43,52 @@ export function getEarliestPredictorDataDate(predictorData: Array<IdbPredictorDa
     let earliestPredictorData: IdbPredictorData = getEarliestPredictorData(predictorData);
     if (earliestPredictorData) {
         return getDateFromPredictorData(earliestPredictorData);
+    } else {
+        return undefined;
+    }
+}
+
+//METER DATA FUNCTIONS
+export function getDateFromMeterData(meterData: IdbUtilityMeterData): Date {
+    return new Date(meterData.year, meterData.month - 1, meterData.day);
+}
+
+export function setMeterDataDateFromDate(meterData: IdbUtilityMeterData, date: Date): IdbUtilityMeterData {
+    meterData.year = date.getFullYear();
+    meterData.month = date.getMonth() + 1;
+    meterData.day = date.getDate();
+    return meterData;
+}
+
+export function getLatestMeterData(meterData: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
+    let latestMeterData: IdbUtilityMeterData = _.maxBy(meterData, (mData: IdbUtilityMeterData) => {
+        let mDataDate: Date = getDateFromMeterData(mData);
+        return mDataDate.getTime();
+    });
+    return latestMeterData;
+}
+
+export function getLatestMeterDataDate(meterData: Array<IdbUtilityMeterData>): Date {
+    let latestMeterData: IdbUtilityMeterData = getLatestMeterData(meterData);
+    if (latestMeterData) {
+        return getDateFromMeterData(latestMeterData);
+    } else {
+        return undefined;
+    }
+}
+
+export function getEarliestMeterData(meterData: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
+    let earliestMeterData: IdbUtilityMeterData = _.minBy(meterData, (mData: IdbUtilityMeterData) => {
+        let mDataDate: Date = getDateFromMeterData(mData);
+        return mDataDate.getTime();
+    });
+    return earliestMeterData;
+}
+
+export function getEarliestMeterDataDate(meterData: Array<IdbUtilityMeterData>): Date {
+    let earliestMeterData: IdbUtilityMeterData = getEarliestMeterData(meterData);
+    if (earliestMeterData) {
+        return getDateFromMeterData(earliestMeterData);
     } else {
         return undefined;
     }

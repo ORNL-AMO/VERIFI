@@ -3,6 +3,7 @@ import { EmissionsResults } from "../eGridEmissions"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbUtilityMeter } from "./utilityMeter";
 import * as _ from 'lodash';
+import { getLatestMeterDataDate } from "src/app/shared/dateHelperFunctions";
 
 export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry {
     //keys (id primary)
@@ -12,11 +13,15 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     facilityId: string,
     accountId: string,
     //data
-    readDateStr?: string,
-    readDate: Date,
+    day: number,
+    month: number,
+    year: number,
+    migratedDates: boolean,
+    // readDateStr?: string,
+    // readDate: Date,
     dbDate?: Date,
-    
-    
+
+
     totalVolume?: number,
     totalEnergyUse: number,
     totalCost: number,
@@ -82,7 +87,11 @@ export function getNewIdbUtilityMeterData(meter: IdbUtilityMeter, accountMeterDa
         meterId: meter.guid,
         facilityId: meter.facilityId,
         accountId: meter.accountId,
-        readDate: newDate,
+        // readDate: newDate,
+        day: newDate.getDate(),
+        month: newDate.getMonth() + 1,
+        year: newDate.getFullYear(),
+        migratedDates: true,
         totalVolume: undefined,
         totalEnergyUse: undefined,
         totalCost: undefined,
@@ -134,8 +143,7 @@ export function getNewIdbUtilityMeterData(meter: IdbUtilityMeter, accountMeterDa
 export function getLastMeterReadingDate(meter: IdbUtilityMeter, accountMeterData: Array<IdbUtilityMeterData>): Date {
     let allSelectedMeterData: Array<IdbUtilityMeterData> = getMeterDataFromMeterId(meter.guid, accountMeterData);
     if (allSelectedMeterData.length != 0) {
-        let lastMeterReading: IdbUtilityMeterData = _.maxBy(allSelectedMeterData, 'readDate');
-        return new Date(lastMeterReading.readDate);
+        return getLatestMeterDataDate(allSelectedMeterData);
     }
     return undefined;
 }
@@ -156,8 +164,8 @@ export function checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter
 }
 
 export function checkSameDate(date: Date, dataItem: IdbUtilityMeterData): boolean {
-    let dataItemDate: Date = new Date(dataItem.readDate);
-    return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear()) && (dataItemDate.getUTCDate() == date.getUTCDate());
+    // let dataItemDate: Date = new Date(dataItem.readDate);
+    return (dataItem.month - 1 == date.getMonth()) && (dataItem.year == date.getFullYear()) && (dataItem.day == date.getDate());
 }
 
 export function getMeterDataFromMeterId(meterId: string, accountMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
