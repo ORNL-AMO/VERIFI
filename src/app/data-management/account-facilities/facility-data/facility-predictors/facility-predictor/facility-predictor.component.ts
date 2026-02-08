@@ -113,7 +113,7 @@ export class FacilityPredictorComponent {
     await this.analysisDbService.updateAnalysisPredictor(this.predictor);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
     await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
@@ -205,7 +205,7 @@ export class FacilityPredictorComponent {
     //set values in services
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictor);

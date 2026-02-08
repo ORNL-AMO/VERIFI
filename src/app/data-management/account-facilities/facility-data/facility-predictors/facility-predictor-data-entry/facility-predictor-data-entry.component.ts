@@ -67,7 +67,7 @@ export class FacilityPredictorDataEntryComponent {
     this.isSaved = true;
     await firstValueFrom(this.predictorDataDbService.updateWithObservable(this.predictorData));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
   }
 
   async saveAndQuit() {
@@ -83,7 +83,7 @@ export class FacilityPredictorDataEntryComponent {
     newPredictorData = await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
     this.router.navigateByUrl('data-management/' + newPredictorData.accountId + '/facilities/' + newPredictorData.facilityId + '/predictors/' + newPredictorData.predictorId + '/predictor-data/edit-entry/' + newPredictorData.guid);
     this.toastNotificationService.showToast('Predictor entry added!', undefined, undefined, undefined, 'alert-success');
   }

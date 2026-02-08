@@ -6,6 +6,7 @@ import { LoadingService } from '../core-components/loading/loading.service';
 import { firstValueFrom } from 'rxjs';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { DbChangesService } from './db-changes.service';
 // import { getStringFromDate } from '../shared/dateHelperFunctions';
 
 @Injectable({
@@ -14,34 +15,39 @@ import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 export class MigrateDatesService {
 
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private predictorDataDbService: PredictorDataDbService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private dbChangesService: DbChangesService
   ) { }
 
   async migrateDates(account: IdbAccount) {
+    this.loadingService.setLoadingMessage('Migrating Meter Dates');
+    this.loadingService.setLoadingStatus(true);
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     for (let meterData of accountMeterData) {
-      if (meterData['readDate'] && !meterData.migratedDates) {
+      if (!meterData.migratedDates) {
         // Format date as YYYY-MM-DD
         // meterData.readDateStr = getStringFromDate(meterData['readDate']);
         meterData.month = meterData['readDate'].getMonth() + 1;
         meterData.year = meterData['readDate'].getFullYear();
         meterData.day = meterData['readDate'].getDate();
         meterData.migratedDates = true;
-        delete meterData['readDate'];
         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
       }
     }
+
+    this.loadingService.setLoadingMessage('Migrating Predictor Dates');
     let accountPredictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
     for (let predictorData of accountPredictorData) {
-      if (predictorData['date'] && !predictorData.migratedDates) {
+      if (!predictorData.migratedDates) {
         // Format date as YYYY-MM-DD
         // predictorData.dateStr = getStringFromDate(predictorData['date']);
         predictorData.month = predictorData['date'].getMonth() + 1;
         predictorData.year = predictorData['date'].getFullYear();
         predictorData.migratedDates = true;
-        delete predictorData['date'];
         await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData));
       }
     }
+    this.dbChangesService.selectAccount(account, true)
+    this.loadingService.setLoadingStatus(false);
   }
 }

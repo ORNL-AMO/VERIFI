@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { getDateFromPredictorData } from '../dateHelperFunctions';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { Month, Months } from '../form-data/months';
 
 @Pipe({
   name: 'displayPredictorDataDate',
@@ -9,12 +8,9 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 })
 export class DisplayPredictorDataDatePipe implements PipeTransform {
 
-  transform(predictorData: IdbPredictorData, options?: any): string {
-    let date: Date = getDateFromPredictorData(predictorData);
-    let datePipe: DatePipe = new DatePipe(navigator.language);
-    // let stringFormat: string = 'shortTime';
-    let timeStr = datePipe.transform(date, options);
-    return timeStr;
+  transform(predictorData: IdbPredictorData): string {
+    let month: Month = Months.find(month => month.monthNumValue == (predictorData.month - 1));
+    return month.abbreviation + ', ' + predictorData.year;
   }
 
 }

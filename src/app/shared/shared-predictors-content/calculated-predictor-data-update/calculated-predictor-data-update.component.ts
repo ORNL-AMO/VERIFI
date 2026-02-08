@@ -323,7 +323,7 @@ export class CalculatedPredictorDataUpdateComponent {
     }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, selectedFacility)
+    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility)
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();

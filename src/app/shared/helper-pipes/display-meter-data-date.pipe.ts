@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getDateFromMeterData } from '../dateHelperFunctions';
-import { DatePipe } from '@angular/common';
+import { Month, Months } from '../form-data/months';
 
 @Pipe({
   name: 'displayMeterDataDate',
@@ -9,11 +8,8 @@ import { DatePipe } from '@angular/common';
 })
 export class DisplayMeterDataDatePipe implements PipeTransform {
 
-  transform(meterData: IdbUtilityMeterData, options?: any): string {
-    let date: Date = getDateFromMeterData(meterData);
-    let datePipe: DatePipe = new DatePipe(navigator.language);
-    // let stringFormat: string = 'shortTime';
-    let timeStr = datePipe.transform(date, options);
-    return timeStr;
+  transform(meterData: IdbUtilityMeterData): string {
+    let month: Month = Months.find(month => month.monthNumValue == (meterData.month - 1));
+    return month.abbreviation + ' ' + meterData.day + ', ' + meterData.year;
   }
 }

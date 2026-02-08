@@ -145,7 +145,7 @@ export class EditPredictorComponent {
     }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
     await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');

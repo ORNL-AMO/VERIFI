@@ -253,9 +253,11 @@ export class BackupDataService {
       meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
       if (meterData['readDate']) {
-        meterData.year = new Date(meterData['readDate']).getFullYear();
-        meterData.month = new Date(meterData['readDate']).getMonth() + 1;
-        meterData.day = new Date(meterData['readDate']).getDate();
+        const [datePart] = meterData['readDate'].split('T');
+        const [year, month, day] = datePart.split('-').map(Number);
+        meterData.year = year;
+        meterData.month = month;
+        meterData.day = day;
         delete meterData['readDate'];
       }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
@@ -342,9 +344,11 @@ export class BackupDataService {
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUIDs.newId;
         if (predictorData['date']) {
-          predictorData.month = predictorData['date'].getMonth() + 1;
-          predictorData.year = predictorData['date'].getFullYear();
-          delete predictorData['date'];
+          const [datePart] = predictorData['date'].split('T');
+          const [year, month, day] = datePart.split('-').map(Number);
+          predictorData.year = year;
+          predictorData.month = month;
+          predictorData.migratedDates = true;
         }
         predictorData.facilityId = this.getNewId(predictorData.facilityId, facilityGUIDs);
         predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
@@ -543,7 +547,7 @@ export class BackupDataService {
         meterData.year = new Date(meterData['readDate']).getFullYear();
         meterData.month = new Date(meterData['readDate']).getMonth() + 1;
         meterData.day = new Date(meterData['readDate']).getDate();
-        delete meterData['readDate'];
+        meterData.migratedDates = true;
       }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }

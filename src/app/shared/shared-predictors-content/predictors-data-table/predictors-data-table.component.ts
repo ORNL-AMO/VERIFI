@@ -134,7 +134,7 @@ export class PredictorsDataTableComponent {
       newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
+      await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(newEntry);
     } else {
@@ -232,7 +232,7 @@ export class PredictorsDataTableComponent {
   async finishDelete() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
     this.setHasChecked();

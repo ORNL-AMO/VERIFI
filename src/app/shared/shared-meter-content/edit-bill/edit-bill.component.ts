@@ -108,7 +108,7 @@ export class EditBillComponent implements OnInit {
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.meterDataForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
@@ -129,7 +129,7 @@ export class EditBillComponent implements OnInit {
     meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
     let nextDate: Date = getDateFromMeterData(meterDataToSave);

@@ -11,8 +11,6 @@ export interface IdbPredictorData extends IdbEntry {
     amount: number,
     month: number,
     year: number,
-    // dateStr: string,
-    // date: Date,
     checked?: boolean,
     weatherDataWarning: boolean,
     weatherOverride: boolean,
@@ -41,10 +39,10 @@ export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: A
         amount: undefined,
         month: pDate.getMonth() + 1,
         year: pDate.getFullYear(),
-        // dateStr: getStringFromDate(pDate),
         checked: false,
         weatherDataWarning: false,
         weatherOverride: false,
-        notes: ''
+        notes: '',
+        migratedDates: true
     }
 }
