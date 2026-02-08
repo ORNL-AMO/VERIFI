@@ -13,7 +13,6 @@ import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import * as _ from 'lodash';
 import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
-import { DatePipe, formatDate } from '@angular/common';
 import { getDetailedDataForMonth } from './weatherDataCalculations';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { getDegreeDayAmount } from '../shared/sharedHelperFunctions';
@@ -24,6 +23,7 @@ import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { checkSameMonthPredictorData } from '../data-management/data-management-import/import-services/upload-helper-functions';
+import { Month, Months } from '../shared/form-data/months';
 
 
 @Injectable({
@@ -126,9 +126,8 @@ export class WeatherPredictorManagementService {
         let entryDate: Date = new Date(startDate);
         // await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.selectedStation.ID)
 
-        let datePipe: DatePipe = new DatePipe(navigator.language);
-        let stringFormat: string = 'MMM y';
-        let dateStr = datePipe.transform(startDate.toLocaleDateString(), stringFormat);
+        let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+        let dateStr = month.abbreviation + ', ' + entryDate.getFullYear();
         this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
 
         //ISSUE: 1822
@@ -220,13 +219,16 @@ export class WeatherPredictorManagementService {
             //add predictor data
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+            let formatedDate: string = month.abbreviation + ', ' + entryDate.getFullYear();
+
+            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
             let nextMonthsDate: Date = new Date(startDate)
             nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
             let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {

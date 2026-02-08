@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -57,12 +56,14 @@ export class ExportToExcelTemplateV3Service {
           let url = window.URL.createObjectURL(blob);
           a.href = url;
           let date = new Date();
-          let datePipe = new DatePipe('en-us');
+          let month: string = (date.getMonth() + 1).toString().padStart(2, '0');
+          let day: string = date.getDate().toString().padStart(2, '0');
+          let formatedDate: string = month + '-' + day + '-' + date.getFullYear();
           let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
           let accountName: string = account.name;
           accountName = accountName.replaceAll(' ', '-');
           accountName = accountName.replaceAll('.', '_');
-          a.download = accountName + "-" + datePipe.transform(date, 'MM-dd-yyyy');
+          a.download = accountName + "-" + formatedDate;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);

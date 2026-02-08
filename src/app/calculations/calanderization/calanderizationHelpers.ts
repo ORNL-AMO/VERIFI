@@ -10,16 +10,15 @@ import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { getDateFromMeterData, getLatestMeterData } from "src/app/shared/dateHelperFunctions";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
-    //set to the 5th to not conflict
-    let previousMonth: Date = new Date();
-    previousMonth.setFullYear(year, month - 1, 5);
-    let previousMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(previousMonth.getMonth(), previousMonth.getFullYear(), meterReadings);
+    let prevMonth: number = month === 0 ? 11 : month - 1;
+    let prevYear: number = month === 0 ? year - 1 : year;
+    let previousMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(prevMonth, prevYear, meterReadings);
     if (previousMonthReadings.length == 0) {
-        return getPreviousMonthsBill(previousMonth.getMonth(), previousMonth.getFullYear(), meterReadings);
+        return getPreviousMonthsBill(prevMonth, prevYear, meterReadings);
     } else if (previousMonthReadings.length == 1) {
         return previousMonthReadings[0]
     } else {
-        let latestReading: IdbUtilityMeterData = getLatestMeterData(meterReadings);
+        let latestReading: IdbUtilityMeterData = getLatestMeterData(previousMonthReadings);
         return latestReading;
     }
 }
@@ -28,15 +27,15 @@ export function getCurrentMonthsReadings(month: number, year: number, meterReadi
     let currentMonthReadings: Array<IdbUtilityMeterData> = _.filter(meterReadings, (reading: IdbUtilityMeterData) => {
         return (month == reading.month - 1 && year == reading.year);
     });
-    return _.orderBy(currentMonthReadings, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data) });
+    return _.orderBy(currentMonthReadings, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data).getTime() });
 }
 
 export function getNextMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
-    let nextMonth: Date = new Date();
-    nextMonth.setFullYear(year, month + 1, 5);
-    let nextMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(nextMonth.getMonth(), nextMonth.getFullYear(), meterReadings);
+    let nextMonthNum: number = month === 11 ? 0 : month + 1;
+    let nextYear: number = month === 11 ? year + 1 : year;
+    let nextMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(nextMonthNum, nextYear, meterReadings);
     if (nextMonthReadings.length == 0) {
-        return getNextMonthsBill(nextMonth.getMonth(), nextMonth.getFullYear(), meterReadings);
+        return getNextMonthsBill(nextMonthNum, nextYear, meterReadings);
     } else if (nextMonthReadings.length == 1) {
         return nextMonthReadings[0]
     } else {
@@ -104,8 +103,37 @@ export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacilit
 }
 export function daysBetweenDates(firstDate: Date, secondDate: Date) {
     const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-    // Discard the time and time-zone information.
-    const utc1 = Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
-    const utc2 = Date.UTC(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
-    return Math.round((utc2 - utc1) / _MS_PER_DAY);
+    // Discard the time information, use local time (midnight)
+    const local1 = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+    const local2 = new Date(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
+    return Math.round((local2.getTime() - local1.getTime()) / _MS_PER_DAY);
+}
+
+export function getMonthsArray(meterData: Array<IdbUtilityMeterData>): Array<{ month: number, year: number }> {
+    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data).getTime() });
+
+    let yearMonths: Array<{ year: number, month: number }> = orderedMeterData.map(reading => { return { year: reading.year, month: reading.month - 1 } });
+    //unique year months
+    let uniqYearMonths: Array<{ year: number, month: number }> = _.uniqWith(yearMonths, _.isEqual);
+    //remove first and last month for iteration since they will be used as previous and next month for calanderization
+    uniqYearMonths.shift();
+    uniqYearMonths.pop();
+    //fill missing months
+    uniqYearMonths.forEach((yearMonth, index) => {
+        if (index > 0) {
+            let previousYearMonth = uniqYearMonths[index - 1];
+            let currentYearMonth = yearMonth;
+            //check if there are missing months between previous and current
+            let monthsBetween = (currentYearMonth.year - previousYearMonth.year) * 12 + (currentYearMonth.month - previousYearMonth.month);
+            if (monthsBetween > 1) {
+                //add missing months to uniqYearMonths
+                for (let i = 1; i < monthsBetween; i++) {
+                    let missingMonth = (previousYearMonth.month + i) % 12;
+                    let missingYear = previousYearMonth.year + Math.floor((previousYearMonth.month + i) / 12);
+                    uniqYearMonths.splice(index, 0, { year: missingYear, month: missingMonth });
+                }
+            }
+        };
+    });
+    return uniqYearMonths;
 }

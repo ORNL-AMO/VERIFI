@@ -93,3 +93,13 @@ export function getEarliestMeterDataDate(meterData: Array<IdbUtilityMeterData>):
         return undefined;
     }
 }
+
+export function getMeterDataDateString(meterData: IdbUtilityMeterData): string {
+    if (meterData.year && meterData.month && meterData.day) {
+        let monthString: string = meterData.month.toString().padStart(2, '0');
+        let dayString: string = meterData.day.toString().padStart(2, '0');
+        return meterData.year + '-' + monthString + '-' + dayString;
+    } else {
+        return undefined;
+    }
+}

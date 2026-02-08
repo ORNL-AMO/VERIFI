@@ -258,7 +258,7 @@ export class BackupDataService {
         meterData.year = year;
         meterData.month = month;
         meterData.day = day;
-        delete meterData['readDate'];
+        meterData.migratedDates = true;
       }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
@@ -643,6 +643,12 @@ export class BackupDataService {
           oldId: predictorData.guid
         });
         delete predictorData.id;
+        if(predictorData['date']){
+          predictorData.year = new Date(predictorData['date']).getFullYear();
+          predictorData.month = new Date(predictorData['date']).getMonth() + 1;
+          predictorData.migratedDates = true;
+        }
+
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUID;
         predictorData.facilityId = newFacilityGUID;

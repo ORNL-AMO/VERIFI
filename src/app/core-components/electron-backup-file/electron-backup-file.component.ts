@@ -8,7 +8,6 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from '../loading/loading.service';
-import { DatePipe } from '@angular/common';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
@@ -175,10 +174,13 @@ export class ElectronBackupFileComponent {
     let sub: string = dataBackupFilePath.substring(0, dataBackupFilePath.length - 5);
     let date: Date = new Date(archiveBackup.timeStamp);
 
-    let datePipe: DatePipe = new DatePipe(navigator.language);
-    let stringFormat: string = 'shortTime';
-    let timeStr = datePipe.transform(archiveBackup.timeStamp, stringFormat);
-    timeStr = timeStr.replace(':', '_').replace(' ', '_').replace('.', '_');
+    // Format time as HH_MM_AMPM using native Date methods
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let ampm = hours >= 12 ? 'PM' : 'AM';
+    let displayHours = hours % 12;
+    displayHours = displayHours ? displayHours : 12; // 0 should be 12
+    let timeStr = `${displayHours}_${minutes.toString().padStart(2, '0')}_${ampm}`;
     let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear() + '_' + timeStr;
     archiveBackup.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
     this.electronService.sendSaveData(archiveBackup, true);

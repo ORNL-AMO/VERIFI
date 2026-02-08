@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,6 +25,7 @@ import { checkSameMonthPredictorData } from 'src/app/data-management/data-manage
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
 import { getDateFromPredictorData } from 'src/app/shared/dateHelperFunctions';
+import { Month, Months } from 'src/app/shared/form-data/months';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -127,8 +127,6 @@ export class FacilityPredictorComponent {
   async updateWeatherData() {
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
     if (this.latestMeterReading && this.firstMeterReading) {
-      let datePipe: DatePipe = new DatePipe(navigator.language);
-      let stringFormat: string = 'MMM, yyyy';
       let startDate: Date = new Date(this.firstMeterReading);
       let endDate: Date = new Date(this.latestMeterReading);
       let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, []);
@@ -138,7 +136,8 @@ export class FacilityPredictorComponent {
             break;
           }
           let newDate: Date = new Date(startDate);
-          let dateString = datePipe.transform(newDate, stringFormat);
+          let month: Month = Months.find(m => m.monthNumValue == newDate.getMonth());
+          let dateString = month.abbreviation + ', ' + newDate.getFullYear();
           this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
           let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
           let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
