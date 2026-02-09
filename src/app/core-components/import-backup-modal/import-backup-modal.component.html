@@ -135,10 +135,10 @@
         <label class="w-50 ps-0 bold">Overwrite existing facility? </label>
         <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData">
           <option [ngValue]="true">Overwrite Facility</option>
-          <option [ngValue]="false">Create New Facilty</option>
+          <option [ngValue]="false">Create New Facility</option>
         </select>
       </div>
-      @if (overwriteData) {
+      @if (overwriteData == true) {
       <div class="input-group pt-2">
         <label class="w-50 ps-0 bold">Facility to overwrite</label>
         <select class="form-select" [(ngModel)]="overwriteFacility" name="overwriteFacility">
@@ -148,7 +148,7 @@
         </select>
       </div>
       }
-      @if (overwriteData) {
+      @if (overwriteData == true) {
       <p class="alert alert-warning mt-3">
         Existing facility ({{overwriteFacility.name}}) data will be overwritten. This cannot be undone.
       </p>

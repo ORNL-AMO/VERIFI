@@ -116,6 +116,7 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   setImportFile(event: EventTarget) {
+    this.selectedFacilitiesToImport = [];
     let files: FileList = (event as HTMLInputElement).files;
     if (files) {
       if (files.length !== 0) {
@@ -339,13 +340,13 @@ export class ImportBackupModalComponent implements OnInit {
       const facilityBackupFile: BackupFile = {
         ...backupFile,
         facility: facilityBackup,
-        meters: backupFile.meters.filter(m => m.facilityId === facilityBackup.guid),
-        meterData: backupFile.meterData.filter(md => md.facilityId === facilityBackup.guid),
-        groups: backupFile.groups.filter(g => g.facilityId === facilityBackup.guid),
-        facilityAnalysisItems: backupFile.facilityAnalysisItems.filter(fa => fa.facilityId === facilityBackup.guid),
-        predictorData: backupFile.predictorData.filter(pd => pd.facilityId === facilityBackup.guid),
-        predictorDataV2: backupFile.predictorDataV2.filter(pd => pd.facilityId === facilityBackup.guid),
-        predictors: backupFile.predictors.filter(p => p.facilityId === facilityBackup.guid)
+        meters: backupFile.meters.filter(m => m.facilityId === facilityBackup?.guid),
+        meterData: backupFile.meterData.filter(md => md.facilityId === facilityBackup?.guid),
+        groups: backupFile.groups.filter(g => g.facilityId === facilityBackup?.guid),
+        facilityAnalysisItems: backupFile.facilityAnalysisItems.filter(fa => fa.facilityId === facilityBackup?.guid),
+        predictorData: backupFile.predictorData.filter(pd => pd.facilityId === facilityBackup?.guid),
+        predictorDataV2: backupFile.predictorDataV2.filter(pd => pd.facilityId === facilityBackup?.guid),
+        predictors: backupFile.predictors.filter(p => p.facilityId === facilityBackup?.guid)
       };
 
       //import all selected facilities as new
@@ -387,7 +388,7 @@ export class ImportBackupModalComponent implements OnInit {
         }
 
         // check for differences in meters
-        let facilityBackupMeters: Array<IdbUtilityMeter> = backupData.meters.filter(m => m.facilityId === f.backupFacility.guid);
+        let facilityBackupMeters: Array<IdbUtilityMeter> = backupData.meters?.filter(m => m.facilityId === f.backupFacility.guid);
         let facilityAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(f.accountFacility.guid);
         const meterDifferenceFound =
           facilityBackupMeters.some(bm => !facilityAccountMeters.some(am => am.name === bm.name && am.meterNumber === bm.meterNumber)) ||
@@ -398,7 +399,7 @@ export class ImportBackupModalComponent implements OnInit {
         }
 
         // check for differences in meter data
-        let facilityBackupMeterData: Array<IdbUtilityMeterData> = backupData.meterData.filter(md => md.facilityId === f.backupFacility.guid);
+        let facilityBackupMeterData: Array<IdbUtilityMeterData> = backupData.meterData?.filter(md => md.facilityId === f.backupFacility.guid);
         let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(f.accountFacility.guid);
         const meterDataDifferenceFound =
           facilityBackupMeterData.some(bmd => !facilityAccountMeterData.some(amd =>
@@ -420,7 +421,7 @@ export class ImportBackupModalComponent implements OnInit {
 
 
         // check for differences in predictors
-        let facilityBackupPredictors: Array<IdbPredictor> = backupData.predictors.filter(p => p.facilityId === f.backupFacility.guid);
+        let facilityBackupPredictors: Array<IdbPredictor> = backupData.predictors?.filter(p => p.facilityId === f.backupFacility.guid);
         let facilityAccountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(f.accountFacility.guid);
         const predictorDifferenceFound =
           facilityBackupPredictors.some(bp => !facilityAccountPredictors.some(ap => ap.name === bp.name)) ||
@@ -430,7 +431,7 @@ export class ImportBackupModalComponent implements OnInit {
         }
 
         // check for differences in predictor data
-        let facilityBackupPredictorData: Array<IdbPredictorData> = backupData.predictorDataV2.filter(pd => pd.facilityId === f.backupFacility.guid);
+        let facilityBackupPredictorData: Array<IdbPredictorData> = backupData.predictorDataV2?.filter(pd => pd.facilityId === f.backupFacility.guid);
         let facilityAccountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(f.accountFacility.guid);
         const predictorDataDifferenceFound =
           facilityBackupPredictorData.some(bpd => !facilityAccountPredictorData.some(apd =>
