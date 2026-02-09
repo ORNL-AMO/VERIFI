@@ -55,8 +55,8 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
         let yearData: Array<MonthlyData> = monthlyData.filter(data => {
             return data.fiscalYear == year;
         });
-        let months: Array<string> = yearData.map(data => { return data.month });
-        months = _.uniq(months)
+        let months: Array<{month: string, monthNumValue: number}> = yearData.map(data => { return {month: data.month, monthNumValue: data.monthNumValue} });
+        months = _.uniqBy(months, month => { return month.monthNumValue });
         months.forEach(month => {
             let energyUse: number = 0;
             let energyCost: number = 0;
@@ -84,7 +84,7 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
             let stationaryOtherEmissions: number = 0;
             let stationaryCarbonEmissions: number = 0;
             for (let i = 0; i < yearData.length; i++) {
-                if (yearData[i].month == month) {
+                if (yearData[i].monthNumValue == month.monthNumValue) {
                     energyUse += yearData[i].energyUse;
                     energyCost += yearData[i].energyCost;
                     consumption += yearData[i].energyConsumption;
@@ -113,7 +113,7 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                 }
             }
             yearMonthData.push({
-                yearMonth: { year: year, month: month, fiscalYear: year },
+                yearMonth: { year: year, month: month.month, fiscalYear: year, monthNum: month.monthNumValue },
                 energyUse: energyUse,
                 energyCost: energyCost,
                 consumption: consumption,

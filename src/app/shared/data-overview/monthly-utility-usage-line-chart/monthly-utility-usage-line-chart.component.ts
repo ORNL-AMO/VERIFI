@@ -70,6 +70,7 @@ export class MonthlyUtilityUsageLineChartComponent {
   drawChart() {
     if (this.monthlyUsageChart && this.yearMonthData) {
       let traceData = Array();
+      console.log(this.yearMonthData)
 
       let accountOrFacility: IdbFacility | IdbAccount;
       if (!this.facilityId) {
@@ -150,7 +151,7 @@ export class MonthlyUtilityUsageLineChartComponent {
   }
 
   getYValue(year: number, month: Month): number {
-    let yearMonthData: YearMonthData = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.month === month.abbreviation })
+    let yearMonthData: YearMonthData = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.monthNum === month.monthNumValue })
     if (yearMonthData) {
       if (this.dataType == 'energyUse') {
         return yearMonthData.energyUse;
