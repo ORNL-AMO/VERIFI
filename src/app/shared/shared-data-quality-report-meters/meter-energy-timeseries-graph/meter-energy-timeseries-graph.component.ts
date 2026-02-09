@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getConsumptionData, getUnitFromMeter, Statistics } from '../meterDataQualityStatistics';
+import { getDateFromMeterData } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-energy-timeseries-graph',
@@ -43,7 +44,7 @@ export class MeterEnergyTimeseriesGraphComponent {
   }
 
   getDataAndUnit() {
-    this.meterData = this.meterData.slice().sort((a, b) => new Date(a.readDate).getTime() - new Date(b.readDate).getTime());
+    this.meterData = this.meterData.slice().sort((a, b) => getDateFromMeterData(a).getTime() - getDateFromMeterData(b).getTime());
     this.unit = getUnitFromMeter(this.selectedMeter, this.meterData);
     this.meterDataToPlot = getConsumptionData(this.meterData, this.selectedMeter);
   }
@@ -67,7 +68,7 @@ export class MeterEnergyTimeseriesGraphComponent {
         type: "scatter",
         mode: "lines+markers",
         name: 'Meter Data',
-        x: this.meterData.map(data => { return data.readDate }),
+        x: this.meterData.map(data => { return getDateFromMeterData(data) }),
         y: this.meterDataToPlot,
         line: { color: '#832a75', width: 3 },
         marker: {

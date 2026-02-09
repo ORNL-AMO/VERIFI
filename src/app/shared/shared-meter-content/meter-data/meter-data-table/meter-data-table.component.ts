@@ -119,7 +119,7 @@ export class MeterDataTableComponent {
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true,  selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -145,7 +145,7 @@ export class MeterDataTableComponent {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage("Setting Meter Data...");
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.loadingService.setLoadingMessage("Meter Data Set...");
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");

@@ -22,13 +22,11 @@ export function getHasDuplicateReadings(meterGuid: string, allMeterData: Array<I
   let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(mData => {
     return mData.meterId == meterGuid
   });
-  let readDates: Array<Date> = meterData.map(mData => {
-    let date: Date = new Date(mData.readDate);
-    // return date.getFullYear() + '_' + date.getMonth() + '_' + date.getDate();
-    return date
+  let readDates: Array<string> = meterData.map(mData => {
+    return mData.year + '_' + mData.month + '_' + mData.day;
   });
-  let counts: Array<any> = _.countBy(readDates, (date: Date) => {
-    return date.getFullYear() + '_' + date.getMonth() + '_' + date.getDate();
+  let counts: Array<any> = _.countBy(readDates, (dateStr: string) => {
+    return dateStr;
   })
   let duplicateReadingDates: Array<Date> = new Array();
   for (let obj in counts) {

@@ -11,6 +11,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-data-application-menu',
@@ -38,20 +39,20 @@ export class DataApplicationMenuComponent implements OnInit {
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
-    this.utilityMeterData = _.orderBy(meterData, (data) => { return new Date(data.readDate) }, 'asc');
+    this.utilityMeterData = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data) }, 'asc');
     if (this.utilityMeterData.length > 2) {
       if (!this.meter.meterReadingDataApplication) {
         this.meter.meterReadingDataApplication = 'fullMonth';
       }
-      this.firstBillReadDate = new Date(this.utilityMeterData[0].readDate);
-      this.secondBillReadDate = new Date(this.utilityMeterData[1].readDate);
-      this.thirdBillReadDate = new Date(this.utilityMeterData[2].readDate);
+      this.firstBillReadDate = getDateFromMeterData(this.utilityMeterData[0]);
+      this.secondBillReadDate = getDateFromMeterData(this.utilityMeterData[1]);
+      this.thirdBillReadDate = getDateFromMeterData(this.utilityMeterData[2]);
       if (this.utilityMeterData.length > 3) {
-        this.fourthBillReadDate = new Date(this.utilityMeterData[3].readDate);
+        this.fourthBillReadDate = getDateFromMeterData(this.utilityMeterData[3]);
       } else {
         this.displayMonths = 3;
       }
-      this.startDate = { year: this.firstBillReadDate.getUTCFullYear(), month: this.firstBillReadDate.getUTCMonth() + 1, day: this.firstBillReadDate.getUTCDate() };
+      this.startDate = { year: this.firstBillReadDate.getFullYear(), month: this.firstBillReadDate.getMonth() + 1, day: this.firstBillReadDate.getDate() };
       this.calanderizeMeter();
     }
   }
@@ -72,35 +73,19 @@ export class DataApplicationMenuComponent implements OnInit {
   }
 
   checkSameDate(firstDate: Date, secondDate: Date): boolean {
-    return ((firstDate.getUTCMonth() == secondDate.getUTCMonth()) && (firstDate.getDate() == secondDate.getDate()))
+    return ((firstDate.getMonth() == secondDate.getMonth()) && (firstDate.getDate() == secondDate.getDate()))
   }
 
   checkSameMonth(firstDate: Date, secondDate: Date): boolean {
-    return firstDate.getUTCMonth() == secondDate.getUTCMonth();
+    return firstDate.getMonth() == secondDate.getMonth();
   }
 
   checkPreviousDate(firstDate: Date, secondDate: Date): boolean {
-    if (firstDate.getUTCFullYear() == secondDate.getUTCFullYear()) {
-      if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
-        return firstDate.getUTCDate() > secondDate.getUTCDate()
-      } else {
-        return firstDate.getUTCMonth() > secondDate.getUTCMonth();
-      }
-    } else {
-      return firstDate.getUTCFullYear() > secondDate.getUTCFullYear();
-    }
+    return firstDate.getTime() > secondDate.getTime();
   }
 
   checkLaterDate(firstDate: Date, secondDate: Date): boolean {
-    if (firstDate.getUTCFullYear() == secondDate.getUTCFullYear()) {
-      if (firstDate.getUTCMonth() == secondDate.getUTCMonth()) {
-        return firstDate.getDate() < secondDate.getDate()
-      } else {
-        return firstDate.getUTCMonth() < secondDate.getUTCMonth();
-      }
-    } else {
-      return firstDate.getUTCFullYear() < secondDate.getUTCFullYear();
-    }
+    return firstDate.getTime() < secondDate.getTime();
   }
 
   getBackground(ngbDate: NgbDateStruct): string {

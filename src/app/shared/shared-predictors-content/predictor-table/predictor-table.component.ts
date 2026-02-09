@@ -121,7 +121,7 @@ export class PredictorTableComponent {
     //set values in services
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.selectedFacility);
-    await this.dbChangesService.setPredictorDataV2(account, this.selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(account, true, this.selectedFacility);
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
@@ -159,7 +159,7 @@ export class PredictorTableComponent {
       await this.analysisDbService.addAnalysisPredictor(newPredictor);
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.setPredictorsV2(account, facility);
-      await this.dbChangesService.setPredictorDataV2(account, facility);
+      await this.dbChangesService.setPredictorDataV2(account, true, facility);
       await this.dbChangesService.setAnalysisItems(account, true, facility);
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
@@ -275,7 +275,7 @@ export class PredictorTableComponent {
     this.toastNotificationService.showToast("Predictor Copy Created", undefined, undefined, false, "alert-success");
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account);
-    await this.dbChangesService.setPredictorDataV2(account)
+    await this.dbChangesService.setPredictorDataV2(account, true)
     await this.dbChangesService.selectFacility(facility);
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/predictor-table');
   }

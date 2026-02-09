@@ -18,11 +18,12 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     assessmentReportVersion?: AssessmentReportVersion,
     sidebarCustomDataOpen?: boolean,
     toDoListOutdatedDays?: number
+    migratedDates?: boolean
 }
 
 export function getNewIdbAccount(): IdbAccount {
     let idbEntry: IdbEntry = getNewIdbEntry();
-    let baselineYear: number = new Date().getUTCFullYear();
+    let baselineYear: number = new Date().getMonth();
     let targetYear: number = baselineYear + 10;
     return {
         ...idbEntry,

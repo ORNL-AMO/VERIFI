@@ -9,7 +9,7 @@ import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predi
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameMonth } from './upload-helper-functions';
+import { checkSameMonthPredictorData } from './upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'
@@ -85,14 +85,15 @@ export class UploadDataSharedFunctionsService {
           let predictorAmount: number = importDataItem[predictor.name];
           if (isNaN(predictorAmount) == false) {
             let existingPredictorData: IdbPredictorData = facilityPredictorData.find(pData => {
-              return predictor.guid == pData.predictorId && checkSameMonth(new Date(pData.date), predictorDataDate)
+              return predictor.guid == pData.predictorId && checkSameMonthPredictorData(pData, predictorDataDate)
             });
             if (existingPredictorData) {
               existingPredictorData.amount = predictorAmount;
               importPredictorData.push(existingPredictorData);
             }else{
               let newPredictorData: IdbPredictorData = getNewIdbPredictorData(predictor);
-              newPredictorData.date = predictorDataDate;
+              newPredictorData.year = predictorDataDate.getFullYear();
+              newPredictorData.month = predictorDataDate.getMonth() + 1;
               newPredictorData.amount = predictorAmount;
               importPredictorData.push(newPredictorData);
             }
