@@ -7,7 +7,7 @@
     <div class="col">
       <div class="input-group">
         <input id="predictorDate" class="form-control" type="month"
-          [ngModel]="predictorData | displayPredictorDataDate" (ngModelChange)="setDate($event)" name="date">
+          [ngModel]="predictorData | displayPredictorDataDate:true" (ngModelChange)="setDate($event)" name="date">
       </div>
     </div>
   </div>

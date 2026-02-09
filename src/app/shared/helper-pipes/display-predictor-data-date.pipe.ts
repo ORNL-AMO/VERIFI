@@ -8,7 +8,11 @@ import { Month, Months } from '../form-data/months';
 })
 export class DisplayPredictorDataDatePipe implements PipeTransform {
 
-  transform(predictorData: IdbPredictorData): string {
+  transform(predictorData: IdbPredictorData, forForm?: boolean): string {
+    if(forForm){
+      //need date in yyyy-mm
+      return predictorData.year + '-' + (predictorData.month < 10 ? '0' : '') + predictorData.month;
+    }
     let month: Month = Months.find(month => month.monthNumValue == (predictorData.month - 1));
     return month.abbreviation + ', ' + predictorData.year;
   }

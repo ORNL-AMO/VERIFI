@@ -48,7 +48,7 @@ export class EditPredictorDataEntryFormComponent {
     //eventData format = yyyy-mm = 2022-06
     let yearMonth: Array<string> = eventData.split('-');
     this.predictorData.year = Number(yearMonth[0]);
-    this.predictorData.month = Number(yearMonth[1]) - 1; //-1 on month because month is 0 indexed in predictor data
+    this.predictorData.month = Number(yearMonth[1]);
     this.setDegreeDayValues();
   }
 
