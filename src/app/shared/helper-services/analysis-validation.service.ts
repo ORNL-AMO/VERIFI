@@ -16,9 +16,6 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 })
 export class AnalysisValidationService {
 
-  // facilityMeterData: Array<IdbUtilityMeterData>;
-  // facilityPredictorData: Array<IdbPredictorData>;
-
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,

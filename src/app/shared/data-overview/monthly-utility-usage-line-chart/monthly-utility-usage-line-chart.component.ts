@@ -70,7 +70,6 @@ export class MonthlyUtilityUsageLineChartComponent {
   drawChart() {
     if (this.monthlyUsageChart && this.yearMonthData) {
       let traceData = Array();
-      console.log(this.yearMonthData)
 
       let accountOrFacility: IdbFacility | IdbAccount;
       if (!this.facilityId) {
