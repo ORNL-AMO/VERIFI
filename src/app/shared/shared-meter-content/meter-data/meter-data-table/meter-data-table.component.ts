@@ -42,7 +42,7 @@ export class MeterDataTableComponent {
   duplicateReadingDates: Array<Date>;
   filteredMeterData: Array<IdbUtilityMeterData>;
   optionSelected: 'all' | 'estimated' = 'all';
-
+  hasEstimatedReadings: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -94,6 +94,9 @@ export class MeterDataTableComponent {
     }) != -1;
     this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
+    this.hasEstimatedReadings = this.meterData.findIndex(mData => {
+      return mData.isEstimated == true;
+    }) != -1;
   }
 
   uploadData() {
@@ -116,7 +119,7 @@ export class MeterDataTableComponent {
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true,  selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -142,7 +145,7 @@ export class MeterDataTableComponent {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage("Setting Meter Data...");
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.loadingService.setLoadingMessage("Meter Data Set...");
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");

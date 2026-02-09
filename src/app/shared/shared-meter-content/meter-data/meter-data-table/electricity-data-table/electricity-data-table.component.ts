@@ -158,7 +158,8 @@ export class ElectricityDataTableComponent implements OnInit {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], co2EmissionsRates, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, dataItem.year, false, [facility],
+        co2EmissionsRates, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion, []);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });
   }
@@ -202,9 +203,9 @@ export class ElectricityDataTableComponent implements OnInit {
     this.numEmissions = emissionCount;
 
     if (this.isRECs) {
-      if(this.generalInformationFilters.totalCost){
+      if (this.generalInformationFilters.totalCost) {
         this.numGeneralInformation = 2
-      }else{
+      } else {
         this.numGeneralInformation = 1;
       }
     } else {

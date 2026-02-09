@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 
 addEventListener('message', ({ data }) => {
     try {
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, [data.facility], data.assessmentReportVersion);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, [data.facility], data.assessmentReportVersion, data.customGWPs);
         let dateRange: { endDate: Date, startDate: Date };
         if (!data.dateRange) {
             if (calanderizedMeters && calanderizedMeters.length > 0) {
@@ -18,7 +18,7 @@ addEventListener('message', ({ data }) => {
                 let minDate: Date;
                 if (data.inOverview) {
                     maxDate = new Date(latestData.year, latestData.monthNumValue);
-                    minDate = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+                    minDate = new Date(maxDate.getFullYear() - 1, maxDate.getMonth(), 1);
                 } else {
                     let startData: MonthlyData = _.minBy(monthlyData, 'date');
                     maxDate = new Date(latestData.year, latestData.monthNumValue);

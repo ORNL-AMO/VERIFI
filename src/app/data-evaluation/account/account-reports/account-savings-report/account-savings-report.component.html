@@ -18,7 +18,7 @@
                 @if (!print || !(accountSavingsReportSetup.analysisTableColumns | breakUpTableForPrint: 'annual')) {
                     <div class="scroll-x">
                         <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
-                            [analysisItem]="selectedAnalysisItem" [latestMonthSummary]="latestMonthSummary"
+                            [analysisItem]="selectedAnalysisItem" [latestMonthSummary]="latestMonthSummary" [inReport]="true"
                             [accountOrFacility]="account" [printBlock]="'all'">
                         </app-annual-analysis-summary-table>
                     </div>
@@ -26,21 +26,21 @@
                     @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'consumption') {
                     <app-annual-analysis-summary-table
                         [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="selectedAnalysisItem"
-                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="account"
+                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="account" [inReport]="true"
                         [printBlock]="'consumption'">
                     </app-annual-analysis-summary-table>
                     }
                     @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'predictors') {
                     <app-annual-analysis-summary-table
                         [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="selectedAnalysisItem"
-                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="account"
+                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="account" [inReport]="true"
                         [printBlock]="'predictors'">
                     </app-annual-analysis-summary-table>
                     }
                     @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'savings') {
                     <app-annual-analysis-summary-table
                         [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="selectedAnalysisItem"
-                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="account"
+                        [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="account" [inReport]="true"
                         [printBlock]="'savings'">
                     </app-annual-analysis-summary-table>
                     }
@@ -68,28 +68,28 @@
                 <div class="scroll-x">
                     <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
                         [analysisItem]="selectedAnalysisItem" [facilityOrAccount]="account"
-                        [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
+                        [itemsPerPage]="itemsPerPage" [printBlock]="'all'" [inReport]="true">
                     </app-monthly-analysis-summary-table>
                 </div>
             } @else {
                 @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'consumption') {
                 <app-monthly-analysis-summary-table
                     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="selectedAnalysisItem"
-                    [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'consumption'">
+                    [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'consumption'" [inReport]="true">
                 </app-monthly-analysis-summary-table>
                 }
 
                 @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'predictors') {
                 <app-monthly-analysis-summary-table
                     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="selectedAnalysisItem"
-                    [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'predictors'">
+                    [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'predictors'" [inReport]="true">
                 </app-monthly-analysis-summary-table>
                 }
 
                 @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'savings') {
                 <app-monthly-analysis-summary-table
                     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="selectedAnalysisItem"
-                    [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'savings'">
+                    [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'savings'" [inReport]="true">
                 </app-monthly-analysis-summary-table>
                 }
             }
@@ -138,7 +138,7 @@
                                 <app-annual-analysis-summary-table
                                     [annualAnalysisSummary]="summary.annualAnalysisSummaries"
                                     [analysisItem]="summary.analysisItem"
-                                    [latestMonthSummary]="summary.latestMonthSummary"
+                                    [latestMonthSummary]="summary.latestMonthSummary" [inReport]="true"
                                     [accountOrFacility]="summary.facility" [printBlock]="'all'">
                                 </app-annual-analysis-summary-table>
                             </div>
@@ -146,21 +146,21 @@
                             @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'consumption') {
                             <app-annual-analysis-summary-table
                                 [annualAnalysisSummary]="summary.annualAnalysisSummaries"
-                                [analysisItem]="summary.analysisItem" [latestMonthSummary]="summary.latestMonthSummary"
+                                [analysisItem]="summary.analysisItem" [latestMonthSummary]="summary.latestMonthSummary" [inReport]="true"
                                 [accountOrFacility]="summary.facility" [printBlock]="'consumption'">
                             </app-annual-analysis-summary-table>
                             }
                             @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'predictors') {
                             <app-annual-analysis-summary-table
                                 [annualAnalysisSummary]="summary.annualAnalysisSummaries"
-                                [analysisItem]="summary.analysisItem" [latestMonthSummary]="summary.latestMonthSummary"
+                                [analysisItem]="summary.analysisItem" [latestMonthSummary]="summary.latestMonthSummary" [inReport]="true"
                                 [accountOrFacility]="summary.facility" [printBlock]="'predictors'">
                             </app-annual-analysis-summary-table>
                             }
                             @if (accountSavingsReportSetup.analysisTableColumns | includeTable: 'savings') {
                             <app-annual-analysis-summary-table
                                 [annualAnalysisSummary]="summary.annualAnalysisSummaries"
-                                [analysisItem]="summary.analysisItem" [latestMonthSummary]="summary.latestMonthSummary"
+                                [analysisItem]="summary.analysisItem" [latestMonthSummary]="summary.latestMonthSummary" [inReport]="true"
                                 [accountOrFacility]="summary.facility" [printBlock]="'savings'">
                             </app-annual-analysis-summary-table>
                             }

@@ -11,7 +11,7 @@
     <!--annual facility-->
     @if (analysisReportSettings.facilityAnnualResults) {
       <app-annual-facility-analysis-report [analysisItem]="analysisItem"
-        [annualAnalysisSummaries]="annualAnalysisSummaries" [facility]="facility"
+        [annualAnalysisSummaries]="annualAnalysisSummaries" [facility]="facility" [groupSummaries]="groupSummaries"
       [analysisReportSettings]="analysisReportSettings"></app-annual-facility-analysis-report>
       <div class="report-spacer-container">
         <hr>
@@ -20,7 +20,7 @@
       <!--monthly facility-->
       @if (analysisReportSettings.facilityMonthlyResults) {
         <app-monthly-facility-analysis-report [analysisItem]="analysisItem" [facility]="facility"
-          [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+          [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries"
         [analysisReportSettings]="analysisReportSettings"></app-monthly-facility-analysis-report>
         <div class="report-spacer-container">
           <hr>

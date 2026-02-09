@@ -19,7 +19,7 @@
                 @if (annualAnalysisSummaries) {
                 <div class="scroll-x">
                     <app-annual-analysis-summary-table
-                        [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                        [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem" [inReport]="true" [groupSummaries]="groupSummaries"
                         [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility" [printBlock]="'all'">
                     </app-annual-analysis-summary-table>
                 </div>
@@ -27,21 +27,21 @@
             } @else {
                 @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption') {
                 <app-annual-analysis-summary-table
-                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem" [inReport]="true" [groupSummaries]="groupSummaries"
                     [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility"
                     [printBlock]="'consumption'">
                 </app-annual-analysis-summary-table>
                 }
                 @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors') {
                 <app-annual-analysis-summary-table
-                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem" [inReport]="true" [groupSummaries]="groupSummaries"
                     [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility"
                     [printBlock]="'predictors'">
                 </app-annual-analysis-summary-table>
                 }
                 @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings') {
                 <app-annual-analysis-summary-table
-                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+                    [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem" [inReport]="true" [groupSummaries]="groupSummaries"
                     [latestMonthSummary]="latestMonthSummary" [accountOrFacility]="facility" [printBlock]="'savings'">
                 </app-annual-analysis-summary-table>
                 }
@@ -61,30 +61,30 @@
             </div>
             @if (!print || !(facilityReport.savingsReportSettings.analysisTableColumns| breakUpTableForPrint: 'monthly')) {
                 <div class="scroll-x">
-                    <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                    <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries"
+                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true"
                         [printBlock]="'all'">
                     </app-monthly-analysis-summary-table>
                 </div>
             } @else {
                 @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption') {
                 <app-monthly-analysis-summary-table
-                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'consumption'">
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true" [printBlock]="'consumption'">
                 </app-monthly-analysis-summary-table>
                 }
 
                 @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors') {
                 <app-monthly-analysis-summary-table
-                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'predictors'">
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true" [printBlock]="'predictors'">
                 </app-monthly-analysis-summary-table>
                 }
 
                 @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings') {
                 <app-monthly-analysis-summary-table
-                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
-                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'savings'">
+                    [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true" [printBlock]="'savings'">
                 </app-monthly-analysis-summary-table>
                 }
             }
@@ -168,7 +168,7 @@
                     <div class="scroll-x">
                         <app-annual-analysis-summary-table
                             [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData"
-                            [analysisItem]="analysisItem" [latestMonthSummary]="groupSummary.latestMonthGroupSummary"
+                            [analysisItem]="analysisItem" [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [inReport]="true"
                             [accountOrFacility]="facility" [printBlock]="'all'" [group]="groupSummary.group">
                         </app-annual-analysis-summary-table>
                     </div>
@@ -176,21 +176,21 @@
                 } @else {
                     @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption') {
                     <app-annual-analysis-summary-table
-                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem" [inReport]="true"
                         [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [group]="groupSummary.group"
                         [accountOrFacility]="facility" [printBlock]="'consumption'">
                     </app-annual-analysis-summary-table>
                     }
                     @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors') {
                     <app-annual-analysis-summary-table
-                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem" [inReport]="true"
                         [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [group]="groupSummary.group"
                         [accountOrFacility]="facility" [printBlock]="'predictors'">
                     </app-annual-analysis-summary-table>
                     }
                     @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings') {
                     <app-annual-analysis-summary-table
-                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem"
+                        [annualAnalysisSummary]="groupSummary.annualAnalysisSummaryData" [analysisItem]="analysisItem" [inReport]="true"
                         [latestMonthSummary]="groupSummary.latestMonthGroupSummary" [group]="groupSummary.group"
                         [accountOrFacility]="facility" [printBlock]="'savings'">
                     </app-annual-analysis-summary-table>
@@ -214,8 +214,8 @@
                 @if (!print || !(facilityReport.savingsReportSettings.analysisTableColumns| breakUpTableForPrint: 'monthly')) {
                     <div class="scroll-x">
                         <app-monthly-analysis-summary-table
-                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                            [analysisItem]="analysisItem" [facilityOrAccount]="facility"
+                            [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [group]="groupSummary.group"
+                            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [inReport]="true"
                             [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
                         </app-monthly-analysis-summary-table>
                         <hr>
@@ -223,24 +223,24 @@
                 } @else {
                     @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'consumption') {
                     <app-monthly-analysis-summary-table
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [group]="groupSummary.group"
+                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true"
                         [printBlock]="'consumption'">
                     </app-monthly-analysis-summary-table>
                     }
 
                     @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'predictors') {
                     <app-monthly-analysis-summary-table
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [group]="groupSummary.group"
+                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true"
                         [printBlock]="'predictors'">
                     </app-monthly-analysis-summary-table>
                     }
 
                     @if (facilityReport.savingsReportSettings.analysisTableColumns | includeTable: 'savings') {
                     <app-monthly-analysis-summary-table
-                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
-                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage"
+                        [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [group]="groupSummary.group"
+                        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [inReport]="true"
                         [printBlock]="'savings'">
                     </app-monthly-analysis-summary-table>
                     }

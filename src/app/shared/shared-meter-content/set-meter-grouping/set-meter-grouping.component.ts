@@ -23,7 +23,7 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
   styleUrl: './set-meter-grouping.component.css'
 })
 export class SetMeterGroupingComponent {
-facilityMeters: Array<IdbUtilityMeter>;
+  facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
 
   facility: IdbFacility;

@@ -7,7 +7,7 @@ import { CalanderizedMeter, MonthlyData } from "../models/calanderization";
 import * as _ from 'lodash';
 addEventListener('message', ({ data }) => {
     try {
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.account, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, data.facilities, data.account.assessmentReportVersion);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.account, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, data.facilities, data.account.assessmentReportVersion, data.customGWPs);
         let dateRange: { endDate: Date, startDate: Date };
         if (!data.dateRange) {
             if (calanderizedMeters && calanderizedMeters.length > 0) {
@@ -17,7 +17,7 @@ addEventListener('message', ({ data }) => {
                 let minDate: Date;
                 if (data.inOverview) {
                     maxDate = new Date(latestData.year, latestData.monthNumValue);
-                    minDate = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+                    minDate = new Date(maxDate.getFullYear() - 1, maxDate.getMonth(), 1);
                 } else {
                     let startData: MonthlyData = _.minBy(monthlyData, 'date');
                     maxDate = new Date(latestData.year, latestData.monthNumValue);

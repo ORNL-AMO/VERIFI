@@ -55,7 +55,10 @@ export class MigratePredictorsService {
               return predictor.id == newPredictor.guid
             });
             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-            newIdbPredictorData.date = new Date(oldEntry.date);
+            // newIdbPredictorData.date = new Date(oldEntry.date);
+            let entryDate: Date = new Date(oldEntry.date);
+            newIdbPredictorData.year = entryDate.getFullYear();
+            newIdbPredictorData.month = entryDate.getMonth() + 1;
             newIdbPredictorData.amount = oldEntryPredictor.amount;
             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;

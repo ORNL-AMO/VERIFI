@@ -5,12 +5,12 @@ import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facilit
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterCharge, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
@@ -27,6 +27,7 @@ import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/
 import { WaterDischargeTypes, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -405,7 +406,7 @@ export class UploadDataV3Service {
             });
             if (gwpOption) {
               meter.globalWarmingPotentialOption = gwpOption.value;
-              meter.globalWarmingPotential = gwpOption.gwp;
+              // meter.globalWarmingPotential = gwpOption.gwp;
             }
           }
           meter.startingUnit = checkImportStartingUnit(excelMeter['Unit (COLLECTION)'], meter.source, meter.phase, meter.fuel, meter.scope);
@@ -509,7 +510,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+          dbDataPoint.year = readDate.getFullYear();
+          dbDataPoint.month = readDate.getMonth() + 1;
+          dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalEnergyUse = totalUsage;
           dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Actual Demand']);
           dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
@@ -539,7 +542,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Higher Heating Value']);
           let totalVolume: number = 0;
@@ -584,7 +589,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
           let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
           if (fuelEff) {
             dbDataPoint.vehicleFuelEfficiency = fuelEff;
@@ -624,7 +631,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Energy Factor']);
           let totalVolume: number = 0;
@@ -670,7 +679,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           dbDataPoint.totalVolume = totalUsage;
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
@@ -697,7 +708,9 @@ export class UploadDataV3Service {
           if (!dbDataPoint) {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
-          dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           dbDataPoint.totalVolume = totalUsage;
           this.addMeterDataCharges(dataPoint, dbDataPoint, meter);
@@ -825,8 +838,7 @@ export class UploadDataV3Service {
   getExistingDbEntry(utilityMeterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter, readDate: Date): IdbUtilityMeterData {
     return utilityMeterData.find(meterDataItem => {
       if (meterDataItem.meterId == meter.guid) {
-        let dateItemDate: Date = new Date(meterDataItem.readDate);
-        return checkSameDay(dateItemDate, readDate);
+        return checkSameDate(readDate, meterDataItem);
       } else {
         return false;
       }
@@ -970,7 +982,7 @@ export class UploadDataV3Service {
                 let predictorValue: number = excelPredictorData['Predictor ' + i + ' Value'];
                 if (isNaN(predictorValue) == false) {
                   let existingPredictorData: IdbPredictorData = facilityPredictorData.find(pData => {
-                    return facilityPredictor.guid == pData.predictorId && checkSameMonth(new Date(pData.date), readDate)
+                    return facilityPredictor.guid == pData.predictorId && checkSameMonthPredictorData(pData, readDate)
                   });
                   if (existingPredictorData) {
                     let predictorDataCopy: IdbPredictorData = _.cloneDeep(existingPredictorData);
@@ -978,7 +990,8 @@ export class UploadDataV3Service {
                     importPredictorData.push(predictorDataCopy);
                   } else {
                     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(facilityPredictor);
-                    newPredictorData.date = readDate;
+                    // newPredictorData.date = readDate;
+                    newPredictorData = setPredictorDateDataFromDate(newPredictorData, readDate);
                     newPredictorData.amount = predictorValue;
                     importPredictorData.push(newPredictorData);
                   }

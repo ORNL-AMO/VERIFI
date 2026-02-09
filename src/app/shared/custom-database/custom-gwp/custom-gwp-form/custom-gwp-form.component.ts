@@ -89,28 +89,30 @@ export class CustomGwpFormComponent {
 
   async save() {
     this.editCustomGWP.label = this.form.controls.gwpLabel.value;
-    this.editCustomGWP.gwp = this.form.controls.gwp.value;
+    this.editCustomGWP.gwp_ar4 = this.form.controls.gwp.value;
+    this.editCustomGWP.gwp_ar5 = this.form.controls.gwp.value;
+    this.editCustomGWP.gwp_ar6 = this.form.controls.gwp.value;
     this.editCustomGWP.display = this.form.controls.gwpLabel.value;
 
     if (this.isAdd) {
       await firstValueFrom(this.customGWPDbService.addWithObservable(this.editCustomGWP));
     } else {
       if (this.isGWPInUse) {
-        //update meters
-        let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-        let needsUpdate: boolean = false;
-        for (let i = 0; i < accountMeters.length; i++) {
-          if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
-            needsUpdate = true;
-            accountMeters[i].globalWarmingPotential = this.editCustomGWP.gwp;
-            await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
-          }
-        }
-        let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
-        let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
-          return meter.accountId == this.selectedAccount.guid;
-        });
-        this.utilityMeterDbService.accountMeters.next(accountMetersUpdates);
+        // //update meters
+        // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+        // let needsUpdate: boolean = false;
+        // for (let i = 0; i < accountMeters.length; i++) {
+        //   if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
+        //     needsUpdate = true;
+        //     // accountMeters[i].globalWarmingPotential = this.editCustomGWP.gwp;
+        //     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
+        //   }
+        // }
+        // let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
+        // let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
+        //   return meter.accountId == this.selectedAccount.guid;
+        // });
+        // this.utilityMeterDbService.accountMeters.next(accountMetersUpdates);
       }
       await firstValueFrom(this.customGWPDbService.updateWithObservable(this.editCustomGWP));
     }
@@ -131,7 +133,7 @@ export class CustomGwpFormComponent {
   setForm(editItem: IdbCustomGWP) {
     this.form = this.formBuilder.group({
       'gwpLabel': [editItem.label, [Validators.required]],
-      'gwp': [editItem.gwp, [Validators.required]],
+      'gwp': [editItem.gwp_ar4, [Validators.required]],
     });
   }
 
@@ -143,7 +145,7 @@ export class CustomGwpFormComponent {
     this.displayGWPModal = false;
     if (selectedOption) {
       this.form.controls.gwpLabel.patchValue(selectedOption.label + ' (Modified)');
-      this.form.controls.gwp.patchValue(selectedOption.gwp);
+      this.form.controls.gwp_ar4.patchValue(selectedOption.gwp_ar4);
     }
   }
 

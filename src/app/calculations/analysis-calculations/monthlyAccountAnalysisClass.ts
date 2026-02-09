@@ -7,7 +7,7 @@ import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calcula
 import { getFiscalYear, getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
-import { IdbAccount } from "src/app/models/idbModels/account";
+import { AssessmentReportVersion, IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
@@ -70,7 +70,7 @@ export class MonthlyAccountAnalysisClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>,
-        assessmentReportVersion: 'AR4' | 'AR5') {
+        assessmentReportVersion: AssessmentReportVersion) {
         this.monthlyFacilityAnalysisClasses = new Array();
         this.facilitySummaries = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -78,7 +78,7 @@ export class MonthlyAccountAnalysisClass {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
-                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, assessmentReportVersion);
+                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, assessmentReportVersion, []);
                 let monthlyFacilityAnalysisClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(
                     analysisItem,
                     facility,
@@ -106,7 +106,7 @@ export class MonthlyAccountAnalysisClass {
 
     setAnnualUsageValues() {
         this.annualUsageValues = new Array();
-        for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
+        for (let year = this.baselineYear + 1; year <= this.endDate.getFullYear(); year++) {
             let yearMeterData: Array<MonthlyAnalysisSummaryDataClass> = this.allAccountAnalysisData.filter(data => { return data.fiscalYear == year });
             let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
             this.annualUsageValues.push({ year: year, usage: totalUsage });
@@ -125,9 +125,9 @@ export class MonthlyAccountAnalysisClass {
                 this.baselineYear
             );
             this.accountMonthSummaries.push(monthSummary);
-            let currentMonth: number = monthDate.getUTCMonth()
+            let currentMonth: number = monthDate.getMonth()
             let nextMonth: number = currentMonth + 1;
-            monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
+            monthDate = new Date(monthDate.getFullYear(), nextMonth, 1);
         }
     }
 
@@ -172,7 +172,8 @@ export class MonthlyAccountAnalysisClass {
                 fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentSavings),
                 thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
                 thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings),
-                missingValueWarning: summaryDataItem.monthlyAnalysisCalculatedValues.missingValueWarning
+                missingValueWarning: summaryDataItem.monthlyAnalysisCalculatedValues.missingValueWarning,
+                missingPredictors: summaryDataItem.monthlyAnalysisCalculatedValues.missingPredictors
             }
         })
     }

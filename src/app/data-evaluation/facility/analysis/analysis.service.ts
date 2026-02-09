@@ -23,7 +23,7 @@ export class AnalysisService {
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   accountAnalysisItem: IdbAccountAnalysisItem;
   hideInUseMessage: boolean = false;
-   groupSummaries: BehaviorSubject<Array<{
+  groupSummaries: BehaviorSubject<Array<{
     group: AnalysisGroup,
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
@@ -138,13 +138,13 @@ export class AnalysisService {
   checkFiscalYearEnd(date: Date, facilityOrAccount: IdbFacility | IdbAccount, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {
     if (orderDataField == 'date' || orderDataField == 'fiscalYear') {
       if (facilityOrAccount.fiscalYear == 'calendarYear' && (orderByDirection == 'asc' || orderDataField == 'fiscalYear')) {
-        return date.getUTCMonth() == 0;
+        return date.getMonth() == 0;
       } else if (facilityOrAccount.fiscalYear == 'calendarYear' && orderByDirection == 'desc') {
-        return date.getUTCMonth() == 11;
+        return date.getMonth() == 11;
       } else {
-        if (date.getUTCMonth() == facilityOrAccount.fiscalYearMonth && orderByDirection == 'asc') {
+        if (date.getMonth() == facilityOrAccount.fiscalYearMonth && orderByDirection == 'asc') {
           return true;
-        } else if (date.getUTCMonth() + 1 == facilityOrAccount.fiscalYearMonth && orderByDirection == 'desc') {
+        } else if (date.getMonth() + 1 == facilityOrAccount.fiscalYearMonth && orderByDirection == 'desc') {
           return true;
         } else {
           return false;

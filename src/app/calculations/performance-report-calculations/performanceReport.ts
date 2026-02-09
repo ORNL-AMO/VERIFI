@@ -6,7 +6,7 @@ import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from
 import * as _ from 'lodash';
 import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
 import { MeterSource } from "src/app/models/constantsAndTypes";
-import { IdbAccount } from "src/app/models/idbModels/account";
+import { AssessmentReportVersion, IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
@@ -88,14 +88,14 @@ export class PerformanceReport {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>,
-        assessmentReportVersion: 'AR4' | 'AR5') {
+        assessmentReportVersion: AssessmentReportVersion) {
         this.annualFacilityAnalysisSummaries = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
-                let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) }, [], [], facilities, assessmentReportVersion);
+                let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) }, [], [], facilities, assessmentReportVersion, []);
                 let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, true);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let groupAnnualAnalysisSummary: Array<{

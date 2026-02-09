@@ -26,6 +26,8 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
     selector: 'app-account-home',
@@ -57,7 +59,8 @@ export class AccountHomeComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -239,6 +242,7 @@ export class AccountHomeComponent implements OnInit {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let co2Emissions: Array<SubregionEmissions> = this.eGridService.co2Emissions;
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
 
     if (typeof Worker !== 'undefined') {
       this.accountOverviewWorker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));
@@ -265,11 +269,12 @@ export class AccountHomeComponent implements OnInit {
         account: this.account,
         energyIsSource: this.account.energyIsSource,
         co2Emissions: co2Emissions,
-        customFuels: customFuels
+        customFuels: customFuels,
+        customGWPs: customGWPs
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, co2Emissions, customFuels, facilities, this.account.assessmentReportVersion);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, co2Emissions, customFuels, facilities, this.account.assessmentReportVersion, customGWPs);
       let dateRange: { endDate: Date, startDate: Date };
       if (calanderizedMeters && calanderizedMeters.length > 0) {
         let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });

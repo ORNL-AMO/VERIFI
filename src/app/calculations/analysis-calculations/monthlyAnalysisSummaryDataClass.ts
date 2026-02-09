@@ -7,6 +7,7 @@ import { ConvertValue } from "../conversions/convertValue";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { GroupMonthlyAnalysisRollupValues } from './groupMonthlyAnalysisRollupValuesClass';
+import { checkSameMonth } from "src/app/data-management/data-management-import/import-services/upload-helper-functions";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -46,6 +47,7 @@ export class MonthlyAnalysisSummaryDataClass {
     originalBaselineYearBaselineActualEnergyUse: number;
 
     missingValueWarning: boolean;
+    missingPredictors: Array<string>;
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
@@ -57,6 +59,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.date = monthDate;
         this.missingValueWarning = false;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
+        this.missingPredictors = [];
         this.isNew = facility.isNewFacility;
         this.baselineYear = monthlyGroupAnalysisClass.baselineYear;
         this.bankedAnalysisYear = monthlyGroupAnalysisClass.bankedAnalysisYear;
@@ -75,6 +78,15 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setModelYearDataAdjustment(monthlyGroupAnalysisClass);
         this.setDataAdjustment();
         this.setMonthlyAnalysisCalculatedValues(previousMonthsSummaryData, lastBankedMonthlyAnalysis);
+        this.checkMissingPredictors(monthlyGroupAnalysisClass.selectedGroup.predictorVariables);
+    }
+
+    checkMissingPredictors(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
+        predictorVariables.forEach(variable => {
+            if (variable.productionInAnalysis && !this.monthPredictorData.some(data => (data.predictorId === variable.id))) {
+                this.missingPredictors.push(variable.id);
+            }
+        });
     }
 
     setFiscalYear(facility: IdbFacility) {
@@ -95,15 +107,14 @@ export class MonthlyAnalysisSummaryDataClass {
 
     setMonthPredictorData(groupPredictorData: Array<IdbPredictorData>) {
         this.monthPredictorData = groupPredictorData.filter(predictorData => {
-            let predictorDate: Date = new Date(predictorData.date);
-            return predictorDate.getUTCFullYear() == this.date.getUTCFullYear() && predictorDate.getUTCMonth() == this.date.getUTCMonth();
+            return predictorData.year == this.date.getFullYear() && (predictorData.month - 1) == this.date.getMonth();
         });
     }
 
     setMonthMeterData(allMonthlyData: Array<MonthlyData>) {
         this.monthMeterData = allMonthlyData.filter(data => {
             let meterDataDate: Date = new Date(data.date);
-            return meterDataDate.getUTCFullYear() == this.date.getUTCFullYear() && meterDataDate.getUTCMonth() == this.date.getUTCMonth();
+            return checkSameMonth(meterDataDate, this.date);
         });
     }
 

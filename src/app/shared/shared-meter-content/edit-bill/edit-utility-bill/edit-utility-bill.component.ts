@@ -12,7 +12,7 @@ import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFunctio
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -92,9 +92,8 @@ export class EditUtilityBillComponent implements OnInit {
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
-      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
       let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
-      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
+      if (checkSameDate(changeDate, this.editMeterData)) {
         this.invalidDate = false;
       } else {
         this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter,accountMeterData) != undefined;
@@ -115,7 +114,7 @@ export class EditUtilityBillComponent implements OnInit {
         false, [facility], this.eGridService.co2Emissions, customFuels,
         this.meterDataForm.controls.totalVolume.value, undefined, undefined,
         this.meterDataForm.controls.heatCapacity.value,
-        account.assessmentReportVersion);
+        account.assessmentReportVersion, []);
     } else {
       this.emissionsResults = getZeroEmissionsResults();
     }

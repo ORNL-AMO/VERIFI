@@ -9,6 +9,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -52,7 +54,13 @@ export class RegressionModelsService {
             });
             model['predictorVariables'] = modelPredictorVariables;
             model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
-            model['modelId'] = Math.random().toString(36).substr(2, 9);
+
+            let modelId: string = '';
+            let predictorVariableIds: string = '';
+            const sortedVariableIds = variableIdCombo.slice().sort();
+            predictorVariableIds = sortedVariableIds.join('_');
+            modelId = analysisGroup.idbGroupId + '_' + predictorVariableIds + '_' + startYear;
+            model['modelId'] = modelId;
             model['modelPValue'] = model.f.pvalue;
             model['errorModeling'] = false;
             //Remove unused JSTAT data from model
@@ -143,7 +151,7 @@ export class RegressionModelsService {
     while (startDate < endDate) {
       let monthData: Array<MonthlyData> = allMeterData.filter(data => {
         let dataDate: Date = new Date(data.date);
-        return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return checkSameMonth(dataDate, startDate);
       });
       let energyConsumption: number;
       if (analysisCategory == 'energy') {
@@ -153,8 +161,7 @@ export class RegressionModelsService {
       }
       endog.push(energyConsumption);
       let monthPredictorData: Array<IdbPredictorData> = facilityPredictorData.filter(pData => {
-        let dataDate: Date = new Date(pData.date);
-        return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return checkSameMonthPredictorData(pData, startDate);
       });
 
       //need 1 for constants
@@ -169,9 +176,9 @@ export class RegressionModelsService {
         usageArr.push(totalUsage);
       });
       exog.push(usageArr);
-      let currentMonth: number = startDate.getUTCMonth()
+      let currentMonth: number = startDate.getMonth()
       let nextMonth: number = currentMonth + 1;
-      startDate = new Date(startDate.getUTCFullYear(), nextMonth, 1);
+      startDate = new Date(startDate.getFullYear(), nextMonth, 1);
     }
 
     return {
@@ -310,7 +317,8 @@ export class RegressionModelsService {
     let reportYearPredictorData: Array<IdbPredictorData> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorData> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = getFiscalYear(new Date(facilityPredictorData[i].date), facility);
+      let predictorDate: Date = getDateFromPredictorData(facilityPredictorData[i])
+      let fiscalYear: number = getFiscalYear(predictorDate, facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }

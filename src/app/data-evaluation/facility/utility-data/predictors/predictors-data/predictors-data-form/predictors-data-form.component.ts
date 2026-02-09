@@ -73,7 +73,7 @@ export class PredictorsDataFormComponent {
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(selectedAccount, selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(selectedAccount, true, selectedFacility);
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');

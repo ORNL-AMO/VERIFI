@@ -8,11 +8,13 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-edit-other-emissions-bill',
@@ -43,7 +45,8 @@ export class EditOtherEmissionsBillComponent {
     private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private customGwpDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
     this.setTotalEmissions();
@@ -71,9 +74,8 @@ export class EditOtherEmissionsBillComponent {
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
-      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
       let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
-      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
+      if (checkSameDate(changeDate, this.editMeterData)) {
         this.invalidDate = false;
       } else {
         this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
@@ -87,12 +89,13 @@ export class EditOtherEmissionsBillComponent {
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       //meed to use total volume for fugitive/process emissions
+      let customGWPs: Array<IdbCustomGWP> = this.customGwpDbService.accountCustomGWPs.getValue();
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
         this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
-        this.meterDataForm.controls.totalVolume.value, undefined, undefined, undefined, account.assessmentReportVersion);
+        this.meterDataForm.controls.totalVolume.value, undefined, undefined, undefined, account.assessmentReportVersion, customGWPs);
       this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
       this.processEmissions = emissionsValues.processEmissions;
     } else {

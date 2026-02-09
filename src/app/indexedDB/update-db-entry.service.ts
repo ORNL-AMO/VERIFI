@@ -13,6 +13,7 @@ import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { getGUID } from '../shared/sharedHelperFunctions';
 import { MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import * as _ from 'lodash';
+import { IdbCustomGWP } from '../models/idbModels/customGWP';
 
 @Injectable({
   providedIn: 'root'
@@ -427,7 +428,7 @@ export class UpdateDbEntryService {
 
   updateSelectedFacilityAnalysis(facility: IdbFacility, facilityAnalysisItems: Array<IdbAnalysisItem>): { facility: IdbFacility, isChanged: boolean } {
     //TODO: ensure we are selecting with the correct baseline year for goals...
-    
+
     let isChanged: boolean = false;
     if (facility.selectedEnergyAnalysisId == undefined) {
       let energyAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => {
@@ -440,7 +441,7 @@ export class UpdateDbEntryService {
         let latestItem: IdbAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
         facility.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
-      }else if(energyAnalysisItems.length > 0){
+      } else if (energyAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
         facility.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
@@ -457,7 +458,7 @@ export class UpdateDbEntryService {
         let latestItem: IdbAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
         facility.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
-      }else if(waterAnalysisItems.length > 0){
+      } else if (waterAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
         facility.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
@@ -467,5 +468,17 @@ export class UpdateDbEntryService {
       facility: facility,
       isChanged: isChanged
     }
+  }
+  
+  updateCustomGWP(customGWP: IdbCustomGWP): { customGWP: IdbCustomGWP, isChanged: boolean } {
+    let isChanged: boolean = false;
+    if (customGWP.gwp_ar4 == undefined && customGWP['gwp'] != undefined) {
+      customGWP.gwp_ar4 = customGWP['gwp'];
+      customGWP.gwp_ar5 = customGWP['gwp'];
+      customGWP.gwp_ar6 = customGWP['gwp'];
+      delete customGWP['gwp'];
+      isChanged = true;
+    }
+    return { customGWP: customGWP, isChanged: isChanged };
   }
 }

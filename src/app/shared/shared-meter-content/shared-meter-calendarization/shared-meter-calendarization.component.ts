@@ -18,6 +18,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { Router } from '@angular/router';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-shared-meter-calendarization',
@@ -55,7 +57,8 @@ export class SharedMeterCalendarizationComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService,
-    private router: Router) { }
+    private router: Router,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -102,7 +105,8 @@ export class SharedMeterCalendarizationComponent {
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], selectedAccount.assessmentReportVersion);
+      let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], selectedAccount.assessmentReportVersion, customGWPs);
 
       let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
         return cMeter.meter.guid == this.selectedMeter.guid

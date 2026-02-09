@@ -15,14 +15,15 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     deleteAccount?: boolean,
     sidebarFacilitiesOpen?: boolean,
     isBetterPlantsPartner?: boolean,
-    assessmentReportVersion?: 'AR4' | 'AR5',
+    assessmentReportVersion?: AssessmentReportVersion,
     sidebarCustomDataOpen?: boolean,
     toDoListOutdatedDays?: number
+    migratedDates?: boolean
 }
 
 export function getNewIdbAccount(): IdbAccount {
     let idbEntry: IdbEntry = getNewIdbEntry();
-    let baselineYear: number = new Date().getUTCFullYear();
+    let baselineYear: number = new Date().getMonth();
     let targetYear: number = baselineYear + 10;
     return {
         ...idbEntry,
@@ -80,6 +81,8 @@ export function getNewIdbAccount(): IdbAccount {
         archiveOption: 'skip',
         isSharedBackupFile: false,
         color: undefined,
-        assessmentReportVersion: 'AR5'
+        assessmentReportVersion: 'AR6'
     }
 }
+
+export type AssessmentReportVersion = 'AR4' | 'AR5' | 'AR6';

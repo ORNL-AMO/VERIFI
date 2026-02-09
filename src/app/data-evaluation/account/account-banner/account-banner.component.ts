@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -13,12 +13,17 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 })
 export class AccountBannerComponent implements OnInit {
 
+  @ViewChild('navTabs') navTabs: ElementRef;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
   meterDataSub: Subscription;
   meterData: Array<IdbUtilityMeterData>;
+
+  hideTabText: boolean = false;
+  hideAllText: boolean = false;
   constructor(private accountDbService: AccountdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
@@ -33,5 +38,20 @@ export class AccountBannerComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.meterDataSub.unsubscribe();
+  }
+  ngAfterViewInit() {
+    this.setHideTabText();
+    this.cd.detectChanges();
+  }
+
+  setHideTabText() {
+    this.hideTabText = this.navTabs.nativeElement.offsetWidth < 750;
+    this.hideAllText = this.navTabs.nativeElement.offsetWidth < 550;
+  }
+
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.setHideTabText();
   }
 }

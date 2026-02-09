@@ -21,7 +21,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
@@ -225,7 +225,7 @@ export class UploadDataV2Service {
             this.setMeterUnits(excelMeter, meter, facility);
             if (meter.scope == 5 || meter.scope == 6) {
               let parseGWPData = this.parseGlobalWarmingPotentials(excelMeter, meter.startingUnit);
-              meter.globalWarmingPotential = parseGWPData.globalWarmingPotential;
+              // meter.globalWarmingPotential = parseGWPData.globalWarmingPotential;
               meter.globalWarmingPotentialOption = parseGWPData.globalWarmingPotentialOption;
             }
           }
@@ -277,7 +277,9 @@ export class UploadDataV2Service {
         if (!dbDataPoint) {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Consumption']);
         dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Total Real Demand']);
         dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
@@ -321,7 +323,9 @@ export class UploadDataV2Service {
         if (!dbDataPoint) {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         let totalVolume: number = 0;
         let energyUse: number = 0;
         let totalConsumption: number = checkImportCellNumber(dataPoint['Total Consumption']);
@@ -342,7 +346,9 @@ export class UploadDataV2Service {
           }
         }
 
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = totalVolume;
         dbDataPoint.totalEnergyUse = energyUse;
         dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost']);
@@ -373,7 +379,9 @@ export class UploadDataV2Service {
         if (!dbDataPoint) {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = dataPoint['Total Consumption or Total Distance'];
         let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
         if (fuelEff) {
@@ -410,7 +418,9 @@ export class UploadDataV2Service {
         if (!dbDataPoint) {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = dataPoint['Total Consumption'];
         dbDataPoint.totalEnergyUse = 0;
         dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost']);
@@ -441,7 +451,9 @@ export class UploadDataV2Service {
         if (!dbDataPoint) {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = dataPoint['Total Consumption'];
         dbDataPoint.totalEnergyUse = 0;
         dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost']);
@@ -485,8 +497,7 @@ export class UploadDataV2Service {
   getExistingDbEntry(utilityMeterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter, readDate: Date): IdbUtilityMeterData {
     return utilityMeterData.find(meterDataItem => {
       if (meterDataItem.meterId == meter.guid) {
-        let dateItemDate: Date = new Date(meterDataItem.readDate);
-        return checkSameDay(dateItemDate, readDate);
+        return checkSameDate(readDate, meterDataItem);
       } else {
         return false;
       }
@@ -563,22 +574,22 @@ export class UploadDataV2Service {
     return;
   }
 
-  parseGlobalWarmingPotentials(excelMeter: any, startingUnit: string): { globalWarmingPotentialOption: number, globalWarmingPotential: number } {
+  parseGlobalWarmingPotentials(excelMeter: any, startingUnit: string): { globalWarmingPotentialOption: number } {
     let excelGWPOption: string = excelMeter['Fuel or Emission'];
 
     let selectedGWPOption: GlobalWarmingPotential = GlobalWarmingPotentials.find(gwpOption => {
       return gwpOption.label == excelGWPOption;
     });
     if (selectedGWPOption) {
-      let conversionHelper: number = new ConvertValue(1, 'kg', startingUnit).convertedValue;
-      let convertedGWP: number = selectedGWPOption.gwp / conversionHelper;
+      // let conversionHelper: number = new ConvertValue(1, 'kg', startingUnit).convertedValue;
+      // let convertedGWP: number = selectedGWPOption.gwp / conversionHelper;
       return {
-        globalWarmingPotential: convertedGWP,
+        // globalWarmingPotential: convertedGWP,
         globalWarmingPotentialOption: selectedGWPOption.value
       }
     }
     return {
-      globalWarmingPotential: undefined,
+      // globalWarmingPotential: undefined,
       globalWarmingPotentialOption: undefined
     }
   }

@@ -7,6 +7,7 @@ import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
 import * as _ from 'lodash';
 import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup";
+import { getDateFromMeterData, getDateFromPredictorData, getLatestMeterData, getLatestPredictorData } from "../shared/dateHelperFunctions";
 
 export function getTodoList(account: IdbAccount,
     facilities: Array<IdbFacility>,
@@ -28,7 +29,8 @@ export function getTodoList(account: IdbAccount,
                 url: '/data-management/' + account.guid + '/account-setup',
                 description: "Set the account name, unit settings, location and sustainability goals. This will help you manage your data effectively.",
                 facilityId: undefined,
-                type: 'account'
+                type: 'account',
+                trackGuid: account.guid + '_setup_account'
             })
         }
 
@@ -38,14 +40,16 @@ export function getTodoList(account: IdbAccount,
                 url: '/data-management/' + account.guid + '/import-data',
                 description: "For accounts with large amounts of facility data, upload data to the account. Use VERIFI's upload data features to get data into VERIFI via excel.",
                 facilityId: undefined,
-                type: 'account'
+                type: 'account',
+                trackGuid: account.guid + '_upload_data'
             });
             otherItems.push({
                 label: 'Add data manually',
                 url: '/data-management/' + account.guid + '/facilities',
                 description: "For smaller accounts. Manual data entry is possible. Create one or more facilities for this account manually. Once a facility is created, you can add utility meters and predictors to it.",
                 facilityId: undefined,
-                type: 'account'
+                type: 'account',
+                trackGuid: account.guid + '_add_facility'
             });
         } else {
             facilities.forEach(facility => {
@@ -81,7 +85,8 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
             url: '/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/meters',
             description: "Add utility meters to the facility. Utility meters are used to track energy, water, and other resource usage.",
             facilityId: facility.guid,
-            type: 'meter'
+            type: 'meter',
+            trackGuid: facility.guid + '_add_meters'
         });
     } else {
         // Check if there are any meter groups for the facility
@@ -92,7 +97,8 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
                 url: '/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/meter-grouping',
                 description: "Add utility meter groups to the facility. Utility meter groups are used to group meters for analysis and reporting.",
                 facilityId: facility.guid,
-                type: 'meter'
+                type: 'meter',
+                trackGuid: facility.guid + '_add_meter_groups'
             });
         }
         facilityMeters.forEach(meter => {
@@ -106,7 +112,8 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
             url: '/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors',
             description: "Add predictors to the facility. Predictors are used to analyze and forecast resource usage based on various factors.",
             facilityId: facility.guid,
-            type: 'predictor'
+            type: 'predictor',
+            trackGuid: facility.guid + '_add_predictors'
         });
     } else {
         facilityPredictors.forEach(predictor => {
@@ -136,7 +143,8 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
             url: '/data-management/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-data',
             description: "Add utility meter data for the meter. This data is used to analyze resource usage and trends.",
             facilityId: meter.facilityId,
-            type: 'meter'
+            type: 'meter',
+            trackGuid: meter.guid + '_add'
         });
     } else {
         if (!meter.meterReadingDataApplication) {
@@ -145,13 +153,14 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
                 url: '/data-management/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-monthly-data',
                 description: "Select the method with which to calendarize the meter data for this meter. Calendarization is the process of properly applying the correct amount of energy use to a month.",
                 facilityId: meter.facilityId,
-                type: 'meter'
+                type: 'meter',
+                trackGuid: meter.guid + "_calendarization"
             });
         }
 
 
-        let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
-        let readingDate: Date = new Date(latestReading.readDate);
+        let latestReading: IdbUtilityMeterData = getLatestMeterData(meterDataForMeter);
+        let readingDate: Date = getDateFromMeterData(latestReading);
 
         if (latestReading && readingDate.getTime() < (new Date().getTime() - outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
             const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
@@ -161,6 +170,7 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
                 description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than " + outdatedDays + " days old.",
                 facilityId: meter.facilityId,
                 type: 'meter',
+                trackGuid: meter.guid + '_update'
             });
         }
     }
@@ -178,11 +188,12 @@ function setPredictorTodoItems(predictor: IdbPredictor,
             description: "Add predictor data for the predictor. This data is used to analyze and forecast resource usage based on various factors.",
             facilityId: predictor.facilityId,
             type: 'predictor',
-            isWeather: predictor.predictorType == 'Weather'
+            isWeather: predictor.predictorType == 'Weather',
+            trackGuid: predictor.guid
         });
     } else {
-        let latestReading: IdbPredictorData = _.maxBy(predictorDataForFacility, (data: IdbPredictorData) => new Date(data.date).getTime());
-        let readingDate: Date = new Date(latestReading.date);
+        let latestReading: IdbPredictorData = getLatestPredictorData(predictorDataForFacility);
+        let readingDate: Date = getDateFromPredictorData(latestReading);
         // Set readingDate to end of the month
         readingDate = new Date(readingDate.getFullYear(), readingDate.getMonth() + 1, 0);
         //
@@ -195,7 +206,8 @@ function setPredictorTodoItems(predictor: IdbPredictor,
                 description: "Update predictor data for the predictor. The latest reading (" + formattedDate + ") is more than " + outdatedDays + " days old.",
                 facilityId: predictor.facilityId,
                 type: 'predictor',
-                isWeather: predictor.predictorType == 'Weather'
+                isWeather: predictor.predictorType == 'Weather',
+                trackGuid: predictor.guid
             });
         }
     }
@@ -208,7 +220,8 @@ export interface TodoItem {
     description: string;
     facilityId: string,
     type: 'account' | 'facility' | 'meter' | 'predictor';
-    isWeather?: boolean
+    isWeather?: boolean,
+    trackGuid: string
 }
 
 export interface FacilityTodoItem {

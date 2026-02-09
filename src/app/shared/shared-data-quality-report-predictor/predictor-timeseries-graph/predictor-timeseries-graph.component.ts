@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorStatistics } from '../predictorDataQualityStatistics';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-predictor-timeseries-graph',
@@ -62,7 +63,7 @@ export class PredictorTimeseriesGraphComponent {
       unit = '';
     }
 
-    this.predictorData = this.predictorData.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    this.predictorData = this.predictorData.slice().sort((a, b) => getDateFromPredictorData(a).getTime() - getDateFromPredictorData(b).getTime());
     let markers: Array<{
       color: string,
       symbol: string,
@@ -78,7 +79,7 @@ export class PredictorTimeseriesGraphComponent {
         type: "scatter",
         mode: "lines+markers",
         name: 'Predictor Data',
-        x: this.predictorData.map(data => { return data.date }),
+        x: this.predictorData.map(data => { return getDateFromPredictorData(data) }),
         y: this.predictorData.map(data => { return data.amount }),
         line: { color: '#832a75', width: 3 },
         marker: {

@@ -7,11 +7,11 @@ import { CostsOverviewComponent } from './costs-overview/costs-overview.componen
 import { EmissionsOverviewComponent } from './emissions-overview/emissions-overview.component';
 import { RouterModule } from '@angular/router';
 import { WaterOverviewComponent } from './water-overview/water-overview.component';
-import { OtherUtilityOverviewComponent } from './other-utility-overview/other-utility-overview.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
+import { AccountOverviewOptions } from './account-overview-banner/account-overview-options/account-overview-options';
 
 
 
@@ -23,7 +23,7 @@ import { FormsModule } from '@angular/forms';
     CostsOverviewComponent,
     EmissionsOverviewComponent,
     WaterOverviewComponent,
-    OtherUtilityOverviewComponent
+    AccountOverviewOptions
   ],
   imports: [
     CommonModule,

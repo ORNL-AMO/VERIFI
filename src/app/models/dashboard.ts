@@ -20,7 +20,8 @@ export interface YearMonthData extends EmissionsResults {
     yearMonth: {
         year: number,
         month: string,
-        fiscalYear: number
+        fiscalYear: number,
+        monthNum: number
     },
     energyUse: number,
     energyCost: number,

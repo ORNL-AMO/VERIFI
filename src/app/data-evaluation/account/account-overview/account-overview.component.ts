@@ -18,6 +18,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
     selector: 'app-account-overview',
@@ -39,7 +41,8 @@ export class AccountOverviewComponent implements OnInit {
     private facilityDbService: FacilitydbService, private router: Router, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -81,6 +84,7 @@ export class AccountOverviewComponent implements OnInit {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -114,19 +118,18 @@ export class AccountOverviewComponent implements OnInit {
         energyIsSource: this.account.energyIsSource,
         inOverview: true,
         co2Emissions: this.eGridService.co2Emissions,
-        customFuels: customFuels
+        customFuels: customFuels,
+        customGWPs: customGWPs
       });
-
-
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, facilities, this.account.assessmentReportVersion);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, facilities, this.account.assessmentReportVersion, customGWPs);
       if (!this.dateRange) {
         if (calanderizedMeters && calanderizedMeters.length > 0) {
           let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
           let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
           let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
-          let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+          let minDate: Date = new Date(latestData.year - 1, maxDate.getMonth(), 1);
           minDate.setMonth(minDate.getMonth() + 1);
           this.dateRange = {
             endDate: maxDate,

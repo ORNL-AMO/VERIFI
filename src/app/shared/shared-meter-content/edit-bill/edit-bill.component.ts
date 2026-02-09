@@ -16,6 +16,7 @@ import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/i
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { getDateFromMeterData, setMeterDataDateFromDate } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-edit-bill',
@@ -60,6 +61,7 @@ export class EditBillComponent implements OnInit {
           this.addOrEdit = 'edit';
           let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
           this.editMeterData = accountMeterData.find(data => { return data.guid == meterReadingId });
+          console.log(this.editMeterData);
         } else {
           //new Reading
           let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -107,7 +109,7 @@ export class EditBillComponent implements OnInit {
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.meterDataForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
@@ -128,11 +130,12 @@ export class EditBillComponent implements OnInit {
     meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
-    this.editMeterData.readDate = new Date(meterDataToSave.readDate);
-    this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
+    let nextDate: Date = getDateFromMeterData(meterDataToSave);
+    nextDate.setMonth(nextDate.getMonth() + 1);
+    this.editMeterData = setMeterDataDateFromDate(this.editMeterData, nextDate);
     this.setMeterDataForm();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "alert-success");

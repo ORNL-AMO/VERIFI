@@ -3,6 +3,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getStatistics, Statistics } from '../meterDataQualityStatistics';
 import { Router } from '@angular/router';
+import { getDateFromMeterData } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-data-quality-report',
@@ -56,7 +57,7 @@ export class MeterDataQualityReportComponent {
   checkMultipleReadings() {
     let dateCount: { [key: string]: number } = {};
     this.meterData.forEach(data => {
-      let date = new Date(data.readDate);
+      let date = getDateFromMeterData(data);
       let month = date.toLocaleString('default', { month: 'short' });
       let year = date.getFullYear();
       let monthYear = `${month}, ${year}`;

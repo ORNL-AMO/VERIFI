@@ -7,11 +7,12 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -57,9 +58,8 @@ export class EditElectricityBillComponent implements OnInit {
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
-      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
       let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
-      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
+      if (checkSameDate(changeDate, this.editMeterData)) {
         this.invalidDate = false;
       } else {
         this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
@@ -72,7 +72,7 @@ export class EditElectricityBillComponent implements OnInit {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, account.assessmentReportVersion);
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, account.assessmentReportVersion, []);
       this.totalLocationEmissions = emissionsValues.locationElectricityEmissions;
       this.totalMarketEmissions = emissionsValues.marketElectricityEmissions;
       this.RECs = emissionsValues.RECs;

@@ -112,8 +112,7 @@
                     <span class="fa fa-exclamation white"></span>
                   </span>
                   Meter readings needed. @if (lastBill) {
-                  <span>Latest entry {{lastBill.readDate |
-                  date}}.</span>
+                  <span>Latest entry {{lastBill |displayMeterDataDate}}.</span>
                 }
               </a>
             </li>

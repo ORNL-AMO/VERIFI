@@ -11,6 +11,7 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.mod
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
+import { FacilityOverviewOptions } from './facility-overview-banner/facility-overview-options/facility-overview-options';
 
 
 
@@ -21,7 +22,8 @@ import { FormsModule } from '@angular/forms';
     FacilityWaterOverviewComponent,
     FacilityCostOverviewComponent,
     FacilityEmissionsOverviewComponent,
-    FacilityOverviewBannerComponent
+    FacilityOverviewBannerComponent,
+    FacilityOverviewOptions
   ],
   imports: [
     CommonModule,
