@@ -61,6 +61,7 @@ export class EditBillComponent implements OnInit {
           this.addOrEdit = 'edit';
           let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
           this.editMeterData = accountMeterData.find(data => { return data.guid == meterReadingId });
+          console.log(this.editMeterData);
         } else {
           //new Reading
           let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();

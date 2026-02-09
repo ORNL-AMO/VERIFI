@@ -437,10 +437,6 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
 
     let uniqYearMonths: Array<{ year: number, month: number }> = getMonthsArray(meterData);
     if (meterData.length != 0) {
-        // let startDate: Date = getDateFromMeterData(orderedMeterData[0]);
-        // startDate.setDate(15);
-        // let endDate: Date = getDateFromMeterData(orderedMeterData[orderedMeterData.length - 1]);
-        // endDate.setMonth(endDate.getMonth() + 1);
         for (let uniqMonth of uniqYearMonths) {
             let month: number = uniqMonth.month;
             let year: number = uniqMonth.year;

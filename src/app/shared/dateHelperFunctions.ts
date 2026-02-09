@@ -95,7 +95,7 @@ export function getEarliestMeterDataDate(meterData: Array<IdbUtilityMeterData>):
 }
 
 export function getMeterDataDateString(meterData: IdbUtilityMeterData): string {
-    if (meterData.year && meterData.month && meterData.day) {
+    if (isNaN(meterData.year) == false && isNaN(meterData.month) == false && isNaN(meterData.day) == false) {
         let monthString: string = meterData.month.toString().padStart(2, '0');
         let dayString: string = meterData.day.toString().padStart(2, '0');
         return meterData.year + '-' + monthString + '-' + dayString;

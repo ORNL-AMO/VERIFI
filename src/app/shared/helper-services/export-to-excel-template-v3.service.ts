@@ -715,22 +715,22 @@ export class ExportToExcelTemplateV3Service {
       worksheet.getCell(alpha + rowIndex).value = charge.name;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = ChargesTypes.find(type => { return type.value == charge.chargeType })?.label;
-      rowIndex++;
+      alpha = this.getNextAlpha(alpha);
     })
+    rowIndex++;
   }
 
   addChargeReadingsToWorksheet(worksheet: ExcelJS.Worksheet, alpha: string, rowIndex: number, meter: IdbUtilityMeter, meterData: IdbUtilityMeterData) {
     meterData.charges.forEach(mDataCharge => {
       let charge: MeterCharge = meter.charges.find(charge => { return charge.guid == mDataCharge.chargeGuid });
-
       worksheet.getCell(alpha + rowIndex).value = charge.name;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeUsage;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeAmount;
       alpha = this.getNextAlpha(alpha);
-      rowIndex++;
     })
+    rowIndex++;
   }
 
   setAlphabet() {
@@ -815,7 +815,7 @@ export class ExportToExcelTemplateV3Service {
         facilityPredictors.forEach(predictor => {
           alpha = this.getNextAlpha(alpha);
           let reading: IdbPredictorData = facilityPredictorData.find(pData => {
-            return checkSameMonthPredictorData(pData, new Date(pDate.year, pDate.month, 1)) && pData.predictorId == predictor.guid;
+            return checkSameMonthPredictorData(pData, new Date(pDate.year, pDate.month - 1, 1)) && pData.predictorId == predictor.guid;
           });
           if (reading) {
             worksheet.getCell(alpha + rowIndex).value = reading.amount;

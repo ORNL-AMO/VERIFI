@@ -7,19 +7,26 @@ import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
-import { getDateFromMeterData, getLatestMeterData } from "src/app/shared/dateHelperFunctions";
+import { getDateFromMeterData, getEarliestMeterData, getLatestMeterData, getLatestMeterDataDate } from "src/app/shared/dateHelperFunctions";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
+    let earliestReading: IdbUtilityMeterData = getEarliestMeterData(meterReadings);
+    let earliestReadingDate: Date = getDateFromMeterData(earliestReading);
     let prevMonth: number = month === 0 ? 11 : month - 1;
     let prevYear: number = month === 0 ? year - 1 : year;
-    let previousMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(prevMonth, prevYear, meterReadings);
-    if (previousMonthReadings.length == 0) {
-        return getPreviousMonthsBill(prevMonth, prevYear, meterReadings);
-    } else if (previousMonthReadings.length == 1) {
-        return previousMonthReadings[0]
+    let prevMonthDate: Date = new Date(prevYear, prevMonth, 1);
+    if (earliestReadingDate && prevMonthDate > earliestReadingDate) {
+        let previousMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(prevMonth, prevYear, meterReadings);
+        if (previousMonthReadings.length == 0) {
+            return getPreviousMonthsBill(prevMonth, prevYear, meterReadings);
+        } else if (previousMonthReadings.length == 1) {
+            return previousMonthReadings[0]
+        } else {
+            let latestReading: IdbUtilityMeterData = getLatestMeterData(previousMonthReadings);
+            return latestReading;
+        }
     } else {
-        let latestReading: IdbUtilityMeterData = getLatestMeterData(previousMonthReadings);
-        return latestReading;
+        return earliestReading;
     }
 }
 
@@ -31,16 +38,23 @@ export function getCurrentMonthsReadings(month: number, year: number, meterReadi
 }
 
 export function getNextMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
+    let lastReading: IdbUtilityMeterData = getLatestMeterData(meterReadings);
+    let lastReadingDate: Date = getDateFromMeterData(lastReading);
     let nextMonthNum: number = month === 11 ? 0 : month + 1;
     let nextYear: number = month === 11 ? year + 1 : year;
-    let nextMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(nextMonthNum, nextYear, meterReadings);
-    if (nextMonthReadings.length == 0) {
-        return getNextMonthsBill(nextMonthNum, nextYear, meterReadings);
-    } else if (nextMonthReadings.length == 1) {
-        return nextMonthReadings[0]
+    let nextMonthDate: Date = new Date(nextYear, nextMonthNum, 1);
+    if (lastReadingDate && nextMonthDate < lastReadingDate) {
+        let nextMonthReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(nextMonthNum, nextYear, meterReadings);
+        if (nextMonthReadings.length == 0) {
+            return getNextMonthsBill(nextMonthNum, nextYear, meterReadings);
+        } else if (nextMonthReadings.length == 1) {
+            return nextMonthReadings[0]
+        } else {
+            let latestReading: IdbUtilityMeterData = getLatestMeterData(nextMonthReadings);
+            return latestReading;
+        }
     } else {
-        let latestReading: IdbUtilityMeterData = _.minBy(nextMonthReadings, (reading: IdbUtilityMeterData) => { return getDateFromMeterData(reading) });
-        return latestReading;
+        return lastReading;
     }
 }
 

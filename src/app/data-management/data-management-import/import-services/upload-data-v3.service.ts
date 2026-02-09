@@ -511,7 +511,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
           dbDataPoint.year = readDate.getFullYear();
-          dbDataPoint.month = readDate.getMonth() - 1;
+          dbDataPoint.month = readDate.getMonth() + 1;
           dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalEnergyUse = totalUsage;
           dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Actual Demand']);
@@ -543,7 +543,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth();
         dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Higher Heating Value']);
@@ -590,7 +590,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
           let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
           if (fuelEff) {
@@ -632,7 +632,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Energy Factor']);
@@ -680,7 +680,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           dbDataPoint.totalVolume = totalUsage;
@@ -709,7 +709,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           dbDataPoint.totalVolume = totalUsage;
