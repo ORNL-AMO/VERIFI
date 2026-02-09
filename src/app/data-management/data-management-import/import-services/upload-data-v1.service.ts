@@ -212,7 +212,7 @@ export class UploadDataV1Service {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Consumption']);
         dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Total Real Demand']);
@@ -279,7 +279,7 @@ export class UploadDataV1Service {
         }
 
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = totalVolume;
         dbDataPoint.totalEnergyUse = energyUse;

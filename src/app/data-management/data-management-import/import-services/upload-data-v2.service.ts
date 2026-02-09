@@ -278,7 +278,7 @@ export class UploadDataV2Service {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Consumption']);
         dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Total Real Demand']);
@@ -324,7 +324,7 @@ export class UploadDataV2Service {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         let totalVolume: number = 0;
         let energyUse: number = 0;
@@ -347,7 +347,7 @@ export class UploadDataV2Service {
         }
 
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = totalVolume;
         dbDataPoint.totalEnergyUse = energyUse;
@@ -380,7 +380,7 @@ export class UploadDataV2Service {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = dataPoint['Total Consumption or Total Distance'];
         let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
@@ -419,7 +419,7 @@ export class UploadDataV2Service {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = dataPoint['Total Consumption'];
         dbDataPoint.totalEnergyUse = 0;
@@ -452,7 +452,7 @@ export class UploadDataV2Service {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth() - 1;
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = dataPoint['Total Consumption'];
         dbDataPoint.totalEnergyUse = 0;

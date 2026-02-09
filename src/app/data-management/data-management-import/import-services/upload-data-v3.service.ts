@@ -543,7 +543,7 @@ export class UploadDataV3Service {
             dbDataPoint = getNewIdbUtilityMeterData(meter, []);
           }
         dbDataPoint.year = readDate.getFullYear();
-        dbDataPoint.month = readDate.getMonth();
+        dbDataPoint.month = readDate.getMonth() + 1;
         dbDataPoint.day = readDate.getDate();
           dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
           let hhv: number = checkImportCellNumber(dataPoint['Higher Heating Value']);
