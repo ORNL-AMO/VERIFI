@@ -25,8 +25,6 @@ export class MigrateDatesService {
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     for (let meterData of accountMeterData) {
       if (!meterData.migratedDates) {
-        // Format date as YYYY-MM-DD
-        // meterData.readDateStr = getStringFromDate(meterData['readDate']);
         meterData.month = meterData['readDate'].getMonth() + 1;
         meterData.year = meterData['readDate'].getFullYear();
         meterData.day = meterData['readDate'].getDate();
