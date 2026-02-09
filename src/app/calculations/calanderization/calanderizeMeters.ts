@@ -129,7 +129,10 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
     let calanderizeData: Array<MonthlyData> = new Array();
     //unique year months
     let uniqYearMonths: Array<{ year: number, month: number }> = getMonthsArray(meterData);
-
+    //remove first and last month for iteration since they will be used as previous and next month for calanderization
+    uniqYearMonths.shift();
+    uniqYearMonths.pop();
+    
     if (meterData.length > 3) {
         for (let uniqMonth of uniqYearMonths) {
 

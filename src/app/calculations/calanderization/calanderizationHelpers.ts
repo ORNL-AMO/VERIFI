@@ -115,9 +115,6 @@ export function getMonthsArray(meterData: Array<IdbUtilityMeterData>): Array<{ m
     let yearMonths: Array<{ year: number, month: number }> = orderedMeterData.map(reading => { return { year: reading.year, month: reading.month - 1 } });
     //unique year months
     let uniqYearMonths: Array<{ year: number, month: number }> = _.uniqWith(yearMonths, _.isEqual);
-    //remove first and last month for iteration since they will be used as previous and next month for calanderization
-    uniqYearMonths.shift();
-    uniqYearMonths.pop();
     //fill missing months
     uniqYearMonths.forEach((yearMonth, index) => {
         if (index > 0) {
