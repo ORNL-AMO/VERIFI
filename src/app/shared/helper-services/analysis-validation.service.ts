@@ -100,6 +100,7 @@ export class AnalysisValidationService {
         missingRegressionConstant = this.checkValueValid(group.regressionConstant) == false;
         missingRegressionModelYear = this.checkValueValid(group.regressionModelYear) == false;
         if (!group.userDefinedModel) {
+          missingRegressionModelYear = false;
           missingRegressionModelStartMonth = this.checkValueValid(group.regressionModelStartMonth) == false;
           missingRegressionStartYear = this.checkValueValid(group.regressionStartYear) == false;
           missingRegressionModelEndMonth = this.checkValueValid(group.regressionModelEndMonth) == false;
