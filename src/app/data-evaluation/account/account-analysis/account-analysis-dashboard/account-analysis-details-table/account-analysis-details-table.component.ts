@@ -38,7 +38,7 @@ export class AccountAnalysisDetailsTableComponent {
   currentPageNumber: number = 1;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
-  orderDataField: string = 'baselineYear';
+  orderDataField: string = 'name';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
   selectedAccountSub: Subscription;

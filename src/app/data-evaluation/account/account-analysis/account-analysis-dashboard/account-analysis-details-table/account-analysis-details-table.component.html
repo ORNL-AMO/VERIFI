@@ -32,10 +32,6 @@
             <th>
               Analysis Category
             </th>
-            <th class="can-click" (click)="setOrderDataField('reportYear')"
-              [ngClass]="{'active': orderDataField == 'reportYear'}">
-              Report Year
-            </th>
             <th class="can-click" (click)="setOrderDataField('baselineYear')"
               [ngClass]="{'active': orderDataField == 'baselineYear'}">
               Baseline Year
@@ -79,9 +75,6 @@
               @if (item.analysisCategory == 'water') {
               Water Analysis
               }
-            </td>
-            <td>
-              {{item.reportYear | yearDisplay:selectedAccount.fiscalYear}}
             </td>
             <td>
               {{item.baselineYear | yearDisplay:selectedAccount.fiscalYear}}

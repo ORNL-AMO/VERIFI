@@ -39,7 +39,7 @@ export class AnalysisDetailsTableComponent {
   analysisItemToCopy: IdbAnalysisItem;
   analysisItemToCreateReport: IdbAnalysisItem;
   analysisItemToView: IdbAnalysisItem;
-  orderDataField: string = 'analysisItem.reportYear';
+  orderDataField: string = 'analysisItem.name';
   orderByDirection: 'asc' | 'desc' = 'desc';
   selectedAnalysisCategory: 'energy' | 'water' | 'all' = 'all';
   facilityAnalysisItems: Array<IdbAnalysisItem>;
