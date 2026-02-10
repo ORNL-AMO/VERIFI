@@ -1,6 +1,6 @@
 import { AnalysisGroup, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestYearWithData, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import { IdbFacility } from "src/app/models/idbModels/facility";
@@ -21,6 +21,8 @@ export class MonthlyAnalysisSummaryClass {
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.group = selectedGroup;
         this.facility = facility;
+        this.setReportYear(analysisItem, calanderizedMeters, facility);
+
         if (analysisItem.hasBanking && this.group.applyBanking) {
             let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => {
                 return item.guid == analysisItem.bankedAnalysisItemId
@@ -29,12 +31,18 @@ export class MonthlyAnalysisSummaryClass {
                 return group.idbGroupId == this.group.idbGroupId;
             });
             let bankedAnalysisCpy: IdbAnalysisItem = JSON.parse(JSON.stringify(bankedAnalysisItem));
-            bankedAnalysisCpy.reportYear = this.group.bankedAnalysisYear;
+            bankedAnalysisCpy.calculatedReportYear = this.group.bankedAnalysisYear;
             this.bankedMonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(bankedGroup, bankedAnalysisCpy, this.facility, calanderizedMeters, accountPredictorEntries, false, accountAnalysisItems);
             this.setBankedMonthlyAnalysisSummaryData(this.bankedMonthlyAnalysisSummaryClass, selectedGroup.bankedAnalysisYear);
         }
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setMonthlyAnalysisSummaryData(analysisItem);
+    }
+
+    setReportYear(analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
+        if (!analysisItem.calculatedReportYear) {
+            analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, facility);
+        }
     }
 
     setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem) {

@@ -44,7 +44,7 @@ export class AnalysisReportSetupComponent {
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.analysisReportForm = this.accountReportsService.getAnalysisFormFromReport(val.analysisReportSetup);
-        this.setAnalysisOptions(val);
+        this.setAnalysisOptions();
       } else {
         this.isFormChange = false;
       }
@@ -69,9 +69,8 @@ export class AnalysisReportSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  setAnalysisOptions(report: IdbAccountReport) {
-    let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear });
+  setAnalysisOptions() {
+    this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.analysisReportForm.controls.analysisItemId.patchValue(undefined);

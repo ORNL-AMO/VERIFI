@@ -14,18 +14,6 @@
         <option value="water">Water</option>
       </select>
     </div>
-    <div class="pe-4 select-width">
-      <label class="form-label fw-bold mb-2">
-        <i class="fa fa-calendar-alt text-primary"></i>
-        Report Year
-      </label>
-      <select class="form-select" [(ngModel)]="selectedReportYear" (change)="filterAnalysisItems()">
-        <option value="all">All</option>
-        @for (year of yearOptions; track year) {
-        <option [ngValue]="year">{{year}}</option>
-        }
-      </select>
-    </div>
     @if (linkedItemsList.length > 6) {
     <div class="select-width">
       <app-table-items-dropdown></app-table-items-dropdown>
@@ -46,9 +34,9 @@
             <th>
               Analysis Category
             </th>
-            <th class="can-click" (click)="setOrderDataField('analysisItem.reportYear')"
-              [ngClass]="{'active': orderDataField == 'reportYear'}">
-              Report Year
+            <th class="can-click" (click)="setOrderDataField('analysisItem.baselineYear')"
+              [ngClass]="{'active': orderDataField == 'baselineYear'}">
+              Baseline Year
             </th>
             <th class="can-click" (click)="setOrderDataField('analysisItem.modifiedDate')"
               [ngClass]="{'active': orderDataField == 'modifiedDate'}">
@@ -93,7 +81,7 @@
               }
             </td>
             <td>
-              {{item.analysisItem.reportYear}}
+              {{item.analysisItem.baselineYear}}
             </td>
             <td>
               {{ item.analysisItem.modifiedDate | date:'short'}}

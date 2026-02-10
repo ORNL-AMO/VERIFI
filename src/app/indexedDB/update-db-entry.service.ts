@@ -118,14 +118,17 @@ export class UpdateDbEntryService {
           isChanged = true;
         }
 
+
         if (group.baselineAdjustmentsV2 == undefined) {
           group.hasBaselineAdjustmentV2 = false;
           let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
-          for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
-            yearBaselineAdjustments.push({
-              year: year,
-              amount: 0
-            })
+          if (analysisItem['reportYear']) {
+            for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem['reportYear']; year++) {
+              yearBaselineAdjustments.push({
+                year: year,
+                amount: 0
+              })
+            }
           }
           group.baselineAdjustmentsV2 = yearBaselineAdjustments;
           isChanged = true;
@@ -394,11 +397,11 @@ export class UpdateDbEntryService {
         return item['selectedYearAnalysis'];
       });
       if (selectedEnergyAnalysisItems.length > 0) {
-        let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
         account.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
       } else if (energyAnalysisItems.length > 0) {
-        let latestItem: IdbAccountAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAccountAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
         account.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
       }
@@ -411,11 +414,11 @@ export class UpdateDbEntryService {
         return item['selectedYearAnalysis'];
       })
       if (selectedWaterAnalysisItems.length > 0) {
-        let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
         account.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
       } else if (waterAnalysisItems.length > 0) {
-        let latestItem: IdbAccountAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAccountAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
         account.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
       }
@@ -438,11 +441,11 @@ export class UpdateDbEntryService {
         return item['selectedYearAnalysis'];
       });
       if (selectedEnergyAnalysisItems.length > 0) {
-        let latestItem: IdbAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
         facility.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
       } else if (energyAnalysisItems.length > 0) {
-        let latestItem: IdbAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
         facility.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
       }
@@ -455,11 +458,11 @@ export class UpdateDbEntryService {
         return item['selectedYearAnalysis'];
       });
       if (selectedWaterAnalysisItems.length > 0) {
-        let latestItem: IdbAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
         facility.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
       } else if (waterAnalysisItems.length > 0) {
-        let latestItem: IdbAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAnalysisItem) => { return item.reportYear });
+        let latestItem: IdbAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
         facility.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
       }
@@ -469,7 +472,7 @@ export class UpdateDbEntryService {
       isChanged: isChanged
     }
   }
-  
+
   updateCustomGWP(customGWP: IdbCustomGWP): { customGWP: IdbCustomGWP, isChanged: boolean } {
     let isChanged: boolean = false;
     if (customGWP.gwp_ar4 == undefined && customGWP['gwp'] != undefined) {

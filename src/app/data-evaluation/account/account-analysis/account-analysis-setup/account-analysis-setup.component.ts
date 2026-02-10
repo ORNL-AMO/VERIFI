@@ -76,7 +76,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
         this.setDisableForm();
         this.setShowInUseMessage();
         this.energyUnit = this.account.energyUnit;
-        this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
+        this.yearOptions = this.calendarizationService.getYearOptions(this.analysisItem.analysisCategory);
         this.setBaselineYearWarning();
       } else {
         this.isFormChange = false;
@@ -98,22 +98,9 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  async changeReportYear() {
+  async changeBaselineYear(){
     this.setBaselineYearWarning();
-    //TODO: can change report year when a selected analysis?
-    // if (!this.baselineYearWarning) {
-    //   let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    //   let selectYearAnalysis: boolean = true;
-    //   allAnalysisItems.forEach(item => {
-    //     if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
-    //       selectYearAnalysis = false;
-    //     }
-    //   });
-    //   this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
-    // } else {
-    //   this.analysisItem.selectedYearAnalysis = false;
-    // }
-    // await this.saveItem();
+    await this.saveItem();
   }
 
   setBaselineYearWarning() {
@@ -194,7 +181,6 @@ export class AccountAnalysisSetupComponent implements OnInit {
       this.dbChangesService.selectFacility(facility);
       let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
       newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
-      newIdbItem.reportYear = this.analysisItem.reportYear;
       if (this.analysisItem.name != '') {
         newIdbItem.name = this.analysisItem.name;
       }
@@ -202,7 +188,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
         group.analysisType = this.analysisType;
         group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
       });
-      newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
+      // newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
       newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
       newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
       for (let f = 0; f < this.analysisItem.facilityAnalysisItems.length; f++) {

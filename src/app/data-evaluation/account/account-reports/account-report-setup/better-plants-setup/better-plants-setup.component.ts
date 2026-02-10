@@ -43,7 +43,7 @@ export class BetterPlantsSetupComponent {
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.betterPlantsReportForm = this.accountReportsService.getBetterPlantsFormFromReport(val.betterPlantsReportSetup);
-        this.setAnalysisOptions(val);
+        this.setAnalysisOptions();
       } else {
         this.isFormChange = false;
       }
@@ -67,9 +67,9 @@ export class BetterPlantsSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  setAnalysisOptions(report: IdbAccountReport) {
+  setAnalysisOptions() {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });
+    this.accountAnalysisItems = analysisOptions.filter(option => { return option.energyIsSource });
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.betterPlantsReportForm.controls.analysisItemId.patchValue(undefined);

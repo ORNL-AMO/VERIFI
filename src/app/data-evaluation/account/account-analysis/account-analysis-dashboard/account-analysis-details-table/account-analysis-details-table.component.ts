@@ -33,13 +33,12 @@ export class AccountAnalysisDetailsTableComponent {
   filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
 
   selectedAnalysisCategory: 'energy' | 'water' | 'all' = 'all';
-  selectedReportYear: number | 'all' = 'all';
   displayDeleteModal: boolean = false;
   itemToDelete: IdbAccountAnalysisItem;
   currentPageNumber: number = 1;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
-  orderDataField: string = 'reportYear';
+  orderDataField: string = 'baselineYear';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
   selectedAccountSub: Subscription;
@@ -63,12 +62,11 @@ export class AccountAnalysisDetailsTableComponent {
       this.analysisItemsList = items;
       this.filteredAnalysisItems = this.analysisItemsList;
       this.selectedAnalysisCategory = 'all';
-      this.selectedReportYear = 'all';
       this.filterAnalysisItems();
     });
 
-    this.energyYearOptions = this.calendarizationService.getYearOptionsAccount('energy');
-    this.waterYearOptions = this.calendarizationService.getYearOptionsAccount('water');
+    this.energyYearOptions = this.calendarizationService.getYearOptions('energy');
+    this.waterYearOptions = this.calendarizationService.getYearOptions('water');
     this.yearOptions = _.uniq([...this.energyYearOptions, ...this.waterYearOptions]);
     this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
 
@@ -106,8 +104,7 @@ export class AccountAnalysisDetailsTableComponent {
     this.filteredAnalysisItems = this.analysisItemsList
       .filter(item => {
         const categoryMatch = this.selectedAnalysisCategory === 'all' || item.analysisCategory === this.selectedAnalysisCategory;
-        const yearMatch = this.selectedReportYear === 'all' || item.reportYear === this.selectedReportYear;
-        return categoryMatch && yearMatch;
+        return categoryMatch;
       });
   }
 
@@ -183,6 +180,5 @@ export class AccountAnalysisDetailsTableComponent {
     this.analysisItemsList = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.filteredAnalysisItems = this.analysisItemsList;
     this.selectedAnalysisCategory = 'all';
-    this.selectedReportYear = 'all';
   }
 }

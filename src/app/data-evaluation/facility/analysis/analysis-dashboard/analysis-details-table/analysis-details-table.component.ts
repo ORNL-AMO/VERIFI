@@ -44,7 +44,6 @@ export class AnalysisDetailsTableComponent {
   selectedAnalysisCategory: 'energy' | 'water' | 'all' = 'all';
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   filteredAnalysisItems: Array<IdbAnalysisItem>;
-  selectedReportYear: number | 'all' = 'all';
   yearOptionsEnergy: Array<number>;
   yearOptionsWater: Array<number>;
   yearOptions: Array<number>;
@@ -93,8 +92,8 @@ export class AnalysisDetailsTableComponent {
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptionsEnergy = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'energy');
-      this.yearOptionsWater = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'water');
+      this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', this.selectedFacility.guid);
+      this.yearOptionsWater = this.calendarizationService.getYearOptions('water', this.selectedFacility.guid);
       this.yearOptions = _.uniq([...this.yearOptionsEnergy, ...this.yearOptionsWater]);
       this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
       if (this.yearOptionsEnergy) {
@@ -110,7 +109,6 @@ export class AnalysisDetailsTableComponent {
       this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
       this.filteredAnalysisItems = this.facilityAnalysisItems;
       this.selectedAnalysisCategory = 'all';
-      this.selectedReportYear = 'all';
       this.filterAnalysisItems();
       this.setLinkedItems();
     });
@@ -178,8 +176,7 @@ export class AnalysisDetailsTableComponent {
     this.filteredAnalysisItems = this.facilityAnalysisItems
       .filter(item => {
         const categoryMatch = this.selectedAnalysisCategory === 'all' || item.analysisCategory === this.selectedAnalysisCategory;
-        const yearMatch = this.selectedReportYear === 'all' || item.reportYear === this.selectedReportYear;
-        return categoryMatch && yearMatch;
+        return categoryMatch;
       });
 
     this.setLinkedItems();
@@ -254,10 +251,10 @@ export class AnalysisDetailsTableComponent {
         await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
       }
     }
-    if(this.selectedFacility.selectedEnergyAnalysisId == analysisItem.guid) {
+    if (this.selectedFacility.selectedEnergyAnalysisId == analysisItem.guid) {
       this.selectedFacility.selectedEnergyAnalysisId = undefined;
       await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-    }else if(this.selectedFacility.selectedWaterAnalysisId == analysisItem.guid){
+    } else if (this.selectedFacility.selectedWaterAnalysisId == analysisItem.guid) {
       this.selectedFacility.selectedWaterAnalysisId = undefined;
       await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
     }
@@ -269,7 +266,6 @@ export class AnalysisDetailsTableComponent {
     this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
     this.filteredAnalysisItems = this.facilityAnalysisItems;
     this.selectedAnalysisCategory = 'all';
-    this.selectedReportYear = 'all';
     this.setLinkedItems();
   }
 

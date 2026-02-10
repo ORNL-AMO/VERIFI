@@ -111,8 +111,7 @@ export class SelectItemTableComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.facility, accountMeterGroups, accountPredictors, this.selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
-    newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
-    newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
+    // newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
     newIdbItem.groups.forEach(group => {
       group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
     });

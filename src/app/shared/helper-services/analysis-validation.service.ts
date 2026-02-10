@@ -25,10 +25,8 @@ export class AnalysisValidationService {
   getAnalysisItemErrors(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let noGroups: boolean = analysisItem.groups.length == 0;
-    let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
     let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
-    let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear > analysisItem.reportYear;
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsFacility(analysisItem.facilityId, analysisItem.analysisCategory);
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions(analysisItem.analysisCategory, analysisItem.facilityId);
     let baselineYearAfterMeterDataEnd: boolean = false;
     let baselineYearBeforeMeterDataStart: boolean = false;
     if (yearOptions && yearOptions.length > 0) {
@@ -44,7 +42,7 @@ export class AnalysisValidationService {
       bankingError = analysisItem.bankedAnalysisItemId == undefined;
     }
 
-    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError);
+    let hasError: boolean = (missingName || noGroups || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError);
     let groupsHaveErrors: boolean = false;
     analysisItem.groups.forEach(group => {
       if (group.groupErrors && group.groupErrors.hasErrors) {
@@ -55,8 +53,6 @@ export class AnalysisValidationService {
       hasError: hasError,
       missingName: missingName,
       noGroups: noGroups,
-      missingReportYear: missingReportYear,
-      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
       groupsHaveErrors: groupsHaveErrors,
       missingBaselineYear: missingBaselineYear,
       baselineYearAfterMeterDataEnd: baselineYearAfterMeterDataEnd,
@@ -208,10 +204,8 @@ export class AnalysisValidationService {
 
   getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisItems: Array<IdbAnalysisItem>): AccountAnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
-    let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
     let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
-    let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear >= analysisItem.reportYear;
-    let hasError: boolean = (missingName || missingReportYear || missingBaselineYear || reportYearBeforeBaselineYear);
+    let hasError: boolean = (missingName || missingBaselineYear);
     let facilitiesSelectionsErrors: Array<boolean> = [];
     if (analysisItem.facilityAnalysisItems) {
       analysisItem.facilityAnalysisItems.forEach(item => {
@@ -235,9 +229,7 @@ export class AnalysisValidationService {
     return {
       hasError: hasError,
       missingName: missingName,
-      missingReportYear: missingReportYear,
       missingBaselineYear: missingBaselineYear,
-      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
       facilitiesSelectionsInvalid: facilitiesSelectionsInvalid
     }
   }

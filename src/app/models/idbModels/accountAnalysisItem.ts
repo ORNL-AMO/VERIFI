@@ -8,7 +8,7 @@ export interface IdbAccountAnalysisItem extends IdbEntry {
     accountId: string,
     name: string,
     energyIsSource: boolean,
-    reportYear: number,
+    calculatedReportYear: number,
     energyUnit: string,
     facilityAnalysisItems: Array<{
         facilityId: string,
@@ -43,7 +43,7 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         ...idbEntry,
         accountId: account.guid,
         name: 'Account Analysis',
-        reportYear: undefined,
+        calculatedReportYear: undefined,
         baselineYear: baselineYear,
         energyUnit: account.energyUnit,
         facilityAnalysisItems: facilityAnalysisItems,
@@ -54,9 +54,7 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         setupErrors: {
             hasError: true,
             missingName: false,
-            missingReportYear: true,
             missingBaselineYear: false,
-            reportYearBeforeBaselineYear: false,
             facilitiesSelectionsInvalid: true
         }
     }

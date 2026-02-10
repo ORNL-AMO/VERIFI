@@ -2,7 +2,7 @@ import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { MonthlyAccountAnalysisClass } from "./monthlyAccountAnalysisClass";
-import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestYearWithData } from "../shared-calculations/calculationsHelpers";
 import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
@@ -11,6 +11,9 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { CalanderizedMeter } from "src/app/models/calanderization";
+import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
+import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 
 export class AnnualAccountAnalysisSummaryClass {
 
@@ -29,9 +32,10 @@ export class AnnualAccountAnalysisSummaryClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>) {
+        let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: accountAnalysisItem.energyIsSource, neededUnits: getNeededUnits(accountAnalysisItem) }, [], [], accountFacilities, account.assessmentReportVersion, []);
+        this.setReportYear(accountAnalysisItem, calanderizedMeterData, account);
         this.setMonthlyAnalysisSummaryData(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
         this.setBaselineYear(accountAnalysisItem);
-        this.setReportYear(accountAnalysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, accountPredictors);
     }
 
@@ -48,8 +52,13 @@ export class AnnualAccountAnalysisSummaryClass {
         this.baselineYear = analysisItem.baselineYear;
     }
 
-    setReportYear(analysisItem: IdbAccountAnalysisItem) {
-        this.reportYear = analysisItem.reportYear;
+    setReportYear(analysisItem: IdbAccountAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, account: IdbAccount) {
+        if (analysisItem.calculatedReportYear) {
+            this.reportYear = analysisItem.calculatedReportYear;
+        } else {
+            this.reportYear = getLatestYearWithData(calanderizedMeters, account);
+            analysisItem.calculatedReportYear = this.reportYear;
+        }
     }
 
 

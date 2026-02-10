@@ -1,4 +1,4 @@
-import { MonthlyData } from "src/app/models/calanderization";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { getFiscalYear } from "./calanderizationFunctions";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
@@ -23,20 +23,20 @@ export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAc
 
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         baselineDate = new Date(baselineYear, 0, 1);
-        endDate = new Date(analysisItem.reportYear + 1, 0, 1);
+        endDate = new Date(analysisItem.calculatedReportYear + 1, 0, 1);
         if (analysisItem.hasBanking && group && group.applyBanking) {
             bankedAnalysisDate = new Date(group.bankedAnalysisYear + 1, 0, 1);
         }
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
             baselineDate = new Date(baselineYear - 1, facilityOrAccount.fiscalYearMonth);
-            endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
+            endDate = new Date(analysisItem.calculatedReportYear, facilityOrAccount.fiscalYearMonth);
             if (analysisItem.hasBanking && group && group.applyBanking) {
                 bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
             }
         } else {
             baselineDate = new Date(baselineYear, facilityOrAccount.fiscalYearMonth);
-            endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
+            endDate = new Date(analysisItem.calculatedReportYear + 1, facilityOrAccount.fiscalYearMonth);
             if (analysisItem.hasBanking && group && group.applyBanking) {
                 bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
             }
@@ -101,7 +101,7 @@ export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalys
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
         if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
             let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-            if (facilityAnalysisItem.baselineYear <= year && facilityAnalysisItem.reportYear >= year) {
+            if (facilityAnalysisItem.baselineYear <= year && facilityAnalysisItem.calculatedReportYear >= year) {
                 facilityAnalysisItem.groups.forEach(group => {
                     if (group.analysisType != 'skip') {
                         let filteredMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
@@ -148,4 +148,26 @@ export function checkValueNaN(val: number): number {
         return 0;
     }
     return val;
+}
+
+export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount): Array<number> {
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, facilityOrAccount) });
+    let uniqueYears: Array<number> = _.uniq(years);
+    uniqueYears = uniqueYears.filter(year => {
+        let monthlyDataForYear: Array<MonthlyData> = monthlyData.filter(mData => { return getFiscalYear(mData.date, facilityOrAccount) == year });
+        let months: Array<number> = monthlyDataForYear.map(mData => { return mData.date.getMonth() });
+        let uniqueMonths: Array<number> = _.uniq(months);
+        return uniqueMonths.length == 12;
+    });
+    return uniqueYears;
+}
+
+export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount): number {
+    let yearsWithFullData: Array<number> = getYearsWithFullData(calanderizedMeters, facilityOrAccount);
+    if (yearsWithFullData.length) {
+        return _.max(yearsWithFullData);
+    } else {
+        return undefined;
+    }
 }

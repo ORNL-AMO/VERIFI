@@ -12,10 +12,10 @@ import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/e
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
-    selector: 'app-account-home-summary',
-    templateUrl: './account-home-summary.component.html',
-    styleUrls: ['./account-home-summary.component.css'],
-    standalone: false
+  selector: 'app-account-home-summary',
+  templateUrl: './account-home-summary.component.html',
+  styleUrls: ['./account-home-summary.component.css'],
+  standalone: false
 })
 export class AccountHomeSummaryComponent implements OnInit {
 
@@ -31,7 +31,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service,
     private loadingService: LoadingService
-    ) { }
+  ) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -50,7 +50,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     if (urlStr != 'upload') {
       this.router.navigateByUrl('/data-evaluation/account/' + urlStr);
     } else {
-      this.router.navigateByUrl('/data-management/'+this.account.guid+'/import-data')
+      this.router.navigateByUrl('/data-management/' + this.account.guid + '/import-data')
     }
   }
 
@@ -72,13 +72,15 @@ export class AccountHomeSummaryComponent implements OnInit {
 
 
   setEnergyAnalysisNeeded() {
-    let currentDate: Date = new Date();
+    // let currentDate: Date = new Date();
     if (this.latestEnergyAnalysisItem) {
-      if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.energyAnalysisNeeded = true;
-      } else {
-        this.energyAnalysisNeeded = false;
-      }
+      //TODO:
+      //add check when new data is entered
+      // if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+      //   this.energyAnalysisNeeded = true;
+      // } else {
+      //   this.energyAnalysisNeeded = false;
+      // }
     } else if (this.account.sustainabilityQuestions.energyReductionGoal) {
       this.energyAnalysisNeeded = true;
     } else {
@@ -87,13 +89,15 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
   setWaterAnalysisNeeded() {
-    let currentDate: Date = new Date();
+    // let currentDate: Date = new Date();
     if (this.latestWaterAnalysisItem) {
-      if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.waterAnalysisNeeded = true;
-      } else {
-        this.waterAnalysisNeeded = false;
-      }
+      //TODO:
+      //add check when new data is entered
+      // if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+      //   this.waterAnalysisNeeded = true;
+      // } else {
+      //   this.waterAnalysisNeeded = false;
+      // }
     } else if (this.account.sustainabilityQuestions.waterReductionGoal) {
       this.waterAnalysisNeeded = true;
     } else {
@@ -101,7 +105,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     }
   }
 
-  goToDataManagement(){
+  goToDataManagement() {
     this.router.navigateByUrl('/data-management/' + this.account.guid + '/import-data');
   }
 }
