@@ -55,7 +55,7 @@ export class AnalysisSetupComponent implements OnInit {
       if (!this.isFormChange) {
         this.analysisItem = item;
         this.facility = this.facilityDbService.selectedFacility.getValue();
-        this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, this.facility.guid);
+        this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
         this.setBaselineYearWarning();
         this.setComponentBools();
         this.setFacilityAnalysisItems();

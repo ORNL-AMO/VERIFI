@@ -65,8 +65,8 @@ export class AccountAnalysisDetailsTableComponent {
       this.filterAnalysisItems();
     });
 
-    this.energyYearOptions = this.calendarizationService.getYearOptions('energy');
-    this.waterYearOptions = this.calendarizationService.getYearOptions('water');
+    this.energyYearOptions = this.calendarizationService.getYearOptions('energy', true);
+    this.waterYearOptions = this.calendarizationService.getYearOptions('water', true);
     this.yearOptions = _.uniq([...this.energyYearOptions, ...this.waterYearOptions]);
     this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
 

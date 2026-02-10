@@ -135,7 +135,7 @@ export class FacilitySavingsReportSetupComponent {
 
   setYearOptions() {
     //TODO: include partial years for savings reports?
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', this.facilityReport.facilityId);
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }

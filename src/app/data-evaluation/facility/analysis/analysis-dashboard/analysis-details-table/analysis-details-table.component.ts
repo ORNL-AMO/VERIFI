@@ -92,8 +92,8 @@ export class AnalysisDetailsTableComponent {
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', this.selectedFacility.guid);
-      this.yearOptionsWater = this.calendarizationService.getYearOptions('water', this.selectedFacility.guid);
+      this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', true, this.selectedFacility.guid);
+      this.yearOptionsWater = this.calendarizationService.getYearOptions('water', true, this.selectedFacility.guid);
       this.yearOptions = _.uniq([...this.yearOptionsEnergy, ...this.yearOptionsWater]);
       this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
       if (this.yearOptionsEnergy) {

@@ -76,7 +76,7 @@ export class FacilityEmissionFactorsReportSetupComponent {
     //TODO: baseline years less than report year selection
     //TODO: report years greater than baseline year selection
     //TODO: get options by water/energy
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', this.facilityReport.facilityId);
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }

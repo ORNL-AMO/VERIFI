@@ -26,7 +26,7 @@ export class AnalysisValidationService {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let noGroups: boolean = analysisItem.groups.length == 0;
     let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions(analysisItem.analysisCategory, analysisItem.facilityId);
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions(analysisItem.analysisCategory, true, analysisItem.facilityId);
     let baselineYearAfterMeterDataEnd: boolean = false;
     let baselineYearBeforeMeterDataStart: boolean = false;
     if (yearOptions && yearOptions.length > 0) {

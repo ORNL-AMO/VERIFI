@@ -76,7 +76,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
         this.setDisableForm();
         this.setShowInUseMessage();
         this.energyUnit = this.account.energyUnit;
-        this.yearOptions = this.calendarizationService.getYearOptions(this.analysisItem.analysisCategory);
+        this.yearOptions = this.calendarizationService.getYearOptions(this.analysisItem.analysisCategory, true);
         this.setBaselineYearWarning();
       } else {
         this.isFormChange = false;

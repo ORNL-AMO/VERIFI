@@ -15,7 +15,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getDateFromMeterData, getEarliestMeterData, getLatestMeterData } from '../dateHelperFunctions';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getAllYearsWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Injectable({
   providedIn: 'root'
@@ -244,7 +244,7 @@ export class CalanderizationService {
     return calanderizationSummary;
   }
 
-  getYearOptions(meterCategory: 'water' | 'energy' | 'all', facilityId?: string): Array<number> {
+  getYearOptions(meterCategory: 'water' | 'energy' | 'all', onlyFullYears: boolean, facilityId?: string): Array<number> {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityOrAccount: IdbFacility | IdbAccount;
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -265,29 +265,21 @@ export class CalanderizationService {
     let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(categoryMeters, categoryMeterData, facilityOrAccount, false, undefined, [], [], accountFacilities, 'AR6', []);
     let yearsWithFullData: Array<number> = new Array();
     accountFacilities.forEach(facility => {
-      let facilityYearsWithData: Array<number> = getYearsWithFullData(calanderizedMeterData, facility);
-      yearsWithFullData = yearsWithFullData.concat(facilityYearsWithData);
+      if (onlyFullYears) {
+        let facilityYearsWithData: Array<number> = getYearsWithFullData(calanderizedMeterData, facility);
+        yearsWithFullData = yearsWithFullData.concat(facilityYearsWithData);
+      } else {
+        let facilityYearsWithData: Array<number> = getAllYearsWithData(calanderizedMeterData, facility);
+        yearsWithFullData = yearsWithFullData.concat(facilityYearsWithData);
+      }
     });
     return _.uniq(yearsWithFullData);
   }
 
-  checkReportYearSelection(meterCategory: 'water' | 'energy' | 'all', reportYear: number, facilityId?: string): boolean {
-    let yearOptions: Array<number> = this.getYearOptions(meterCategory, facilityId);
+  checkReportYearSelection(meterCategory: 'water' | 'energy' | 'all', reportYear: number, onlyFullYears: boolean, facilityId?: string): boolean {
+    let yearOptions: Array<number> = this.getYearOptions(meterCategory, onlyFullYears, facilityId);
     return !yearOptions.includes(reportYear);
   }
-
-  // getYearOptionsFacility(facilityId: string, meterCategory: 'water' | 'energy' | 'all'): Array<number> {
-  //   let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-  //   let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityId);
-  //   let categoryMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facilityId && this.isCategoryMeter(meter, meterCategory) });
-  //   let categoryMeterIds: Array<string> = categoryMeters.map(meter => { return meter.guid });
-  //   let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-  //   let categoryMeterData: Array<IdbUtilityMeterData> = meterData.filter(data => { return categoryMeterIds.includes(data.meterId) });
-  //   let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-  //   let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(categoryMeters, categoryMeterData, facility, false, undefined, [], [], accountFacilities, 'AR6', []);
-  //   let fullYears: Array<number> = getYearsWithFullData(calanderizedMeterData, facility);
-  //   return fullYears;
-  // }
 
   isCategoryMeter(meter: IdbUtilityMeter, meterCategory: 'water' | 'energy' | 'all'): boolean {
     if (meterCategory == 'water') {

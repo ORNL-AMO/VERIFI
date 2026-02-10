@@ -179,3 +179,11 @@ export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMete
         return undefined;
     }
 }
+
+export function getAllYearsWithData(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility): Array<number> {
+    let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+    let monthlyData: Array<MonthlyData> = facilityMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, facility) });
+    let uniqueYears: Array<number> = _.uniq(years);
+    return uniqueYears;
+}
