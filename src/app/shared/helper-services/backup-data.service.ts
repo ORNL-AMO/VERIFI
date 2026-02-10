@@ -301,8 +301,9 @@ export class BackupDataService {
                 return predictor.id == newPredictor.guid
               });
               let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-              newIdbPredictorData.month = oldEntry.date.getMonth() + 1;
-              newIdbPredictorData.year = oldEntry.date.getFullYear();
+              let oldEntryDate: Date = new Date(oldEntry.date);
+              newIdbPredictorData.month = oldEntryDate.getMonth() + 1;
+              newIdbPredictorData.year = oldEntryDate.getFullYear();
               newIdbPredictorData.amount = oldEntryPredictor.amount;
               newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
               newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
@@ -604,9 +605,9 @@ export class BackupDataService {
               return predictor.id == newPredictor.guid
             });
             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-            // newIdbPredictorData.dateStr = this.getImportDateString(oldEntry.date);
-            newIdbPredictorData.month = oldEntry.date.getMonth() + 1;
-            newIdbPredictorData.year = oldEntry.date.getFullYear();
+            let oldEntryDate: Date = new Date(oldEntry.date);
+            newIdbPredictorData.month = oldEntryDate.getMonth() + 1;
+            newIdbPredictorData.year = oldEntryDate.getFullYear();
             newIdbPredictorData.amount = oldEntryPredictor.amount;
             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
