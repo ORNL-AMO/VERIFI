@@ -41,7 +41,7 @@ export class MonthlyAnalysisSummaryClass {
 
     setReportYear(analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
         if (!analysisItem.calculatedReportYear) {
-            analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, facility);
+            analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);
         }
     }
 

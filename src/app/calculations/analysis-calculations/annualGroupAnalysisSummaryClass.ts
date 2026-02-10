@@ -45,7 +45,7 @@ export class AnnualGroupAnalysisSummaryClass {
         if (analysisItem.calculatedReportYear) {
             this.reportYear = analysisItem.calculatedReportYear;
         } else {
-            this.reportYear = getLatestYearWithData(calanderizedMeters, facility);
+            this.reportYear = getLatestYearWithData(calanderizedMeters, [facility]);
             analysisItem.calculatedReportYear = this.reportYear;
         }
     }

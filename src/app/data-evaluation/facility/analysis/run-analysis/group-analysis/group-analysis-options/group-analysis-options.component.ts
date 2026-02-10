@@ -136,7 +136,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [facility], 'AR6', []);
-    this.dataEndYear = getLatestYearWithData(calanderizedMeters, facility);
+    this.dataEndYear = getLatestYearWithData(calanderizedMeters, [facility]);
   }
 
   setBaselineYearOptions() {

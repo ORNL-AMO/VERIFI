@@ -21,7 +21,7 @@ export class RegressionModelsService {
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
     //report year is set to latest year with 
-    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, facility);    
+    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);    
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endYear: number = monthlyStartAndEndDate.endDate.getFullYear();

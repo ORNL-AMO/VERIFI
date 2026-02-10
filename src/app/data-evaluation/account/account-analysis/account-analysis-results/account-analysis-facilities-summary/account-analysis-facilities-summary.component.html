@@ -5,7 +5,7 @@
 
 @if (calculating == false) {
   <div class="row">
-    @for (facilitySummary of facilitySummaries; track facilitySummary) {
+    @for (facilitySummary of facilitySummaries; track facilitySummary.facility.guid) {
       <div class="col-6">
         <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="facilitySummary.monthlySummaryData"
           [analysisItem]="analysisItem" [facilityOrAccount]="facilitySummary.facility"

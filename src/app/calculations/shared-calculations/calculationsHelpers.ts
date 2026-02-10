@@ -150,12 +150,13 @@ export function checkValueNaN(val: number): number {
     return val;
 }
 
-export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount): Array<number> {
-    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
-    let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, facilityOrAccount) });
+export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility): Array<number> {
+    let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+    let monthlyData: Array<MonthlyData> = facilityMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, facility) });
     let uniqueYears: Array<number> = _.uniq(years);
     uniqueYears = uniqueYears.filter(year => {
-        let monthlyDataForYear: Array<MonthlyData> = monthlyData.filter(mData => { return getFiscalYear(mData.date, facilityOrAccount) == year });
+        let monthlyDataForYear: Array<MonthlyData> = monthlyData.filter(mData => { return getFiscalYear(mData.date, facility) == year });
         let months: Array<number> = monthlyDataForYear.map(mData => { return mData.date.getMonth() });
         let uniqueMonths: Array<number> = _.uniq(months);
         return uniqueMonths.length == 12;
@@ -163,10 +164,17 @@ export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter
     return uniqueYears;
 }
 
-export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount): number {
-    let yearsWithFullData: Array<number> = getYearsWithFullData(calanderizedMeters, facilityOrAccount);
-    if (yearsWithFullData.length) {
-        return _.max(yearsWithFullData);
+export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): number {
+    let maxYearsWithFullData: Array<number> = new Array();
+    facilities.forEach(facility => {
+        let facilityYearsWithData: Array<number> = getYearsWithFullData(calanderizedMeters, facility);
+        let facilityLatestYearWithData: number = _.max(facilityYearsWithData);
+
+        maxYearsWithFullData.push(facilityLatestYearWithData);
+    });
+    if (maxYearsWithFullData.length) {
+        //want the minimum year that has full data across all facilities
+        return _.min(maxYearsWithFullData);
     } else {
         return undefined;
     }

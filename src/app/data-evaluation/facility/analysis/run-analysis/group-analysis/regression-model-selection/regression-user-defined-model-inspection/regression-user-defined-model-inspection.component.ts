@@ -92,7 +92,7 @@ export class RegressionUserDefinedModelInspectionComponent {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     //report year is determined by the latest full year of data
     let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
-    let reportYear: number = getLatestYearWithData(calanderizedMeters, this.selectedFacility);
+    let reportYear: number = getLatestYearWithData(calanderizedMeters, [this.selectedFacility]);
 
     let baselineYear: number = analysisItem.baselineYear;
     let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedFacility.guid);
