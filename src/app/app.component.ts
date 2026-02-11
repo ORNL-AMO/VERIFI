@@ -279,7 +279,6 @@ export class AppComponent {
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
     let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
     if (needsMigration) {
-      this.loadingMessage = 'Updating predictor data dates for a consistent experience across timezones. This may take a moment...';
       for (let i = 0; i < predictorData.length; i++) {
         if (!predictorData[i].migratedDates) {
           predictorData[i].month = new Date(predictorData[i]['date']).getMonth() + 1;
@@ -318,7 +317,6 @@ export class AppComponent {
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
     if (needsMigration) {
-      this.loadingMessage = 'Updating meter data dates for a consistent experience across timezones. This may take a moment...';
       for (let meterData of accountMeterData) {
         if (!meterData.migratedDates) {
           meterData.month = new Date(meterData['readDate']).getMonth() + 1;
