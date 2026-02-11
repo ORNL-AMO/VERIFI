@@ -120,7 +120,7 @@ export class AppComponent {
     });
     this.inDataManagement = this.router.url.includes('data-management');
   }
-  
+
   async initializeData() {
     try {
       let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
@@ -277,12 +277,16 @@ export class AppComponent {
     this.loadingMessage = "Loading Predictor Data..";
     //set predictor data (V2)
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
-    for (let i = 0; i < predictorData.length; i++) {
-      if (!predictorData[i].migratedDates) {
-        predictorData[i].month = new Date(predictorData[i]['date']).getMonth() + 1;
-        predictorData[i].year = new Date(predictorData[i]['date']).getFullYear();
-        predictorData[i].migratedDates = true;
-        await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+    let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
+    if (needsMigration) {
+      this.loadingMessage = 'Updating predictor data dates for a consistent experience across timezones. This may take a moment...';
+      for (let i = 0; i < predictorData.length; i++) {
+        if (!predictorData[i].migratedDates) {
+          predictorData[i].month = new Date(predictorData[i]['date']).getMonth() + 1;
+          predictorData[i].year = new Date(predictorData[i]['date']).getFullYear();
+          predictorData[i].migratedDates = true;
+          await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+        }
       }
     }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
@@ -312,13 +316,17 @@ export class AppComponent {
     //set meter data
     this.loadingMessage = "Loading Meter Data..";
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
-    for (let meterData of accountMeterData) {
-      if (!meterData.migratedDates) {
-        meterData.month = new Date(meterData['readDate']).getMonth() + 1;
-        meterData.year = new Date(meterData['readDate']).getFullYear();
-        meterData.day = new Date(meterData['readDate']).getDate();
-        meterData.migratedDates = true;
-        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+    let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
+    if (needsMigration) {
+      this.loadingMessage = 'Updating meter data dates for a consistent experience across timezones. This may take a moment...';
+      for (let meterData of accountMeterData) {
+        if (!meterData.migratedDates) {
+          meterData.month = new Date(meterData['readDate']).getMonth() + 1;
+          meterData.year = new Date(meterData['readDate']).getFullYear();
+          meterData.day = new Date(meterData['readDate']).getDate();
+          meterData.migratedDates = true;
+          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+        }
       }
     }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData)
