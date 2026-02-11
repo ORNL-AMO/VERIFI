@@ -94,11 +94,11 @@ export class DbChangesService {
     //TODO: deprecated, remove...?
     let needsMigration = await this.setPredictorsDeprecated(account);
     await this.setPredictorsV2(account);
-    await this.setPredictorDataV2(account);
+    await this.setPredictorDataV2(account, skipUpdates);
     //set meters
     await this.setMeters(account);
     //set meter data
-    await this.setMeterData(account);
+    await this.setMeterData(account, skipUpdates);
     //set meter groups
     await this.setMeterGroups(account);
     //set custom emissions
@@ -117,7 +117,7 @@ export class DbChangesService {
     if (needsMigration) {
       await this.migratePredictorsService.migrateAccountPredictors();
       await this.setPredictorsV2(account);
-      await this.setPredictorDataV2(account);
+      await this.setPredictorDataV2(account, skipUpdates);
     }
   }
 
@@ -250,8 +250,22 @@ export class DbChangesService {
   }
 
   //Predictor Data V2
-  async setPredictorDataV2(account: IdbAccount, facility?: IdbFacility) {
+  async setPredictorDataV2(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
+    if (!skipUpdates) {
+      let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
+      if (needsMigration) {
+        this.loadingService.setLoadingMessage('Updating predictor data dates for a consistent experience across timezones. This may take a moment...');
+        for (let i = 0; i < predictorData.length; i++) {
+          if (!predictorData[i].migratedDates) {
+            predictorData[i].month = predictorData[i]['date'].getMonth() + 1;
+            predictorData[i].year = predictorData[i]['date'].getFullYear();
+            predictorData[i].migratedDates = true;
+            await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+          }
+        }
+      }
+    }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
     if (facility) {
       this.setFacilityPredictorDataV2(facility);
@@ -291,8 +305,23 @@ export class DbChangesService {
     this.utilityMeterDbService.facilityMeters.next(facilityMeters);
   }
 
-  async setMeterData(account: IdbAccount, facility?: IdbFacility) {
+  async setMeterData(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
+    if (!skipUpdates) {
+      let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
+      if (needsMigration) {
+        this.loadingService.setLoadingMessage('Updating meter data dates for a consistent experience across timezones. This may take a moment...');
+        for (let meterData of accountMeterData) {
+          if (meterData['readDate'] && !meterData.migratedDates) {
+            meterData.month = meterData['readDate'].getMonth() + 1;
+            meterData.year = meterData['readDate'].getFullYear();
+            meterData.day = meterData['readDate'].getDate();
+            meterData.migratedDates = true;
+            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+          }
+        }
+      }
+    }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
     if (facility) {
       this.setFacilityMeterData(facility);

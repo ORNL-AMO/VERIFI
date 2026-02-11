@@ -161,7 +161,7 @@ export class AppComponent {
           this.loadingMessage = 'Migrating Predictors for V2..'
           await this.migratePredictorsService.migrateAccountPredictors();
           await this.dbChangesService.setPredictorsV2(account);
-          await this.dbChangesService.setPredictorDataV2(account);
+          await this.dbChangesService.setPredictorDataV2(account, false);
         }
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
@@ -277,6 +277,17 @@ export class AppComponent {
     this.loadingMessage = "Loading Predictor Data..";
     //set predictor data (V2)
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
+    let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
+    if (needsMigration) {
+      for (let i = 0; i < predictorData.length; i++) {
+        if (!predictorData[i].migratedDates) {
+          predictorData[i].month = new Date(predictorData[i]['date']).getMonth() + 1;
+          predictorData[i].year = new Date(predictorData[i]['date']).getFullYear();
+          predictorData[i].migratedDates = true;
+          await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+        }
+      }
+    }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
   }
 
@@ -304,6 +315,18 @@ export class AppComponent {
     //set meter data
     this.loadingMessage = "Loading Meter Data..";
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
+    let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
+    if (needsMigration) {
+      for (let meterData of accountMeterData) {
+        if (!meterData.migratedDates) {
+          meterData.month = new Date(meterData['readDate']).getMonth() + 1;
+          meterData.year = new Date(meterData['readDate']).getFullYear();
+          meterData.day = new Date(meterData['readDate']).getDate();
+          meterData.migratedDates = true;
+          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+        }
+      }
+    }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData)
   }
 

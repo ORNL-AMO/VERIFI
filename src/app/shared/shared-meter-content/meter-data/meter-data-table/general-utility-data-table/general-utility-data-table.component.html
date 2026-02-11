@@ -116,7 +116,7 @@
                         <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
                       </td>
                     }
-                    <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
+                    <td class="read-date">{{meterData | displayMeterDataDate}}</td>
                     @if (generalUtilityDataFilters.totalVolume && showVolumeColumn) {
                       <td>
                         @if (meterData.isEstimated) {

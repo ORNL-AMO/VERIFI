@@ -55,9 +55,9 @@ export class MonthlyAnalysisSummaryClass {
             while (baselineDate < baselineYearEndDate) {
                 let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, baselineActualSummaryData, this.facility, this.lastBankedMonthSummaryData, undefined);
                 baselineActualSummaryData.push(monthlyAnalysisSummaryDataClass);
-                let currentMonth: number = baselineDate.getUTCMonth()
+                let currentMonth: number = baselineDate.getMonth()
                 let nextMonth: number = currentMonth + 1;
-                baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
+                baselineDate = new Date(baselineDate.getFullYear(), nextMonth, 1);
             }
         } else {
             startDate = new Date(this.monthlyGroupAnalysisClass.baselineDate);
@@ -65,9 +65,9 @@ export class MonthlyAnalysisSummaryClass {
         while (startDate < this.monthlyGroupAnalysisClass.endDate) {
             let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, startDate, this.monthlyAnalysisSummaryData, this.facility, this.lastBankedMonthSummaryData, baselineActualSummaryData)
             this.monthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
-            let currentMonth: number = startDate.getUTCMonth()
+            let currentMonth: number = startDate.getMonth()
             let nextMonth: number = currentMonth + 1;
-            startDate = new Date(startDate.getUTCFullYear(), nextMonth, 1);
+            startDate = new Date(startDate.getFullYear(), nextMonth, 1);
         }
     }
 
@@ -106,9 +106,9 @@ export class MonthlyAnalysisSummaryClass {
                 });
                 bankedData.isBanked = true;
                 combinedData.push(bankedData);
-                let currentMonth: number = startBankedDate.getUTCMonth()
+                let currentMonth: number = startBankedDate.getMonth()
                 let nextMonth: number = currentMonth + 1;
-                startBankedDate = new Date(startBankedDate.getUTCFullYear(), nextMonth, 1);
+                startBankedDate = new Date(startBankedDate.getFullYear(), nextMonth, 1);
             }
             unbankedMonthlyAnalysisSummaryData.forEach(data => {
                 combinedData.push(data);

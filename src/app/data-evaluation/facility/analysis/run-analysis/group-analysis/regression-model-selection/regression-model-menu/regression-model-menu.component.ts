@@ -24,6 +24,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
+import { getEarliestMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -110,11 +111,11 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   setYears() {
-    let firstReading: IdbUtilityMeterData = _.minBy(this.facilityMeterData, (data) => { return new Date(data.readDate) });
-    let lastReading: IdbUtilityMeterData = _.maxBy(this.facilityMeterData, (data) => { return new Date(data.readDate) });
+    let firstReading: IdbUtilityMeterData = getEarliestMeterData(this.facilityMeterData);
+    let lastReading: IdbUtilityMeterData = getLatestMeterData(this.facilityMeterData);
     if (firstReading && lastReading) {
-      let start: number = firstReading.readDate.getFullYear();
-      let end: number = lastReading.readDate.getFullYear();
+      let start: number = firstReading.year;
+      let end: number = lastReading.year;
       this.yearOptions = [];
       for (let x = start; x <= end; x++) {
         this.yearOptions.push(x);
@@ -133,7 +134,7 @@ export class RegressionModelMenuComponent implements OnInit {
       this.group.regressionStartYear = this.yearOptions[0];
     }
     if (!this.group.regressionEndYear) {
-      this.group.regressionEndYear = this.yearOptions[0];
+      this.group.regressionEndYear = this.yearOptions[this.yearOptions.length - 1];
     }
   }
 
@@ -403,15 +404,14 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   validateMeterDataForSelectedDates() {
-    let month = this.group.regressionModelStartMonth;;
+    let month = this.group.regressionModelStartMonth;
     let year = this.group.regressionStartYear;
     const endMonth = this.group.regressionModelEndMonth;
     const endYear = this.group.regressionEndYear;
 
     while (year < endYear || (year === endYear && month <= endMonth)) {
       const dataPresent = this.facilityMeterData.some(meterData => {
-        const readDate = new Date(meterData.readDate);
-        return readDate.getFullYear() === year && readDate.getMonth() === month;
+        return meterData.year === year && meterData.month - 1 === month;
       });
       if (!dataPresent) {
         return false;
@@ -438,8 +438,7 @@ export class RegressionModelMenuComponent implements OnInit {
 
         while (year < endYear || (year === endYear && month <= endMonth)) {
           const dataPresent = variablePredictorData.some(predictorData => {
-            const readDate = new Date(predictorData.date);
-            return readDate.getFullYear() === year && readDate.getMonth() === month;
+            return predictorData.year === year && predictorData.month - 1 === month;
           });
           if (!dataPresent) {
             allPresent = false;

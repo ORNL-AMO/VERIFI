@@ -111,7 +111,7 @@
         <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="pData.checked">
       </td>
       }
-      <td>{{pData.date | date:'MMM, yyyy'}}</td>
+      <td>{{pData | displayPredictorDataDate}}</td>
       <td>
         @if (pData.weatherDataWarning) {
         <span class="fa fa-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -192,19 +192,21 @@
 
 <div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete}"></div>
 <div class="popup" [class.open]="predictorDataToDelete">
+@if(predictorDataToDelete) {
   <div class="popup-header">
-    Delete {{predictorDataToDelete?.date | date:'MMM, yyyy'}}?
+    Delete {{predictorDataToDelete | displayPredictorDataDate}}?
     <button class="item-right" (click)="cancelDeletePredictorData()">x</button>
   </div>
   <div class="popup-body">
     <p>WARNING:
-      Are you sure you want to delete the predictor entry for {{predictorDataToDelete?.date | date:'MMM, yyyy'}}?
+      Are you sure you want to delete the predictor entry for {{predictorDataToDelete | displayPredictorDataDate}}?
       This cannot be undone.</p>
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelDeletePredictorData()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDeletePredictorData()">Confirm Delete</button>
   </div>
+}
 </div>
 <div class="popup" [class.open]="showBulkDelete">
   <div class="popup-header">

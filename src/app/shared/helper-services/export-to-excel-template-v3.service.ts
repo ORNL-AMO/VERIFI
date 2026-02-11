@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -21,9 +20,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '../form-data/naics-data';
 import { ChargesTypes, MeterChargeType } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { getDateFromMeterData } from '../dateHelperFunctions';
 
 @Injectable({
   providedIn: 'root'
@@ -56,12 +56,14 @@ export class ExportToExcelTemplateV3Service {
           let url = window.URL.createObjectURL(blob);
           a.href = url;
           let date = new Date();
-          let datePipe = new DatePipe('en-us');
+          let month: string = (date.getMonth() + 1).toString().padStart(2, '0');
+          let day: string = date.getDate().toString().padStart(2, '0');
+          let formatedDate: string = month + '-' + day + '-' + date.getFullYear();
           let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
           let accountName: string = account.name;
           accountName = accountName.replaceAll(' ', '-');
           accountName = accountName.replaceAll('.', '_');
-          a.download = accountName + "-" + datePipe.transform(date, 'MM-dd-yyyy');
+          a.download = accountName + "-" + formatedDate;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
@@ -243,12 +245,12 @@ export class ExportToExcelTemplateV3Service {
     let index: number = 3;
     electricityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
-      meterData = _.orderBy(meterData, 'readDate');
+      meterData = _.orderBy(meterData, (meterData: IdbUtilityMeterData) => { return getDateFromMeterData(meterData) });
       meterData.forEach(dataReading => {
         //A: Meter Number
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //B: Read Date
-        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading);
         //C: Total Consumption
         worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
         //D: Total Real Demand
@@ -328,12 +330,12 @@ export class ExportToExcelTemplateV3Service {
     let index: number = 3;
     electricityMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
-      meterData = _.orderBy(meterData, 'readDate');
+      meterData = _.orderBy(meterData, (meterData: IdbUtilityMeterData) => { return getDateFromMeterData(meterData) });
       meterData.forEach(dataReading => {
         //A: Meter Number
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //B: Read Date
-        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading);
         //C: Total Consumption
         if (getIsEnergyUnit(meter.startingUnit)) {
           worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
@@ -415,12 +417,12 @@ export class ExportToExcelTemplateV3Service {
     let index: number = 3;
     mobileMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
-      meterData = _.orderBy(meterData, 'readDate');
+      meterData = _.orderBy(meterData, (meterData: IdbUtilityMeterData) => { return getDateFromMeterData(meterData) });
       meterData.forEach(dataReading => {
         //A: Meter Number
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //B: Read Date
-        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading);
         //C: Total Consumption
         worksheet.getCell('C' + index).value = dataReading.totalVolume;
         //D: Higher Heating Value
@@ -530,12 +532,12 @@ export class ExportToExcelTemplateV3Service {
     let index: number = 3;
     otherEnergyMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
-      meterData = _.orderBy(meterData, 'readDate');
+      meterData = _.orderBy(meterData, (meterData: IdbUtilityMeterData) => { return getDateFromMeterData(meterData) });
       meterData.forEach(dataReading => {
         //A: Meter Number
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //B: Read Date
-        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading);
         //C: Total Consumption
         worksheet.getCell('C' + index).value = dataReading.totalVolume;
         //D: Energy factor
@@ -608,12 +610,12 @@ export class ExportToExcelTemplateV3Service {
     let index: number = 3;
     otherMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
-      meterData = _.orderBy(meterData, 'readDate');
+      meterData = _.orderBy(meterData, (meterData: IdbUtilityMeterData) => { return getDateFromMeterData(meterData) });
       meterData.forEach(dataReading => {
         //A: Meter Number
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //B: Read Date
-        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading);
         //C: Total Consumption
         worksheet.getCell('C' + index).value = dataReading.totalVolume;
         //D: Total Cost
@@ -689,12 +691,12 @@ export class ExportToExcelTemplateV3Service {
     let index: number = 3;
     waterMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
-      meterData = _.orderBy(meterData, 'readDate');
+      meterData = _.orderBy(meterData, (meterData: IdbUtilityMeterData) => { return getDateFromMeterData(meterData) });
       meterData.forEach(dataReading => {
         //A: Meter Number
         worksheet.getCell('A' + index).value = meter.meterNumber;
         //B: Read Date
-        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
+        worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading);
         //C: Total Consumption
         worksheet.getCell('C' + index).value = dataReading.totalVolume;
         //D: Total Cost
@@ -713,22 +715,22 @@ export class ExportToExcelTemplateV3Service {
       worksheet.getCell(alpha + rowIndex).value = charge.name;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = ChargesTypes.find(type => { return type.value == charge.chargeType })?.label;
-      rowIndex++;
+      alpha = this.getNextAlpha(alpha);
     })
+    rowIndex++;
   }
 
   addChargeReadingsToWorksheet(worksheet: ExcelJS.Worksheet, alpha: string, rowIndex: number, meter: IdbUtilityMeter, meterData: IdbUtilityMeterData) {
     meterData.charges.forEach(mDataCharge => {
       let charge: MeterCharge = meter.charges.find(charge => { return charge.guid == mDataCharge.chargeGuid });
-
       worksheet.getCell(alpha + rowIndex).value = charge.name;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeUsage;
       alpha = this.getNextAlpha(alpha);
       worksheet.getCell(alpha + rowIndex).value = mDataCharge.chargeAmount;
       alpha = this.getNextAlpha(alpha);
-      rowIndex++;
     })
+    rowIndex++;
   }
 
   setAlphabet() {
@@ -793,10 +795,9 @@ export class ExportToExcelTemplateV3Service {
         month: number,
         year: number
       }> = facilityPredictorData.flatMap(pData => {
-        let pDate: Date = new Date(pData.date);
         return {
-          month: pDate.getMonth(),
-          year: pDate.getFullYear()
+          month: pData.month,
+          year: pData.year
         }
       });
       predictorDates = _.uniqBy(predictorDates, (pDate: { month: number, year: number }) => {
@@ -809,13 +810,12 @@ export class ExportToExcelTemplateV3Service {
 
       predictorDates.forEach(pDate => {
         worksheet.getCell('A' + rowIndex).value = facility.name;
-        let date: Date = new Date(pDate.year, pDate.month, 1);
-        worksheet.getCell('B' + rowIndex).value = this.getFormatedDate(date);
+        worksheet.getCell('B' + rowIndex).value = pDate.year + '-' + (pDate.month).toString().padStart(2, '0') + '-01';
         let alpha: string = 'C';
         facilityPredictors.forEach(predictor => {
           alpha = this.getNextAlpha(alpha);
           let reading: IdbPredictorData = facilityPredictorData.find(pData => {
-            return checkSameMonth(new Date(pData.date), new Date(pDate.year, pDate.month, 1)) && pData.predictorId == predictor.guid;
+            return checkSameMonthPredictorData(pData, new Date(pDate.year, pDate.month - 1, 1)) && pData.predictorId == predictor.guid;
           });
           if (reading) {
             worksheet.getCell(alpha + rowIndex).value = reading.amount;
@@ -850,10 +850,9 @@ export class ExportToExcelTemplateV3Service {
     };
   }
 
-  getFormatedDate(dateReading: Date): string {
-    let readingDate: Date = new Date(dateReading)
-    let month: string = (readingDate.getMonth() + 1).toString().padStart(2, '0');
-    let day: string = (readingDate.getDate()).toString().padStart(2, '0');
-    return readingDate.getFullYear() + '-' + month + '-' + day;
+  getFormatedDate(readingData: IdbUtilityMeterData): string {
+    let month: string = (readingData.month).toString().padStart(2, '0');
+    let day: string = (readingData.day).toString().padStart(2, '0');
+    return readingData.year + '-' + month + '-' + day;
   }
 }

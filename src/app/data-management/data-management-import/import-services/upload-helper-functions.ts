@@ -1,3 +1,4 @@
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { AgreementType, AgreementTypes } from "../../../models/agreementType";
 import { AllSources, MeterPhase, MeterSource } from "../../../models/constantsAndTypes";
 import { ScopeOption, ScopeOptions } from "../../../models/scopeOption";
@@ -98,11 +99,15 @@ export function checkImportCellNumber(value: any): number {
 
 
 export function checkSameDay(date1: Date, date2: Date): boolean {
-    return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCDate() == date2.getUTCDate();
+    return date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate();
 }
 
 export function checkSameMonth(date1: Date, date2: Date): boolean {
-    return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth();
+    return date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth();
+}
+
+export function checkSameMonthPredictorData(predictorData: IdbPredictorData, date: Date): boolean {
+    return predictorData.year == date.getFullYear() && predictorData.month == (date.getMonth() + 1);
 }
 
 export function getScope(formScope: string): number {

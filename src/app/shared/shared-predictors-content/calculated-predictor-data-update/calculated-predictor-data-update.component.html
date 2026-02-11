@@ -135,7 +135,7 @@
           @if (pData.deleted) {
             <span class="badge bg-danger">Delete</span>
           }
-          {{pData.date | date:'MMM, yyyy'}}
+          {{pData | displayPredictorDataDate}}
         </td>
         <td>
           @if (pData.weatherDataWarning) {

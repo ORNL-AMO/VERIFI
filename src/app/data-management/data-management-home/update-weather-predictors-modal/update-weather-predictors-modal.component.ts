@@ -10,6 +10,7 @@ import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FileReference } from '../../data-management-import/import-services/upload-data-models';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterData, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-update-weather-predictors-modal',
@@ -86,9 +87,8 @@ export class UpdateWeatherPredictorsModalComponent {
         weatherPredictors.forEach(predictor => {
           let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
           if (predictorData.length > 0) {
-            predictorData = _.sortBy(predictorData, (data: IdbPredictorData) => { return new Date(data.date).getTime(); });
-            let tmpStartDate: Date = new Date(predictorData[0].date);
-            let tmpEndDate: Date = new Date(predictorData[predictorData.length - 1].date);
+            let tmpStartDate: Date = getEarliestPredictorDataDate(predictorData);
+            let tmpEndDate: Date = getLatestPredictorDataDate(predictorData);
             if (!startDate || tmpStartDate.getTime() < startDate.getTime()) {
               startDate = new Date(tmpStartDate);
             }
@@ -101,9 +101,8 @@ export class UpdateWeatherPredictorsModalComponent {
           // Handle case where no valid dates were found
           let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
           if (facilityMeterData.length > 0) {
-            facilityMeterData = _.sortBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate).getTime(); });
-            let tmpStartDate: Date = new Date(facilityMeterData[0].readDate);
-            let tmpEndDate: Date = new Date(facilityMeterData[facilityMeterData.length - 1].readDate);
+            let tmpStartDate: Date = getEarliestMeterDataDate(facilityMeterData);
+            let tmpEndDate: Date = getLatestMeterDataDate(facilityMeterData);
             if (!startDate || tmpStartDate.getTime() < startDate.getTime()) {
               startDate = new Date(tmpStartDate);
             }
