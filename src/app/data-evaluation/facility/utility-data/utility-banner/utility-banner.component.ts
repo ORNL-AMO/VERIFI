@@ -35,6 +35,8 @@ export class UtilityBannerComponent implements OnInit {
   predictorTimer: any;
   meterDataTimer: any;
   meterData: Array<IdbUtilityMeterData>;
+  includeWeatherData: boolean = false;
+  showExportModal: boolean = false;
   constructor(private sharedDataService: SharedDataService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service, private facilityDbService: FacilitydbService,
     private predictorDataHelperService: PredictorDataHelperService,
@@ -70,12 +72,22 @@ export class UtilityBannerComponent implements OnInit {
     this.meterDataSub.unsubscribe();
   }
 
+  openExportModal() {
+    this.includeWeatherData = false;
+    this.showExportModal = true;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+  }
+
   exportData() {
+    this.showExportModal = false;
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facility');
     this.loadingService.setCurrentLoadingIndex(0);
     this.loadingService.addLoadingMessage('Exporting to .xlsx template');
-    this.exportToExcelTemplateV3Service.exportFacilityData(this.facility.guid);
+    this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, this.facility.guid);
   }
 
   setPredictorsNeedUpdate() {
