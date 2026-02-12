@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -59,9 +59,16 @@ export class RegressionModelMenuComponent implements OnInit {
   changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
   showModelComparison: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
+  selectedOptions: Array<number> = [];
+  dropdownOpen: boolean = false;
+  baselineYear: number;
+  dropdownOptions: Array<number> = [];
+  @ViewChild('dropdown') dropdownRef: ElementRef;
+
 
   @Output() userDefinedModelClicked = new EventEmitter<boolean>();
   @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
+  @Output() includedYearsChange = new EventEmitter<number[]>();
 
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
@@ -80,7 +87,9 @@ export class RegressionModelMenuComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
+    this.baselineYear = this.analysisItem.baselineYear;
     this.setYears();
+    this.setDropdownOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
@@ -121,6 +130,12 @@ export class RegressionModelMenuComponent implements OnInit {
         this.yearOptions.push(x);
       }
     }
+  }
+
+  setDropdownOptions() {
+    this.dropdownOptions = [...this.yearOptions];
+    this.dropdownOptions = this.dropdownOptions.filter(year => year >= this.analysisItem.baselineYear);
+    this.selectedOptions = [...this.dropdownOptions];
   }
 
   setUserDefinedDefaultData() {
@@ -213,7 +228,7 @@ export class RegressionModelMenuComponent implements OnInit {
         if (this.group.selectedModelId) {
           const selectedModel = this.generatedModels.find(model => model.modelId === this.group.selectedModelId);
           this.group.models = selectedModel ? [selectedModel] : [];
-          if(selectedModel) {
+          if (selectedModel) {
             this.group.regressionConstant = selectedModel.coef[0];
             this.group.regressionModelYear = selectedModel.modelYear;
             this.group.predictorVariables.forEach(variable => {
@@ -480,4 +495,30 @@ export class RegressionModelMenuComponent implements OnInit {
     this.allMeterReadingsPresent = true;
     this.allPredictorReadingsPresent = true;
   }
+
+  isOptionSelected(option: number): boolean {
+    return this.selectedOptions.includes(option);
+  }
+
+  toggleOption(option: number) {
+    if (this.isOptionSelected(option)) {
+      this.selectedOptions = this.selectedOptions.filter(selected => selected !== option);
+    }
+    else {
+      this.selectedOptions = [...this.selectedOptions, option];
+    }
+    this.includedYearsChange.emit(this.selectedOptions);
+  }
+
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (!this.dropdownRef.nativeElement.contains(event.target)) {
+      this.dropdownOpen = false;
+    }
+  }
+
 }

@@ -24,7 +24,8 @@
       }
       <app-regression-model-menu
         (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
-      (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
+      (isUserDefinedViewVisible)="onFormChanged($event)"
+      (includedYearsChange)="onIncludedYearsChange($event)"></app-regression-model-menu>
       <hr>
         @if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
           <div class="table-responsive">
@@ -74,7 +75,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (model of generatedModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; track model; let modelIndex = $index) {
+                @for (model of filteredModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; track model; let modelIndex = $index) {
                   <tr
                     [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
                     @if (!model.errorModeling) {

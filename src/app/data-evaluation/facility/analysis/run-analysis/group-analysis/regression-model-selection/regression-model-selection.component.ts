@@ -36,6 +36,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   generatedModels: Array<JStatRegressionModel>;
   generatedModelsPerGroupSub: Subscription;
   routerSub: Subscription;
+  includedYears: Array<number> = [];
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -166,5 +167,20 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   onFormChanged(isFormChanged: boolean) {
     this.showView = isFormChanged;
+  }
+
+  onIncludedYearsChange(years: Array<number>) {
+    this.includedYears = years;
+  }
+
+  get filteredModels() {
+    if (this.includedYears.length === 0) {
+      return this.generatedModels;
+    }
+    else {
+      return (this.generatedModels).filter(model => {
+        return this.includedYears.includes(model.modelYear);
+      });
+    }
   }
 }

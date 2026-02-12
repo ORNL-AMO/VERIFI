@@ -100,6 +100,27 @@
           </div>
         </div>
         }
+        @if (generatedModels && generatedModels.length != 0) {
+        <div class="alert alert-info d-flex align-items-center mt-3 alert-style">
+          <p class="section-label me-4 mb-0">Select model years to include</p>
+          <div class="dropdown" #dropdown>
+            <button class="dropdown-btn" (click)="toggleDropdown()">
+              Select Years
+            </button>
+            @if (dropdownOpen) {
+            <div class="dropdown-content">
+              @for (option of dropdownOptions; track option) {
+              <label class="multiselect-option">
+                <input type="checkbox" [value]="option" [checked]="isOptionSelected(option)"
+                  (change)="toggleOption(option)">
+                {{option}}
+              </label>
+              }
+            </div>
+            }
+          </div>
+        </div>
+        }
       </div>
       }
       @if (!group.userDefinedModel) {
