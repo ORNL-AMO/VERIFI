@@ -135,7 +135,7 @@ export class RegressionModelMenuComponent implements OnInit {
   setDropdownOptions() {
     this.dropdownOptions = [...this.yearOptions];
     this.dropdownOptions = this.dropdownOptions.filter(year => year >= this.analysisItem.baselineYear);
-    this.selectedOptions = [...this.dropdownOptions];
+    this.selectedOptions = [...this.dropdownOptions];    
   }
 
   setUserDefinedDefaultData() {
@@ -516,9 +516,8 @@ export class RegressionModelMenuComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   clickOutside(event: Event) {
-    if (!this.dropdownRef.nativeElement.contains(event.target)) {
+    if(this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
       this.dropdownOpen = false;
     }
   }
-
 }
