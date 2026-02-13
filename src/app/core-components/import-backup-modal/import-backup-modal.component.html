@@ -61,7 +61,7 @@
               <th scope="col" class="text-center">Select</th>
               <th scope="col">Imported Facility</th>
               <th scope="col" class="text-center">Create New/ Overwrite</th>
-              <th scope="col" class="text-center">Facility to Overwrite</th>
+              <th scope="col" class="text-center">VERIFI Facility to Update</th>
               <th scope="col" class="text-center">Differences in Imported Data</th>
             </tr>
           </thead>
@@ -78,22 +78,30 @@
                 </label>
               </td>
               <td class="text-center">
-                <select class="form-select form-select-sm" (change)="setFacilityImportOption($event, facility)"
+                <select class="form-select form-select-sm"
+                  [(ngModel)]="facilityImportSelections[facility.name].importAs"
+                  (ngModelChange)="setFacilityImportOption($event, facility)"
                   [disabled]="!selectedFacilitiesToImport.includes(facility)">
                   <option value="new">Create New</option>
                   <option value="replace">Replace Existing</option>
                 </select>
               </td>
               <td class="text-center">
-                <select class="form-select form-select-sm" [(ngModel)]="facilityImportSelections[facility.name].replacedFacility"
-                  (ngModelChange)="setFacilityToReplace($event, facility)"
-                  [disabled]="facilityImportSelections[facility.name]?.importAs !== 'replace' || !selectedFacilitiesToImport.includes(facility)">
+                @if(facilityImportSelections[facility.name]?.importAs === 'replace' &&
+                selectedFacilitiesToImport.includes(facility)) {
+                <select class="form-select form-select-sm"
+                  [(ngModel)]="facilityImportSelections[facility.name].replacedFacility"
+                  (ngModelChange)="setFacilityToReplace($event, facility)">
                   @for (accountFacility of accountFacilities; track accountFacility) {
                   <option [value]="accountFacility.name">
                     {{accountFacility.name}}
                   </option>
                   }
                 </select>
+                }
+                @else {
+                <span>&mdash;</span>
+                }
               </td>
               <td>
                 @if (lookupDifferences(facility.name).length === 0) {

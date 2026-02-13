@@ -284,8 +284,7 @@ export class ImportBackupModalComponent implements OnInit {
     this.checkDuplicate();
   }
 
-  setFacilityImportOption(event: Event, facility: IdbFacility) {
-    let option = (event.target as HTMLSelectElement).value;
+  setFacilityImportOption(option: string, facility: IdbFacility) {
     if (option === 'new') {
       this.facilityImportSelections[facility.name].importAs = 'new';
     } else if (option === 'replace') {
