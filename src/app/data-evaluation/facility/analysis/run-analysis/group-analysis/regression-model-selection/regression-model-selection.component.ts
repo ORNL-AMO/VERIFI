@@ -37,6 +37,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   generatedModelsPerGroupSub: Subscription;
   routerSub: Subscription;
   includedYears: Array<number> = [];
+  isYearSelectionChanged: boolean = false;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -171,16 +172,18 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   onIncludedYearsChange(years: Array<number>) {
     this.includedYears = years;
+    this.isYearSelectionChanged = true;
   }
 
   get filteredModels() {
-    if (this.includedYears.length === 0) {
+    if (!this.isYearSelectionChanged && this.includedYears.length === 0) {
       return this.generatedModels;
     }
-    else {
-      return (this.generatedModels).filter(model => {
-        return this.includedYears.includes(model.modelYear);
-      });
+    if (this.includedYears.length === 0) {
+      return [];
     }
+    return (this.generatedModels).filter(model => {
+      return this.includedYears.includes(model.modelYear);
+    });
   }
 }

@@ -135,7 +135,22 @@ export class RegressionModelMenuComponent implements OnInit {
   setDropdownOptions() {
     this.dropdownOptions = [...this.yearOptions];
     this.dropdownOptions = this.dropdownOptions.filter(year => year >= this.analysisItem.baselineYear);
-    this.selectedOptions = [...this.dropdownOptions];    
+    this.checkCompleteYearDataPresent();
+    this.selectedOptions = [...this.dropdownOptions];
+  }
+
+  checkCompleteYearDataPresent() {
+    for (let year of this.dropdownOptions) {
+      let meterDataForYear = this.facilityMeterData.filter(meterData => meterData.year == year);
+      let predictorDataForYear = this.facilityPredictorData.filter(predictorData => predictorData.year == year);
+      for (let monthNum = 1; monthNum <= 12; monthNum++) {
+        let monthMeterData = meterDataForYear.filter(meterData => meterData.month == monthNum);
+        let monthPredictorData = predictorDataForYear.filter(predictorData => predictorData.month == monthNum);
+        if (monthMeterData.length == 0 || monthPredictorData.length == 0) {
+          this.dropdownOptions = this.dropdownOptions.filter(option => option != year);
+        }
+      }
+    }
   }
 
   setUserDefinedDefaultData() {
@@ -516,7 +531,7 @@ export class RegressionModelMenuComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   clickOutside(event: Event) {
-    if(this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
+    if (this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
       this.dropdownOpen = false;
     }
   }
