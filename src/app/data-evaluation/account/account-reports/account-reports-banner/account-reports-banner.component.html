@@ -11,8 +11,15 @@
             <i class="fa fa-gears"></i>
           Report Setup</a>
         </li>
+         @if (selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'accountSavings') {
+          <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+            <a class="nav-link" routerLink="report-data-check" [routerLinkActive]="['active']">
+              <i class="fa fa-circle-check"></i>
+            Data Check</a>
+          </li>
+        }
         @if (selectedReport.reportType == 'betterPlants') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited}"
             >
             <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
@@ -28,7 +35,7 @@
           </li>
         }
         @if (selectedReport.reportType == 'performance') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited}"
             >
             <a class="nav-link" routerLink="performance-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
@@ -51,7 +58,7 @@
           </li>
         }
         @if (selectedReport.reportType == 'accountSavings') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited}"
             >
             <a class="nav-link" routerLink="account-savings-report"
               [routerLinkActive]="['active']">

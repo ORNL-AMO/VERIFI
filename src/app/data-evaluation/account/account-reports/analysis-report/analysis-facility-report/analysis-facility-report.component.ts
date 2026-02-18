@@ -21,6 +21,8 @@ export class AnalysisFacilityReportComponent {
   analysisReportSetup: AnalysisReportSetup;
   @Input()
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
+  @Input({ required: false })
+  isDataCheck: boolean;
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
   absoluteGroupItems: Array<FacilityGroupAnalysisItem> = [];

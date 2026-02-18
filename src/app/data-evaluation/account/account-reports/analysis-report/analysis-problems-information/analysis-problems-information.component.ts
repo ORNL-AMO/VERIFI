@@ -17,6 +17,8 @@ export class AnalysisProblemsInformationComponent {
   facilityDetails: Array<IdbAnalysisItem>;
   @Input()
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
+  @Input({ required: false })
+  isDataCheck: boolean;
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   criticalItems: Array<FacilityGroupAnalysisItem> = [];
   moderateItems: Array<FacilityGroupAnalysisItem> = [];

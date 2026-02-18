@@ -21,6 +21,8 @@ export class AnalysisDataValidationTablesComponent {
   analysisReportSetup: AnalysisReportSetup;
   @Input()
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
+  @Input({ required: false })
+  isDataCheck: boolean;
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   selectedReport: IdbAccountReport;
 

@@ -1,0 +1,21 @@
+@if (selectedReport) {
+  @if (analysisReportSetup.includeProblemsInformation) {
+    <div class="report">
+      @if (facilityDetails) {
+        <app-analysis-problems-information [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isDataCheck]="true"></app-analysis-problems-information>
+      }
+    </div>
+  }
+  @if (analysisReportSetup.includeExecutiveSummary) {
+    <div class="report">
+      @if (facilityDetails) {
+        <app-analysis-facility-report [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems" [isDataCheck]="true"></app-analysis-facility-report>
+      }
+    </div>
+  }
+  @if (analysisReportSetup.includeDataValidationTables) {
+    <div class="report">
+      <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems" [isDataCheck]="true"></app-analysis-data-validation-tables>
+    </div>
+  }
+}

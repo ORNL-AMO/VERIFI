@@ -15,6 +15,7 @@ export class AccountAnalysisDbService {
 
   accountAnalysisItems: BehaviorSubject<Array<IdbAccountAnalysisItem>>;
   selectedAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
+  analysisVisited: BehaviorSubject<void>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private analysisDbService: AnalysisDbService,
@@ -22,7 +23,7 @@ export class AccountAnalysisDbService {
     private loadingService: LoadingService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
-
+    this.analysisVisited = new BehaviorSubject<void>(undefined);
     //subscribe after initialization
     this.selectedAnalysisItem.subscribe(analysisItem => {
       if (analysisItem) {
