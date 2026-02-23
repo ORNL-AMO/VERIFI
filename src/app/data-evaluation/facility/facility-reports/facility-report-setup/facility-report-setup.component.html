@@ -7,32 +7,31 @@
           <div class="row form-group">
             <label class="col-6 col-form-label semibold" for="reportName">Report Name</label>
             <div class="col-6">
-              <input class="form-control" type="text" id="reportName" name="reportName"
-                [(ngModel)]="reportName" (input)="saveName()" [required]="true">
+              <input class="form-control" type="text" id="reportName" name="reportName" [(ngModel)]="reportName"
+                (input)="saveName()" [required]="true">
               @if (!reportName) {
-                <div class="alert alert-danger small mt-2">
-                  Report Name Required.
-                </div>
+              <div class="alert alert-danger small mt-2">
+                Report Name Required.
+              </div>
               }
             </div>
           </div>
         </div>
         <div class="col-12">
           @if (facilityReportType == 'analysis') {
-            <app-facility-analysis-report-setup
-            ></app-facility-analysis-report-setup>
+          <app-facility-analysis-report-setup></app-facility-analysis-report-setup>
           }
           @if (facilityReportType == 'overview') {
-            <app-facility-overview-report-setup
-            ></app-facility-overview-report-setup>
+          <app-facility-overview-report-setup></app-facility-overview-report-setup>
           }
           @if (facilityReportType == 'savings') {
-            <app-facility-savings-report-setup
-            ></app-facility-savings-report-setup>
+          <app-facility-savings-report-setup></app-facility-savings-report-setup>
           }
           @if (facilityReportType == 'emissionFactors') {
-            <app-facility-emission-factors-report-setup
-            ></app-facility-emission-factors-report-setup>
+          <app-facility-emission-factors-report-setup></app-facility-emission-factors-report-setup>
+          }
+          @if (facilityReportType == 'modeling') {
+          <app-facility-modeling-report-setup></app-facility-modeling-report-setup>
           }
         </div>
       </div>

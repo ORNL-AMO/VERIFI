@@ -106,7 +106,14 @@ export class FacilityReportsTabsComponent {
           this.selectedReport.emissionFactorsReportSettings.endYear != undefined &&
           this.selectedReport.emissionFactorsReportSettings.startYear != undefined &&
           this.errorMessage == undefined)
-      } else {
+      }
+      else if (this.selectedReport.facilityReportType == 'modeling') {
+        this.setupValid = (this.selectedReport.name != '' &&
+          this.selectedReport.modelingReportSettings.reportYear != undefined &&
+          this.selectedReport.analysisItemId != undefined &&
+          this.errorMessage == undefined)
+      }
+      else {
         this.setupValid = false;
       }
     }

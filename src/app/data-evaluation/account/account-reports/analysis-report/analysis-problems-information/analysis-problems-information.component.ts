@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { FacilityGroupAnalysisItem } from '../analysis-report.component';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 
 @Component({
   selector: 'app-analysis-problems-information',
@@ -19,16 +20,27 @@ export class AnalysisProblemsInformationComponent {
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
   @Input({ required: false })
   isDataCheck: boolean;
+  @Input({ required: false })
+  isFacilityReport: boolean;
+  
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   criticalItems: Array<FacilityGroupAnalysisItem> = [];
   moderateItems: Array<FacilityGroupAnalysisItem> = [];
   minorItems: Array<FacilityGroupAnalysisItem> = [];
   selectedReport: IdbAccountReport;
+  facilityReport: IdbFacilityReport;
 
-  constructor(private accountReportDbService: AccountReportDbService) { }
+  constructor(private accountReportDbService: AccountReportDbService,
+    private facilityReportsDbService: FacilityReportsDbService  
+  ) { }
 
   ngOnChanges() {
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    if(this.isFacilityReport) {
+      this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
+    }
+    else {
+      this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    }
     this.getRegressionGroupItems(this.executiveSummaryItems);
     this.getCriticalItems(this.regressionGroupItems);
     this.getModerateItems(this.regressionGroupItems);

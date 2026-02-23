@@ -139,6 +139,12 @@ import { AccountReportsDataCheckComponent } from './account-reports-data-check-c
 ],
   providers: [
     AccountReportTypePipe
+  ],
+  exports: [
+    AnalysisProblemsInformationComponent,
+    AnalysisDataValidationTablesComponent,
+    AnalysisFacilityReportComponent
+
   ]
 })
 export class AccountReportsModule { }

@@ -53,6 +53,7 @@ import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
 import { AnalysisDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-details-table/analysis-details-table.component";
+import { FacilityModelingReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-results.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -293,7 +294,8 @@ export const FacilityRoutes: Route = {
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
                 { path: 'overview-report', component: FacilityOverviewReportResultsComponent },
                 { path: 'savings-report', component: FacilitySavingsReportResultsComponent },
-                { path: 'emission-factors-report', component: FacilityEmissionFactorsReportResultsComponent }
+                { path: 'emission-factors-report', component: FacilityEmissionFactorsReportResultsComponent },
+                { path: 'modeling-report', component: FacilityModelingReportResultsComponent }
             ]
         }
     ]

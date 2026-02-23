@@ -5,6 +5,8 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { FacilityGroupAnalysisItem } from '../analysis-report.component';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 
 @Component({
   selector: 'app-analysis-facility-report',
@@ -17,21 +19,40 @@ export class AnalysisFacilityReportComponent {
 
   @Input()
   facilityDetails: Array<IdbAnalysisItem>;
-  @Input()
+  @Input( { required: false })
   analysisReportSetup: AnalysisReportSetup;
   @Input()
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
   @Input({ required: false })
   isDataCheck: boolean;
+  @Input({ required: false })
+  isFacilityReport: boolean;
+  
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
   absoluteGroupItems: Array<FacilityGroupAnalysisItem> = [];
   selectedReport: IdbAccountReport;
+  facilityReport:IdbFacilityReport;
+  showTitle: boolean = false;
 
-  constructor(private accountReportDbService: AccountReportDbService) { }
+  constructor(private accountReportDbService: AccountReportDbService,
+    private facilityReportsDbService: FacilityReportsDbService
+  ) { }
 
   ngOnChanges() {
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    if(this.isFacilityReport) {
+      this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
+      if(this.facilityReport && !this.facilityReport.modelingReportSettings.includeIssuesSummary) {
+        this.showTitle = true;
+      }
+    }
+    else {
+      this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+      if (this.analysisReportSetup && !this.analysisReportSetup.includeProblemsInformation) {
+        this.showTitle = true;
+      }
+    }
+    
     this.getRegressionGroupItems(this.executiveSummaryItems);
     this.getClassicIntensityItems(this.executiveSummaryItems);
     this.getAbsoluteItems(this.executiveSummaryItems);

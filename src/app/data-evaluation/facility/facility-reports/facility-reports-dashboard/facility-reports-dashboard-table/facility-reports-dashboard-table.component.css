@@ -64,6 +64,15 @@ thead th.can-click:hover{
     padding: 0.5em 0.75em;
     border-radius: 0.50rem;
 }
+
+.badge-modeling {
+    background-color: #4e7481;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
 .form-select{
     border-color: #2c386b;
 }

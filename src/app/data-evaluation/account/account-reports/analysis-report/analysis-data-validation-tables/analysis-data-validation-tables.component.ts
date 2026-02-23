@@ -5,6 +5,8 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { FacilityGroupAnalysisItem } from '../analysis-report.component';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 
 @Component({
   selector: 'app-analysis-data-validation-tables',
@@ -19,17 +21,34 @@ export class AnalysisDataValidationTablesComponent {
   facilityDetails: Array<IdbAnalysisItem>;
   @Input()
   analysisReportSetup: AnalysisReportSetup;
-  @Input()
+  @Input({ required: false })
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
   @Input({ required: false })
   isDataCheck: boolean;
+  @Input({ required: false })
+  isFacilityReport: boolean;
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   selectedReport: IdbAccountReport;
+  facilityReport: IdbFacilityReport;
+  showTitle: boolean = false;
 
-  constructor(private accountReportDbService: AccountReportDbService) { }
+  constructor(private accountReportDbService: AccountReportDbService,
+    private facilityReportsDbService: FacilityReportsDbService
+  ) { }
 
   ngOnChanges() {
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    if (this.isFacilityReport) {
+      this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
+      if(this.facilityReport && (!this.facilityReport.modelingReportSettings.includeIssuesSummary && !this.facilityReport.modelingReportSettings.includeExecutiveSummary)) {
+        this.showTitle = true;
+      }
+    }
+    else {
+      this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+      if (this.analysisReportSetup && (!this.analysisReportSetup.includeProblemsInformation && !this.analysisReportSetup.includeExecutiveSummary)) {
+        this.showTitle = true;
+      }
+    }
     this.getRegressionGroupItems(this.executiveSummaryItems);
   }
 

@@ -27,6 +27,9 @@ import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/ta
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-report-order-by.pipe';
 import { FacilityReportBadgeClassPipe } from './facility-report-pipes/facility-report-badge-class.pipe';
+import { FacilityModelingReportSetupComponent } from './facility-report-setup/facility-modeling-report-setup/facility-modeling-report-setup.component';
+import { FacilityModelingReportResultsComponent } from './report-results/facility-modeling-report-results/facility-modeling-report-results.component';
+import { AccountReportsModule } from '../../account/account-reports/account-reports.module';
 
 
 
@@ -49,7 +52,10 @@ import { FacilityReportBadgeClassPipe } from './facility-report-pipes/facility-r
     FacilityEmissionFactorsReportTableComponent,
     FacilityReportsDashboardTableComponent,
     FacilityReportOrderByPipe,
-    FacilityReportBadgeClassPipe
+    FacilityReportBadgeClassPipe,
+    FacilityModelingReportSetupComponent,
+    FacilityModelingReportResultsComponent
+    
   ],
   imports: [
     CommonModule,
@@ -61,7 +67,8 @@ import { FacilityReportBadgeClassPipe } from './facility-report-pipes/facility-r
     CalculatingSpinnerModule,
     TableItemsDropdownModule,
     NgbPagination,
-    SharedAnalysisModule
+    SharedAnalysisModule,
+    AccountReportsModule
 ], 
 providers: [
     FacilityReportTypePipe,
