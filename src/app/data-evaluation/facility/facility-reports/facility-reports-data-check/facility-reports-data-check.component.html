@@ -1,0 +1,13 @@
+@if (facilityReport && facilityDetails) {
+    <div class="report">
+        <app-analysis-problems-information [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isFacilityReport]="true" [isDataCheck]="true"></app-analysis-problems-information>
+    </div>
+
+    <div class="report">
+        <app-analysis-facility-report [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isFacilityReport]="true" [isDataCheck]="true"></app-analysis-facility-report>
+    </div>
+  
+    <div class="report">
+      <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isFacilityReport]="true" [isDataCheck]="true"></app-analysis-data-validation-tables>
+    </div>
+}

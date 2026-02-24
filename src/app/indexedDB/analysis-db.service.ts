@@ -24,6 +24,7 @@ export class AnalysisDbService {
   selectedAnalysisItem: BehaviorSubject<IdbAnalysisItem>;
 
   generatedModelsPerGroup: BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>;
+  analysisVisited: BehaviorSubject<void>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -40,6 +41,7 @@ export class AnalysisDbService {
     });
     
     this.generatedModelsPerGroup = new BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>({});
+    this.analysisVisited = new BehaviorSubject<void>(undefined);
   }
 
   setGeneratedModelsForGroup(groupId: string, models: Array<JStatRegressionModel>) {

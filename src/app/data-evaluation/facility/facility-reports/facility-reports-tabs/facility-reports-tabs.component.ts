@@ -7,6 +7,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { FacilityReportsService } from '../facility-reports.service';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-facility-reports-tabs',
@@ -30,11 +32,14 @@ export class FacilityReportsTabsComponent {
   facility: IdbFacility;
   facilitySub: Subscription;
   showDropdown: boolean = false;
+  analysisVisitedSub: Subscription;
+  analysisVisited: boolean = false;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
     private facilityDbService: FacilitydbService,
-    private facilityReportsService: FacilityReportsService) { }
+    private facilityReportsService: FacilityReportsService,
+    private analysisDbService: AnalysisDbService) { }
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
       this.setInDashboard();
@@ -59,11 +64,18 @@ export class FacilityReportsTabsComponent {
       this.selectedReport = val;
       if (this.selectedReport) {
         this.setSetupValid();
+        this.checkIfAnalysisVisited();
       }
     });
 
     this.reportListSub = this.facilityReportsDbService.facilityReports.subscribe(reports => {
       this.reportList = reports;
+    });
+
+    this.analysisVisitedSub = this.analysisDbService.analysisVisited.subscribe(() => {
+      if (this.selectedReport) {
+        this.checkIfAnalysisVisited();
+      }
     });
   }
 
@@ -74,6 +86,7 @@ export class FacilityReportsTabsComponent {
     this.facilitySub.unsubscribe();
     this.errorSub.unsubscribe();
     this.reportListSub.unsubscribe();
+    this.analysisVisitedSub.unsubscribe();
   }
 
 
@@ -83,6 +96,16 @@ export class FacilityReportsTabsComponent {
 
   goToDashboard() {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/reports/dashboard');
+  }
+
+  checkIfAnalysisVisited() {
+    let analysisItem: IdbAnalysisItem;
+    if (this.selectedReport) {
+      analysisItem = this.analysisDbService.getByGuid(this.selectedReport.analysisItemId);
+      if (analysisItem) {
+        this.analysisVisited = analysisItem.isAnalysisVisited;
+      }
+    }
   }
 
   setSetupValid() {

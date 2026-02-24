@@ -20,7 +20,8 @@ export interface IdbAnalysisItem extends IdbEntry {
     groups: Array<AnalysisGroup>,
     baselineYear: number,
     hasBanking: boolean,
-    bankedAnalysisItemId: string
+    bankedAnalysisItemId: string,
+    isAnalysisVisited?: boolean
 }
 
 export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility, accountMeterGroups: Array<IdbUtilityMeterGroup>, accountPredictors: Array<IdbPredictor>, analysisCategory: AnalysisCategory): IdbAnalysisItem {
@@ -77,7 +78,8 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       analysisCategory: analysisCategory,
       baselineYear: baselineYear,
       hasBanking: false,
-      bankedAnalysisItemId: undefined
+      bankedAnalysisItemId: undefined,
+      isAnalysisVisited: false
     };
     analysisItem.setupErrors = {
       hasError: true,

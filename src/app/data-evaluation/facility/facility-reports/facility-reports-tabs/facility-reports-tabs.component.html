@@ -10,8 +10,15 @@
           <i class="fa fa-gears"></i>
           Report Setup</a>
       </li>
-      @if (selectedReport.facilityReportType == 'analysis') {
+      @if (selectedReport.facilityReportType == 'analysis' || selectedReport.facilityReportType == 'savings') {
       <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+        <a class="nav-link" routerLink="data-check" [routerLinkActive]="['active']">
+          <i class="fa fa-circle-check"></i>
+          Data Check</a>
+      </li>
+      }
+      @if (selectedReport.facilityReportType == 'analysis') {
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
         <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Analysis Report</a>
@@ -25,7 +32,7 @@
       </li>
       }
       @if (selectedReport.facilityReportType == 'savings') {
-      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
         <a class="nav-link" routerLink="savings-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Savings Report</a>

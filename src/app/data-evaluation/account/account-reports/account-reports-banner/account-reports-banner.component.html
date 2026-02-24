@@ -19,8 +19,7 @@
           </li>
         }
         @if (selectedReport.reportType == 'betterPlants') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited}"
-            >
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
             <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
             Better Plants Report</a>
@@ -35,8 +34,7 @@
           </li>
         }
         @if (selectedReport.reportType == 'performance') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited}"
-            >
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
             <a class="nav-link" routerLink="performance-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
             Performance Report</a>
@@ -58,8 +56,7 @@
           </li>
         }
         @if (selectedReport.reportType == 'accountSavings') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited}"
-            >
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
             <a class="nav-link" routerLink="account-savings-report"
               [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>

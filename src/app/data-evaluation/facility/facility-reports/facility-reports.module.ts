@@ -30,6 +30,7 @@ import { FacilityReportBadgeClassPipe } from './facility-report-pipes/facility-r
 import { FacilityModelingReportSetupComponent } from './facility-report-setup/facility-modeling-report-setup/facility-modeling-report-setup.component';
 import { FacilityModelingReportResultsComponent } from './report-results/facility-modeling-report-results/facility-modeling-report-results.component';
 import { AccountReportsModule } from '../../account/account-reports/account-reports.module';
+import { FacilityReportsDataCheckComponent } from './facility-reports-data-check/facility-reports-data-check.component';
 
 
 
@@ -54,7 +55,8 @@ import { AccountReportsModule } from '../../account/account-reports/account-repo
     FacilityReportOrderByPipe,
     FacilityReportBadgeClassPipe,
     FacilityModelingReportSetupComponent,
-    FacilityModelingReportResultsComponent
+    FacilityModelingReportResultsComponent,
+    FacilityReportsDataCheckComponent
     
   ],
   imports: [

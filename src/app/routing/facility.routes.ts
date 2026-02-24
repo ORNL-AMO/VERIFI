@@ -54,6 +54,7 @@ import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluatio
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
 import { AnalysisDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-details-table/analysis-details-table.component";
 import { FacilityModelingReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-results.component";
+import { FacilityReportsDataCheckComponent } from "../data-evaluation/facility/facility-reports/facility-reports-data-check/facility-reports-data-check.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -291,6 +292,7 @@ export const FacilityRoutes: Route = {
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
                 { path: 'dashboard', component: FacilityReportsDashboardComponent },
                 { path: 'setup', component: FacilityReportSetupComponent },
+                { path: 'data-check', component: FacilityReportsDataCheckComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
                 { path: 'overview-report', component: FacilityOverviewReportResultsComponent },
                 { path: 'savings-report', component: FacilitySavingsReportResultsComponent },
