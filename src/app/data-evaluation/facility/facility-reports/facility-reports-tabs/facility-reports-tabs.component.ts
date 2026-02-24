@@ -105,6 +105,9 @@ export class FacilityReportsTabsComponent {
       if (analysisItem) {
         this.analysisVisited = analysisItem.isAnalysisVisited;
       }
+      else {
+        this.analysisVisited = false;
+      }
     }
   }
 

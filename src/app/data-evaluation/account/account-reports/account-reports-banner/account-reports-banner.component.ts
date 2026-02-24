@@ -107,6 +107,9 @@ export class AccountReportsBannerComponent {
     if (analysisItem) {
       this.analysisVisited = analysisItem.isAnalysisVisited;
     }
+    else {
+      this.analysisVisited = false;
+    }
   }
 
   setInDashboard() {

@@ -85,17 +85,19 @@ export class AccountReportsDataCheckComponent {
   }
 
   initializeGroups() {
-    this.facilityDetails.forEach(facility => {
-      facility.groups.forEach(group => {
-        let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, facility.facilityId, facility.baselineYear);
-        if (groupItem) {
-          this.executiveSummaryItems.push(groupItem);
-        }
+    if (this.facilityDetails) {
+      this.facilityDetails.forEach(facility => {
+        facility.groups.forEach(group => {
+          let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, facility.facilityId, facility.baselineYear);
+          if (groupItem) {
+            this.executiveSummaryItems.push(groupItem);
+          }
+        });
       });
-    });
-    this.executiveSummaryItems = this.executiveSummaryItems.filter(item => {
-      return item.group.analysisType != 'skip';
-    });
+      this.executiveSummaryItems = this.executiveSummaryItems.filter(item => {
+        return item.group.analysisType != 'skip';
+      });
+    }
   }
 
   getGroupItem(group: AnalysisGroup, facilityId: string, baselineYear: number): FacilityGroupAnalysisItem {

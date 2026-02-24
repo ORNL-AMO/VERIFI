@@ -39,7 +39,8 @@ export class AnalysisDataValidationTablesComponent {
   ngOnChanges() {
     if (this.isFacilityReport) {
       this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
-      if(this.facilityReport && (!this.facilityReport.modelingReportSettings.includeIssuesSummary && !this.facilityReport.modelingReportSettings.includeExecutiveSummary)) {
+      if (this.facilityReport && this.facilityReport.facilityReportType === 'modeling' &&
+        this.facilityReport.modelingReportSettings && (!this.facilityReport.modelingReportSettings.includeIssuesSummary && !this.facilityReport.modelingReportSettings.includeExecutiveSummary)) {
         this.showTitle = true;
       }
     }

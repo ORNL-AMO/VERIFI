@@ -19,7 +19,7 @@ export class AnalysisFacilityReportComponent {
 
   @Input()
   facilityDetails: Array<IdbAnalysisItem>;
-  @Input( { required: false })
+  @Input({ required: false })
   analysisReportSetup: AnalysisReportSetup;
   @Input()
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
@@ -27,12 +27,12 @@ export class AnalysisFacilityReportComponent {
   isDataCheck: boolean;
   @Input({ required: false })
   isFacilityReport: boolean;
-  
+
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
   absoluteGroupItems: Array<FacilityGroupAnalysisItem> = [];
   selectedReport: IdbAccountReport;
-  facilityReport:IdbFacilityReport;
+  facilityReport: IdbFacilityReport;
   showTitle: boolean = false;
 
   constructor(private accountReportDbService: AccountReportDbService,
@@ -40,9 +40,10 @@ export class AnalysisFacilityReportComponent {
   ) { }
 
   ngOnChanges() {
-    if(this.isFacilityReport) {
+    if (this.isFacilityReport) {
       this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
-      if(this.facilityReport && !this.facilityReport.modelingReportSettings.includeIssuesSummary) {
+      if (this.facilityReport && this.facilityReport.facilityReportType === 'modeling' &&
+        this.facilityReport.modelingReportSettings && !this.facilityReport.modelingReportSettings.includeIssuesSummary) {
         this.showTitle = true;
       }
     }
@@ -52,7 +53,7 @@ export class AnalysisFacilityReportComponent {
         this.showTitle = true;
       }
     }
-    
+
     this.getRegressionGroupItems(this.executiveSummaryItems);
     this.getClassicIntensityItems(this.executiveSummaryItems);
     this.getAbsoluteItems(this.executiveSummaryItems);
