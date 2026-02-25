@@ -130,7 +130,7 @@ export class ImportBackupModalComponent implements OnInit {
             this.facilityImportSelections = {};
             this.backupFacilities?.forEach(facility => {
               if (!this.facilityImportSelections[facility.name]) {
-                this.facilityImportSelections[facility.name] = { importAs: 'new', replacedFacility: this.accountFacilities[0].name };
+                this.facilityImportSelections[facility.name] = { importAs: 'new', replacedFacility: this.accountFacilities[0]?.name };
               }
             });
             this.getMatchingSelections();
@@ -400,19 +400,24 @@ export class ImportBackupModalComponent implements OnInit {
         // check for differences in meter data
         let facilityBackupMeterData: Array<IdbUtilityMeterData> = backupData.meterData?.filter(md => md.facilityId === f.backupFacility.guid);
         let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(f.accountFacility.guid);
+
         const meterDataDifferenceFound =
-          facilityBackupMeterData.some(bmd => !facilityAccountMeterData.some(amd =>
-            amd.totalEnergyUse === bmd.totalEnergyUse &&
-            amd.meterNumber === bmd.meterNumber &&
-            amd.readDate.getFullYear() === new Date(bmd.readDate).getFullYear() &&
-            amd.readDate.getMonth() === new Date(bmd.readDate).getMonth() &&
-            amd.readDate.getDate() === new Date(bmd.readDate).getDate())) ||
-          facilityAccountMeterData.some(amd => !facilityBackupMeterData.some(bmd =>
-            amd.totalEnergyUse === bmd.totalEnergyUse &&
-            bmd.meterNumber === amd.meterNumber &&
-            amd.readDate.getFullYear() === new Date(bmd.readDate).getFullYear() &&
-            amd.readDate.getMonth() === new Date(bmd.readDate).getMonth() &&
-            amd.readDate.getDate() === new Date(bmd.readDate).getDate()));
+          facilityBackupMeterData.some(bmd => !facilityAccountMeterData.some(amd => {
+            const bmdYMD = this.getYMD(bmd);
+            return amd.totalEnergyUse === bmd.totalEnergyUse &&
+              amd.meterNumber === bmd.meterNumber &&
+              bmdYMD.year === amd.year &&
+              bmdYMD.month === amd.month &&
+              bmdYMD.day === amd.day;
+          })) ||
+          facilityAccountMeterData.some(amd => !facilityBackupMeterData.some(bmd => {
+            const bmdYMD = this.getYMD(bmd);
+            return amd.totalEnergyUse === bmd.totalEnergyUse &&
+              bmd.meterNumber === amd.meterNumber &&
+              bmdYMD.year === amd.year &&
+              bmdYMD.month === amd.month &&
+              bmdYMD.day === amd.day;
+          }));
 
         if (meterDataDifferenceFound) {
           differences.push('Meter Data');
@@ -432,23 +437,49 @@ export class ImportBackupModalComponent implements OnInit {
         // check for differences in predictor data
         let facilityBackupPredictorData: Array<IdbPredictorData> = backupData.predictorDataV2?.filter(pd => pd.facilityId === f.backupFacility.guid);
         let facilityAccountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(f.accountFacility.guid);
+
         const predictorDataDifferenceFound =
-          facilityBackupPredictorData.some(bpd => !facilityAccountPredictorData.some(apd =>
-            apd.amount === bpd.amount &&
-            new Date(apd.date).getFullYear() === new Date(bpd.date).getFullYear() &&
-            new Date(apd.date).getMonth() === new Date(bpd.date).getMonth() &&
-            new Date(apd.date).getDate() === new Date(bpd.date).getDate())) ||
-          facilityAccountPredictorData.some(apd => !facilityBackupPredictorData.some(bpd =>
-            apd.amount === bpd.amount &&
-            new Date(apd.date).getFullYear() === new Date(bpd.date).getFullYear() &&
-            new Date(apd.date).getMonth() === new Date(bpd.date).getMonth() &&
-            new Date(apd.date).getDate() === new Date(bpd.date).getDate()));
+          facilityBackupPredictorData.some(bpd => !facilityAccountPredictorData.some(apd => {
+            const bpdYM = this.getPredictorYM(bpd);
+            return apd.amount === bpd.amount &&
+              apd.year === bpdYM.year &&
+              apd.month === bpdYM.month;
+          })) ||
+          facilityAccountPredictorData.some(apd => !facilityBackupPredictorData.some(bpd => {
+            const bpdYM = this.getPredictorYM(bpd);
+            return apd.amount === bpd.amount &&
+              apd.year === bpdYM.year &&
+              apd.month === bpdYM.month;
+          }));
+
         if (predictorDataDifferenceFound) {
           differences.push('Predictor Data');
         }
       }
       this.differencesList.push({ facilityName: f.backupFacility.name, differences });
     });
+  }
+
+  getYMD(md: any) {
+    if ('readDate' in md && md.readDate) {
+      const d = new Date(md.readDate);
+      return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+    } else if ('year' in md && md.year && 'month' in md && md.month && 'day' in md && md.day) {
+      return { year: md.year, month: md.month, day: md.day };
+    } else {
+      return { year: null, month: null, day: null };
+    }
+  }
+
+  getPredictorYM(pd: any) {
+    if ('date' in pd && pd.date) {
+      const d = new Date(pd.date);
+      return { year: d.getFullYear(), month: d.getMonth() + 1 };
+    } else if ('year' in pd && pd.year && 'month' in pd && pd.month) {
+      return { year: pd.year, month: pd.month };
+    } else {
+      return { year: null, month: null };
+    }
   }
 
   lookupDifferences(facilityName: string): Array<string> {
