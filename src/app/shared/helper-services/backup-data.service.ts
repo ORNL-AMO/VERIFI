@@ -486,7 +486,7 @@ export class BackupDataService {
     return newAccount;
   }
 
-  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<IdbFacility> {
+  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<{facility: IdbFacility, index?: number}> {
     this.analyticsService.sendEvent('import_backup_file');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
@@ -736,7 +736,7 @@ export class BackupDataService {
       await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }
 
-    return newFacility;
+    return {facility: newFacility, index: currIdx};
   }
 
   getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {

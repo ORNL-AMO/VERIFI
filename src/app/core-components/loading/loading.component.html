@@ -8,7 +8,7 @@
     <div class="fw-bold title-style mb-3">{{ title }}</div>
   }
   <div class="p-4 bg-white rounded message-container">
-    @for (message of loadingMessages; track message; let i = $index) {
+    @for (message of loadingMessages; track i; let i = $index) {
       <div class="d-flex align-items-center mb-3">
         @if (i < currentLoadingIndex || loadingComplete) {
           <i class="fa fa-check-circle text-success me-2 icon-style"></i>
