@@ -11,109 +11,106 @@
             account
             and were brought to this page, there may have been an error initializing that account. If you
             are experiencing errors with your data, please backup or export your data and
-            contact the VERIFI help desk at <a
-          href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.<br><br>
+            contact the VERIFI help desk at <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.<br><br>
 
-          You can reset your database by clicking the "Reset Database" button. This will clear all the
-          data in
-          your system and allow you to start over fresh.
-        </p>
-        <p>
-          If the "Reset Database" button doesn't work you'll have to completely delete your database and
-          refresh... @if (!displayMoreHelp) {
-          <a class="click-link" (click)="showMoreHelp()"><span
-          class="fa fa-plus"></span> View
-        More</a>
-      }
-      @if (displayMoreHelp) {
-        <a class="click-link" (click)="hideMoreHelp()"><span
-        class="fa fa-minus"></span> Collapse</a>
-      }
-    </p>
-    @if (displayMoreHelp) {
-      <div class="d-flex">
-        <ol>
-          <li>
-            Open the browsers "Developer Tools"
-          </li>
-          <li>
-            Go to the "Application Tab"
-          </li>
-          <li>
-            Find the IndexedDb Section
-          </li>
-          <li>
-            Click on the "verifi" DB under IndexedDB
-          </li>
-          <li>
-            Click the "Delete database" button
-          </li>
-          <li>
-            Refresh the page or close/open the application
-          </li>
-        </ol>
-        <img class="w-50 rounded mx-auto img" src="assets/images/resetDatabase.png">
+            You can reset your database by clicking the "Reset Database" button. This will clear all the
+            data in
+            your system and allow you to start over fresh.
+          </p>
+          <p>
+            If the "Reset Database" button doesn't work you'll have to completely delete your database and
+            refresh... @if (!displayMoreHelp) {
+            <a class="click-link" (click)="showMoreHelp()"><span class="fa fa-plus"></span> View
+              More</a>
+            }
+            @if (displayMoreHelp) {
+            <a class="click-link" (click)="hideMoreHelp()"><span class="fa fa-minus"></span> Collapse</a>
+            }
+          </p>
+          @if (displayMoreHelp) {
+          <div class="d-flex">
+            <ol>
+              <li>
+                Open the browsers "Developer Tools"
+              </li>
+              <li>
+                Go to the "Application Tab"
+              </li>
+              <li>
+                Find the IndexedDb Section
+              </li>
+              <li>
+                Click on the "verifi" DB under IndexedDB
+              </li>
+              <li>
+                Click the "Delete database" button
+              </li>
+              <li>
+                Refresh the page or close/open the application
+              </li>
+            </ol>
+            <img class="w-50 rounded mx-auto img" src="assets/images/resetDatabase.png">
+          </div>
+          }
+        </div>
       </div>
-    }
+      <hr>
+    </div>
   </div>
-</div>
-<hr>
-</div>
-</div>
-<div class="row">
-  @for (account of accounts; track account; let index = $index) {
+  <div class="row">
+    @for (account of accounts; track account; let index = $index) {
     <div class="col-3 pb-2">
       <div class="card">
         @if (!account.deleteAccount) {
-          <div class="card-header">
-            <a class="click-link large" (click)="goToAccount(account, index)">{{account.name}}</a>
+        <div class="card-header">
+          <a class="click-link large" (click)="goToAccount(account, index)">{{account.name}}</a>
+        </div>
+        <div class="card-body justify-content-center">
+          <div class="p-1">
+            <button class="btn btn-danger" (click)="deleteAccount(account)">
+              <span class="fa fa-trash-can"></span> Delete Account
+            </button>
           </div>
-          <div class="card-body justify-content-center">
-            <div class="p-1">
-              <button class="btn btn-danger" (click)="deleteAccount(account)">
-                <span class="fa fa-trash-can"></span> Delete Account
-              </button>
-            </div>
-            <div class="p-1">
-              <button class="btn action-btn" (click)="backupAccount(account)">
-                <span class="fa fa-download"></span> Backup Account
-              </button>
-            </div>
-            <div class="p-1">
-              <button class="btn action-btn" (click)="exportToExcel(account)">
-                <span class="fa fa-download"></span> Export Account Facilities To Excel
-              </button>
-            </div>
-            @if (accountErrors[index]) {
-              <div class="p-1">
-                <div class="alert alert-danger">
-                  {{accountErrors[index]}}
-                </div>
-              </div>
-            }
+          <div class="p-1">
+            <button class="btn action-btn" (click)="backupAccount(account)">
+              <span class="fa fa-download"></span> Backup Account
+            </button>
           </div>
-          <div class="card-footer">
-            Last Backup: {{account.lastBackup | date}}
+          <div class="p-1">
+            <button class="btn action-btn" (click)="openExportModal(account)">
+              <span class="fa fa-download"></span> Export Account Facilities To Excel
+            </button>
           </div>
+          @if (accountErrors[index]) {
+          <div class="p-1">
+            <div class="alert alert-danger">
+              {{accountErrors[index]}}
+            </div>
+          </div>
+          }
+        </div>
+        <div class="card-footer">
+          Last Backup: {{account.lastBackup | date}}
+        </div>
         }
         @if (account.deleteAccount) {
-          <div class="card-header">
-            {{account.name}}
-          </div>
-          <div class="card-body">
-            <p class="alert alert-danger">
-              This account is being deleted.
-            </p>
-          </div>
+        <div class="card-header">
+          {{account.name}}
+        </div>
+        <div class="card-body">
+          <p class="alert alert-danger">
+            This account is being deleted.
+          </p>
+        </div>
         }
       </div>
     </div>
-  }
-</div>
+    }
+  </div>
 
-<div class="row">
-  <div class="col justify-content-center">
-    <hr>
+  <div class="row">
+    <div class="col justify-content-center">
+      <hr>
       <div class="card">
         <div class="card-body d-flex justify-content-end">
           <div>
@@ -122,14 +119,14 @@
           </div>
           <div>
             @if (!resetDatabase) {
-              <button class="btn btn-danger" (click)="toggleResetDatabase()">Reset
-                Database
-              </button>
+            <button class="btn btn-danger" (click)="toggleResetDatabase()">Reset
+              Database
+            </button>
             }
             @if (resetDatabase) {
-              <button class="btn btn-danger" (click)="deleteDatabase()">Are you sure
-                you want to reset the database?
-              </button>
+            <button class="btn btn-danger" (click)="deleteDatabase()">Are you sure
+              you want to reset the database?
+            </button>
             }
           </div>
         </div>
@@ -139,7 +136,7 @@
 </div>
 
 
-<div [ngClass]="{'windowOverlay': showDeleteAccount}">
+<div [ngClass]="{'windowOverlay': showDeleteAccount || showExportModal}">
 </div>
 
 <div class="popup" [class.open]="showDeleteAccount">
@@ -148,7 +145,7 @@
   </div>
   <div class="popup-body">
     <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
-    Are you sure you want to preform this action?</p>
+      Are you sure you want to preform this action?</p>
     <p>
       This may take a little bit to complete depending on the amount of data you have in your account.
     </p>
@@ -156,5 +153,23 @@
   <div class="popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
+  </div>
+</div>
+
+<div class="popup" [class.open]="showExportModal">
+  <div class="popup-header">Export Account: {{selectedAccount?.name}}
+    <button class="item-right" (click)="closeExportModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <div class="form-check checkbox-style mt-3">
+      <input class="form-check-input" type="checkbox" value="" id="includeWeatherData" [(ngModel)]="includeWeatherData">
+      <label class="form-check-label ms-2" for="includeWeatherData">
+        Include weather data in export
+      </label>
+    </div>
+    <div class="popup-footer text-end mt-4">
+      <button class="btn btn-secondary" (click)="closeExportModal()">Cancel</button>
+      <button class="btn btn-success" (click)="exportToExcel(selectedAccount)">Export</button>
+    </div>
   </div>
 </div>

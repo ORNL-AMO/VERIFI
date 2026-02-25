@@ -26,6 +26,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   energyAnalysisNeeded: boolean;
   latestEnergyAnalysisItem: IdbAccountAnalysisItem;
   latestWaterAnalysisItem: IdbAccountAnalysisItem;
+  includeWeatherData: boolean = false;
+  showExportModal: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -54,12 +56,22 @@ export class AccountHomeSummaryComponent implements OnInit {
     }
   }
 
+  openExportModal() {
+    this.includeWeatherData = false;
+    this.showExportModal = true;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+  }
+
   exportData() {
+    this.showExportModal = false;
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facilities');
     this.loadingService.setCurrentLoadingIndex(0);
     this.loadingService.addLoadingMessage('Exporting to .xlsx template');
-    this.exportToExcelV3TemplateService.exportFacilityData();
+    this.exportToExcelV3TemplateService.exportFacilityData(this.includeWeatherData);
   }
 
 
