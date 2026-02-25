@@ -38,6 +38,7 @@ export class AnalysisDashboardComponent implements OnInit {
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   selectedAnalysisItems: Array<IdbAnalysisItem> = [];
   showComparisonDetails: boolean = false;
+  analysisItemsSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -59,12 +60,16 @@ export class AnalysisDashboardComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       this.setHasEnergyAndWater();
-      this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
+    });
+
+    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
+      this.facilityAnalysisItems = items;
     });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.analysisItemsSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
 
