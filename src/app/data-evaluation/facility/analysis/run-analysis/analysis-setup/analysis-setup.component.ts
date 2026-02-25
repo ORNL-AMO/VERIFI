@@ -217,7 +217,7 @@ export class AnalysisSetupComponent implements OnInit {
       let group: AnalysisGroup = this.analysisItem.groups[i];
       if (group.analysisType == 'regression') {
         for (let m = 0; m < group.models.length; m++) {
-          this.analysisItem.groups[i].models[m] = this.regressionModelsService.updateModelReportYear(this.analysisItem.groups[i].models[m], this.analysisItem.reportYear, this.facility, this.analysisItem.baselineYear);
+          this.analysisItem.groups[i].models[m] = this.regressionModelsService.updateModelReportYear(this.analysisItem.groups[i].models[m], this.analysisItem.reportYear, this.facility, this.analysisItem.baselineYear, group);
         }
       }
     }
