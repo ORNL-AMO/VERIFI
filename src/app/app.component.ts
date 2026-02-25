@@ -338,7 +338,7 @@ export class AppComponent {
   }
 
   async initializeCustomEmissions(account: IdbAccount) {
-    this.loadingMessage = 'Loading Emissions Rates...';
+    // this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
     if (customEmissionsItems.length != 0) {
       for (let i = 0; i < customEmissionsItems.length; i++) {
