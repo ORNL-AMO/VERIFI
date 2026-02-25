@@ -137,10 +137,10 @@ export class UtilityMeterDataService {
 
 
   updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
-    let formDate: Date = new Date(form.controls.readDate.value)
-    meterData.year = formDate.getFullYear();
-    meterData.month = formDate.getMonth() + 1;
-    meterData.day = formDate.getDate();
+    let dateData: Array<string> = form.controls.readDate.value.split('-');
+    meterData.year = parseInt(dateData[0]);
+    meterData.month = parseInt(dateData[1]);
+    meterData.day = parseInt(dateData[2]);
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
     meterData.totalRealDemand = form.controls.totalRealDemand.value;
@@ -221,10 +221,10 @@ export class UtilityMeterDataService {
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
-    let formDate: Date = new Date(form.controls.readDate.value)
-    meterData.year = formDate.getFullYear();
-    meterData.month = formDate.getMonth() + 1;
-    meterData.day = formDate.getDate();
+    let dateData: Array<string> = form.controls.readDate.value.split('-');
+    meterData.year = parseInt(dateData[0]);
+    meterData.month = parseInt(dateData[1]);
+    meterData.day = parseInt(dateData[2]);
     meterData.totalVolume = form.controls.totalVolume.value;
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
