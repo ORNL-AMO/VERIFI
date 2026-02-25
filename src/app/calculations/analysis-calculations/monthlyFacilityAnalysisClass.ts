@@ -10,6 +10,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { getDateFromPredictorData, getLatestPredictorData } from "src/app/shared/dateHelperFunctions";
 
 export class MonthlyFacilityAnalysisClass {
 
@@ -57,9 +58,10 @@ export class MonthlyFacilityAnalysisClass {
                 group.predictorVariables.forEach(variable => {
                     if (group.analysisType != 'absoluteEnergyConsumption' && variable.productionInAnalysis) {
                         let predictorData: Array<IdbPredictorData> = this.facilityPredictorEntries.filter(entry => { return entry.predictorId == variable.id });
-                        let latestReading: IdbPredictorData = _.maxBy(predictorData, (pData: IdbPredictorData) => { return pData.date });
+                        let latestReading: IdbPredictorData = getLatestPredictorData(predictorData);
                         if (latestReading) {
-                            includedDates.push(latestReading.date);
+                            let pDate: Date = getDateFromPredictorData(latestReading);
+                            includedDates.push(pDate);
                         }
                     }
                 });
@@ -125,9 +127,9 @@ export class MonthlyFacilityAnalysisClass {
                 this.facilityPredictors
             );
             this.facilityMonthSummaries.push(monthSummary);
-            let currentMonth: number = monthDate.getUTCMonth()
+            let currentMonth: number = monthDate.getMonth()
             let nextMonth: number = currentMonth + 1;
-            monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
+            monthDate = new Date(monthDate.getFullYear(), nextMonth, 1);
         }
     }
 

@@ -106,7 +106,7 @@ export class MonthlyAccountAnalysisClass {
 
     setAnnualUsageValues() {
         this.annualUsageValues = new Array();
-        for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
+        for (let year = this.baselineYear + 1; year <= this.endDate.getFullYear(); year++) {
             let yearMeterData: Array<MonthlyAnalysisSummaryDataClass> = this.allAccountAnalysisData.filter(data => { return data.fiscalYear == year });
             let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
             this.annualUsageValues.push({ year: year, usage: totalUsage });
@@ -125,9 +125,9 @@ export class MonthlyAccountAnalysisClass {
                 this.baselineYear
             );
             this.accountMonthSummaries.push(monthSummary);
-            let currentMonth: number = monthDate.getUTCMonth()
+            let currentMonth: number = monthDate.getMonth()
             let nextMonth: number = currentMonth + 1;
-            monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
+            monthDate = new Date(monthDate.getFullYear(), nextMonth, 1);
         }
     }
 

@@ -16,9 +16,6 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 })
 export class AnalysisValidationService {
 
-  facilityMeterData: Array<IdbUtilityMeterData>;
-  facilityPredictorData: Array<IdbPredictorData>;
-
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -92,8 +89,9 @@ export class AnalysisValidationService {
     let isTwelveMonthSelected: boolean = true;
     let allMeterReadingsPresent: boolean = true;
     let allPredictorReadingsPresent: boolean = true;
-    this.facilityMeterData = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(analysisItem.facilityId);
-    this.facilityPredictorData = this.predictorDataDbService.getByFacilityId(analysisItem.facilityId);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(analysisItem.facilityId);
+    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(analysisItem.facilityId);
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(analysisItem.facilityId);
 
     let missingGroupMeters: boolean = groupMeters.length == 0;
     if (group.analysisType != 'absoluteEnergyConsumption' && group.analysisType != 'skipAnalysis' && group.analysisType != 'skip') {
@@ -102,6 +100,7 @@ export class AnalysisValidationService {
         missingRegressionConstant = this.checkValueValid(group.regressionConstant) == false;
         missingRegressionModelYear = this.checkValueValid(group.regressionModelYear) == false;
         if (!group.userDefinedModel) {
+          missingRegressionModelYear = false;
           missingRegressionModelStartMonth = this.checkValueValid(group.regressionModelStartMonth) == false;
           missingRegressionStartYear = this.checkValueValid(group.regressionStartYear) == false;
           missingRegressionModelEndMonth = this.checkValueValid(group.regressionModelEndMonth) == false;
@@ -109,9 +108,9 @@ export class AnalysisValidationService {
 
           isDateRangeValid = this.checkDateRangeValidity(group);
           isTwelveMonthSelected = this.checkTwelveMonthSelection(group);
-          allMeterReadingsPresent = this.validateMeterDataForSelectedDates(group);
-          allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates(group);
-          
+          allMeterReadingsPresent = this.validateMeterDataForSelectedDates(group, facilityMeterData, facilityMeters);
+          allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates(group, facilityPredictorData);
+
           if (isDateRangeValid && isTwelveMonthSelected && allMeterReadingsPresent && allPredictorReadingsPresent) {
             invalidModelDateSelection = false;
           }
@@ -271,16 +270,19 @@ export class AnalysisValidationService {
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
-  validateMeterDataForSelectedDates(group: AnalysisGroup) {
-    let month = group.regressionModelStartMonth;;
+  validateMeterDataForSelectedDates(group: AnalysisGroup, facilityMeterData: Array<IdbUtilityMeterData>, facilityMeters: Array<IdbUtilityMeter>): boolean {
+    let month = group.regressionModelStartMonth;
     let year = group.regressionStartYear;
     const endMonth = group.regressionModelEndMonth;
     const endYear = group.regressionEndYear;
-
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => meter.groupId == group.idbGroupId);
+    let groupMeterIds: Array<string> = groupMeters.map(meter => meter.guid);
+    let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(data => {
+      return groupMeterIds.includes(data.meterId);
+    });
     while (year < endYear || (year === endYear && month <= endMonth)) {
-      const dataPresent = this.facilityMeterData.some(meterData => {
-        const readDate = new Date(meterData.readDate);
-        return readDate.getFullYear() === year && readDate.getMonth() === month;
+      const dataPresent = groupMeterData.some(meterData => {
+        return meterData.year === year && meterData.month - 1 === month;
       });
       if (!dataPresent) {
         return false;
@@ -294,11 +296,11 @@ export class AnalysisValidationService {
     return true;
   }
 
-  validatePredictorDataForSelectedDates(group: AnalysisGroup) {
+  validatePredictorDataForSelectedDates(group: AnalysisGroup, facilityPredictorData: Array<IdbPredictorData>) {
     let allPresent: boolean = true;
     group.predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {
-        const variablePredictorData = this.facilityPredictorData.filter(predictor => predictor.predictorId === variable.id);
+        const variablePredictorData = facilityPredictorData.filter(predictor => predictor.predictorId === variable.id);
 
         let month = group.regressionModelStartMonth;;
         let year = group.regressionStartYear;
@@ -307,8 +309,7 @@ export class AnalysisValidationService {
 
         while (year < endYear || (year === endYear && month <= endMonth)) {
           const dataPresent = variablePredictorData.some(predictorData => {
-            const readDate = new Date(predictorData.date);
-            return readDate.getFullYear() === year && readDate.getMonth() === month;
+            return predictorData.year === year && predictorData.month - 1 === month;
           });
           if (!dataPresent) {
             allPresent = false;

@@ -10,6 +10,7 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { AnalysisGroup, AnalysisGroupPredictorVariable } from "src/app/models/analysis";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { getDateFromPredictorData } from "src/app/shared/dateHelperFunctions";
 
 export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } {
     let baselineDate: Date;
@@ -51,11 +52,11 @@ export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAc
 export function filterYearPredictorData(predictorData: Array<IdbPredictorData>, year: number, facilityOrAccount: IdbFacility | IdbAccount): Array<IdbPredictorData> {
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         return predictorData.filter(predictorData => {
-            return new Date(predictorData.date).getUTCFullYear() == year;
+            return predictorData.year == year;
         });
     } else {
         return predictorData.filter(predictorDataItem => {
-            let predictorItemDate: Date = new Date(predictorDataItem.date);
+            let predictorItemDate: Date = getDateFromPredictorData(predictorDataItem);
             return getFiscalYear(predictorItemDate, facilityOrAccount) == year;
         });
     }
@@ -64,7 +65,7 @@ export function filterYearPredictorData(predictorData: Array<IdbPredictorData>, 
 export function filterYearMeterData(meterData: Array<MonthlyData>, year: number, facility: IdbFacility): Array<MonthlyData> {
     if (facility.fiscalYear == 'calendarYear') {
         return meterData.filter(meterDataItem => {
-            return new Date(meterDataItem.date).getUTCFullYear() == year;
+            return new Date(meterDataItem.date).getFullYear() == year;
         });
     } else {
         return meterData.filter(meterDataItem => {

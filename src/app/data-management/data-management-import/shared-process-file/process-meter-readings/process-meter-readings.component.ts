@@ -3,13 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
-import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { getEarliestMeterDataDate, getLatestMeterDataDate } from 'src/app/shared/dateHelperFunctions';
 
 
 @Component({
@@ -79,22 +79,22 @@ export class ProcessMeterReadingsComponent {
         let existingStart: Date;
         let existingEnd: Date;
         if (existingReadings.length != 0) {
-          existingStart = _.minBy(existingReadings, (entry) => { return entry.readDate }).readDate
-          existingEnd = _.maxBy(existingReadings, (entry) => { return entry.readDate }).readDate
+          existingStart = getEarliestMeterDataDate(existingReadings);
+          existingEnd = getLatestMeterDataDate(existingReadings);
         }
 
         let newStart: Date;
         let newEnd: Date;
         if (newReadings.length != 0) {
-          newStart = _.minBy(newReadings, (entry) => { return entry.readDate }).readDate
-          newEnd = _.maxBy(newReadings, (entry) => { return entry.readDate }).readDate
+          newStart = getEarliestMeterDataDate(newReadings);
+          newEnd = getLatestMeterDataDate(newReadings);
         }
 
         let invalidStart: Date;
         let invalidEnd: Date;
         if (invalidReadings.length != 0) {
-          invalidStart = _.minBy(invalidReadings, (entry) => { return entry.readDate }).readDate
-          invalidEnd = _.maxBy(invalidReadings, (entry) => { return entry.readDate }).readDate
+          invalidStart = getEarliestMeterDataDate(invalidReadings);
+          invalidEnd = getLatestMeterDataDate(invalidReadings);
         }
         let skipExisting: string = this.fileReference.skipExistingReadingsMeterIds.find(id => { return id == meter.guid });
         dataSummaries.push({

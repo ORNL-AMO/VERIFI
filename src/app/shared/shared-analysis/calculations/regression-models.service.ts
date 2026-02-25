@@ -9,6 +9,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -51,7 +53,7 @@ export class RegressionModelsService {
               modelPredictorVariables.push(variable);
             });
             model['predictorVariables'] = modelPredictorVariables;
-            model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
+            model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, analysisGroup);
 
             let modelId: string = '';
             let predictorVariableIds: string = '';
@@ -149,7 +151,7 @@ export class RegressionModelsService {
     while (startDate < endDate) {
       let monthData: Array<MonthlyData> = allMeterData.filter(data => {
         let dataDate: Date = new Date(data.date);
-        return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return checkSameMonth(dataDate, startDate);
       });
       let energyConsumption: number;
       if (analysisCategory == 'energy') {
@@ -159,8 +161,7 @@ export class RegressionModelsService {
       }
       endog.push(energyConsumption);
       let monthPredictorData: Array<IdbPredictorData> = facilityPredictorData.filter(pData => {
-        let dataDate: Date = new Date(pData.date);
-        return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
+        return checkSameMonthPredictorData(pData, startDate);
       });
 
       //need 1 for constants
@@ -175,9 +176,9 @@ export class RegressionModelsService {
         usageArr.push(totalUsage);
       });
       exog.push(usageArr);
-      let currentMonth: number = startDate.getUTCMonth()
+      let currentMonth: number = startDate.getMonth()
       let nextMonth: number = currentMonth + 1;
-      startDate = new Date(startDate.getUTCFullYear(), nextMonth, 1);
+      startDate = new Date(startDate.getFullYear(), nextMonth, 1);
     }
 
     return {
@@ -207,7 +208,7 @@ export class RegressionModelsService {
     }
   }
 
-  setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
+  setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number, selectedGroup: AnalysisGroup): JStatRegressionModel {
     let modelNotes: Array<string> = new Array();
     let dataValidationNotes: Array<string> = new Array();
     let modeValidationNotes: Array<string> = new Array();
@@ -265,7 +266,7 @@ export class RegressionModelsService {
       modelNotes.push('No production variable in model');
     }
 
-    let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
+    let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility, baselineYear, selectedGroup);
     validationCheck.SEPNotes.forEach(note => {
       dataValidationNotes.push(note);
     })
@@ -309,14 +310,31 @@ export class RegressionModelsService {
   }
 
 
-  checkSEPNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number): { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } {
+  checkSEPNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number, selectedGroup: AnalysisGroup): { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } {
+    let startMonth: number;
+    let startYear: number;
+    let endMonth: number;
+    let endYear: number;
+    let startDate: Date;
+    let endDate: Date;
+    if (selectedGroup && !selectedGroup.userDefinedModel) {
+      startMonth = selectedGroup.regressionModelStartMonth;
+      startYear = selectedGroup.regressionStartYear;
+      endMonth = selectedGroup.regressionModelEndMonth;
+      endYear = selectedGroup.regressionEndYear;
+      startDate = new Date(startYear, startMonth, 1);
+      endDate = new Date(endYear, endMonth, 1);
+    }
+
     let SEPNotes: Array<string> = new Array();
     let SEPValidation: Array<SEPValidation> = new Array();
     let modelPredictorData: Array<IdbPredictorData> = new Array();
     let reportYearPredictorData: Array<IdbPredictorData> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorData> = new Array();
+    let userDefinedModelPredictorData: Array<IdbPredictorData> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = getFiscalYear(new Date(facilityPredictorData[i].date), facility);
+      let predictorDate: Date = getDateFromPredictorData(facilityPredictorData[i])
+      let fiscalYear: number = getFiscalYear(predictorDate, facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }
@@ -326,6 +344,11 @@ export class RegressionModelsService {
       if (fiscalYear == baselineYear) {
         baselineYearPredictorData.push(facilityPredictorData[i]);
       }
+      if (selectedGroup && !selectedGroup.userDefinedModel && startDate && endDate) {
+        if (predictorDate >= startDate && predictorDate <= endDate) {
+          userDefinedModelPredictorData.push(facilityPredictorData[i])
+        }
+      }
     }
 
     model.predictorVariables.forEach(variable => {
@@ -334,7 +357,6 @@ export class RegressionModelsService {
       let modelPlus3StdDevValid: boolean = true;
       let modelMinus3StdDevValid: boolean = true;
 
-
       let variableNotes: Array<string> = new Array();
       let variableValid: boolean = true;
       let variablePredictorData: Array<IdbPredictorData> = modelPredictorData.filter(pData => {
@@ -342,13 +364,25 @@ export class RegressionModelsService {
       });
       let variableReportYearPredictorData: Array<IdbPredictorData> = reportYearPredictorData.filter(pData => {
         return pData.predictorId == variable.id;
-      })
+      });
       let variableBaselineYearPredictorData: Array<IdbPredictorData> = baselineYearPredictorData.filter(pData => {
         return pData.predictorId == variable.id;
-      })
-      let modelYearUsage: Array<number> = variablePredictorData.map(data => {
-        return data.amount;
       });
+      let variableUserDefinedModelPredictorData: Array<IdbPredictorData> = userDefinedModelPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      });
+
+      let modelYearUsage: Array<number>;
+      if (selectedGroup && !selectedGroup.userDefinedModel) {
+        modelYearUsage = variableUserDefinedModelPredictorData.map(data => {
+          return data.amount;
+        });
+      }
+      else {
+        modelYearUsage = variablePredictorData.map(data => {
+          return data.amount;
+        });
+      }
       let modelMin: number = _.min(modelYearUsage);
       let modelMax: number = _.max(modelYearUsage);
 
@@ -447,7 +481,7 @@ export class RegressionModelsService {
         modelMinus3StdDev: standardMin,
         modelMinus3StdDevValid: modelMinus3StdDevValid,
         isValid: variableValid
-      })
+      });
 
       if (variableValid == false) {
         variableNotes.forEach(note => {
@@ -461,9 +495,9 @@ export class RegressionModelsService {
     };
   }
 
-  updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
+  updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number, group: AnalysisGroup): JStatRegressionModel {
     let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-    model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
+    model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, group);
     return model;
   }
 

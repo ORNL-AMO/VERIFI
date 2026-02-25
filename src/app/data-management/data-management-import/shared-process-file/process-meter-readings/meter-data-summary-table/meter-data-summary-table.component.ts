@@ -6,6 +6,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-data-summary-table',
@@ -36,8 +37,11 @@ export class MeterDataSummaryTableComponent {
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService
   ) { }
+
   setSkipAll() {
-    this.skipAll = !this.skipAll;
+    this.meterDataSummaries.forEach(summary => {
+      summary.skipExisting = this.skipAll;
+    });
   }
 
   ngOnInit() {
@@ -90,10 +94,10 @@ export class MeterDataSummaryTableComponent {
     const comparisonData: Array<MeterReadingComparison> = [];
 
     meterData.forEach(oldData => {
-      const oldDateStr = oldData.readDate.getFullYear() + '-' + (oldData.readDate.getMonth() + 1) + '-' + oldData.readDate.getDate();
+      const oldDateStr = oldData.year + '-' + (oldData.month) + '-' + oldData.day;
       for (let i = 0; i < newMeterDataSummary.meterReadings.length; i++) {
         const reading = newMeterDataSummary.meterReadings[i];
-        const newDateStr = reading.readDate.getFullYear() + '-' + (reading.readDate.getMonth() + 1) + '-' + reading.readDate.getDate();
+        const newDateStr = reading.year + '-' + (reading.month) + '-' + reading.day;
         let meterReadingComparisonObj: MeterReadingComparison;
         if (oldDateStr === newDateStr) {
           meterReadingComparisonObj = this.getMeterReadingValues(oldData, reading, newMeterDataSummary.meter);
@@ -126,7 +130,7 @@ export class MeterDataSummaryTableComponent {
         diffMeterReadings.push('Total Cost');
 
       meterReadingComparisonObj = {
-        readDate: oldData.readDate,
+        readDate: getDateFromMeterData(oldData),
         oldReading: oldData.totalEnergyUse,
         newReading: newData.totalEnergyUse,
         difference: difference,
@@ -147,7 +151,7 @@ export class MeterDataSummaryTableComponent {
         diffMeterReadings.push('Vehicle Fuel Efficiency');
 
       meterReadingComparisonObj = {
-        readDate: oldData.readDate,
+        readDate: getDateFromMeterData(oldData),
         oldReading: oldData.totalVolume,
         newReading: newData.totalVolume,
         difference: difference,
@@ -166,7 +170,7 @@ export class MeterDataSummaryTableComponent {
         diffMeterReadings.push('Total Cost');
 
       meterReadingComparisonObj = {
-        readDate: oldData.readDate,
+        readDate: getDateFromMeterData(oldData),
         oldReading: oldData.totalVolume,
         newReading: newData.totalVolume,
         difference: difference,
@@ -186,7 +190,7 @@ export class MeterDataSummaryTableComponent {
           diffMeterReadings.push('Total Cost');
 
         meterReadingComparisonObj = {
-          readDate: oldData.readDate,
+          readDate: getDateFromMeterData(oldData),
           oldReading: oldData.totalVolume,
           newReading: newData.totalVolume,
           difference: difference,
@@ -205,7 +209,7 @@ export class MeterDataSummaryTableComponent {
           diffMeterReadings.push('Total Cost');
 
         meterReadingComparisonObj = {
-          readDate: oldData.readDate,
+          readDate: getDateFromMeterData(oldData),
           oldReading: oldData.totalEnergyUse,
           newReading: newData.totalEnergyUse,
           difference: difference,

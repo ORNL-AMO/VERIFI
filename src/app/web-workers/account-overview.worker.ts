@@ -17,7 +17,7 @@ addEventListener('message', ({ data }) => {
                 let minDate: Date;
                 if (data.inOverview) {
                     maxDate = new Date(latestData.year, latestData.monthNumValue);
-                    minDate = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+                    minDate = new Date(maxDate.getFullYear() - 1, maxDate.getMonth(), 1);
                 } else {
                     let startData: MonthlyData = _.minBy(monthlyData, 'date');
                     maxDate = new Date(latestData.year, latestData.monthNumValue);

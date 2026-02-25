@@ -18,3 +18,13 @@ a.large{
 a.click-link .fa{
     color: #007bff;
 }
+
+.checkbox-style input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border: 2px solid gray;
+}
+
+.checkbox-style label {
+    font-size: 14px;
+}
