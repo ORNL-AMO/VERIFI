@@ -12,7 +12,6 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-edit-electricity-bill',
