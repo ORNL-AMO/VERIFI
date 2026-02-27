@@ -111,6 +111,61 @@
       </select>
     </div>
   </div>
+  @if(selectedAccount.displayEmissions){
+  <!--Greenhouse reduction-->
+  <div class="form-check">
+    <input type="checkbox" class="form-check-input" name="greenhouseReductionGoal"
+      formControlName="greenhouseReductionGoal" (change)="saveChanges()" id="greenhouseReductionGoal">
+    <label class="form-check-label semibold" for="greenhouseReductionGoal">Do you have a Greenhouse Emission/Carbon
+      Reduction
+      goal? </label>
+  </div>
+  <div class="row" [hidden]="!form.controls.greenhouseReductionGoal.value">
+    <div class="col-6">
+      <label for="greenhouseReductionPercent">Reduction Goal</label>
+      <div class="input-group">
+        <input type="number" class="form-control" formControlName="greenhouseReductionPercent" (input)="saveChanges();"
+          min="0" max="100">
+        <span class="input-group-text">%</span>
+      </div>
+    </div>
+    <div class="col-6">
+      <label>Is goal for absolute GHG/Carbon or GHG/Carbon intensity?</label>
+
+      <div class="form-check">
+        <input type="radio" class="form-check-input" name="greenhouseIsAbsolute" formControlName="greenhouseIsAbsolute"
+          [value]="true" (change)="saveChanges()" id="greenhouseAbsolute">
+        <label class="checkbox" for="greenhouseAbsolute">Absolute</label>
+      </div>
+
+      <div class="form-check">
+        <input type="radio" class="form-check-input" name="greenhouseIsAbsolute" formControlName="greenhouseIsAbsolute"
+          [value]="false" (change)="saveChanges()" id="greenhouseIntensity">
+        <label class="checkbox" for="greenhouseIntensity">Intensity</label>
+      </div>
+    </div>
+    <div class="col-6">
+      <label for="greenhouseReductionBaselineYear">Baseline Year</label>
+      <select class="form-select" formControlName="greenhouseReductionBaselineYear"
+        (change)="changeBaselineYear('greenhouseReductionBaselineYear','greenhouseReductionTargetYear')">
+        @for (year of years; track year) {
+        <option [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
+        }
+      </select>
+    </div>
+    <div class="col-6">
+      <label for="greenhouseReductionTargetYear">Target Year</label>
+      <select class="form-select" formControlName="greenhouseReductionTargetYear" (change)="saveChanges()">
+        @for (year of years | yearOptions: form.controls.greenhouseReductionBaselineYear.value; track year) {
+        <option [ngValue]="year">{{year | yearDisplay:fiscalYearOption}}</option>
+        }
+      </select>
+    </div>
+    <div class="col-12">
+      <hr>
+    </div>
+  </div>
+  }
 </form>
 @if (sustainQuestionsDontMatchAccount) {
 <hr>

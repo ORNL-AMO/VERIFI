@@ -419,8 +419,8 @@ export class BackupDataService {
       await firstValueFrom(this.accountAnalysisDbService.addWithObservable(accountAnalysisItem));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom Emissions');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom Emissions');
     for (let i = 0; i < backupFile.customEmissionsItems?.length; i++) {
       let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
       customEmissionsItem.accountId = accountGUIDs.newId;
@@ -437,8 +437,8 @@ export class BackupDataService {
       await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom GWPs');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom GWPs');
     for (let i = 0; i < backupFile.customGWPs?.length; i++) {
       let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
       customGWP.accountId = accountGUIDs.newId;
@@ -681,8 +681,8 @@ export class BackupDataService {
       await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom Emissions');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom Emissions');
     for (let i = 0; i < backupFile.customEmissionsItems.length; i++) {
       let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
       customEmissionsItem.accountId = accountGUID;
@@ -699,8 +699,8 @@ export class BackupDataService {
       await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom GWPs');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom GWPs');
     for (let i = 0; i < backupFile.customGWPs.length; i++) {
       let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
       customGWP.accountId = accountGUID;

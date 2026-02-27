@@ -150,6 +150,11 @@ export class SettingsFormsService {
       energyReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyReductionBaselineYear : null],
       energyReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyReductionTargetYear : null],
       energyIsAbsolute: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.energyIsAbsolute : null],
+      greenhouseReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionGoal : null],
+      greenhouseReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionPercent : null],
+      greenhouseReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionBaselineYear : null],
+      greenhouseReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionTargetYear : null],
+      greenhouseIsAbsolute: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseIsAbsolute : null],
       waterReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionGoal : null],
       waterReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionPercent : null],
       waterReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionBaselineYear : null],
@@ -166,6 +171,11 @@ export class SettingsFormsService {
     account.sustainabilityQuestions.energyReductionBaselineYear = form.controls.energyReductionBaselineYear.value;
     account.sustainabilityQuestions.energyReductionTargetYear = form.controls.energyReductionTargetYear.value;
     account.sustainabilityQuestions.energyIsAbsolute = form.controls.energyIsAbsolute.value;
+    account.sustainabilityQuestions.greenhouseReductionGoal = form.controls.greenhouseReductionGoal.value;
+    account.sustainabilityQuestions.greenhouseReductionPercent = form.controls.greenhouseReductionPercent.value;
+    account.sustainabilityQuestions.greenhouseReductionBaselineYear = form.controls.greenhouseReductionBaselineYear.value;
+    account.sustainabilityQuestions.greenhouseReductionTargetYear = form.controls.greenhouseReductionTargetYear.value;
+    account.sustainabilityQuestions.greenhouseIsAbsolute = form.controls.greenhouseIsAbsolute.value;
     account.sustainabilityQuestions.waterReductionGoal = form.controls.waterReductionGoal.value;
     account.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     account.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
@@ -180,6 +190,11 @@ export class SettingsFormsService {
     facility.sustainabilityQuestions.energyReductionBaselineYear = form.controls.energyReductionBaselineYear.value;
     facility.sustainabilityQuestions.energyReductionTargetYear = form.controls.energyReductionTargetYear.value;
     facility.sustainabilityQuestions.energyIsAbsolute = form.controls.energyIsAbsolute.value;
+    facility.sustainabilityQuestions.greenhouseReductionGoal = form.controls.greenhouseReductionGoal.value;
+    facility.sustainabilityQuestions.greenhouseReductionPercent = form.controls.greenhouseReductionPercent.value;
+    facility.sustainabilityQuestions.greenhouseReductionBaselineYear = form.controls.greenhouseReductionBaselineYear.value;
+    facility.sustainabilityQuestions.greenhouseReductionTargetYear = form.controls.greenhouseReductionTargetYear.value;
+    facility.sustainabilityQuestions.greenhouseIsAbsolute = form.controls.greenhouseIsAbsolute.value;
     facility.sustainabilityQuestions.waterReductionGoal = form.controls.waterReductionGoal.value;
     facility.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     facility.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
@@ -256,6 +271,11 @@ export class SettingsFormsService {
         account.sustainabilityQuestions.energyReductionBaselineYear != facility.sustainabilityQuestions.energyReductionBaselineYear ||
         account.sustainabilityQuestions.energyReductionTargetYear != facility.sustainabilityQuestions.energyReductionTargetYear ||
         account.sustainabilityQuestions.energyIsAbsolute != facility.sustainabilityQuestions.energyIsAbsolute ||
+        account.sustainabilityQuestions.greenhouseReductionGoal != facility.sustainabilityQuestions.greenhouseReductionGoal ||
+        account.sustainabilityQuestions.greenhouseReductionPercent != facility.sustainabilityQuestions.greenhouseReductionPercent ||
+        account.sustainabilityQuestions.greenhouseReductionBaselineYear != facility.sustainabilityQuestions.greenhouseReductionBaselineYear ||
+        account.sustainabilityQuestions.greenhouseReductionTargetYear != facility.sustainabilityQuestions.greenhouseReductionTargetYear ||
+        account.sustainabilityQuestions.greenhouseIsAbsolute != facility.sustainabilityQuestions.greenhouseIsAbsolute ||
         account.sustainabilityQuestions.waterReductionGoal != facility.sustainabilityQuestions.waterReductionGoal ||
         account.sustainabilityQuestions.waterReductionPercent != facility.sustainabilityQuestions.waterReductionPercent ||
         account.sustainabilityQuestions.waterReductionBaselineYear != facility.sustainabilityQuestions.waterReductionBaselineYear ||
@@ -273,6 +293,11 @@ export class SettingsFormsService {
     facilityForm.controls.energyReductionBaselineYear.patchValue(account.sustainabilityQuestions.energyReductionBaselineYear);
     facilityForm.controls.energyReductionTargetYear.patchValue(account.sustainabilityQuestions.energyReductionTargetYear);
     facilityForm.controls.energyIsAbsolute.patchValue(account.sustainabilityQuestions.energyIsAbsolute);
+    facilityForm.controls.greenhouseReductionGoal.patchValue(account.sustainabilityQuestions.greenhouseReductionGoal);
+    facilityForm.controls.greenhouseReductionPercent.patchValue(account.sustainabilityQuestions.greenhouseReductionPercent);
+    facilityForm.controls.greenhouseReductionBaselineYear.patchValue(account.sustainabilityQuestions.greenhouseReductionBaselineYear);
+    facilityForm.controls.greenhouseReductionTargetYear.patchValue(account.sustainabilityQuestions.greenhouseReductionTargetYear);
+    facilityForm.controls.greenhouseIsAbsolute.patchValue(account.sustainabilityQuestions.greenhouseIsAbsolute);
     facilityForm.controls.waterReductionGoal.patchValue(account.sustainabilityQuestions.waterReductionGoal);
     facilityForm.controls.waterReductionPercent.patchValue(account.sustainabilityQuestions.waterReductionPercent);
     facilityForm.controls.waterReductionBaselineYear.patchValue(account.sustainabilityQuestions.waterReductionBaselineYear);
