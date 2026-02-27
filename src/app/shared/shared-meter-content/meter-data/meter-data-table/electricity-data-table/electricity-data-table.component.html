@@ -71,7 +71,7 @@
                   <th (click)="setOrderDataField('RECs')"
                     [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
                   }
-                  @for (charge of selectedMeter.charges; track charge) {
+                  @for (charge of selectedMeter.charges; track charge.guid) {
                     @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
                       <th (click)="setOrderDataField(charge.guid, 'usage')"
                         [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
@@ -91,7 +91,7 @@
                 </tr>
               </thead>
               <tbody class="table-group-divider">
-                @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData) {
+                @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData.guid) {
                   <tr
                     >
                     @if (!copyingTable) {
@@ -215,7 +215,7 @@
                           [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
                           RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
                         }
-                        @for (charge of selectedMeter.charges; track charge) {
+                        @for (charge of selectedMeter.charges; track charge.guid) {
                           @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
                             <th (click)="setOrderDataField(charge.guid, 'usage')"
                               [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
@@ -233,7 +233,7 @@
                       </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                      @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData) {
+                      @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData.guid) {
                         <tr
                           >
                           @if (!copyingTable) {
@@ -254,7 +254,7 @@
                           @if (emissionsFilters.excessRECsEmissions) {
                             <td>{{meterData.excessRECsEmissions | customNumber}}</td>
                           }
-                          @for (meterCharge of selectedMeter.charges; track meterCharge) {
+                          @for (meterCharge of selectedMeter.charges; track meterCharge.guid) {
                             @if ((meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable) {
                               <td>
                                 {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
