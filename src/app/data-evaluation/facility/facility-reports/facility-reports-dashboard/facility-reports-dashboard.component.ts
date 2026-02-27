@@ -24,6 +24,9 @@ export class FacilityReportsDashboardComponent {
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
 
+  account: IdbAccount;
+  accountSub: Subscription;
+
   facilityReports: Array<IdbFacilityReport>;
   facilityReportsSub: Subscription;
 
@@ -44,6 +47,9 @@ export class FacilityReportsDashboardComponent {
   }
 
   ngOnInit() {
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+    });
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
     });
@@ -64,6 +70,7 @@ export class FacilityReportsDashboardComponent {
     this.selectedFacilitySub.unsubscribe();
     this.facilityReportsSub.unsubscribe();
     this.routerSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
   openCreateReport() {
@@ -78,8 +85,7 @@ export class FacilityReportsDashboardComponent {
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.selectedFacility.guid);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility.guid, this.selectedFacility.accountId, this.newReportType, groups);
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);
+    await this.dbChangesService.setAccountFacilityReports(this.account, this.selectedFacility);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.facilityReportsDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
