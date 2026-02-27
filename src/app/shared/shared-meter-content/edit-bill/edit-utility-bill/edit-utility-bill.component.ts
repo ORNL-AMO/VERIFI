@@ -19,10 +19,10 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-edit-utility-bill',
-    templateUrl: './edit-utility-bill.component.html',
-    styleUrls: ['./edit-utility-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-utility-bill',
+  templateUrl: './edit-utility-bill.component.html',
+  styleUrls: ['./edit-utility-bill.component.css'],
+  standalone: false
 })
 export class EditUtilityBillComponent implements OnInit {
   @Input()
@@ -74,9 +74,16 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setShowEmissions() {
-    this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
-    this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
-    this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (account.displayEmissions) {
+      this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
+      this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
+      this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
+    } else {
+      this.showEmissions = false;
+      this.showStationaryEmissions = false;
+      this.showScope2OtherEmissions = false;
+    }
   }
 
   calculateTotalEnergyUse() {
@@ -96,7 +103,7 @@ export class EditUtilityBillComponent implements OnInit {
       if (checkSameDate(changeDate, this.editMeterData)) {
         this.invalidDate = false;
       } else {
-        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter,accountMeterData) != undefined;
+        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
       }
     }
   }

@@ -8,6 +8,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { maxDateValidator, minDateValidator } from '../customFormValidators';
 import { getMeterDataDateString } from '../dateHelperFunctions';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +21,9 @@ export class UtilityMeterDataService {
   tableVehicleDataFilters: BehaviorSubject<VehicleDataFilters>;
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
 
-  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService) {
+  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService
+  ) {
     let defaultFilters: ElectricityDataFilters = this.getDefaultFilters();
     this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     this.electricityInputFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
@@ -52,8 +56,9 @@ export class UtilityMeterDataService {
   }
 
   checkSavedFilters(dataFilters: ElectricityDataFilters): ElectricityDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (!dataFilters.emissionsFilters) {
-      dataFilters.emissionsFilters = this.getDefaultEmissionsFilters();
+      dataFilters.emissionsFilters = this.getDefaultEmissionsFilters(account ? account.displayEmissions : false);
     }
     if (!dataFilters.generalInformationFilters) {
       dataFilters.generalInformationFilters = this.getDefaultGeneralInformationFilters();
@@ -63,8 +68,9 @@ export class UtilityMeterDataService {
 
 
   getDefaultFilters(): ElectricityDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
-      emissionsFilters: this.getDefaultEmissionsFilters(),
+      emissionsFilters: this.getDefaultEmissionsFilters(account ? account.displayEmissions : false),
       generalInformationFilters: this.getDefaultGeneralInformationFilters()
     }
   }
@@ -79,36 +85,38 @@ export class UtilityMeterDataService {
     }
   }
 
-  getDefaultEmissionsFilters(): EmissionsFilters {
+  getDefaultEmissionsFilters(displayEmissions: boolean): EmissionsFilters {
     return {
-      showSection: true,
-      marketEmissions: true,
-      locationEmissions: true,
-      excessRECs: true,
-      excessRECsEmissions: true,
+      showSection: displayEmissions,
+      marketEmissions: displayEmissions,
+      locationEmissions: displayEmissions,
+      excessRECs: displayEmissions,
+      excessRECsEmissions: displayEmissions,
       recs: true
     }
   }
 
   getDefaultGeneralFilters(): GeneralUtilityDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
       totalVolume: true,
       totalCost: true,
-      stationaryBiogenicEmmissions: true,
-      stationaryCarbonEmissions: true,
-      stationaryOtherEmissions: true,
-      totalEmissions: true,
+      stationaryBiogenicEmmissions: account && account.displayEmissions ? true : false,
+      stationaryCarbonEmissions: account && account.displayEmissions ? true : false,
+      stationaryOtherEmissions: account && account.displayEmissions ? true : false,
+      totalEmissions: account && account.displayEmissions ? true : false,
     }
   }
 
   getDefaultVehicleFilters(): VehicleDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
       totalEnergy: true,
       totalCost: true,
-      mobileBiogenicEmissions: true,
-      mobileCarbonEmissions: false,
-      mobileOtherEmissions: false,
-      mobileTotalEmissions: true
+      mobileBiogenicEmissions: account && account.displayEmissions ? true : false,
+      mobileCarbonEmissions: account && account.displayEmissions ? true : false,
+      mobileOtherEmissions: account && account.displayEmissions ? true : false,
+      mobileTotalEmissions: account && account.displayEmissions ? true : false
     }
   }
 
