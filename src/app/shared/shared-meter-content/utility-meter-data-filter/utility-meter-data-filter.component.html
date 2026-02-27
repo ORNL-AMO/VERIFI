@@ -34,6 +34,7 @@
       </div>
       <div class="col">
         @if (!isRECs) {
+        @if(account.displayEmissions){
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="marketEmissions" id="marketEmissions"
             [(ngModel)]="emissionsFilters.marketEmissions" (change)="save()">
@@ -44,17 +45,20 @@
             [(ngModel)]="emissionsFilters.locationEmissions" (change)="save()">
           <label for="locationEmissions" class="form-check-label">Location Emissions</label>
         </div>
+        }
         } @else {
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="excessRECs" id="excessRECs"
             [(ngModel)]="emissionsFilters.excessRECs" (change)="save()">
           <label for="excessRECs" class="form-check-label">Excess RECs</label>
         </div>
+        @if(account.displayEmissions){
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="excessRECsEmissions" id="excessRECsEmissions"
             [(ngModel)]="emissionsFilters.excessRECsEmissions" (change)="save()">
           <label for="excessRECsEmissions" class="form-check-label">Excess RECs Emissions</label>
         </div>
+        }
         }
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="recs" id="recs" [(ngModel)]="emissionsFilters.recs"
@@ -81,7 +85,7 @@
             [(ngModel)]="generalUtilityDataFilters.totalCost" (change)="save()">
           <label for="totalCost" class="form-check-label">Total Cost</label>
         </div>
-        @if(showEmissions){
+        @if(showEmissions && account.displayEmissions){
         @if (meter.source == 'Other Fuels' || meter.source == 'Natural Gas') {
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="stationaryBiogenicEmmissions"
@@ -128,6 +132,7 @@
           <label for="totalCost" class="form-check-label">Total Cost</label>
         </div>
       </div>
+      @if(account.displayEmissions){
       <div class="col">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="mobileBiogenicEmissions" id="mobileBiogenicEmissions"
@@ -153,6 +158,7 @@
             Emissions</label>
         </div>
       </div>
+      }
       <ng-container *ngTemplateOutlet="chargesBlock"></ng-container>
     </div>
     }
