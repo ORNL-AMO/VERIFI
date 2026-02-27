@@ -10,9 +10,9 @@
       <label for="energyUnit">Result Energy Unit</label>
       <select class="form-select" formControlName="energyUnit" (change)="saveChanges()">
         @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
-          <option [ngValue]="energyUnitOption.value">
-            <span [innerHTML]="energyUnitOption.display"></span>
-          </option>
+        <option [ngValue]="energyUnitOption.value">
+          <span [innerHTML]="energyUnitOption.display"></span>
+        </option>
         }
       </select>
     </div>
@@ -34,159 +34,172 @@
   <div class="row">
     <div class="col">
       <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <h5>Default units for setting up meters</h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="mb-3 col">
+      <label for="electricityUnit">Electricity Unit</label>
+      <select class="form-select" formControlName="electricityUnit" (change)="saveChanges()">
+        @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
+        <option [ngValue]="energyUnitOption.value">
+          <span [innerHTML]="energyUnitOption.display"></span>
+        </option>
+        }
+      </select>
+    </div>
+    <div class="mb-3 col">
+      <label for="volumeLiquidUnit">Volume Unit (Liquid)</label>
+      <select class="form-select" formControlName="volumeLiquidUnit" (change)="saveChanges()">
+        @for (volumeUnitOption of volumeLiquidOptions; track volumeUnitOption) {
+        <option [ngValue]="volumeUnitOption.value">
+          <span [innerHTML]="volumeUnitOption.display"></span>
+        </option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="mb-3 col">
+      <label for="volumeGasUnit">Volume Unit (Gases)</label>
+      <select class="form-select" formControlName="volumeGasUnit" (change)="saveChanges()">
+        @for (volumeUnitOption of volumeGasOptions; track volumeUnitOption) {
+        <option [ngValue]="volumeUnitOption.value">
+          <span [innerHTML]="volumeUnitOption.display"></span>
+        </option>
+        }
+      </select>
+    </div>
+
+    <div class="mb-3 col">
+      <label for="massUnit">Mass Unit</label>
+      <select class="form-select" formControlName="massUnit" (change)="saveChanges()">
+        @for (massUnitOption of massUnitOptions; track massUnitOption) {
+        <option [ngValue]="massUnitOption.value">
+          <span [innerHTML]="massUnitOption.display"></span>
+        </option>
+        }
+      </select>
+    </div>
+  </div>
+  @if (unitsDontMatchAccount) {
+  <div class="row">
+    <div class="col">
+      <p class="alert alert-warning">
+        The Facility units are different then the units that are set for the account. If you would like to use
+        the
+        account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
+      </p>
+    </div>
+  </div>
+  }
+  @if(inAccount){
+  <div class="row">
+    <div class="col">
+      <hr>
+      <h5>Other Impacts of Operations</h5>
+    </div>
+    <div class="col-12 pb-3">
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="displayEmissions" formControlName="displayEmissions"
+          (change)="saveChanges()" id="displayEmissions">
+        <label class="form-check-label" for="displayEmissions">Assess other impacts of your operations?</label>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
-        <h5>Default units for setting up meters</h5>
+  </div>
+  }
+  @if(selectedAccount.displayEmissions) {
+  <div class="row">
+    <div class="col">
+      <h5>Electricity Global Warming Potential</h5>
+    </div>
+  </div>
+  @if (inAccount) {
+  <div class="col-12 pb-3">
+    <div class="form-group">
+      <label for="assessmentReportVersion">IPCC Assessment Report Version</label>
+      <div class="form-check ps-5">
+        <input type="radio" class="form-check-input" name="assessmentReportVersion"
+          formControlName="assessmentReportVersion" value="AR4" (change)="saveChanges()" id="AR4">
+        <label class="form-check-label" for="AR4">AR4</label>
+      </div>
+      <div class="form-check ps-5">
+        <input type="radio" class="form-check-input" name="assessmentReportVersion"
+          formControlName="assessmentReportVersion" value="AR5" (change)="saveChanges()" id="AR5">
+        <label class="form-check-label" for="AR5">AR5</label>
+      </div>
+      <div class="form-check ps-5">
+        <input type="radio" class="form-check-input" name="assessmentReportVersion"
+          formControlName="assessmentReportVersion" value="AR6" (change)="saveChanges()" id="AR6">
+        <label class="form-check-label" for="AR6">AR6</label>
       </div>
     </div>
-
-    <div class="row">
-      <div class="mb-3 col">
-        <label for="electricityUnit">Electricity Unit</label>
-        <select class="form-select" formControlName="electricityUnit" (change)="saveChanges()">
-          @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
-            <option [ngValue]="energyUnitOption.value">
-              <span [innerHTML]="energyUnitOption.display"></span>
-            </option>
-          }
-        </select>
-      </div>
-      <div class="mb-3 col">
-        <label for="volumeLiquidUnit">Volume Unit (Liquid)</label>
-        <select class="form-select" formControlName="volumeLiquidUnit" (change)="saveChanges()">
-          @for (volumeUnitOption of volumeLiquidOptions; track volumeUnitOption) {
-            <option [ngValue]="volumeUnitOption.value">
-              <span [innerHTML]="volumeUnitOption.display"></span>
-            </option>
-          }
-        </select>
-      </div>
-    </div>
-
-    <div class="row">
-
-      <div class="mb-3 col">
-        <label for="volumeGasUnit">Volume Unit (Gases)</label>
-        <select class="form-select" formControlName="volumeGasUnit" (change)="saveChanges()">
-          @for (volumeUnitOption of volumeGasOptions; track volumeUnitOption) {
-            <option [ngValue]="volumeUnitOption.value">
-              <span [innerHTML]="volumeUnitOption.display"></span>
-            </option>
-          }
-        </select>
-      </div>
-
-      <div class="mb-3 col">
-        <label for="massUnit">Mass Unit</label>
-        <select class="form-select" formControlName="massUnit" (change)="saveChanges()">
-          @for (massUnitOption of massUnitOptions; track massUnitOption) {
-            <option [ngValue]="massUnitOption.value">
-              <span [innerHTML]="massUnitOption.display"></span>
-            </option>
-          }
-        </select>
-      </div>
-    </div>
-    @if (unitsDontMatchAccount) {
-      <div class="row">
-        <div class="col">
-          <p class="alert alert-warning">
-            The Facility units are different then the units that are set for the account. If you would like to use
-            the
-            account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
-          </p>
-        </div>
-      </div>
-    }
-
-    <div class="row">
-      <div class="col">
-        <hr>
-          <h5>Electricity Global Warming Potential</h5>
-        </div>
-      </div>
-      @if (inAccount) {
-        <div class="col-12 pb-3">
-          <div class="form-group">
-            <label for="assessmentReportVersion">IPCC Assessment Report Version</label>
-            <div class="form-check ps-5">
-              <input type="radio" class="form-check-input" name="assessmentReportVersion"
-                formControlName="assessmentReportVersion" value="AR4" (change)="saveChanges()" id="AR4">
-              <label class="form-check-label" for="AR4">AR4</label>
-            </div>
-            <div class="form-check ps-5">
-              <input type="radio" class="form-check-input" name="assessmentReportVersion"
-                formControlName="assessmentReportVersion" value="AR5" (change)="saveChanges()" id="AR5">
-              <label class="form-check-label" for="AR5">AR5</label>
-            </div>
-            <div class="form-check ps-5">
-              <input type="radio" class="form-check-input" name="assessmentReportVersion"
-                formControlName="assessmentReportVersion" value="AR6" (change)="saveChanges()" id="AR6">
-              <label class="form-check-label" for="AR6">AR6</label>
-            </div>
+  </div>
+  }
+  <div class="row">
+    <div class="col-12">
+      <div class="form-group">
+        <div class="d-flex w-100 justify-content-between">
+          <div>
+            <label for="eGridSubregion">eGRID Subregion </label>
           </div>
-        </div>
-      }
-      <div class="row">
-        <div class="col-12">
-          <div class="form-group">
-            <div class="d-flex w-100 justify-content-between">
-              <div>
-                <label for="eGridSubregion">eGRID Subregion </label>
-              </div>
-              <div>
-                @if (zipCodeSubRegionData.length != 0) {
-                  <a (click)="showEmissionsRates()" class="float-end click-link"
-                  >View Emission Rates</a>
-                }
-              </div>
-            </div>
-            @if (zipCodeSubRegionData.length > 1) {
-              <select class="form-select" name="eGridSubregion"
-                id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions(true)">
-                @for (subregion of zipCodeSubRegionData; track subregion) {
-                  <option [ngValue]="subregion">{{subregion}}</option>
-                }
-              </select>
-            }
-            @if (zipCodeSubRegionData.length == 1) {
-              <span>
-                {{form.controls.eGridSubregion.value}}
-              </span>
-            }
-            @if (zipCodeSubRegionData.length == 0) {
-              <span class="alert alert-warning">
-                No subregion matching zip code. U.S. Average will be used.
-              </span>
+          <div>
+            @if (zipCodeSubRegionData.length != 0) {
+            <a (click)="showEmissionsRates()" class="float-end click-link">View Emission Rates</a>
             }
           </div>
         </div>
-      </div>
-    </form>
-
-    <p class="alert alert-info w-100 text-center">The eGRID Subregion and emissions output rate will be set
-      based on your zipcode and the data found in the <a class="click-link" target="_blank"
-      href="https://www.epa.gov/climateleadership/ghg-emission-factors-hub">EPA
-    GHG Emissions Factors Hub</a>.
-    <br>
-      <br>
-        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account
-      Custom Data</a>
-      page.
-    </p>
-
-    @if (openEmissionsRates) {
-      <div class="windowOverlay"></div>
-    }
-    <div class="window" [class.open]="openEmissionsRates">
-      <div class="windowContent emission-rates">
-        @if (selectedSubregionEmissions) {
-          <app-e-grid-emissions-table
-            [selectedSubregionEmissions]="selectedSubregionEmissions"
-            [eGridSubregion]="form.controls.eGridSubregion.value" (emitClose)="closeEmissionsRates()">
-          </app-e-grid-emissions-table>
+        @if (zipCodeSubRegionData.length > 1) {
+        <select class="form-select" name="eGridSubregion" id="eGridSubregion" formControlName="eGridSubregion"
+          (change)="setSelectedSubregionEmissions(true)">
+          @for (subregion of zipCodeSubRegionData; track subregion) {
+          <option [ngValue]="subregion">{{subregion}}</option>
+          }
+        </select>
+        }
+        @if (zipCodeSubRegionData.length == 1) {
+        <span>
+          {{form.controls.eGridSubregion.value}}
+        </span>
+        }
+        @if (zipCodeSubRegionData.length == 0) {
+        <span class="alert alert-warning">
+          No subregion matching zip code. U.S. Average will be used.
+        </span>
         }
       </div>
     </div>
+  </div>
+  }
+</form>
+@if(selectedAccount.displayEmissions){
+<p class="alert alert-info w-100 text-center">The eGRID Subregion and emissions output rate will be set
+  based on your zipcode and the data found in the <a class="click-link" target="_blank"
+    href="https://www.epa.gov/climateleadership/ghg-emission-factors-hub">EPA
+    GHG Emissions Factors Hub</a>.
+  <br>
+  <br>
+  Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account
+    Custom Data</a>
+  page.
+</p>
+}
+@if (openEmissionsRates) {
+<div class="windowOverlay"></div>
+}
+<div class="window" [class.open]="openEmissionsRates">
+  <div class="windowContent emission-rates">
+    @if (selectedSubregionEmissions) {
+    <app-e-grid-emissions-table [selectedSubregionEmissions]="selectedSubregionEmissions"
+      [eGridSubregion]="form.controls.eGridSubregion.value" (emitClose)="closeEmissionsRates()">
+    </app-e-grid-emissions-table>
+    }
+  </div>
+</div>

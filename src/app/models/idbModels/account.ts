@@ -18,7 +18,8 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     assessmentReportVersion?: AssessmentReportVersion,
     sidebarCustomDataOpen?: boolean,
     toDoListOutdatedDays?: number
-    migratedDates?: boolean
+    migratedDates?: boolean,
+    displayEmissions: boolean
 }
 
 export function getNewIdbAccount(): IdbAccount {
@@ -56,15 +57,6 @@ export function getNewIdbAccount(): IdbAccount {
             greenhouseReductionBaselineYear: baselineYear,
             greenhouseReductionTargetYear: targetYear,
             greenhouseIsAbsolute: true,
-            renewableEnergyGoal: false,
-            renewableEnergyPercent: 0,
-            renewableEnergyBaselineYear: baselineYear,
-            renewableEnergyTargetYear: targetYear,
-            wasteReductionGoal: false,
-            wasteReductionPercent: 0,
-            wasteReductionBaselineYear: baselineYear,
-            wasteReductionTargetYear: targetYear,
-            wasteIsAbsolute: true,
             waterReductionGoal: false,
             waterReductionPercent: 0,
             waterReductionBaselineYear: baselineYear,
@@ -81,7 +73,8 @@ export function getNewIdbAccount(): IdbAccount {
         archiveOption: 'skip',
         isSharedBackupFile: false,
         color: undefined,
-        assessmentReportVersion: 'AR6'
+        assessmentReportVersion: 'AR6',
+        displayEmissions: false
     }
 }
 
