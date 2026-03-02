@@ -28,7 +28,8 @@ export class FacilityOverviewReportSetupComponent {
   months: Array<Month> = Months;
   errorMessage: string;
   errorMessageSub: Subscription;
-
+  account: IdbAccount;
+  accountSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -40,6 +41,9 @@ export class FacilityOverviewReportSetupComponent {
   }
 
   ngOnInit() {
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+    });
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
@@ -58,6 +62,7 @@ export class FacilityOverviewReportSetupComponent {
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.errorMessageSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
   async save() {
@@ -65,9 +70,8 @@ export class FacilityOverviewReportSetupComponent {
     let facilityReport: IdbFacilityReport = this.facilityReportsDbService.selectedReport.getValue();
     this.facilityReport.dataOverviewReportSettings = this.reportSettings;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAccountFacilityReports(this.account, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(facilityReport);
   }
 
