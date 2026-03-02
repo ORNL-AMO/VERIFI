@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-performance-setup',
@@ -19,7 +20,6 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 })
 export class PerformanceSetupComponent {
 
-
   performanceReportForm: FormGroup;
   account: IdbAccount;
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
@@ -28,12 +28,17 @@ export class PerformanceSetupComponent {
   itemToEdit: IdbAccountAnalysisItem;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  baselineYears: Array<number> = [];
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router) {
+    private router: Router,
+    private calanderizationService: CalanderizationService) {
   }
 
   ngOnInit() {
@@ -63,7 +68,9 @@ export class PerformanceSetupComponent {
   }
 
   setAnalysisOptions() {
+    this.setYearOptions();
     this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.applyFilters();
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.performanceReportForm.controls.analysisItemId.patchValue(undefined);
@@ -85,8 +92,27 @@ export class PerformanceSetupComponent {
     this.itemToEdit = undefined;
   }
 
-
   setSelectedAnalysisItem() {
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.performanceReportForm.controls.analysisItemId.value });
+  }
+
+  setYearOptions() {
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
+    this.baselineYears = yearOptions;
+  }
+
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.accountAnalysisItems];
+    if(this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if(this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem();
   }
 }

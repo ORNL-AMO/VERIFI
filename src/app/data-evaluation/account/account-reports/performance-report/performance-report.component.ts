@@ -100,7 +100,7 @@ export class PerformanceReportComponent {
       };
       this.calculating = true;
       this.worker.postMessage({
-        baselineYear: this.selectedReport.baselineYear,
+        baselineYear: this.selectedAnalysisItem.baselineYear,
         reportYear: this.selectedReport.reportYear,
         selectedAnalysisItem: this.selectedAnalysisItem,
         accountPredictorEntries: accountPredictorEntries,
@@ -114,7 +114,7 @@ export class PerformanceReportComponent {
     } else {
       // Web Workers are not supported in this environment.
       this.performanceReport = new PerformanceReport(
-        this.selectedReport.baselineYear,
+        this.selectedAnalysisItem.baselineYear,
         this.selectedReport.reportYear,
         this.selectedAnalysisItem,
         accountPredictorEntries,
