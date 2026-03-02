@@ -114,7 +114,7 @@ export const AccountRoutes: Route = {
             path: 'custom-data',
             component: CustomDatabaseComponent,
             children: [
-                { path: '', pathMatch: 'full', redirectTo: 'emissions' },
+                { path: '', pathMatch: 'full', redirectTo: 'fuels' },
                 {
                     path: 'emissions',
                     component: RegionalEmissionsDataComponent,
