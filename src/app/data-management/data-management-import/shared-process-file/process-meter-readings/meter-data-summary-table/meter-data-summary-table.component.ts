@@ -37,8 +37,11 @@ export class MeterDataSummaryTableComponent {
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService
   ) { }
+
   setSkipAll() {
-    this.skipAll = !this.skipAll;
+    this.meterDataSummaries.forEach(summary => {
+      summary.skipExisting = this.skipAll;
+    });
   }
 
   ngOnInit() {

@@ -42,7 +42,8 @@
             <select class="form-select" id="scope" type="text" formControlName="scope" (change)="changeScope()">
               @for (scopeOption of scopeOptions; track scopeOption) {
               <option [ngValue]="scopeOption.value">
-                {{scopeOption.scope}}: {{scopeOption.optionLabel}}
+                <!-- {{scopeOption.scope}}:  -->
+                {{scopeOption.optionLabel}}
               </option>
               }
             </select>

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -13,16 +15,24 @@ export class CustomDatabaseComponent implements OnInit {
   modalOpen: boolean;
   modalOpenSub: Subscription;
 
-  constructor(private sharedDataService: SharedDataService) { }
+  account: IdbAccount;
+  accountSub: Subscription;
+  constructor(private sharedDataService: SharedDataService,
+    private accountDbService: AccountdbService
+  ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
-    })
+    });
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+    });
   }
 
   ngOnDestroy(){
     this.modalOpenSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
 

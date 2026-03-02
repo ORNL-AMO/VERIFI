@@ -28,6 +28,7 @@
             </span>
           </a>
         </li>
+        @if(selectedAccount.displayEmissions){
         <li class="nav-item">
           <a class="nav-link" routerLink="emissions" [routerLinkActive]="['active']">
             <i class="fa fa-smog"></i>
@@ -36,6 +37,7 @@
             </span>
           </a>
         </li>
+        }
       </ul>
     </div>
     <app-account-overview-options></app-account-overview-options>

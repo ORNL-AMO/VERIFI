@@ -51,3 +51,13 @@ li.disabled:hover .navigation-warning{
     overflow-x: auto;
     overflow-y: hidden;
 }
+
+.checkbox-style input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border: 2px solid gray;
+}
+
+.checkbox-style label {
+    font-size: 14px;
+}

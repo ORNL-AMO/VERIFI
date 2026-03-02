@@ -11,6 +11,7 @@ import { FacilityWaterReductionGoalComponent } from './facility-water-card/facil
 import { FacilityEnergyCardComponent } from './facility-energy-card/facility-energy-card.component';
 import { FacilityWaterCardComponent } from './facility-water-card/facility-water-card.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -29,7 +30,8 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     HelperPipesModule,
     CalculatingSpinnerModule,
     SharedAnalysisModule,
-    DataOverviewModule
+    DataOverviewModule,
+    FormsModule
   ]
 })
 export class FacilityHomeModule { }

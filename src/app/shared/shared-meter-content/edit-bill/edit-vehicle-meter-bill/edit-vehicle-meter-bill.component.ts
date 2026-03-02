@@ -45,6 +45,7 @@ export class EditVehicleMeterBillComponent {
   meterFuel: FuelTypeOption;
   totalVolumeLabel: 'Total Fuel Consumption' | 'Total Distance';
   usingMeterFuelEfficiency: boolean;
+  account: IdbAccount;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
     private accountDbService: AccountdbService) {
@@ -54,6 +55,7 @@ export class EditVehicleMeterBillComponent {
     this.setFuel();
     this.setTotalEmissions();
     this.setUsingMeterFuelEfficiency();
+    this.account = this.accountDbService.selectedAccount.getValue();
   }
 
   ngOnChanges() {
@@ -135,14 +137,13 @@ export class EditVehicleMeterBillComponent {
   }
 
   setTotalEmissions() {
-    if (this.meterDataForm.controls.totalVolume.value) {
+    if (this.meterDataForm.controls.totalVolume.value && this.account && this.account.displayEmissions) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       this.emissionsValues = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,
         this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value,
-        account.assessmentReportVersion, []);
+        this.account.assessmentReportVersion, []);
     } else {
       this.emissionsValues = getZeroEmissionsResults();
     }

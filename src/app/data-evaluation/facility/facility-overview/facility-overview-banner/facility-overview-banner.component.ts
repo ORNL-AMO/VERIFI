@@ -1,17 +1,13 @@
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { Month, Months } from 'src/app/shared/form-data/months';
-import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -39,6 +35,9 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   hideTabText: boolean = false;
   hideAllText: boolean = false;
+
+  account: IdbAccount;
+  accountSub: Subscription
   constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
     private router: Router,
     private dbChangesService: DbChangesService,
@@ -57,6 +56,9 @@ export class FacilityOverviewBannerComponent implements OnInit {
       this.selectedFacility = val;
       this.setShowWater();
     });
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+    });
   }
 
   ngAfterViewInit() {
@@ -67,6 +69,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
   ngOnDestroy() {
     this.modalOpenSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
   setShowWater() {
@@ -99,8 +102,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   async createReport() {
     this.facilityReport = await firstValueFrom(this.facilityReportDbService.addWithObservable(this.facilityReport));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);
+    await this.dbChangesService.setAccountFacilityReports(this.account, this.selectedFacility);
     this.facilityReportDbService.selectedReport.next(this.facilityReport);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }

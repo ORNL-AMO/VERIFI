@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
     selector: 'app-account-custom-data-help',
@@ -8,4 +10,11 @@ import { Component } from '@angular/core';
 })
 export class AccountCustomDataHelpComponent {
 
+    account: IdbAccount;
+
+    constructor(private accountDbService: AccountdbService) { }
+
+    ngOnInit(): void {
+        this.account = this.accountDbService.selectedAccount.getValue();
+    }
 }

@@ -99,11 +99,13 @@
             [(ngModel)]="reportSetup.includeCostsSection" (change)="save()">
           <label class="form-check-label" for="includeCostsSection">Costs</label>
         </div>
+        @if(account.displayEmissions){
         <div class="form-check">
           <input type="checkbox" class="form-check-input" name="includeEmissionsSection" id="includeEmissionsSection"
             [(ngModel)]="reportSetup.includeEmissionsSection" (change)="save()">
           <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
         </div>
+        }
         @if (showWater) {
         <div class="form-check">
           <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"

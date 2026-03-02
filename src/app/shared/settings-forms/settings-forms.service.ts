@@ -155,15 +155,6 @@ export class SettingsFormsService {
       greenhouseReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionBaselineYear : null],
       greenhouseReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseReductionTargetYear : null],
       greenhouseIsAbsolute: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.greenhouseIsAbsolute : null],
-      renewableEnergyGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyGoal : null],
-      renewableEnergyPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyPercent : null],
-      renewableEnergyBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyBaselineYear : null],
-      renewableEnergyTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.renewableEnergyTargetYear : null],
-      wasteReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionGoal : null],
-      wasteReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionPercent : null],
-      wasteReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionBaselineYear : null],
-      wasteReductionTargetYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteReductionTargetYear : null],
-      wasteIsAbsolute: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.wasteIsAbsolute : null],
       waterReductionGoal: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionGoal : null],
       waterReductionPercent: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionPercent : null],
       waterReductionBaselineYear: [questionsData.sustainabilityQuestions ? questionsData.sustainabilityQuestions.waterReductionBaselineYear : null],
@@ -185,15 +176,6 @@ export class SettingsFormsService {
     account.sustainabilityQuestions.greenhouseReductionBaselineYear = form.controls.greenhouseReductionBaselineYear.value;
     account.sustainabilityQuestions.greenhouseReductionTargetYear = form.controls.greenhouseReductionTargetYear.value;
     account.sustainabilityQuestions.greenhouseIsAbsolute = form.controls.greenhouseIsAbsolute.value;
-    account.sustainabilityQuestions.renewableEnergyGoal = form.controls.renewableEnergyGoal.value;
-    account.sustainabilityQuestions.renewableEnergyPercent = form.controls.renewableEnergyPercent.value;
-    account.sustainabilityQuestions.renewableEnergyBaselineYear = form.controls.renewableEnergyBaselineYear.value;
-    account.sustainabilityQuestions.renewableEnergyTargetYear = form.controls.renewableEnergyTargetYear.value;
-    account.sustainabilityQuestions.wasteReductionGoal = form.controls.wasteReductionGoal.value;
-    account.sustainabilityQuestions.wasteReductionPercent = form.controls.wasteReductionPercent.value;
-    account.sustainabilityQuestions.wasteReductionBaselineYear = form.controls.wasteReductionBaselineYear.value;
-    account.sustainabilityQuestions.wasteReductionTargetYear = form.controls.wasteReductionTargetYear.value;
-    account.sustainabilityQuestions.wasteIsAbsolute = form.controls.wasteIsAbsolute.value;
     account.sustainabilityQuestions.waterReductionGoal = form.controls.waterReductionGoal.value;
     account.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     account.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
@@ -213,15 +195,6 @@ export class SettingsFormsService {
     facility.sustainabilityQuestions.greenhouseReductionBaselineYear = form.controls.greenhouseReductionBaselineYear.value;
     facility.sustainabilityQuestions.greenhouseReductionTargetYear = form.controls.greenhouseReductionTargetYear.value;
     facility.sustainabilityQuestions.greenhouseIsAbsolute = form.controls.greenhouseIsAbsolute.value;
-    facility.sustainabilityQuestions.renewableEnergyGoal = form.controls.renewableEnergyGoal.value;
-    facility.sustainabilityQuestions.renewableEnergyPercent = form.controls.renewableEnergyPercent.value;
-    facility.sustainabilityQuestions.renewableEnergyBaselineYear = form.controls.renewableEnergyBaselineYear.value;
-    facility.sustainabilityQuestions.renewableEnergyTargetYear = form.controls.renewableEnergyTargetYear.value;
-    facility.sustainabilityQuestions.wasteReductionGoal = form.controls.wasteReductionGoal.value;
-    facility.sustainabilityQuestions.wasteReductionPercent = form.controls.wasteReductionPercent.value;
-    facility.sustainabilityQuestions.wasteReductionBaselineYear = form.controls.wasteReductionBaselineYear.value;
-    facility.sustainabilityQuestions.wasteReductionTargetYear = form.controls.wasteReductionTargetYear.value;
-    facility.sustainabilityQuestions.wasteIsAbsolute = form.controls.wasteIsAbsolute.value;
     facility.sustainabilityQuestions.waterReductionGoal = form.controls.waterReductionGoal.value;
     facility.sustainabilityQuestions.waterReductionPercent = form.controls.waterReductionPercent.value;
     facility.sustainabilityQuestions.waterReductionBaselineYear = form.controls.waterReductionBaselineYear.value;
@@ -303,15 +276,6 @@ export class SettingsFormsService {
         account.sustainabilityQuestions.greenhouseReductionBaselineYear != facility.sustainabilityQuestions.greenhouseReductionBaselineYear ||
         account.sustainabilityQuestions.greenhouseReductionTargetYear != facility.sustainabilityQuestions.greenhouseReductionTargetYear ||
         account.sustainabilityQuestions.greenhouseIsAbsolute != facility.sustainabilityQuestions.greenhouseIsAbsolute ||
-        account.sustainabilityQuestions.renewableEnergyGoal != facility.sustainabilityQuestions.renewableEnergyGoal ||
-        account.sustainabilityQuestions.renewableEnergyPercent != facility.sustainabilityQuestions.renewableEnergyPercent ||
-        account.sustainabilityQuestions.renewableEnergyBaselineYear != facility.sustainabilityQuestions.renewableEnergyBaselineYear ||
-        account.sustainabilityQuestions.renewableEnergyTargetYear != facility.sustainabilityQuestions.renewableEnergyTargetYear ||
-        account.sustainabilityQuestions.wasteReductionGoal != facility.sustainabilityQuestions.wasteReductionGoal ||
-        account.sustainabilityQuestions.wasteReductionPercent != facility.sustainabilityQuestions.wasteReductionPercent ||
-        account.sustainabilityQuestions.wasteReductionBaselineYear != facility.sustainabilityQuestions.wasteReductionBaselineYear ||
-        account.sustainabilityQuestions.wasteReductionTargetYear != facility.sustainabilityQuestions.wasteReductionTargetYear ||
-        account.sustainabilityQuestions.wasteIsAbsolute != facility.sustainabilityQuestions.wasteIsAbsolute ||
         account.sustainabilityQuestions.waterReductionGoal != facility.sustainabilityQuestions.waterReductionGoal ||
         account.sustainabilityQuestions.waterReductionPercent != facility.sustainabilityQuestions.waterReductionPercent ||
         account.sustainabilityQuestions.waterReductionBaselineYear != facility.sustainabilityQuestions.waterReductionBaselineYear ||
@@ -334,15 +298,6 @@ export class SettingsFormsService {
     facilityForm.controls.greenhouseReductionBaselineYear.patchValue(account.sustainabilityQuestions.greenhouseReductionBaselineYear);
     facilityForm.controls.greenhouseReductionTargetYear.patchValue(account.sustainabilityQuestions.greenhouseReductionTargetYear);
     facilityForm.controls.greenhouseIsAbsolute.patchValue(account.sustainabilityQuestions.greenhouseIsAbsolute);
-    facilityForm.controls.renewableEnergyGoal.patchValue(account.sustainabilityQuestions.renewableEnergyGoal);
-    facilityForm.controls.renewableEnergyPercent.patchValue(account.sustainabilityQuestions.renewableEnergyPercent);
-    facilityForm.controls.renewableEnergyBaselineYear.patchValue(account.sustainabilityQuestions.renewableEnergyBaselineYear);
-    facilityForm.controls.renewableEnergyTargetYear.patchValue(account.sustainabilityQuestions.renewableEnergyTargetYear);
-    facilityForm.controls.wasteReductionGoal.patchValue(account.sustainabilityQuestions.wasteReductionGoal);
-    facilityForm.controls.wasteReductionPercent.patchValue(account.sustainabilityQuestions.wasteReductionPercent);
-    facilityForm.controls.wasteReductionBaselineYear.patchValue(account.sustainabilityQuestions.wasteReductionBaselineYear);
-    facilityForm.controls.wasteReductionTargetYear.patchValue(account.sustainabilityQuestions.wasteReductionTargetYear);
-    facilityForm.controls.wasteIsAbsolute.patchValue(account.sustainabilityQuestions.wasteIsAbsolute);
     facilityForm.controls.waterReductionGoal.patchValue(account.sustainabilityQuestions.waterReductionGoal);
     facilityForm.controls.waterReductionPercent.patchValue(account.sustainabilityQuestions.waterReductionPercent);
     facilityForm.controls.waterReductionBaselineYear.patchValue(account.sustainabilityQuestions.waterReductionBaselineYear);

@@ -96,12 +96,12 @@ export class AnalysisDetailsTableComponent {
         this.yearOptionsWater = this.calendarizationService.getYearOptionsFacility(this.selectedFacility.guid, 'water');
         this.yearOptions = _.uniq([...this.yearOptionsEnergy, ...this.yearOptionsWater]);
         this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
-        if (this.yearOptionsEnergy) {
+        if (this.yearOptionsEnergy && this.selectedFacility.sustainabilityQuestions.energyReductionGoal) {
           this.baselineYearErrorMinEnergy = this.yearOptionsEnergy[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
           this.baselineYearErrorMaxEnergy = this.yearOptionsEnergy[this.yearOptionsEnergy.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
         }
 
-        if (this.yearOptionsWater) {
+        if (this.yearOptionsWater && this.selectedFacility.sustainabilityQuestions.waterReductionGoal) {
           this.baselineYearErrorMinWater = this.yearOptionsWater[0] > this.selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
           this.baselineYearErrorMaxWater = this.yearOptionsWater[this.yearOptionsWater.length - 1] < this.selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
         }

@@ -338,7 +338,7 @@ export class AppComponent {
   }
 
   async initializeCustomEmissions(account: IdbAccount) {
-    this.loadingMessage = 'Loading Emissions Rates...';
+    // this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
     if (customEmissionsItems.length != 0) {
       for (let i = 0; i < customEmissionsItems.length; i++) {
@@ -372,7 +372,7 @@ export class AppComponent {
   }
 
   async initializeCustomGWPs(account: IdbAccount) {
-    this.loadingMessage = 'Loading Custom GWPs...';
+    // this.loadingMessage = 'Loading Custom GWPs...';
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
     for (let i = 0; i < customGWPs.length; i++) {
       let updateGWP = this.updateDbEntryService.updateCustomGWP(customGWPs[i]);
