@@ -9,10 +9,9 @@ import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
-import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { getGUID } from '../shared/sharedHelperFunctions';
-import { ChargeCostUnit, MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
 
 @Injectable({
@@ -47,8 +46,12 @@ export class UpdateDbEntryService {
     //default to displaying emissions if not defined. 
     // This was added in 2026 and we want legacy accounts to display emissions by default
     // unless they had it explicitly set to false.
-    if(account.displayEmissions == undefined){
-      account.displayEmissions = true;
+    if (account.displayEmissions == undefined) {
+      if (account.name != 'Cocoa Co. Example') {
+        account.displayEmissions = true;
+      }else{
+        account.displayEmissions = false;
+      }
       isChanged = true;
     }
 
@@ -142,19 +145,19 @@ export class UpdateDbEntryService {
           group.maxModelVariables = 4;
           isChanged = true;
         }
-        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelStartMonth == undefined){
+        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelStartMonth == undefined) {
           group.regressionModelStartMonth = 0;
           isChanged = true;
         }
-        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionStartYear == undefined){
+        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionStartYear == undefined) {
           group.regressionStartYear = analysisItem.baselineYear;
           isChanged = true;
         }
-        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelEndMonth == undefined){
+        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelEndMonth == undefined) {
           group.regressionModelEndMonth = 11;
           isChanged = true;
         }
-        if(group.analysisType == 'regression' && !group.userDefinedModel && group.regressionEndYear == undefined){
+        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionEndYear == undefined) {
           group.regressionEndYear = analysisItem.baselineYear;
           isChanged = true;
         }
@@ -396,7 +399,7 @@ export class UpdateDbEntryService {
 
   updateCustomGWP(customGWP: IdbCustomGWP): { customGWP: IdbCustomGWP, isChanged: boolean } {
     let isChanged: boolean = false;
-    if(customGWP.gwp_ar4 == undefined && customGWP['gwp'] != undefined){
+    if (customGWP.gwp_ar4 == undefined && customGWP['gwp'] != undefined) {
       customGWP.gwp_ar4 = customGWP['gwp'];
       customGWP.gwp_ar5 = customGWP['gwp'];
       customGWP.gwp_ar6 = customGWP['gwp'];
