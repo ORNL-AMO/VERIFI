@@ -19,7 +19,7 @@
     <select class="form-select border-success" [(ngModel)]="selectedBaselineYear" (ngModelChange)="onOptionChange()">
       <option value="All">All</option>
       @for (year of baselineYears; track year) {
-      <option [value]="year">{{ year }}</option>
+      <option [ngValue]="year">{{ year }}</option>
       }
     </select>
   </div>
@@ -50,10 +50,10 @@
                 <th>
                   Baseline Year
                 </th>
-                <td>
+                <th>
                   Facilities Included
-                </td>
-                <td></td>
+                </th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -103,13 +103,6 @@
         </div>
       </div>
     </div>
-    @if (filteredAnalysisItems.length == 0) {
-    <div class="w-100 m-2">
-      <div class="alert alert-danger">
-        Analysis Item Selection Required.
-      </div>
-    </div>
-    }
 
     @if (selectedAnalysisItem) {
     <hr>

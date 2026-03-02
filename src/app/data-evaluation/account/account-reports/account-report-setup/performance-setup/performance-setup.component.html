@@ -19,7 +19,7 @@
     <select class="form-select border-success" [(ngModel)]="selectedBaselineYear" (ngModelChange)="onOptionChange()">
       <option value="All">All</option>
       @for (year of baselineYears; track year) {
-      <option [value]="year">{{ year }}</option>
+      <option [ngValue]="year">{{ year }}</option>
       }
     </select>
   </div>
@@ -95,13 +95,6 @@
               </td>
               <td class="text-center">
                 <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
-              </td>
-            </tr>
-          }
-          @if (filteredAnalysisItems.length == 0) {
-            <tr>
-              <td colspan="4" class="alert alert-warning">
-                No analysis items matching selected report year.
               </td>
             </tr>
           }

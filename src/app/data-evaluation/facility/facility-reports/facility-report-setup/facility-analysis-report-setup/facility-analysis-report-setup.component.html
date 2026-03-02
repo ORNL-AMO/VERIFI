@@ -35,7 +35,7 @@
     <select class="form-select border-primary" [(ngModel)]="selectedBaselineYear" (ngModelChange)="onOptionChange()">
       <option value="All">All</option>
       @for (year of baselineYears; track year) {
-      <option [value]="year">{{ year }}</option>
+      <option [ngValue]="year">{{ year }}</option>
       }
     </select>
   </div>
