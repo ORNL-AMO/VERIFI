@@ -92,7 +92,7 @@ export class UtilityMeterDataService {
       locationEmissions: displayEmissions,
       excessRECs: displayEmissions,
       excessRECsEmissions: displayEmissions,
-      recs: true
+      recs: displayEmissions
     }
   }
 
