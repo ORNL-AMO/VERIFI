@@ -53,7 +53,7 @@ export class AccountReportsDataCheckComponent {
     if (this.selectedAnalysisItem) {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-      this.accountAnalysisDbService.analysisVisited.next();
+      this.accountAnalysisDbService.analysisVisited.next(undefined);
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.setAccountAnalysisItems(account, false);
       this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
@@ -62,6 +62,8 @@ export class AccountReportsDataCheckComponent {
 
   setFacilityItems() {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.facilityDetails = [];
+    this.executiveSummaryItems = [];
 
     if (this.selectedReport.reportType == 'betterPlants') {
       this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
@@ -85,6 +87,7 @@ export class AccountReportsDataCheckComponent {
   }
 
   initializeGroups() {
+    this.executiveSummaryItems = [];
     if (this.facilityDetails) {
       this.facilityDetails.forEach(facility => {
         facility.groups.forEach(group => {

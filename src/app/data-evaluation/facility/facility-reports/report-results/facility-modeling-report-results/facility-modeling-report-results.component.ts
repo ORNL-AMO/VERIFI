@@ -27,10 +27,12 @@ export class FacilityModelingReportResultsComponent {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.facilityDetails = [];
+      this.executiveSummaryItems = [];
       if (this.analysisItem) {
         this.facilityDetails.push(this.analysisItem);
+        this.initializeFacilityGroups();
       }
-      this.initializeFacilityGroups();
     });
   }
 

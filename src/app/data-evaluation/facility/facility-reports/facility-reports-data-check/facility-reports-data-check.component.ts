@@ -38,9 +38,9 @@ export class FacilityReportsDataCheckComponent {
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       if (this.analysisItem) {
         this.facilityDetails.push(this.analysisItem);
+        this.initializeFacilityGroups();
+        this.setAnalysisVisited();
       }
-      this.initializeFacilityGroups();
-      this.setAnalysisVisited();
     });
   }
 
@@ -82,7 +82,7 @@ export class FacilityReportsDataCheckComponent {
       this.analysisItem.isAnalysisVisited = true;
       this.analysisItem.dataCheckedDate = new Date();
       await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
-      this.analysisDbService.analysisVisited.next();
+      this.analysisDbService.analysisVisited.next(undefined);
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);

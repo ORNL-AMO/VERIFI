@@ -13,11 +13,9 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { FacilityReportsService } from '../../facility-reports.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -57,9 +55,7 @@ export class FacilitySavingsReportSetupComponent {
     private facilityReportsService: FacilityReportsService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService
-  ) {
+    private utilityMeterDbService: UtilityMeterdbService  ) {
 
   }
 
@@ -134,7 +130,7 @@ export class FacilitySavingsReportSetupComponent {
   async saveAnalysisVisitedData() {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    this.analysisDbService.analysisVisited.next();
+    this.analysisDbService.analysisVisited.next(undefined);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);

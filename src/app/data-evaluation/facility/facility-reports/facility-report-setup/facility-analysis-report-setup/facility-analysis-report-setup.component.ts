@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -11,7 +10,6 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -46,9 +44,7 @@ export class FacilityAnalysisReportSetupComponent {
     private facilityDbService: FacilitydbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService
-  ) {
+    private utilityMeterDbService: UtilityMeterdbService  ) {
 
   }
 
@@ -104,7 +100,7 @@ export class FacilityAnalysisReportSetupComponent {
   async saveAnalysisVisitedData() {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    this.analysisDbService.analysisVisited.next();
+    this.analysisDbService.analysisVisited.next(undefined);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
