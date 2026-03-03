@@ -74,6 +74,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    analysisItem.isAnalysisVisited = false;
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, analysisItem);
     analysisItem.groups[groupIndex] = this.group;

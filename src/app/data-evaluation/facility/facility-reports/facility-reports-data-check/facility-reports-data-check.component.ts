@@ -80,6 +80,7 @@ export class FacilityReportsDataCheckComponent {
   async setAnalysisVisited() {
     if (this.analysisItem) {
       this.analysisItem.isAnalysisVisited = true;
+      this.analysisItem.dataCheckedDate = new Date();
       await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
       this.analysisDbService.analysisVisited.next();
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();

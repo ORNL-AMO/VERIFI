@@ -148,6 +148,7 @@ export class RegressionModelMenuComponent implements OnInit {
   async saveItem() {
     this.resetErrors();
     this.isFormChange = true;
+    this.analysisItem.isAnalysisVisited = false;
     this.isUserDefinedViewVisible.emit(false);
     this.checkDateValidity();
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });

@@ -1,22 +1,29 @@
 import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-    selector: 'app-facility-analysis-report-setup',
-    templateUrl: './facility-analysis-report-setup.component.html',
-    styleUrl: './facility-analysis-report-setup.component.css',
-    standalone: false
+  selector: 'app-facility-analysis-report-setup',
+  templateUrl: './facility-analysis-report-setup.component.html',
+  styleUrl: './facility-analysis-report-setup.component.css',
+  standalone: false
 })
 export class FacilityAnalysisReportSetupComponent {
 
@@ -31,12 +38,16 @@ export class FacilityAnalysisReportSetupComponent {
   energyColumnLabel: string;
   actualUseLabel: string;
   modeledUseLabel: string;
+  hasDataChanged: boolean = false;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService
+    private predictorDataDbService: PredictorDataDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private accountAnalysisDbService: AccountAnalysisDbService
   ) {
 
   }
@@ -51,11 +62,53 @@ export class FacilityAnalysisReportSetupComponent {
       this.analysisItems = items;
     });
     this.setSelectedAnalysisItem(true);
+    if (this.selectedAnalysisItem) {
+      this.checkModelData();
+    }
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
+  }
+
+  checkModelData() {
+    this.hasDataChanged = false;
+    let dataCheckDate: Date = this.selectedAnalysisItem?.dataCheckedDate ? new Date(this.selectedAnalysisItem?.dataCheckedDate) : undefined;
+    let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+
+    let hasDataChanged = facilityPredictorEntries.find(predictor => {
+      return new Date(predictor.modifiedDate) > dataCheckDate
+    });
+    if (hasDataChanged) {
+      this.hasDataChanged = true;
+      this.saveAnalysisVisitedData();
+    } else {
+      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+
+      let groupMeters: Array<IdbUtilityMeter> = this.selectedAnalysisItem.groups.flatMap(group => {
+        return facilityMeters.filter(meter => meter.groupId == group.idbGroupId);
+      });
+      let groupMeterIds: Array<string> = groupMeters.map(meter => meter.guid);
+      let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => groupMeterIds.includes(meterData.meterId));
+
+      let hasDataChanged = groupMeterData.some(meterData => new Date(meterData.dbDate) > dataCheckDate);
+      if (hasDataChanged) {
+        this.hasDataChanged = true;
+        this.saveAnalysisVisitedData();
+      }
+    }
+  }
+
+  async saveAnalysisVisitedData() {
+    this.selectedAnalysisItem.isAnalysisVisited = false;
+    await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
+    this.analysisDbService.analysisVisited.next();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
+    this.analysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
   }
 
   async setSelectedAnalysisItem(onInit: boolean) {
