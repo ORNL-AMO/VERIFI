@@ -79,7 +79,8 @@ export function getAnalysisReportSettings(): AnalysisReportSettings {
         groupMonthlyResultsGraphs: true,
         groupAnnualResults: true,
         groupAnnualResultsTable: true,
-        groupAnnualResultsGraphs: true
+        groupAnnualResultsGraphs: true,
+        reportYear: undefined
     }
 }
 
@@ -103,7 +104,8 @@ export interface AnalysisReportSettings {
     groupMonthlyResultsGraphs: boolean,
     groupAnnualResults: boolean,
     groupAnnualResultsTable: boolean,
-    groupAnnualResultsGraphs: boolean
+    groupAnnualResultsGraphs: boolean,
+    reportYear: number
 }
 
 

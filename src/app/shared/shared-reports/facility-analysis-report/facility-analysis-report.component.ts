@@ -63,6 +63,9 @@ export class FacilityAnalysisReportComponent {
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.analysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (this.analysisReportSettings.reportYear) {
+      this.analysisItem.calculatedReportYear = this.analysisReportSettings.reportYear;
+    }
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -87,7 +90,7 @@ export class FacilityAnalysisReportComponent {
         accountPredictors: accountPredictors,
         accountAnalysisItems: accountAnalysisItems,
         includeGroupSummaries: true,
-        assessmentReportVersion: account.assessmentReportVersion,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.     
@@ -104,5 +107,4 @@ export class FacilityAnalysisReportComponent {
       this.worker.terminate();
     }
   }
-
 }

@@ -12,6 +12,8 @@ import { AccountReportsService } from '../../account-reports.service';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
+import { Router } from '@angular/router';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-account-savings-report-setup',
@@ -32,13 +34,20 @@ export class AccountSavingsReportSetupComponent {
   analysisTableColumns: AnalysisTableColumns;
   energyColumnLabel: string;
   actualUseLabel: string;
+  itemToEdit: IdbAccountAnalysisItem;
+  baselineYears: Array<number> = [];
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisService: AnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private router: Router,
+    private calanderizationService: CalanderizationService) {
   }
 
 
@@ -85,7 +94,9 @@ export class AccountSavingsReportSetupComponent {
   }
 
   setAnalysisOptions() {
+    this.setYearOptions();
     this.analysisOptions = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.applyFilters();
     this.setSelectedAnalysisItem(true);
     if (!this.selectedAnalysisItem) {
       this.accountSavingsReportForm.controls.analysisItemId.patchValue(undefined);
@@ -203,6 +214,39 @@ export class AccountSavingsReportSetupComponent {
       this.analysisTableColumns.bankedSavings ||
       this.analysisTableColumns.savingsUnbanked
     )
+  }
+
+  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
+    this.itemToEdit = analysisItem;
+  }
+
+  confirmEditItem() {
+    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
+    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
+  }
+
+  cancelEditItem() {
+    this.itemToEdit = undefined;
+  }
+
+  setYearOptions() {
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
+    this.baselineYears = yearOptions;
+  }
+
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.analysisOptions];
+    if(this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if(this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem(true);
   }
 }
 

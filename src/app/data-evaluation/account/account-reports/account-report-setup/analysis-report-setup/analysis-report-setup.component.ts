@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import * as _ from 'lodash';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-analysis-report-setup',
@@ -30,12 +31,17 @@ export class AnalysisReportSetupComponent {
   itemToEdit: IdbAccountAnalysisItem;
   facilityAnalysisItems: Array<IdbAnalysisItem> = [];
   facilityDetails: Array<IdbAnalysisItem> = [];
+  baselineYears: Array<number> = [];
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router) {
+    private router: Router,
+    private calanderizationService: CalanderizationService) {
   }
 
 
@@ -70,7 +76,9 @@ export class AnalysisReportSetupComponent {
   }
 
   setAnalysisOptions() {
+    this.setYearOptions();
     this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.applyFilters();
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.analysisReportForm.controls.analysisItemId.patchValue(undefined);
@@ -89,11 +97,31 @@ export class AnalysisReportSetupComponent {
 
   confirmEditItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('account/analysis/results/annual-analysis');
+    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
   }
 
   cancelEditItem() {
     this.itemToEdit = undefined;
+  }
+
+  setYearOptions() {
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
+    this.baselineYears = yearOptions;
+  }
+
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.accountAnalysisItems];
+    if(this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if(this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem();
   }
 }
 
