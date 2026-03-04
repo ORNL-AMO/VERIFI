@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -12,6 +12,11 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { NavigationStart, Router } from '@angular/router';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getEarliestMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 @Component({
   selector: 'app-regression-model-selection',
   templateUrl: './regression-model-selection.component.html',
@@ -22,9 +27,7 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   selectedGroup: AnalysisGroup;
   showInvalid: boolean;
-  showFailedValidationModel: boolean;
-  showInvalidSub: Subscription;
-  showFailedDataValidationSub: Subscription;
+  showFailedValidationModel: boolean = true;
   orderDataField: string = 'adjust_R2';
   orderByDirection: 'asc' | 'desc' = 'desc';
   selectedGroupSub: Subscription;
@@ -38,24 +41,45 @@ export class RegressionModelSelectionComponent implements OnInit {
   routerSub: Subscription;
   includedYears: Array<number> = [];
   isYearSelectionChanged: boolean = false;
+  dropdownOpen: boolean = false;
+  yearOptions: Array<number> = [];
+  dropdownOptions: Array<number> = [];
+  selectedOptions: Array<number> = [];
+  facilityMeterData: Array<IdbUtilityMeterData>;
+  facilityPredictorData: Array<IdbPredictorData>;
+  analysisItem: IdbAnalysisItem;
+  noValidModels: boolean;
+  noDataValidationModels: boolean;
+  selectedModel: JStatRegressionModel;
+
+  @ViewChild('dropdown') dropdownRef: ElementRef;
+
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisValidationService: AnalysisValidationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
+    private predictorDataDbService: PredictorDataDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private router: Router) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
+    this.setYears();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.selectedGroup = group;
-
+      this.setDropdownOptions();
       this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.selectedGroup.idbGroupId);
 
       if (!this.generatedModels?.length && this.selectedGroup?.models?.length) {
         this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.selectedGroup.models);
         this.generatedModels = this.selectedGroup.models;
       }
+      this.checkHasValidModels();
+      this.checkFailedValidationModels();
     });
 
     this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
@@ -65,6 +89,8 @@ export class RegressionModelSelectionComponent implements OnInit {
       else {
         this.generatedModels = [];
       }
+      this.checkHasValidModels();
+      this.checkFailedValidationModels();
     });
 
     this.routerSub = this.router.events.subscribe(event => {
@@ -74,21 +100,11 @@ export class RegressionModelSelectionComponent implements OnInit {
         }
       }
     });
-
-    this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
-      this.showInvalid = val;
-    });
-    this.showFailedDataValidationSub = this.analysisService.showFailedValidationModels.subscribe(val => {
-      this.showFailedValidationModel = val;
-    });
-
     this.setShowInUseMessage();
-
   }
+
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
-    this.showInvalidSub.unsubscribe();
-    this.showFailedDataValidationSub.unsubscribe();
     this.generatedModelsPerGroupSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
@@ -170,20 +186,88 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.showView = isFormChanged;
   }
 
-  onIncludedYearsChange(years: Array<number>) {
-    this.includedYears = years;
+  checkHasValidModels() {
+    this.noValidModels = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
+    if (!this.showInvalid && this.noValidModels) {
+      this.showInvalid = true;
+    }
+  }
+
+  checkFailedValidationModels() {
+    this.noDataValidationModels = this.generatedModels?.find(model => {
+      if (model.SEPValidation) {
+        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
+      } else {
+        return undefined;
+      }
+    }) == undefined;
+    if (!this.showFailedValidationModel && this.noDataValidationModels) {
+      this.showFailedValidationModel = true;
+    }
+  }
+
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  isOptionSelected(option: number): boolean {
+    return this.selectedOptions.includes(option);
+  }
+
+  toggleOption(option: number) {
+    if (this.isOptionSelected(option)) {
+      this.selectedOptions = this.selectedOptions.filter(selected => selected !== option);
+    }
+    else {
+      this.selectedOptions = [...this.selectedOptions, option];
+    }
+    this.includedYears = this.selectedOptions;
     this.isYearSelectionChanged = true;
   }
 
-  get filteredModels() {
-    if (!this.isYearSelectionChanged && this.includedYears.length === 0) {
-      return this.generatedModels;
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
+      this.dropdownOpen = false;
     }
-    if (this.includedYears.length === 0) {
-      return [];
+  }
+
+  setYears() {
+    let firstReading: IdbUtilityMeterData = getEarliestMeterData(this.facilityMeterData);
+    let lastReading: IdbUtilityMeterData = getLatestMeterData(this.facilityMeterData);
+    if (firstReading && lastReading) {
+      let start: number = firstReading.year;
+      let end: number = lastReading.year;
+      this.yearOptions = [];
+      for (let x = start; x <= end; x++) {
+        this.yearOptions.push(x);
+      }
     }
-    return (this.generatedModels).filter(model => {
-      return this.includedYears.includes(model.modelYear);
-    });
+  }
+
+  setDropdownOptions() {
+    this.dropdownOptions = [];
+    this.dropdownOptions = [...this.yearOptions];
+    this.dropdownOptions = this.dropdownOptions.filter(year => year >= this.analysisItem.baselineYear);
+    this.dropdownOptions = this.dropdownOptions.filter(year => year <= new Date().getFullYear());
+    this.checkCompleteYearDataPresent();
+    if (this.selectedGroup) {
+      this.selectedModel = this.selectedGroup.selectedModelId ? this.selectedGroup.models.find(model => model.modelId == this.selectedGroup.selectedModelId) : undefined;
+    }
+    this.selectedOptions = [...this.dropdownOptions];
+  }
+
+  checkCompleteYearDataPresent() {
+    for (let year of this.dropdownOptions) {
+      let meterDataForYear = this.facilityMeterData.filter(meterData => meterData.year == year);
+      let predictorDataForYear = this.facilityPredictorData.filter(predictorData => predictorData.year == year);
+      for (let monthNum = 1; monthNum <= 12; monthNum++) {
+        let monthMeterData = meterDataForYear.filter(meterData => meterData.month == monthNum);
+        let monthPredictorData = predictorDataForYear.filter(predictorData => predictorData.month == monthNum);
+        if (monthMeterData.length == 0 || monthPredictorData.length == 0) {
+          this.dropdownOptions = this.dropdownOptions.filter(option => option != year);
+        }
+      }
+    }
   }
 }

@@ -16,8 +16,6 @@ export class AnalysisService {
   dataDisplay: BehaviorSubject<"graph" | "table">;
 
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
-  showInvalidModels: BehaviorSubject<boolean>;
-  showFailedValidationModels: BehaviorSubject<boolean>;
   calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
@@ -36,8 +34,6 @@ export class AnalysisService {
     }
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
-    this.showInvalidModels = new BehaviorSubject<boolean>(false);
-    this.showFailedValidationModels = new BehaviorSubject<boolean>(true);
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);

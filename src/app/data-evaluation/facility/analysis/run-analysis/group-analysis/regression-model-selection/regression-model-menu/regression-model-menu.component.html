@@ -104,61 +104,7 @@
       </div>
       }
     </div>
-    <div class="row mt-3">
-      <div class="col-md-6 d-flex flex-column justify-content-center align-items-center">
-        @if (generatedModels) {
-        <div class="d-flex">
-          <label class="show-models-label bold pe-3" for="showInvalid">
-            Show Statistically Invalid Models
-          </label>
-          <div>
-            <label class="switch" for="showInvalid">
-              <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid"
-                (change)="saveInvalidChange()">
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
-        }
-        @if (generatedModels) {
-        <div class="d-flex">
-          <label class="show-models-label bold pe-3" for="showFailedValidationModel">
-            Show Models that fail Data Validation
-          </label>
-          <div>
-            <label class="switch" for="showFailedValidationModel">
-              <input class="checkbox" type="checkbox" id="showFailedValidationModel" name="showFailedValidationModel"
-                [(ngModel)]="showFailedValidationModel" (change)="saveFailedValidationChange()">
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
-        }
-      </div>
-      <div class="col-md-6 d-flex flex-column justify-content-center align-items-center">
-        @if (generatedModels && generatedModels.length != 0) {
-        <div class="alert alert-info d-flex align-items-center alert-style">
-          <p class="section-label me-3 mb-0">Select model years to include</p>
-          <div class="dropdown" #dropdown>
-            <button class="dropdown-btn" (click)="toggleDropdown()">
-              Select Years
-            </button>
-            @if (dropdownOpen) {
-            <div class="dropdown-content">
-              @for (option of dropdownOptions; track option) {
-              <label class="multiselect-option">
-                <input type="checkbox" [value]="option" [checked]="isOptionSelected(option)"
-                  (change)="toggleOption(option)">
-                {{option}}
-              </label>
-              }
-            </div>
-            }
-          </div>
-        </div>
-        }
-      </div>
-    </div>
+
   </div>
   <div class="col-md-8 col-sm-12">
     <label class="bold">Regression Model</label>
@@ -353,7 +299,7 @@
   </div>
 </div>
 
-@if(showModelComparison) {
+@if(showModelComparison && changedModel) {
 <app-regression-model-comparison [selectedFacility]="selectedFacility" [changedModel]="changedModel"
   [showModelComparison]="showModelComparison" (close)="closeModal()"></app-regression-model-comparison>
 }

@@ -1,209 +1,262 @@
 @if (showInUseMessage) {
-  <div class="row">
-    <div class="col-12 alert alert-info text-center">
-      <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
-      This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
-      to the corresponding analysis items. Making changes to this analysis may effect the results of the account
-      analysis.
-    </div>
+<div class="row">
+  <div class="col-12 alert alert-info text-center">
+    <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+    This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+    to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+    analysis.
   </div>
+</div>
 }
 
 @if (!selectedInspectModel) {
-  @if (selectedGroup.groupErrors?.hasInvalidRegressionModel) {
-    <div class="alert alert-warning w-100 text-center">
-      The selected model is invalid.
-    </div>
-    <hr>
-    }
-    @if (selectedGroup.groupErrors?.missingRegressionModelSelection) {
-      <div class="alert alert-warning w-100 text-center">
-        Model selection required.
+@if (selectedGroup.groupErrors?.hasInvalidRegressionModel) {
+<div class="alert alert-warning w-100 text-center">
+  The selected model is invalid.
+</div>
+<hr>
+}
+@if (selectedGroup.groupErrors?.missingRegressionModelSelection) {
+<div class="alert alert-warning w-100 text-center">
+  Model selection required.
+</div>
+<hr>
+}
+<app-regression-model-menu (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
+  (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
+<hr>
+
+@if(generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
+<div class="container-fluid px-4 mb-3">
+  <div class="d-flex justify-content-end align-items-center gap-3 mb-2">
+    @if (generatedModels) {
+    <div class="d-flex align-items-center me-3">
+      <label class="show-models-label bold me-2" for="showInvalid">
+        Show Statistically Invalid Models
+      </label>
+      <div>
+        <label class="switch mb-0" for="showInvalid">
+          <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid">
+          <span class="slider round"></span>
+        </label>
       </div>
-      <hr>
-      }
-      <app-regression-model-menu
-        (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
-      (isUserDefinedViewVisible)="onFormChanged($event)"
-      (includedYearsChange)="onIncludedYearsChange($event)"></app-regression-model-menu>
-      <hr>
-        @if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
-          <div class="table-responsive">
-            <table class="table table-sm table-hover utility-data table-bordered">
-              <thead>
-                <tr>
-                  <th>
-                    Select<br> Model
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('modelYear')"
-                    [ngClass]="{'active': orderDataField == 'modelYear'}">
-                    Model<br> Year
-                  </th>
-                  <th>
-                    Variable<br> p-Values
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('R2')"
-                    [ngClass]="{'active': orderDataField == 'R2'}">
-                    R2
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('adjust_R2')"
-                    [ngClass]="{'active': orderDataField == 'adjust_R2'}">
-                    Adjusted<br> R2
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('modelPValue')"
-                    [ngClass]="{'active': orderDataField == 'modelPValue'}">
-                    Model<br> p-Value
-                  </th>
-                  <th>
-                    Formula
-                  </th>
-                  <th>
-                    Model Notes
-                  </th>
-                  @if (showInvalid) {
-                    <th>
-                      Model Validation<br> Failures
-                    </th>
-                  }
-                  @if (showFailedValidationModel) {
-                    <th>
-                      Data Validation<br> Failures
-                    </th>
-                  }
-                  <th>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (model of filteredModels | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:showFailedValidationModel; track model; let modelIndex = $index) {
-                  <tr
-                    [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
-                    @if (!model.errorModeling) {
-                      <td class="text-center">
-                        <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
-                          [value]="model.modelId" name="{{modelIndex+'_selectedModelId'}}"
-                          id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()" title="Select this model">
-                      </td>
-                    }
-                    @if (!model.errorModeling) {
-                      <td>
-                        {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
-                      </td>
-                    }
-                    @if (!model.errorModeling) {
-                      <td>
-                        @for (pVal of model.t.p; track pVal; let index = $index) {
-                          <span>
-                            @if (index != 0) {
-                              <span class="no-break">{{model.predictorVariables[index-1].name}}: {{pVal
-                                | number:'0.2-2'}}
-                                <br>
-                                </span>
-                              }
-                            </span>
-                          }
-                        </td>
-                      }
-                      @if (!model.errorModeling) {
-                        <td>
-                          {{model.R2 | number:'0.3-3'}}
-                        </td>
-                      }
-                      @if (!model.errorModeling) {
-                        <td>
-                          {{model.adjust_R2| number:'0.3-3'}}
-                        </td>
-                      }
-                      @if (!model.errorModeling) {
-                        <td>
-                          {{model.modelPValue| number:'0.2-2'}}
-                        </td>
-                      }
-                      @if (!model.errorModeling) {
-                        <td>
-                          @for (coefVal of model.coef; track coefVal; let index = $index) {
-                            <span>
-                              @if (index == 0) {
-                                <span>{{coefVal| regressionNumber}}</span>
-                              }
-                              @if (index != 0) {
-                                <span>({{coefVal|
-                                regressionNumber}}*{{model.predictorVariables[index-1].name}})</span>
-                                } @if (index != model.coef.length-1) {
-                                <span
-                                > +</span>
-                              }
-                            </span>
-                          }
-                        </td>
-                      }
-                      @if (!model.errorModeling) {
-                        <td>
-                          @for (notes of model.modelNotes; track notes) {
-                            <span>
-                              {{notes}}<br>
-                            </span>
-                          }
-                          @if (model.modelNotes.length == 0) {
-                            <span>
-                              &mdash;
-                            </span>
-                          }
-                        </td>
-                      }
-                      @if (showInvalid && !model.errorModeling) {
-                        <td>
-                          @if (model.isValid) {
-                            <span>&mdash;</span>
-                          }
-                          @for (notes of model.modelValidationNotes; track notes) {
-                            <span>
-                              {{notes}}<br>
-                            </span>
-                          }
-                        </td>
-                      }
-                      @if (showFailedValidationModel && !model.errorModeling) {
-                        <td>
-                          @for (notes of model.dataValidationNotes; track notes) {
-                            <span>
-                              {{notes}}<br>
-                            </span>
-                          }
-                          @if (model.SEPValidationPass) {
-                            <span>&mdash;</span>
-                          }
-                        </td>
-                      }
-                      <!--error modeling-->
-                      @if (model.errorModeling) {
-                        <td class="alert-danger" colspan="10">
-                          There was an error when generating model for {{model.modelYear}}: @for (variable of model.predictorVariables; track variable) {
-                          <span class="pe-1"
-                          >{{variable.name}}</span>
-                          }.
-                        </td>
-                      }
-                      <td class="text-center">
-                        <button class="btn nav-btn" [ngClass]="{'btn-invalid': !model.SEPValidationPass}"
-                          (click)="inspectModel(model)" title="Inspect Model">
-                          <span class="fa fa-microscope" [ngClass]="{'text-danger': !model.SEPValidationPass}"></span>
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+    </div>
+    }
+    @if (generatedModels) {
+    <div class="d-flex align-items-center me-3">
+      <label class="show-models-label bold me-2" for="showFailedValidationModel">
+        Show Models that fail Data Validation
+      </label>
+      <div>
+        <label class="switch mb-0" for="showFailedValidationModel">
+          <input class="checkbox" type="checkbox" id="showFailedValidationModel" name="showFailedValidationModel"
+            [(ngModel)]="showFailedValidationModel">
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+    }
+    @if (generatedModels && generatedModels.length != 0) {
+    <div class="d-flex align-items-center alert-style me-3">
+      <label class="show-models-label bold me-2">Select model years to include</label>
+      <div class="dropdown position-relative" #dropdown>
+        <button class="dropdown-btn" (click)="toggleDropdown()">
+          Select Years
+        </button>
+        @if (dropdownOpen) {
+        <div class="dropdown-content dropdown-menu-end p-2">
+          @for (option of dropdownOptions; track option) {
+          <label class="multiselect-option d-flex align-items-center"
+            [ngClass]="{'text-muted': option === selectedModel?.modelYear}">
+            <input type="checkbox" class="me-2" [value]="option" [checked]="isOptionSelected(option)"
+              (change)="toggleOption(option)" [disabled]="option === selectedModel?.modelYear">
+            {{option}}
+          </label>
           }
+        </div>
         }
+      </div>
+    </div>
+    }
+  </div>
+</div>
+}
 
-        @if (selectedInspectModel) {
-          <app-regression-model-inspection [model]="selectedInspectModel"
-          (emitClose)="cancelInspectModel()" (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
+@if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
+<div class="table-responsive">
+  <table class="table table-sm table-hover utility-data table-bordered">
+    <thead>
+      <tr>
+        <th>
+          Select<br> Model
+        </th>
+        <th class="can-click" (click)="setOrderDataField('modelYear')"
+          [ngClass]="{'active': orderDataField == 'modelYear'}">
+          Model<br> Year
+        </th>
+        <th>
+          Variable<br> p-Values
+        </th>
+        <th class="can-click" (click)="setOrderDataField('R2')" [ngClass]="{'active': orderDataField == 'R2'}">
+          R2
+        </th>
+        <th class="can-click" (click)="setOrderDataField('adjust_R2')"
+          [ngClass]="{'active': orderDataField == 'adjust_R2'}">
+          Adjusted<br> R2
+        </th>
+        <th class="can-click" (click)="setOrderDataField('modelPValue')"
+          [ngClass]="{'active': orderDataField == 'modelPValue'}">
+          Model<br> p-Value
+        </th>
+        <th>
+          Formula
+        </th>
+        <th>
+          Model Notes
+        </th>
+        @if (showInvalid) {
+        <th>
+          Model Validation<br> Failures
+        </th>
         }
+        @if (showFailedValidationModel) {
+        <th>
+          Data Validation<br> Failures
+        </th>
+        }
+        <th>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (model of generatedModels | orderBy: orderDataField: orderByDirection |
+      modelFilter:showInvalid:showFailedValidationModel:isYearSelectionChanged:includedYears; track model; let
+      modelIndex = $index) {
+      <tr [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
+        @if (!model.errorModeling) {
+        <td class="text-center">
+          <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId" [value]="model.modelId"
+            name="{{modelIndex+'_selectedModelId'}}" id="{{modelIndex+'_selectedModelId'}}" (change)="selectModel()"
+            title="Select this model">
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          {{model.modelYear | yearDisplay:selectedFacility.fiscalYear}}
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          @for (pVal of model.t.p; track pVal; let index = $index) {
+          <span>
+            @if (index != 0) {
+            <span class="no-break">{{model.predictorVariables[index-1].name}}: {{pVal
+              | number:'0.2-2'}}
+              <br>
+            </span>
+            }
+          </span>
+          }
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          {{model.R2 | number:'0.3-3'}}
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          {{model.adjust_R2| number:'0.3-3'}}
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          {{model.modelPValue| number:'0.2-2'}}
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          @for (coefVal of model.coef; track coefVal; let index = $index) {
+          <span>
+            @if (index == 0) {
+            <span>{{coefVal| regressionNumber}}</span>
+            }
+            @if (index != 0) {
+            <span>({{coefVal|
+              regressionNumber}}*{{model.predictorVariables[index-1].name}})</span>
+            } @if (model.coef && index != model.coef.length-1) {
+            <span> +</span>
+            }
+          </span>
+          }
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          @for (notes of model.modelNotes; track notes) {
+          <span>
+            {{notes}}<br>
+          </span>
+          }
+          @if (model.modelNotes.length == 0) {
+          <span>
+            &mdash;
+          </span>
+          }
+        </td>
+        }
+        @if (showInvalid && !model.errorModeling) {
+        <td>
+          @if (model.isValid) {
+          <span>&mdash;</span>
+          }
+          @for (notes of model.modelValidationNotes; track notes) {
+          <span>
+            {{notes}}<br>
+          </span>
+          }
+        </td>
+        }
+        @if (showFailedValidationModel && !model.errorModeling) {
+        <td>
+          @for (notes of model.dataValidationNotes; track notes) {
+          <span>
+            {{notes}}<br>
+          </span>
+          }
+          @if (model.SEPValidationPass) {
+          <span>&mdash;</span>
+          }
+        </td>
+        }
+        <!--error modeling-->
+        @if (model.errorModeling) {
+        <td class="alert-danger" colspan="10">
+          There was an error when generating model for {{model.modelYear}}: @for (variable of model.predictorVariables;
+          track variable) {
+          <span class="pe-1">{{variable.name}}</span>
+          }.
+        </td>
+        }
+        <td class="text-center">
+          <button class="btn nav-btn" [ngClass]="{'btn-invalid': !model.SEPValidationPass}"
+            (click)="inspectModel(model)" title="Inspect Model">
+            <span class="fa fa-microscope" [ngClass]="{'text-danger': !model.SEPValidationPass}"></span>
+          </button>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+}
+}
 
-        @if (!selectedGroup.userDefinedModel && generateUserDefinedModel && showView) {
-          <app-regression-user-defined-model-inspection
-          ></app-regression-user-defined-model-inspection>
-        }
+@if (selectedInspectModel) {
+<app-regression-model-inspection [model]="selectedInspectModel" (emitClose)="cancelInspectModel()"
+  (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
+}
+
+@if (!selectedGroup.userDefinedModel && generateUserDefinedModel && showView) {
+<app-regression-user-defined-model-inspection></app-regression-user-defined-model-inspection>
+}
