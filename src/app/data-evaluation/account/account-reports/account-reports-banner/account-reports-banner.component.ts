@@ -30,8 +30,8 @@ export class AccountReportsBannerComponent {
   reportListSub: Subscription;
   compareBaselineYearToReportYearError: boolean;
   compareBaselineYearToReportYearErrorSub: Subscription;
-  analysisVisitedSub: Subscription;
   analysisVisited: boolean = false;
+  selectedAnalysisItemSub: Subscription;
 
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
@@ -74,8 +74,8 @@ export class AccountReportsBannerComponent {
       this.reportList = reports;
     });
 
-    this.analysisVisitedSub = this.accountAnalysisDbService.analysisVisited.subscribe(() => {
-      if (this.selectedReport) {
+    this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
         this.checkIfAnalysisVisited();
       }
     });
@@ -85,9 +85,10 @@ export class AccountReportsBannerComponent {
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
-    this.analysisVisitedSub.unsubscribe();
     this.errorSub.unsubscribe();
     this.reportListSub.unsubscribe();
+    this.selectedAnalysisItemSub.unsubscribe();
+    this.compareBaselineYearToReportYearErrorSub.unsubscribe();
   }
 
   checkIfAnalysisVisited() {

@@ -2,9 +2,9 @@ import { Component, Input } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { FacilityGroupAnalysisItem } from '../analysis-report.component';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-analysis-problems-information',

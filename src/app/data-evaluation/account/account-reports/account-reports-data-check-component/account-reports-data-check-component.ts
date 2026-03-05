@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
+import { FacilityGroupAnalysisItem, getGroupItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-account-reports-data-check-component',
@@ -27,6 +27,7 @@ export class AccountReportsDataCheckComponent {
   facilityDetails: Array<IdbAnalysisItem> = [];
   analysisReportSetup: AnalysisReportSetup;
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
+  facilityAnalysisItemsSub: Subscription;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -43,17 +44,23 @@ export class AccountReportsDataCheckComponent {
       this.analysisReportSetup = this.selectedReport.analysisReportSetup;
     }
     this.account = this.accountDbService.selectedAccount.getValue();
-    this.analysisDbService.getAllAccountAnalysisItems(this.account.guid).then(items => {
+
+    this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
       this.facilityAnalysisItems = items;
       this.setFacilityItems();
     });
+  }
+
+  ngOnDestroy() {
+    if (this.facilityAnalysisItemsSub) {
+      this.facilityAnalysisItemsSub.unsubscribe();
+    }
   }
 
   async setAnalysisVisited() {
     if (this.selectedAnalysisItem) {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-      this.accountAnalysisDbService.analysisVisited.next(undefined);
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.setAccountAnalysisItems(account, false);
       this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
@@ -91,7 +98,7 @@ export class AccountReportsDataCheckComponent {
     if (this.facilityDetails) {
       this.facilityDetails.forEach(facility => {
         facility.groups.forEach(group => {
-          let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, facility.facilityId, facility.baselineYear);
+          let groupItem: FacilityGroupAnalysisItem = getGroupItem(group, facility.facilityId, facility.baselineYear);
           if (groupItem) {
             this.executiveSummaryItems.push(groupItem);
           }
@@ -102,28 +109,4 @@ export class AccountReportsDataCheckComponent {
       });
     }
   }
-
-  getGroupItem(group: AnalysisGroup, facilityId: string, baselineYear: number): FacilityGroupAnalysisItem {
-    let selectedModel: JStatRegressionModel;
-    if (group.analysisType == 'regression') {
-      if (group.selectedModelId) {
-        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-      }
-    }
-    return {
-      group: group,
-      selectedModel: selectedModel,
-      facilityId: facilityId,
-      baselineYear: baselineYear
-    }
-  }
 }
-
-export interface FacilityGroupAnalysisItem {
-  group: AnalysisGroup,
-  selectedModel: JStatRegressionModel,
-  facilityId: string,
-  baselineYear: number
-}
-
-

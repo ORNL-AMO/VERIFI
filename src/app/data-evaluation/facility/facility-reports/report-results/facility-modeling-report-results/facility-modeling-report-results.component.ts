@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { FacilityGroupAnalysisItem, getGroupItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-facility-modeling-report-results',
@@ -44,7 +44,7 @@ export class FacilityModelingReportResultsComponent {
 
   initializeFacilityGroups() {
     this.analysisItem.groups.forEach(group => {
-      let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, this.analysisItem.facilityId, this.analysisItem.baselineYear);
+      let groupItem: FacilityGroupAnalysisItem = getGroupItem(group, this.analysisItem.facilityId, this.analysisItem.baselineYear);
       if (groupItem) {
         this.executiveSummaryItems.push(groupItem);
       }
@@ -53,26 +53,4 @@ export class FacilityModelingReportResultsComponent {
       return item.group.analysisType != 'skip';
     });
   }
-
-  getGroupItem(group: AnalysisGroup, facilityId: string, baselineYear: number): FacilityGroupAnalysisItem {
-    let selectedModel: JStatRegressionModel;
-    if (group.analysisType == 'regression') {
-      if (group.selectedModelId) {
-        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-      }
-    }
-    return {
-      group: group,
-      selectedModel: selectedModel,
-      facilityId: facilityId,
-      baselineYear: baselineYear
-    }
-  }
-}
-
-export interface FacilityGroupAnalysisItem {
-  group: AnalysisGroup,
-  selectedModel: JStatRegressionModel,
-  facilityId: string,
-  baselineYear: number
 }

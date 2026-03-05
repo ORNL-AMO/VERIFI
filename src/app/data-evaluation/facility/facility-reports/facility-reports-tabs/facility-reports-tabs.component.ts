@@ -32,7 +32,6 @@ export class FacilityReportsTabsComponent {
   facility: IdbFacility;
   facilitySub: Subscription;
   showDropdown: boolean = false;
-  analysisVisitedSub: Subscription;
   analysisVisited: boolean = false;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
@@ -72,8 +71,8 @@ export class FacilityReportsTabsComponent {
       this.reportList = reports;
     });
 
-    this.analysisVisitedSub = this.analysisDbService.analysisVisited.subscribe(() => {
-      if (this.selectedReport) {
+    this.analysisDbService.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
         this.checkIfAnalysisVisited();
       }
     });
@@ -86,7 +85,6 @@ export class FacilityReportsTabsComponent {
     this.facilitySub.unsubscribe();
     this.errorSub.unsubscribe();
     this.reportListSub.unsubscribe();
-    this.analysisVisitedSub.unsubscribe();
   }
 
 

@@ -1,12 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
-import { FacilityGroupAnalysisItem } from '../analysis-report.component';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-analysis-data-validation-tables',
@@ -28,28 +25,15 @@ export class AnalysisDataValidationTablesComponent {
   @Input({ required: false })
   isFacilityReport: boolean;
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
-  selectedReport: IdbAccountReport;
-  facilityReport: IdbFacilityReport;
   showTitle: boolean = false;
+  reportTitle: string;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private facilityReportsDbService: FacilityReportsDbService
   ) { }
 
   ngOnChanges() {
-    if (this.isFacilityReport) {
-      this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
-      if (this.facilityReport && this.facilityReport.facilityReportType === 'modeling' &&
-        this.facilityReport.modelingReportSettings && (!this.facilityReport.modelingReportSettings.includeIssuesSummary && !this.facilityReport.modelingReportSettings.includeExecutiveSummary)) {
-        this.showTitle = true;
-      }
-    }
-    else {
-      this.selectedReport = this.accountReportDbService.selectedReport.getValue();
-      if (this.analysisReportSetup && (!this.analysisReportSetup.includeProblemsInformation && !this.analysisReportSetup.includeExecutiveSummary)) {
-        this.showTitle = true;
-      }
-    }
+    this.setReportTitle();
     this.getRegressionGroupItems(this.executiveSummaryItems);
   }
 
@@ -57,5 +41,22 @@ export class AnalysisDataValidationTablesComponent {
     this.regressionGroupItems = executiveSummaryItems.filter(item => {
       return item.group.analysisType == 'regression';
     });
+  }
+
+  setReportTitle() {
+    if (this.isFacilityReport) {
+      let report = this.facilityReportsDbService.selectedReport.getValue();
+      this.reportTitle = report?.name;
+      if(report && report.facilityReportType === 'modeling' && report.modelingReportSettings && (!report.modelingReportSettings.includeIssuesSummary && !report.modelingReportSettings.includeExecutiveSummary)) {
+        this.showTitle = true;
+      }
+    }
+    else {
+      let report = this.accountReportDbService.selectedReport.getValue();
+      this.reportTitle = report?.name;
+      if(report && this.analysisReportSetup && (!this.analysisReportSetup.includeProblemsInformation && !this.analysisReportSetup.includeExecutiveSummary)) {
+        this.showTitle = true;
+      }
+    }
   }
 }

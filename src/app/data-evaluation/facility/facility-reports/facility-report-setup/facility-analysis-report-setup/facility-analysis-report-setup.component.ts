@@ -44,7 +44,7 @@ export class FacilityAnalysisReportSetupComponent {
     private facilityDbService: FacilitydbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService  ) {
+    private utilityMeterDbService: UtilityMeterdbService) {
 
   }
 
@@ -70,29 +70,31 @@ export class FacilityAnalysisReportSetupComponent {
 
   checkModelData() {
     this.hasDataChanged = false;
-    let dataCheckDate: Date = this.selectedAnalysisItem?.dataCheckedDate ? new Date(this.selectedAnalysisItem?.dataCheckedDate) : undefined;
-    let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+    if (this.selectedAnalysisItem?.dataCheckedDate) {
+      let dataCheckDate: Date = new Date(this.selectedAnalysisItem?.dataCheckedDate);
+      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
 
-    let hasDataChanged = facilityPredictorEntries.find(predictor => {
-      return new Date(predictor.modifiedDate) > dataCheckDate
-    });
-    if (hasDataChanged) {
-      this.hasDataChanged = true;
-      this.saveAnalysisVisitedData();
-    } else {
-      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-
-      let groupMeters: Array<IdbUtilityMeter> = this.selectedAnalysisItem.groups.flatMap(group => {
-        return facilityMeters.filter(meter => meter.groupId == group.idbGroupId);
+      let hasDataChanged = facilityPredictorEntries.find(predictor => {
+        return new Date(predictor.modifiedDate) > dataCheckDate
       });
-      let groupMeterIds: Array<string> = groupMeters.map(meter => meter.guid);
-      let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => groupMeterIds.includes(meterData.meterId));
-
-      let hasDataChanged = groupMeterData.some(meterData => new Date(meterData.dbDate) > dataCheckDate);
       if (hasDataChanged) {
         this.hasDataChanged = true;
         this.saveAnalysisVisitedData();
+      } else {
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+        let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+
+        let groupMeters: Array<IdbUtilityMeter> = this.selectedAnalysisItem.groups.flatMap(group => {
+          return facilityMeters.filter(meter => meter.groupId == group.idbGroupId);
+        });
+        let groupMeterIds: Array<string> = groupMeters.map(meter => meter.guid);
+        let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => groupMeterIds.includes(meterData.meterId));
+
+        let hasDataChanged = groupMeterData.some(meterData => new Date(meterData.dbDate) > dataCheckDate);
+        if (hasDataChanged) {
+          this.hasDataChanged = true;
+          this.saveAnalysisVisitedData();
+        }
       }
     }
   }
@@ -100,7 +102,7 @@ export class FacilityAnalysisReportSetupComponent {
   async saveAnalysisVisitedData() {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    this.analysisDbService.analysisVisited.next(undefined);
+    //this.analysisDbService.analysisVisited.next(undefined);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);

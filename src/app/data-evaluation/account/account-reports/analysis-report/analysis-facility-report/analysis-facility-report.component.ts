@@ -1,12 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
-import { FacilityGroupAnalysisItem } from '../analysis-report.component';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-analysis-facility-report',
@@ -31,29 +28,15 @@ export class AnalysisFacilityReportComponent {
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
   absoluteGroupItems: Array<FacilityGroupAnalysisItem> = [];
-  selectedReport: IdbAccountReport;
-  facilityReport: IdbFacilityReport;
   showTitle: boolean = false;
+  reportTitle: string;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private facilityReportsDbService: FacilityReportsDbService
   ) { }
 
   ngOnChanges() {
-    if (this.isFacilityReport) {
-      this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
-      if (this.facilityReport && this.facilityReport.facilityReportType === 'modeling' &&
-        this.facilityReport.modelingReportSettings && !this.facilityReport.modelingReportSettings.includeIssuesSummary) {
-        this.showTitle = true;
-      }
-    }
-    else {
-      this.selectedReport = this.accountReportDbService.selectedReport.getValue();
-      if (this.analysisReportSetup && !this.analysisReportSetup.includeProblemsInformation) {
-        this.showTitle = true;
-      }
-    }
-
+    this.setReportTitle();
     this.getRegressionGroupItems(this.executiveSummaryItems);
     this.getClassicIntensityItems(this.executiveSummaryItems);
     this.getAbsoluteItems(this.executiveSummaryItems);
@@ -75,6 +58,23 @@ export class AnalysisFacilityReportComponent {
     this.absoluteGroupItems = executiveSummaryItems.filter(item => {
       return item.group.analysisType == 'absoluteEnergyConsumption';
     });
+  }
+
+  setReportTitle() {
+    if (this.isFacilityReport) {
+      let report = this.facilityReportsDbService.selectedReport.getValue();
+      this.reportTitle = report?.name;
+      if(report && report.facilityReportType === 'modeling' && report.modelingReportSettings && !report.modelingReportSettings.includeIssuesSummary) {
+        this.showTitle = true;
+      }
+    }
+    else {
+      let report = this.accountReportDbService.selectedReport.getValue();
+      this.reportTitle = report?.name;
+      if(report && this.analysisReportSetup && !this.analysisReportSetup.includeProblemsInformation) {
+        this.showTitle = true;
+      }
+    }
   }
 }
 
