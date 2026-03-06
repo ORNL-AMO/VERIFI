@@ -25,6 +25,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { getEarliestMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
+
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -92,7 +93,9 @@ export class RegressionModelMenuComponent implements OnInit {
           this.checkHasValidModels();
           this.checkFailedValidationModels();
         } else if (this.group.models == undefined) {
-          this.generateModels();
+          if (group.predictorVariables && group.predictorVariables.length < 7) {
+            this.generateModels();
+          }
         } else {
           this.noValidModels = false;
           this.noDataValidationModels = false;
@@ -213,7 +216,7 @@ export class RegressionModelMenuComponent implements OnInit {
         if (this.group.selectedModelId) {
           const selectedModel = this.generatedModels.find(model => model.modelId === this.group.selectedModelId);
           this.group.models = selectedModel ? [selectedModel] : [];
-          if(selectedModel) {
+          if (selectedModel) {
             this.group.regressionConstant = selectedModel.coef[0];
             this.group.regressionModelYear = selectedModel.modelYear;
             this.group.predictorVariables.forEach(variable => {
