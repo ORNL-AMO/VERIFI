@@ -128,6 +128,7 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    analysisItem.isAnalysisVisited = false;
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
     this.selectedGroup.groupErrors = this.analysisValidationService.getGroupErrors(this.selectedGroup, analysisItem);
     analysisItem.groups[groupIndex] = this.selectedGroup;

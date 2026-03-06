@@ -90,6 +90,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
+    this.analysisItem.isAnalysisVisited = false;
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.analysisItem, analysisItems);
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
