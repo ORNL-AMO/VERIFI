@@ -44,6 +44,9 @@ export class FacilitySavingsReportSetupComponent {
   errorMessageSub: Subscription;
   months: Array<Month> = Months;
   analysisTableColumns: AnalysisTableColumns;
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAnalysisItem>;
   hasDataChanged: boolean = false;
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
@@ -70,6 +73,7 @@ export class FacilitySavingsReportSetupComponent {
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
+      this.applyFilters();
     });
     this.setSelectedAnalysisItem(true);
     if (this.selectedAnalysisItem) {
@@ -313,4 +317,18 @@ export class FacilitySavingsReportSetupComponent {
     await this.save();
   }
 
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.analysisItems];
+    if (this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if (this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem(true);
+  }
 }

@@ -12,7 +12,8 @@ import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/mo
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { AnalysisReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -36,12 +37,20 @@ export class FacilityAnalysisReportSetupComponent {
   energyColumnLabel: string;
   actualUseLabel: string;
   modeledUseLabel: string;
+  reportYears: Array<number>;
+  reportSettings: AnalysisReportSettings;
+  baselineYears: Array<number>;
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAnalysisItem>;
+
   hasDataChanged: boolean = false;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
+    private calanderizationService: CalanderizationService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService) {
@@ -51,13 +60,16 @@ export class FacilityAnalysisReportSetupComponent {
   ngOnInit() {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
+      this.reportSettings = this.facilityReport.analysisReportSettings;
       this.analysisTableColumns = this.facilityReport.analysisReportSettings.analysisTableColumns;
     });
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
+      this.applyFilters();
     });
     this.setSelectedAnalysisItem(true);
+    this.setYearOptions();
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }
@@ -290,4 +302,24 @@ export class FacilityAnalysisReportSetupComponent {
     await this.save();
   }
 
+  setYearOptions() {
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
+    this.reportYears = yearOptions;
+    this.baselineYears = yearOptions;
+  }
+
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.analysisItems];
+    if (this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if (this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem(true);
+  }
 }

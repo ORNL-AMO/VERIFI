@@ -112,7 +112,7 @@ export class FacilityReportsTabsComponent {
   setSetupValid() {
     if (this.selectedReport != undefined) {
       if (this.selectedReport.facilityReportType == 'analysis') {
-        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '' && this.selectedReport.analysisReportSettings.reportYear != undefined);
       } else if (this.selectedReport.facilityReportType == 'overview') {
         this.setupValid = (this.selectedReport.name != '' &&
           this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
