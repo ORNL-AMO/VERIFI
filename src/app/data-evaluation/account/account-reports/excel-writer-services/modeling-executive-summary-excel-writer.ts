@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { FacilityGroupAnalysisItem } from '../analysis-report/analysis-report.component';
 import * as ExcelJS from 'exceljs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Injectable({
   providedIn: 'root',

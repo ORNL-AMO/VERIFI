@@ -63,6 +63,7 @@ import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
 import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
+import { AccountReportsDataCheckComponent } from './account-reports-data-check-component/account-reports-data-check-component';
 
 @NgModule({
   declarations: [
@@ -119,7 +120,8 @@ import { SharedReportsModule } from "../../../shared/shared-reports/shared-repor
     AccountEmissionFactorsReportTableComponent,
     AccountReportsDashboardTableComponent,
     ReportOrderByPipe,
-    ReportBadgeClassPipe
+    ReportBadgeClassPipe,
+    AccountReportsDataCheckComponent
   ],
   imports: [
     CommonModule,
@@ -137,6 +139,12 @@ import { SharedReportsModule } from "../../../shared/shared-reports/shared-repor
 ],
   providers: [
     AccountReportTypePipe
+  ],
+  exports: [
+    AnalysisProblemsInformationComponent,
+    AnalysisDataValidationTablesComponent,
+    AnalysisFacilityReportComponent
+
   ]
 })
 export class AccountReportsModule { }

@@ -72,34 +72,6 @@
           </div>
           }
         </div>
-        @if (generatedModels) {
-        <div class="d-flex">
-          <label class="show-models-label bold pe-3" for="showInvalid">
-            Show Statistically Invalid Models
-          </label>
-          <div>
-            <label class="switch" for="showInvalid">
-              <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid"
-                (change)="saveInvalidChange()">
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
-        }
-        @if (generatedModels) {
-        <div class="d-flex">
-          <label class="show-models-label bold pe-3" for="showFailedValidationModel">
-            Show Models that fail Data Validation
-          </label>
-          <div>
-            <label class="switch" for="showFailedValidationModel">
-              <input class="checkbox" type="checkbox" id="showFailedValidationModel" name="showFailedValidationModel"
-                [(ngModel)]="showFailedValidationModel" (change)="saveFailedValidationChange()">
-              <span class="slider round"></span>
-            </label>
-          </div>
-        </div>
-        }
       </div>
       }
       @if (!group.userDefinedModel) {
@@ -132,6 +104,7 @@
       </div>
       }
     </div>
+
   </div>
   <div class="col-md-8 col-sm-12">
     <label class="bold">Regression Model</label>
@@ -326,7 +299,7 @@
   </div>
 </div>
 
-@if(showModelComparison) {
+@if(showModelComparison && changedModel) {
 <app-regression-model-comparison [selectedFacility]="selectedFacility" [changedModel]="changedModel"
   [showModelComparison]="showModelComparison" (close)="closeModal()"></app-regression-model-comparison>
 }

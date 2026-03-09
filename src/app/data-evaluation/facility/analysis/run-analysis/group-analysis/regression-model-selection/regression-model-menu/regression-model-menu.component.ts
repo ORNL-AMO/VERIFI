@@ -36,12 +36,9 @@ export class RegressionModelMenuComponent implements OnInit {
   group: AnalysisGroup;
   selectedGroupSub: Subscription;
   yearOptions: Array<number>;
-  showInvalid: boolean = false;
-  showFailedValidationModel: boolean = true;
   hasLaterDate: boolean;
   showUpdateModelsModal: boolean = false;
   noValidModels: boolean;
-  noDataValidationModels: boolean;
   showConfirmPredictorChangeModel: boolean = false;
   modelingError: boolean = false;
   selectedFacility: IdbFacility;
@@ -75,8 +72,6 @@ export class RegressionModelMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.showInvalid = this.analysisService.showInvalidModels.getValue();
-    this.showFailedValidationModel = this.analysisService.showFailedValidationModels.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
@@ -90,18 +85,15 @@ export class RegressionModelMenuComponent implements OnInit {
           this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.group.idbGroupId);
           this.checkModelData();
           this.checkHasValidModels();
-          this.checkFailedValidationModels();
         } else if (this.group.models == undefined) {
           this.generateModels();
         } else {
           this.noValidModels = false;
-          this.noDataValidationModels = false;
         }
       } else {
         this.isFormChange = false;
       }
     });
-
     this.setUserDefinedDefaultData();
     this.checkDateValidity();
   }
@@ -148,6 +140,7 @@ export class RegressionModelMenuComponent implements OnInit {
   async saveItem() {
     this.resetErrors();
     this.isFormChange = true;
+    this.analysisItem.isAnalysisVisited = false;
     this.isUserDefinedViewVisible.emit(false);
     this.checkDateValidity();
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
@@ -197,7 +190,6 @@ export class RegressionModelMenuComponent implements OnInit {
       if (this.generatedModels) {
         this.modelingError = false;
         this.checkHasValidModels();
-        this.checkFailedValidationModels();
         this.hasLaterDate = false;
         this.group.dateModelsGenerated = new Date();
 
@@ -213,7 +205,7 @@ export class RegressionModelMenuComponent implements OnInit {
         if (this.group.selectedModelId) {
           const selectedModel = this.generatedModels.find(model => model.modelId === this.group.selectedModelId);
           this.group.models = selectedModel ? [selectedModel] : [];
-          if(selectedModel) {
+          if (selectedModel) {
             this.group.regressionConstant = selectedModel.coef[0];
             this.group.regressionModelYear = selectedModel.modelYear;
             this.group.predictorVariables.forEach(variable => {
@@ -292,31 +284,6 @@ export class RegressionModelMenuComponent implements OnInit {
 
   checkHasValidModels() {
     this.noValidModels = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
-    if (!this.showInvalid && this.noValidModels) {
-      this.showInvalid = true;
-    }
-    this.saveInvalidChange();
-  }
-
-  saveInvalidChange() {
-    this.analysisService.showInvalidModels.next(this.showInvalid);
-  }
-
-  checkFailedValidationModels() {
-    this.noDataValidationModels = this.generatedModels?.find(model => {
-      if (model.SEPValidation) {
-        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
-      } else {
-        return undefined;
-      }
-    }) == undefined;
-    if (!this.showFailedValidationModel && this.noDataValidationModels) {
-      this.showFailedValidationModel = true;
-    }
-    this.saveFailedValidationChange();
-  }
-  saveFailedValidationChange() {
-    this.analysisService.showFailedValidationModels.next(this.showFailedValidationModel);
   }
 
   checkModelData() {

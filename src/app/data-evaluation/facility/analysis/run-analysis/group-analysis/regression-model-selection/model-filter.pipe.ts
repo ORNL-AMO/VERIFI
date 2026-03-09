@@ -7,9 +7,10 @@ import { JStatRegressionModel } from 'src/app/models/analysis';
 })
 export class ModelFilterPipe implements PipeTransform {
 
-  transform(models: Array<JStatRegressionModel>, showInvalid: boolean, showFailedValidationModel: boolean): Array<JStatRegressionModel> {
+  transform(models: Array<JStatRegressionModel>, showInvalid: boolean, showFailedValidationModel: boolean, isYearSelectionChanged: boolean, includedYears: Array<number>): Array<JStatRegressionModel> {
 
     let filteredModels: Array<JStatRegressionModel> = models;
+
     if (!showInvalid) {
       filteredModels = filteredModels.filter(model => { return model.isValid });
     }
@@ -21,6 +22,13 @@ export class ModelFilterPipe implements PipeTransform {
         return false;
       });
     }
-    return filteredModels;
+
+    if (!isYearSelectionChanged && includedYears.length === 0) {
+      return filteredModels;
+    }
+    if (includedYears.length === 0) {
+      return [];
+    }
+    return filteredModels.filter(model => includedYears.includes(model.modelYear));
   }
 }
