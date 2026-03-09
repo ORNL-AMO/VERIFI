@@ -8,6 +8,7 @@ import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 
 @Component({
   selector: 'app-upload-files',
@@ -26,7 +27,8 @@ export class UploadFilesComponent {
     private uploadDataService: UploadDataService,
     private dataManagementService: DataManagementService,
     private accountDbService: AccountdbService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private importBackupModalService: ImportBackupModalService
   ) {
 
   }
@@ -110,5 +112,10 @@ export class UploadFilesComponent {
     } else {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-general-file/' + fileReference.id)
     }
+  }
+
+  openImportBackup() {
+    this.importBackupModalService.inFacility = false;
+    this.importBackupModalService.showModal.next(true);
   }
 }
