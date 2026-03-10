@@ -32,6 +32,8 @@ import { Month, Months } from '../shared/form-data/months';
 export class WeatherPredictorManagementService {
 
   hasWarning: boolean = false;
+  heatingTemp: number;
+  coolingTemp: number;
 
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
@@ -46,7 +48,7 @@ export class WeatherPredictorManagementService {
   ) {
   }
 
-  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value: number }>): Promise<"success" | "error"> {
+  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
@@ -56,14 +58,14 @@ export class WeatherPredictorManagementService {
       //create HDD predictor
       hddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
       if (this.weatherDataService.weatherDataSelection == 'degreeDays') {
-        hddPredictor.name = 'HDD Generated ' + '(' + this.weatherDataService.heatingTemp + "F)";
-        hddPredictor.heatingBaseTemperature = this.weatherDataService.heatingTemp;
+        this.heatingTemp = this.weatherDataService.heatingTemp;
       }
       else {
         let hddValue: number = selectedValues.find(val => val.name == 'HDD').value;
-        hddPredictor.name = 'HDD Generated ' + '(' + hddValue + "F)";
-        hddPredictor.heatingBaseTemperature = hddValue;
+        this.heatingTemp = hddValue;
       }
+      hddPredictor.name = 'HDD Generated ' + '(' + this.heatingTemp + "F)";
+      hddPredictor.heatingBaseTemperature = this.heatingTemp;
       hddPredictor.predictorType = 'Weather';
       hddPredictor.weatherDataType = 'HDD';
       hddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
@@ -78,14 +80,14 @@ export class WeatherPredictorManagementService {
       //create CDD predictor
       cddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
       if (this.weatherDataService.weatherDataSelection == 'degreeDays') {
-        cddPredictor.name = 'CDD Generated ' + '(' + this.weatherDataService.coolingTemp + "F)";
-        cddPredictor.coolingBaseTemperature = this.weatherDataService.coolingTemp;
+        this.coolingTemp = this.weatherDataService.coolingTemp;
       }
       else {
         let cddValue: number = selectedValues.find(val => val.name == 'CDD').value;
-        cddPredictor.name = 'CDD Generated ' + '(' + cddValue + "F)";
-        cddPredictor.coolingBaseTemperature = cddValue;
+        this.coolingTemp = cddValue;
       }
+      cddPredictor.name = 'CDD Generated ' + '(' + this.coolingTemp + "F)";
+      cddPredictor.coolingBaseTemperature = this.coolingTemp;
       cddPredictor.predictorType = 'Weather';
       cddPredictor.weatherDataType = 'CDD';
       cddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
@@ -145,7 +147,7 @@ export class WeatherPredictorManagementService {
         this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
 
         //ISSUE: 1822
-        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
+        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
         // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp)
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true

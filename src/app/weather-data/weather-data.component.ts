@@ -38,7 +38,7 @@ export class WeatherDataComponent {
   dryBulbTempSelected: boolean = false;
   cddBaseTemp: number;
   hddBaseTemp: number;
-  selectedValues: Array<{ name: WeatherDataSelection, value: number }> = [];
+  selectedValues: Array<{ name: WeatherDataSelection, value?: number }> = [];
 
   constructor(
     private weatherDataService: WeatherDataService,
@@ -142,14 +142,11 @@ export class WeatherDataComponent {
         this.selectedValues.push({ name: 'HDD', value: this.hddBaseTemp });
       }
       if (this.relativeHumiditySelected) {
-        this.selectedValues.push({ name: 'relativeHumidity', value: undefined });
+        this.selectedValues.push({ name: 'relativeHumidity' });
       }
       if (this.dryBulbTempSelected) {
-        this.selectedValues.push({ name: 'dryBulbTemp', value: undefined });
+        this.selectedValues.push({ name: 'dryBulbTemp' });
       }
-    }
-    if (this.selectedValues.length != 0) {
-      this.weatherDataService.weatherDataSelection = 'multipleSelections';
     }
   }
 
