@@ -1,9 +1,9 @@
 @if (inDashboard) {
-  <div class="upload-banner banner d-flex justify-content-between w-100">
-    <div class="banner-title">
-      <h3><span class="fa fa-temperature-half"></span> Weather Data</h3>
-    </div>
+<div class="upload-banner banner d-flex justify-content-between w-100">
+  <div class="banner-title">
+    <h3><span class="fa fa-temperature-half"></span> Weather Data</h3>
   </div>
+</div>
 }
 
 <div class="wrapper main-content">
@@ -13,20 +13,20 @@
   <p>
     This page provides a detailed look of the weather data available for use by VERIFI. The weather data is pulled
     from <a href="https://www.ncei.noaa.gov/" target="_blank">The National Centers for Environmental
-  Information</a>. If quality
-  data is found, VERIFI can automatically calculate heating and cooling degree days, average relative humidity and
-  average dry bulb temperature. The calculated weather data can
-  be used as predictor data for analysis.
-</p>
-<p>
-  For much more information on all things degree days, visit <a href="https://www.degreedays.net/"
-target="_blank">https://www.degreedays.net/</a>
-</p>
-<p>
-  Average relative humidty and dry bulb temperature are calculated using a weighted average where the weights are
-  the number of minutes that a reading covers.
-</p>
-<hr>
+      Information</a>. If quality
+    data is found, VERIFI can automatically calculate heating and cooling degree days, average relative humidity and
+    average dry bulb temperature. The calculated weather data can
+    be used as predictor data for analysis.
+  </p>
+  <p>
+    For much more information on all things degree days, visit <a href="https://www.degreedays.net/"
+      target="_blank">https://www.degreedays.net/</a>
+  </p>
+  <p>
+    Average relative humidty and dry bulb temperature are calculated using a weighted average where the weights are
+    the number of minutes that a reading covers.
+  </p>
+  <hr>
   <router-outlet></router-outlet>
 </div>
 
@@ -37,48 +37,106 @@ target="_blank">https://www.degreedays.net/</a>
   </div>
   <div class="popup-body">
     @if (weatherDataSelection == 'HDD') {
-      <p>Select the facility to create new heating degree day predictors using
+    <p>Select the facility to create new heating degree day predictors using
       the selected weather station and temperature threshold.</p>
     }
-    @if (weatherDataSelection == 'CDD') {
-      <p>Select the facility to create new cooling degree day predictors using
-      the selected weather station and temperature threshold.</p>
+    @else {
+    <p>Select the facility and one or more predictor types below to create predictors using the selected weather station
+      and temperature thresholds.</p>
     }
-    @if (weatherDataSelection == 'degreeDays') {
-      <p>Select the facility to create new heating and cooling degree day
-      predictors using the selected weather station and temperature thresholds.</p>
-    }
-    @if (weatherDataSelection == 'relativeHumidity') {
-      <p>Select the facility to create new relative humidity
-      predictors using the weighted average relative humidity of the selected station.</p>
-    }
-    @if (weatherDataSelection == 'dryBulbTemp') {
-      <p>Select the facility to create new dry bulb temperature
-      predictors using the weighted average dry bulb temp of the selected station.</p>
-    }
+
     <form>
-      <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility"
-        (change)="setFacilityData()">
+      <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility" (change)="setFacilityData()">
         @for (facility of facilities; track facility) {
-          <option [ngValue]="facility">{{facility.name}}</option>
+        <option [ngValue]="facility">{{facility.name}}</option>
         }
       </select>
+
+      @if(weatherDataSelection != 'degreeDays' && selectedFacility) {
+      <div class="d-flex flex-column mb-3 mt-5">
+
+        <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+          <div class="col-auto">
+            <input type="checkbox" name="cddSelected" class="form-check-input" [(ngModel)]="cddSelected">
+          </div>
+          <div class="col-auto fw-bold">
+            <span>Cooling Degree Days</span>
+          </div>
+          @if(cddSelected) {
+          <ng-container>
+            <div class="col-auto">
+              <span class="text-muted fst-italic ms-3">Cooling Base Temperature:</span>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+              <div class="input-group">
+                <input type="number" class="form-control border-primary bg-light" name="cddBaseTemp"
+                  [(ngModel)]="cddBaseTemp">
+                <span class="input-group-text">&#8457;</span>
+              </div>
+            </div>
+          </ng-container>
+          }
+        </div>
+
+        <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+          <div class="col-auto">
+            <input type="checkbox" name="hddSelected" class="form-check-input" [(ngModel)]="hddSelected">
+          </div>
+          <div class="col-auto fw-bold">
+            <span>Heating Degree Days</span>
+          </div>
+          @if(hddSelected) {
+          <ng-container>
+            <div class="col-auto">
+              <span class="text-muted fst-italic ms-3">Heating Base Temperature:</span>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+              <div class="input-group">
+                <input type="number" class="form-control border-primary bg-light" name="hddBaseTemp"
+                  [(ngModel)]="hddBaseTemp">
+                <span class="input-group-text">&#8457;</span>
+              </div>
+            </div>
+          </ng-container>
+          }
+        </div>
+
+        <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+          <div class="col-auto">
+            <input type="checkbox" name="relativeHumiditySelected" class="form-check-input"
+              [(ngModel)]="relativeHumiditySelected">
+          </div>
+          <div class="col-auto fw-bold">
+            <span>Relative Humidity</span>
+          </div>
+        </div>
+
+        <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+          <div class="col-auto">
+            <input type="checkbox" name="dryBulbTempSelected" class="form-check-input"
+              [(ngModel)]="dryBulbTempSelected">
+          </div>
+          <div class="col-auto fw-bold">
+            <span>Dry Bulb Temperature</span>
+          </div>
+        </div>
+      </div>
+      }
     </form>
     @if (facilityPredictorData?.length == 0 && facilityMeterData?.length != 0) {
-      <div class="alert alert-warning">
-        No facility predictor entries found. Entries will be created to match facility meter dates.
-      </div>
+    <div class="alert alert-warning">
+      No facility predictor entries found. Entries will be created to match facility meter dates.
+    </div>
     }
     @if (facilityMeterData?.length == 0) {
-      <div class="alert alert-danger">
-        No meter data found for this facility, predictors cannot be created.
-      </div>
+    <div class="alert alert-danger">
+      No meter data found for this facility, predictors cannot be created.
+    </div>
     }
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelApplyToFacility()">Cancel</button>
-    <button class="btn action-btn" (click)="confirmCreate()"
-      [disabled]="!selectedFacility || facilityMeterData?.length == 0">Create
-    Predictors</button>
+    <button class="btn action-btn" (click)="confirmCreate()" [disabled]="isButtonDisabled()">Create
+      Predictors</button>
   </div>
 </div>

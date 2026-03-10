@@ -69,7 +69,7 @@ export interface DetailDegreeDay {
     minutesBetween: number
 }
 
-export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity' | 'dryBulbTemp';
+export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity' | 'dryBulbTemp' | 'multipleSelections';
 
 export interface WeatherDataSelectionOption {
     selection: WeatherDataSelection,
