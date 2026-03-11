@@ -18,7 +18,6 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisGroupItem } from '../../analysis.service';
-import * as _ from 'lodash';
 
 @Component({
   selector: 'app-analysis-details-table',
@@ -46,7 +45,6 @@ export class AnalysisDetailsTableComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   yearOptionsEnergy: Array<number>;
   yearOptionsWater: Array<number>;
-  yearOptions: Array<number>;
   selectedYearCategoryMap: { [year: number]: { [category: string]: boolean } } = {};
   errorList: Array<{ year: number, category: string }> = [];
 
@@ -94,8 +92,7 @@ export class AnalysisDetailsTableComponent {
       this.selectedFacility = val;
       this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', true, this.selectedFacility.guid);
       this.yearOptionsWater = this.calendarizationService.getYearOptions('water', true, this.selectedFacility.guid);
-      this.yearOptions = _.uniq([...this.yearOptionsEnergy, ...this.yearOptionsWater]);
-      this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
+     
       if (this.yearOptionsEnergy) {
         this.baselineYearErrorMinEnergy = this.yearOptionsEnergy[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
         this.baselineYearErrorMaxEnergy = this.yearOptionsEnergy[this.yearOptionsEnergy.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
