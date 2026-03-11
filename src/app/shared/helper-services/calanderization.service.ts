@@ -273,6 +273,7 @@ export class CalanderizationService {
         yearsWithFullData = yearsWithFullData.concat(facilityYearsWithData);
       }
     });
+    yearsWithFullData = _.orderBy(yearsWithFullData, (year) => { return year }, 'asc');
     return _.uniq(yearsWithFullData);
   }
 
