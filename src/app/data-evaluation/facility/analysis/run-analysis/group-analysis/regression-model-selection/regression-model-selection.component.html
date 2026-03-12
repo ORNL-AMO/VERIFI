@@ -27,8 +27,8 @@
 <hr>
 
 @if(generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
-<div class="container-fluid px-4 mb-3">
-  <div class="d-flex justify-content-end align-items-center gap-3 mb-2">
+<div class="container-fluid px-4 mb-5">
+  <div class="d-flex justify-content-start align-items-center gap-3 mb-2">
     @if (generatedModels) {
     <div class="d-flex align-items-center me-3">
       <label class="show-models-label bold me-2" for="showInvalid">
@@ -65,12 +65,12 @@
         </button>
         @if (dropdownOpen) {
         <div class="dropdown-content dropdown-menu-end p-2">
-          @for (option of dropdownOptions; track option) {
+          @for (option of optionSelections; track option) {
           <label class="multiselect-option d-flex align-items-center"
-            [ngClass]="{'text-muted': option === selectedModel?.modelYear}">
-            <input type="checkbox" class="me-2" [value]="option" [checked]="isOptionSelected(option)"
-              (change)="toggleOption(option)" [disabled]="option === selectedModel?.modelYear">
-            {{option}}
+            [ngClass]="{'text-muted': option.year === selectedModel?.modelYear}">
+            <input type="checkbox" class="me-2" [value]="option" [checked]="option.isChecked"
+              (change)="toggleOption(option.year)" [disabled]="option.year === selectedModel?.modelYear">
+            {{option.year}}
           </label>
           }
         </div>
