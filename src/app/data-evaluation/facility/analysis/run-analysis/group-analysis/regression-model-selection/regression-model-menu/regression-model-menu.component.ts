@@ -8,7 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -24,7 +24,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { getEarliestMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -32,6 +32,8 @@ import { getEarliestMeterData, getLatestMeterData } from 'src/app/shared/dateHel
   standalone: false
 })
 export class RegressionModelMenuComponent implements OnInit {
+  @Output() 
+  setShowUserDefinedModelInspection: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   group: AnalysisGroup;
   selectedGroupSub: Subscription;
@@ -47,19 +49,14 @@ export class RegressionModelMenuComponent implements OnInit {
   numVariableOptions: Array<number>;
   months: Array<Month> = Months;
   isButtonDisabled: boolean = false;
-  facilityMeterData: Array<IdbUtilityMeterData>;
   allMeterReadingsPresent: boolean = true;
   allPredictorReadingsPresent: boolean = true;
   isDateRangeValid: boolean = true;
   isTwelveMonthSelected: boolean = true;
-  facilityPredictorData: Array<IdbPredictorData>;
   changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
   showModelComparison: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
-
-  @Output() userDefinedModelClicked = new EventEmitter<boolean>();
-  @Output() isUserDefinedViewVisible = new EventEmitter<boolean>();
-
+  calendarizedMeterData: Array<CalanderizedMeter>;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -73,19 +70,17 @@ export class RegressionModelMenuComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
-    this.setYears();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
+        this.setYears();
         this.checkUserDefinedModelValues();
         this.setNumVariableOptions();
         if (this.group.models && this.group.models.length != 0) {
           this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.group.idbGroupId);
           this.checkModelData();
           this.checkHasValidModels();
-        } else if (this.group.models == undefined) {
+        } else if (this.group.models == undefined && this.group.userDefinedModel) {
           this.generateModels();
         } else {
           this.noValidModels = false;
@@ -103,16 +98,15 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   setYears() {
-    let firstReading: IdbUtilityMeterData = getEarliestMeterData(this.facilityMeterData);
-    let lastReading: IdbUtilityMeterData = getLatestMeterData(this.facilityMeterData);
-    if (firstReading && lastReading) {
-      let start: number = firstReading.year;
-      let end: number = lastReading.year;
-      this.yearOptions = [];
-      for (let x = start; x <= end; x++) {
-        this.yearOptions.push(x);
-      }
-    }
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.group.idbGroupId });
+    this.calendarizedMeterData = getCalanderizedMeterData(groupMeters, facilityMeterData, this.selectedFacility, true, undefined, [], [], [this.selectedFacility], 'AR6', []);
+    let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let fullYearsWithData: Array<number> = getYearsWithFullData(this.calendarizedMeterData, this.selectedFacility);
+    this.yearOptions = fullYearsWithData.filter(year => {
+      return year >= selectedAnalysisItem.baselineYear;
+    })
   }
 
   setUserDefinedDefaultData() {
@@ -131,17 +125,19 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   checkDateValidity() {
-    this.isDateRangeValid = this.checkDateRangeValidity();
-    this.isTwelveMonthSelected = this.checkTwelveMonthSelection();
-    this.allMeterReadingsPresent = this.validateMeterDataForSelectedDates();
-    this.allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates();
+    if (!this.group.userDefinedModel) {
+      this.isDateRangeValid = this.checkDateRangeValidity();
+      this.isTwelveMonthSelected = this.checkTwelveMonthSelection();
+      this.allMeterReadingsPresent = this.validateMeterDataForSelectedDates();
+      this.allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates();
+    }
   }
 
   async saveItem() {
     this.resetErrors();
     this.isFormChange = true;
     this.analysisItem.isAnalysisVisited = false;
-    this.isUserDefinedViewVisible.emit(false);
+    this.setShowUserDefinedModelInspection.emit(false);
     this.checkDateValidity();
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, this.analysisItem);
@@ -366,19 +362,20 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   async generateUserDefinedModel() {
-    this.userDefinedModelClicked.emit(true);
-    this.isUserDefinedViewVisible.emit(true);
+    this.setShowUserDefinedModelInspection.emit(true);
   }
 
   validateMeterDataForSelectedDates() {
-    let month = this.group.regressionModelStartMonth;
-    let year = this.group.regressionStartYear;
-    const endMonth = this.group.regressionModelEndMonth;
-    const endYear = this.group.regressionEndYear;
-
+    let month: number = this.group.regressionModelStartMonth;
+    let year: number = this.group.regressionStartYear;
+    const endMonth: number = this.group.regressionModelEndMonth;
+    const endYear: number = this.group.regressionEndYear;
+    let monthlyData: Array<MonthlyData> = this.calendarizedMeterData.flatMap(meter => {
+      return meter.monthlyData;
+    });
     while (year < endYear || (year === endYear && month <= endMonth)) {
-      const dataPresent = this.facilityMeterData.some(meterData => {
-        return meterData.year === year && meterData.month - 1 === month;
+      const dataPresent = monthlyData.some(data => {
+        return data.year === year && data.monthNumValue === month;
       });
       if (!dataPresent) {
         return false;
@@ -393,22 +390,24 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   validatePredictorDataForSelectedDates() {
+    let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
     let allPresent: boolean = true;
     this.group.predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {
-        const variablePredictorData = this.facilityPredictorData.filter(predictor => predictor.predictorId === variable.id);
+        const variablePredictorData: Array<IdbPredictorData> = facilityPredictorEntries.filter(predictor => predictor.predictorId === variable.id);
 
-        let month = this.group.regressionModelStartMonth;;
-        let year = this.group.regressionStartYear;
-        const endMonth = this.group.regressionModelEndMonth;
-        const endYear = this.group.regressionEndYear;
+        let month: number = this.group.regressionModelStartMonth;
+        let year: number = this.group.regressionStartYear;
+        const endMonth: number = this.group.regressionModelEndMonth;
+        const endYear: number = this.group.regressionEndYear;
 
         while (year < endYear || (year === endYear && month <= endMonth)) {
           const dataPresent = variablePredictorData.some(predictorData => {
-            return predictorData.year === year && predictorData.month - 1 === month;
+            return predictorData.year === year && predictorData.month === month + 1;
           });
           if (!dataPresent) {
             allPresent = false;
+            console.log(`Missing predictor data for variable ${variable.name} for ${month + 1} ${year}`);
             break;
           }
           month++;

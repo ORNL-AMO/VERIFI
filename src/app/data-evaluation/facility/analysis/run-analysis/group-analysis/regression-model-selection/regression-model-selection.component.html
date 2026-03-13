@@ -22,8 +22,8 @@
 </div>
 <hr>
 }
-<app-regression-model-menu (userDefinedModelClicked)="onUserDefinedModelClicked($event)"
-  (isUserDefinedViewVisible)="onFormChanged($event)"></app-regression-model-menu>
+<app-regression-model-menu
+  (setShowUserDefinedModelInspection)="setShowUserDefinedModelInspection($event)"></app-regression-model-menu>
 <hr>
 
 @if(generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
@@ -36,7 +36,8 @@
       </label>
       <div>
         <label class="switch mb-0" for="showInvalid">
-          <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [(ngModel)]="showInvalid">
+          <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid"
+            [(ngModel)]="modelFilterOptions.showInvalid">
           <span class="slider round"></span>
         </label>
       </div>
@@ -50,7 +51,7 @@
       <div>
         <label class="switch mb-0" for="showFailedValidationModel">
           <input class="checkbox" type="checkbox" id="showFailedValidationModel" name="showFailedValidationModel"
-            [(ngModel)]="showFailedValidationModel">
+            [(ngModel)]="modelFilterOptions.showFailedValidationModel">
           <span class="slider round"></span>
         </label>
       </div>
@@ -65,11 +66,11 @@
         </button>
         @if (dropdownOpen) {
         <div class="dropdown-content dropdown-menu-end p-2">
-          @for (option of optionSelections; track option) {
+          @for (option of modelFilterOptions.yearOptionSelections; track option) {
           <label class="multiselect-option d-flex align-items-center"
-            [ngClass]="{'text-muted': option.year === selectedModel?.modelYear}">
+            [ngClass]="{'text-muted': option.year === selectedGroup.regressionModelYear}">
             <input type="checkbox" class="me-2" [value]="option" [checked]="option.isChecked"
-              (change)="toggleOption(option.year)" [disabled]="option.year === selectedModel?.modelYear">
+              (change)="toggleOption(option.year)" [disabled]="option.year === selectedGroup.regressionModelYear">
             {{option.year}}
           </label>
           }
@@ -114,12 +115,12 @@
         <th>
           Model Notes
         </th>
-        @if (showInvalid) {
+        @if (modelFilterOptions.showInvalid) {
         <th>
           Model Validation<br> Failures
         </th>
         }
-        @if (showFailedValidationModel) {
+        @if (modelFilterOptions.showFailedValidationModel) {
         <th>
           Data Validation<br> Failures
         </th>
@@ -129,8 +130,8 @@
       </tr>
     </thead>
     <tbody>
-      @for (model of generatedModels | orderBy: orderDataField: orderByDirection |
-      modelFilter:showInvalid:showFailedValidationModel:isYearSelectionChanged:includedYears; track model; let
+      @for (model of generatedModels | modelFilter:modelFilterOptions: orderDataField: orderByDirection; track
+      model.modelId; let
       modelIndex = $index) {
       <tr [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
         @if (!model.errorModeling) {
@@ -205,7 +206,7 @@
           }
         </td>
         }
-        @if (showInvalid && !model.errorModeling) {
+        @if (modelFilterOptions.showInvalid && !model.errorModeling) {
         <td>
           @if (model.isValid) {
           <span>&mdash;</span>
@@ -217,7 +218,7 @@
           }
         </td>
         }
-        @if (showFailedValidationModel && !model.errorModeling) {
+        @if (modelFilterOptions.showFailedValidationModel && !model.errorModeling) {
         <td>
           @for (notes of model.dataValidationNotes; track notes) {
           <span>
@@ -257,6 +258,6 @@
   (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
 }
 
-@if (!selectedGroup.userDefinedModel && generateUserDefinedModel && showView) {
+@if (!selectedGroup.userDefinedModel && showUserDefinedModelInspection) {
 <app-regression-user-defined-model-inspection></app-regression-user-defined-model-inspection>
 }
