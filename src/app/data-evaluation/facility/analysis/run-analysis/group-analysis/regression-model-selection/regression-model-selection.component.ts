@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -14,9 +14,9 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { NavigationStart, Router } from '@angular/router';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getEarliestMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 @Component({
   selector: 'app-regression-model-selection',
   templateUrl: './regression-model-selection.component.html',
@@ -44,13 +44,13 @@ export class RegressionModelSelectionComponent implements OnInit {
   dropdownOpen: boolean = false;
   yearOptions: Array<number> = [];
   dropdownOptions: Array<number> = [];
-  selectedOptions: Array<number> = [];
   facilityMeterData: Array<IdbUtilityMeterData>;
-  facilityPredictorData: Array<IdbPredictorData>;
   analysisItem: IdbAnalysisItem;
   noValidModels: boolean;
   noDataValidationModels: boolean;
   selectedModel: JStatRegressionModel;
+  facilityMeters: Array<IdbUtilityMeter>;
+  optionSelections: Array<{ year: number, isChecked: boolean }> = [];
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
 
@@ -59,15 +59,15 @@ export class RegressionModelSelectionComponent implements OnInit {
     private accountDbService: AccountdbService,
     private analysisValidationService: AnalysisValidationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService,
     private router: Router) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.facilityPredictorData = this.predictorDataDbService.facilityPredictorData.getValue();
     this.setYears();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.selectedGroup = group;
@@ -211,18 +211,12 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
-  isOptionSelected(option: number): boolean {
-    return this.selectedOptions.includes(option);
-  }
-
   toggleOption(option: number) {
-    if (this.isOptionSelected(option)) {
-      this.selectedOptions = this.selectedOptions.filter(selected => selected !== option);
+    const selection = this.optionSelections.find(selection => selection.year == option);
+    if (selection) {
+      selection.isChecked = !selection.isChecked;
     }
-    else {
-      this.selectedOptions = [...this.selectedOptions, option];
-    }
-    this.includedYears = this.selectedOptions;
+    this.includedYears = this.optionSelections.filter(selection => selection.isChecked).map(selection => selection.year);
     this.isYearSelectionChanged = true;
   }
 
@@ -251,24 +245,34 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.dropdownOptions = [...this.yearOptions];
     this.dropdownOptions = this.dropdownOptions.filter(year => year >= this.analysisItem.baselineYear);
     this.dropdownOptions = this.dropdownOptions.filter(year => year <= new Date().getFullYear());
-    this.checkCompleteYearDataPresent();
+    this.checkYearsIncluded();
     if (this.selectedGroup) {
       this.selectedModel = this.selectedGroup.selectedModelId ? this.selectedGroup.models.find(model => model.modelId == this.selectedGroup.selectedModelId) : undefined;
     }
-    this.selectedOptions = [...this.dropdownOptions];
   }
 
-  checkCompleteYearDataPresent() {
+  checkYearsIncluded() {
+    this.optionSelections = [];
+    let metersInGroup: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == this.selectedGroup.idbGroupId });
     for (let year of this.dropdownOptions) {
       let meterDataForYear = this.facilityMeterData.filter(meterData => meterData.year == year);
-      let predictorDataForYear = this.facilityPredictorData.filter(predictorData => predictorData.year == year);
+      let meterDataForYearAndGroup = meterDataForYear.filter(meterData => metersInGroup.some(meter => meter.guid == meterData.meterId));
+      let monthsWithData = 0;
       for (let monthNum = 1; monthNum <= 12; monthNum++) {
-        let monthMeterData = meterDataForYear.filter(meterData => meterData.month == monthNum);
-        let monthPredictorData = predictorDataForYear.filter(predictorData => predictorData.month == monthNum);
-        if (monthMeterData.length == 0 || monthPredictorData.length == 0) {
-          this.dropdownOptions = this.dropdownOptions.filter(option => option != year);
+        let monthMeterData = meterDataForYearAndGroup.filter(meterData => meterData.month == monthNum);
+        if (monthMeterData && monthMeterData.length > 0) {
+          monthsWithData++;
+        }
+      }
+      if (monthsWithData >= 10) {
+        if (monthsWithData < 12) {
+          this.optionSelections.push({ year: year, isChecked: false });
+        }
+        else {
+          this.optionSelections.push({ year: year, isChecked: true });
         }
       }
     }
   }
 }
+
