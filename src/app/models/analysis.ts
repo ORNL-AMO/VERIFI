@@ -212,8 +212,6 @@ export interface AnalysisSetupErrors {
   hasError: boolean,
   missingName: boolean,
   noGroups: boolean,
-  // missingReportYear: boolean,
-  // reportYearBeforeBaselineYear: boolean,
   groupsHaveErrors: boolean,
   missingBaselineYear: boolean,
   baselineYearAfterMeterDataEnd: boolean,
@@ -238,12 +236,10 @@ export interface AnalysisGroup {
     monthNum: number,
     percent: number
   }>,
-  hasDataAdjustement: boolean,
   dataAdjustments: Array<{
     year: number,
     amount: number
   }>,
-  hasBaselineAdjustmentV2: boolean,
   baselineAdjustmentsV2: Array<{
     year: number,
     amount: number

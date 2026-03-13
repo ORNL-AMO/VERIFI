@@ -111,26 +111,13 @@ export class UpdateDbEntryService {
         }
 
         if (group['baselineAdjustments'] != undefined) {
-          group.hasDataAdjustement = group['hasBaselineAdjustement'];
-          delete group['hasBaselineAdjustement'];
           group.dataAdjustments = group['baselineAdjustments'];
           delete group['baselineAdjustments'];
           isChanged = true;
         }
 
-
         if (group.baselineAdjustmentsV2 == undefined) {
-          group.hasBaselineAdjustmentV2 = false;
-          let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
-          if (analysisItem['reportYear']) {
-            for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem['reportYear']; year++) {
-              yearBaselineAdjustments.push({
-                year: year,
-                amount: 0
-              })
-            }
-          }
-          group.baselineAdjustmentsV2 = yearBaselineAdjustments;
+          group.baselineAdjustmentsV2 = [];
           isChanged = true;
         }
         if (group.maxModelVariables == undefined) {
@@ -153,6 +140,13 @@ export class UpdateDbEntryService {
           group.regressionEndYear = analysisItem.baselineYear;
           isChanged = true;
         }
+
+        if(group['hasDataAdjustement'] != undefined){
+          delete group['hasDataAdjustement'];
+          group.dataAdjustments = group.dataAdjustments.filter(adjustment => adjustment.amount != 0);
+          isChanged = true;
+        }
+        
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
