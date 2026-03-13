@@ -54,16 +54,12 @@ export class WeatherPredictorManagementService {
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;
     let dryBulbTempPredictor: IdbPredictor;
-    if (selectedValues.find(val => val.name == 'HDD') || this.weatherDataService.weatherDataSelection == 'degreeDays') {
+    if (selectedValues.find(val => val.name == 'HDD')) {
       //create HDD predictor
       hddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
-      if (this.weatherDataService.weatherDataSelection == 'degreeDays') {
-        this.heatingTemp = this.weatherDataService.heatingTemp;
-      }
-      else {
-        let hddValue: number = selectedValues.find(val => val.name == 'HDD').value;
-        this.heatingTemp = hddValue;
-      }
+      let hddValue: number = selectedValues.find(val => val.name == 'HDD').value;
+      this.heatingTemp = hddValue;
+
       hddPredictor.name = 'HDD Generated ' + '(' + this.heatingTemp + "F)";
       hddPredictor.heatingBaseTemperature = this.heatingTemp;
       hddPredictor.predictorType = 'Weather';
@@ -76,16 +72,12 @@ export class WeatherPredictorManagementService {
 
     }
 
-    if (selectedValues.find(val => val.name == 'CDD') || this.weatherDataService.weatherDataSelection == 'degreeDays') {
+    if (selectedValues.find(val => val.name == 'CDD')) {
       //create CDD predictor
       cddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
-      if (this.weatherDataService.weatherDataSelection == 'degreeDays') {
-        this.coolingTemp = this.weatherDataService.coolingTemp;
-      }
-      else {
-        let cddValue: number = selectedValues.find(val => val.name == 'CDD').value;
-        this.coolingTemp = cddValue;
-      }
+      let cddValue: number = selectedValues.find(val => val.name == 'CDD').value;
+      this.coolingTemp = cddValue;
+
       cddPredictor.name = 'CDD Generated ' + '(' + this.coolingTemp + "F)";
       cddPredictor.coolingBaseTemperature = this.coolingTemp;
       cddPredictor.predictorType = 'Weather';

@@ -97,6 +97,12 @@ export class WeatherDataComponent {
     this.hddBaseTemp = undefined;
 
     switch (this.weatherDataSelection) {
+      case 'degreeDays':
+        this.cddSelected = true;
+        this.hddSelected = true;
+        this.cddBaseTemp = this.weatherDataService.coolingTemp;
+        this.hddBaseTemp = this.weatherDataService.heatingTemp;
+        break;
       case 'CDD':
         this.cddSelected = true;
         this.cddBaseTemp = this.weatherDataService.coolingTemp;
@@ -118,35 +124,32 @@ export class WeatherDataComponent {
     if (!this.selectedFacility || this.facilityMeterData?.length == 0) {
       return true;
     }
-    if (this.weatherDataSelection != 'degreeDays') {
-      if (!this.cddSelected && !this.hddSelected && !this.relativeHumiditySelected && !this.dryBulbTempSelected) {
-        return true;
-      }
-      if (this.cddSelected && (this.cddBaseTemp == undefined || this.cddBaseTemp == null)) {
-        return true;
-      }
-      if (this.hddSelected && (this.hddBaseTemp == undefined || this.hddBaseTemp == null)) {
-        return true;
-      }
+    if (!this.cddSelected && !this.hddSelected && !this.relativeHumiditySelected && !this.dryBulbTempSelected) {
+      return true;
     }
+    if (this.cddSelected && (this.cddBaseTemp == undefined || this.cddBaseTemp == null)) {
+      return true;
+    }
+    if (this.hddSelected && (this.hddBaseTemp == undefined || this.hddBaseTemp == null)) {
+      return true;
+    }
+
     return false;
   }
 
   setSelectedValues() {
     this.selectedValues = [];
-    if (this.weatherDataSelection != 'degreeDays') {
-      if (this.cddSelected) {
-        this.selectedValues.push({ name: 'CDD', value: this.cddBaseTemp });
-      }
-      if (this.hddSelected) {
-        this.selectedValues.push({ name: 'HDD', value: this.hddBaseTemp });
-      }
-      if (this.relativeHumiditySelected) {
-        this.selectedValues.push({ name: 'relativeHumidity' });
-      }
-      if (this.dryBulbTempSelected) {
-        this.selectedValues.push({ name: 'dryBulbTemp' });
-      }
+    if (this.cddSelected) {
+      this.selectedValues.push({ name: 'CDD', value: this.cddBaseTemp });
+    }
+    if (this.hddSelected) {
+      this.selectedValues.push({ name: 'HDD', value: this.hddBaseTemp });
+    }
+    if (this.relativeHumiditySelected) {
+      this.selectedValues.push({ name: 'relativeHumidity' });
+    }
+    if (this.dryBulbTempSelected) {
+      this.selectedValues.push({ name: 'dryBulbTemp' });
     }
   }
 
