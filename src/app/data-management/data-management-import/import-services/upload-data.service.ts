@@ -70,7 +70,6 @@ export class UploadDataService {
   }
 
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
-    console.log('get ref')
     let isTemplate: TemplateVersion = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();

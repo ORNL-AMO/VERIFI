@@ -60,10 +60,8 @@ export class UploadFilesComponent {
   }
 
   addFile(file: File) {
-    console.log(file)
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      console.log('file read');
       const arrayBuffer: ArrayBuffer = e.target.result;
       const uint8Array = new Uint8Array(arrayBuffer);
       let workBook: XLSX.WorkBook = XLSX.read(uint8Array, { type: 'array', cellDates: true });
