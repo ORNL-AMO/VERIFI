@@ -8,6 +8,7 @@ import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 
 @Component({
   selector: 'app-upload-files',
@@ -26,7 +27,8 @@ export class UploadFilesComponent {
     private uploadDataService: UploadDataService,
     private dataManagementService: DataManagementService,
     private accountDbService: AccountdbService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private importBackupModalService: ImportBackupModalService
   ) {
 
   }
@@ -60,8 +62,9 @@ export class UploadFilesComponent {
   addFile(file: File) {
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+      const arrayBuffer: ArrayBuffer = e.target.result;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let workBook: XLSX.WorkBook = XLSX.read(uint8Array, { type: 'array', cellDates: true });
       try {
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
@@ -73,7 +76,13 @@ export class UploadFilesComponent {
         this.loadingService.setLoadingStatus(false);
       }
     };
-    reader.readAsBinaryString(file);
+
+    reader.onerror = (error) => {
+      console.log('Error: ', error);
+      this.fileUploadError = true;
+      this.loadingService.setLoadingStatus(false);
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   removeReference(index: number) {
@@ -110,5 +119,10 @@ export class UploadFilesComponent {
     } else {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-general-file/' + fileReference.id)
     }
+  }
+
+  openImportBackup() {
+    this.importBackupModalService.inFacility = false;
+    this.importBackupModalService.showModal.next(true);
   }
 }
