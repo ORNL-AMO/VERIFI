@@ -2,31 +2,15 @@
   <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
     <div class="col-11 pt-4 pb-4">
       <div class="form-paper">
-        <div>
-          <h4>
-            Upload Data From .JSON File
-          </h4>
-          <br>
-          <p>
-            Use the below button to import a json backup data file. Accounts or facilities can be imported as new data or to overwrite existing data.
-          </p>
-
-          <button class="btn btn-secondary import-btn" (click)="openImportBackup()">
-            <span class="fa fa-file-import"></span>
-            Import File
-          </button>
-        </div>
-        <hr class="mt-5">
-        <h4 class="mt-5">
-          Upload Data From .XLSX Files
+        <h4>
+          Upload Data
         </h4>
-        <br>
         <div class="row">
           <div class="col-12">
-            <h5>Data Entry Options </h5>
+            <h5>Data Entry Options</h5>
           </div>
           <div class="col-12">
-            <p class="large">VERIFI has two options for adding utility data to corporate accounts. Users
+            <p class="large">VERIFI has multiple options for adding utility data to corporate accounts. Users
               with
               only a couple
               facilities may want to add data manually by filling out data forms for facilities, meters,
@@ -34,13 +18,43 @@
               predictors. Otherwise, accounts with many facilities can use our excel
               template for uploading
               all the data tracking information at once.</p>
+
+            <ol>
+              <li>
+                <b>Manual Data Entry:</b> This option allows users to add data by filling out forms for each
+                facility, meter, bill and predictor. This is a good option for users with only a few
+                facilities or for users who want to add data for a single facility at a time.
+              </li>
+              <li>
+                <b>Excel Data Upload (Template):</b> This option allows users to upload data for multiple facilities at
+                once
+                using an excel template. This is a good option for users with many facilities or for users who want to
+                add data for multiple facilities at once.
+              </li>
+              <li>
+                <b>Excel Data Upload (Custom):</b> Depending on the structure of the data in the excel file, it may be
+                possible
+                to upload data without using the provided template. This option is best for users with a strong
+                understanding of how the data is structured in VERIFI and how to map data from their excel file to the
+                correct fields in VERIFI. <i>(This option is good for ENPI files.)</i>
+              </li>
+              <li>
+                <b>Backup Data Upload (JSON):</b> This option allows users to upload data from a JSON backup file. This
+                is a
+                good option for users who have exported data from VERIFI in the past and want to re-import it, or want
+                to selectively import facilities into the current account from a JSON backup file.
+              </li>
+            </ol>
+
+
             <p>
-              It should be noted that a combination of manual data entry and excel data uploading can be
-              used.
+              It should be noted a combination of these options can be used. For example, a user could upload data for
+              some facilities using the excel template and then add additional facilities manually using the data forms.
             </p>
           </div>
         </div>
         <hr>
+        <h6>Excel File Upload</h6>
         <p>
           An excel template has been created to more easily upload facility and utility data. <a class="click-link"
             href="assets/csv_templates/VERIFI-Import-Data.xlsx">
@@ -58,31 +72,8 @@
         </div>
         }
         <hr>
-        <div class="alert alert-info">
-          <ul class="mb-0">
-            <li>
-              Select the files you wish to upload data from into facilities.
-            </li>
-            <li>
-              Data must be in excel (.XLSX) files.
-            </li>
-            <li>
-              Once the files have been selected we will work through parsing out the relevant data into
-              the correct
-              places.
-            </li>
-            <li>
-              Click the "Choose Files" button or drag and drop files into the grey box.
-            </li>
-            <li>
-              Multiple files can be uploaded.
-            </li>
-          </ul>
-        </div>
-
         @if (fileReferences.length != 0) {
         <div class="table-responsive">
-          <hr>
           <table class="table table-hover table-sm table-bordered utility-data">
             <thead class="table-mh">
               <tr>
@@ -110,12 +101,24 @@
             </tbody>
           </table>
         </div>
+        }@else {
+        <div>
+          <h6>
+            Upload Data From Backup JSON File
+          </h6>
+          <p>
+            Use the below button to selectively import facilities from a JSON backup data file.
+          </p>
+          <button class="btn btn-secondary" (click)="openImportBackup()">
+            <span class="fa fa-file-import"></span>
+            Import Backup File
+          </button>
+        </div>
         }
       </div>
     </div>
   </div>
 </div>
-
 
 <nav class="data-management-footer navbar">
   <div class="container-fluid justify-content-end">

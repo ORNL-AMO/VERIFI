@@ -73,7 +73,11 @@ export class ImportBackupModalComponent implements OnInit {
         this.backupFile = undefined;
         this.backupFileError = undefined;
         this.backupName = undefined;
-        this.overwriteData = false;
+        if (this.router.url.includes('import-data')) {
+          this.overwriteData = 'selective_import';
+        } else {
+          this.overwriteData = false;
+        }
         this.selectedAccount = this.accountDbService.selectedAccount.getValue();
         this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
         this.accountFacilityNames = this.accountFacilities.map(facility => facility.name);

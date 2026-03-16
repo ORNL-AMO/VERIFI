@@ -60,10 +60,13 @@ export class UploadFilesComponent {
   }
 
   addFile(file: File) {
+    console.log(file)
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+      console.log('file read');
+      const arrayBuffer: ArrayBuffer = e.target.result;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let workBook: XLSX.WorkBook = XLSX.read(uint8Array, { type: 'array', cellDates: true });
       try {
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
@@ -75,7 +78,13 @@ export class UploadFilesComponent {
         this.loadingService.setLoadingStatus(false);
       }
     };
-    reader.readAsBinaryString(file);
+
+    reader.onerror = (error) => {
+      console.log('Error: ', error);
+      this.fileUploadError = true;
+      this.loadingService.setLoadingStatus(false);
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   removeReference(index: number) {
