@@ -1,85 +1,79 @@
 <hr>
 
-  @if (groupAnalysisData?.length > 0) {
-    <div class="mt-3">
-      @for (groupSummary of groupAnalysisData; track groupSummary; let i = $index) {
-        <div>
-          <h4>{{groupSummary.groupId | groupName}} Analysis</h4>
-          <table class="table utility-data table-sm table-bordered table-hover mt-5" #savingsTable>
-            <thead>
-              <tr class="table-mh">
-                <th class="text-center sortable-header" (click)="setOrderDataField('year')"
-                  [ngClass]="{'active': orderDataField == 'year'}">
-                  Year
-                </th>
-                <th class="text-center sortable-header" (click)="setOrderDataField('savings')"
-                  [ngClass]="{'active': orderDataField == 'savings'}">
-                  Savings
-                </th>
-                <th class="text-center sortable-header" (click)="setOrderDataField('totalSavingsPercentImprovement')"
-                  [ngClass]="{'active': orderDataField == 'totalSavingsPercentImprovement'}">
-                  % Savings
-                </th>
-                <th class="text-center sortable-header" (click)="setOrderDataField('contributionPercent')"
-                  [ngClass]="{'active': orderDataField == 'contributionPercent'}">
-                  % Contribution
-                </th>
-              </tr>
-            </thead>
-            <tbody class="table-group-divider">
-              @for (data of groupSummary.data | orderBy: orderDataField: orderByDirection; track data; let i = $index) {
-                <tr
-                  >
-                  <td class="text-center"> {{data.year}} </td>
-                  @if (data.savings) {
-                    <td class="text-center">
-                      <span [ngClass]="{'red': data.savings < 0}">
-                        {{data.savings | number:'1.0-2'}}
-                      </span>
-                    </td>
-                  }
-                  @if (!data.savings || data.savings == null) {
-                    <td class="text-center">
-                      &mdash;
-                    </td>
-                  }
-                  @if (data.totalSavingsPercentImprovement) {
-                    <td class="text-center"
-                      >
-                      <span [ngClass]="{'red': data.totalSavingsPercentImprovement < 0}">
-                        {{data.totalSavingsPercentImprovement | number:'1.0-3'}} %
-                      </span>
-                    </td>
-                  }
-                  @if (!data.totalSavingsPercentImprovement) {
-                    <td class="text-center"
-                      >
-                      &mdash;
-                    </td>
-                  }
-                  @if (data.savings && annualAnalysisSummary[i]?.adjusted) {
-                    <td class="text-center"
-                      >
-                      <span
-                        [ngClass]="{'red': (data.savings / annualAnalysisSummary[i].adjusted) < 0}">
-                      {{(data.savings / annualAnalysisSummary[i].adjusted) | number:'1.0-3'}} %</span>
-                    </td>
-                  }
-                  @if (!data.savings || !annualAnalysisSummary[i]?.adjusted) {
-                    <td class="text-center"
-                      >
-                      &mdash;
-                    </td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
-          <button class="btn action-btn btn-sm mt-3" (click)="copyTable(i)">
-            <span class="fa fa-copy"></span> Copy Table
-          </button>
-          <hr>
-          </div>
+@if (groupAnalysisData?.length > 0) {
+<div class="mt-3">
+  @for (groupSummary of groupAnalysisData; track groupSummary; let i = $index) {
+  <div>
+    <h4>{{groupSummary.groupId | groupName}} Analysis</h4>
+    <table class="table utility-data table-sm table-bordered table-hover mt-5" #savingsTable>
+      <thead>
+        <tr class="table-mh">
+          <th class="text-center sortable-header" (click)="setOrderDataField('year')"
+            [ngClass]="{'active': orderDataField == 'year'}">
+            Year
+          </th>
+          <th class="text-center sortable-header" (click)="setOrderDataField('savings')"
+            [ngClass]="{'active': orderDataField == 'savings'}">
+            Savings
+          </th>
+          <th class="text-center sortable-header" (click)="setOrderDataField('totalSavingsPercentImprovement')"
+            [ngClass]="{'active': orderDataField == 'totalSavingsPercentImprovement'}">
+            % Savings
+          </th>
+          <th class="text-center sortable-header" (click)="setOrderDataField('contributionPercent')"
+            [ngClass]="{'active': orderDataField == 'contributionPercent'}">
+            % Contribution
+          </th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+        @for (data of groupSummary.data | orderBy: orderDataField: orderByDirection; track data; let i = $index) {
+        <tr>
+          <td class="text-center"> {{data.year}} </td>
+          @if (data.savings) {
+          <td class="text-center">
+            <span [ngClass]="{'red': data.savings < 0}">
+              {{data.savings | number:'1.0-2'}}
+            </span>
+          </td>
+          }
+          @if (!data.savings || data.savings == null) {
+          <td class="text-center">
+            &mdash;
+          </td>
+          }
+          @if (data.totalSavingsPercentImprovement) {
+          <td class="text-center">
+            <span [ngClass]="{'red': data.totalSavingsPercentImprovement < 0}">
+              {{data.totalSavingsPercentImprovement | number:'1.0-3'}} %
+            </span>
+          </td>
+          }
+          @if (!data.totalSavingsPercentImprovement) {
+          <td class="text-center">
+            &mdash;
+          </td>
+          }
+          @if (data.contributionPercent) {
+          <td class="text-center">
+            <span [ngClass]="{'red': data.contributionPercent < 0}">
+              {{data.contributionPercent | number:'1.0-3'}} %</span>
+          </td>
+          }
+          @if (!data.contributionPercent) {
+          <td class="text-center">
+            &mdash;
+          </td>
+          }
+        </tr>
         }
-      </div>
-    }
+      </tbody>
+    </table>
+    <button class="btn action-btn btn-sm mt-3" (click)="copyTable(i)">
+      <span class="fa fa-copy"></span> Copy Table
+    </button>
+    <hr>
+  </div>
+  }
+</div>
+}
