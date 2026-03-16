@@ -43,6 +43,15 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   displayEnableForm: boolean = false;
 
   dataEndYear: number;
+
+  displayDataAdjustmentModal: boolean = false;
+  dataAdjustmentYearOptions: Array<number>;
+  deleteDataAdjustmentYear: number;
+
+  displayBaselineAdjustmentModal: boolean = false;
+  baselineAdjustmentYearOptions: Array<number>;
+  deleteBaselineAdjustmentYear: number;
+
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -56,11 +65,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.setShowInUseMessage();
-    this.setBaselineYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
+      this.setDataEndYear();
+      this.setBaselineYearOptions();
+      this.setAdjustmentYearOptions();
       if (this.analysisItem.hasBanking && this.group.applyBanking) {
-        this.setDataEndYear();
         this.setBankedGroup();
         this.setBankedAnalysisYearOptions();
         this.setHasModelsGenerated();
@@ -171,7 +181,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     }
   }
 
-
   showEnableForm() {
     this.displayEnableForm = true;
   }
@@ -195,4 +204,78 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.setHasModelsGenerated();
     this.cancelEnableForm();
   }
+
+  setAdjustmentYearOptions() {
+    //baselineYearOptions doesn't include end year
+    let yearOptions: Array<number> = this.baselineYearOptions;
+    yearOptions.push(this.dataEndYear);
+    let dataAdjustmentYears: Array<number> = this.group.dataAdjustments.map(adjustment => adjustment.year);
+    this.dataAdjustmentYearOptions = yearOptions.filter(year => {
+      if (!dataAdjustmentYears.includes(year)) {
+        return year;
+      }
+    });
+    let baselineAdjustmentYears: Array<number> = this.group.baselineAdjustmentsV2.map(adjustment => adjustment.year);
+    this.baselineAdjustmentYearOptions = yearOptions.filter(year => {
+      if (!baselineAdjustmentYears.includes(year)) {
+        return year;
+      }
+    });
+  }
+
+  //DATA ADJUSTMENT
+  openDataAdjustmentModal() {
+    this.displayDataAdjustmentModal = true;
+  }
+
+  closeDataAdjustmentModal() {
+    this.displayDataAdjustmentModal = false;
+  }
+
+  async addDataAdjustments(year: number) {
+    this.group.dataAdjustments.push({ year: year, amount: 0 });
+    this.group.dataAdjustments.sort((a, b) => a.year - b.year);
+    await this.saveItem();
+    this.closeDataAdjustmentModal();
+  }
+
+  openRemoveDataAdjustment(year: number) {
+    this.deleteDataAdjustmentYear = year;
+  }
+
+  async closeRemoveDataAdjustment(removeAdjustment: boolean) {
+    if (removeAdjustment) {
+      this.group.dataAdjustments = this.group.dataAdjustments.filter(adjustment => adjustment.year != this.deleteDataAdjustmentYear);
+      await this.saveItem();
+    }
+    this.deleteDataAdjustmentYear = undefined;
+  }
+
+  //BASELINE ADJUSTMENT
+  openBaselineAdjustmentModal(){
+    this.displayBaselineAdjustmentModal = true;
+  }
+
+  closeBaselineAdjustmentModal() {
+    this.displayBaselineAdjustmentModal = false;
+  }
+  
+  async addBaselineAdjustments(year: number) {
+    this.group.baselineAdjustmentsV2.push({ year: year, amount: 0 });
+    this.group.baselineAdjustmentsV2.sort((a, b) => a.year - b.year);
+    await this.saveItem();
+    this.closeBaselineAdjustmentModal();
+  }
+
+  openRemoveBaselineAdjustment(year: number) {
+    this.deleteBaselineAdjustmentYear = year;
+  }
+
+  async closeRemoveBaselineAdjustment(removeAdjustment: boolean) {
+    if (removeAdjustment) {
+      this.group.baselineAdjustmentsV2 = this.group.baselineAdjustmentsV2.filter(adjustment => adjustment.year != this.deleteBaselineAdjustmentYear);
+      await this.saveItem();
+    }
+    this.deleteBaselineAdjustmentYear = undefined;
+  } 
 }

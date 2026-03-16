@@ -119,7 +119,7 @@
         Regression Coefficient
       </div>
     </div>
-    @for (predictor of group.predictorVariables; track predictor) {
+    @for (predictor of group.predictorVariables; track predictor.id) {
     <div class="row sub-column">
       <div class="col-4">
         {{predictor.name}}@if (predictor.unit) {
