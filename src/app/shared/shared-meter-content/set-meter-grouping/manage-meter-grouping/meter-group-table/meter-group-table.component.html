@@ -8,7 +8,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (meter of meters; track meter) {
+      @for (meter of meters; track meter.guid) {
         <tr>
           <td>
             {{meter.name}}

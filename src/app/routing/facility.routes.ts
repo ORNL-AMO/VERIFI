@@ -53,6 +53,8 @@ import { EditPredictorComponent } from "src/app/data-evaluation/facility/utility
 import { FacilityEmissionFactorsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component";
 import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
 import { AnalysisDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-details-table/analysis-details-table.component";
+import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
+import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -147,7 +149,26 @@ export const FacilityRoutes: Route = {
                     ],
                 },
                 { path: 'monthly-meter-data', component: CalanderizationComponent },
-                { path: 'meter-groups', component: MeterGroupingComponent },
+                { 
+                    path: 'meter-groups', 
+                    component: MeterGroupingComponent,
+                    children: [
+                        {
+                            path: '',
+                            pathMatch: 'full',
+                            redirectTo: 'manage'
+                        },
+                        {
+                            path: 'manage',
+                            component: ManageMeterGroupingComponent
+                        },
+                        {
+                            path: 'edit-group/:id',
+                            component: MeterGroupFormComponent,
+                            canDeactivate: [canDeactivateGuard]
+                        }
+                    ]
+                },
                 {
                     path: 'predictors',
                     component: PredictorsComponent,

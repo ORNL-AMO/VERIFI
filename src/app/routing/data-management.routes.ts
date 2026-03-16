@@ -52,6 +52,8 @@ import { HelpComponent } from "../static-content/help/help.component";
 import { FacilityMeterDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component";
 import { FacilityPredictorDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component";
 import { MeterChargesVisualizationComponent } from "../data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-visualization.component";
+import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
+import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -158,6 +160,22 @@ export const DataManagementRoutes: Route = {
                         {
                             path: 'meter-grouping',
                             component: SetMeterGroupingComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'manage'
+                                },
+                                {
+                                    path: 'manage',
+                                    component: ManageMeterGroupingComponent
+                                },
+                                {
+                                    path: 'edit-group/:id',
+                                    component: MeterGroupFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                }
+                            ]
                         },
                         {
                             path: 'predictors',

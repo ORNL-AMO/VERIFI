@@ -33,7 +33,7 @@ import { CalanderizedMeterDataTableComponent } from './shared-meter-calendarizat
 import { DataApplicationMenuComponent } from './shared-meter-calendarization/data-application-menu/data-application-menu.component';
 import { SetMeterGroupingComponent } from './set-meter-grouping/set-meter-grouping.component';
 import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/meter-group-form.component';
-import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
+import { MeterGroupTableComponent } from './set-meter-grouping/manage-meter-grouping/meter-group-table/meter-group-table.component';
 import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-connect-bill/view-connect-bill.component';
 import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
 import { MeterChargesFormComponent } from './edit-meter-form/meter-charges-form/meter-charges-form.component';
@@ -43,6 +43,7 @@ import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe
 import { MeterChargeValuePipe } from './meter-data/meter-charge-value.pipe';
 import { SharedDataQualityReportMetersModule } from '../shared-data-quality-report-meters/shared-data-quality-report-meters.module';
 import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-data-by.pipe';
+import { ManageMeterGroupingComponent } from './set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component';
 
 
 
@@ -83,7 +84,8 @@ import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-
     EditBillChargesComponent,
     MeterChargePipe,
     MeterChargeValuePipe,
-    OrderMeterDataByPipe
+    OrderMeterDataByPipe,
+    ManageMeterGroupingComponent
   ],
   imports: [
     CommonModule,
