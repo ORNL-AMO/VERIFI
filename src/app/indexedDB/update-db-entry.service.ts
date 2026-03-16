@@ -146,6 +146,12 @@ export class UpdateDbEntryService {
           group.dataAdjustments = group.dataAdjustments.filter(adjustment => adjustment.amount != 0);
           isChanged = true;
         }
+
+        if(group['hasBaselineAdjustmentV2'] != undefined){
+          delete group['hasBaselineAdjustmentV2'];
+          group.baselineAdjustmentsV2 = group.baselineAdjustmentsV2.filter(adjustment => adjustment.amount != 0);
+          isChanged = true;
+        }
         
       });
     }
