@@ -53,70 +53,66 @@
       </select>
 
       @if(selectedFacility) {
-      <div class="d-flex flex-column mb-3 mt-5">
-
+      <div class="d-flex flex-column mb-3 mt-3">
+        @if(cddSelected || hddSelected) {
+        <div class="row justify-content-end">
+          <div class="col-6">
+            <span class="text-muted fst-italic">Base Temperature</span>
+          </div>
+        </div>
+        }
         <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
-          <div class="col-auto">
+          <div class="col-6">
             <input type="checkbox" id="cddSelected" name="cddSelected" class="form-check-input"
               [(ngModel)]="cddSelected">
+            <label for="cddSelected" class="fw-bold ps-2">Cooling Degree Days</label>
           </div>
-          <label for="cddSelected" class="col-auto fw-bold">Cooling Degree Days</label>
           @if(cddSelected) {
-          <ng-container>
-            <div class="col-auto">
-              <span class="text-muted fst-italic ms-3">Cooling Base Temperature:</span>
+          <div class="col-6">
+            <div class="input-group">
+              <input type="number" class="form-control border-primary bg-light" name="cddBaseTemp"
+                [(ngModel)]="cddBaseTemp">
+              <span class="input-group-text">&#8457;</span>
             </div>
-            <div class="col-6 col-md-4 col-lg-3">
-              <div class="input-group">
-                <input type="number" class="form-control border-primary bg-light" name="cddBaseTemp"
-                  [(ngModel)]="cddBaseTemp">
-                <span class="input-group-text">&#8457;</span>
-              </div>
-            </div>
-          </ng-container>
+          </div>
           }
         </div>
 
         <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
-          <div class="col-auto">
+          <div class="col-6">
             <input type="checkbox" id="hddSelected" name="hddSelected" class="form-check-input"
               [(ngModel)]="hddSelected">
+            <label for="hddSelected" class="fw-bold ps-2">Heating Degree Days</label>
           </div>
-          <label for="hddSelected" class="col-auto fw-bold">Heating Degree Days</label>
           @if(hddSelected) {
-          <ng-container>
-            <div class="col-auto">
-              <span class="text-muted fst-italic ms-3">Heating Base Temperature:</span>
+          <div class="col-6">
+            <div class="input-group">
+              <input type="number" class="form-control border-primary bg-light" name="hddBaseTemp"
+                [(ngModel)]="hddBaseTemp">
+              <span class="input-group-text">&#8457;</span>
             </div>
-            <div class="col-6 col-md-4 col-lg-3">
-              <div class="input-group">
-                <input type="number" class="form-control border-primary bg-light" name="hddBaseTemp"
-                  [(ngModel)]="hddBaseTemp">
-                <span class="input-group-text">&#8457;</span>
-              </div>
-            </div>
-          </ng-container>
+          </div>
           }
         </div>
 
         <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
-          <div class="col-auto">
+          <div class="col-12">
             <input type="checkbox" id="relativeHumiditySelected" name="relativeHumiditySelected"
               class="form-check-input" [(ngModel)]="relativeHumiditySelected">
+            <label for="relativeHumiditySelected" class="fw-bold ps-2">
+              Relative Humidity
+            </label>
           </div>
-          <label for="relativeHumiditySelected" class="col-auto fw-bold">
-            Relative Humidity
-          </label>
         </div>
 
         <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
-          <div class="col-auto">
+          <div class="col-12">
             <input type="checkbox" id="dryBulbTempSelected" name="dryBulbTempSelected" class="form-check-input"
               [(ngModel)]="dryBulbTempSelected">
+            <label for="dryBulbTempSelected" class="fw-bold ps-2">
+              Dry Bulb Temperature
+            </label>
           </div>
-          <label for="dryBulbTempSelected" class="col-auto fw-bold">
-            Dry Bulb Temperature
-          </label>
         </div>
       </div>
       }
