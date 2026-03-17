@@ -1,3 +1,12 @@
 .fa-save{
     color: white;
 }
+
+.fa-trash{
+    color: red;
+}
+
+i.fa{
+    vertical-align: middle;
+}
+

@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -42,6 +43,7 @@ export class MeterGroupingResultsTableComponent {
   showConsumption: boolean = false;
   showEnergyUse: boolean = true;
   metersInGroup: Array<IdbUtilityMeter>;
+  selectedFacility: IdbFacility;
   constructor(private activatedRoute: ActivatedRoute,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -50,7 +52,8 @@ export class MeterGroupingResultsTableComponent {
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
     private copyTableService: CopyTableService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private dbChangesService: DbChangesService
   ) { }
 
   ngOnInit() {
@@ -87,11 +90,11 @@ export class MeterGroupingResultsTableComponent {
   setCalanderizedMeterData() {
     this.metersInGroup = this.utilityMeterDbService.getGroupMetersByGroupId(this.meterGroup.guid);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.energyUnit = facility.energyUnit;
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.energyUnit = this.selectedFacility.energyUnit;
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     //TODO: site/source option
-    this.calanderizedMeterData = getCalanderizedMeterData(this.metersInGroup, facilityMeterData, facility, false, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion, []);
+    this.calanderizedMeterData = getCalanderizedMeterData(this.metersInGroup, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedFacility.energyIsSource, neededUnits: undefined }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
     this.groupMonthlyData = this.calanderizedMeterData.flatMap(meter => { return meter.monthlyData });
     //combine monthly data for meters in group with same month and year
     this.groupMonthlyData = this.groupMonthlyData.reduce((acc, monthlyData) => {
@@ -149,5 +152,12 @@ export class MeterGroupingResultsTableComponent {
     }, 200)
   }
 
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      this.selectedFacility.energyIsSource = energyIsSource;
+      await this.dbChangesService.updateFacilities(this.selectedFacility);
+      this.setCalanderizedMeterData();
+    }
+  }
 
 }

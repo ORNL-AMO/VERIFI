@@ -76,7 +76,7 @@
       </div>
     </div>
     }
-    <div class="btn-groupps-1 pe-1 mb-2">
+    <div class="btn-group pe-1 mb-2">
       <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
         <span class="fa fa-chevron-right"></span>
         Table
@@ -90,7 +90,7 @@
     </div>
     @if (selectedMeter.source != 'Water Discharge' && selectedMeter.source != 'Water Intake' && selectedMeter.source !=
     'Other') {
-    <div class="btn-groupps-1 pe-1 mb-2">
+    <div class="btn-group pe-1 mb-2">
       <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
         [ngClass]="{'active': selectedFacility.energyIsSource == true}">
         <span class="fa fa-chevron-right"></span>

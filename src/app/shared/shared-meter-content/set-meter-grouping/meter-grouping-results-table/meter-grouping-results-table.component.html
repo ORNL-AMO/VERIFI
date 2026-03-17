@@ -1,12 +1,15 @@
 <div class="d-flex w-100 pb-2">
     <div class="btn-group">
-        <button class="btn btn-sm btn-outline" (click)="cancel()" title="Manage All Groups">
+        <button class="btn meter-group-action-btn" (click)="cancel()" title="Manage All Groups">
             <i class="fa fa-layer-group"></i>
         </button>
-        <button class="btn btn-sm btn-outline" (click)="editGroup()" title="Edit Group">
+        <button class="btn meter-group-action-btn" (click)="editGroup()" title="Edit Group">
             <i class="fa fa-pencil"></i>
         </button>
-        <button class="btn btn-sm btn-outline" (click)="viewGroupChartData()" title="Chart Group Data">
+        <button class="btn meter-group-action-btn active" title="Group Data Table">
+            <i class="fa fa-table"></i>
+        </button>
+        <button class="btn meter-group-action-btn" (click)="viewGroupChartData()" title="Chart Group Data">
             <i class="fa fa-chart-line"></i>
         </button>
     </div>
@@ -16,7 +19,21 @@
 
 
 
-<div class="d-flex w-100 justify-content-end">
+<div class="d-flex w-100 justify-content-end pb-2">
+    <div class="btn-group pe-1 mb-2">
+        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
+            [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+            <span class="fa fa-chevron-right"></span>
+            Source Energy
+            <span class="fa fa-chevron-left"></span>
+        </button>
+        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
+            [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+            <span class="fa fa-chevron-right"></span>
+            Site Energy
+            <span class="fa fa-chevron-left"></span>
+        </button>
+    </div>
     <app-table-items-dropdown></app-table-items-dropdown>
 </div>
 
@@ -120,10 +137,11 @@
     </tbody>
 </table>
 
-
-<ngb-pagination [collectionSize]="groupMonthlyData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-    [maxSize]="5" [rotate]="true" aria-label="Pagination">
-</ngb-pagination>
+<div class="d-flex w-100 justify-content-end">
+    <ngb-pagination [collectionSize]="groupMonthlyData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>
 }@else {
 <div class="alert alert-info p-1">
     No meters added to this group. Return to the group management to add meters to this group and view results.

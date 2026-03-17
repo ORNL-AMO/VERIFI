@@ -11,9 +11,7 @@
     @if (hasEnergyMeters) {
     <div>
         <div class="group-section">
-            <h5>
-                Energy Groups
-            </h5>
+            Energy Groups
         </div>
         @if (energyGroups.length > 0) {
         <div>
@@ -36,9 +34,7 @@
     @if (hasWaterMeters) {
     <div>
         <div class="group-section">
-            <h5>
-                Water Groups
-            </h5>
+            Water Groups
         </div>
         @if (waterGroups.length > 0) {
         <div>
@@ -58,10 +54,8 @@
     </div>
     }
     <!--OTHER-->
-    <div class="group-section mt-2">
-        <h5>
-            Other Groups
-        </h5>
+    <div class="group-section">
+        Other Groups
     </div>
     @if (otherGroups.length > 0) {
     <div>
@@ -80,10 +74,8 @@
     }
     @if (ungroupedMeters.length > 0) {
     <div>
-        <div class="group-section mt-2">
-            <h5>
-                Ungrouped Meters
-            </h5>
+        <div class="group-section">
+            Ungrouped Meters
         </div>
         <div class="d-flex flex-column p-2">
             <app-meter-group-table [meterGroup]="undefined"></app-meter-group-table>
@@ -97,7 +89,7 @@
     @let source = group.guid | meterGroupSource:facilityMeters;
     <div class="d-flex flex-column p-2">
         <div class="d-flex justify-content-between">
-            <a class="semibold group-label click-link" (click)="editGroup(group)">
+            <a class="semibold group-label click-link mt-auto" (click)="editGroup(group)">
                 <i class="fa fa-layer-group"></i>
                 {{group.name}}
             </a>
@@ -105,17 +97,19 @@
                 <span class="badge me-3 large"
                     [ngStyle]="{'background-color':source | meterSourceColor}">{{source}}</span>
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit">
+                    <button class="btn meter-group-action-btn" (click)="editGroup(group)" title="Edit">
                         <i class="fa fa-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline" (click)="viewGroupDataTable(group)" title="Group Data Table">
+                    <button class="btn meter-group-action-btn" (click)="viewGroupDataTable(group)"
+                        title="Group Data Table">
                         <i class="fa fa-table"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline" (click)="viewGroupChartData(group)" title="Chart Group Data">
+                    <button class="btn meter-group-action-btn" (click)="viewGroupChartData(group)"
+                        title="Chart Group Data">
                         <i class="fa fa-chart-line"></i>
+                    </button>
+                    <button class="btn meter-group-btn-danger" (click)="setDeleteGroup(group)" title="Delete">
+                        <i class="fa fa-trash"></i>
                     </button>
                 </div>
             </div>
@@ -136,7 +130,7 @@
     }
     <div class="popup-body">
         <p>WARNING: Deleting meter group cannot be undone. Analysis and reports will be updated.
-            Are you sure you want to preform this action?</p>
+            Are you sure you want to perform this action?</p>
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="closeDeleteGroup()">Cancel</button>

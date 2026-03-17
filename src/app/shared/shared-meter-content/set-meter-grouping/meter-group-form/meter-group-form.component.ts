@@ -14,6 +14,10 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-meter-group-form',
@@ -39,7 +43,11 @@ export class MeterGroupFormComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private loadingService: LoadingService,
+    private toastNoticationService: ToastNotificationsService,
+    private accountReportDbService: AccountReportDbService,
+    private analysisDbService: AnalysisDbService
   ) {
 
   }
@@ -173,6 +181,39 @@ export class MeterGroupFormComponent {
 
   viewGroupChartData() {
     this.router.navigate(['../../data-chart/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
+  }
+
+  closeDeleteGroup() {
+    this.showDeleteModal = false;
+  }
+
+  async deleteMeterGroup() {
+    this.loadingService.setLoadingMessage("Deleting Meter Group...");
+    this.loadingService.setLoadingStatus(true);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.meterGroup.id));
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeterGroups(selectedAccount, facility);
+
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.groupId == this.meterGroup.guid });
+
+    for (let i = 0; i < groupMeters.length; i++) {
+      let meter: IdbUtilityMeter = groupMeters[i];
+      meter.groupId = undefined;
+      await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter))
+    }
+    await this.dbChangesService.setMeters(selectedAccount, facility);
+    //update analysis items
+    await this.analysisDbService.deleteGroup(this.meterGroup.guid);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, facility);
+    //update BCC reports
+    await this.accountReportDbService.updateReportsRemoveGroup(this.meterGroup.guid);
+    await this.dbChangesService.setAccountReports(selectedAccount);
+    this.closeDeleteGroup();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
+    this.cancel();
   }
 
 }

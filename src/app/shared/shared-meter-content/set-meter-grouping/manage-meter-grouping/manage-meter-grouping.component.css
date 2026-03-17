@@ -1,7 +1,14 @@
-:not(.no-meters) h5{
-    border-bottom: solid;
-}
 
 .large{
     font-size: 12px;
+}
+
+.group-section{
+    background-color: #2c386b;
+    padding-left: .2rem;
+    padding-top: .1rem;
+    padding-bottom: .1rem;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 500;
 }
