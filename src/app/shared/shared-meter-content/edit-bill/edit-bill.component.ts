@@ -9,7 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { firstValueFrom, map, Observable, of, Subscription, take } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -173,14 +173,13 @@ export class EditBillComponent implements OnInit {
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
-          this.saveAndQuit();
-          return true;
+          return from(this.saveAndQuit()).pipe(map(() => true));
         } else if (action == 'discard') {
-          return true;
+          return of(true);
         }
-        return false;
+        return of(false);
       }),
-        take(1));
+        take(1), switchAll());
     }
     return of(true);
   }

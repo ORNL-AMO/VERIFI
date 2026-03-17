@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, map, Observable, of, Subscription, take } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
@@ -148,14 +148,13 @@ export class FacilityMeterComponent {
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
-          this.saveChanges();
-          return true;
+          return from(this.saveChanges()).pipe(map(() => true));
         } else if (action == 'discard') {
-          return true;
+          return of(true);
         }
-        return false;
+        return of(false);
       }),
-        take(1));
+        take(1), switchAll());
     }
     return of(true);
   }

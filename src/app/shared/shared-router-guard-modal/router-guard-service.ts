@@ -26,9 +26,6 @@ export class RouterGuardService {
   }
 
   setShowModal(show: boolean) {
-    if (show) {
-      this.actionSelected.next(undefined);
-    }
     this.showModal.next(show);
   }
 

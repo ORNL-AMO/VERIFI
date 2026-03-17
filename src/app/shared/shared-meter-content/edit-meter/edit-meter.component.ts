@@ -10,7 +10,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { Observable, firstValueFrom, map, of, take } from 'rxjs';
+import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -127,14 +127,13 @@ export class EditMeterComponent implements OnInit {
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
-          this.saveChanges();
-          return true;
+          return from(this.saveChanges()).pipe(map(() => true));
         } else if (action == 'discard') {
-          return true;
+          return of(true);
         }
-        return false;
+        return of(false);
       }),
-        take(1));
+        take(1), switchAll());
     }
     return of(true);
   }
