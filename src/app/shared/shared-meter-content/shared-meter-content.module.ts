@@ -33,7 +33,7 @@ import { CalanderizedMeterDataTableComponent } from './shared-meter-calendarizat
 import { DataApplicationMenuComponent } from './shared-meter-calendarization/data-application-menu/data-application-menu.component';
 import { SetMeterGroupingComponent } from './set-meter-grouping/set-meter-grouping.component';
 import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/meter-group-form.component';
-import { MeterGroupTableComponent } from './set-meter-grouping/manage-meter-grouping/meter-group-table/meter-group-table.component';
+import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
 import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-connect-bill/view-connect-bill.component';
 import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
 import { MeterChargesFormComponent } from './edit-meter-form/meter-charges-form/meter-charges-form.component';
