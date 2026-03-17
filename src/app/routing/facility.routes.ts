@@ -55,6 +55,8 @@ import { FacilitySavingsReportResultsComponent } from "../data-evaluation/facili
 import { AnalysisDetailsTableComponent } from "../data-evaluation/facility/analysis/analysis-dashboard/analysis-details-table/analysis-details-table.component";
 import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
 import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
+import { MeterGroupingResultsTableComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
+import { MeterGroupingResultsGraphComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -166,6 +168,14 @@ export const FacilityRoutes: Route = {
                             path: 'edit-group/:id',
                             component: MeterGroupFormComponent,
                             canDeactivate: [canDeactivateGuard]
+                        },
+                        {
+                            path: 'data-table/:id',
+                            component: MeterGroupingResultsTableComponent
+                        },
+                        {
+                            path: 'data-chart/:id',
+                            component: MeterGroupingResultsGraphComponent
                         }
                     ]
                 },

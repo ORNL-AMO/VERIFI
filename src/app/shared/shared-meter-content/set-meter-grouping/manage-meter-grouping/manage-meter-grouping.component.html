@@ -18,30 +18,8 @@
         @if (energyGroups.length > 0) {
         <div>
             @for (group of energyGroups; track group.guid) {
-            @let source = group.guid | meterGroupSource:facilityMeters;
-            <div class="d-flex flex-column p-2">
-                <div class="d-flex justify-content-between">
-                    <a class="semibold group-label click-link" (click)="editGroup(group)">
-                        <i class="fa fa-layer-group"></i>
-                        {{group.name}}
-                    </a>
-                    <div>
-                        <span class="badge me-3 large"
-                            [ngStyle]="{'background-color':source | meterSourceColor}">{{source}}</span>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit">
-                                <i class="fa fa-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="pt-2">
-                    <app-meter-group-table [groupId]="group.guid"></app-meter-group-table>
-                </div>
-            </div>
+            <ng-container
+                *ngTemplateOutlet="meterGroupBlock; context: { group: group, facilityMeters: facilityMeters }"></ng-container>
             }
         </div>
         }
@@ -65,30 +43,8 @@
         @if (waterGroups.length > 0) {
         <div>
             @for (group of waterGroups; track group.guid) {
-            @let source = group.guid | meterGroupSource:facilityMeters;
-            <div class="d-flex flex-column p-2">
-                <div class="d-flex justify-content-between">
-                    <a class="semibold group-label click-link" (click)="editGroup(group)">
-                        <i class="fa fa-layer-group"></i>
-                        {{group.name}}
-                    </a>
-                    <div>
-                        <span class="badge me-3 large"
-                            [ngStyle]="{'background-color':source | meterSourceColor}">{{source}}</span>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit">
-                                <i class="fa fa-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Delete">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="pt-2">
-                    <app-meter-group-table [groupId]="group.guid"></app-meter-group-table>
-                </div>
-            </div>
+            <ng-container
+                *ngTemplateOutlet="meterGroupBlock; context: { group: group, facilityMeters: facilityMeters }"></ng-container>
             }
         </div>
         }
@@ -110,30 +66,8 @@
     @if (otherGroups.length > 0) {
     <div>
         @for (group of otherGroups; track group.guid) {
-        @let source = group.guid | meterGroupSource:facilityMeters;
-        <div class="d-flex flex-column p-2">
-            <div class="d-flex justify-content-between">
-                <a class="semibold group-label click-link" (click)="editGroup(group)">
-                    <i class="fa fa-layer-group"></i>
-                    {{group.name}}
-                </a>
-                <div>
-                    <span class="badge me-3 large"
-                        [ngStyle]="{'background-color':source | meterSourceColor}">{{source}}</span>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="pt-2">
-                <app-meter-group-table [groupId]="group.guid"></app-meter-group-table>
-            </div>
-        </div>
+        <ng-container
+            *ngTemplateOutlet="meterGroupBlock; context: { group: group, facilityMeters: facilityMeters }"></ng-container>
         }
     </div>
     }
@@ -152,11 +86,45 @@
             </h5>
         </div>
         <div class="d-flex flex-column p-2">
-            <app-meter-group-table [groupId]="undefined"></app-meter-group-table>
+            <app-meter-group-table [meterGroup]="undefined"></app-meter-group-table>
         </div>
     </div>
     }
 </div>
+
+<!--reused template for meter groups (Energy, Water, Other)-->
+<ng-template #meterGroupBlock let-group="group" let-facilityMeters="facilityMeters">
+    @let source = group.guid | meterGroupSource:facilityMeters;
+    <div class="d-flex flex-column p-2">
+        <div class="d-flex justify-content-between">
+            <a class="semibold group-label click-link" (click)="editGroup(group)">
+                <i class="fa fa-layer-group"></i>
+                {{group.name}}
+            </a>
+            <div>
+                <span class="badge me-3 large"
+                    [ngStyle]="{'background-color':source | meterSourceColor}">{{source}}</span>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" (click)="viewGroupDataTable(group)" title="Group Data Table">
+                        <i class="fa fa-table"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" (click)="viewGroupChartData(group)" title="Chart Group Data">
+                        <i class="fa fa-chart-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="pt-2">
+            <app-meter-group-table [meterGroup]="group"></app-meter-group-table>
+        </div>
+    </div>
+</ng-template>
 
 
 <div [ngClass]="{'windowOverlay': groupToDelete}"></div>

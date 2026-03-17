@@ -125,4 +125,12 @@ export class ManageMeterGroupingComponent {
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
   }
+
+  viewGroupDataTable(group: IdbUtilityMeterGroup) {
+    this.router.navigate(['../data-table/' + group.guid], { relativeTo: this.activatedRoute });
+  }
+
+  viewGroupChartData(group: IdbUtilityMeterGroup) {
+    this.router.navigate(['../data-chart/' + group.guid], { relativeTo: this.activatedRoute });
+  }
 }

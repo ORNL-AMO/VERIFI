@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
   selector: 'app-meter-group-table',
@@ -11,8 +12,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   styleUrl: './meter-group-table.component.css'
 })
 export class MeterGroupTableComponent {
+  @Input({required: true})
+  meterGroup: IdbUtilityMeterGroup;
   @Input()
-  groupId: string;
+  showHeader: boolean;
 
   meters: Array<IdbUtilityMeter>;
   metersSub: Subscription;
@@ -21,7 +24,11 @@ export class MeterGroupTableComponent {
   ngOnInit() {
     this.metersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
       this.meters = meters.filter(m => {
-        return m.groupId == this.groupId;
+        if (this.meterGroup == undefined) {
+          return m.groupId == undefined;
+        } else {
+          return m.groupId == this.meterGroup.guid;
+        }
       });
     });
   }

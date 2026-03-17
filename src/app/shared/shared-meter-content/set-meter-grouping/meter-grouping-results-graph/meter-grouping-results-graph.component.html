@@ -1,0 +1,21 @@
+<div class="d-flex w-100 pb-2">
+    <div class="btn-group">
+        <button class="btn btn-sm btn-outline" (click)="cancel()" title="Manage All Groups">
+            <i class="fa fa-layer-group"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="editGroup()" title="Edit Group">
+            <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="viewGroupDataTable()" title="Group Data Table">
+            <i class="fa fa-table"></i>
+        </button>
+    </div>
+</div>
+
+@if(metersInGroup.length > 0) {
+<app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
+}@else {
+<div class="alert alert-info">
+    No meters in this group.
+</div>
+}

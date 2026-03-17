@@ -1,0 +1,131 @@
+<div class="d-flex w-100 pb-2">
+    <div class="btn-group">
+        <button class="btn btn-sm btn-outline" (click)="cancel()" title="Manage All Groups">
+            <i class="fa fa-layer-group"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="editGroup()" title="Edit Group">
+            <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="viewGroupChartData()" title="Chart Group Data">
+            <i class="fa fa-chart-line"></i>
+        </button>
+    </div>
+</div>
+@if(metersInGroup.length > 0) {
+<app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
+
+
+
+<div class="d-flex w-100 justify-content-end">
+    <app-table-items-dropdown></app-table-items-dropdown>
+</div>
+
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
+        <tr>
+            <th class="row-year" (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
+                class="row-year">
+                Month</th>
+            <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)
+            </th>
+            <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
+                Cost</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        @for (data of groupMonthlyData| orderBy: orderDataField: orderByDirection | slice:
+        ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data.date) {
+        <tr>
+            <td>{{data.date | date: 'MMMM, y'}}</td>
+            @if (showConsumption) {
+            <td>{{data.energyConsumption |customNumber}}
+            </td>
+            }
+            @if (showEnergyUse) {
+            <td>{{data.energyUse | customNumber}}
+            </td>
+            }
+            <!-- electricity
+            @if(account.displayEmissions){
+            @if (calanderizedMeter.showElectricalEmissions) {
+            @if (!isRECs) {
+            <td>{{data.totalWithMarketEmissions |
+                customNumber}}
+            </td>
+            }
+            @if (!isRECs) {
+            <td>{{data.totalWithLocationEmissions |
+                customNumber}}
+            </td>
+            }
+            }
+            @if (isRECs) {
+            <td>{{data.RECs | customNumber}}
+            </td>
+            }
+            @if (isRECs) {
+            <td>{{data.excessRECs | customNumber}}
+            </td>
+            }
+            @if(account.displayEmissions){
+            @if (isRECs) {
+            <td>
+                {{data.excessRECsEmissions | customNumber}}
+            </td>
+            }
+            }
+            <!--stationary other fuels--
+            @if (calanderizedMeter.showStationaryEmissions) {
+            <td>{{data.stationaryBiogenicEmmissions | customNumber}}
+            </td>
+            <td>{{data.stationaryCarbonEmissions | customNumber}}
+            </td>
+            <td>{{data.stationaryOtherEmissions | customNumber}}
+            </td>
+            <td>{{data.stationaryEmissions | customNumber}}
+            </td>
+            }
+            @if (calanderizedMeter.showOtherScope2Emissions) {
+            <td>{{data.otherScope2Emissions | customNumber}}
+            </td>
+            }
+            <!--mobile--
+            @if (calanderizedMeter.showMobileEmissions) {
+            <td>{{data.mobileBiogenicEmissions | customNumber}}
+            </td>
+            <td>{{data.mobileCarbonEmissions | customNumber}}
+            </td>
+            <td>{{data.mobileOtherEmissions | customNumber}}
+            </td>
+            <td>{{data.mobileTotalEmissions | customNumber}}
+            </td>
+            }
+            <!--fugitive--
+            @if (calanderizedMeter.showFugitiveEmissions) {
+            <td>{{data.fugitiveEmissions | customNumber}}
+            </td>
+            }
+            <!--process--
+            @if (calanderizedMeter.showProcessEmissions) {
+            <td>{{data.processEmissions | customNumber}}
+            </td>
+            }
+            } -->
+            <td>{{data.energyCost | customNumber:true}}
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+
+<ngb-pagination [collectionSize]="groupMonthlyData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+    [maxSize]="5" [rotate]="true" aria-label="Pagination">
+</ngb-pagination>
+}@else {
+<div class="alert alert-info p-1">
+    No meters added to this group. Return to the group management to add meters to this group and view results.
+</div>
+}

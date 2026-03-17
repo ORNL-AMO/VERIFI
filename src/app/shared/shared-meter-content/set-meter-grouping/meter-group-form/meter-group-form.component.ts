@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -10,7 +10,7 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -31,6 +31,8 @@ export class MeterGroupFormComponent {
   meterGroup: IdbUtilityMeterGroup;
   hasEnergyMeters: boolean;
   hasWaterMeters: boolean;
+
+  showDeleteModal: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -47,17 +49,21 @@ export class MeterGroupFormComponent {
     this.activatedRoute.params.subscribe(params => {
       let meterGroupId: string = params['id'];
       this.meterGroup = this.utilityMeterGroupDbService.getGroupById(meterGroupId);
-      this.groupForm = this.formBuilder.group({
-        name: [this.meterGroup.name, Validators.required],
-        groupType: [this.meterGroup.groupType, Validators.required],
-        description: [this.meterGroup.description]
-      });
-      this.setGroupOptions();
-      //existing group
-      if (this.meterGroupOptions.some(option => { return option.includeInGroup })) {
-        this.groupForm.controls['groupType'].disable();
+      if (!this.meterGroup) {
+        this.cancel();
+      } else {
+        this.groupForm = this.formBuilder.group({
+          name: [this.meterGroup.name, Validators.required],
+          groupType: [this.meterGroup.groupType, Validators.required],
+          description: [this.meterGroup.description]
+        });
+        this.setGroupOptions();
+        //existing group
+        if (this.meterGroupOptions.some(option => { return option.includeInGroup })) {
+          this.groupForm.controls['groupType'].disable();
+        }
+        this.hasExistingGroups = this.meterGroupOptions.find(option => { return option.inAnotherGroup }) != undefined;
       }
-      this.hasExistingGroups = this.meterGroupOptions.find(option => { return option.inAnotherGroup }) != undefined;
     });
   }
 
@@ -156,6 +162,19 @@ export class MeterGroupFormComponent {
     // }
     return of(true);
   }
+
+  openDeleteGroupModal() {
+    this.showDeleteModal = true;
+  }
+
+  viewGroupDataTable() {
+    this.router.navigate(['../../data-table/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
+  }
+
+  viewGroupChartData() {
+    this.router.navigate(['../../data-chart/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
+  }
+
 }
 
 export interface MeterGroupOption {
