@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, map, Observable, of, Subscription, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
@@ -15,6 +15,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-meter',
@@ -42,7 +43,8 @@ export class FacilityMeterComponent {
     private toastNotificationsService: ToastNotificationsService,
     private loadingService: LoadingService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private routerGuardService: RouterGuardService
   ) {
 
   }
@@ -143,10 +145,18 @@ export class FacilityMeterComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.meterForm && this.meterForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          this.saveChanges();
+          return true;
+        } else if (action == 'discard') {
+          return true;
+        }
+        return false;
+      }),
+        take(1));
     }
     return of(true);
   }
-
 }
