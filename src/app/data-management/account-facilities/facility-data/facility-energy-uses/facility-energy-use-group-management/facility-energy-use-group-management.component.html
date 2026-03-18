@@ -21,67 +21,23 @@
             <tr>
                 <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
                 <th>Equipment/Systems</th>
-                <!-- <th (click)="setOrderDataField('meterNumber')"
-                        [ngClass]="{'active': orderDataField == 'meterNumber'}">
-                        Meter #</th> -->
-                <!-- <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
-                    </th>
-                    <th (click)="setOrderDataField('fuel')" [ngClass]="{'active': orderDataField == 'fuel'}">Fuel
-                    </th>
-                    <th (click)="setOrderDataField('scope')" [ngClass]="{'active': orderDataField == 'scope'}">Scope
-                    </th>
-                    <th (click)="setOrderDataField('startingUnit')"
-                        [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th> -->
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr
-                *ngFor="let group of facilityEnergyUseGroups  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-                <!-- <td [ngClass]="{'invalid': isMeterInvalid(meter)}"> -->
+            @for(group of (facilityEnergyUseGroups | orderBy: orderDataField: orderByDirection | slice:
+            ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage); track group.guid) {
+            <tr>
                 <td>
                     <a (click)="selectEditGroup(group)">{{group.name}}</a>
                 </td>
 
                 @let groupEquipment = (group.guid | facilityEnergyEquipmentList:facilityEnergyUseEquipment);
                 <td>
-                    @for (equipment of groupEquipment; track $index) {
-                        <a class="click-link" (click)="goToEquipment(equipment)">{{equipment.name}}</a><br>
+                    @for (equipment of groupEquipment; track equipment.guid) {
+                    <a class="click-link" (click)="goToEquipment(equipment)">{{equipment.name}}</a><br>
                     }
                 </td>
-
-
-                <!-- <td>{{meter.meterNumber}}</td> -->
-                <!-- <td>{{meter.source}}</td>
-                    <td>
-                        <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
-                            <ng-container *ngIf="meter.scope != 2">
-                                {{meter.fuel}}
-                            </ng-container>
-                            <ng-container *ngIf="meter.scope == 2">
-                                {{meter.vehicleFuel}}
-                            </ng-container>
-                        </ng-container>
-                        <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <span [innerHTML]="meter.scope | scopeLabel"></span>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="meter.scope != 2">
-                            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
-                        </ng-container>
-                        <ng-container *ngIf="meter.scope == 2">
-                            <ng-container *ngIf="meter.vehicleCollectionType == 1">
-                                <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
-                            </ng-container>
-                            <ng-container *ngIf="meter.vehicleCollectionType == 2">
-                                <span [innerHTML]="meter.vehicleDistanceUnit | settingsLabel"></span>
-                            </ng-container>
-                        </ng-container>
-                    </td> -->
                 <td class="actions">
                     <div class="btn-group">
                         <button class="btn btn-sm btn-outline" (click)="selectEditGroup(group)" title="Edit">
@@ -96,6 +52,7 @@
                     </div>
                 </td>
             </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -104,7 +61,8 @@
     <h5>No energy use groups found for this facility.</h5>
     <div class="d-flex w-100 justify-content-center">
         <div class="pe-1">
-            <button class="btn action-btn" (click)="setupEnergyUseGroups()"><i class="fa fa-plus"></i> Setup Energy Use Groups</button>
+            <button class="btn action-btn" (click)="setupEnergyUseGroups()"><i class="fa fa-plus"></i> Setup Energy Use
+                Groups</button>
         </div>
     </div>
 </div>

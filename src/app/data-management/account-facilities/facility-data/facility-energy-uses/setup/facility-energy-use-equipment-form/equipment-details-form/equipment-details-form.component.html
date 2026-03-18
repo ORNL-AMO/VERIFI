@@ -19,9 +19,11 @@
                 <label class="col-sm-5 col-form-label" for="equipmentType">Industrial System</label>
                 <div class="col-sm-7">
                     <select name="equipmentType" class="form-select" id="equipmentType" formControlName="equipmentType">
-                        <option *ngFor="let option of equipmentTypes" [ngValue]="option">
+                        @for(option of equipmentTypes; track option) {
+                        <option [ngValue]="option">
                             {{option}}
                         </option>
+                        }
                     </select>
                 </div>
             </div>
@@ -88,18 +90,6 @@
                         <span class="badge me-1"
                             [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
                         }
-
-                        <!-- <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
-                            <ng-container *ngIf="meter.scope != 2">
-                                {{meter.fuel}}
-                            </ng-container>
-                            <ng-container *ngIf="meter.scope == 2">
-                                {{meter.vehicleFuel}}
-                            </ng-container>
-                        </ng-container>
-                        <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
-                            &mdash;
-                        </ng-container> -->
                     </td>
                 </tr>
                 }
