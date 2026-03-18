@@ -20,9 +20,11 @@
                 <input id="size_{{energySource}}" class="form-control" type="number" formControlName="size"
                     onfocus="this.select();" min="0">
                 <select class="input-group-text" id="units_{{energySource}}" name="units" formControlName="units">
-                    <option *ngFor="let option of (energySource | equipmentUnitOptions )" [ngValue]="option.value">
+                    @for(option of (energySource | equipmentUnitOptions); track option.value) {
+                    <option [ngValue]="option.value">
                         <span [innerHTML]="option.value | settingsLabel"></span>
                     </option>
+                    }
                 </select>
             </div>
         </div>

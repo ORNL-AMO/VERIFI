@@ -18,8 +18,10 @@
                     <input id="groupName" class="form-control" type="text" formControlName="name"
                         onfocus="this.select();" minlength="0" maxlength="100">
                 </div>
-                <div class="alert alert-danger" *ngIf="form.get('name').hasError('required')">Group name is
+                @if(form.get('name').touched && form.get('name').hasError('required')) {
+                <div class="alert alert-danger">Group name is
                     required</div>
+                }
             </div>
             <div>
                 <label class="w-100" for="groupNotes">Group Notes</label>
@@ -27,8 +29,10 @@
                     <textarea id="groupNotes" class="form-control" formControlName="notes" onfocus="this.select();"
                         minlength="0" maxlength="500"></textarea>
                 </div>
-                <div class="alert alert-danger" *ngIf="form.get('notes').hasError('required')">Group notes are
+                @if(form.get('notes').touched && form.get('notes').hasError('required')) {
+                <div class="alert alert-danger">Group notes are
                     required</div>
+                }
             </div>
         </form>
     </div>
@@ -103,7 +107,7 @@
 
 <div [ngClass]="{'windowOverlay': showDeleteGroup}"></div>
 <div class="popup" [class.open]="showDeleteGroup">
-    <div class="popup-header" *ngIf="showDeleteGroup">Delete Group: {{energyUseGroup.name}}
+    <div class="popup-header">Delete Group: {{energyUseGroup?.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
     <div class="popup-body">
