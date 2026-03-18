@@ -1,24 +1,22 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Component({
-  selector: 'app-equipment-utility-data-form',
+  selector: 'app-energy-use-data-form',
   standalone: false,
-  templateUrl: './equipment-utility-data-form.component.html',
-  styleUrl: './equipment-utility-data-form.component.css',
+  templateUrl: './energy-use-data-form.component.html',
+  styleUrl: './energy-use-data-form.component.css',
 })
-export class EquipmentUtilityDataFormComponent {
+export class EnergyUseDataFormComponent {
+  @Input({ required: true })
+  energyUseForms: Array<FormGroup>;
   @Input({ required: true })
   energySource: MeterSource;
   @Input({ required: true })
   utilityDataForm: FormGroup;
-  @Input({ required: true })
-  equipmentDetailsForm: FormGroup;
-  @Output('emitRemoveUtilityType')
-  emitRemoveUtilityType: EventEmitter<void> = new EventEmitter<void>();
   @Input()
   inSetup: boolean = false;
 
@@ -37,7 +35,14 @@ export class EquipmentUtilityDataFormComponent {
     this.facilitySub.unsubscribe();
   }
 
-  removeUtilityType() {
-    this.emitRemoveUtilityType.emit();
+  toggleOverride(energyUseForm: FormGroup) {
+    energyUseForm.patchValue({
+      overrideEnergyUse: !energyUseForm.controls.overrideEnergyUse.value
+    });
+    if (energyUseForm.controls.overrideEnergyUse.value) {
+      energyUseForm.controls.energyUse.enable();
+    } else {
+      energyUseForm.controls.energyUse.disable();
+    }
   }
 }

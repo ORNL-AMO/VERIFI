@@ -99,6 +99,7 @@ import { OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe } from './account
 import { OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-meter-group.pipe';
 import { OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-source.pipe';
 import { FacilityEnergyUsesResultDropdownComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-result-dropdown/facility-energy-uses-result-dropdown.component';
+import { EnergyUseDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/energy-use-data-form/energy-use-data-form.component';
 
 @NgModule({
   declarations: [
@@ -187,7 +188,8 @@ import { FacilityEnergyUsesResultDropdownComponent } from './account-facilities/
     OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe,
     OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe,
     OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe,
-    FacilityEnergyUsesResultDropdownComponent
+    FacilityEnergyUsesResultDropdownComponent,
+    EnergyUseDataFormComponent
   ],
   imports: [
     CommonModule,

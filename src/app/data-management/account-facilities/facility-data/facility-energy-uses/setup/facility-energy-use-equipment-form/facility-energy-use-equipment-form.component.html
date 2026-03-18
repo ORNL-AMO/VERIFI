@@ -1,5 +1,31 @@
 <app-equipment-details-form [equipmentDetailsForm]="equipmentDetailsForm" [utilityDataForms]="utilityDataForms"
     [annualOperatingConditionsDataForms]="annualOperatingConditionsDataForms"></app-equipment-details-form>
+
+<!--Utility data-->
+<hr>
+<p class="bold mb-0">
+    Utility Data
+</p>
+@if(utilityDataForms.length != 0) {
+@for(utilityDataFormGroup of utilityDataForms; track utilityDataFormGroup.energySource) {
+<app-equipment-utility-data-form [energySource]="utilityDataFormGroup.energySource"
+    [utilityDataForm]="utilityDataFormGroup.utilityDataForm" [equipmentDetailsForm]="equipmentDetailsForm"
+    (emitRemoveUtilityType)="removeUtilityType(utilityDataFormGroup.energySource)"
+    [inSetup]="inSetup"></app-equipment-utility-data-form>
+}
+}@else {
+<p class="fw-light italic">
+    No utility data found for this equipment. Please add a utility type to begin entering utility data. Linking a
+    Utility Meter Group will populate the utility types for this equipment based on the sources in the meter group.
+</p>
+}
+<div class="w-100 text-end">
+    <a class="click-link" (click)="openAddUtilityModal()">
+        <span class="fa fa-plus"></span> Add Utility Type
+    </a>
+</div>
+
+<!--Operating conditions data-->
 @if(!inSetup) {
 <hr>
 <div class="row">
@@ -69,32 +95,26 @@ track $index) {
     </div>
 </div>
 }
+<!--energy use data-->
+@if(annualOperatingConditionsDataForms.length > 0) {
 <hr>
-<p class="bold mb-0">
-    Utility Data
-</p>
-@if(utilityDataForms.length != 0) {
-@for(utilityDataFormGroup of utilityDataForms; track utilityDataFormGroup.energySource) {
-<app-equipment-utility-data-form [energySource]="utilityDataFormGroup.energySource"
-    [utilityDataForm]="utilityDataFormGroup.utilityDataForm" [energyUseForms]="utilityDataFormGroup.energyUseForms"
-    [equipmentDetailsForm]="equipmentDetailsForm"
-    (emitRemoveUtilityType)="removeUtilityType(utilityDataFormGroup.energySource)"
-    [inSetup]="inSetup"></app-equipment-utility-data-form>
-}
-}@else {
-<p class="fw-light italic">
-    No utility data found for this equipment. Please add a utility type to begin entering utility data. Linking a
-    Utility Meter Group will populate the utility types for this equipment based on the sources in the meter group.
-</p>
-}
-<div class="w-100 text-end">
-    <a class="click-link" (click)="openAddUtilityModal()">
-        <span class="fa fa-plus"></span> Add Utility Type
-    </a>
+<div class="mt-3 mb-2">
+    <p class="bold">Energy Use Data</p>
 </div>
+<div class="row">
+    <label class="col-5 bold">Year</label>
+    <label class="col-7 bold">Energy Use</label>
+</div>
+@for(utilityDataFormGroup of utilityDataForms; track utilityDataFormGroup.energySource) {
+<app-energy-use-data-form [energySource]="utilityDataFormGroup.energySource"
+    [utilityDataForm]="utilityDataFormGroup.utilityDataForm" [energyUseForms]="utilityDataFormGroup.energyUseForms"
+    [inSetup]="inSetup"></app-energy-use-data-form>
+}
+}
 
 
 
+<!--MODALS-->
 <div [ngClass]="{'windowOverlay': showUtilityTypeModal || showAddOperatingConditionsModal}"></div>
 <div class="popup" [class.open]="showUtilityTypeModal">
     <div class="popup-header"><span class="fa fa-plus"></span> Add Utility Type to Equipment
