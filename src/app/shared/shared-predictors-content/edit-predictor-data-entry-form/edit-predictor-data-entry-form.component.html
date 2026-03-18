@@ -92,7 +92,7 @@
           </label>
         </div>
         <div class="col">
-          <textarea class="form-control" name="notes" id="notes" [(ngModel)]="predictorData.notes"></textarea>
+          <textarea class="form-control" name="notes" id="notes" [(ngModel)]="predictorData.notes" (input)="setChanged()"></textarea>
         </div>
       </div>
     </form>
