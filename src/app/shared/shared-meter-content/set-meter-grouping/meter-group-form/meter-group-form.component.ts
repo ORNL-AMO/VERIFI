@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -10,9 +10,15 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-meter-group-form',
@@ -22,66 +28,70 @@ import * as _ from 'lodash';
   styleUrl: './meter-group-form.component.css'
 })
 export class MeterGroupFormComponent {
-  @Input()
-  meterGroup: IdbUtilityMeterGroup;
-  @Output('emitClose')
-  emitClose: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Input()
-  hasEnergyMeters: boolean;
-  @Input()
-  hasWaterMeters: boolean;
 
   groupForm: FormGroup;
   meterGroupOptions: Array<MeterGroupOption>;
   selectionsChanged: boolean = false;
   hasExistingGroups: boolean = false;
+  meterGroup: IdbUtilityMeterGroup;
+  hasEnergyMeters: boolean;
+  hasWaterMeters: boolean;
+
+  showDeleteModal: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService
+    private accountDbService: AccountdbService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
+    private loadingService: LoadingService,
+    private toastNoticationService: ToastNotificationsService,
+    private accountReportDbService: AccountReportDbService,
+    private analysisDbService: AnalysisDbService,
+    private routerGuardService: RouterGuardService
   ) {
 
   }
 
   ngOnInit() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    if (!this.meterGroup) {
-      if (this.hasEnergyMeters) {
-        this.meterGroup = getNewIdbUtilityMeterGroup("Energy", "New Meter Group", facility.guid, facility.accountId);
-      } else if (this.hasWaterMeters) {
-        this.meterGroup = getNewIdbUtilityMeterGroup("Water", "New Meter Group", facility.guid, facility.accountId);
+    this.setHasMetersBools();
+    this.activatedRoute.params.subscribe(params => {
+      let meterGroupId: string = params['id'];
+      this.meterGroup = this.utilityMeterGroupDbService.getGroupById(meterGroupId);
+      if (!this.meterGroup) {
+        this.cancel();
       } else {
-        this.meterGroup = getNewIdbUtilityMeterGroup("Other", "New Meter Group", facility.guid, facility.accountId);
+        this.groupForm = this.formBuilder.group({
+          name: [this.meterGroup.name, Validators.required],
+          groupType: [this.meterGroup.groupType, Validators.required],
+          description: [this.meterGroup.description]
+        });
+        this.setGroupOptions();
+        //existing group
+        if (this.meterGroupOptions.some(option => { return option.includeInGroup })) {
+          this.groupForm.controls['groupType'].disable();
+        }
+        this.hasExistingGroups = this.meterGroupOptions.find(option => { return option.inAnotherGroup }) != undefined;
       }
-    }
-    this.groupForm = this.formBuilder.group({
-      name: [this.meterGroup.name, Validators.required],
-      groupType: [this.meterGroup.groupType, Validators.required],
-      description: [this.meterGroup.description]
     });
-    if (!this.meterGroup.id) {
-      this.groupForm.markAsDirty();
-    } else {
-      this.groupForm.controls['groupType'].disable();
-    }
-    this.setGroupOptions();
-    this.hasExistingGroups = this.meterGroupOptions.find(option => { return option.inAnotherGroup }) != undefined;
   }
 
   cancel() {
-    this.emitClose.emit(true);
+    this.router.navigate(['../..'], { relativeTo: this.activatedRoute });
+  }
+
+  setHasMetersBools() {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    this.hasEnergyMeters = meters.find(meter => { return meter.includeInEnergy }) != undefined;
+    this.hasWaterMeters = meters.find(meter => { return meter.source == 'Water Discharge' || meter.source == 'Water Intake' }) != undefined;
   }
 
   async saveChanges() {
     this.meterGroup.name = this.groupForm.controls['name'].value;
     this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
     this.meterGroup.description = this.groupForm.controls['description'].value;
-    if (!this.meterGroup.id) {
-      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(this.meterGroup));
-    } else {
-      await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.meterGroup));
-    }
+    await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.meterGroup));
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     for (let i = 0; i < this.meterGroupOptions.length; i++) {
       let groupOption: MeterGroupOption = this.meterGroupOptions[i];
@@ -100,7 +110,8 @@ export class MeterGroupFormComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeterGroups(account, facility);
     await this.dbChangesService.setMeters(account, facility);
-    this.cancel()
+    this.selectionsChanged = false;
+    this.groupForm.markAsPristine();
   }
 
   setGroupOptions() {
@@ -154,6 +165,70 @@ export class MeterGroupFormComponent {
   setSelectionsChanged() {
     this.selectionsChanged = true;
   }
+
+  canDeactivate(): Observable<boolean> {
+    if (this.groupForm.dirty || this.selectionsChanged) {
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
+    }
+    return of(true);
+  }
+
+  openDeleteGroupModal() {
+    this.showDeleteModal = true;
+  }
+
+  viewGroupDataTable() {
+    this.router.navigate(['../../data-table/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
+  }
+
+  viewGroupChartData() {
+    this.router.navigate(['../../data-chart/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
+  }
+
+  closeDeleteGroup() {
+    this.showDeleteModal = false;
+  }
+
+  async deleteMeterGroup() {
+    this.loadingService.setLoadingMessage("Deleting Meter Group...");
+    this.loadingService.setLoadingStatus(true);
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.meterGroup.id));
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeterGroups(selectedAccount, facility);
+
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.groupId == this.meterGroup.guid });
+
+    for (let i = 0; i < groupMeters.length; i++) {
+      let meter: IdbUtilityMeter = groupMeters[i];
+      meter.groupId = undefined;
+      await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter))
+    }
+    await this.dbChangesService.setMeters(selectedAccount, facility);
+    //update analysis items
+    await this.analysisDbService.deleteGroup(this.meterGroup.guid);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, facility);
+    //update BCC reports
+    await this.accountReportDbService.updateReportsRemoveGroup(this.meterGroup.guid);
+    await this.dbChangesService.setAccountReports(selectedAccount);
+    this.closeDeleteGroup();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
+    this.groupForm.markAsPristine();
+    this.selectionsChanged = false;
+    this.cancel();
+  }
+
 }
 
 export interface MeterGroupOption {
