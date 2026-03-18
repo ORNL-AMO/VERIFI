@@ -1,7 +1,7 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
-import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestYearWithData, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisDataClass } from "./monthlyFacilityAnalysisDataClass";
@@ -10,6 +10,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { getDateFromPredictorData, getLatestPredictorData } from "src/app/shared/dateHelperFunctions";
 
 export class MonthlyFacilityAnalysisClass {
 
@@ -34,6 +35,7 @@ export class MonthlyFacilityAnalysisClass {
             this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
         }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
+        this.setReportYear(calanderizedFacilityMeters)
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setFacilityPredictors(accountPredictors, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
@@ -57,9 +59,10 @@ export class MonthlyFacilityAnalysisClass {
                 group.predictorVariables.forEach(variable => {
                     if (group.analysisType != 'absoluteEnergyConsumption' && variable.productionInAnalysis) {
                         let predictorData: Array<IdbPredictorData> = this.facilityPredictorEntries.filter(entry => { return entry.predictorId == variable.id });
-                        let latestReading: IdbPredictorData = _.maxBy(predictorData, (pData: IdbPredictorData) => { return pData.date });
+                        let latestReading: IdbPredictorData = getLatestPredictorData(predictorData);
                         if (latestReading) {
-                            includedDates.push(latestReading.date);
+                            let pDate: Date = getDateFromPredictorData(latestReading);
+                            includedDates.push(pDate);
                         }
                     }
                 });
@@ -72,6 +75,12 @@ export class MonthlyFacilityAnalysisClass {
             this.endDate.setDate(1);
         } else {
             this.endDate = monthlyStartAndEndDate.endDate;
+        }
+    }
+
+    setReportYear(calanderizedMeters: Array<CalanderizedMeter>) {
+        if (!this.analysisItem.calculatedReportYear) {
+            this.analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [this.facility]);
         }
     }
 
@@ -125,9 +134,9 @@ export class MonthlyFacilityAnalysisClass {
                 this.facilityPredictors
             );
             this.facilityMonthSummaries.push(monthSummary);
-            let currentMonth: number = monthDate.getUTCMonth()
+            let currentMonth: number = monthDate.getMonth()
             let nextMonth: number = currentMonth + 1;
-            monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
+            monthDate = new Date(monthDate.getFullYear(), nextMonth, 1);
         }
     }
 

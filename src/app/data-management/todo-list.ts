@@ -7,6 +7,7 @@ import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
 import * as _ from 'lodash';
 import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup";
+import { getDateFromMeterData, getDateFromPredictorData, getLatestMeterData, getLatestPredictorData } from "../shared/dateHelperFunctions";
 
 export function getTodoList(account: IdbAccount,
     facilities: Array<IdbFacility>,
@@ -26,7 +27,7 @@ export function getTodoList(account: IdbAccount,
             otherItems.push({
                 label: 'Setup account settings',
                 url: '/data-management/' + account.guid + '/account-setup',
-                description: "Set the account name, unit settings, location and sustainability goals. This will help you manage your data effectively.",
+                description: "Set the account name, unit settings, location and organizational goals. This will help you manage your data effectively.",
                 facilityId: undefined,
                 type: 'account',
                 trackGuid: account.guid + '_setup_account'
@@ -158,8 +159,8 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
         }
 
 
-        let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
-        let readingDate: Date = new Date(latestReading.readDate);
+        let latestReading: IdbUtilityMeterData = getLatestMeterData(meterDataForMeter);
+        let readingDate: Date = getDateFromMeterData(latestReading);
 
         if (latestReading && readingDate.getTime() < (new Date().getTime() - outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
             const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
@@ -191,8 +192,8 @@ function setPredictorTodoItems(predictor: IdbPredictor,
             trackGuid: predictor.guid
         });
     } else {
-        let latestReading: IdbPredictorData = _.maxBy(predictorDataForFacility, (data: IdbPredictorData) => new Date(data.date).getTime());
-        let readingDate: Date = new Date(latestReading.date);
+        let latestReading: IdbPredictorData = getLatestPredictorData(predictorDataForFacility);
+        let readingDate: Date = getDateFromPredictorData(latestReading);
         // Set readingDate to end of the month
         readingDate = new Date(readingDate.getFullYear(), readingDate.getMonth() + 1, 0);
         //

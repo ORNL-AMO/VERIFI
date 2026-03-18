@@ -12,6 +12,7 @@ import { AccountEnergyCardComponent } from './account-energy-card/account-energy
 import { AccountWaterCardComponent } from './account-water-card/account-water-card.component';
 import { AccountAnnualAnalysisTableComponent } from './account-annual-analysis-table/account-annual-analysis-table.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -31,7 +32,8 @@ import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.m
     HelperPipesModule,
     SharedAnalysisModule,
     CalculatingSpinnerModule,
-    DataOverviewModule
+    DataOverviewModule,
+    FormsModule
   ]
 })
 export class AccountHomeModule { }

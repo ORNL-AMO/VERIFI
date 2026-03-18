@@ -13,15 +13,16 @@ export interface IdbAnalysisItem extends IdbEntry {
     name: string,
     analysisCategory: AnalysisCategory,
     energyIsSource: boolean,
-    reportYear: number,
+    calculatedReportYear: number,
     energyUnit: string,
     waterUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean,
     baselineYear: number,
     hasBanking: boolean,
-    bankedAnalysisItemId: string
+    bankedAnalysisItemId: string,
+    isAnalysisVisited?: boolean,
+    dataCheckedDate?: Date
 }
 
 export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility, accountMeterGroups: Array<IdbUtilityMeterGroup>, accountPredictors: Array<IdbPredictor>, analysisCategory: AnalysisCategory): IdbAnalysisItem {
@@ -69,7 +70,7 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       facilityId: facility.guid,
       accountId: account.guid,
       name: name,
-      reportYear: undefined,
+      calculatedReportYear: undefined,
       energyIsSource: facility.energyIsSource,
       energyUnit: facility.energyUnit,
       waterUnit: facility.volumeLiquidUnit,
@@ -78,14 +79,16 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       analysisCategory: analysisCategory,
       baselineYear: baselineYear,
       hasBanking: false,
-      bankedAnalysisItemId: undefined
+      bankedAnalysisItemId: undefined,
+      isAnalysisVisited: false,
+      dataCheckedDate: undefined
     };
     analysisItem.setupErrors = {
       hasError: true,
       missingName: false,
       noGroups: itemGroups.length == 0,
-      missingReportYear: true,
-      reportYearBeforeBaselineYear: false,
+      // missingReportYear: true,
+      // reportYearBeforeBaselineYear: false,
       groupsHaveErrors: true,
       missingBaselineYear: false,
       baselineYearAfterMeterDataEnd: false,
@@ -123,11 +126,9 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     specifiedMonthlyPercentBaseload: false,
     averagePercentBaseload: undefined,
     monthlyPercentBaseload: getMonthlyPercentBaseload(),
-    hasDataAdjustement: false,
     dataAdjustments: [],
     userDefinedModel: true,
     models: undefined,
-    hasBaselineAdjustmentV2: false,
     baselineAdjustmentsV2: [],
     maxModelVariables: 4,
     applyBanking: true,

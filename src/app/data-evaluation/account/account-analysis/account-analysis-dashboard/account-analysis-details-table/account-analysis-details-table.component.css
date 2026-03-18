@@ -66,3 +66,11 @@ thead th.can-click:hover {
 .select-width{
     width: 200px;
 }
+
+.water.fa-circle-check{
+    color: #3055cf;
+}
+
+.energy.fa-circle-check{
+    color: #bf3d00;
+}

@@ -8,6 +8,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { firstValueFrom } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -26,11 +28,14 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   showEmissions: boolean;
   vehicleDataFilters: VehicleDataFilters;
   isRECs: boolean;
+  account: IdbAccount;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
+    this.account = this.accountDbService.selectedAccount.getValue();
   }
 
   ngOnChanges() {
@@ -79,14 +84,16 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   async showAllColumns() {
     if (this.meter.source == 'Electricity') {
-      this.emissionsFilters = {
-        showSection: true,
-        marketEmissions: true,
-        locationEmissions: true,
-        recs: true,
-        excessRECs: true,
-        excessRECsEmissions: true
+      if (this.account.displayEmissions) {
+        this.emissionsFilters = {
+          showSection: true,
+          marketEmissions: true,
+          locationEmissions: true,
+          recs: true,
+          excessRECs: true,
+          excessRECsEmissions: true
 
+        }
       }
       this.generalInformationFilters = {
         showSection: true,
@@ -100,19 +107,19 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: true,
         totalCost: true,
-        stationaryBiogenicEmmissions: true,
-        stationaryCarbonEmissions: true,
-        stationaryOtherEmissions: true,
-        totalEmissions: true,
+        stationaryBiogenicEmmissions: this.account.displayEmissions ? true : false,
+        stationaryCarbonEmissions: this.account.displayEmissions ? true : false,
+        stationaryOtherEmissions: this.account.displayEmissions ? true : false,
+        totalEmissions: this.account.displayEmissions ? true : false,
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {
         totalEnergy: true,
         totalCost: true,
-        mobileBiogenicEmissions: true,
-        mobileCarbonEmissions: true,
-        mobileOtherEmissions: true,
-        mobileTotalEmissions: true,
+        mobileBiogenicEmissions: this.account.displayEmissions ? true : false,
+        mobileCarbonEmissions: this.account.displayEmissions ? true : false,
+        mobileOtherEmissions: this.account.displayEmissions ? true : false,
+        mobileTotalEmissions: this.account.displayEmissions ? true : false,
       }
     }
 

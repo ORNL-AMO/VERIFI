@@ -137,3 +137,26 @@
 .btn.action-btn:hover .fa{
   color: #fff;
 }
+
+
+
+/*
+Group action button
+*/
+.btn-group .btn.meter-group-btn-danger {
+  color: #ffffff !important;
+  background-color: #ec0000 !important;
+  border-left-color: white;
+  border-right-color: white;
+  border-top-color: #ec0000;
+  border-bottom-color: #ec0000;
+}
+
+.btn-group .btn.meter-group-btn-danger .fa{
+  color: white;
+  vertical-align: middle;
+}
+
+.btn-group .btn.meter-group-btn-danger:hover {
+  opacity: .5;
+}

@@ -13,6 +13,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { getDateFromMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -36,6 +37,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   predictorsNeeded: boolean;
   energyAnalysisHasErrors: boolean;
   waterAnalysisHasErrors: boolean;
+  includeWeatherData: boolean = false;
+  showExportModal: boolean = false;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
@@ -65,7 +68,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   setFacilityStatus() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
+    this.lastBill = getLatestMeterData(facilityMeterData);
     this.setMeterReadingsNeeded();
     this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
     this.setEnergyAnalysisNeeded();
@@ -79,7 +82,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let currentDate: Date = new Date();
     currentDate.setMonth(currentDate.getMonth() - 1);
     if (this.lastBill) {
-      let lastBillDate: Date = new Date(this.lastBill.readDate);
+      let lastBillDate: Date = getDateFromMeterData(this.lastBill);
       if (lastBillDate < currentDate) {
         this.meterReadingsNeeded = true;
       } else {
@@ -91,13 +94,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setEnergyAnalysisNeeded() {
-    let currentDate: Date = new Date();
+    // let currentDate: Date = new Date();
     if (this.latestEnergyAnalysisItem) {
-      if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.energyAnalysisNeeded = true;
-      } else {
-        this.energyAnalysisNeeded = false;
-      }
+      //TODO:
+      //add check when new data is entered
+      //probably will incorporate with todo list logic
+      // if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+      //   this.energyAnalysisNeeded = true;
+      // } else {
+      //   this.energyAnalysisNeeded = false;
+      // }
+      this.energyAnalysisNeeded = false;
     } else if (this.facility.sustainabilityQuestions.energyReductionGoal) {
       this.energyAnalysisNeeded = true;
     } else {
@@ -106,13 +113,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setWaterAnalysisNeeded() {
-    let currentDate: Date = new Date();
+    // let currentDate: Date = new Date();
     if (this.latestWaterAnalysisItem) {
-      if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.waterAnalysisNeeded = true;
-      } else {
-        this.waterAnalysisNeeded = false;
-      }
+      //TODO:
+      //add check when new data is entered
+      //probably will incorporate with todo list logic
+      // if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+      //   this.waterAnalysisNeeded = true;
+      // } else {
+      //   this.waterAnalysisNeeded = false;
+      // }
+      this.waterAnalysisNeeded = false;
     } else if (this.facility.sustainabilityQuestions.waterReductionGoal) {
       this.waterAnalysisNeeded = true;
     } else {
@@ -136,13 +147,23 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.sources = _.uniq(sources);
   }
 
+  openExportModal() {
+    this.includeWeatherData = false;
+    this.showExportModal = true;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+  }
+
   exportData() {
+    this.showExportModal = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facility');
     this.loadingService.setCurrentLoadingIndex(0);
     this.loadingService.addLoadingMessage('Exporting to .xlsx template');
-    this.exportToExcelTemplateV3Service.exportFacilityData(selectedFacility.guid);
+    this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, selectedFacility.guid);
   }
 
   goToDataManagement() {

@@ -4,7 +4,7 @@
 </p>
 <hr>
 <p>
-    The units, sustainability goals, and financial reporting settings will be inherited from the account.
+    The units, organizational goals, and financial reporting settings will be inherited from the account.
 </p>
 <hr>
 <p>
@@ -18,16 +18,14 @@
     Volume and Mass units are only used for setting the physical units of meters.
 </p>
 <hr>
+@if(account.displayEmissions){
 <p>
     Your zip code is used to set the "Electricity Global Warming Potential", unless otherwise specified. This value is
     used to calculate the emissions for electricity meters in this facility. If you do not see this field, set your
     country to "United States of America (the)".
 </p>
 <hr>
-<p>
-    The answers to the Sustainability Questions will be used for reporting.
-</p>
-<hr>
+}
 <p>
     Use the financial reporting if your facility does not use a calendar year. The application will adjust to your
     fiscal year based on this setting.

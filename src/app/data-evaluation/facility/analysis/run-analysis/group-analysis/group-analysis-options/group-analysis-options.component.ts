@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -13,12 +12,20 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
-    selector: 'app-group-analysis-options',
-    templateUrl: './group-analysis-options.component.html',
-    styleUrls: ['./group-analysis-options.component.css'],
-    standalone: false
+  selector: 'app-group-analysis-options',
+  templateUrl: './group-analysis-options.component.html',
+  styleUrls: ['./group-analysis-options.component.css'],
+  standalone: false
 })
 export class GroupAnalysisOptionsComponent implements OnInit {
 
@@ -34,20 +41,35 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   bankedGroup: AnalysisGroup;
   hasModelsGenerated: boolean;
   displayEnableForm: boolean = false;
+
+  dataEndYear: number;
+
+  displayDataAdjustmentModal: boolean = false;
+  dataAdjustmentYearOptions: Array<number>;
+  deleteDataAdjustmentYear: number;
+
+  displayBaselineAdjustmentModal: boolean = false;
+  baselineAdjustmentYearOptions: Array<number>;
+  deleteBaselineAdjustmentYear: number;
+
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
     private router: Router,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.setShowInUseMessage();
-    this.setBaselineYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
+      this.setDataEndYear();
+      this.setBaselineYearOptions();
+      this.setAdjustmentYearOptions();
       if (this.analysisItem.hasBanking && this.group.applyBanking) {
         this.setBankedGroup();
         this.setBankedAnalysisYearOptions();
@@ -62,6 +84,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    analysisItem.isAnalysisVisited = false;
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, analysisItem);
     analysisItem.groups[groupIndex] = this.group;
@@ -119,9 +142,17 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.analysisService.hideInUseMessage = true;
   }
 
+  setDataEndYear() {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.group.idbGroupId);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [facility], 'AR6', []);
+    this.dataEndYear = getLatestYearWithData(calanderizedMeters, [facility]);
+  }
+
   setBaselineYearOptions() {
     this.baselineYearOptions = new Array();
-    for (let i = this.analysisItem.baselineYear; i < this.analysisItem.reportYear; i++) {
+    for (let i = this.analysisItem.baselineYear; i < this.dataEndYear; i++) {
       this.baselineYearOptions.push(i);
     }
   }
@@ -129,8 +160,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   setBankedAnalysisYearOptions() {
     this.bankedAnalysisYears = new Array();
     if (this.bankedAnalysisItem) {
-      let minReportYear: number = _.min([this.bankedAnalysisItem.reportYear, this.analysisItem.reportYear])
-      for (let i = this.bankedAnalysisItem.baselineYear + 1; i < minReportYear; i++) {
+      for (let i = this.bankedAnalysisItem.baselineYear + 1; i < this.dataEndYear; i++) {
         this.bankedAnalysisYears.push(i);
       }
     }
@@ -150,7 +180,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       this.hasModelsGenerated = false;
     }
   }
-
 
   showEnableForm() {
     this.displayEnableForm = true;
@@ -175,4 +204,78 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.setHasModelsGenerated();
     this.cancelEnableForm();
   }
+
+  setAdjustmentYearOptions() {
+    //baselineYearOptions doesn't include end year
+    let yearOptions: Array<number> = this.baselineYearOptions;
+    yearOptions.push(this.dataEndYear);
+    let dataAdjustmentYears: Array<number> = this.group.dataAdjustments.map(adjustment => adjustment.year);
+    this.dataAdjustmentYearOptions = yearOptions.filter(year => {
+      if (!dataAdjustmentYears.includes(year)) {
+        return year;
+      }
+    });
+    let baselineAdjustmentYears: Array<number> = this.group.baselineAdjustmentsV2.map(adjustment => adjustment.year);
+    this.baselineAdjustmentYearOptions = yearOptions.filter(year => {
+      if (!baselineAdjustmentYears.includes(year)) {
+        return year;
+      }
+    });
+  }
+
+  //DATA ADJUSTMENT
+  openDataAdjustmentModal() {
+    this.displayDataAdjustmentModal = true;
+  }
+
+  closeDataAdjustmentModal() {
+    this.displayDataAdjustmentModal = false;
+  }
+
+  async addDataAdjustments(year: number) {
+    this.group.dataAdjustments.push({ year: year, amount: 0 });
+    this.group.dataAdjustments.sort((a, b) => a.year - b.year);
+    await this.saveItem();
+    this.closeDataAdjustmentModal();
+  }
+
+  openRemoveDataAdjustment(year: number) {
+    this.deleteDataAdjustmentYear = year;
+  }
+
+  async closeRemoveDataAdjustment(removeAdjustment: boolean) {
+    if (removeAdjustment) {
+      this.group.dataAdjustments = this.group.dataAdjustments.filter(adjustment => adjustment.year != this.deleteDataAdjustmentYear);
+      await this.saveItem();
+    }
+    this.deleteDataAdjustmentYear = undefined;
+  }
+
+  //BASELINE ADJUSTMENT
+  openBaselineAdjustmentModal(){
+    this.displayBaselineAdjustmentModal = true;
+  }
+
+  closeBaselineAdjustmentModal() {
+    this.displayBaselineAdjustmentModal = false;
+  }
+  
+  async addBaselineAdjustments(year: number) {
+    this.group.baselineAdjustmentsV2.push({ year: year, amount: 0 });
+    this.group.baselineAdjustmentsV2.sort((a, b) => a.year - b.year);
+    await this.saveItem();
+    this.closeBaselineAdjustmentModal();
+  }
+
+  openRemoveBaselineAdjustment(year: number) {
+    this.deleteBaselineAdjustmentYear = year;
+  }
+
+  async closeRemoveBaselineAdjustment(removeAdjustment: boolean) {
+    if (removeAdjustment) {
+      this.group.baselineAdjustmentsV2 = this.group.baselineAdjustmentsV2.filter(adjustment => adjustment.year != this.deleteBaselineAdjustmentYear);
+      await this.saveItem();
+    }
+    this.deleteBaselineAdjustmentYear = undefined;
+  } 
 }

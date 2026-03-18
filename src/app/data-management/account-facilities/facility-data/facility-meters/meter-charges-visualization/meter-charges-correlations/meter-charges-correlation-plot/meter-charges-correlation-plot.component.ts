@@ -8,6 +8,7 @@ import { JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
+import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-charges-correlation-plot',
@@ -122,7 +123,7 @@ export class MeterChargesCorrelationPlotComponent {
 
   setData() {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
-    meterData = _.sortBy(meterData, (data) => new Date(data.readDate).getTime(), 'desc');
+    meterData = _.sortBy(meterData, (data: IdbUtilityMeterData) => getDateFromMeterData(data).getTime(), 'desc');
     this.dates = new Array();
     this.xValues = new Array();
     this.yValues = new Array();
@@ -132,7 +133,7 @@ export class MeterChargesCorrelationPlotComponent {
       });
       if (meterDataCharge?.chargeAmount) {
         this.yValues.push(meterDataCharge.chargeAmount)
-        this.dates.push(new Date(mData.readDate));
+        this.dates.push(getDateFromMeterData(mData));
         if (this.compareTo == 'totalCost') {
           this.xValues.push(mData.totalCost);
         } else if (this.compareTo == 'demand') {

@@ -55,7 +55,7 @@ export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<Id
             includeStackedBarChart: true,
             includeMonthlyLineChart: true,
             includeCostsSection: true,
-            includeEmissionsSection: true,
+            includeEmissionsSection: account.displayEmissions,
             includeEnergySection: true,
             includeWaterSection: true,
             includeAllMeterData: true,

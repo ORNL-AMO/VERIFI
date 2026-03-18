@@ -1,84 +1,93 @@
 @if (!inDashboard) {
-  <div class="reports banner sticky-top d-flex justify-content-between"
-    [ngClass]="{'modal-open': modalOpen}">
+<div class="reports banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
+  <div>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
+          @if (!setupValid) {
+          <span class="fa fa-exclamation-circle"></span>
+          }
+          <i class="fa fa-gears"></i>
+          Report Setup</a>
+      </li>
+      @if (selectedReport.facilityReportType == 'analysis' || selectedReport.facilityReportType == 'savings') {
+      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+        <a class="nav-link" routerLink="data-check" [routerLinkActive]="['active']">
+          <i class="fa fa-circle-check"></i>
+          Data Check</a>
+      </li>
+      }
+      @if (selectedReport.facilityReportType == 'analysis') {
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+        <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Analysis Report</a>
+      </li>
+      }
+      @if (selectedReport.facilityReportType == 'overview') {
+      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+        <a class="nav-link" routerLink="overview-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Data Overview Report</a>
+      </li>
+      }
+      @if (selectedReport.facilityReportType == 'savings') {
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+        <a class="nav-link" routerLink="savings-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Savings Report</a>
+      </li>
+      }
+      @if (selectedReport.facilityReportType == 'emissionFactors') {
+      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+        <a class="nav-link" routerLink="emission-factors-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Emission Factors Report</a>
+      </li>
+      }
+      @if (selectedReport.facilityReportType == 'modeling') {
+      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+        <a class="nav-link" routerLink="modeling-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Modeling Report</a>
+      </li>
+      }
+    </ul>
+  </div>
+  <div>
     <div>
       <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
-            @if (!setupValid) {
-              <span class="fa fa-exclamation-circle"></span>
-            }
-            <i class="fa fa-gears"></i>
-          Report Setup</a>
-        </li>
-        @if (selectedReport.facilityReportType == 'analysis') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
-            >
-            <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Analysis Report</a>
-          </li>
-        }
-        @if (selectedReport.facilityReportType == 'overview') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
-            >
-            <a class="nav-link" routerLink="overview-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Data Overview Report</a>
-          </li>
-        }
-        @if (selectedReport.facilityReportType == 'savings') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
-            >
-            <a class="nav-link" routerLink="savings-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Savings Report</a>
-          </li>
-        }
-        @if (selectedReport.facilityReportType == 'emissionFactors') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
-            >
-            <a class="nav-link" routerLink="emission-factors-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Emission Factors Report</a>
-          </li>
-        }
-      </ul>
-    </div>
-    <div>
-      <div>
-        <ul class="nav nav-tabs">
-          <li class="nav-item dropdown">
-            <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
-              <i class="fa fa-file"></i>
-              {{selectedReport.name}}
-            </a>
-            <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
-              <div class="menu-scroll-section">
-                @for (report of reportList; track report) {
-                  @if (selectedReport.guid != report.guid && selectedReport.facilityReportType == report.facilityReportType) {
-                    <li
-                      >
-                      <a class="dropdown-item" (click)="selectItem(report)">
-                        <i class="fa fa-file"></i>
-                        {{report.name}}
-                      </a>
-                    </li>
-                  }
-                }
-              </div>
+        <li class="nav-item dropdown">
+          <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+            <i class="fa fa-file"></i>
+            {{selectedReport.name}}
+          </a>
+          <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
+            <div class="menu-scroll-section">
+              @for (report of reportList; track report) {
+              @if (selectedReport.guid != report.guid && selectedReport.facilityReportType == report.facilityReportType)
+              {
               <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="goToDashboard()">
-                  <i class="fa fa-list"></i> All Facility Reports
+                <a class="dropdown-item" (click)="selectItem(report)">
+                  <i class="fa fa-file"></i>
+                  {{report.name}}
                 </a>
               </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
+              }
+              }
+            </div>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item" (click)="goToDashboard()">
+                <i class="fa fa-list"></i> All Facility Reports
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </div>
+</div>
 }

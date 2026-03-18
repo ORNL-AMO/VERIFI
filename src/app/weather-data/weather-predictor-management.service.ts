@@ -13,7 +13,6 @@ import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import * as _ from 'lodash';
 import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
-import { DatePipe, formatDate } from '@angular/common';
 import { getDetailedDataForMonth } from './weatherDataCalculations';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { getDegreeDayAmount } from '../shared/sharedHelperFunctions';
@@ -23,7 +22,8 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { checkSameMonth } from '../data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '../data-management/data-management-import/import-services/upload-helper-functions';
+import { Month, Months } from '../shared/form-data/months';
 
 
 @Injectable({
@@ -32,6 +32,8 @@ import { checkSameMonth } from '../data-management/data-management-import/import
 export class WeatherPredictorManagementService {
 
   hasWarning: boolean = false;
+  heatingTemp: number;
+  coolingTemp: number;
 
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
@@ -46,20 +48,23 @@ export class WeatherPredictorManagementService {
   ) {
   }
 
-  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility): Promise<"success" | "error"> {
+  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;
     let dryBulbTempPredictor: IdbPredictor;
-    if (this.weatherDataService.weatherDataSelection == 'HDD' || this.weatherDataService.weatherDataSelection == 'degreeDays') {
+    if (selectedValues.find(val => val.name == 'HDD')) {
       //create HDD predictor
       hddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
-      hddPredictor.name = 'HDD Generated ' + '(' + this.weatherDataService.heatingTemp + "F)";
+      let hddValue: number = selectedValues.find(val => val.name == 'HDD').value;
+      this.heatingTemp = hddValue;
+
+      hddPredictor.name = 'HDD Generated ' + '(' + this.heatingTemp + "F)";
+      hddPredictor.heatingBaseTemperature = this.heatingTemp;
       hddPredictor.predictorType = 'Weather';
       hddPredictor.weatherDataType = 'HDD';
       hddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
-      hddPredictor.heatingBaseTemperature = this.weatherDataService.heatingTemp;
       hddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
       await firstValueFrom(this.predictorDbService.addWithObservable(hddPredictor));
       //add predictor to analysis
@@ -67,21 +72,24 @@ export class WeatherPredictorManagementService {
 
     }
 
-    if (this.weatherDataService.weatherDataSelection == 'CDD' || this.weatherDataService.weatherDataSelection == 'degreeDays') {
+    if (selectedValues.find(val => val.name == 'CDD')) {
       //create CDD predictor
       cddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
-      cddPredictor.name = 'CDD Generated ' + '(' + this.weatherDataService.coolingTemp + "F)";
+      let cddValue: number = selectedValues.find(val => val.name == 'CDD').value;
+      this.coolingTemp = cddValue;
+
+      cddPredictor.name = 'CDD Generated ' + '(' + this.coolingTemp + "F)";
+      cddPredictor.coolingBaseTemperature = this.coolingTemp;
       cddPredictor.predictorType = 'Weather';
       cddPredictor.weatherDataType = 'CDD';
       cddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
-      cddPredictor.coolingBaseTemperature = this.weatherDataService.coolingTemp;
       cddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
       await firstValueFrom(this.predictorDbService.addWithObservable(cddPredictor));
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(cddPredictor);
     }
 
-    if (this.weatherDataService.weatherDataSelection == 'relativeHumidity') {
+    if (selectedValues.find(val => val.name == 'relativeHumidity')) {
       //create relative humidity predictor
       relativeHumidityPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
       relativeHumidityPredictor.name = "Relative Humidity";
@@ -94,7 +102,7 @@ export class WeatherPredictorManagementService {
       await this.analysisDbService.addAnalysisPredictor(relativeHumidityPredictor);
     }
 
-    if (this.weatherDataService.weatherDataSelection == 'dryBulbTemp') {
+    if (selectedValues.find(val => val.name == 'dryBulbTemp')) {
       //create dry bulb temp predictor
       dryBulbTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
       dryBulbTempPredictor.name = "Dry Bulb Temp";
@@ -126,20 +134,20 @@ export class WeatherPredictorManagementService {
         let entryDate: Date = new Date(startDate);
         // await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.selectedStation.ID)
 
-        let datePipe: DatePipe = new DatePipe(navigator.language);
-        let stringFormat: string = 'MMM y';
-        let dateStr = datePipe.transform(startDate.toLocaleDateString(), stringFormat);
+        let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+        let dateStr = month.abbreviation + ', ' + entryDate.getFullYear();
         this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
 
         //ISSUE: 1822
-        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
+        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
         // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp)
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
         });
         if (cddPredictor) {
           let newCddPredictorData: IdbPredictorData = getNewIdbPredictorData(cddPredictor);
-          newCddPredictorData.date = new Date(entryDate);
+          newCddPredictorData.month = entryDate.getMonth() + 1;
+          newCddPredictorData.year = entryDate.getFullYear();
           newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
           newCddPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newCddPredictorData));
@@ -147,7 +155,8 @@ export class WeatherPredictorManagementService {
 
         if (hddPredictor) {
           let newHddPredictorData: IdbPredictorData = getNewIdbPredictorData(hddPredictor);
-          newHddPredictorData.date = new Date(entryDate);
+          newHddPredictorData.month = entryDate.getMonth() + 1;
+          newHddPredictorData.year = entryDate.getFullYear();
           newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
           newHddPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newHddPredictorData));
@@ -155,7 +164,8 @@ export class WeatherPredictorManagementService {
 
         if (relativeHumidityPredictor) {
           let newRHPredictorData: IdbPredictorData = getNewIdbPredictorData(relativeHumidityPredictor);
-          newRHPredictorData.date = new Date(entryDate);
+          newRHPredictorData.month = entryDate.getMonth() + 1;
+          newRHPredictorData.year = entryDate.getFullYear();
           newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
           newRHPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newRHPredictorData));
@@ -163,7 +173,8 @@ export class WeatherPredictorManagementService {
 
         if (dryBulbTempPredictor) {
           let newDryBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dryBulbTempPredictor);
-          newDryBulbTempPredictorData.date = new Date(entryDate);
+          newDryBulbTempPredictorData.month = entryDate.getMonth() + 1;
+          newDryBulbTempPredictorData.year = entryDate.getFullYear();
           newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
           newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newDryBulbTempPredictorData));
@@ -209,27 +220,31 @@ export class WeatherPredictorManagementService {
         while (startDate < endDate) {
           let entryDate: Date = new Date(startDate);
           let monthPredictorEntry: IdbPredictorData = predictorData.find(data => {
-            return checkSameMonth(new Date(data.date), entryDate);
+            return checkSameMonthPredictorData(data, entryDate);
           });
           if (!monthPredictorEntry) {
             monthPredictorEntry = getNewIdbPredictorData(weatherPredictor);
             //add predictor data
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+            let formatedDate: string = month.abbreviation + ', ' + entryDate.getFullYear();
+
+            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
             let nextMonthsDate: Date = new Date(startDate)
             nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
             let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatDate(startDate, 'MM/yyyy', 'en-US'));
+            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
                 return degreeDay.gapInData == true
               });
               let newPredictorData: IdbPredictorData = getNewIdbPredictorData(weatherPredictor);
-              newPredictorData.date = new Date(entryDate);
+              newPredictorData.month = entryDate.getMonth() + 1;
+              newPredictorData.year = entryDate.getFullYear();
               if (weatherPredictor.weatherDataType == 'HDD') {
                 newPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
               } else if (weatherPredictor.weatherDataType == 'CDD') {

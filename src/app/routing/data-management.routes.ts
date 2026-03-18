@@ -62,6 +62,10 @@ import { FacilityEnergyUsesGroupSummaryComponent } from "../data-management/acco
 import { FootprintUploadSelectFacilityComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component";
 import { FacilityEnergyUsesGroupFootprintComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint.component";
 import { FacilityEnergyUsesFootprintComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint.component";
+import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
+import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
+import { MeterGroupingResultsTableComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
+import { MeterGroupingResultsGraphComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -177,6 +181,30 @@ export const DataManagementRoutes: Route = {
                         {
                             path: 'meter-grouping',
                             component: SetMeterGroupingComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'manage'
+                                },
+                                {
+                                    path: 'manage',
+                                    component: ManageMeterGroupingComponent
+                                },
+                                {
+                                    path: 'edit-group/:id',
+                                    component: MeterGroupFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'data-table/:id',
+                                    component: MeterGroupingResultsTableComponent
+                                },
+                                {
+                                    path: 'data-chart/:id',
+                                    component: MeterGroupingResultsGraphComponent
+                                }
+                            ]
                         },
                         {
                             path: 'predictors',

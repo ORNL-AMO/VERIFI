@@ -77,7 +77,6 @@ export class ProcessPredictorsComponent {
   }
 
   setSkipAll() {
-    this.skipAll = !this.skipAll;
     this.fileReference.predictors.forEach(predictor => {
       predictor.skipImport = this.skipAll;
     });

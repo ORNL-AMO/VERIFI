@@ -12,17 +12,17 @@ import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFunctio
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-edit-utility-bill',
-    templateUrl: './edit-utility-bill.component.html',
-    styleUrls: ['./edit-utility-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-utility-bill',
+  templateUrl: './edit-utility-bill.component.html',
+  styleUrls: ['./edit-utility-bill.component.css'],
+  standalone: false
 })
 export class EditUtilityBillComponent implements OnInit {
   @Input()
@@ -74,9 +74,16 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setShowEmissions() {
-    this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
-    this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
-    this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    if (account.displayEmissions) {
+      this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
+      this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
+      this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
+    } else {
+      this.showEmissions = false;
+      this.showStationaryEmissions = false;
+      this.showScope2OtherEmissions = false;
+    }
   }
 
   calculateTotalEnergyUse() {
@@ -92,12 +99,11 @@ export class EditUtilityBillComponent implements OnInit {
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
-      let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
       let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
-      if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
+      if (checkSameDate(changeDate, this.editMeterData)) {
         this.invalidDate = false;
       } else {
-        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter,accountMeterData) != undefined;
+        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
       }
     }
   }

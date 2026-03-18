@@ -1,0 +1,16 @@
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [ngClass]="{'open': showModal}">
+    <div class="popup-header">Unsaved Changes
+        <button class="item-right" (click)="onClose()">x</button>
+    </div>
+    <div class="popup-body">
+        There are unsaved changes on this page. Would you like to save the changes?
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-danger" (click)="onDiscard()">Discard</button>
+        <button class="btn btn-success" (click)="onSave()">
+            <span class="fa fa-save"></span>
+            Save
+        </button>
+    </div>
+</div>

@@ -18,10 +18,10 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 
 @Component({
-    selector: 'app-analysis-dashboard',
-    templateUrl: './analysis-dashboard.component.html',
-    styleUrls: ['./analysis-dashboard.component.css'],
-    standalone: false
+  selector: 'app-analysis-dashboard',
+  templateUrl: './analysis-dashboard.component.html',
+  styleUrls: ['./analysis-dashboard.component.css'],
+  standalone: false
 })
 export class AnalysisDashboardComponent implements OnInit {
 
@@ -34,6 +34,11 @@ export class AnalysisDashboardComponent implements OnInit {
   hasEnergy: boolean;
   analysisType: 'Water' | 'Energy';
   routerSub: Subscription;
+  compareAnalysisModal: boolean = false;
+  facilityAnalysisItems: Array<IdbAnalysisItem>;
+  selectedAnalysisItems: Array<IdbAnalysisItem> = [];
+  showComparisonDetails: boolean = false;
+  analysisItemsSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -56,10 +61,15 @@ export class AnalysisDashboardComponent implements OnInit {
       this.selectedFacility = val;
       this.setHasEnergyAndWater();
     });
+
+    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
+      this.facilityAnalysisItems = items;
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.analysisItemsSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
 
@@ -134,5 +144,33 @@ export class AnalysisDashboardComponent implements OnInit {
     } else if (url.includes('energy')) {
       this.analysisType = 'Energy';
     }
+  }
+
+  openCompareAnalysis() {
+    this.compareAnalysisModal = true;
+  }
+
+  closeComparisonModal() {
+    this.compareAnalysisModal = false;
+    this.selectedAnalysisItems = [];
+    this.showComparisonDetails = false;
+  }
+
+  isSelected(analysisItem: IdbAnalysisItem): boolean {
+    return this.selectedAnalysisItems.findIndex(item => item.id === analysisItem.id) > -1;
+  }
+
+  toggleSelectedAnalysisItem(analysisItem: IdbAnalysisItem) {
+    this.showComparisonDetails = false;
+    const index = this.selectedAnalysisItems.findIndex(item => item.id === analysisItem.id);
+    if (index > -1) {
+      this.selectedAnalysisItems.splice(index, 1);
+    } else if (this.selectedAnalysisItems.length < 3) {
+      this.selectedAnalysisItems.push(analysisItem);
+    }
+  }
+
+  showDetails() {
+    this.showComparisonDetails = true;
   }
 }

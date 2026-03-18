@@ -1,164 +1,147 @@
 @if (!baselineYearErrorEnergy && !baselineYearErrorWater) {
-  @if (analysisItemsList.length > 0) {
-    <div class="wrapper m-0">
-      <div class="d-flex align-items-end mb-1">
-        <div class="pe-4 select-width">
-          <label class="form-label fw-bold mb-2">
-            <i class="fa fa-filter text-primary"></i>
-            Analysis Category
-          </label>
-          <select class="form-select" [(ngModel)]="selectedAnalysisCategory" (change)="filterAnalysisItems()">
-            <option value="all">All</option>
-            <option value="energy">Energy</option>
-            <option value="water">Water</option>
-          </select>
-        </div>
-        <div class="pe-4 select-width">
-          <label class="form-label fw-bold mb-2">
-            <i class="fa fa-calendar-alt text-primary"></i>
-            Report Year
-          </label>
-          <select class="form-select" [(ngModel)]="selectedReportYear" (change)="filterAnalysisItems()">
-            <option value="all">All</option>
-            @for (year of yearOptions; track year) {
-              <option [ngValue]="year">{{year}}</option>
-            }
-          </select>
-        </div>
-        @if (filteredAnalysisItems.length > 6) {
-          <div class="select-width">
-            <app-table-items-dropdown></app-table-items-dropdown>
-          </div>
-        }
-      </div>
-      @if (filteredAnalysisItems.length > 0) {
-        <div>
-          <div class="table-responsive mt-2">
-            <table class="table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th class="can-click" (click)="setOrderDataField('name')"
-                    [ngClass]="{'active': orderDataField == 'name'}">
-                    Analysis Item
-                  </th>
-                  <th>
-                    Analysis Category
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('reportYear')"
-                    [ngClass]="{'active': orderDataField == 'reportYear'}">
-                    Report Year
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('baselineYear')"
-                    [ngClass]="{'active': orderDataField == 'baselineYear'}">
-                    Baseline Year
-                  </th>
-                  <th class="can-click" (click)="setOrderDataField('modifiedDate')"
-                    [ngClass]="{'active': orderDataField == 'modifiedDate'}">
-                    Last Modified
-                  </th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (item of filteredAnalysisItems | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track item) {
-                  <tr
-                    >
-                    <td class="text-center">
-                      <span class="fa"
-                        [ngClass]="{'fa-circle-check': item.selectedYearAnalysis, 'fa-circle':!item.selectedYearAnalysis}"
-                      (click)="setUseItem(item)"></span>
-                    </td>
-                    <td>
-                      <a (click)="selectAnalysisItem(item)">
-                        @if (item.setupErrors.hasError || item.setupErrors.facilitiesSelectionsInvalid) {
-                          <span class="me-2 fa fa-exclamation-circle error-icon"
-                          ></span>
-                        }
-                        {{item.name}}
-                      </a>
-                    </td>
-                    <td>
-                      @if (item.analysisCategory == 'energy') {
-                        Energy Analysis
-                      }
-                      @if (item.analysisCategory == 'water') {
-                        Water Analysis
-                      }
-                    </td>
-                    <td>
-                      {{item.reportYear | yearDisplay:selectedAccount.fiscalYear}}
-                      @if (hasSelectionError(item.reportYear, item.analysisCategory)) {
-                        <span class="ms-2 text-danger fw-bold"
-                          >
-                          No item selected for this year!
-                        </span>
-                      }
-                    </td>
-                    <td>
-                      {{item.baselineYear | yearDisplay:selectedAccount.fiscalYear}}
-                    </td>
-                    <td>
-                      {{ item.modifiedDate | date:'short'}}
-                    </td>
-                    <td class="text-center">
-                      <button class="btn action-btn btn-sm m-1 icon-style" (click)="deleteItem(item)"
-                        title="Delete Analysis">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
+@if (analysisItemsList.length > 0) {
+<div class="wrapper m-0">
+  <div class="d-flex align-items-end mb-1">
+    <div class="pe-4 select-width">
+      <label class="form-label fw-bold mb-2">
+        <i class="fa fa-filter text-primary"></i>
+        Analysis Category
+      </label>
+      <select class="form-select" [(ngModel)]="selectedAnalysisCategory" (change)="filterAnalysisItems()">
+        <option value="all">All</option>
+        <option value="energy">Energy</option>
+        <option value="water">Water</option>
+      </select>
+    </div>
+    @if (filteredAnalysisItems.length > 6) {
+    <div class="select-width">
+      <app-table-items-dropdown></app-table-items-dropdown>
+    </div>
+    }
+  </div>
+  @if (filteredAnalysisItems.length > 0) {
+  <div>
+    <div class="table-responsive mt-2">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
+              Analysis Item
+            </th>
+            <th>
+              Analysis Category
+            </th>
+            <th class="can-click" (click)="setOrderDataField('baselineYear')"
+              [ngClass]="{'active': orderDataField == 'baselineYear'}">
+              Baseline Year
+            </th>
+            <th class="can-click" (click)="setOrderDataField('modifiedDate')"
+              [ngClass]="{'active': orderDataField == 'modifiedDate'}">
+              Last Modified
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredAnalysisItems | orderBy: orderDataField: orderByDirection | slice:
+          ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track item.guid) {
+          <tr>
+            <td class="text-center">
+              @if (item.analysisCategory == 'energy') {
+              <span class="energy fa"
+                [ngClass]="{'fa-circle-check': item.guid == selectedAccount.selectedEnergyAnalysisId, 'fa-circle':item.guid != selectedAccount.selectedEnergyAnalysisId}"
+                (click)="setUseItem(item)"></span>
+              }
+              @if (item.analysisCategory == 'water') {
+              <span class="water fa"
+                [ngClass]="{'fa-circle-check': item.guid == selectedAccount.selectedWaterAnalysisId, 'fa-circle':item.guid != selectedAccount.selectedWaterAnalysisId}"
+                (click)="setUseItem(item)"></span>
+              }
+
+            </td>
+            <td>
+              <a (click)="selectAnalysisItem(item)">
+                @if (item.setupErrors.hasError || item.setupErrors.facilitiesSelectionsInvalid) {
+                <span class="me-2 fa fa-exclamation-circle error-icon"></span>
                 }
-              </tbody>
-            </table>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="fw-bold icon-text">
-              <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
-            </div>
-            <div>
-              <ngb-pagination
-                [collectionSize]="(filteredAnalysisItems | orderBy: orderDataField: orderByDirection).length"
-                [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
-                aria-label="Pagination">
-              </ngb-pagination>
-            </div>
-          </div>
-        </div>
-      }
+                {{item.name}}
+              </a>
+            </td>
+            <td>
+              @if (item.analysisCategory == 'energy') {
+              Energy Analysis
+              }
+              @if (item.analysisCategory == 'water') {
+              Water Analysis
+              }
+            </td>
+            <td>
+              {{item.baselineYear | yearDisplay:selectedAccount.fiscalYear}}
+            </td>
+            <td>
+              {{ item.modifiedDate | date:'short'}}
+            </td>
+            <td class="text-center">
+              <button class="btn action-btn btn-sm m-1 icon-style" (click)="deleteItem(item)" title="Delete Analysis">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
     </div>
-  }
-  @if (analysisItemsList.length == 0) {
-    <div class="card card-body text-center bold">
-      No analysis items found for this account. Click "+Add New Analysis" to start analyzing this
-      account!
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="icon-text">
+        <span class="energy fa fa-circle-check"></span> Denotes selected energy analysis.<br>
+        <span class="water fa fa-circle-check"></span> Denotes selected water analysis.
+        <p class="fw-light pt-2 italic mb-0">
+          The selected analysis is used to track progress towards your goals and for reporting.
+        </p>
+      </div>
+      <div>
+        <ngb-pagination [collectionSize]="(filteredAnalysisItems | orderBy: orderDataField: orderByDirection).length"
+          [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
+      </div>
     </div>
+  </div>
   }
-  @if (analysisItemsList.length > 0 && filteredAnalysisItems.length == 0) {
-    <div class="wrapper text-center bold">
-      No analysis items match your filter criteria. Please adjust your filters.
-    </div>
-  }
+</div>
+}
+@if (analysisItemsList.length == 0) {
+<div class="card card-body text-center bold">
+  No analysis items found for this account. Click "+Add New Analysis" to start analyzing this
+  account!
+</div>
+}
+@if (analysisItemsList.length > 0 && filteredAnalysisItems.length == 0) {
+<div class="wrapper text-center bold">
+  No analysis items match your filter criteria. Please adjust your filters.
+</div>
+}
 }
 
 @if (baselineYearErrorEnergy) {
-  <div class="w-100 justify-content-center p-5">
-    <div class="alert alert-danger text-center p-2">
-      The baseline year for your energy reduction goal is
-      {{selectedAccount.sustainabilityQuestions.energyReductionBaselineYear}} and your data starts {{energyYearOptions[0]}}.
-      Fix your facility settings or add data.
-    </div>
+<div class="w-100 justify-content-center p-5">
+  <div class="alert alert-danger text-center p-2">
+    The baseline year for your energy reduction goal is
+    {{selectedAccount.sustainabilityQuestions.energyReductionBaselineYear}} and your data starts
+    {{energyYearOptions[0]}}.
+    Fix your facility settings or add data.
   </div>
+</div>
 }
 
 @if (baselineYearErrorWater) {
-  <div class="w-100 justify-content-center p-5">
-    <div class="alert alert-danger text-center p-2">
-      The baseline year for your water reduction goal is
-      {{selectedAccount.sustainabilityQuestions.waterReductionBaselineYear}} and your data starts {{waterYearOptions[0]}}.
-      Fix your facility settings or add data.
-    </div>
+<div class="w-100 justify-content-center p-5">
+  <div class="alert alert-danger text-center p-2">
+    The baseline year for your water reduction goal is
+    {{selectedAccount.sustainabilityQuestions.waterReductionBaselineYear}} and your data starts {{waterYearOptions[0]}}.
+    Fix your facility settings or add data.
   </div>
+</div>
 }
 
 <div [ngClass]="{'windowOverlay': displayDeleteModal}">
@@ -166,9 +149,9 @@
 
 <div class="popup" [class.open]="displayDeleteModal">
   @if (displayDeleteModal) {
-    <div class="popup-header">Delete: {{itemToDelete?.name}}
-      <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
+  <div class="popup-header">Delete: {{itemToDelete?.name}}
+    <button class="item-right" (click)="cancelDelete()">x</button>
+  </div>
   }
   <div class="popup-body">
     <p>WARNING: Deleting this analysis item cannot be undone.</p>

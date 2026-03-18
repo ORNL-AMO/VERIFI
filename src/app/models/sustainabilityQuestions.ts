@@ -4,20 +4,14 @@ export interface SustainabilityQuestions {
     energyReductionBaselineYear: number,
     energyReductionTargetYear: number,
     energyIsAbsolute: boolean,
+    //greenhouse reductions goals are used
+    //by the better climate report that is currently
+    //hidden.
     greenhouseReductionGoal: boolean,
     greenhouseReductionPercent: number,
     greenhouseReductionBaselineYear: number,
     greenhouseReductionTargetYear: number,
     greenhouseIsAbsolute: boolean,
-    renewableEnergyGoal: boolean,
-    renewableEnergyPercent: number,
-    renewableEnergyBaselineYear: number,
-    renewableEnergyTargetYear: number,
-    wasteReductionGoal: boolean,
-    wasteReductionPercent: number,
-    wasteReductionBaselineYear: number,
-    wasteReductionTargetYear: number,
-    wasteIsAbsolute: boolean,
     waterReductionGoal: boolean,
     waterReductionPercent: number,
     waterReductionBaselineYear: number,

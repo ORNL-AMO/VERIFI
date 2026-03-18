@@ -75,14 +75,14 @@ export class AnnualAnalysisSummaryDataClass {
 
     setMissingPredictorValue(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
         this.missingPredictorValue = monthlyAnalysisSummaryData.some(data =>
-            data.date.getUTCFullYear() === this.year && data.missingValueWarning
+            data.date.getFullYear() === this.year && data.missingValueWarning
         );
     }
 
     setMissingPredictors(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
         const allMissing: string[] = [];
         monthlyAnalysisSummaryData.forEach(data => {
-            if (data.date.getUTCFullYear() === this.year && data.missingPredictors) {
+            if (data.date.getFullYear() === this.year && data.missingPredictors) {
                 allMissing.push(...data.missingPredictors);
             }
         });

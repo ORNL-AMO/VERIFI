@@ -41,7 +41,6 @@
             ],
             "styles": [
               "src/styles/styles.css",
-              "src/styles/pagination.css",
               "src/styles/sliderToggle.css",
               "src/styles/meterDisplays.css",
               "src/styles/contentTabs.css",
@@ -171,7 +170,6 @@
             ],
             "styles": [
               "src/styles/styles.css",
-              "src/styles/pagination.css",
               "src/styles/sliderToggle.css",
               "src/styles/meterDisplays.css",
               "src/styles/contentTabs.css",

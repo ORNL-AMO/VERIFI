@@ -2,53 +2,53 @@
 <div class="popup" [ngClass]="{'open': showModal}">
   <div class="popup-header">Create New
     @if (isOverviewReport) {
-      Data Overview
+    Data Overview
     }
     @if (!isOverviewReport) {
-      Better Plants
+    Better Plants
     }
     Report
     <button class="item-right" (click)="cancelCreateReport()">x</button>
   </div>
   @if (isOverviewReport) {
-    <div class="popup-body">
-      <form>
-        <label class="semibold larger">Sections to Include in Report</label>
-        <div class="section-options">
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeEnergySection"
-              id="includeEnergySection"
-              [(ngModel)]="accountReport.dataOverviewReportSetup.includeEnergySection">
-            <label class="form-check-label" for="includeEnergySection">Energy Use</label>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeCostsSection" id="includeCostsSection"
-              [(ngModel)]="accountReport.dataOverviewReportSetup.includeCostsSection">
-            <label class="form-check-label" for="includeCostsSection">Costs</label>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeEmissionsSection"
-              id="includeEmissionsSection"
-              [(ngModel)]="accountReport.dataOverviewReportSetup.includeEmissionsSection">
-            <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
-          </div>
-          @if (showWater) {
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"
-                [(ngModel)]="accountReport.dataOverviewReportSetup.includeWaterSection">
-              <label class="form-check-label" for="includeWaterSection">Water</label>
-            </div>
-          }
-          @if (inAccount) {
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" name="includeFacilityReports" id="includeFacilityReports"
-                [(ngModel)]="accountReport.dataOverviewReportSetup.includeFacilityReports">
-              <label class="form-check-label" for="includeFacilityReports">Individual Facility Reports</label>
-            </div>
-          }
+  <div class="popup-body">
+    <form>
+      <label class="semibold larger">Sections to Include in Report</label>
+      <div class="section-options">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="includeEnergySection" id="includeEnergySection"
+            [(ngModel)]="accountReport.dataOverviewReportSetup.includeEnergySection">
+          <label class="form-check-label" for="includeEnergySection">Energy Use</label>
         </div>
-      </form>
-    </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="includeCostsSection" id="includeCostsSection"
+            [(ngModel)]="accountReport.dataOverviewReportSetup.includeCostsSection">
+          <label class="form-check-label" for="includeCostsSection">Costs</label>
+        </div>
+        @if(account.displayEmissions){
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="includeEmissionsSection" id="includeEmissionsSection"
+            [(ngModel)]="accountReport.dataOverviewReportSetup.includeEmissionsSection">
+          <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
+        </div>
+        }
+        @if (showWater) {
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"
+            [(ngModel)]="accountReport.dataOverviewReportSetup.includeWaterSection">
+          <label class="form-check-label" for="includeWaterSection">Water</label>
+        </div>
+        }
+        @if (inAccount) {
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="includeFacilityReports" id="includeFacilityReports"
+            [(ngModel)]="accountReport.dataOverviewReportSetup.includeFacilityReports">
+          <label class="form-check-label" for="includeFacilityReports">Individual Facility Reports</label>
+        </div>
+        }
+      </div>
+    </form>
+  </div>
   }
   <div class="popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelCreateReport()">Cancel</button>

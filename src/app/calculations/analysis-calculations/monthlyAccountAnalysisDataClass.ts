@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalculatedValuesClassSummation";
 import { IdbAccount } from "src/app/models/idbModels/account";
+import { checkSameMonth } from "src/app/data-management/data-management-import/import-services/upload-helper-functions";
 
 export class MonthlyAccountAnalysisDataClass {
     date: Date;
@@ -36,7 +37,7 @@ export class MonthlyAccountAnalysisDataClass {
     setCurrentMonthData(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.currentMonthData = allFacilityAnalysisData.filter(summaryData => {
             let summaryDataDate: Date = new Date(summaryData.date);
-            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && summaryDataDate.getUTCFullYear() == this.date.getUTCFullYear();
+            return checkSameMonth(summaryDataDate, this.date);
         });
     }
 
@@ -62,7 +63,7 @@ export class MonthlyAccountAnalysisDataClass {
         let allBaselineDataForNewFacilitiesThisMonth: Array<MonthlyAnalysisSummaryDataClass> = allFacilityAnalysisData.filter(summaryData => {
             let summaryDataDate: Date = new Date(summaryData.date);
             let fiscalYear: number = getFiscalYear(this.date, account);
-            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && (summaryData.isNew && summaryData.isBaselineYear) && (summaryData.baselineYear <= fiscalYear);
+            return summaryDataDate.getMonth() == this.date.getMonth() && (summaryData.isNew && summaryData.isBaselineYear) && (summaryData.baselineYear <= fiscalYear);
         });
 
         this.baselineAdjustmentForNew = _.sumBy(allBaselineDataForNewFacilitiesThisMonth, (data: MonthlyAnalysisSummaryDataClass) => {

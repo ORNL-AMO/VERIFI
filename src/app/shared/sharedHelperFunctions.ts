@@ -6,6 +6,7 @@ import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "./unitOptions";
+import * as _ from 'lodash';
 
 export function getGUID(): string {
     return Math.random().toString(36).substr(2, 9);
@@ -167,7 +168,6 @@ export function checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
     }
 }
 
-import * as _ from 'lodash';
 export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDataSelection: WeatherDataSelection): number {
     if (weatherDataSelection == 'CDD') {
         return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {

@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
@@ -6,8 +6,9 @@ import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-edit-predictor-data-entry-form',
@@ -21,16 +22,16 @@ export class EditPredictorDataEntryFormComponent {
   @Input({ required: true })
   predictorData: IdbPredictorData;
   @Input()
-  isSaved: boolean;
-  @Input()
   calculatingDegreeDays: boolean = false;
+
+  @Output()
+  isSaved = new EventEmitter<boolean>();
 
   constructor(
     // private degreeDaysService: DegreeDaysService,
     private facilityDbService: FacilitydbService,
     private weatherDataService: WeatherDataService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
   ) {
   }
 
@@ -47,9 +48,10 @@ export class EditPredictorDataEntryFormComponent {
   setDate(eventData: string) {
     //eventData format = yyyy-mm = 2022-06
     let yearMonth: Array<string> = eventData.split('-');
-    //-1 on month
-    this.predictorData.date = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
+    this.predictorData.year = Number(yearMonth[0]);
+    this.predictorData.month = Number(yearMonth[1]);
     this.setDegreeDayValues();
+    this.setChanged();
   }
 
   async setDegreeDayValues() {
@@ -57,8 +59,8 @@ export class EditPredictorDataEntryFormComponent {
       this.calculatingDegreeDays = true;
       let hasWeatherDataWarning: boolean = false;
       if (!this.predictorData.weatherOverride) {
-        let stationId: string = this.predictor.weatherStationId;
-        let entryDate: Date = new Date(this.predictorData.date);
+        // let stationId: string = this.predictor.weatherStationId;
+        let entryDate: Date = getDateFromPredictorData(this.predictorData);
         let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
         if (degreeDays != 'error') {
@@ -81,8 +83,8 @@ export class EditPredictorDataEntryFormComponent {
   async goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
-    this.weatherDataService.selectedMonth = this.predictorData.date;
-    this.weatherDataService.selectedYear = new Date(this.predictorData.date).getFullYear();
+    this.weatherDataService.selectedMonth = getDateFromPredictorData(this.predictorData);
+    this.weatherDataService.selectedYear = this.predictorData.year
 
     if (this.predictor.weatherDataType == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
@@ -116,7 +118,7 @@ export class EditPredictorDataEntryFormComponent {
   }
 
   setChanged() {
-    this.isSaved = false;
+    this.isSaved.emit(false);
   }
 
   setWeatherManually() {
@@ -124,6 +126,7 @@ export class EditPredictorDataEntryFormComponent {
       this.predictorData.weatherOverride = true;
       this.predictorData.weatherDataWarning = false;
     }
+    this.setChanged();
   }
 
   async revertManualWeatherData() {
@@ -131,6 +134,6 @@ export class EditPredictorDataEntryFormComponent {
       this.predictorData.weatherOverride = false;
     }
     await this.setDegreeDayValues();
+    this.setChanged();
   }
-
 }

@@ -76,7 +76,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
         this.setDisableForm();
         this.setShowInUseMessage();
         this.energyUnit = this.account.energyUnit;
-        this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
+        this.yearOptions = this.calendarizationService.getYearOptions(this.analysisItem.analysisCategory, true);
         this.setBaselineYearWarning();
       } else {
         this.isFormChange = false;
@@ -90,6 +90,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
+    this.analysisItem.isAnalysisVisited = false;
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.analysisItem, analysisItems);
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
@@ -98,20 +99,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  async changeReportYear() {
+  async changeBaselineYear(){
     this.setBaselineYearWarning();
-    if (!this.baselineYearWarning) {
-      let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-      let selectYearAnalysis: boolean = true;
-      allAnalysisItems.forEach(item => {
-        if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
-          selectYearAnalysis = false;
-        }
-      });
-      this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
-    } else {
-      this.analysisItem.selectedYearAnalysis = false;
-    }
     await this.saveItem();
   }
 
@@ -193,7 +182,18 @@ export class AccountAnalysisSetupComponent implements OnInit {
       this.dbChangesService.selectFacility(facility);
       let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
       newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
-      newIdbItem.reportYear = this.analysisItem.reportYear;
+      let facilityBaselineYear: number;
+      if (this.analysisItem.analysisCategory == 'energy') {
+        facilityBaselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      }
+      else if (this.analysisItem.analysisCategory == 'water') {
+        facilityBaselineYear = facility.sustainabilityQuestions.waterReductionBaselineYear;
+      }
+      if (facility.isNewFacility && (facilityBaselineYear > this.analysisItem.baselineYear)) {
+        newIdbItem.baselineYear = facilityBaselineYear;
+      } else {
+        newIdbItem.baselineYear = this.analysisItem.baselineYear;
+      }
       if (this.analysisItem.name != '') {
         newIdbItem.name = this.analysisItem.name;
       }
@@ -201,7 +201,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
         group.analysisType = this.analysisType;
         group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
       });
-      newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
+      // newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
       newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
       newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
       for (let f = 0; f < this.analysisItem.facilityAnalysisItems.length; f++) {

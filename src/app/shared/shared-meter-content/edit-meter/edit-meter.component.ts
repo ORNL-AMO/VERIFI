@@ -10,11 +10,12 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { Observable, firstValueFrom, of } from 'rxjs';
+import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
+import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-meter',
@@ -35,7 +36,8 @@ export class EditMeterComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService, private activatedRoute: ActivatedRoute,
-    private router: Router) { }
+    private router: Router,
+    private routerGuardService: RouterGuardService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -121,9 +123,17 @@ export class EditMeterComponent implements OnInit {
   }
 
   canDeactivate(): Observable<boolean> {
-    if (this.meterForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+    if (this.meterForm && this.meterForm.dirty) {
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }

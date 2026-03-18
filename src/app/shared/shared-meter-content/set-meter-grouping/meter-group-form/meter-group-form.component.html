@@ -1,4 +1,21 @@
-<div class="d-flex w-100 flex-column justify-content-end">
+<div class="d-flex w-100 justify-content-between">
+  <div class="btn-group">
+    <button class="btn toggle-btn" (click)="cancel()" title="Manage All Groups">
+      <i class="fa fa-layer-group"></i>
+    </button>
+    <!-- <button class="btn btn-outline" (click)="openDeleteGroupModal()" title="Delete Group">
+      <i class="fa fa-trash"></i>
+    </button> -->
+    <button class="btn toggle-btn active" title="Edit Group">
+      <i class="fa fa-pencil"></i>
+    </button>
+    <button class="btn toggle-btn" (click)="viewGroupDataTable()" title="Group Data Table">
+      <i class="fa fa-table"></i>
+    </button>
+    <button class="btn toggle-btn" (click)="viewGroupChartData()" title="Chart Group Data">
+      <i class="fa fa-chart-line"></i>
+    </button>
+  </div>
   <div class="d-flex justify-content-end">
     <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
     <button class="btn btn-primary" (click)="saveChanges()"
@@ -8,23 +25,24 @@
     </button>
   </div>
 </div>
-<p class="bold">Group Information</p>
+<hr class="my-2">
+<p class="bold mb-0">Group Information</p>
 <form [formGroup]="groupForm">
   <label for="name">Name <span class="required">*</span> </label>
   <div class="input-group mb-3">
     <input id="name" class="form-control" type="text" formControlName="name" minlength="0" maxlength="42">
   </div>
   @if (groupForm.get('name').hasError('required')) {
-    <span class="inputError">Name is required</span>
+  <span class="inputError">Name is required</span>
   }
 
   <label for="groupType">Group Type <span class="required">*</span></label>
   <select id="groupType" class="form-select mb-3" formControlName="groupType" (change)="setGroupOptions()">
     @if (hasEnergyMeters) {
-      <option [value]="'Energy'">Energy</option>
+    <option [value]="'Energy'">Energy</option>
     }
     @if (hasWaterMeters) {
-      <option [value]="'Water'">Water</option>
+    <option [value]="'Water'">Water</option>
     }
     <option [value]="'Other'">Other</option>
   </select>
@@ -45,35 +63,60 @@
     </tr>
   </thead>
   <tbody>
-    @for (groupOption of meterGroupOptions; track groupOption) {
-      <tr>
-        <td>
-          <div class="form-check">
-            <input (change)="setSelectionsChanged()" type="checkbox" class="form-check-input"
-              [name]="groupOption.guid" [id]="groupOption.guid" [(ngModel)]="groupOption.includeInGroup">
-          </div>
-        </td>
-        <td>
-          {{groupOption.name}}
-          @if (groupOption.inAnotherGroup) {
-            <span class="fa fa-asterisk"></span>
-          }
-        </td>
-        <td>
-          {{groupOption.source}}
-        </td>
-        <td>
-          <span [innerHTML]="groupOption.scope | scopeLabel"></span>
-        </td>
-      </tr>
+    @for (groupOption of meterGroupOptions; track groupOption.guid) {
+    <tr>
+      <td>
+        <div class="form-check">
+          <input (change)="setSelectionsChanged()" type="checkbox" class="form-check-input" [name]="groupOption.guid"
+            [id]="groupOption.guid" [(ngModel)]="groupOption.includeInGroup">
+        </div>
+      </td>
+      <td>
+        {{groupOption.name}}
+        @if (groupOption.inAnotherGroup) {
+        <span class="fa fa-asterisk"></span>
+        }
+      </td>
+      <td>
+        {{groupOption.source}}
+      </td>
+      <td>
+        <span [innerHTML]="groupOption.scope | scopeLabel"></span>
+      </td>
+    </tr>
     }
   </tbody>
 </table>
 
 @if (hasExistingGroups) {
-  <p class="fw-light">
-    <span class="fa fa-asterisk"></span> Indicates this meter is already in a different group. Adding it to this group
-    will remove it from the group it currently is in. Changing groups can create bad models in analysis if they already
-    exist.
-  </p>
+<p class="fw-light">
+  <span class="fa fa-asterisk"></span> Indicates this meter is already in a different group. Adding it to this group
+  will remove it from the group it currently is in. Changing groups can create bad models in analysis if they already
+  exist.
+</p>
 }
+<hr>
+<div class="d-flex w-100 justify-content-end">
+  <button class="btn btn-danger" (click)="openDeleteGroupModal()">
+    <i class="fa fa-trash"></i>
+    Delete Group
+  </button>
+</div>
+
+
+<div [ngClass]="{'windowOverlay': showDeleteModal}"></div>
+<div class="popup" [class.open]="showDeleteModal">
+  @if (showDeleteModal) {
+  <div class="popup-header">Delete Meter Group: {{meterGroup.name}}
+    <button class="item-right" (click)="closeDeleteGroup()">x</button>
+  </div>
+  }
+  <div class="popup-body">
+    <p>WARNING: Deleting meter group cannot be undone. Analysis and reports will be updated.
+      Are you sure you want to perform this action?</p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="closeDeleteGroup()">Cancel</button>
+    <button class="btn btn-danger" (click)="deleteMeterGroup()">Delete</button>
+  </div>
+</div>

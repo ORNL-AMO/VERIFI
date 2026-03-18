@@ -1,3 +1,30 @@
-.popup{
+.checkbox-style {
+    width: 15px;
+    height: 15px;
+}
+
+.facility-table {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.facility-table {
+    max-height: 350px;
+    max-width: 700px;
+    overflow-y: auto;
+}
+
+.popup {
+    position: fixed;
     top: 15%;
+    width: 700px;
+    max-width: 90vw;
+    height: auto;
+    max-height: 70vh;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-y: auto;
 }

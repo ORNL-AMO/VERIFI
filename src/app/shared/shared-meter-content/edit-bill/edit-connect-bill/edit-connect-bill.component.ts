@@ -86,9 +86,11 @@ export class EditConnectBillComponent {
     }
     else {
       this.folderError = false;
-      let date;
-      if ((this.editMeterData.readDate))
-        date = this.editMeterData.readDate.getFullYear() + '-' + (this.editMeterData.readDate.getMonth() + 1) + '-' + this.editMeterData.readDate.getDate();
+      let date: string;
+      if (this.editMeterData.year) {
+        date = this.editMeterData.year + '-' + (this.editMeterData.month) + '-' + this.editMeterData.day;
+      }
+
       await this.electronService.selectFile(this.key, this.folderPath, this.editMeterData.meterNumber, date);
       this.electronService.getFilePath(this.key).pipe(skip(1), take(1)).subscribe(async path => {
         if (path) {

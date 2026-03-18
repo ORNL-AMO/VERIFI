@@ -125,7 +125,7 @@ export class FacilityMetersTableComponent {
     //set meters
     await this.dbChangesService.setMeters(account, selectedFacility);
     //set meter data
-    await this.dbChangesService.setMeterData(account, selectedFacility);
+    await this.dbChangesService.setMeterData(account, true, selectedFacility);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
