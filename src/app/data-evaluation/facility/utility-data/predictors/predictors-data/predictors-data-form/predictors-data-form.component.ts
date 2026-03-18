@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -13,12 +13,13 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
-    selector: 'app-predictors-data-form',
-    templateUrl: './predictors-data-form.component.html',
-    styleUrl: './predictors-data-form.component.css',
-    standalone: false
+  selector: 'app-predictors-data-form',
+  templateUrl: './predictors-data-form.component.html',
+  styleUrl: './predictors-data-form.component.css',
+  standalone: false
 })
 export class PredictorsDataFormComponent {
 
@@ -33,7 +34,8 @@ export class PredictorsDataFormComponent {
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
-    private predictorDataDbService: PredictorDataDbService) {
+    private predictorDataDbService: PredictorDataDbService,
+    private routerGuardService: RouterGuardService) {
   }
 
   ngOnInit() {
@@ -59,6 +61,7 @@ export class PredictorsDataFormComponent {
   }
 
   cancel() {
+    this.isSaved = true;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
   }
@@ -95,8 +98,16 @@ export class PredictorsDataFormComponent {
 
   canDeactivate(): Observable<boolean> {
     if (!this.isSaved) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }
@@ -117,5 +128,9 @@ export class PredictorsDataFormComponent {
     await this.saveChanges();
     this.setNewPredictorEntry();
     this.isSaved = false;
+  }
+
+  onSavedChanges(isSaved: boolean) {
+    this.isSaved = isSaved;
   }
 }

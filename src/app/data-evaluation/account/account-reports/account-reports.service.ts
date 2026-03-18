@@ -71,7 +71,7 @@ export class AccountReportsService {
       }
     }
 
-    if (report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
+    if (report.reportType == 'betterClimate' || report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
         reportType: [report.reportType, Validators.required],
@@ -84,7 +84,7 @@ export class AccountReportsService {
       });
       return form;
     }
-    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis') {
+    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis' || report.reportType == 'performance') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
         reportType: [report.reportType, Validators.required],

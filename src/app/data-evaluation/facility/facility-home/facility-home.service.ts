@@ -38,31 +38,32 @@ export class FacilityHomeService {
 
   setLatestEnergyAnalysisItem(selectedFacility: IdbFacility) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == selectedFacility.guid && item.analysisCategory == 'energy' });
-    if (facilityAnalysisItems.length > 0) {
-      let selectedAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => { return item.selectedYearAnalysis == true });
-      if (selectedAnalysisItems.length != 0) {
-        this.latestEnergyAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
-      } else {
-        this.latestEnergyAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
-      }
+    if (selectedFacility.selectedEnergyAnalysisId) {
+      let selectedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == selectedFacility.selectedEnergyAnalysisId });
+      this.latestEnergyAnalysisItem = selectedAnalysisItem;
     } else {
-      this.latestEnergyAnalysisItem = undefined;
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == selectedFacility.guid && item.analysisCategory == 'energy' });
+      if (facilityAnalysisItems.length > 0) {
+        this.latestEnergyAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+
+      } else {
+        this.latestEnergyAnalysisItem = undefined;
+      }
     }
   }
 
   setLatestWaterAnalysisItem(selectedFacility: IdbFacility) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == selectedFacility.guid && item.analysisCategory == 'water' });
-    if (facilityAnalysisItems.length > 0) {
-      let selectedAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => { return item.selectedYearAnalysis == true });
-      if (selectedAnalysisItems.length != 0) {
-        this.latestWaterAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
-      } else {
-        this.latestWaterAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
-      }
+    if (selectedFacility.selectedWaterAnalysisId) {
+      let selectedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == selectedFacility.selectedWaterAnalysisId });
+      this.latestWaterAnalysisItem = selectedAnalysisItem;
     } else {
-      this.latestWaterAnalysisItem = undefined;
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == selectedFacility.guid && item.analysisCategory == 'water' });
+      if (facilityAnalysisItems.length > 0) {
+        this.latestWaterAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+      } else {
+        this.latestWaterAnalysisItem = undefined;
+      }
     }
   }
 }

@@ -15,10 +15,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-    selector: 'app-select-facility-analysis-items',
-    templateUrl: './select-facility-analysis-items.component.html',
-    styleUrls: ['./select-facility-analysis-items.component.css'],
-    standalone: false
+  selector: 'app-select-facility-analysis-items',
+  templateUrl: './select-facility-analysis-items.component.html',
+  styleUrls: ['./select-facility-analysis-items.component.css'],
+  standalone: false
 })
 export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
@@ -38,16 +38,12 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private accountAnalysisService: AccountAnalysisService,
-    private analysisValidationService: AnalysisValidationService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
     private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
       this.selectedAnalysisItem = item;
       this.setShowInUseMessage();
-      this.initializeSelectedFacilitiesItems();
       this.setFacilitiesList();
     })
 
@@ -90,7 +86,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
       this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
         return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
           && item.facilityId == this.selectedFacility.guid
-          && item.reportYear == this.selectedAnalysisItem.reportYear
           && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
           && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
       });
@@ -98,7 +93,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
       this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
         return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
           && item.facilityId == this.selectedFacility.guid
-          && item.reportYear == this.selectedAnalysisItem.reportYear
           && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
       });
     }
@@ -141,39 +135,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
       }
     });
   }
-
-  async initializeSelectedFacilitiesItems() {
-    if (!this.selectedAnalysisItem.facilityItemsInitialized) {
-      let findItemSelected = this.selectedAnalysisItem.facilityAnalysisItems.find(item => {
-        return item.analysisItemId != undefined;
-      });
-      if (!findItemSelected) {
-        let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-        this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-          let facilityItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => {
-            return (accountItem.reportYear == this.selectedAnalysisItem.reportYear
-              && accountItem.facilityId == item.facilityId
-              && accountItem.selectedYearAnalysis
-              && accountItem.baselineYear == this.selectedAnalysisItem.baselineYear
-              && accountItem.analysisCategory == this.selectedAnalysisItem.analysisCategory);
-          });
-          if (facilityItem) {
-            item.analysisItemId = facilityItem.guid;
-          } else {
-            item.analysisItemId = undefined;
-          }
-        });
-        this.selectedAnalysisItem.facilityItemsInitialized = true;
-        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-        this.selectedAnalysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.selectedAnalysisItem, analysisItems);
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        await this.dbChangesService.setAccountAnalysisItems(account, false);
-        this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
-      }
-    }
-  }
-
 
   setShowInUseMessage() {
     let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.selectedAnalysisItem.guid);

@@ -33,7 +33,7 @@ export class FacilityReportsDashboardComponent {
   newReportType: FacilityReportType = 'analysis';
   displayNewReport: boolean = false;
   routerSub: Subscription;
-  reportType: 'Analysis' | 'Data Overview' | 'Savings' | 'Emission Factors';
+  reportType: 'Analysis' | 'Data Overview' | 'Savings' | 'Emission Factors' | 'Modeling';
   constructor(private facilityDbService: FacilitydbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private dbChangesService: DbChangesService,
@@ -100,15 +100,16 @@ export class FacilityReportsDashboardComponent {
       this.newReportType = 'analysis';
     } else if (url.includes('overview')) {
       this.reportType = 'Data Overview';
+      this.newReportType = 'overview';
     } else if (url.includes('savings')) {
       this.reportType = 'Savings';
-      this.newReportType = 'overview';
+      this.newReportType = 'savings';
     } else if (url.includes('emission-factors')) {
       this.reportType = 'Emission Factors';
       this.newReportType = 'emissionFactors';
+    } else if (url.includes('modeling')) {
+      this.reportType = 'Modeling';
+      this.newReportType = 'modeling';
     }
   }
-
-
-
 }

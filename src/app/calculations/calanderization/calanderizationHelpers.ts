@@ -125,7 +125,6 @@ export function daysBetweenDates(firstDate: Date, secondDate: Date) {
 
 export function getMonthsArray(meterData: Array<IdbUtilityMeterData>): Array<{ month: number, year: number }> {
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data).getTime() });
-
     let yearMonths: Array<{ year: number, month: number }> = orderedMeterData.map(reading => { return { year: reading.year, month: reading.month - 1 } });
     //unique year months
     let uniqYearMonths: Array<{ year: number, month: number }> = _.uniqWith(yearMonths, _.isEqual);

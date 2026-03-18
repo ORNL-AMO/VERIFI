@@ -1,6 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
-import { filterYearMeterData, filterYearPredictorData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
+import { filterYearMeterData, filterYearPredictorData, getLatestYearWithData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisGroup } from "src/app/models/analysis";
 import { IdbFacility } from "src/app/models/idbModels/facility";
@@ -40,16 +40,24 @@ export class MonthlyGroupAnalysisClass {
     this.analysisItem = analysisItem;
     this.facility = facility;
     this.isNew = this.facility.isNewFacility;
-    let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
+    let calanderizedGroupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == this.selectedGroup.idbGroupId});
+    this.setReportYear(calanderizedGroupMeters);
     this.setModelYear();
     this.setPredictorVariables();
     this.setGroupPredictorData(accountPredictorEntries);
-    this.setStartAndEndDate(calanderizedFacilityMeters, calculateAllMonthlyData);
-    this.setGroupMeters(calanderizedFacilityMeters);
+    this.setStartAndEndDate(calanderizedGroupMeters, calculateAllMonthlyData);
+    this.setGroupMeters(calanderizedGroupMeters);
     this.setGroupMonthlyData();
     this.setBaselineYear();
     this.setAnnualMeterDataUsage();
     this.setBaselineYearEnergyIntensity();
+  }
+
+
+  setReportYear(calanderizedMeters: Array<CalanderizedMeter>) {
+    if (!this.analysisItem.calculatedReportYear) {
+      this.analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [this.facility]);
+    }
   }
 
   setStartAndEndDate(calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {

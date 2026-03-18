@@ -10,5 +10,5 @@
             Add Another</button>
     </div>
 </div>
-<app-edit-predictor-data-entry-form [isSaved]="isSaved" [predictor]="predictor" [predictorData]="predictorData"
+<app-edit-predictor-data-entry-form (isSaved)="onSavedChanges($event)" [predictor]="predictor" [predictorData]="predictorData"
     [calculatingDegreeDays]="calculatingDegreeDays"></app-edit-predictor-data-entry-form>

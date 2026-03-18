@@ -1,7 +1,7 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
-import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestYearWithData, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisDataClass } from "./monthlyFacilityAnalysisDataClass";
@@ -35,6 +35,7 @@ export class MonthlyFacilityAnalysisClass {
             this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
         }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
+        this.setReportYear(calanderizedFacilityMeters)
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setFacilityPredictors(accountPredictors, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
@@ -74,6 +75,12 @@ export class MonthlyFacilityAnalysisClass {
             this.endDate.setDate(1);
         } else {
             this.endDate = monthlyStartAndEndDate.endDate;
+        }
+    }
+
+    setReportYear(calanderizedMeters: Array<CalanderizedMeter>) {
+        if (!this.analysisItem.calculatedReportYear) {
+            this.analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [this.facility]);
         }
     }
 

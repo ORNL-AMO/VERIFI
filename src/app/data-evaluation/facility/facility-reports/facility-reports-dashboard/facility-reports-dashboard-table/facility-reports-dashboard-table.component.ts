@@ -28,7 +28,7 @@ export class FacilityReportsDashboardTableComponent {
   selectedFacilitySub: Subscription;
   facilityReportsSub: Subscription;
   selectedReportType = '';
-  reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors', 'savings'];
+  reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors', 'savings', 'modeling'];
   displayDeleteModal: boolean;
   deletedReport: IdbFacilityReport;
   account: IdbAccount;

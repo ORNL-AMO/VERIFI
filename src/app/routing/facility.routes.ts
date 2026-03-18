@@ -57,6 +57,8 @@ import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set
 import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
 import { MeterGroupingResultsTableComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
 import { MeterGroupingResultsGraphComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
+import { FacilityModelingReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-results.component";
+import { FacilityReportsDataCheckComponent } from "../data-evaluation/facility/facility-reports/facility-reports-data-check/facility-reports-data-check.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -321,10 +323,12 @@ export const FacilityRoutes: Route = {
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
                 { path: 'dashboard', component: FacilityReportsDashboardComponent },
                 { path: 'setup', component: FacilityReportSetupComponent },
+                { path: 'data-check', component: FacilityReportsDataCheckComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
                 { path: 'overview-report', component: FacilityOverviewReportResultsComponent },
                 { path: 'savings-report', component: FacilitySavingsReportResultsComponent },
-                { path: 'emission-factors-report', component: FacilityEmissionFactorsReportResultsComponent }
+                { path: 'emission-factors-report', component: FacilityEmissionFactorsReportResultsComponent },
+                { path: 'modeling-report', component: FacilityModelingReportResultsComponent }
             ]
         }
     ]

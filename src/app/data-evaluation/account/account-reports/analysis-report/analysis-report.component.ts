@@ -15,6 +15,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { AccountReportsService } from '../account-reports.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ModelingExecutiveSummaryExcelWriter } from '../excel-writer-services/modeling-executive-summary-excel-writer';
+import { FacilityGroupAnalysisItem, getGroupItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-analysis-report',
@@ -90,7 +91,7 @@ export class AnalysisReportComponent {
   initializeGroups() {
     this.facilityDetails.forEach(facility => {
       facility.groups.forEach(group => {
-        let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, facility.facilityId, facility.baselineYear);
+        let groupItem: FacilityGroupAnalysisItem = getGroupItem(group, facility.facilityId, facility.baselineYear);
         if (groupItem) {
           this.executiveSummaryItems.push(groupItem);
         }
@@ -101,21 +102,6 @@ export class AnalysisReportComponent {
     });
   }
 
-  getGroupItem(group: AnalysisGroup, facilityId: string, baselineYear: number): FacilityGroupAnalysisItem {
-    let selectedModel: JStatRegressionModel;
-    if (group.analysisType == 'regression') {
-      if (group.selectedModelId) {
-        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-      }
-    }
-    return {
-      group: group,
-      selectedModel: selectedModel,
-      facilityId: facilityId,
-      baselineYear: baselineYear
-    }
-  }
-
   generateExcelReport() {
     this.loadingService.setLoadingMessage('Generating Executive Summary Excel Report...');
     this.loadingService.setLoadingStatus(true);
@@ -123,11 +109,4 @@ export class AnalysisReportComponent {
     this.accountReportsService.generateExcel.next(false);
     this.loadingService.setLoadingStatus(false);
   }
-}
-
-export interface FacilityGroupAnalysisItem {
-  group: AnalysisGroup,
-  selectedModel: JStatRegressionModel,
-  facilityId: string,
-  baselineYear: number
 }

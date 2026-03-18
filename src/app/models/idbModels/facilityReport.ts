@@ -11,7 +11,8 @@ export interface IdbFacilityReport extends IdbEntry {
     analysisReportSettings: AnalysisReportSettings,
     dataOverviewReportSettings: DataOverviewFacilityReportSettings,
     savingsReportSettings: SavingsFacilityReportSettings,
-    emissionFactorsReportSettings: EmissionFactorsReportSettings
+    emissionFactorsReportSettings: EmissionFactorsReportSettings,
+    modelingReportSettings: ModelingReportSettings
 }
 
 export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
@@ -26,11 +27,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         analysisReportSettings: getAnalysisReportSettings(),
         dataOverviewReportSettings: getDataOverviewReportSettings(groups),
         savingsReportSettings: getSavingsReportSettings(),
-        emissionFactorsReportSettings: getEmissionFactorsReportSettings()
+        emissionFactorsReportSettings: getEmissionFactorsReportSettings(),
+        modelingReportSettings: getModelingReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -79,7 +81,8 @@ export function getAnalysisReportSettings(): AnalysisReportSettings {
         groupMonthlyResultsGraphs: true,
         groupAnnualResults: true,
         groupAnnualResultsTable: true,
-        groupAnnualResultsGraphs: true
+        groupAnnualResultsGraphs: true,
+        reportYear: undefined
     }
 }
 
@@ -103,7 +106,8 @@ export interface AnalysisReportSettings {
     groupMonthlyResultsGraphs: boolean,
     groupAnnualResults: boolean,
     groupAnnualResultsTable: boolean,
-    groupAnnualResultsGraphs: boolean
+    groupAnnualResultsGraphs: boolean,
+    reportYear: number
 }
 
 
@@ -245,4 +249,20 @@ export function getEmissionFactorsReportSettings(): EmissionFactorsReportSetting
 export interface EmissionFactorsReportSettings {
     startYear: number,
     endYear: number,
+}
+
+export function getModelingReportSettings(): ModelingReportSettings {
+    return {
+        reportYear: undefined,
+        includeIssuesSummary: true,
+        includeExecutiveSummary: true,
+        includeDataValidationTables: true
+    }
+}
+
+export interface ModelingReportSettings {
+    reportYear: number,
+    includeIssuesSummary: boolean,
+    includeExecutiveSummary: boolean,
+    includeDataValidationTables: boolean
 }

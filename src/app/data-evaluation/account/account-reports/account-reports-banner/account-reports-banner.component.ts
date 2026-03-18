@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-account-reports-banner',
@@ -28,11 +30,14 @@ export class AccountReportsBannerComponent {
   reportListSub: Subscription;
   compareBaselineYearToReportYearError: boolean;
   compareBaselineYearToReportYearErrorSub: Subscription;
+  analysisVisited: boolean = false;
+  selectedAnalysisItemSub: Subscription;
 
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private accountReportsService: AccountReportsService,
-    private accountReportDbService: AccountReportDbService) { }
+    private accountReportDbService: AccountReportDbService,
+    private accountAnalysisDbService: AccountAnalysisDbService,) { }
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
       this.setInDashboard();
@@ -61,11 +66,18 @@ export class AccountReportsBannerComponent {
       this.selectedReport = val;
       if (val) {
         this.setValidation(val);
+        this.checkIfAnalysisVisited();
       }
     });
 
     this.reportListSub = this.accountReportDbService.accountReports.subscribe(reports => {
       this.reportList = reports;
+    });
+
+    this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(analysisItem => {
+      if (analysisItem) {
+        this.checkIfAnalysisVisited();
+      }
     });
   }
 
@@ -75,8 +87,31 @@ export class AccountReportsBannerComponent {
     this.selectedReportSub.unsubscribe();
     this.errorSub.unsubscribe();
     this.reportListSub.unsubscribe();
+    this.selectedAnalysisItemSub.unsubscribe();
+    this.compareBaselineYearToReportYearErrorSub.unsubscribe();
   }
 
+  checkIfAnalysisVisited() {
+    let analysisItem: IdbAccountAnalysisItem;
+    if (this.selectedReport) {
+      if (this.selectedReport.reportType == 'betterPlants') {
+        analysisItem = this.accountAnalysisDbService.getByGuid(this.selectedReport.betterPlantsReportSetup?.analysisItemId);
+      }
+      else if (this.selectedReport.reportType == 'performance') {
+        analysisItem = this.accountAnalysisDbService.getByGuid(this.selectedReport.performanceReportSetup?.analysisItemId);
+      }
+      else if (this.selectedReport.reportType == 'accountSavings') {
+        analysisItem = this.accountAnalysisDbService.getByGuid(this.selectedReport.accountSavingsReportSetup?.analysisItemId);
+      }
+    }
+  
+    if (analysisItem) {
+      this.analysisVisited = analysisItem.isAnalysisVisited;
+    }
+    else {
+      this.analysisVisited = false;
+    }
+  }
 
   setInDashboard() {
     this.inDashboard = this.router.url.includes('dashboard');

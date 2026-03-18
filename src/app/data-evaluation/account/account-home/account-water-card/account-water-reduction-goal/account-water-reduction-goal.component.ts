@@ -42,7 +42,7 @@ export class AccountWaterReductionGoalComponent {
     this.latestSummarySub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
       this.latestAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && this.latestAnalysisItem?.selectedYearAnalysis) {
+      if (this.latestAnalysisSummary && this.latestAnalysisItem?.guid == this.account.selectedWaterAnalysisId) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {

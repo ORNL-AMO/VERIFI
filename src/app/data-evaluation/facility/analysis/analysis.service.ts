@@ -16,8 +16,6 @@ export class AnalysisService {
   dataDisplay: BehaviorSubject<"graph" | "table">;
 
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
-  showInvalidModels: BehaviorSubject<boolean>;
-  showFailedValidationModels: BehaviorSubject<boolean>;
   calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
@@ -36,8 +34,6 @@ export class AnalysisService {
     }
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
-    this.showInvalidModels = new BehaviorSubject<boolean>(false);
-    this.showFailedValidationModels = new BehaviorSubject<boolean>(true);
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
@@ -93,47 +89,47 @@ export class AnalysisService {
     }>>(undefined);
   }
 
-  setDataAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
-    if (analysisItem.baselineYear < analysisItem.reportYear) {
-      analysisItem.groups.forEach(group => {
-        let yearDataAdjustments: Array<{ year: number, amount: number }> = new Array();
-        let baselineAdjustments: Array<{ year: number, amount: number }> = new Array();
-        for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
-          let currentDataAdjustment = group.dataAdjustments.find(adjustment => {
-            return adjustment.year == year
-          });
-          if (currentDataAdjustment) {
-            yearDataAdjustments.push({
-              year: year,
-              amount: currentDataAdjustment.amount
-            });
-          } else {
-            yearDataAdjustments.push({
-              year: year,
-              amount: 0
-            });
-          }
-          let currentBaselineAdjustment = group.baselineAdjustmentsV2.find(adjustment => {
-            return adjustment.year == year
-          });
-          if (currentBaselineAdjustment) {
-            baselineAdjustments.push({
-              year: year,
-              amount: currentBaselineAdjustment.amount
-            });
-          } else {
-            baselineAdjustments.push({
-              year: year,
-              amount: 0
-            });
-          }
-        }
-        group.dataAdjustments = yearDataAdjustments;
-        group.baselineAdjustmentsV2 = baselineAdjustments;
-      });
-    }
-    return analysisItem;
-  }
+  // setDataAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+  //   if (analysisItem.baselineYear < analysisItem.reportYear) {
+  //     analysisItem.groups.forEach(group => {
+  //       let yearDataAdjustments: Array<{ year: number, amount: number }> = new Array();
+  //       let baselineAdjustments: Array<{ year: number, amount: number }> = new Array();
+  //       for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
+  //         let currentDataAdjustment = group.dataAdjustments.find(adjustment => {
+  //           return adjustment.year == year
+  //         });
+  //         if (currentDataAdjustment) {
+  //           yearDataAdjustments.push({
+  //             year: year,
+  //             amount: currentDataAdjustment.amount
+  //           });
+  //         } else {
+  //           yearDataAdjustments.push({
+  //             year: year,
+  //             amount: 0
+  //           });
+  //         }
+  //         let currentBaselineAdjustment = group.baselineAdjustmentsV2.find(adjustment => {
+  //           return adjustment.year == year
+  //         });
+  //         if (currentBaselineAdjustment) {
+  //           baselineAdjustments.push({
+  //             year: year,
+  //             amount: currentBaselineAdjustment.amount
+  //           });
+  //         } else {
+  //           baselineAdjustments.push({
+  //             year: year,
+  //             amount: 0
+  //           });
+  //         }
+  //       }
+  //       group.dataAdjustments = yearDataAdjustments;
+  //       group.baselineAdjustmentsV2 = baselineAdjustments;
+  //     });
+  //   }
+  //   return analysisItem;
+  // }
 
   checkFiscalYearEnd(date: Date, facilityOrAccount: IdbFacility | IdbAccount, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {
     if (orderDataField == 'date' || orderDataField == 'fiscalYear') {

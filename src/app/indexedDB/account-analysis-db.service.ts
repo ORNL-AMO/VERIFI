@@ -22,7 +22,6 @@ export class AccountAnalysisDbService {
     private loadingService: LoadingService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
-
     //subscribe after initialization
     this.selectedAnalysisItem.subscribe(analysisItem => {
       if (analysisItem) {
