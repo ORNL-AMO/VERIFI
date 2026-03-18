@@ -143,42 +143,6 @@
 /*
 Group action button
 */
-
-.btn-group .btn.meter-group-action-btn {
-  color: white !important;
-  background-color: #2c386b !important;
-  border-left-color: white;
-  border-right-color: white;
-  border-top-color: #2c386b;
-  border-bottom-color: #2c386b;
-}
-
-.btn-group .btn.meter-group-action-btn .fa{
-  color: white;
-  vertical-align: middle;
-}
-
-
-.btn-group .btn.meter-group-action-btn.active{
-  background-color: white !important;
-  color: #2c386b !important;
-  border-color: #2c386b;
-}
-
-.btn-group .btn.meter-group-action-btn.active .fa{
-  color: #2c386b;
-}
-
-.btn-group .btn.meter-group-action-btn:hover {
-  background-color: #2c386b !important;
-  color: #fff !important;
-  opacity: .5;
-}
-
-.btn-group .btn.meter-group-action-btn.active:hover {
-  color: #2c386b !important;
-}
-
 .btn-group .btn.meter-group-btn-danger {
   color: #ffffff !important;
   background-color: #ec0000 !important;
@@ -194,7 +158,5 @@ Group action button
 }
 
 .btn-group .btn.meter-group-btn-danger:hover {
-  /* background-color: #2c386b !important;
-  color: #fff !important; */
   opacity: .5;
 }
