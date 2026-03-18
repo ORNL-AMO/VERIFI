@@ -87,14 +87,14 @@ export class AccountReportSetupComponent {
     //TODO: baseline years less than report year selection
     //TODO: report years greater than baseline year selection
     //TODO: get options by water/energy
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount('all');
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }
 
   checkReportYear() {
     if (this.reportType == 'analysis' && this.setupForm.controls.reportYear.value != undefined) {
-      this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.setupForm.controls.reportYear.value, this.account);
+      this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.setupForm.controls.reportYear.value, true);
     }
   }
 }

@@ -9,13 +9,15 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { getDateFromMeterData, setMeterDataDateFromDate } from '../../dateHelperFunctions';
+import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-bill',
@@ -43,7 +45,8 @@ export class EditBillComponent implements OnInit {
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
     private router: Router,
-    private electronService: ElectronService) { }
+    private electronService: ElectronService,
+    private routerGuardService: RouterGuardService) { }
 
   ngOnInit(): void {
     this.setInDataManagement();
@@ -107,7 +110,7 @@ export class EditBillComponent implements OnInit {
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.meterDataForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
@@ -128,11 +131,12 @@ export class EditBillComponent implements OnInit {
     meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
-    this.editMeterData.readDate = new Date(meterDataToSave.readDate);
-    this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
+    let nextDate: Date = getDateFromMeterData(meterDataToSave);
+    nextDate.setMonth(nextDate.getMonth() + 1);
+    this.editMeterData = setMeterDataDateFromDate(this.editMeterData, nextDate);
     this.setMeterDataForm();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "alert-success");
@@ -164,11 +168,18 @@ export class EditBillComponent implements OnInit {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-
   canDeactivate(): Observable<boolean> {
-    if (this.meterDataForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+    if (this.meterDataForm && this.meterDataForm.dirty) {
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveAndQuit()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }

@@ -12,3 +12,11 @@
   margin-left: 0.5em;
   vertical-align: middle;
 }
+
+a.click-link .fa{
+  color: inherit;
+}
+
+a.click-link-danger .fa{
+  color: red;
+}

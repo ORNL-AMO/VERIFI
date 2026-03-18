@@ -33,11 +33,12 @@ export class AnnualAnalysisGroupSavingsTableComponent {
     this.groupSummaries.forEach(summary => {
       const grpId = summary.group.idbGroupId;
       const data = summary.annualAnalysisSummaryData.map(yearData => {
+        let adjusted: number = this.annualAnalysisSummary.find(y => y.year == yearData.year).adjusted;
         return {
           year: yearData.year,
           savings: yearData.savings,
           totalSavingsPercentImprovement: yearData.totalSavingsPercentImprovement,
-          contributionPercent: yearData.savings / this.annualAnalysisSummary.find(y => y.year == yearData.year).adjusted
+          contributionPercent: yearData.savings / adjusted * 100
         }
       });
       this.groupAnalysisData.push({ groupId: grpId, data: data });

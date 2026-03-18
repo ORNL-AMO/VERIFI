@@ -99,11 +99,11 @@ export class DbChangesService {
     //TODO: deprecated, remove...?
     let needsMigration = await this.setPredictorsDeprecated(account);
     await this.setPredictorsV2(account);
-    await this.setPredictorDataV2(account);
+    await this.setPredictorDataV2(account, skipUpdates);
     //set meters
     await this.setMeters(account);
     //set meter data
-    await this.setMeterData(account);
+    await this.setMeterData(account, skipUpdates);
     //set meter groups
     await this.setMeterGroups(account);
     //set custom emissions
@@ -128,8 +128,9 @@ export class DbChangesService {
     if (needsMigration) {
       await this.migratePredictorsService.migrateAccountPredictors();
       await this.setPredictorsV2(account);
-      await this.setPredictorDataV2(account);
+      await this.setPredictorDataV2(account, skipUpdates);
     }
+    await this.updateFacilityAnalysisSelectedItems();
   }
 
   selectFacility(facility: IdbFacility) {
@@ -163,13 +164,18 @@ export class DbChangesService {
   async setAccountAnalysisItems(account: IdbAccount, skipUpdates: boolean) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     if (!skipUpdates) {
-      let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllAccountAnalysisItems(account.guid);
       for (let i = 0; i < accountAnalysisItems.length; i++) {
         let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
         if (updateAnalysis.isChanged) {
           accountAnalysisItems[i] = updateAnalysis.analysisItem;
           await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
         };
+      }
+      let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
+      if (updateAccount.isChanged) {
+        account = updateAccount.account;
+        await this.updateAccount(account);
       }
     }
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
@@ -184,6 +190,13 @@ export class DbChangesService {
           analysisItems[i] = updateAnalysis.analysisItem;
           await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
         };
+      }
+      if (facility) {
+        let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, analysisItems);
+        if (updateFacility.isChanged) {
+          facility = updateFacility.facility;
+          await this.updateFacilities(facility);
+        }
       }
     }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
@@ -296,8 +309,22 @@ export class DbChangesService {
   }
 
   //Predictor Data V2
-  async setPredictorDataV2(account: IdbAccount, facility?: IdbFacility) {
+  async setPredictorDataV2(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
+    if (!skipUpdates) {
+      let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
+      if (needsMigration) {
+        this.loadingService.setLoadingMessage('Updating predictor data dates for a consistent experience across timezones. This may take a moment...');
+        for (let i = 0; i < predictorData.length; i++) {
+          if (!predictorData[i].migratedDates) {
+            predictorData[i].month = predictorData[i]['date'].getMonth() + 1;
+            predictorData[i].year = predictorData[i]['date'].getFullYear();
+            predictorData[i].migratedDates = true;
+            await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+          }
+        }
+      }
+    }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
     if (facility) {
       this.setFacilityPredictorDataV2(facility);
@@ -337,8 +364,23 @@ export class DbChangesService {
     this.utilityMeterDbService.facilityMeters.next(facilityMeters);
   }
 
-  async setMeterData(account: IdbAccount, facility?: IdbFacility) {
+  async setMeterData(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
+    if (!skipUpdates) {
+      let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
+      if (needsMigration) {
+        this.loadingService.setLoadingMessage('Updating meter data dates for a consistent experience across timezones. This may take a moment...');
+        for (let meterData of accountMeterData) {
+          if (meterData['readDate'] && !meterData.migratedDates) {
+            meterData.month = meterData['readDate'].getMonth() + 1;
+            meterData.year = meterData['readDate'].getFullYear();
+            meterData.day = meterData['readDate'].getDate();
+            meterData.migratedDates = true;
+            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+          }
+        }
+      }
+    }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
     if (facility) {
       this.setFacilityMeterData(facility);
@@ -389,55 +431,83 @@ export class DbChangesService {
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 
-  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount) {
+  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount, showLoading: boolean = true) {
     let currIdx = -1;
-    this.loadingService.setContext('delete-facility');
-    this.loadingService.setTitle('Deleting Facility');
+    if (showLoading) {
+      this.loadingService.setContext('delete-facility');
+      this.loadingService.setTitle('Deleting Facility');
+    }
 
     // Delete all info associated with facility
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Predictors");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Predictors");
+    }
     await this.predictorsDbServiceDeprecated.deleteAllFacilityPredictors(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Predictor Data");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Predictor Data");
+    }
     await this.predictorDbService.deleteAllFacilityPredictors(facility.guid);
     await this.predictorDataDbService.deleteAllFacilityPredictorData(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Meter Data");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Meter Data");
+    }
     await this.utilityMeterDataDbService.deleteAllFacilityMeterData(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Meters");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Meters");
+    }
     await this.utilityMeterDbService.deleteAllFacilityMeters(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Meter Groups");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Meter Groups");
+    }
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Reports");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Reports");
+    }
     await this.facilityReportsDbService.deleteFacilityReports(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Energy Use Groups");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Energy Use Groups");
+    }
     await this.facilityEnergyUseGroupsDbService.deleteAllFacilityEnergyUseGroups(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Energy Use Equipment`");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Energy Use Equipment`");
+    }
     await this.facilityEnergyUseEquipmentDbService.deleteAllFacilityEnergyUseEquipment(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Updating Account Reports");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Updating Account Reports");
+    }
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
+    }
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Updating Account Analysis Items');
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage('Updating Account Analysis Items');
+    }
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != facility.guid });
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage("Deleting Facility");
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility");
+    }
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
     await this.selectAccount(selectedAccount, false);
-    this.loadingService.isLoadingComplete.next(true);
+    if (showLoading) {
+      this.loadingService.isLoadingComplete.next(true);
+    }
   }
 
   async updateDataNewFacility(newFacility: IdbFacility) {
@@ -470,6 +540,23 @@ export class DbChangesService {
         });
       }
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+    }
+  }
+
+  async updateFacilityAnalysisSelectedItems() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    for (let facility of facilities) {
+      let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
+      if (updateFacility.isChanged) {
+        facility = updateFacility.facility;
+        let onSelect: boolean = false;
+        if (selectedFacility && selectedFacility.id === facility.id) {
+          onSelect = true;
+        }
+        await this.updateFacilities(facility, onSelect);
+      }
     }
   }
 }

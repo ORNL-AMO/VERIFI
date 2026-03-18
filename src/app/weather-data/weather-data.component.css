@@ -5,3 +5,7 @@
 .wrapper.main-content {
     height: auto;
 }
+
+.predictor-row {
+    min-height: 35px;
+}

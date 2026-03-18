@@ -169,8 +169,10 @@ export class AppComponent {
           this.loadingMessage = 'Migrating Predictors for V2..'
           await this.migratePredictorsService.migrateAccountPredictors();
           await this.dbChangesService.setPredictorsV2(account);
-          await this.dbChangesService.setPredictorDataV2(account);
+          await this.dbChangesService.setPredictorDataV2(account, false);
         }
+        await this.updateAccountAnalysisSelectedItems(account);
+        await this.updateFacilityAnalysisSelectedItems();
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
         this.setAppOpenNotifications();
@@ -285,6 +287,17 @@ export class AppComponent {
     this.loadingMessage = "Loading Predictor Data..";
     //set predictor data (V2)
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
+    let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
+    if (needsMigration) {
+      for (let i = 0; i < predictorData.length; i++) {
+        if (!predictorData[i].migratedDates) {
+          predictorData[i].month = new Date(predictorData[i]['date']).getMonth() + 1;
+          predictorData[i].year = new Date(predictorData[i]['date']).getFullYear();
+          predictorData[i].migratedDates = true;
+          await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+        }
+      }
+    }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
   }
 
@@ -312,6 +325,18 @@ export class AppComponent {
     //set meter data
     this.loadingMessage = "Loading Meter Data..";
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
+    let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
+    if (needsMigration) {
+      for (let meterData of accountMeterData) {
+        if (!meterData.migratedDates) {
+          meterData.month = new Date(meterData['readDate']).getMonth() + 1;
+          meterData.year = new Date(meterData['readDate']).getFullYear();
+          meterData.day = new Date(meterData['readDate']).getDate();
+          meterData.migratedDates = true;
+          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+        }
+      }
+    }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData)
   }
 
@@ -323,7 +348,7 @@ export class AppComponent {
   }
 
   async initializeCustomEmissions(account: IdbAccount) {
-    this.loadingMessage = 'Loading Emissions Rates...';
+    // this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
     if (customEmissionsItems.length != 0) {
       for (let i = 0; i < customEmissionsItems.length; i++) {
@@ -357,7 +382,7 @@ export class AppComponent {
   }
 
   async initializeCustomGWPs(account: IdbAccount) {
-    this.loadingMessage = 'Loading Custom GWPs...';
+    // this.loadingMessage = 'Loading Custom GWPs...';
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
     for (let i = 0; i < customGWPs.length; i++) {
       let updateGWP = this.updateDbEntryService.updateCustomGWP(customGWPs[i]);
@@ -390,6 +415,32 @@ export class AppComponent {
     //set energy use equipment
     let accountFacilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = await this.facilityEnergyUseEquipmentDbService.getAllAccountEnergyUseEquipment(account.guid);
     this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.next(accountFacilityEnergyUseEquipment);
+  }
+  
+  async updateAccountAnalysisSelectedItems(account: IdbAccount) {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
+    let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
+    if (updateAccount.isChanged) {
+      account = updateAccount.account;
+      await this.dbChangesService.updateAccount(account);
+    }
+  }
+
+  async updateFacilityAnalysisSelectedItems() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    for (let facility of facilities) {
+      let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
+      if (updateFacility.isChanged) {
+        facility = updateFacility.facility;
+        let onSelect: boolean = false;
+        if (selectedFacility && selectedFacility.id === facility.id) {
+          onSelect = true;
+        }
+        await this.dbChangesService.updateFacilities(facility, onSelect);
+      }
+    }
   }
 
   async setAppOpenNotifications() {

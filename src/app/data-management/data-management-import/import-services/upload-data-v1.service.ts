@@ -21,7 +21,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
@@ -206,8 +206,7 @@ export class UploadDataV1Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = utilityMeterData.find(meterDataItem => {
           if (meterDataItem.meterId == meter.guid) {
-            let dateItemDate: Date = new Date(meterDataItem.readDate);
-            return checkSameDay(dateItemDate, readDate);
+            return checkSameDate(readDate, meterDataItem);
           } else {
             return false;
           }
@@ -215,7 +214,9 @@ export class UploadDataV1Service {
         if (!dbDataPoint) {
           dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Consumption']);
         dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Total Real Demand']);
         dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
@@ -258,8 +259,7 @@ export class UploadDataV1Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = utilityMeterData.find(meterDataItem => {
           if (meterDataItem.meterId == meter.guid) {
-            let dateItemDate: Date = new Date(meterDataItem.readDate);
-            return checkSameDay(dateItemDate, readDate);
+            return checkSameDate(readDate, meterDataItem);
           } else {
             return false;
           }
@@ -281,7 +281,9 @@ export class UploadDataV1Service {
           }
         }
 
-        dbDataPoint.readDate = readDate;
+        dbDataPoint.year = readDate.getFullYear();
+        dbDataPoint.month = readDate.getMonth() + 1;
+        dbDataPoint.day = readDate.getDate();
         dbDataPoint.totalVolume = totalVolume;
         dbDataPoint.totalEnergyUse = energyUse;
         dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost']);

@@ -64,9 +64,9 @@ export class HomePageComponent {
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);
           await this.dbChangesService.selectAccount(newAccount, false);
-          let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-          this.accountDbService.allAccounts.next(allAccounts);
-          await this.dbChangesService.selectAccount(newAccount, false);
+          // let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+          // this.accountDbService.allAccounts.next(allAccounts);
+          // await this.dbChangesService.selectAccount(newAccount, false);
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
@@ -108,12 +108,18 @@ export class HomePageComponent {
   }
 
   async goToAccountHome(account: IdbAccount) {
+    this.loadingService.setLoadingMessage('Loading Account...');
+    this.loadingService.setLoadingStatus(true);
     await this.dbChangesService.selectAccount(account, false);
+    this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/data-evaluation/account/home');
   }
 
   async goToDataWizard(account: IdbAccount) {
+    this.loadingService.setLoadingMessage('Loading Account...');
+    this.loadingService.setLoadingStatus(true);
     await this.dbChangesService.selectAccount(account, false);
+    this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 }

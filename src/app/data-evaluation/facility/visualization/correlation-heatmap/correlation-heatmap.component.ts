@@ -134,7 +134,8 @@ export class CorrelationHeatmapComponent {
   }
 
   getSigFigs(val: number): number {
-    return Number((val).toLocaleString(undefined, { maximumSignificantDigits: 3 }));
+    const rounded = Number(val.toPrecision(3));
+    return rounded;
   }
 
 

@@ -26,6 +26,7 @@
               Costs</span>
           </a>
         </li>
+        @if(account.displayEmissions){
         <li class="nav-item">
           <a class="nav-link" routerLink="emissions" [routerLinkActive]="['active']">
             <i class="fa fa-smog"></i>
@@ -33,6 +34,7 @@
               Emissions</span>
           </a>
         </li>
+        }
       </ul>
     </div>
     <app-facility-overview-options></app-facility-overview-options>

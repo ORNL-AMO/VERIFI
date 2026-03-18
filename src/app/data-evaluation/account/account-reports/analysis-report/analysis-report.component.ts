@@ -12,6 +12,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { AccountReportsService } from '../account-reports.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ModelingExecutiveSummaryExcelWriter } from '../excel-writer-services/modeling-executive-summary-excel-writer';
+import { FacilityGroupAnalysisItem, getGroupItem } from 'src/app/shared/facilityGroupItemFunction';
 
 @Component({
   selector: 'app-analysis-report',
@@ -30,13 +34,17 @@ export class AnalysisReportComponent {
   facilityDetails: Array<IdbAnalysisItem> = [];
   analysisReportSetup: AnalysisReportSetup;
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
+  generateExcelSub: Subscription;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService,
-    private dataEvaluationService: DataEvaluationService) { }
+    private dataEvaluationService: DataEvaluationService,
+    private accountReportsService: AccountReportsService,
+    private loadingService: LoadingService,
+    private modelingExecutiveSummaryExcelWriter: ModelingExecutiveSummaryExcelWriter) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -53,10 +61,17 @@ export class AnalysisReportComponent {
       this.facilityAnalysisItems = items;
       this.setFacilityItems();
     });
+
+    this.generateExcelSub = this.accountReportsService.generateExcel.subscribe(generateExcel => {
+      if (generateExcel == true) {
+        this.generateExcelReport();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    this.generateExcelSub.unsubscribe();
   }
 
   setFacilityItems() {
@@ -76,7 +91,7 @@ export class AnalysisReportComponent {
   initializeGroups() {
     this.facilityDetails.forEach(facility => {
       facility.groups.forEach(group => {
-        let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, facility.facilityId, facility.baselineYear);
+        let groupItem: FacilityGroupAnalysisItem = getGroupItem(group, facility.facilityId, facility.baselineYear);
         if (groupItem) {
           this.executiveSummaryItems.push(groupItem);
         }
@@ -87,25 +102,11 @@ export class AnalysisReportComponent {
     });
   }
 
-  getGroupItem(group: AnalysisGroup, facilityId: string, baselineYear: number): FacilityGroupAnalysisItem {
-    let selectedModel: JStatRegressionModel;
-    if (group.analysisType == 'regression') {
-      if (group.selectedModelId) {
-        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-      }
-    }
-    return {
-      group: group,
-      selectedModel: selectedModel,
-      facilityId: facilityId,
-      baselineYear: baselineYear
-    }
+  generateExcelReport() {
+    this.loadingService.setLoadingMessage('Generating Executive Summary Excel Report...');
+    this.loadingService.setLoadingStatus(true);
+    this.modelingExecutiveSummaryExcelWriter.exportToExcel(this.selectedReport, this.executiveSummaryItems);
+    this.accountReportsService.generateExcel.next(false);
+    this.loadingService.setLoadingStatus(false);
   }
-}
-
-export interface FacilityGroupAnalysisItem {
-  group: AnalysisGroup,
-  selectedModel: JStatRegressionModel,
-  facilityId: string,
-  baselineYear: number
 }

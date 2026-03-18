@@ -4,6 +4,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash'
+import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 @Component({
   selector: 'app-meter-charges-timeseries',
   standalone: false,
@@ -32,14 +33,14 @@ export class MeterChargesTimeseriesComponent {
     if (this.chargesTimeseries) {
 
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
-      meterData = _.sortBy(meterData, (data) => new Date(data.readDate).getTime(), 'desc');
+      meterData = _.sortBy(meterData, (data: IdbUtilityMeterData) => getDateFromMeterData(data).getTime(), 'desc');
 
       var data = [
         {
           type: "scatter",
           mode: "lines+markers",
           name: 'Total Cost',
-          x: meterData.map(data => { return data.readDate }),
+          x: meterData.map(data => { return getDateFromMeterData(data) }),
           y: meterData.map(data => { return data.totalCost }),
           line: { width: 3 },
           hovertemplate: 'Date: %{x}<br>Cost: $%{y}<extra></extra>',
@@ -52,7 +53,7 @@ export class MeterChargesTimeseriesComponent {
             type: "scatter",
             mode: "lines+markers",
             name: charge.name,
-            x: meterData.map(data => { return data.readDate }),
+            x: meterData.map(data => { return getDateFromMeterData(data) }),
             y: meterData.map(data => {
               let meterDataCharge = data.charges.find(c => { return c.chargeGuid == charge.guid });
               if (meterDataCharge) {

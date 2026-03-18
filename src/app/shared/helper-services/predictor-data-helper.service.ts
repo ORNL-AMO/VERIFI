@@ -6,14 +6,9 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getDateFromMeterData, getDateFromPredictorData, getEarliestMeterData, getLatestMeterData, getLatestPredictorData } from '../dateHelperFunctions';
 
 @Injectable({
   providedIn: 'root'
@@ -22,8 +17,6 @@ export class PredictorDataHelperService {
 
   constructor(private predictorDbService: PredictorDbService, private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService
   ) { }
 
   checkWeatherPredictorsNeedUpdate(facility: IdbFacility, facilityPredictors?: Array<IdbPredictor>): Array<{ predictor: IdbPredictor, latestReadingDate: Date }> {
@@ -51,11 +44,9 @@ export class PredictorDataHelperService {
 
   getLastPredictorReadingDate(predictor: IdbPredictor): Date {
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
-    let latestPredictorData: IdbPredictorData = _.maxBy(predictorData, (pData: IdbPredictorData) => {
-      return new Date(pData.date);
-    })
+    let latestPredictorData: IdbPredictorData = getLatestPredictorData(predictorData);
     if (latestPredictorData) {
-      let predictorDate: Date = new Date(latestPredictorData.date);
+      let predictorDate: Date = getDateFromPredictorData(latestPredictorData);
       return predictorDate;
     }
     return undefined;
@@ -63,40 +54,18 @@ export class PredictorDataHelperService {
 
   getLastMeterDate(facility: IdbFacility): Date {
     let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
-    let utilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(facility.guid);
-    let filteredMeters: Array<IdbUtilityMeter> = utilityMeters.filter(meter => {
-      return meter.meterReadingDataApplication != 'fullYear';
-    });
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion, []);
-    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
-      return cMeter.monthlyData;
-    });
-    let lastReading: MonthlyData = _.maxBy(monthlyData, (cMeter: MonthlyData) => {
-      return new Date(cMeter.date);
-    });
-    if (lastReading) {
-      return new Date(lastReading.date);
+    let latestMeterData: IdbUtilityMeterData = getLatestMeterData(utilityMeterData);
+    if (latestMeterData) {
+      return getDateFromMeterData(latestMeterData);
     }
     return;
   }
 
   getFirstMeterDate(facility: IdbFacility): Date {
     let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
-    let utilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(facility.guid);
-    let filteredMeters: Array<IdbUtilityMeter> = utilityMeters.filter(meter => {
-      return meter.meterReadingDataApplication != 'fullYear';
-    });
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion, []);
-    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
-      return cMeter.monthlyData;
-    });
-    let lastReading: MonthlyData = _.minBy(monthlyData, (cMeter: MonthlyData) => {
-      return new Date(cMeter.date);
-    });
-    if (lastReading) {
-      return new Date(lastReading.date);
+    let firstMeterData: IdbUtilityMeterData = getEarliestMeterData(utilityMeterData);
+    if (firstMeterData) {
+      return getDateFromMeterData(firstMeterData);
     }
     return;
   }

@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import * as _ from 'lodash'
 import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
+import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Pipe({
   name: 'orderMeterDataBy',
@@ -23,7 +24,11 @@ export class OrderMeterDataByPipe implements PipeTransform {
           }
         }
       } else {
-        return dataItem[orderDataBy];
+        if (orderDataBy === 'readDate') {
+          return getDateFromMeterData(dataItem).getTime();
+        } else {
+          return dataItem[orderDataBy];
+        }
       }
     }, orderDirection)
   }

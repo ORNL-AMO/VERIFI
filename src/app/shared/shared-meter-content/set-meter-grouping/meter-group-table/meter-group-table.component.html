@@ -1,30 +1,38 @@
 @if (meters.length > 0) {
-  <table class="table table-bordered table-sm">
-    <thead>
-      <tr>
-        <th>Meter</th>
-        <th>Source</th>
-        <th>Scope</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (meter of meters; track meter) {
-        <tr>
-          <td>
-            {{meter.name}}
-          </td>
-          <td>
-            {{meter.source}}
-          </td>
-          <td>
-            <span [innerHTML]="meter.scope | scopeLabel"></span>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+<table class="table table-bordered table-sm utility-data">
+  <thead>
+    @if(showHeader){
+    <tr class="table-mh">
+      <th colspan="3">
+        Meter Group:
+        {{meterGroup.name}}
+      </th>
+    </tr>
+    }
+    <tr>
+      <th>Meter</th>
+      <th>Source</th>
+      <th>Scope</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (meter of meters; track meter.guid) {
+    <tr>
+      <td>
+        {{meter.name}}
+      </td>
+      <td>
+        {{meter.source}}
+      </td>
+      <td>
+        <span [innerHTML]="meter.scope | scopeLabel"></span>
+      </td>
+    </tr>
+    }
+  </tbody>
+</table>
 } @else {
-  <div class="alert alert-info p-1">
-    No meters added to this group.
-  </div>
+<div class="alert alert-info p-1">
+  No meters added to this group.
+</div>
 }

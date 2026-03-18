@@ -27,6 +27,8 @@ export class ManageAccountsComponent {
   displayMoreHelp: boolean = false;
   account: IdbAccount;
   loadingSub: Subscription;
+  showExportModal: boolean = false;
+  includeWeatherData: boolean = false;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -86,7 +88,19 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingStatus(false);
   }
 
+  openExportModal(account: IdbAccount) {
+    this.includeWeatherData = false;
+    this.showExportModal = true;
+    this.selectedAccount = account;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+    this.selectedAccount = undefined;
+  }
+
   async exportToExcel(account: IdbAccount) {
+    this.showExportModal = false;
     this.account = account;
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facilities');
@@ -94,7 +108,7 @@ export class ManageAccountsComponent {
     this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     try {
       await this.dbChangesService.selectAccount(account, true);
-      this.exportToExcelTemplateV3Service.exportFacilityData();
+      this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData);
     } catch (err) {
       this.loadingService.clearLoadingMessages();
       this.loadingService.setContext(undefined);

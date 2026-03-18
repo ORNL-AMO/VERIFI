@@ -19,6 +19,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -122,11 +123,11 @@ export class CalculatedPredictorDataUpdateComponent {
         }
       });
       this.predictorData = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
-        return new Date(pData.date)
+        return getDateFromPredictorData(pData).getTime();
       });
       if (this.predictorData.length > 0) {
-        this.startDate = new Date(this.predictorData[0].date);
-        this.endDate = new Date(this.predictorData[this.predictorData.length - 1].date);
+        this.startDate = getDateFromPredictorData(this.predictorData[0]);
+        this.endDate = getDateFromPredictorData(this.predictorData[this.predictorData.length - 1]);
         if (this.endDate < this.latestMeterReading) {
           this.endDate = new Date(this.latestMeterReading);
           this.updateDataDateChange();
@@ -159,7 +160,7 @@ export class CalculatedPredictorDataUpdateComponent {
       }
       let predictorIndex: number = existingPredictorIndex[i];
       if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
-        let entryDate: Date = new Date(this.predictorData[predictorIndex].date);
+        let entryDate: Date = getDateFromPredictorData(this.predictorData[predictorIndex]);
         let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
         if (degreeDays != 'error') {
@@ -184,16 +185,16 @@ export class CalculatedPredictorDataUpdateComponent {
       let endDate: Date = new Date(this.endDate);
       let startDate: Date = new Date(this.startDate);
       let orderedData: Array<CalculatedPredictorTableItem> = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
-        return new Date(pData.date)
+        return getDateFromPredictorData(pData).getTime();
       });
 
       if (orderedData.length > 0) {
-        let dataEndDate: Date = new Date(orderedData[orderedData.length - 1].date);
+        let dataEndDate: Date = getDateFromPredictorData(orderedData[orderedData.length - 1]);
         dataEndDate.setMonth(dataEndDate.getMonth() + 1);
         if (dataEndDate <= endDate) {
           await this.addDegreeDays(dataEndDate, endDate);
         }
-        let dataStartDate: Date = new Date(orderedData[0].date);
+        let dataStartDate: Date = getDateFromPredictorData(orderedData[0]);
         dataStartDate.setMonth(dataStartDate.getMonth() - 1);
         if (startDate <= dataStartDate) {
           await this.addDegreeDays(startDate, dataStartDate);
@@ -203,10 +204,10 @@ export class CalculatedPredictorDataUpdateComponent {
         let testEndDate: Date = new Date(this.endDate);
         if (dataEndDate > testEndDate || dataStartDate > testStartDate) {
           this.predictorData = this.predictorData.filter(pData => {
-            return pData.id || ((pData.date <= testEndDate) && (pData.date >= testStartDate));
+            return pData.id || ((getDateFromPredictorData(pData).getTime() <= testEndDate.getTime()) && (getDateFromPredictorData(pData).getTime() >= testStartDate.getTime()));
           });
           this.predictorData = this.predictorData.map(pData => {
-            if (pData.date > testEndDate || pData.date < testStartDate) {
+            if (getDateFromPredictorData(pData).getTime() > testEndDate.getTime() || getDateFromPredictorData(pData).getTime() < testStartDate.getTime()) {
               pData.deleted = true
             } else {
               pData.deleted = false;
@@ -242,7 +243,8 @@ export class CalculatedPredictorDataUpdateComponent {
           return degreeDay.gapInData == true
         });
         let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
-        newPredictorData.date = newDate;
+        newPredictorData.year = newDate.getFullYear();
+        newPredictorData.month = newDate.getMonth() + 1;
         newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
         newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
         let tableItem: CalculatedPredictorTableItem = {
@@ -321,7 +323,7 @@ export class CalculatedPredictorDataUpdateComponent {
     }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, selectedFacility)
+    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility)
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();

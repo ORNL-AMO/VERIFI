@@ -19,6 +19,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
+import { getDateFromPredictorData } from '../../dateHelperFunctions';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
@@ -133,7 +134,7 @@ export class PredictorsDataTableComponent {
       newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
+      await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(newEntry);
     } else {
@@ -231,7 +232,7 @@ export class PredictorsDataTableComponent {
   async finishDelete() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
     this.setHasChecked();
@@ -273,7 +274,7 @@ export class PredictorsDataTableComponent {
           this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
         }
       }
-      let entryDate: Date = new Date(predictorEntry.date);
+      let entryDate: Date = getDateFromPredictorData(predictorEntry);
       this.weatherDataService.selectedYear = entryDate.getFullYear();
       this.weatherDataService.selectedDate = entryDate;
       this.weatherDataService.selectedMonth = entryDate;

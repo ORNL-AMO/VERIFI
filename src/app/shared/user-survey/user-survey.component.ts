@@ -33,7 +33,7 @@ export class UserSurveyComponent {
       this.completedStatus = status;
       if (this.completedStatus === 'success') {
         this.setSurveyDone();
-        this.close()
+        this.surveyService.showSurveyModal.next(false);
       }
     });
 
@@ -117,7 +117,8 @@ export class UserSurveyComponent {
     this.surveyService.showSurveyModal.next(false);
   }
 
-  close() {
+  async close() {
+    await this.setSurveyDone();
     this.surveyService.showSurveyModal.next(false);
   }
 }

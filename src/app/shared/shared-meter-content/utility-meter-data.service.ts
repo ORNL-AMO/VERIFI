@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
@@ -8,6 +7,9 @@ import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { maxDateValidator, minDateValidator } from '../customFormValidators';
+import { getMeterDataDateString } from '../dateHelperFunctions';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +21,9 @@ export class UtilityMeterDataService {
   tableVehicleDataFilters: BehaviorSubject<VehicleDataFilters>;
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
 
-  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService) {
+  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService
+  ) {
     let defaultFilters: ElectricityDataFilters = this.getDefaultFilters();
     this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     this.electricityInputFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
@@ -52,8 +56,9 @@ export class UtilityMeterDataService {
   }
 
   checkSavedFilters(dataFilters: ElectricityDataFilters): ElectricityDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (!dataFilters.emissionsFilters) {
-      dataFilters.emissionsFilters = this.getDefaultEmissionsFilters();
+      dataFilters.emissionsFilters = this.getDefaultEmissionsFilters(account ? account.displayEmissions : false);
     }
     if (!dataFilters.generalInformationFilters) {
       dataFilters.generalInformationFilters = this.getDefaultGeneralInformationFilters();
@@ -63,12 +68,13 @@ export class UtilityMeterDataService {
 
 
   getDefaultFilters(): ElectricityDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
-      emissionsFilters: this.getDefaultEmissionsFilters(),
+      emissionsFilters: this.getDefaultEmissionsFilters(account ? account.displayEmissions : false),
       generalInformationFilters: this.getDefaultGeneralInformationFilters()
     }
   }
-  
+
   getDefaultGeneralInformationFilters(): GeneralInformationFilters {
     return {
       showSection: true,
@@ -79,48 +85,43 @@ export class UtilityMeterDataService {
     }
   }
 
-  getDefaultEmissionsFilters(): EmissionsFilters {
+  getDefaultEmissionsFilters(displayEmissions: boolean): EmissionsFilters {
     return {
-      showSection: true,
-      marketEmissions: true,
-      locationEmissions: true,
-      excessRECs: true,
-      excessRECsEmissions: true,
-      recs: true
+      showSection: displayEmissions,
+      marketEmissions: displayEmissions,
+      locationEmissions: displayEmissions,
+      excessRECs: displayEmissions,
+      excessRECsEmissions: displayEmissions,
+      recs: displayEmissions
     }
   }
 
   getDefaultGeneralFilters(): GeneralUtilityDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
       totalVolume: true,
       totalCost: true,
-      stationaryBiogenicEmmissions: true,
-      stationaryCarbonEmissions: true,
-      stationaryOtherEmissions: true,
-      totalEmissions: true,
+      stationaryBiogenicEmmissions: account && account.displayEmissions ? true : false,
+      stationaryCarbonEmissions: account && account.displayEmissions ? true : false,
+      stationaryOtherEmissions: account && account.displayEmissions ? true : false,
+      totalEmissions: account && account.displayEmissions ? true : false,
     }
   }
 
   getDefaultVehicleFilters(): VehicleDataFilters {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
       totalEnergy: true,
       totalCost: true,
-      mobileBiogenicEmissions: true,
-      mobileCarbonEmissions: false,
-      mobileOtherEmissions: false,
-      mobileTotalEmissions: true
+      mobileBiogenicEmissions: account && account.displayEmissions ? true : false,
+      mobileCarbonEmissions: account && account.displayEmissions ? true : false,
+      mobileOtherEmissions: account && account.displayEmissions ? true : false,
+      mobileTotalEmissions: account && account.displayEmissions ? true : false
     }
   }
 
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
-    //need to use date string for calander to work in form
-    let dateString: string;
-    if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
-      let datePipe: DatePipe = new DatePipe(navigator.language);
-      let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
-      dateString = datePipe.transform(meterData.readDate, stringFormat);
-    }
-
+    let dateString: string = getMeterDataDateString(meterData);
     let chargesArray: FormArray = this.formBuilder.array(meterData.charges ? meterData.charges.map(charge => {
       return this.formBuilder.group({
         chargeGuid: [charge.chargeGuid],
@@ -144,9 +145,10 @@ export class UtilityMeterDataService {
 
 
   updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
-    //UTC date is one day behind from form
-    let formDate: Date = new Date(form.controls.readDate.value)
-    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
+    let dateData: Array<string> = form.controls.readDate.value.split('-');
+    meterData.year = parseInt(dateData[0]);
+    meterData.month = parseInt(dateData[1]);
+    meterData.day = parseInt(dateData[2]);
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
     meterData.totalRealDemand = form.controls.totalRealDemand.value;
@@ -179,13 +181,7 @@ export class UtilityMeterDataService {
 
 
   getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean, source: MeterSource): FormGroup {
-    //need to use date string for calander to work in form 
-    let dateString: string;
-    if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
-      let datePipe: DatePipe = new DatePipe(navigator.language);
-      let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
-      dateString = datePipe.transform(meterData.readDate, stringFormat);
-    }
+    let dateString: string = getMeterDataDateString(meterData);
     let totalVolumeValidators: Array<ValidatorFn> = [];
     if (displayVolumeInput) {
       totalVolumeValidators = [Validators.required, Validators.min(0)]
@@ -233,9 +229,10 @@ export class UtilityMeterDataService {
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
-    //UTC date is one day behind from form
-    let formDate: Date = new Date(form.controls.readDate.value)
-    meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
+    let dateData: Array<string> = form.controls.readDate.value.split('-');
+    meterData.year = parseInt(dateData[0]);
+    meterData.month = parseInt(dateData[1]);
+    meterData.day = parseInt(dateData[2]);
     meterData.totalVolume = form.controls.totalVolume.value;
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;

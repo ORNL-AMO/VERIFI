@@ -152,7 +152,7 @@ export class OtherEmissionsDataTableComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let customGWPs: Array<IdbCustomGWP> = this.customGwpDbService.accountCustomGWPs.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [],
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, dataItem.year, false, [facility], [],
         customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.heatCapacity, account.assessmentReportVersion, customGWPs);
       dataItem.processEmissions = emissionsValues.processEmissions;
       dataItem.fugitiveEmissions = emissionsValues.fugitiveEmissions;

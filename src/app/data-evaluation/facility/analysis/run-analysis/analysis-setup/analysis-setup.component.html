@@ -94,7 +94,7 @@
           </label>
           <div class="col-7">
             <select required class="form-select" id="baselineYear" name="baselineYear"
-              [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
+              [(ngModel)]="analysisItem.baselineYear" (change)="changeBaselineYear()"
               [disabled]="disableForm || showInUseMessage">
               @for (year of yearOptions; track year) {
               <option [ngValue]="year">
@@ -117,29 +117,6 @@
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
           starts.
-        </div>
-        }
-        <div class="form-group row">
-          <label for="reportYear" class="col-5 col-form-label">
-            Report Year
-          </label>
-          <div class="col-7">
-            <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="analysisItem.reportYear"
-              (change)="changeReportYear()" [disabled]="disableForm || showInUseMessage">
-              @for (year of reportYears; track year) {
-              <option [ngValue]="year">{{year| yearDisplay:
-                facility.fiscalYear}}
-              </option>
-              }
-            </select>
-          </div>
-        </div>
-        @if (showReportYearWarning) {
-        <div class="alert alert-warning text-center p-1">
-          This facility does not have 12 months of data for the selected report year
-          ({{analysisItem.reportYear}}). An analysis is intended to be run with complete years only. To see
-          mid-year progress, please run a <a class="click-link" (click)="goToSavingsReport()">"Savings
-            Report"</a> for an analysis conducted with a different report year.
         </div>
         }
         <div class="form-group row">
@@ -209,12 +186,6 @@
       One or more groups have regression models generated. These settings were used to create the models and are
       now locked.
       <ul class="mb-0">
-        @if (!showInUseMessage) {
-        <li>
-          <a class="click-link" (click)="showChangeReportYear()">To change the report year and keep your
-            models click here.</a>
-        </li>
-        }
         <li>
           <a class="click-link" (click)="showEnableForm()">To clear the models so that you can modify all
             settings click here</a>
@@ -226,7 +197,7 @@
 </div>
 
 
-<div [ngClass]="{'windowOverlay': displayEnableForm || displayChangeReportYear}"></div>
+<div [ngClass]="{'windowOverlay': displayEnableForm}"></div>
 <div class="popup" [ngClass]="{'open': displayEnableForm}">
   <div class="popup-header">Are you sure?
     <button class="item-right" (click)="cancelEnableForm()">x</button>
@@ -246,32 +217,5 @@
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
     <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
-  </div>
-</div>
-
-
-<div class="popup" [ngClass]="{'open': displayChangeReportYear}">
-  <div class="popup-header">Select New Report Year
-    <button class="item-right" (click)="cancelChangeReportYear()">x</button>
-  </div>
-  <div class="popup-body">
-    <div class="form-group row">
-      <label for="reportYear" class="col-5 col-form-label">
-        Report Year
-      </label>
-      <div class="col-7">
-        <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="newReportYear">
-          @for (year of reportYears; track year) {
-          <option [ngValue]="year">{{year| yearDisplay:
-            facility.fiscalYear}}
-          </option>
-          }
-        </select>
-      </div>
-    </div>
-  </div>
-  <div class="saveCancel popup-footer text-end">
-    <button class="btn btn-secondary" (click)="cancelChangeReportYear()">Cancel</button>
-    <button class="btn action-btn" (click)="saveNewReportYear()">Update Report Year</button>
   </div>
 </div>

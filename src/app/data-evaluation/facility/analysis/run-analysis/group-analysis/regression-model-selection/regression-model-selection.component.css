@@ -38,3 +38,13 @@ tr.selected-model{
   background-color: #e5e8ea;
   color: red;
 }
+
+.dropdown-menu label:hover{
+    cursor: pointer;
+    background-color: #e5e8ea;
+
+}
+
+.dropdown-menu label{
+    font-size: larger;
+}

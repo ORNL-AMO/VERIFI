@@ -37,6 +37,8 @@ import { MeterGroupSourcesListPipe } from './meter-group-sources-list.pipe';
 import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 import { FacilityEnergyEquipmentNamePipe } from './facility-energy-equipment-name.pipe';
+import { DisplayPredictorDataDatePipe } from './display-predictor-data-date.pipe';
+import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
 
 @NgModule({
   declarations: [
@@ -76,7 +78,9 @@ import { FacilityEnergyEquipmentNamePipe } from './facility-energy-equipment-nam
     MeterGroupSourcesListPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
-    FacilityEnergyEquipmentNamePipe
+    FacilityEnergyEquipmentNamePipe,
+    DisplayPredictorDataDatePipe,
+    DisplayMeterDataDatePipe
   ],
   imports: [
     CommonModule
@@ -118,7 +122,9 @@ import { FacilityEnergyEquipmentNamePipe } from './facility-energy-equipment-nam
     MeterGroupSourcesListPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
-    FacilityEnergyEquipmentNamePipe
+    FacilityEnergyEquipmentNamePipe,
+    DisplayPredictorDataDatePipe,
+    DisplayMeterDataDatePipe
   ]
 })
 export class HelperPipesModule { }

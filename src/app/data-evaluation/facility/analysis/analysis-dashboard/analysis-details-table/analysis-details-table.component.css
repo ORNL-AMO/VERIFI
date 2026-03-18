@@ -59,14 +59,19 @@ thead th.can-click:hover {
     vertical-align: middle;
 }
 
-.placeholder-style {
-    visibility: hidden;
-}
-
 .form-select{
     border-color: #2c386b;
 }
 
 .select-width{
     width: 200px;
+}
+
+
+.water.fa-circle-check{
+    color: #3055cf;
+}
+
+.energy.fa-circle-check{
+    color: #bf3d00;
 }

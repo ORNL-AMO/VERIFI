@@ -56,6 +56,7 @@ export class DefaultUnitsFormComponent implements OnInit {
         if (this.isFormChange == false) {
           this.form = this.settingsFormsService.getUnitsForm(account);
           this.form.addControl('assessmentReportVersion', new FormControl(account.assessmentReportVersion))
+          this.form.addControl('displayEmissions', new FormControl(account.displayEmissions ? true : false))
           this.checkCurrentZip();
         } else {
           this.isFormChange = false;
@@ -93,6 +94,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     if (this.inAccount) {
       this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
       this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
+      this.selectedAccount.displayEmissions = this.form.controls.displayEmissions.value;
       let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
       let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.selectedAccount.next(updatedAccount);

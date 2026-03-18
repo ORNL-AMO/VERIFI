@@ -1,93 +1,109 @@
 @if (calculating == false) {
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-header bg-white">
-          <h4 class="mb-0">Facility Emissions</h4>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-12">
-              <app-data-overview-map [dataType]="'emissions'"
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">
+          <div class="d-flex justify-content-between">
+            <div class="h4-text">
+              Facility Emissions
+            </div>
+            <div class="text-center mt-auto">
+              {{dateRange.startDate | date:'MMM yyyy'}} - {{dateRange.endDate | date:'MMM yyyy'}}
+            </div>
+          </div>
+        </h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+            <app-data-overview-map [dataType]="'emissions'"
               [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-data-overview-map>
-              <hr>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <app-facilities-usage-table [dataType]="'emissions'"
-                  [accountOverviewFacilities]="accountOverviewData.facilitiesCost"
-                [accountOverviewData]="accountOverviewData"></app-facilities-usage-table>
-              </div>
-              <div class="col-6">
-                <app-facility-usage-donut [dataType]="'emissions'"
-                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-6">
-                <app-emissions-usage-table [overviewData]="accountOverviewData"
-                [inAccount]="true"></app-emissions-usage-table>
-              </div>
-              <div class="col-6">
-                <app-emissions-donut
-                [accountOverviewFacility]="accountOverviewData.facilitiesCost"></app-emissions-donut>
-              </div>
-            </div>
+            <hr>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <app-facilities-usage-table [dataType]="'emissions'"
+              [accountOverviewFacilities]="accountOverviewData.facilitiesCost"
+              [accountOverviewData]="accountOverviewData"></app-facilities-usage-table>
+          </div>
+          <div class="col-6">
+            <app-facility-usage-donut [dataType]="'emissions'"
+              [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <app-emissions-usage-table [overviewData]="accountOverviewData"
+              [inAccount]="true"></app-emissions-usage-table>
+          </div>
+          <div class="col-6">
+            <app-emissions-donut [accountOverviewFacility]="accountOverviewData.facilitiesCost"></app-emissions-donut>
           </div>
         </div>
       </div>
     </div>
-    <hr>
-      <div class="row">
-        <div class="col">
-          <div class="card">
-            <div class="card-header bg-white">
-              <h4 class="mb-0">Utility Emissions</h4>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">
+          <div class="d-flex justify-content-between">
+            <div class="h4-text">
+              Utility Emissions
             </div>
-            <div class="card-body">
-              <app-utility-consumption-table [dataType]="'emissions'"
-                [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
-                [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
-                [previousYear]="utilityUseAndCost.previousYear"
-              [dateRange]="dateRange"></app-utility-consumption-table>
+            <div class="text-center mt-auto">
+              {{dateRange.startDate | date:'MMM yyyy'}} - {{dateRange.endDate | date:'MMM yyyy'}}
             </div>
           </div>
-        </div>
+        </h4>
       </div>
-      <hr>
-        <div class="row">
-          <div class="col">
-            <div class="card">
-              <div class="card-header bg-white">
-                <h4 class="mb-0">Utility Emissions</h4>
-              </div>
-              <div class="card-body">
-                <app-facilities-emissions-stacked-bar-chart
-                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facilities-emissions-stacked-bar-chart>
-              </div>
-            </div>
-          </div>
-        </div>
-        <hr>
-          <div class="row">
-            <div class="col">
-              <div class="card">
-                <div class="card-header bg-white">
-                  <h4 class="mb-0">Monthly Emissions</h4>
-                </div>
-                <div class="card-body">
-                  <!-- <app-monthly-emissions-chart></app-monthly-emissions-chart> -->
-                  <app-monthly-utility-usage-line-chart [dataType]="'emissions'"
-                  [yearMonthData]="accountOverviewData.energyYearMonthData"></app-monthly-utility-usage-line-chart>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+      <div class="card-body">
+        <app-utility-consumption-table [dataType]="'emissions'"
+          [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
+          [useAndCostTotal]="utilityUseAndCost.allSourcesTotal" [previousYear]="utilityUseAndCost.previousYear"
+          [dateRange]="dateRange"></app-utility-consumption-table>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">Utility Emissions</h4>
+      </div>
+      <div class="card-body">
+        <app-facilities-emissions-stacked-bar-chart
+          [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facilities-emissions-stacked-bar-chart>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h4 class="mb-0">Monthly Emissions</h4>
+      </div>
+      <div class="card-body">
+        <!-- <app-monthly-emissions-chart></app-monthly-emissions-chart> -->
+        <app-monthly-utility-usage-line-chart [dataType]="'emissions'"
+          [yearMonthData]="accountOverviewData.energyYearMonthData"></app-monthly-utility-usage-line-chart>
+      </div>
+    </div>
+  </div>
+</div>
+}
 
 
-        @if (calculating != false) {
-          <app-calculating-spinner [message]="'Calculating Data Overview...'"
-          [error]="calculating == 'error'"></app-calculating-spinner>
-        }
+@if (calculating != false) {
+<app-calculating-spinner [message]="'Calculating Data Overview...'"
+  [error]="calculating == 'error'"></app-calculating-spinner>
+}

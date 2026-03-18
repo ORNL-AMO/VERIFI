@@ -208,7 +208,7 @@ jobs:
       - name: Codesign
         run: |
           TMP_CERT_PATH="$RUNNER_TEMP/cert.pem"
-          BUNDLE_PATH=$(find . -name "VERIFI-Setup-*.exe")
+          BUNDLE_PATH=$(find output -name "VERIFI-Setup-*.exe")
 
           echo -n "${{ secrets.WIN_CERT_BASE64 }}" | base64 --decode > $TMP_CERT_PATH
 
@@ -231,6 +231,8 @@ jobs:
           compression-level: 0
           if-no-files-found: error
           retention-days: 1
+      - name: Cleanup
+        run: rm -rf ./output
 
   release:
     if: github.ref_name == 'master'

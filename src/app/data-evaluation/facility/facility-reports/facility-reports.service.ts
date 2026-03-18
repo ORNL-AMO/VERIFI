@@ -31,7 +31,6 @@ export class FacilityReportsService {
         }
       }
       else if (report.facilityReportType == 'emissionFactors') {
-        console.log(report);
         if (report.emissionFactorsReportSettings.startYear != undefined && report.emissionFactorsReportSettings.endYear != undefined && report.emissionFactorsReportSettings.endYear < report.emissionFactorsReportSettings.startYear) {
           errorMessage = 'Start year cannot be later than the end year.';
         }

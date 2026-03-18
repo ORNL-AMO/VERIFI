@@ -17,6 +17,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'
@@ -238,8 +239,7 @@ export class VisualizationStateService {
       let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
       dates.forEach(date => {
         let monthPredictorEntry: IdbPredictorData = facilityPredictorEntries.find(entry => {
-          let entryDate: Date = new Date(entry.date)
-          return entry.predictorId == axisOption.itemId && entryDate.getMonth() == date.getMonth() && entryDate.getFullYear() == date.getFullYear();
+          return entry.predictorId == axisOption.itemId && checkSameMonthPredictorData(entry, date);
         });
         if (monthPredictorEntry) {
           values.push(monthPredictorEntry.amount);

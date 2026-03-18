@@ -63,7 +63,7 @@ export class MonthlyFacilityAnalysisReportComponent {
 
   setReportYearMonthlyData() {
     this.reportYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
-      return summaryData.fiscalYear == this.analysisItem.reportYear;
+      return summaryData.fiscalYear == this.analysisItem.calculatedReportYear;
     });
   }
 }

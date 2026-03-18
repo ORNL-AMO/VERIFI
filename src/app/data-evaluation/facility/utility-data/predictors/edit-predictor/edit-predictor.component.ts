@@ -1,8 +1,7 @@
-import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -23,6 +22,9 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
+import { getDateFromPredictorData } from 'src/app/shared/dateHelperFunctions';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -52,7 +54,8 @@ export class EditPredictorComponent {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private routerGuardService: RouterGuardService
   ) {
   }
 
@@ -110,16 +113,16 @@ export class EditPredictorComponent {
     if (this.predictor.predictorType == 'Weather') {
       if (this.addOrEdit == 'edit' && needsWeatherDataUpdate) {
         let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
-        let predictorDates: Array<Date> = predictorData.map(pData => { return new Date(pData.date) })
+        let predictorDates: Array<Date> = predictorData.map(pData => { return getDateFromPredictorData(pData) })
         let minDate: Date = _.min(predictorDates);
         let maxDate: Date = _.max(predictorDates);
         let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, minDate, maxDate, ['humidity']);
         if (parsedData != 'error') {
           for (let i = 0; i < predictorData.length; i++) {
             if (!predictorData[i].weatherOverride) {
-              let entryDate: Date = new Date(predictorData[i].date);
+              // let entryDate: Date = new Date(predictorData[i].date);
               this.loadingService.setLoadingMessage('Updating Weather Predictors: (' + i + '/' + predictorData.length + ')');
-              let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
+              let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, predictorData[i].month - 1, predictorData[i].year, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
                 return degreeDay.gapInData == true
               });
@@ -144,7 +147,7 @@ export class EditPredictorComponent {
     }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
     await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
@@ -158,8 +161,6 @@ export class EditPredictorComponent {
 
   async addWeatherData() {
     if (this.latestMeterReading && this.firstMeterReading) {
-      let datePipe: DatePipe = new DatePipe(navigator.language);
-      let stringFormat: string = 'MMM, yyyy';
       let startDate: Date = new Date(this.firstMeterReading);
       let endDate: Date = new Date(this.latestMeterReading);
       let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, []);
@@ -169,14 +170,16 @@ export class EditPredictorComponent {
             break;
           }
           let newDate: Date = new Date(startDate);
-          let dateString = datePipe.transform(newDate, stringFormat);
+          let month: Month = Months.find(m => m.monthNumValue == newDate.getMonth());
+          let dateString = month.abbreviation + ', ' + newDate.getFullYear();
           this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
           let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
           let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
             return degreeDay.gapInData == true
           });
           let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
-          newPredictorData.date = newDate;
+          newPredictorData.year = newDate.getFullYear();
+          newPredictorData.month = newDate.getMonth() + 1;
           newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
           newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
@@ -190,8 +193,16 @@ export class EditPredictorComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.predictorForm && this.predictorForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }
