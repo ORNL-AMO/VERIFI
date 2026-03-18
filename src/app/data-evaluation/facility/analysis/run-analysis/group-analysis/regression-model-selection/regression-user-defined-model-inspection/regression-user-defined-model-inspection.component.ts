@@ -21,6 +21,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-regression-user-defined-model-inspection',
@@ -89,7 +90,10 @@ export class RegressionUserDefinedModelInspectionComponent {
 
   generateUserDefinedModel() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let reportYear = analysisItem.reportYear;
+    //report year is determined by the latest full year of data
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
+    let reportYear: number = getLatestYearWithData(calanderizedMeters, [this.selectedFacility]);
+
     let baselineYear: number = analysisItem.baselineYear;
     let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedFacility.guid);
     const selectedPredictors = this.selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
@@ -203,10 +207,10 @@ export class RegressionUserDefinedModelInspectionComponent {
         const endYear = this.selectedGroup.regressionEndYear;
 
         let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = [];
-        if(this.inspectedMonthlyAnalysisSummaryData) {
+        if (this.inspectedMonthlyAnalysisSummaryData) {
           potentialModelYearData = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
             const date = data.date;
-            return(
+            return (
               (date.getFullYear() > startYear || (date.getFullYear() == startYear && date.getMonth() >= startMonth)) &&
               (date.getFullYear() < endYear || (date.getFullYear() == endYear && date.getMonth() <= endMonth))
             );

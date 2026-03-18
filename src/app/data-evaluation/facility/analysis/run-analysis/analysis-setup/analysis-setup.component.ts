@@ -13,8 +13,6 @@ import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
-import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -33,20 +31,16 @@ export class AnalysisSetupComponent implements OnInit {
   facility: IdbFacility;
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
-  reportYears: Array<number>;
   baselineYearWarning: string;
   disableForm: boolean;
   showInUseMessage: boolean;
   hasModelsGenerated: boolean;
   displayEnableForm: boolean = false;
-  displayChangeReportYear: boolean = false;
-  newReportYear: number;
 
   facilityAnalysisItems: Array<IdbAnalysisItem>;
 
   analysisItemSub: Subscription;
   isFormChange: boolean = false;
-  showReportYearWarning: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -54,7 +48,6 @@ export class AnalysisSetupComponent implements OnInit {
     private accountDbService: AccountdbService,
     private calanderizationService: CalanderizationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private regressionModelsService: RegressionModelsService,
     private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -62,11 +55,10 @@ export class AnalysisSetupComponent implements OnInit {
       if (!this.isFormChange) {
         this.analysisItem = item;
         this.facility = this.facilityDbService.selectedFacility.getValue();
-        this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
-        this.setReportYears();
+        this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
         this.setBaselineYearWarning();
-        this.setReportYearWarning();
         this.setComponentBools();
+        this.setFacilityAnalysisItems();
       } else {
         this.isFormChange = false;
       }
@@ -87,23 +79,8 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  async changeReportYear() {
-    this.analysisItem = this.analysisService.setDataAdjustments(this.analysisItem);
+  async changeBaselineYear() {
     this.setBaselineYearWarning();
-    this.setReportYearWarning();
-    if (!this.baselineYearWarning) {
-      let allFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
-      let selectYearAnalysis: boolean = true;
-      allFacilityAnalysisItems.forEach(item => {
-        if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
-          selectYearAnalysis = false;
-        }
-      });
-      this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
-    } else {
-      this.analysisItem.selectedYearAnalysis = false;
-    }
-    this.setReportYears();
     await this.saveItem();
   }
 
@@ -181,51 +158,6 @@ export class AnalysisSetupComponent implements OnInit {
     this.displayEnableForm = undefined;
   }
 
-  setReportYears() {
-    if (this.analysisItem.baselineYear) {
-      let modelYears: Array<number> = [this.analysisItem.baselineYear];
-
-      this.analysisItem.groups.forEach(group => {
-        if (group.analysisType == 'regression' && group.regressionModelYear) {
-          modelYears.push(group.regressionModelYear);
-        }
-      });
-
-      let minNeededModelYear: number = _.max(modelYears);
-
-      this.reportYears = this.yearOptions.filter(year => {
-        return year >= minNeededModelYear;
-      });
-    } else {
-      this.reportYears = [];
-    }
-    this.setFacilityAnalysisItems();
-  }
-
-  showChangeReportYear() {
-    this.newReportYear = this.analysisItem.reportYear;
-    this.displayChangeReportYear = true;
-  }
-
-  cancelChangeReportYear() {
-    this.displayChangeReportYear = false;
-  }
-
-  async saveNewReportYear() {
-    this.analysisItem.reportYear = this.newReportYear;
-    for (let i = 0; i < this.analysisItem.groups.length; i++) {
-      let group: AnalysisGroup = this.analysisItem.groups[i];
-      if (group.analysisType == 'regression') {
-        for (let m = 0; m < group.models.length; m++) {
-          this.analysisItem.groups[i].models[m] = this.regressionModelsService.updateModelReportYear(this.analysisItem.groups[i].models[m], this.analysisItem.reportYear, this.facility, this.analysisItem.baselineYear, group);
-        }
-      }
-    }
-    this.changeReportYear();
-    this.displayChangeReportYear = false;
-    await this.saveItem();
-  }
-
   setFacilityAnalysisItems() {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
     this.facilityAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
@@ -242,15 +174,6 @@ export class AnalysisSetupComponent implements OnInit {
       this.analysisItem.bankedAnalysisItemId = undefined;
     }
     await this.saveItem();
-  }
-
-
-  setReportYearWarning() {
-    if (this.analysisItem.reportYear != undefined) {
-      this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.analysisItem.reportYear, this.facility);
-    } else {
-      this.showReportYearWarning = false;
-    }
   }
 
   goToSavingsReport(){

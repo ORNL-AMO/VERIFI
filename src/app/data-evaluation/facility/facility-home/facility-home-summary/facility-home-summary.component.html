@@ -117,12 +117,15 @@
                 <span class="badge rounded-pill bg-danger">
                   <span class="fa fa-exclamation white"></span>
                 </span>
-                Energy analysis needed. @if (latestEnergyAnalysisItem) {
+                Energy analysis needed.
+                <!-- 
+                TODO: add check when new data is entered to determine if analysis is needed
+                @if (latestEnergyAnalysisItem) {
                 Latest energy
                 analysis conducted for
                 {{latestEnergyAnalysisItem.reportYear |
                 yearDisplay:facility.fiscalYear}}
-                }
+              } -->
               </a>
             </li>
             }
@@ -133,12 +136,15 @@
                 <span class="badge rounded-pill bg-danger">
                   <span class="fa fa-exclamation white"></span>
                 </span>
-                Water analysis needed. @if (latestWaterAnalysisItem) {
-                Latest water
-                analysis conducted for
-                {{latestWaterAnalysisItem.reportYear |
-                yearDisplay:facility.fiscalYear}}
-                }
+                Water analysis needed.
+                <!-- 
+              TODO: add check when new data is entered to determine if analysis is needed
+              @if (latestWaterAnalysisItem) {
+              Latest water
+              analysis conducted for
+              {{latestWaterAnalysisItem.reportYear |
+              yearDisplay:facility.fiscalYear}}
+            } -->
               </a>
             </li>
             }
@@ -149,8 +155,7 @@
                 <span class="badge rounded-pill bg-danger">
                   <span class="fa fa-exclamation white"></span>
                 </span>
-                Errors in the energy analysis conducted for {{latestEnergyAnalysisItem.reportYear |
-                yearDisplay:facility.fiscalYear}} - {{latestEnergyAnalysisItem.name}}
+                Errors in the energy analysis: {{latestEnergyAnalysisItem.name}}
               </a>
             </li>
             }
@@ -161,8 +166,7 @@
                 <span class="badge rounded-pill bg-danger">
                   <span class="fa fa-exclamation white"></span>
                 </span>
-                Errors in the water analysis conducted for {{latestWaterAnalysisItem.reportYear |
-                yearDisplay:facility.fiscalYear}} - {{latestWaterAnalysisItem.name}}
+                Errors in the water analysis: {{latestWaterAnalysisItem.name}}
               </a>
             </li>
             }

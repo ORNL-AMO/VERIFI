@@ -240,7 +240,8 @@ export class MonthlyAnalysisSummaryDataClass {
     setBaselineAdjustmentInput() {
         this.baselineAdjustmentInput = 0;
         this.baselineAdjustmentInputYearTotal = 0;
-        if (this.group.hasBaselineAdjustmentV2) {
+        let hasBaselineAdjustment: boolean = this.group.baselineAdjustmentsV2.length > 0;
+        if (hasBaselineAdjustment) {
             let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustmentsV2.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
             if (yearAdjustment && yearAdjustment.amount) {
                 this.baselineAdjustmentInput = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
@@ -253,7 +254,9 @@ export class MonthlyAnalysisSummaryDataClass {
     setModelYearDataAdjustment(monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass) {
         this.modelYearDataAdjustment = 0;
         this.modelYearDataAdjustmentYearTotal = 0;
-        if (this.group.hasDataAdjustement) {
+        let hasDataAdjustment: boolean = this.group.dataAdjustments.length > 0;
+
+        if (hasDataAdjustment) {
             let yearAdjustment: { year: number, amount: number };
             if (monthlyGroupAnalysisClass.customModelYear) {
                 let startYearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == monthlyGroupAnalysisClass.customModelYear.startYear; })
@@ -287,7 +290,8 @@ export class MonthlyAnalysisSummaryDataClass {
     setDataAdjustment() {
         this.dataAdjustment = 0;
         this.dataAdjustmentCurrentYear = 0;
-        if (this.group.hasDataAdjustement) {
+        let hasDataAdjustment: boolean = this.group.dataAdjustments.length > 0;
+        if (hasDataAdjustment) {
             let yearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
             if (yearAdjustment && yearAdjustment.amount) {
                 this.dataAdjustmentCurrentYear = yearAdjustment.amount;

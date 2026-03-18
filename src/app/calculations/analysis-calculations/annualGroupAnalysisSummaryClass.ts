@@ -3,7 +3,7 @@ import { CalanderizedMeter } from "src/app/models/calanderization";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestYearWithData } from "../shared-calculations/calculationsHelpers";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import * as _ from 'lodash';
 import { IdbFacility } from "src/app/models/idbModels/facility";
@@ -13,9 +13,6 @@ import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class AnnualGroupAnalysisSummaryClass {
 
-    // bankedAnnualGroupAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass;
-
-
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
     baselineYear: number;
@@ -24,13 +21,13 @@ export class AnnualGroupAnalysisSummaryClass {
     group: AnalysisGroup;
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.group = selectedGroup;
+        this.setReportYear(analysisItem, calanderizedMeters, facility);
         if (!this.monthlyAnalysisSummaryData) {
             this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
         } else {
             this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryData;
         }
-        this.setBaselineYear(analysisItem, selectedGroup);
-        this.setReportYear(analysisItem);
+        this.setBaselineYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility, accountPredictors);
     }
 
@@ -40,24 +37,17 @@ export class AnnualGroupAnalysisSummaryClass {
         this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
     }
 
-    // setBankedMonthlyAnalysisSummaryData(selectedGroup: AnalysisGroup, bankedAnalysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>) {
-    //     let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(selectedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, undefined);
-    //     this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
-    //     this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
-    // }
-
-    setBaselineYear(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup) {
-        // if (!analysisItem.hasBanking) {
+    setBaselineYear(analysisItem: IdbAnalysisItem) {
         this.baselineYear = analysisItem.baselineYear;
-        // } else if (!selectedGroup.applyBanking) {
-        //     this.baselineYear = analysisItem.baselineYear;
-        // } else {
-        //     this.baselineYear = selectedGroup.newBaselineYear;
-        // }
     }
 
-    setReportYear(analysisItem: IdbAnalysisItem) {
-        this.reportYear = analysisItem.reportYear;
+    setReportYear(analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
+        if (analysisItem.calculatedReportYear) {
+            this.reportYear = analysisItem.calculatedReportYear;
+        } else {
+            this.reportYear = getLatestYearWithData(calanderizedMeters, [facility]);
+            analysisItem.calculatedReportYear = this.reportYear;
+        }
     }
 
 
@@ -84,21 +74,6 @@ export class AnnualGroupAnalysisSummaryClass {
     }
 
     getAnnualAnalysisSummaries(): Array<AnnualAnalysisSummary> {
-        // if (this.bankedAnnualGroupAnalysisSummaryClass) {
-        //     // let startUnbankedYear: number = this.annualAnalysisSummaryDataClasses[0].year;
-        //     // let startBankedYear: number = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses[0].year;
-        //     let combinedData: Array<AnnualAnalysisSummary> = new Array();
-        //     // for (let indexYear = startBankedYear; indexYear < startUnbankedYear; indexYear++) {
-        //     //     let bankedData: AnnualAnalysisSummaryDataClass = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses.find(data => {
-        //     //         return data.year == indexYear;
-        //     //     });
-        //     //     combinedData.push(this.getFormattedResult(bankedData, true));
-        //     // }
-        //     this.annualAnalysisSummaryDataClasses.forEach(data => {
-        //         combinedData.push(this.getFormattedResult(data, false));
-        //     });
-        //     return combinedData;
-        // } else {
         return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
             return this.getFormattedResult(summaryDataClass);
         });

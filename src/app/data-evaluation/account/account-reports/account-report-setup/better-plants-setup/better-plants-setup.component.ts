@@ -10,6 +10,7 @@ import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-better-plants-setup',
@@ -30,12 +31,17 @@ export class BetterPlantsSetupComponent {
   itemToEdit: IdbAccountAnalysisItem;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   baselineYearWarning: string;
+  baselineYears: Array<number> = [];
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router) {
+    private router: Router,
+    private calanderizationService: CalanderizationService) {
   }
 
   ngOnInit() {
@@ -43,7 +49,7 @@ export class BetterPlantsSetupComponent {
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.betterPlantsReportForm = this.accountReportsService.getBetterPlantsFormFromReport(val.betterPlantsReportSetup);
-        this.setAnalysisOptions(val);
+        this.setAnalysisOptions();
       } else {
         this.isFormChange = false;
       }
@@ -67,9 +73,11 @@ export class BetterPlantsSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  setAnalysisOptions(report: IdbAccountReport) {
+  setAnalysisOptions() {
+    this.setYearOptions();
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });
+    this.accountAnalysisItems = analysisOptions.filter(option => { return option.energyIsSource });
+    this.applyFilters();
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.betterPlantsReportForm.controls.analysisItemId.patchValue(undefined);
@@ -122,4 +130,23 @@ export class BetterPlantsSetupComponent {
     }
   }
 
+  setYearOptions() {
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
+    this.baselineYears = yearOptions;
+  }
+
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.accountAnalysisItems];
+    if(this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if(this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem();
+  }
 }

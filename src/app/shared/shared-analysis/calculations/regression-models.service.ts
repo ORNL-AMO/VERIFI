@@ -4,7 +4,7 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SE
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestYearWithData, getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -20,9 +20,11 @@ export class RegressionModelsService {
   constructor(private predictorDataDbService: PredictorDataDbService) { }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
+    //report year is set to latest year with 
+    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);    
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let reportYear: number = analysisItem.reportYear;
+    let endYear: number = monthlyStartAndEndDate.endDate.getFullYear();
     let baselineYear: number = getFiscalYear(baselineDate, facility);
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
     let predictorVariableIds: Array<string> = new Array();
@@ -40,7 +42,7 @@ export class RegressionModelsService {
 
       let models: Array<JStatRegressionModel> = new Array();
       let startYear: number = getFiscalYear(baselineDate, facility);
-      while (startYear <= reportYear) {
+      while (startYear <= endYear) {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, startYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {
           let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo, analysisItem.analysisCategory);
@@ -53,7 +55,7 @@ export class RegressionModelsService {
               modelPredictorVariables.push(variable);
             });
             model['predictorVariables'] = modelPredictorVariables;
-            model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, analysisGroup);
+            model = this.setModelVaildAndNotes(model, facilityPredictorData, endYear, facility, baselineYear, analysisGroup);
 
             let modelId: string = '';
             let predictorVariableIds: string = '';

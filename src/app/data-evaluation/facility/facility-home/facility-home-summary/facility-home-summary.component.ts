@@ -94,13 +94,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setEnergyAnalysisNeeded() {
-    let currentDate: Date = new Date();
+    // let currentDate: Date = new Date();
     if (this.latestEnergyAnalysisItem) {
-      if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.energyAnalysisNeeded = true;
-      } else {
-        this.energyAnalysisNeeded = false;
-      }
+      //TODO:
+      //add check when new data is entered
+      //probably will incorporate with todo list logic
+      // if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+      //   this.energyAnalysisNeeded = true;
+      // } else {
+      //   this.energyAnalysisNeeded = false;
+      // }
+      this.energyAnalysisNeeded = false;
     } else if (this.facility.sustainabilityQuestions.energyReductionGoal) {
       this.energyAnalysisNeeded = true;
     } else {
@@ -109,13 +113,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setWaterAnalysisNeeded() {
-    let currentDate: Date = new Date();
+    // let currentDate: Date = new Date();
     if (this.latestWaterAnalysisItem) {
-      if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.waterAnalysisNeeded = true;
-      } else {
-        this.waterAnalysisNeeded = false;
-      }
+      //TODO:
+      //add check when new data is entered
+      //probably will incorporate with todo list logic
+      // if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+      //   this.waterAnalysisNeeded = true;
+      // } else {
+      //   this.waterAnalysisNeeded = false;
+      // }
+      this.waterAnalysisNeeded = false;
     } else if (this.facility.sustainabilityQuestions.waterReductionGoal) {
       this.waterAnalysisNeeded = true;
     } else {

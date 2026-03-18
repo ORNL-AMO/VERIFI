@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -12,6 +12,14 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { NavigationStart, Router } from '@angular/router';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+
 @Component({
   selector: 'app-regression-model-selection',
   templateUrl: './regression-model-selection.component.html',
@@ -21,39 +29,56 @@ import { NavigationStart, Router } from '@angular/router';
 export class RegressionModelSelectionComponent implements OnInit {
 
   selectedGroup: AnalysisGroup;
-  showInvalid: boolean;
-  showFailedValidationModel: boolean;
-  showInvalidSub: Subscription;
-  showFailedDataValidationSub: Subscription;
   orderDataField: string = 'adjust_R2';
   orderByDirection: 'asc' | 'desc' = 'desc';
   selectedGroupSub: Subscription;
   selectedFacility: IdbFacility;
   selectedInspectModel: JStatRegressionModel;
   showInUseMessage: boolean;
-  generateUserDefinedModel: boolean;
-  showView: boolean = true;
+  showUserDefinedModelInspection: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
   generatedModelsPerGroupSub: Subscription;
   routerSub: Subscription;
+  dropdownOpen: boolean = false;
+
+  modelFilterOptions: {
+    yearOptionSelections: Array<{ year: number, isChecked: boolean }>
+    showInvalid: boolean;
+    showFailedValidationModel: boolean;
+  } = {
+      yearOptionSelections: [],
+      showInvalid: false,
+      showFailedValidationModel: true
+    }
+
+  @ViewChild('dropdown') dropdownRef: ElementRef;
+
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisValidationService: AnalysisValidationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService,
     private router: Router) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      this.selectedGroup = group;
-
+      if (!this.selectedGroup || group.idbGroupId != this.selectedGroup.idbGroupId) {
+        this.selectedGroup = group;
+        //group change
+        this.setYears();
+      } else {
+        this.selectedGroup = group;
+      }
       this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.selectedGroup.idbGroupId);
-
       if (!this.generatedModels?.length && this.selectedGroup?.models?.length) {
         this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.selectedGroup.models);
         this.generatedModels = this.selectedGroup.models;
       }
+      this.checkHasValidModels();
+      this.checkFailedValidationModels();
     });
 
     this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
@@ -63,6 +88,8 @@ export class RegressionModelSelectionComponent implements OnInit {
       else {
         this.generatedModels = [];
       }
+      this.checkHasValidModels();
+      this.checkFailedValidationModels();
     });
 
     this.routerSub = this.router.events.subscribe(event => {
@@ -72,21 +99,11 @@ export class RegressionModelSelectionComponent implements OnInit {
         }
       }
     });
-
-    this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
-      this.showInvalid = val;
-    });
-    this.showFailedDataValidationSub = this.analysisService.showFailedValidationModels.subscribe(val => {
-      this.showFailedValidationModel = val;
-    });
-
     this.setShowInUseMessage();
-
   }
+
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
-    this.showInvalidSub.unsubscribe();
-    this.showFailedDataValidationSub.unsubscribe();
     this.generatedModelsPerGroupSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
@@ -110,6 +127,7 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    analysisItem.isAnalysisVisited = false;
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
     this.selectedGroup.groupErrors = this.analysisValidationService.getGroupErrors(this.selectedGroup, analysisItem);
     analysisItem.groups[groupIndex] = this.selectedGroup;
@@ -160,11 +178,59 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.analysisService.hideInUseMessage = true;
   }
 
-  onUserDefinedModelClicked(isClicked: boolean) {
-    this.generateUserDefinedModel = isClicked;
+  setShowUserDefinedModelInspection(showUserDefinedModelInspection: boolean) {
+    this.showUserDefinedModelInspection = showUserDefinedModelInspection;
   }
 
-  onFormChanged(isFormChanged: boolean) {
-    this.showView = isFormChanged;
+  checkHasValidModels() {
+    let noValidModels: boolean = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
+    if (!this.modelFilterOptions.showInvalid && noValidModels) {
+      this.modelFilterOptions.showInvalid = true;
+    }
+  }
+
+  checkFailedValidationModels() {
+    let noDataValidationModels: boolean = this.generatedModels?.find(model => {
+      if (model.SEPValidation) {
+        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
+      } else {
+        return undefined;
+      }
+    }) == undefined;
+    if (!this.modelFilterOptions.showFailedValidationModel && noDataValidationModels) {
+      this.modelFilterOptions.showFailedValidationModel = true;
+    }
+  }
+
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  toggleOption(option: number) {
+    const selection = this.modelFilterOptions.yearOptionSelections.find(selection => selection.year == option);
+    if (selection) {
+      selection.isChecked = !selection.isChecked;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
+      this.dropdownOpen = false;
+    }
+  }
+
+  setYears() {
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.selectedGroup.idbGroupId });
+    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(groupMeters, facilityMeterData, this.selectedFacility, true, undefined, [], [], [this.selectedFacility], 'AR6', []);
+    let fullYearsWithData: Array<number> = getYearsWithFullData(calanderizedMeterData, this.selectedFacility);
+    let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    fullYearsWithData = fullYearsWithData.filter(year => {
+      return year >= selectedAnalysisItem.baselineYear;
+    })
+    this.modelFilterOptions.yearOptionSelections = fullYearsWithData.map(year => { return { year: year, isChecked: true } });
   }
 }
+

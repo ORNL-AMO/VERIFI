@@ -171,7 +171,8 @@ export class CreateReportModalComponent {
       newReport.name = 'Better Plants Report';
       newReport.reportType = 'betterPlants';
       newReport.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
-      newReport.reportYear = selectedAnalysisItem.reportYear;
+      // TODO: set report year to latest year of data
+      // newReport.reportYear = selectedAnalysisItem.reportYear;
       newReport.betterPlantsReportSetup.analysisItemId = selectedAnalysisItem.guid;
     }
     return newReport;
