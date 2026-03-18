@@ -82,10 +82,9 @@ export class MeterGroupingResultsGraphComponent {
     this.metersInGroup = this.utilityMeterDbService.getGroupMetersByGroupId(this.meterGroup.guid);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    
+
     this.energyUnit = this.selectedFacility.energyUnit;
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    //TODO: site/source option
     this.calanderizedMeterData = getCalanderizedMeterData(this.metersInGroup, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedFacility.energyIsSource, neededUnits: undefined }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
     this.groupMonthlyData = this.calanderizedMeterData.flatMap(meter => { return meter.monthlyData });
     //combine monthly data for meters in group with same month and year
@@ -94,28 +93,7 @@ export class MeterGroupingResultsGraphComponent {
       if (existingData) {
         existingData.energyUse += monthlyData.energyUse;
         existingData.energyCost += monthlyData.energyCost;
-        existingData.RECs += monthlyData.RECs;
-        existingData.locationElectricityEmissions += monthlyData.locationElectricityEmissions;
-        existingData.marketElectricityEmissions += monthlyData.marketElectricityEmissions;
-        existingData.otherScope2Emissions += monthlyData.otherScope2Emissions;
-        existingData.scope2LocationEmissions += monthlyData.scope2LocationEmissions;
-        existingData.scope2MarketEmissions += monthlyData.scope2MarketEmissions;
-        existingData.excessRECs += monthlyData.excessRECs;
-        existingData.excessRECsEmissions += monthlyData.excessRECsEmissions;
-        existingData.mobileCarbonEmissions += monthlyData.mobileCarbonEmissions;
-        existingData.mobileBiogenicEmissions += monthlyData.mobileBiogenicEmissions;
-        existingData.mobileOtherEmissions += monthlyData.mobileOtherEmissions;
-        existingData.mobileTotalEmissions += monthlyData.mobileTotalEmissions;
-        existingData.fugitiveEmissions += monthlyData.fugitiveEmissions;
-        existingData.processEmissions += monthlyData.processEmissions;
-        existingData.stationaryBiogenicEmmissions += monthlyData.stationaryBiogenicEmmissions;
-        existingData.stationaryCarbonEmissions += monthlyData.stationaryCarbonEmissions;
-        existingData.stationaryOtherEmissions += monthlyData.stationaryOtherEmissions;
-        existingData.stationaryEmissions += monthlyData.stationaryEmissions;
-        existingData.totalScope1Emissions += monthlyData.totalScope1Emissions;
-        existingData.totalWithMarketEmissions += monthlyData.totalWithMarketEmissions;
-        existingData.totalWithLocationEmissions += monthlyData.totalWithLocationEmissions;
-        existingData.totalBiogenicEmissions += monthlyData.totalBiogenicEmissions;
+        existingData.energyConsumption += monthlyData.energyConsumption;
       } else {
         acc.push({ ...monthlyData });
       }
@@ -123,10 +101,17 @@ export class MeterGroupingResultsGraphComponent {
     }, new Array<MonthlyData>());
 
     //check energy use and cost
-    this.showEnergyUse = this.groupMonthlyData.some(data => { return data.energyUse > 0 });
+    if (this.meterGroup.groupType == 'Energy') {
+      this.showEnergyUse = this.groupMonthlyData.some(data => { return data.energyUse > 0 });
+    } else {
+      this.showEnergyUse = false;
+    }
+    if (this.meterGroup.groupType == 'Water') {
+      this.showConsumption = this.groupMonthlyData.some(data => { return data.energyConsumption > 0 });
+    } else {
+      this.showConsumption = false;
+    }
     this.showCost = this.groupMonthlyData.some(data => { return data.energyCost > 0 });
-    this.showConsumption = this.groupMonthlyData.some(data => { return data.energyConsumption > 0 });
-
   }
 
 
@@ -155,11 +140,7 @@ export class MeterGroupingResultsGraphComponent {
       let yAxisTitle: string;
       let yAxis2Title: string;
       let hoverformat: string;
-      // let tickSuffix: string;
-      // let tickPrefix: string;
       let hoverformat2: string;
-      // let tickSuffix2: string;
-      // let tickPrefix2: string;
       let yaxis: string = 'y';
       let offsetgroup: number = 1;
       let costLine: { width: number };
@@ -189,17 +170,13 @@ export class MeterGroupingResultsGraphComponent {
         let yData: Array<number>;
         hoverformat = ',.0f'
         if (!this.showEnergyUse) {
-          //todo: need unit
-          yAxisTitle = 'Utility Consumption ('+ this.selectedFacility.volumeLiquidUnit +')';
+          yAxisTitle = 'Utility Consumption (' + this.selectedFacility.volumeLiquidUnit + ')';
           yData = this.groupMonthlyData.map(data => { return data.energyConsumption })
         } else {
-          // tickSuffix = " " + this.meterData.energyUnit;
           yAxisTitle = 'Utility Consumption (' + this.selectedFacility.energyUnit + ')';
           yData = this.groupMonthlyData.map(data => { return data.energyUse });
         }
-        // let min: number = _.min(yData);
         let max: number = _.max(yData);
-        // let diff: number = max - min;
         yAxisDtick = max / 5;
         traceData.push({
           x: this.groupMonthlyData.map(data => { return data.date }),
@@ -208,9 +185,6 @@ export class MeterGroupingResultsGraphComponent {
           type: this.displayGraphEnergy,
           yaxis: yaxis,
           offsetgroup: offsetgroup,
-          // marker: {
-          //   color: this.getMarkerColor(),
-          // },
           line: energyLine
         });
         yaxis = 'y2';
@@ -220,17 +194,12 @@ export class MeterGroupingResultsGraphComponent {
 
       if (this.displayGraphCost && this.showCost) {
         let yData: Array<number> = this.groupMonthlyData.map(data => { return data.energyCost });
-        // let min: number = _.min(yData);
         let max: number = _.max(yData);
-        // let diff: number = max - min;
-
         if (!this.displayGraphEnergy) {
-          // tickPrefix = "$";
           hoverformat = '$,.0f';
           yAxisTitle = 'Utility Cost';
           yAxisDtick = max / 5;
         } else {
-          // tickPrefix2 = "$";
           hoverformat2 = '$,.0f';
           yAxis2Title = 'Utility Cost';
           yAxis2Dtick = max / 5;
@@ -286,8 +255,6 @@ export class MeterGroupingResultsGraphComponent {
             standoff: 18
           },
           hoverformat: hoverformat2,
-          // ticksuffix: tickSuffix2,
-          // tickprefix: tickPrefix2,
           automargin: true,
           overlaying: y2overlay,
           side: 'right',

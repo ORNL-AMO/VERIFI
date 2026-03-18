@@ -96,7 +96,6 @@ export class MeterGroupingResultsTableComponent {
     this.energyUnit = this.selectedFacility.energyUnit;
     this.consumptionUnit = this.selectedFacility.volumeLiquidUnit;
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    //TODO: site/source option
     this.calanderizedMeterData = getCalanderizedMeterData(this.metersInGroup, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedFacility.energyIsSource, neededUnits: undefined }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
     this.groupMonthlyData = this.calanderizedMeterData.flatMap(meter => { return meter.monthlyData });
     //combine monthly data for meters in group with same month and year
@@ -105,28 +104,7 @@ export class MeterGroupingResultsTableComponent {
       if (existingData) {
         existingData.energyUse += monthlyData.energyUse;
         existingData.energyCost += monthlyData.energyCost;
-        existingData.RECs += monthlyData.RECs;
-        existingData.locationElectricityEmissions += monthlyData.locationElectricityEmissions;
-        existingData.marketElectricityEmissions += monthlyData.marketElectricityEmissions;
-        existingData.otherScope2Emissions += monthlyData.otherScope2Emissions;
-        existingData.scope2LocationEmissions += monthlyData.scope2LocationEmissions;
-        existingData.scope2MarketEmissions += monthlyData.scope2MarketEmissions;
-        existingData.excessRECs += monthlyData.excessRECs;
-        existingData.excessRECsEmissions += monthlyData.excessRECsEmissions;
-        existingData.mobileCarbonEmissions += monthlyData.mobileCarbonEmissions;
-        existingData.mobileBiogenicEmissions += monthlyData.mobileBiogenicEmissions;
-        existingData.mobileOtherEmissions += monthlyData.mobileOtherEmissions;
-        existingData.mobileTotalEmissions += monthlyData.mobileTotalEmissions;
-        existingData.fugitiveEmissions += monthlyData.fugitiveEmissions;
-        existingData.processEmissions += monthlyData.processEmissions;
-        existingData.stationaryBiogenicEmmissions += monthlyData.stationaryBiogenicEmmissions;
-        existingData.stationaryCarbonEmissions += monthlyData.stationaryCarbonEmissions;
-        existingData.stationaryOtherEmissions += monthlyData.stationaryOtherEmissions;
-        existingData.stationaryEmissions += monthlyData.stationaryEmissions;
-        existingData.totalScope1Emissions += monthlyData.totalScope1Emissions;
-        existingData.totalWithMarketEmissions += monthlyData.totalWithMarketEmissions;
-        existingData.totalWithLocationEmissions += monthlyData.totalWithLocationEmissions;
-        existingData.totalBiogenicEmissions += monthlyData.totalBiogenicEmissions;
+        existingData.energyConsumption += monthlyData.energyConsumption;
       } else {
         acc.push({ ...monthlyData });
       }
@@ -134,9 +112,17 @@ export class MeterGroupingResultsTableComponent {
     }, new Array<MonthlyData>());
 
     //check energy use and cost
-    this.showEnergyUse = this.groupMonthlyData.some(data => { return data.energyUse > 0 });
+    if (this.meterGroup.groupType == 'Energy') {
+      this.showEnergyUse = this.groupMonthlyData.some(data => { return data.energyUse > 0 });
+    } else {
+      this.showEnergyUse = false;
+    }
+    if (this.meterGroup.groupType == 'Water') {
+      this.showConsumption = this.groupMonthlyData.some(data => { return data.energyConsumption > 0 });
+    } else {
+      this.showConsumption = false;
+    }
     this.showCost = this.groupMonthlyData.some(data => { return data.energyCost > 0 });
-    this.showConsumption = this.groupMonthlyData.some(data => { return data.energyConsumption > 0 });
   }
 
   setOrderDataField(str: string) {

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -18,6 +18,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-meter-group-form',
@@ -47,7 +48,8 @@ export class MeterGroupFormComponent {
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
     private accountReportDbService: AccountReportDbService,
-    private analysisDbService: AnalysisDbService
+    private analysisDbService: AnalysisDbService,
+    private routerGuardService: RouterGuardService
   ) {
 
   }
@@ -108,7 +110,8 @@ export class MeterGroupFormComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeterGroups(account, facility);
     await this.dbChangesService.setMeters(account, facility);
-    this.cancel()
+    this.selectionsChanged = false;
+    this.groupForm.markAsPristine();
   }
 
   setGroupOptions() {
@@ -164,10 +167,18 @@ export class MeterGroupFormComponent {
   }
 
   canDeactivate(): Observable<boolean> {
-    // if (this.predictorForm && this.predictorForm.dirty) {
-    //   const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-    //   return of(result);
-    // }
+    if (this.groupForm.dirty || this.selectionsChanged) {
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
+    }
     return of(true);
   }
 
@@ -213,6 +224,8 @@ export class MeterGroupFormComponent {
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
+    this.groupForm.markAsPristine();
+    this.selectionsChanged = false;
     this.cancel();
   }
 

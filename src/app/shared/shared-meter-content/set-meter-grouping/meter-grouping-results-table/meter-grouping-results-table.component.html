@@ -1,23 +1,21 @@
 <div class="d-flex w-100 pb-2">
     <div class="btn-group">
-        <button class="btn meter-group-action-btn" (click)="cancel()" title="Manage All Groups">
+        <button class="btn toggle-btn" (click)="cancel()" title="Manage All Groups">
             <i class="fa fa-layer-group"></i>
         </button>
-        <button class="btn meter-group-action-btn" (click)="editGroup()" title="Edit Group">
+        <button class="btn toggle-btn" (click)="editGroup()" title="Edit Group">
             <i class="fa fa-pencil"></i>
         </button>
-        <button class="btn meter-group-action-btn active" title="Group Data Table">
+        <button class="btn toggle-btn active" title="Group Data Table">
             <i class="fa fa-table"></i>
         </button>
-        <button class="btn meter-group-action-btn" (click)="viewGroupChartData()" title="Chart Group Data">
+        <button class="btn toggle-btn" (click)="viewGroupChartData()" title="Chart Group Data">
             <i class="fa fa-chart-line"></i>
         </button>
     </div>
 </div>
 @if(metersInGroup.length > 0) {
 <app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
-
-
 
 <div class="d-flex w-100 justify-content-end pb-2">
     @if(showEnergyUse){
@@ -69,7 +67,7 @@
         ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data.date) {
         <tr>
             <td>{{data.date | date: 'MMMM, y'}}</td>
-            @if (showConsumption) {
+            @if (showConsumption && !showEnergyUse) {
             <td>{{data.energyConsumption |customNumber}}
             </td>
             }
@@ -77,72 +75,6 @@
             <td>{{data.energyUse | customNumber}}
             </td>
             }
-            <!-- electricity
-            @if(account.displayEmissions){
-            @if (calanderizedMeter.showElectricalEmissions) {
-            @if (!isRECs) {
-            <td>{{data.totalWithMarketEmissions |
-                customNumber}}
-            </td>
-            }
-            @if (!isRECs) {
-            <td>{{data.totalWithLocationEmissions |
-                customNumber}}
-            </td>
-            }
-            }
-            @if (isRECs) {
-            <td>{{data.RECs | customNumber}}
-            </td>
-            }
-            @if (isRECs) {
-            <td>{{data.excessRECs | customNumber}}
-            </td>
-            }
-            @if(account.displayEmissions){
-            @if (isRECs) {
-            <td>
-                {{data.excessRECsEmissions | customNumber}}
-            </td>
-            }
-            }
-            <!--stationary other fuels--
-            @if (calanderizedMeter.showStationaryEmissions) {
-            <td>{{data.stationaryBiogenicEmmissions | customNumber}}
-            </td>
-            <td>{{data.stationaryCarbonEmissions | customNumber}}
-            </td>
-            <td>{{data.stationaryOtherEmissions | customNumber}}
-            </td>
-            <td>{{data.stationaryEmissions | customNumber}}
-            </td>
-            }
-            @if (calanderizedMeter.showOtherScope2Emissions) {
-            <td>{{data.otherScope2Emissions | customNumber}}
-            </td>
-            }
-            <!--mobile--
-            @if (calanderizedMeter.showMobileEmissions) {
-            <td>{{data.mobileBiogenicEmissions | customNumber}}
-            </td>
-            <td>{{data.mobileCarbonEmissions | customNumber}}
-            </td>
-            <td>{{data.mobileOtherEmissions | customNumber}}
-            </td>
-            <td>{{data.mobileTotalEmissions | customNumber}}
-            </td>
-            }
-            <!--fugitive--
-            @if (calanderizedMeter.showFugitiveEmissions) {
-            <td>{{data.fugitiveEmissions | customNumber}}
-            </td>
-            }
-            <!--process--
-            @if (calanderizedMeter.showProcessEmissions) {
-            <td>{{data.processEmissions | customNumber}}
-            </td>
-            }
-            } -->
             @if(showCost){
             <td>{{data.energyCost | customNumber:true}}
             </td>
@@ -159,7 +91,7 @@
     </ngb-pagination>
 </div>
 }@else {
-<div class="alert alert-info p-1">
-    No meters added to this group. Return to the group management to add meters to this group and view results.
+<div class="alert alert-info p-1 text-center">
+    No meters added to this group. Click the "<span class="fa fa-pencil"></span>" button to add meters to this group.
 </div>
 }

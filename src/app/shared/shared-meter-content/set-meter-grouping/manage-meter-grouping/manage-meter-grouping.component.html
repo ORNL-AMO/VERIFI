@@ -97,14 +97,14 @@
                 <span class="badge me-3 large"
                     [ngStyle]="{'background-color':source | meterSourceColor}">{{source}}</span>
                 <div class="btn-group">
-                    <button class="btn meter-group-action-btn" (click)="editGroup(group)" title="Edit">
+                    <button class="btn toggle-btn" (click)="editGroup(group)" title="Edit">
                         <i class="fa fa-pencil"></i>
                     </button>
-                    <button class="btn meter-group-action-btn" (click)="viewGroupDataTable(group)"
+                    <button class="btn toggle-btn" (click)="viewGroupDataTable(group)"
                         title="Group Data Table">
                         <i class="fa fa-table"></i>
                     </button>
-                    <button class="btn meter-group-action-btn" (click)="viewGroupChartData(group)"
+                    <button class="btn toggle-btn" (click)="viewGroupChartData(group)"
                         title="Chart Group Data">
                         <i class="fa fa-chart-line"></i>
                     </button>
