@@ -117,7 +117,7 @@ export function getDataOverviewReportSettings(groups: Array<IdbUtilityMeterGroup
         emissionsDisplay: 'market',
         includeEnergySection: true,
         includeCostsSection: true,
-        includeEmissionsSection: true,
+        includeEmissionsSection: false,
         includeWaterSection: true,
         includeAllMeterData: true,
         startYear: undefined,

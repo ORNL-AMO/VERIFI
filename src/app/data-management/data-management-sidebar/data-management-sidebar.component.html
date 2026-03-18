@@ -246,6 +246,7 @@
     </div>
     @if (account.sidebarCustomDataOpen) {
     <div class="sidebar-section facilities-section">
+      @if(account.displayEmissions){
       <div class="ps-2 nav-item">
         <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-grid-factors'"
           [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
@@ -253,6 +254,7 @@
           Grid Factors
         </a>
       </div>
+      }
       <div class="ps-2 nav-item">
         <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-fuels'"
           [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
@@ -260,6 +262,7 @@
           Fuels
         </a>
       </div>
+      @if(account.displayEmissions){
       <div class="ps-2 nav-item">
         <a class="nav-link" [routerLink]="'/data-management/'+account.guid+'/account-custom-data/custom-gwps'"
           [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
@@ -267,6 +270,7 @@
           Global Warming Potentials
         </a>
       </div>
+      }
     </div>
     }
     <div class="p-2 w-100">

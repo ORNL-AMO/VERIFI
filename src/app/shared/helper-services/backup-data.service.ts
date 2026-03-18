@@ -301,8 +301,9 @@ export class BackupDataService {
                 return predictor.id == newPredictor.guid
               });
               let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-              newIdbPredictorData.month = oldEntry.date.getMonth() + 1;
-              newIdbPredictorData.year = oldEntry.date.getFullYear();
+              let oldEntryDate: Date = new Date(oldEntry.date);
+              newIdbPredictorData.month = oldEntryDate.getMonth() + 1;
+              newIdbPredictorData.year = oldEntryDate.getFullYear();
               newIdbPredictorData.amount = oldEntryPredictor.amount;
               newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
               newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
@@ -418,8 +419,8 @@ export class BackupDataService {
       await firstValueFrom(this.accountAnalysisDbService.addWithObservable(accountAnalysisItem));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom Emissions');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom Emissions');
     for (let i = 0; i < backupFile.customEmissionsItems?.length; i++) {
       let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
       customEmissionsItem.accountId = accountGUIDs.newId;
@@ -436,8 +437,8 @@ export class BackupDataService {
       await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom GWPs');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom GWPs');
     for (let i = 0; i < backupFile.customGWPs?.length; i++) {
       let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
       customGWP.accountId = accountGUIDs.newId;
@@ -485,7 +486,7 @@ export class BackupDataService {
     return newAccount;
   }
 
-  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<IdbFacility> {
+  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<{facility: IdbFacility, index?: number}> {
     this.analyticsService.sendEvent('import_backup_file');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
@@ -604,9 +605,9 @@ export class BackupDataService {
               return predictor.id == newPredictor.guid
             });
             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-            // newIdbPredictorData.dateStr = this.getImportDateString(oldEntry.date);
-            newIdbPredictorData.month = oldEntry.date.getMonth() + 1;
-            newIdbPredictorData.year = oldEntry.date.getFullYear();
+            let oldEntryDate: Date = new Date(oldEntry.date);
+            newIdbPredictorData.month = oldEntryDate.getMonth() + 1;
+            newIdbPredictorData.year = oldEntryDate.getFullYear();
             newIdbPredictorData.amount = oldEntryPredictor.amount;
             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
@@ -680,8 +681,8 @@ export class BackupDataService {
       await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom Emissions');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom Emissions');
     for (let i = 0; i < backupFile.customEmissionsItems.length; i++) {
       let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
       customEmissionsItem.accountId = accountGUID;
@@ -698,8 +699,8 @@ export class BackupDataService {
       await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
     }
 
-    this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom GWPs');
+    // this.loadingService.setCurrentLoadingIndex(++currIdx);
+    // this.loadingService.addLoadingMessage('Adding Custom GWPs');
     for (let i = 0; i < backupFile.customGWPs.length; i++) {
       let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
       customGWP.accountId = accountGUID;
@@ -735,7 +736,7 @@ export class BackupDataService {
       await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }
 
-    return newFacility;
+    return {facility: newFacility, index: currIdx};
   }
 
   getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {

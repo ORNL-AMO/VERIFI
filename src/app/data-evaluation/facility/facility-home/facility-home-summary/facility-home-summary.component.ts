@@ -37,6 +37,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   predictorsNeeded: boolean;
   energyAnalysisHasErrors: boolean;
   waterAnalysisHasErrors: boolean;
+  includeWeatherData: boolean = false;
+  showExportModal: boolean = false;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
@@ -145,13 +147,23 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.sources = _.uniq(sources);
   }
 
+  openExportModal() {
+    this.includeWeatherData = false;
+    this.showExportModal = true;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+  }
+
   exportData() {
+    this.showExportModal = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facility');
     this.loadingService.setCurrentLoadingIndex(0);
     this.loadingService.addLoadingMessage('Exporting to .xlsx template');
-    this.exportToExcelTemplateV3Service.exportFacilityData(selectedFacility.guid);
+    this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, selectedFacility.guid);
   }
 
   goToDataManagement() {

@@ -41,7 +41,7 @@ export class ExportToExcelTemplateV3Service {
     private predictorDataDbService: PredictorDataDbService) { }
 
 
-  exportFacilityData(facilityId?: string) {
+  exportFacilityData(includeWeatherData: boolean, facilityId?: string) {
     this.setAlphabet();
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
@@ -49,7 +49,7 @@ export class ExportToExcelTemplateV3Service {
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
-        this.fillWorkbook(workbook, facilityId);
+        this.fillWorkbook(workbook, includeWeatherData, facilityId);
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let a = document.createElement("a");
@@ -78,7 +78,7 @@ export class ExportToExcelTemplateV3Service {
     request.send();
   }
 
-  fillWorkbook(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Workbook {
+  fillWorkbook(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Workbook {
     this.utilityMeterDbService.setTemporaryMeterNumbersForExport();
     this.loadingService.setCurrentLoadingIndex(1);
     this.loadingService.addLoadingMessage('Adding Facility Details');
@@ -121,10 +121,10 @@ export class ExportToExcelTemplateV3Service {
     this.setWaterDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(14);
     this.loadingService.addLoadingMessage('Adding Predictors');
-    this.setPredictorsWorksheet(workbook, facilityId);
+    this.setPredictorsWorksheet(workbook, includeWeatherData, facilityId);
     this.loadingService.setCurrentLoadingIndex(15);
     this.loadingService.addLoadingMessage('Adding Predictor Data');
-    this.setPredictorDataWorksheet(workbook, facilityId);
+    this.setPredictorDataWorksheet(workbook, includeWeatherData, facilityId);
     this.loadingService.setCurrentLoadingIndex(16);
     this.loadingService.addLoadingMessage('Finishing up');
     return workbook;
@@ -748,7 +748,7 @@ export class ExportToExcelTemplateV3Service {
   }
 
   //===== Predictors =====//
-  setPredictorsWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+  setPredictorsWorksheet(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictor Setup');
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilityId) {
@@ -757,6 +757,9 @@ export class ExportToExcelTemplateV3Service {
     let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     if (facilityId) {
       predictors = predictors.filter(predictor => { return predictor.facilityId == facilityId });
+    }
+    if(!includeWeatherData) {
+      predictors = predictors.filter(predictor => { return predictor.predictorType != 'Weather' });
     }
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
@@ -780,7 +783,7 @@ export class ExportToExcelTemplateV3Service {
     return worksheet;
   }
 
-  setPredictorDataWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
+  setPredictorDataWorksheet(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictors');
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilityId) {
@@ -807,6 +810,10 @@ export class ExportToExcelTemplateV3Service {
       let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
         return predictor.facilityId == facility.guid;
       });
+
+      if(!includeWeatherData) {
+        facilityPredictors = facilityPredictors.filter(predictor => { return predictor.predictorType != 'Weather' });
+      }
 
       predictorDates.forEach(pDate => {
         worksheet.getCell('A' + rowIndex).value = facility.name;

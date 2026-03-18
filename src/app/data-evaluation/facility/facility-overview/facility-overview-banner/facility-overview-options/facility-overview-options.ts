@@ -8,6 +8,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-facility-overview-options',
@@ -31,10 +33,14 @@ export class FacilityOverviewOptions {
   errorMessage: string = '';
   dateRangeSub: Subscription;
   displayMenu: boolean = true;
+
+  account: IdbAccount;
+  accountSub: Subscription;
   constructor(private facilityDbService: FacilitydbService,
     private facilityOverviewService: FacilityOverviewService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit() {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -54,12 +60,17 @@ export class FacilityOverviewOptions {
         this.maxYear = dateRange.endDate.getFullYear();
       }
     });
+
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.emissionsDisplaySub.unsubscribe();
     this.dateRangeSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
   async setFacilityEnergyIsSource() {

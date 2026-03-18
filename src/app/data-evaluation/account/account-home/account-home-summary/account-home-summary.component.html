@@ -50,7 +50,7 @@
             </button>
           </div>
           <div class="p-1">
-            <button class="btn btn-outline m-0" (click)="exportData()">
+            <button class="btn btn-outline m-0" (click)="openExportModal()">
               <span class="fa fa-download"></span><br>
               Export Account <br> Utility Data
             </button>
@@ -117,4 +117,25 @@
     </div>
   </div>
   }
+</div>
+
+<div [ngClass]="{'windowOverlay': showExportModal}">
+</div>
+
+<div class="popup" [class.open]="showExportModal">
+  <div class="popup-header">Export Account: {{account?.name}}
+    <button class="item-right" (click)="closeExportModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <div class="form-check checkbox-style mt-3">
+      <input class="form-check-input" type="checkbox" value="" id="includeWeatherData" [(ngModel)]="includeWeatherData">
+      <label class="form-check-label ms-2" for="includeWeatherData">
+        Include weather data in export
+      </label>
+    </div>
+    <div class="popup-footer text-end mt-4">
+      <button class="btn btn-secondary" (click)="closeExportModal()">Cancel</button>
+      <button class="btn btn-success" (click)="exportData()">Export</button>
+    </div>
+  </div>
 </div>

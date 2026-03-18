@@ -80,8 +80,10 @@ export class RegressionModelMenuComponent implements OnInit {
           this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.group.idbGroupId);
           this.checkModelData();
           this.checkHasValidModels();
-        } else if (this.group.models == undefined && this.group.userDefinedModel) {
-          this.generateModels();
+        } else if (this.group.models == undefined) {
+          if (group.predictorVariables && group.predictorVariables.length < 7) {
+            this.generateModels();
+          }
         } else {
           this.noValidModels = false;
         }

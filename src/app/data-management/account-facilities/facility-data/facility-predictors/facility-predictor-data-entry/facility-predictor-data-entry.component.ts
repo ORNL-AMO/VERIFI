@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -12,6 +12,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-predictor-data-entry',
@@ -36,7 +37,8 @@ export class FacilityPredictorDataEntryComponent {
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private routerGuardService: RouterGuardService
   ) {
   }
 
@@ -95,16 +97,26 @@ export class FacilityPredictorDataEntryComponent {
 
   canDeactivate(): Observable<boolean> {
     if (!this.isSaved) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveAndQuit()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
+  }
+
+  onSavedChanges(isSaved: boolean) {
+    this.isSaved = isSaved;
   }
 
   cancel() {
     this.isSaved = true;
     this.router.navigateByUrl('data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/predictors/' + this.predictor.guid + '/predictor-data');
-
   }
-
 }

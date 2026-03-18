@@ -27,7 +27,7 @@ export function getTodoList(account: IdbAccount,
             otherItems.push({
                 label: 'Setup account settings',
                 url: '/data-management/' + account.guid + '/account-setup',
-                description: "Set the account name, unit settings, location and sustainability goals. This will help you manage your data effectively.",
+                description: "Set the account name, unit settings, location and organizational goals. This will help you manage your data effectively.",
                 facilityId: undefined,
                 type: 'account',
                 trackGuid: account.guid + '_setup_account'

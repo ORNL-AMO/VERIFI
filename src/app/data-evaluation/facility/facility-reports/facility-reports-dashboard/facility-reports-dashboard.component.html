@@ -39,11 +39,13 @@
                             id="overview" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="overview">Data Overview</label>
                     </div>
+                    @if(account.displayEmissions){
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="newReportType" [value]="'emissionFactors'"
                             id="emissionFactors" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="emissionFactors">Emission Factors</label>
                     </div>
+                    }
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="newReportType" [value]="'savings'"
                             id="savings" [(ngModel)]="newReportType">

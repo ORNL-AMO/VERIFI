@@ -4,82 +4,172 @@
     <button class="item-right" (click)="cancelImportBackup()">x</button>
   </div>
   @if (showModal) {
-    <div class="popup-body">
-      <p>Select backup .json file you previously exported from VERIFI application.</p>
-      <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" accept=".json">
-      @if (backupFileError) {
-        <p class="alert alert-danger">
-          {{backupFileError}}
-        </p>
-      }
-      @if (backupFile != undefined && backupFileError == undefined && importIsAccount) {
-        <div class="d-flex flex-column pt-3"
-          >
-          <div class="input-group">
-            <label class="w-50 ps-0 bold">
-              Import Account Name
-            </label>
-            <div class="w-50">
-              {{backupName}}
-            </div>
-          </div>
-          @if (selectedAccount) {
-            <div class="input-group pt-2">
-              <label class="w-50 ps-0 bold">Overwrite current account? </label>
-              <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData">
-                <option [ngValue]="true">Overwrite Account</option>
-                <option [ngValue]="false">Create New Account</option>
-              </select>
-            </div>
-          }
-          @if (overwriteData) {
-            <p class="alert alert-warning mt-3">
-              Existing account ({{selectedAccount.name}}) data will be overwritten. This cannot be undone.
-            </p>
-          }
+  <div class="popup-body">
+    <p>Select backup .json file you previously exported from VERIFI application.</p>
+    <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" accept=".json">
+    @if (backupFileError) {
+    <p class="alert alert-danger">
+      {{backupFileError}}
+    </p>
+    }
+    @if (backupFile != undefined && backupFileError == undefined && importIsAccount) {
+    <div class="d-flex flex-column pt-3">
+      <div class="input-group">
+        <label class="w-50 ps-0 bold">
+          Import Account Name
+        </label>
+        <div class="w-50">
+          {{backupName}}
         </div>
+      </div>
+      @if (selectedAccount) {
+      <div class="input-group pt-2">
+        <label class="w-50 ps-0 bold">Overwrite current account? </label>
+        <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData"
+          (ngModelChange)="clearSelectedFacilities()">
+          <option [ngValue]="true">Overwrite Account</option>
+          <option [ngValue]="false">Create New Account</option>
+          <option [ngValue]="'selective_import'">Select Facilities to Import</option>
+        </select>
+      </div>
       }
-      @if (backupFile != undefined && backupFileError == undefined && !importIsAccount && accountFacilities.length != 0) {
-        <div class="d-flex flex-column pt-3"
-          >
-          <div class="input-group">
-            <label class="w-50 ps-0 bold">
-              Import Facility Name
-            </label>
-            <div class="w-50">
-              {{backupName}}
-            </div>
-          </div>
-          <div class="input-group pt-2">
-            <label class="w-50 ps-0 bold">Overwrite existing facility? </label>
-            <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData">
-              <option [ngValue]="true">Overwrite Facility</option>
-              <option [ngValue]="false">Create New Facilty</option>
-            </select>
-          </div>
-          @if (overwriteData) {
-            <div class="input-group pt-2">
-              <label class="w-50 ps-0 bold">Facility to overwrite</label>
-              <select class="form-select" [(ngModel)]="overwriteFacility" name="overwriteFacility">
-                @for (facility of accountFacilities; track facility) {
-                  <option [ngValue]="facility">{{facility.name}}</option>
+      @if (overwriteData === true) {
+      <p class="alert alert-warning mt-3">
+        Existing account ({{selectedAccount.name}}) data will be overwritten. This cannot be undone.
+      </p>
+      }
+      @if (overwriteData === 'selective_import') {
+      @if (backupFacilities?.length === 0) {
+      <p class="alert alert-info">
+        No facilities found in backup file to import.
+      </p>
+      }
+      @else {
+      <p class="mt-5 alert alert-info">
+        Select the facilities you would like to import from the backup file. For each facility, choose to either
+        create a new facility or replace an existing facility in your account.
+      </p>
+      @if (selectedAccount.name !== backupName) {
+      <p class="mt-2 alert alert-warning">
+        The backup file selected is from an account different than the one you are importing into.
+      </p>
+      }
+      <div class="facility-table">
+        <table class="table table-bordered align-middle shadow-sm rounded facility-table mt-2">
+          <thead class="table-primary">
+            <tr>
+              <th scope="col" class="text-center">Select</th>
+              <th scope="col">Imported Facility</th>
+              <th scope="col" class="text-center">Create New/ Overwrite</th>
+              <th scope="col" class="text-center">VERIFI Facility to Update</th>
+              <th scope="col" class="text-center">Differences in Imported Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (facility of backupFacilities; track facility) {
+            <tr>
+              <td class="text-center">
+                <input class="form-check-input checkbox-style" type="checkbox"
+                  (change)="onSelectedFacilityChange($event, facility)" id="facility-{{facility.guid}}">
+              </td>
+              <td>
+                <label class="fw-bold" for="facility-{{facility.guid}}">
+                  {{facility.name}}
+                </label>
+              </td>
+              <td class="text-center">
+                <select class="form-select form-select-sm"
+                  [(ngModel)]="facilityImportSelections[facility.name].importAs"
+                  (ngModelChange)="setFacilityImportOption($event, facility)"
+                  [disabled]="!selectedFacilitiesToImport.includes(facility)">
+                  <option value="new">Create New</option>
+                  <option value="replace">Replace Existing</option>
+                </select>
+              </td>
+              <td class="text-center">
+                @if(facilityImportSelections[facility.name]?.importAs === 'replace' &&
+                selectedFacilitiesToImport.includes(facility)) {
+                <select class="form-select form-select-sm"
+                  [(ngModel)]="facilityImportSelections[facility.name].replacedFacility"
+                  (ngModelChange)="setFacilityToReplace($event, facility)">
+                  @for (accountFacility of accountFacilities; track accountFacility) {
+                  <option [value]="accountFacility.name">
+                    {{accountFacility.name}}
+                  </option>
+                  }
+                </select>
                 }
-              </select>
-            </div>
-          }
-          @if (overwriteData) {
-            <p class="alert alert-warning mt-3">
-              Existing facility ({{overwriteFacility.name}}) data will be overwritten. This cannot be undone.
-            </p>
-          }
+                @else {
+                <span>&mdash;</span>
+                }
+              </td>
+              <td>
+                @if (lookupDifferences(facility.name).length === 0) {
+                <span>&mdash;</span>
+                }
+                @else {
+                <ul>
+                  @for (difference of lookupDifferences(facility.name); track difference) {
+                  <li class="text-danger">{{difference}}</li>
+                  }
+                </ul>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+      @if (duplicateFacilityError) {
+      <p class="alert alert-danger mt-3">
+        You have selected the same facility to be replaced more than once. Please correct this before continuing.
+        }
+        }
+    </div>
+    }
+    @if (backupFile != undefined && backupFileError == undefined && !importIsAccount && accountFacilities.length != 0)
+    {
+    <div class="d-flex flex-column pt-3">
+      <div class="input-group">
+        <label class="w-50 ps-0 bold">
+          Import Facility Name
+        </label>
+        <div class="w-50">
+          {{backupName}}
         </div>
+      </div>
+      <div class="input-group pt-2">
+        <label class="w-50 ps-0 bold">Overwrite existing facility? </label>
+        <select class="form-select" [(ngModel)]="overwriteData" name="overwriteData">
+          <option [ngValue]="true">Overwrite Facility</option>
+          <option [ngValue]="false">Create New Facility</option>
+        </select>
+      </div>
+      @if (overwriteData == true) {
+      <div class="input-group pt-2">
+        <label class="w-50 ps-0 bold">Facility to overwrite</label>
+        <select class="form-select" [(ngModel)]="overwriteFacility" name="overwriteFacility">
+          @for (facility of accountFacilities; track facility) {
+          <option [ngValue]="facility">{{facility.name}}</option>
+          }
+        </select>
+      </div>
+      }
+      @if (overwriteData == true) {
+      <p class="alert alert-warning mt-3">
+        Existing facility ({{overwriteFacility.name}}) data will be overwritten. This cannot be undone.
+      </p>
       }
     </div>
+    }
+  </div>
   }
   <div class="popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelImportBackup()">Cancel</button>
     <button class="btn btn-primary" (click)="importBackupFile()"
-      [disabled]="backupFile == undefined || backupFileError != undefined">Import Backup
-    {{backupType}}</button>
+      [disabled]="backupFile == undefined || backupFileError != undefined || (overwriteData === 'selective_import' && selectedFacilitiesToImport.length === 0)">Import
+      Backup
+      {{backupType}}</button>
   </div>
 </div>

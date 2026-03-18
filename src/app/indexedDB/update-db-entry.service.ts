@@ -44,6 +44,18 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    //default to displaying emissions if not defined. 
+    // This was added in 2026 and we want legacy accounts to display emissions by default
+    // unless they had it explicitly set to false.
+    if (account.displayEmissions == undefined) {
+      if (account.name != 'Cocoa Co. Example') {
+        account.displayEmissions = true;
+      }else{
+        account.displayEmissions = false;
+      }
+      isChanged = true;
+    }
+
     return { account: account, isChanged: isChanged };
   }
 

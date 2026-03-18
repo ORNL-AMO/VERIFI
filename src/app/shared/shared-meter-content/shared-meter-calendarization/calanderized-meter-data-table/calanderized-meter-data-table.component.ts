@@ -1,5 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
@@ -23,9 +25,13 @@ export class CalanderizedMeterDataTableComponent implements OnInit {
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
   copyingTable: boolean = false
-  constructor(private copyTableService: CopyTableService) { }
+  account: IdbAccount;
+  constructor(private copyTableService: CopyTableService,
+    private accountDbService: AccountdbService
+  ) { }
 
   ngOnInit(): void {
+    this.account = this.accountDbService.selectedAccount.getValue();
   }
 
 

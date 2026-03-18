@@ -182,6 +182,18 @@ export class AccountAnalysisSetupComponent implements OnInit {
       this.dbChangesService.selectFacility(facility);
       let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
       newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
+      let facilityBaselineYear: number;
+      if (this.analysisItem.analysisCategory == 'energy') {
+        facilityBaselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      }
+      else if (this.analysisItem.analysisCategory == 'water') {
+        facilityBaselineYear = facility.sustainabilityQuestions.waterReductionBaselineYear;
+      }
+      if (facility.isNewFacility && (facilityBaselineYear > this.analysisItem.baselineYear)) {
+        newIdbItem.baselineYear = facilityBaselineYear;
+      } else {
+        newIdbItem.baselineYear = this.analysisItem.baselineYear;
+      }
       if (this.analysisItem.name != '') {
         newIdbItem.name = this.analysisItem.name;
       }

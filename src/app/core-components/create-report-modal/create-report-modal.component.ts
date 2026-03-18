@@ -33,6 +33,8 @@ export class CreateReportModalComponent {
   isOverviewReport: boolean;
   showWater: boolean;
   inAccount: boolean;
+  account: IdbAccount;
+  accountSub: Subscription;
   constructor(private sharedDataService: SharedDataService, private router: Router,
     private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
@@ -48,6 +50,9 @@ export class CreateReportModalComponent {
   }
 
   ngOnInit() {
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+    });
     this.showModalSub = this.sharedDataService.openCreateReportModal.subscribe(val => {
       if (val == true) {
         this.accountReport = this.getNewReport();
@@ -62,6 +67,7 @@ export class CreateReportModalComponent {
 
   ngOnDestroy() {
     this.showModalSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
   cancelCreateReport() {

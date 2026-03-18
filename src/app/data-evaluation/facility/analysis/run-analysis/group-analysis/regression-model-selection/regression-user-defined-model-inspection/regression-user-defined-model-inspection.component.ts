@@ -133,7 +133,7 @@ export class RegressionUserDefinedModelInspectionComponent {
       modelValidationNotes: ['']
     };
 
-    const validatedModel = this.regressionsModelsService.setModelVaildAndNotes(this.userModel, facilityPredictorData, reportYear, this.selectedFacility, baselineYear);
+    const validatedModel = this.regressionsModelsService.setModelVaildAndNotes(this.userModel, facilityPredictorData, reportYear, this.selectedFacility, baselineYear, this.selectedGroup);
     this.userModel = validatedModel;
   }
 

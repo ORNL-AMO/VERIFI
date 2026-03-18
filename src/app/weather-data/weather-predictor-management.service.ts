@@ -32,6 +32,8 @@ import { Month, Months } from '../shared/form-data/months';
 export class WeatherPredictorManagementService {
 
   hasWarning: boolean = false;
+  heatingTemp: number;
+  coolingTemp: number;
 
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
@@ -46,20 +48,23 @@ export class WeatherPredictorManagementService {
   ) {
   }
 
-  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility): Promise<"success" | "error"> {
+  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;
     let dryBulbTempPredictor: IdbPredictor;
-    if (this.weatherDataService.weatherDataSelection == 'HDD' || this.weatherDataService.weatherDataSelection == 'degreeDays') {
+    if (selectedValues.find(val => val.name == 'HDD')) {
       //create HDD predictor
       hddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
-      hddPredictor.name = 'HDD Generated ' + '(' + this.weatherDataService.heatingTemp + "F)";
+      let hddValue: number = selectedValues.find(val => val.name == 'HDD').value;
+      this.heatingTemp = hddValue;
+
+      hddPredictor.name = 'HDD Generated ' + '(' + this.heatingTemp + "F)";
+      hddPredictor.heatingBaseTemperature = this.heatingTemp;
       hddPredictor.predictorType = 'Weather';
       hddPredictor.weatherDataType = 'HDD';
       hddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
-      hddPredictor.heatingBaseTemperature = this.weatherDataService.heatingTemp;
       hddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
       await firstValueFrom(this.predictorDbService.addWithObservable(hddPredictor));
       //add predictor to analysis
@@ -67,21 +72,24 @@ export class WeatherPredictorManagementService {
 
     }
 
-    if (this.weatherDataService.weatherDataSelection == 'CDD' || this.weatherDataService.weatherDataSelection == 'degreeDays') {
+    if (selectedValues.find(val => val.name == 'CDD')) {
       //create CDD predictor
       cddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
-      cddPredictor.name = 'CDD Generated ' + '(' + this.weatherDataService.coolingTemp + "F)";
+      let cddValue: number = selectedValues.find(val => val.name == 'CDD').value;
+      this.coolingTemp = cddValue;
+
+      cddPredictor.name = 'CDD Generated ' + '(' + this.coolingTemp + "F)";
+      cddPredictor.coolingBaseTemperature = this.coolingTemp;
       cddPredictor.predictorType = 'Weather';
       cddPredictor.weatherDataType = 'CDD';
       cddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
-      cddPredictor.coolingBaseTemperature = this.weatherDataService.coolingTemp;
       cddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
       await firstValueFrom(this.predictorDbService.addWithObservable(cddPredictor));
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(cddPredictor);
     }
 
-    if (this.weatherDataService.weatherDataSelection == 'relativeHumidity') {
+    if (selectedValues.find(val => val.name == 'relativeHumidity')) {
       //create relative humidity predictor
       relativeHumidityPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
       relativeHumidityPredictor.name = "Relative Humidity";
@@ -94,7 +102,7 @@ export class WeatherPredictorManagementService {
       await this.analysisDbService.addAnalysisPredictor(relativeHumidityPredictor);
     }
 
-    if (this.weatherDataService.weatherDataSelection == 'dryBulbTemp') {
+    if (selectedValues.find(val => val.name == 'dryBulbTemp')) {
       //create dry bulb temp predictor
       dryBulbTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
       dryBulbTempPredictor.name = "Dry Bulb Temp";
@@ -131,7 +139,7 @@ export class WeatherPredictorManagementService {
         this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
 
         //ISSUE: 1822
-        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
+        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
         // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp)
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true

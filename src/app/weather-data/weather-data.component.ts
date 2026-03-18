@@ -32,6 +32,14 @@ export class WeatherDataComponent {
   facilityPredictorData: Array<IdbPredictorData>;
   facilityMeterData: Array<IdbUtilityMeterData>;
   inDashboard: boolean = false;
+  cddSelected: boolean = false;
+  hddSelected: boolean = false;
+  relativeHumiditySelected: boolean = false;
+  dryBulbTempSelected: boolean = false;
+  cddBaseTemp: number;
+  hddBaseTemp: number;
+  selectedValues: Array<{ name: WeatherDataSelection, value?: number }> = [];
+
   constructor(
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService,
@@ -53,6 +61,7 @@ export class WeatherDataComponent {
       if (this.applyToFacility) {
         this.weatherDataSelection = this.weatherDataService.weatherDataSelection;
         this.facilities = this.facilityDbService.accountFacilities.getValue();
+        this.setWeatherDataSelection();
         if (this.weatherDataService.selectedFacility) {
           let facilityExists: IdbFacility = this.facilities.find(facility => { return facility.guid == this.weatherDataService.selectedFacility.guid });
           if (facilityExists) {
@@ -74,18 +83,84 @@ export class WeatherDataComponent {
   ngOnDestroy() {
     this.applyToFacilitySub.unsubscribe();
   }
-  
+
   cancelApplyToFacility() {
     this.weatherDataService.applyToFacility.next(false);
   }
 
+  setWeatherDataSelection() {
+    this.cddSelected = false;
+    this.hddSelected = false;
+    this.relativeHumiditySelected = false;
+    this.dryBulbTempSelected = false;
+    this.cddBaseTemp = undefined;
+    this.hddBaseTemp = undefined;
+
+    switch (this.weatherDataSelection) {
+      case 'degreeDays':
+        this.cddSelected = true;
+        this.hddSelected = true;
+        this.cddBaseTemp = this.weatherDataService.coolingTemp;
+        this.hddBaseTemp = this.weatherDataService.heatingTemp;
+        break;
+      case 'CDD':
+        this.cddSelected = true;
+        this.cddBaseTemp = this.weatherDataService.coolingTemp;
+        break;
+      case 'HDD':
+        this.hddSelected = true;
+        this.hddBaseTemp = this.weatherDataService.heatingTemp;
+        break;
+      case 'relativeHumidity':
+        this.relativeHumiditySelected = true;
+        break;
+      case 'dryBulbTemp':
+        this.dryBulbTempSelected = true;
+        break;
+    }
+  }
+
+  isButtonDisabled(): boolean {
+    if (!this.selectedFacility || this.facilityMeterData?.length == 0) {
+      return true;
+    }
+    if (!this.cddSelected && !this.hddSelected && !this.relativeHumiditySelected && !this.dryBulbTempSelected) {
+      return true;
+    }
+    if (this.cddSelected && (this.cddBaseTemp == undefined || this.cddBaseTemp == null)) {
+      return true;
+    }
+    if (this.hddSelected && (this.hddBaseTemp == undefined || this.hddBaseTemp == null)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  setSelectedValues() {
+    this.selectedValues = [];
+    if (this.cddSelected) {
+      this.selectedValues.push({ name: 'CDD', value: this.cddBaseTemp });
+    }
+    if (this.hddSelected) {
+      this.selectedValues.push({ name: 'HDD', value: this.hddBaseTemp });
+    }
+    if (this.relativeHumiditySelected) {
+      this.selectedValues.push({ name: 'relativeHumidity' });
+    }
+    if (this.dryBulbTempSelected) {
+      this.selectedValues.push({ name: 'dryBulbTemp' });
+    }
+  }
+
   async confirmCreate() {
+    this.setSelectedValues();
     //Create weather data predictors and data for selected facility.
     this.analyticsService.sendEvent('weather_data_predictors');
     this.weatherDataService.applyToFacility.next(false);
     this.loadingService.setLoadingMessage('Adding Predictors...');
     this.loadingService.setLoadingStatus(true);
-    let results: "success" | "error" = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(this.selectedFacility);
+    let results: "success" | "error" = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(this.selectedFacility, this.selectedValues);
 
     // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     // let hddPredictor: IdbPredictor;

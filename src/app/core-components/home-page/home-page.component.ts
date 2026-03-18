@@ -108,12 +108,18 @@ export class HomePageComponent {
   }
 
   async goToAccountHome(account: IdbAccount) {
+    this.loadingService.setLoadingMessage('Loading Account...');
+    this.loadingService.setLoadingStatus(true);
     await this.dbChangesService.selectAccount(account, false);
+    this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/data-evaluation/account/home');
   }
 
   async goToDataWizard(account: IdbAccount) {
+    this.loadingService.setLoadingMessage('Loading Account...');
+    this.loadingService.setLoadingStatus(true);
     await this.dbChangesService.selectAccount(account, false);
+    this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 }
