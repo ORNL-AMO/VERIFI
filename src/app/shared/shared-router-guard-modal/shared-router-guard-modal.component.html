@@ -7,7 +7,10 @@
         There are unsaved changes on this page. Would you like to save the changes?
     </div>
     <div class="popup-footer text-end">
-        <button class="btn btn-success" (click)="onSave()">Save</button>
         <button class="btn btn-danger" (click)="onDiscard()">Discard</button>
+        <button class="btn btn-success" (click)="onSave()">
+            <span class="fa fa-save"></span>
+            Save
+        </button>
     </div>
 </div>
