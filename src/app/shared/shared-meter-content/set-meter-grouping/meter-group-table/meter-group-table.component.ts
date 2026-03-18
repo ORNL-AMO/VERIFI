@@ -1,4 +1,4 @@
-import { Component, input, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -12,8 +12,8 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
   styleUrl: './meter-group-table.component.css'
 })
 export class MeterGroupTableComponent {
-  @Input({required: true})
-  meterGroup: IdbUtilityMeterGroup;
+  @Input()
+  meterGroup: IdbUtilityMeterGroup | undefined;
   @Input()
   showHeader: boolean;
 

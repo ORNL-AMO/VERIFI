@@ -41,8 +41,7 @@
     [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
         <tr>
-            <th class="row-year" (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
-                class="row-year">
+            <th class="row-year" (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
                 Month</th>
             @if(showEnergyUse){
             <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">

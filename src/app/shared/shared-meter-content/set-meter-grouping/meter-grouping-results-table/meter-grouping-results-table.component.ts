@@ -29,7 +29,7 @@ export class MeterGroupingResultsTableComponent {
 
   meterGroup: IdbUtilityMeterGroup;
 
-  orderDataField: string = 'readDate';
+  orderDataField: string = 'date';
   orderByDirection: string = 'desc';
 
   calanderizedMeterData: Array<CalanderizedMeter>;
