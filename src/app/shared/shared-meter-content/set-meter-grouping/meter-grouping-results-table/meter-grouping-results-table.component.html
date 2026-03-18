@@ -20,6 +20,7 @@
 
 
 <div class="d-flex w-100 justify-content-end pb-2">
+    @if(showEnergyUse){
     <div class="btn-group pe-1 mb-2">
         <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
             [ngClass]="{'active': selectedFacility.energyIsSource == true}">
@@ -34,6 +35,7 @@
             <span class="fa fa-chevron-left"></span>
         </button>
     </div>
+    }
     <app-table-items-dropdown></app-table-items-dropdown>
 </div>
 
@@ -44,11 +46,22 @@
             <th class="row-year" (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}"
                 class="row-year">
                 Month</th>
+            @if(showEnergyUse){
             <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
                 Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)
             </th>
+            }
+            @if(showConsumption && !showEnergyUse){
+            <th (click)="setOrderDataField('energyConsumption')"
+                [ngClass]="{'active': orderDataField == 'energyConsumption'}">
+                Total Consumption<br> (<span [innerHTML]="consumptionUnit | settingsLabel"></span>)
+            </th>
+            }
+
+            @if(showCost){
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
+            }
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -130,9 +143,12 @@
             </td>
             }
             } -->
+            @if(showCost){
             <td>{{data.energyCost | customNumber:true}}
             </td>
+            }
         </tr>
+
         }
     </tbody>
 </table>

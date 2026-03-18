@@ -37,11 +37,13 @@ export class MeterGroupingResultsTableComponent {
   copyingTable: boolean = false;
   currentPageNumber: number = 1;
   energyUnit: string;
+  consumptionUnit: string;
   itemsPerPageSub: Subscription;
   itemsPerPage: number;
 
   showConsumption: boolean = false;
   showEnergyUse: boolean = true;
+  showCost: boolean = false;
   metersInGroup: Array<IdbUtilityMeter>;
   selectedFacility: IdbFacility;
   constructor(private activatedRoute: ActivatedRoute,
@@ -92,6 +94,7 @@ export class MeterGroupingResultsTableComponent {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.selectedFacility.energyUnit;
+    this.consumptionUnit = this.selectedFacility.volumeLiquidUnit;
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     //TODO: site/source option
     this.calanderizedMeterData = getCalanderizedMeterData(this.metersInGroup, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedFacility.energyIsSource, neededUnits: undefined }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
@@ -129,6 +132,11 @@ export class MeterGroupingResultsTableComponent {
       }
       return acc;
     }, new Array<MonthlyData>());
+
+    //check energy use and cost
+    this.showEnergyUse = this.groupMonthlyData.some(data => { return data.energyUse > 0 });
+    this.showCost = this.groupMonthlyData.some(data => { return data.energyCost > 0 });
+    this.showConsumption = this.groupMonthlyData.some(data => { return data.energyConsumption > 0 });
   }
 
   setOrderDataField(str: string) {
