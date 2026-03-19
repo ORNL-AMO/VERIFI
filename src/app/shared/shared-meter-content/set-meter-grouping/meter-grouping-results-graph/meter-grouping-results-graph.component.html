@@ -16,7 +16,8 @@
 </div>
 
 @if(metersInGroup.length > 0) {
-<app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
+<app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"
+    [calanderizedMeterData]="calanderizedMeterData"></app-meter-group-table>
 <div class="d-flex w-100 justify-content-end">
     <div>
         @if(showConsumption || showEnergyUse){
