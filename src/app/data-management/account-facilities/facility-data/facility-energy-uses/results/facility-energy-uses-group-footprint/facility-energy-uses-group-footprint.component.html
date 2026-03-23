@@ -1,68 +1,75 @@
-<h4>
-    <div class="d-flex w-100 justify-content-between align-items-center">
-        <div class="h4 mt-auto mb-0">
-            {{energyUseGroup?.name}} Footprint
-        </div>
-        <div class="d-flex">
-            <button class="btn action-btn" (click)="goToFacilityFootprint()">
-                <span class="fa fa-paw"></span>
-                View Facility Footprint
-            </button>
-        </div>
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div class="h4 mt-auto mb-0">
+                            {{energyUseGroup?.name}} Footprint
+                        </div>
+                        <div class="d-flex">
+                            <button class="btn action-btn" (click)="goToFacilityFootprint()">
+                                <span class="fa fa-paw"></span>
+                                View Facility Footprint
+                            </button>
+                        </div>
 
-        <div class="d-flex">
-            <div class="d-flex">
-                <label class="switch" for="dataType">
-                    <input class="checkbox" type="checkbox" id="dataType" [(ngModel)]="dataTypeMeterGroup"
-                        name="dataType">
-                    <span class="slider round"></span>
-                </label>
-                <div class="ps-1 my-auto">
-                    Show by Meter Group
-                </div>
-            </div>
-            <!-- <div class="ps-2">
+                        <div class="d-flex">
+                            <div class="d-flex">
+                                <label class="switch" for="dataType">
+                                    <input class="checkbox" type="checkbox" id="dataType"
+                                        [(ngModel)]="dataTypeMeterGroup" name="dataType">
+                                    <span class="slider round"></span>
+                                </label>
+                                <div class="ps-1 my-auto">
+                                    Show by Meter Group
+                                </div>
+                            </div>
+                            <!-- <div class="ps-2">
                 <app-facility-energy-uses-result-dropdown></app-facility-energy-uses-result-dropdown>
             </div> -->
+                        </div>
+                    </div>
+                </h4>
+                @let dataType = dataTypeMeterGroup ? 'meterGroup' : 'source';
+                @if(dataType == 'meterGroup'){
+                @if(energyFootprintGroup.meterGroupsAnnualResults.length == 0){
+                <div class="alert alert-warning text-center">
+                    No meter groups have been linked to the equipment in this energy use group.
+                </div>
+                }@else{
+                <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup"
+                    [facility]="facility" [tableType]="'meterGroup'">
+                </app-facility-energy-uses-group-footprint-table>
+                <hr>
+                <div class="row justify-content-center">
+                    @for(groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
+                    <div class="col-12">
+                        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
+                            [facility]="facility" [chartType]="'meterGroup'"
+                            [groupId]="groupResult.meterGroupId"></app-facility-energy-uses-group-footprint-chart>
+                    </div>
+                    @if($index < energyFootprintGroup.meterGroupsAnnualResults.length - 1){ <hr>
+                        }
+                        }
+                </div>
+                }
+                }@else {
+                <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup"
+                    [facility]="facility" [tableType]="'source'">
+                </app-facility-energy-uses-group-footprint-table>
+                <hr>
+                <div class="row justify-content-center">
+                    @for(sourceResult of energyFootprintGroup.includedSourcesAnnualResults; track $index){
+                    <div class="col-12">
+                        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
+                            [facility]="facility" [chartType]="'source'"
+                            [source]="sourceResult.source"></app-facility-energy-uses-group-footprint-chart>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
         </div>
     </div>
-</h4>
-@let dataType = dataTypeMeterGroup ? 'meterGroup' : 'source';
-@if(dataType == 'meterGroup'){
-@if(energyFootprintGroup.meterGroupsAnnualResults.length == 0){
-<div class="alert alert-warning text-center">
-    No meter groups have been linked to the equipment in this energy use group.
 </div>
-}@else{
-<app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
-    [tableType]="'meterGroup'">
-</app-facility-energy-uses-group-footprint-table>
-<hr>
-<div class="row justify-content-center">
-    @for(groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
-    <div class="col-12">
-        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
-            [facility]="facility" [chartType]="'meterGroup'"
-            [groupId]="groupResult.meterGroupId"></app-facility-energy-uses-group-footprint-chart>
-    </div>
-    @if($index < energyFootprintGroup.meterGroupsAnnualResults.length - 1){ <hr>
-        }
-        }
-</div>
-}
-}@else {
-<app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup" [facility]="facility"
-    [tableType]="'source'">
-</app-facility-energy-uses-group-footprint-table>
-<hr>
-<div class="row justify-content-center">
-    @for(sourceResult of energyFootprintGroup.includedSourcesAnnualResults; track $index){
-    <div class="col-12">
-        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
-            [facility]="facility" [chartType]="'source'"
-            [source]="sourceResult.source"></app-facility-energy-uses-group-footprint-chart>
-    </div>
-    }
-</div>
-
-}

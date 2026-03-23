@@ -70,6 +70,7 @@ import { FacilityEnergyUsesSetupOptionsComponent } from "../data-management/acco
 import { NewEquipmentGroupSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component";
 import { EditExistingGroupsSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component";
 import { AddYearSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component";
+import { FacilityMeterGroupsComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -184,7 +185,7 @@ export const DataManagementRoutes: Route = {
                         },
                         {
                             path: 'meter-grouping',
-                            component: SetMeterGroupingComponent,
+                            component: FacilityMeterGroupsComponent,
                             children: [
                                 {
                                     path: '',

@@ -14,6 +14,9 @@ import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup
 })
 export class EditExistingGroupsSetupOptionsComponent {
 
+  facility: IdbFacility;
+  facilitySub: Subscription;
+
   facilityEnergyUseGroups: Array<{
     guid: string,
     name: string,
@@ -29,6 +32,10 @@ export class EditExistingGroupsSetupOptionsComponent {
   ) { }
 
   ngOnInit() {
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.facility = facility;
+    });
+
     this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
       this.facilityEnergyUseGroups = groups.map(group => {
         return {
@@ -42,6 +49,7 @@ export class EditExistingGroupsSetupOptionsComponent {
 
   ngOnDestroy() {
     this.facilityEnergyUseGroupsSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
   toggleGroupSelection(group: { guid: string, name: string, selected: boolean }) {
@@ -50,9 +58,10 @@ export class EditExistingGroupsSetupOptionsComponent {
 
   goToEquipmentDetails() {
     this.facilityEnergyUsesSetupService.existingGroupsToEdit = this.facilityEnergyUseGroups.filter(group => group.selected).map(group => group.guid);
-    // let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    // this.router.navigateByUrl('/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/energy-uses/equipment-details');
     this.router.navigate(['../../edit-existing'], { relativeTo: this.route });
+  }
 
+  leaveGroupSetup() {
+    this.router.navigate(['../../'], { relativeTo: this.route });
   }
 }

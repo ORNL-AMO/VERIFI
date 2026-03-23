@@ -122,4 +122,8 @@ export class NewEquipmentGroupSetupOptionsComponent {
       group.numberOfEquipment--;
     }
   }
+
+  leaveGroupSetup() {
+    this.router.navigate(['../../'], { relativeTo: this.route });
+  }
 }

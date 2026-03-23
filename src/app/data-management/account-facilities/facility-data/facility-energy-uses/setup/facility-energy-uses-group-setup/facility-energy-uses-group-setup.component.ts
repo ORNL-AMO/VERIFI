@@ -214,4 +214,8 @@ export class FacilityEnergyUsesGroupSetupComponent {
   leaveGroupSetup() {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
   }
+
+  startOver() {
+    this.router.navigate(['../setup-options'], { relativeTo: this.activatedRoute });
+  }
 }

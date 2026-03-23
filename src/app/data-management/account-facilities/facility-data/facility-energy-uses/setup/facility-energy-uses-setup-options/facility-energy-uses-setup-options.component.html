@@ -1,32 +1,45 @@
-<h4>
-    <div class="d-flex justify-content-between">
-        <div class="h4 mb-0 mt-auto">
-            {{facility.name}} Energy Use Groups Setup
-
-        </div>
-        <div class="ps-1">
-            <button class="btn nav-btn" (click)="leaveGroupSetup()">
-                <span class="fa fa-times"></span>
-                Leave Group Setup
-            </button>
-        </div>
-    </div>
-</h4>
-
 <!--only show if no child route exists-->
 @if(!hasChildRoute){
-<div>
-    <h5 class="text-center mb-0">Existing energy use groups found.<br> Would you like to set up new groups or edit
-        existing groups?</h5>
-    <div class="d-flex justify-content-center">
-        <button class="btn action-btn" (click)="setupNewGroups()"><i class="fa fa-plus"></i> Set Up New
-            Groups</button>
-        <button class="btn action-btn ms-2 me-2" (click)="editExistingGroups()"><i class="fa fa-pencil"></i> Bulk Edit
-            Existing
-            Groups</button>
-        <button class="btn action-btn" (click)="addYearOfData()"><i class="fa fa-calendar"></i> Add Year of
-            Data</button>
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex justify-content-between">
+                        <div class="h4 mb-0 mt-auto">
+                            {{facility.name}} Energy Use Groups Setup
+
+                        </div>
+                        <div class="ps-1">
+                            <button class="btn nav-btn" (click)="leaveGroupSetup()">
+                                <span class="fa fa-times"></span>
+                                Leave Group Setup
+                            </button>
+                        </div>
+                    </div>
+                </h4>
+
+                <div>
+                    <h5 class="text-center mb-0">Existing energy use groups found.<br> Would you like to set up new
+                        groups or edit
+                        existing groups?</h5>
+                    <div class="d-flex justify-content-center">
+                        <button class="btn action-btn" (click)="setupNewGroups()"><i class="fa fa-plus"></i> Set Up New
+                            Groups</button>
+                        <button class="btn action-btn ms-2 me-2" (click)="editExistingGroups()"><i
+                                class="fa fa-pencil"></i> Bulk
+                            Edit
+                            Existing
+                            Groups</button>
+                        <button class="btn action-btn" (click)="addYearOfData()"><i class="fa fa-calendar"></i> Add Year
+                            of
+                            Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-}
+}@else{
 <router-outlet></router-outlet>
+}

@@ -1,24 +1,49 @@
-<div class="d-flex flex-column">
-    <div class="d-flex w-100 justify-content-end">
-        <button class="btn nav-btn" (click)="goToEquipmentDetails()"><i class="fa fa-arrow-right"></i>
-            Equipment Details
-        </button>
-    </div>
-    <div>
-        <h5 class="mb-0">Edit Existing Groups</h5>
-        <p class="fw-light">
-            Select the groups you want to modify.
-        </p>
-        <div class="d-flex flex-column">
-            @for(group of facilityEnergyUseGroups; track group.guid;){
-            <div class="d-flex">
-                <label for="{{'group'+group.guid}}" class="form-check-label large">
-                    <input id="{{'group'+group.guid}}" type="checkbox" [checked]="group.selected"
-                        (change)="toggleGroupSelection(group);" />
-                    {{group.name}}
-                </label>
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex justify-content-between">
+                        <div class="h4 mb-0 mt-auto">
+                            {{facility.name}} Energy Use Groups Setup
+
+                        </div>
+                        <div class="ps-1">
+                            <button class="btn nav-btn" (click)="leaveGroupSetup()">
+                                <span class="fa fa-times"></span>
+                                Leave Group Setup
+                            </button>
+                        </div>
+                    </div>
+                </h4>
+                <div class="d-flex flex-column">
+                    <div>
+                        <h5 class="mb-0">Edit Existing Groups</h5>
+                        <p class="fw-light">
+                            Select the groups you want to modify.
+                        </p>
+                        <div class="d-flex flex-column">
+                            @for(group of facilityEnergyUseGroups; track group.guid;){
+                            <div class="d-flex">
+                                <label for="{{'group'+group.guid}}" class="form-check-label large">
+                                    <input id="{{'group'+group.guid}}" type="checkbox" [checked]="group.selected"
+                                        (change)="toggleGroupSelection(group);" />
+                                    {{group.name}}
+                                </label>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
-            }
         </div>
     </div>
 </div>
+<nav class="data-management-footer navbar">
+    <div class="container-fluid justify-content-end">
+        <button class="btn nav-btn" (click)="goToEquipmentDetails()">
+            Edit Equipment Groups
+            <i class="fa fa-arrow-right"></i>
+        </button>
+    </div>
+</nav>

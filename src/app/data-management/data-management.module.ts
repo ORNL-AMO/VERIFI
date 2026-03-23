@@ -104,6 +104,7 @@ import { FacilityEnergyUsesSetupOptionsComponent } from './account-facilities/fa
 import { NewEquipmentGroupSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component';
 import { EditExistingGroupsSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component';
 import { AddYearSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component';
+import { FacilityMeterGroupsComponent } from './account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component';
 
 @NgModule({
   declarations: [
@@ -197,7 +198,8 @@ import { AddYearSetupOptionsComponent } from './account-facilities/facility-data
     FacilityEnergyUsesSetupOptionsComponent,
     NewEquipmentGroupSetupOptionsComponent,
     EditExistingGroupsSetupOptionsComponent,
-    AddYearSetupOptionsComponent
+    AddYearSetupOptionsComponent,
+    FacilityMeterGroupsComponent
   ],
   imports: [
     CommonModule,
