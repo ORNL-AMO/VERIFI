@@ -100,6 +100,10 @@ import { OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe } from './ac
 import { OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-source.pipe';
 import { FacilityEnergyUsesResultDropdownComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-result-dropdown/facility-energy-uses-result-dropdown.component';
 import { EnergyUseDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/energy-use-data-form/energy-use-data-form.component';
+import { FacilityEnergyUsesSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/facility-energy-uses-setup-options.component';
+import { NewEquipmentGroupSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component';
+import { EditExistingGroupsSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component';
+import { AddYearSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component';
 
 @NgModule({
   declarations: [
@@ -189,7 +193,11 @@ import { EnergyUseDataFormComponent } from './account-facilities/facility-data/f
     OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe,
     OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe,
     FacilityEnergyUsesResultDropdownComponent,
-    EnergyUseDataFormComponent
+    EnergyUseDataFormComponent,
+    FacilityEnergyUsesSetupOptionsComponent,
+    NewEquipmentGroupSetupOptionsComponent,
+    EditExistingGroupsSetupOptionsComponent,
+    AddYearSetupOptionsComponent
   ],
   imports: [
     CommonModule,

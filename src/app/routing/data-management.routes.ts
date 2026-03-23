@@ -66,6 +66,10 @@ import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set
 import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
 import { MeterGroupingResultsTableComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
 import { MeterGroupingResultsGraphComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
+import { FacilityEnergyUsesSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/facility-energy-uses-setup-options.component";
+import { NewEquipmentGroupSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component";
+import { EditExistingGroupsSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component";
+import { AddYearSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -254,7 +258,29 @@ export const DataManagementRoutes: Route = {
                                     component: FacilityEnergyUseGroupManagementComponent
                                 },
                                 {
-                                    path: 'setup',
+                                    path: 'setup-options',
+                                    component: FacilityEnergyUsesSetupOptionsComponent,
+                                    children: [
+                                        {
+                                            path: 'new-groups',
+                                            component: NewEquipmentGroupSetupOptionsComponent
+                                        },
+                                        {
+                                            path: 'edit-groups',
+                                            component: EditExistingGroupsSetupOptionsComponent
+                                        },
+                                        {
+                                            path: 'add-year',
+                                            component: AddYearSetupOptionsComponent
+                                        }
+                                    ]
+                                },
+                                {
+                                    path: 'edit-existing',
+                                    component: FacilityEnergyUsesGroupSetupComponent
+                                },
+                                {
+                                    path: 'new-setup',
                                     component: FacilityEnergyUsesGroupSetupComponent
                                 },
                                 {

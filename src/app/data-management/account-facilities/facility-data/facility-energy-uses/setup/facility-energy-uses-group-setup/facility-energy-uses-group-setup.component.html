@@ -5,15 +5,15 @@
 
         </div>
         <div class="ps-1">
-            <button class="btn btn-secondary" (click)="leaveGroupSetup()">
+            <button class="btn nav-btn" (click)="leaveGroupSetup()">
                 <span class="fa fa-times"></span>
-                Leave Group Setup
+                Leave Bulk Group Setup
             </button>
         </div>
     </div>
 </h4>
 
-
+@if(energyUseGroups && energyUseGroups.length > 0) {
 <div>
     <h5 class="text-center mb-0">Setting up group {{groupSetupIndex + 1}} of {{energyUseGroups.length}}</h5>
     <p class="fw-light text-center">
@@ -25,7 +25,7 @@
             <button class="btn action-btn" (click)="initEnergyUseGroups()"><i class="fa fa-refresh"></i> Start
                 Over</button>
             }@else{
-            <button class="btn action-btn" (click)="previousGroup()"><i class="fa fa-arrow-left"></i> Previous
+            <button class="btn nav-btn" (click)="previousGroup()"><i class="fa fa-arrow-left"></i> Previous
                 Group</button>
             }
         </div>
@@ -39,8 +39,8 @@
                     class="fa fa-check"></i>
                 Finalize Setup</button>
             }@else{
-            <button class="btn action-btn" (click)="nextGroup()" [disabled]="disableNext"><i
-                    class="fa fa-arrow-right"></i> Next
+            <button class="btn nav-btn" (click)="nextGroup()" [disabled]="disableNext"><i class="fa fa-arrow-right"></i>
+                Next
                 Group</button>
             }
         </div>
@@ -68,10 +68,10 @@
                 Equipment/System to {{energyUseGroups[groupSetupIndex].name}}</button>
         </div>
     </div>
-    <div class="row">
+    <div class="row align-items-stretch">
         @for (equipment of energyUseGroups[groupSetupIndex].equipment; track $index) {
         <div class="col-6 mb-2 mt-2">
-            <div class="card">
+            <div class="card h-100">
                 <div class="card-header bg-card-header">
                     <div class="d-flex justify-content-between">
                         <div class="color-white">
@@ -128,3 +128,4 @@
         <button class="btn btn-danger" (click)="confirmDeleteGroup()">Delete</button>
     </div>
 </div>
+}
