@@ -19,7 +19,7 @@
                 </h4>
                 <div class="row">
                     <div class="col-12 text-center">
-                        <h5 class="mb-0">Setting up group {{groupSetupIndex + 1}} of
+                        <h5 class="mb-0">Setting Up Group {{groupSetupIndex + 1}} of
                             {{energyUseGroups.length}}
                         </h5>
                     </div>
@@ -99,11 +99,20 @@
             @let formsInvalid = energyUseGroups[groupSetupIndex].equipment | energyUseEquipmentInvalid;
             @let disableNext = formsInvalid || !energyUseGroups[groupSetupIndex].name;
             @if(groupSetupIndex == energyUseGroups.length - 1) {
-            <button class="btn action-btn me-1" (click)="addGroup()" [disabled]="disableNext"><i class="fa fa-plus"></i>
-                Add Group</button>
-            <button class="btn action-btn" (click)="finalizeSetup()" [disabled]="disableNext"><i
-                    class="fa fa-check"></i>
-                Finalize Setup</button>
+            @if(isNew){
+            <button class="btn action-btn me-1" (click)="addGroup()" [disabled]="disableNext">
+                <i class="fa fa-plus"></i>
+                Add Group
+            </button>
+            }
+            <button class="btn action-btn" (click)="finalizeSetup()" [disabled]="disableNext">
+                <i class="fa fa-save"></i>
+                @if(isNew){
+                Finalize Setup
+                }@else{
+                Save Changes
+                }
+            </button>
             }@else{
             <button class="btn nav-btn" (click)="nextGroup()" [disabled]="disableNext">
                 Next Group <i class="fa fa-arrow-right"></i>
