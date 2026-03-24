@@ -18,6 +18,8 @@ export class FacilityReportBadgeClassPipe implements PipeTransform {
         return 'badge-savings';
       case 'modeling':
         return 'badge-modeling';
+      case 'costSavings':
+        return 'badge-cost-savings';
       default:
     }
     return '';

@@ -137,7 +137,12 @@ export class FacilityReportsTabsComponent {
           this.selectedReport.analysisItemId != undefined &&
           this.errorMessage == undefined)
       }
-      else {
+      else if (this.selectedReport.facilityReportType == 'costSavings') {
+        this.setupValid = (this.selectedReport.name != '' &&
+          this.selectedReport.costSavingsReportSettings.reportYear != undefined &&
+          this.selectedReport.analysisItemId != undefined &&
+          this.errorMessage == undefined);
+      } else {
         this.setupValid = false;
       }
     }

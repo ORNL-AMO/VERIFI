@@ -1,0 +1,48 @@
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [ngClass]="{'open': showModal}">
+  <div class="popup-header">Calculate Blended Energy Rate
+    <button class="item-right" (click)="closeCalculator()">x</button>
+  </div>
+  <div class="popup-body">
+    <div class="text-center fw-bold mb-3">
+      {{group.idbGroupId | groupName}} - {{year}}
+    </div>
+    <div class=table-responsive>
+      <table class="table table-sm table-bordered mb-4">
+        <thead class="text-center">
+          <tr>
+            <th>Meters</th>
+            <th>Energy Contribution</th>
+            <th>Unit cost</th>
+            <th>Unit cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (meter of groupMeters; track meter) {
+          <tr>
+            <td>{{meter.name}}</td>
+            <td class="text-center">{{energyPercentagePerMeter[meter.guid] | percent}}</td>
+            <td class="text-center">
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="unitCostPerMeter[meter.guid]"
+                  (input)="convertEnergyRates(meter)">
+                <span class="input-group-text">$/{{meter.startingUnit}}</span>
+              </div>
+            </td>
+            <td class="text-center">
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control form-control-sm" [value]="convertedEnergyRatePerMeter[meter.guid] || 0" disabled>
+                <span class="input-group-text">$/MMBtu</span>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      <hr>
+    </div>
+    <div class="popup-footer text-end mt-1">
+      <button class="btn btn-secondary" (click)="closeCalculator()">Cancel</button>
+      <button class="btn btn-success" (click)="calculateBlendedRate()">Calculate</button>
+    </div>
+  </div>
