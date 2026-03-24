@@ -48,8 +48,15 @@
   </div>
   }
   <div class="ps-1 pe-1 mb-2">
+    @if (inDataManagement) {
+    <button class="btn" (click)="goToDataQualityReport()"
+      [ngClass]="predictor | predictorDataQualityStatus: predictorData: true"><i class="fa fa-clipboard-check"></i>
+      Data
+      Quality Report</button>
+    } @else {
     <app-predictor-data-quality-report-modal [selectedPredictor]="predictor"
       [predictorData]="predictorData"></app-predictor-data-quality-report-modal>
+    }
   </div>
 </div>
 @if (hasWeatherDataWarnings) {
@@ -192,7 +199,7 @@
 
 <div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete}"></div>
 <div class="popup" [class.open]="predictorDataToDelete">
-@if(predictorDataToDelete) {
+  @if(predictorDataToDelete) {
   <div class="popup-header">
     Delete {{predictorDataToDelete | displayPredictorDataDate}}?
     <button class="item-right" (click)="cancelDeletePredictorData()">x</button>
@@ -206,7 +213,7 @@
     <button class="btn btn-secondary" (click)="cancelDeletePredictorData()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDeletePredictorData()">Confirm Delete</button>
   </div>
-}
+  }
 </div>
 <div class="popup" [class.open]="showBulkDelete">
   <div class="popup-header">
