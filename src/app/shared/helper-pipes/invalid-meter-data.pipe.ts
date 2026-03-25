@@ -26,7 +26,7 @@ export function getHasDuplicateReadings(meterData: Array<IdbUtilityMeterData>): 
     return mData.year + '_' + mData.month + '_' + mData.day;
   });
   //has duplicates
-  let counts: Array<any> = _.countBy(readDateStrs, (dateStr: string) => {
+  let counts: Record<string, number> = _.countBy(readDateStrs, (dateStr: string) => {
     return dateStr;
   })
   let duplicateDates: Array<string> = [];

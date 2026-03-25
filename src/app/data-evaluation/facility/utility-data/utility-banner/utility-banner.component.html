@@ -4,9 +4,9 @@
       <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">
         <i class="fa fa-file-pen"></i>
         Meter Management
-        <!-- @if (metersHaveErrors) {
+        @if (facility.guid | invalidMeters) {
           <i class="fa fa-exclamation-circle"></i>
-        } -->
+        }
       </a>
     </li>
     <li class="nav-item">

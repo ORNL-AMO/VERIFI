@@ -6,6 +6,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 @Pipe({
   name: 'invalidMeters',
   standalone: false,
+  pure: false
 })
 export class InvalidMetersPipe implements PipeTransform {
 

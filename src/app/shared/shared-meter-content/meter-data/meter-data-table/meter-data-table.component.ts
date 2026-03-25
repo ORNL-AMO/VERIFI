@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -44,7 +44,7 @@ export class MeterDataTableComponent {
   filteredMeterData: Array<IdbUtilityMeterData>;
   optionSelected: 'all' | 'estimated' = 'all';
   hasEstimatedReadings: boolean = false;
-  isMeterInvalid: boolean;
+  isMeterInvalid: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
