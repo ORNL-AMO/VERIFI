@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -38,6 +38,18 @@ export class MeterGroupFormComponent {
   hasWaterMeters: boolean;
 
   showDeleteModal: boolean = false;
+
+  @HostListener('window:keydown', ['$event'])
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if ((!this.groupForm.invalid && !this.groupForm.pristine) || this.selectionsChanged) {
+        await this.saveChanges();
+        this.cancel();
+      }
+    }
+  }
+  
   constructor(private facilityDbService: FacilitydbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService,

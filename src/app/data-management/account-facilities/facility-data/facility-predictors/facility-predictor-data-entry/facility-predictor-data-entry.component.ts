@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -29,12 +28,22 @@ export class FacilityPredictorDataEntryComponent {
   showDeletePredictorEntry: boolean = false;
   isSaved: boolean = true;
   calculatingDegreeDays: boolean;
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.calculatingDegreeDays) {
+        this.saveAndQuit();
+      }
+    }
+  }
+  
   constructor(private activatedRoute: ActivatedRoute,
     private predictorDbService: PredictorDbService,
     private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private router: Router,
-    private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,

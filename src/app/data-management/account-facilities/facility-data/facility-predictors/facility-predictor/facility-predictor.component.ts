@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
@@ -44,6 +44,18 @@ export class FacilityPredictorComponent {
   firstMeterReading: Date;
 
   showDeletePredictor: boolean = false;
+
+  @HostListener('window:keydown', ['$event'])
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.predictorForm.invalid && !this.predictorForm.pristine) {
+        await this.saveChanges();
+        this.goToManagePredictors();
+      }
+    }
+  }
+
   constructor(private activatedRoute: ActivatedRoute,
     private predictorDbService: PredictorDbService,
     private toastNotificationService: ToastNotificationsService,

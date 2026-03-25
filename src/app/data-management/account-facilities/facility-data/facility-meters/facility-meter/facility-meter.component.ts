@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
@@ -32,6 +32,18 @@ export class FacilityMeterComponent {
   utilityMeter: IdbUtilityMeter;
   meterForm: FormGroup;
   showDeleteMeter: boolean = false;
+
+  @HostListener('window:keydown', ['$event'])
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.meterForm.invalid && !this.meterForm.pristine) {
+        await this.saveChanges();
+        this.goToMeterList();
+      }
+    }
+  }
+  
   constructor(private activatedRoute: ActivatedRoute,
     private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
