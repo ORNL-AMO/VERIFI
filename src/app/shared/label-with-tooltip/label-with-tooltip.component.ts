@@ -11,7 +11,7 @@ declare var bootstrap: any;
 export class LabelWithTooltipComponent implements OnInit {
   @Input({required: true})
   field: string;
-  @Input({required: true})
+  @Input()
   label: string;
   @Input()
   isRequired: boolean;
