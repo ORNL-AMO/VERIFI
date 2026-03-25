@@ -10,7 +10,6 @@ import { ProcessTemplateFileComponent } from "../data-management/data-management
 import { ProcessTemplateFacilitiesComponent } from "../data-management/data-management-import/process-template-file/process-template-facilities/process-template-facilities.component";
 import { FacilityMetersTableComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
-import { MeterDataComponent } from "../shared/shared-meter-content/meter-data/meter-data.component";
 import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { FacilitiesListComponent } from "../data-management/account-facilities/facilities-list/facilities-list.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
@@ -43,7 +42,6 @@ import { CustomFuelDataFormComponent } from "../shared/custom-database/custom-fu
 import { CustomGwpFormComponent } from "../shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 import { CustomGwpDashboardComponent } from "../shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
 import { AccountCustomDataComponent } from "../data-management/account-custom-data/account-custom-data.component";
-import { SetMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/set-meter-grouping.component";
 import { PrivacyNoticeComponent } from "../static-content/privacy-notice/privacy-notice.component";
 import { AboutComponent } from "../static-content/about/about.component";
 import { AcknowledgmentsComponent } from "../static-content/acknowledgments/acknowledgments.component";
@@ -71,6 +69,7 @@ import { NewEquipmentGroupSetupOptionsComponent } from "../data-management/accou
 import { EditExistingGroupsSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component";
 import { AddYearSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component";
 import { FacilityMeterGroupsComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component";
+import { FacilityMeterDataComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -162,7 +161,7 @@ export const DataManagementRoutes: Route = {
                                 },
                                 {
                                     path: 'meter-data',
-                                    component: MeterDataComponent,
+                                    component: FacilityMeterDataComponent,
                                     children: [
                                         { path: '', component: MeterDataTableComponent },
                                         {

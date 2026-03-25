@@ -110,7 +110,8 @@ import { MeterGroupingResultsGraphComponent } from './set-meter-grouping/meter-g
     GeneralUtilityDataTableComponent,
     OtherEmissionsDataTableComponent,
     VehicleDataTableComponent,
-    SetMeterGroupingComponent
+    SetMeterGroupingComponent,
+    MeterDataComponent
   ]
 })
 export class SharedMeterContentModule { }
