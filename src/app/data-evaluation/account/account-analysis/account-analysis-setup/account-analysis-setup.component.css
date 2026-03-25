@@ -19,3 +19,7 @@
 .switch-col{
     padding-top: calc(.375rem + 1px);
 }
+
+a.click-link .fa{
+    color: inherit;
+}
