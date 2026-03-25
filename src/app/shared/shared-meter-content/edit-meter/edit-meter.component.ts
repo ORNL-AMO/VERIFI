@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -9,7 +9,6 @@ import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -21,16 +20,28 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   selector: 'app-edit-meter',
   templateUrl: './edit-meter.component.html',
   styleUrls: ['./edit-meter.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditMeterComponent implements OnInit {
-
 
   meterForm: FormGroup;
   meterDataExists: boolean;
   editMeter: IdbUtilityMeter;
   addOrEdit: 'add' | 'edit';
   selectedFacility: IdbFacility;
+
+  handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if(!this.meterForm.invalid) {
+        this.saveChanges();
+      }
+    }
+  }
+
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
@@ -32,7 +32,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-facility-predictor',
   templateUrl: './facility-predictor.component.html',
   styleUrl: './facility-predictor.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class FacilityPredictorComponent {
 
@@ -44,6 +47,16 @@ export class FacilityPredictorComponent {
   firstMeterReading: Date;
 
   showDeletePredictor: boolean = false;
+
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.predictorForm.invalid && !this.predictorForm.pristine) {
+        await this.saveChanges();
+      }
+    }
+  }
+
   constructor(private activatedRoute: ActivatedRoute,
     private predictorDbService: PredictorDbService,
     private toastNotificationService: ToastNotificationsService,
