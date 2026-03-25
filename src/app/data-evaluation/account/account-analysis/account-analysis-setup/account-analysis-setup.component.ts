@@ -216,4 +216,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
   }
+
+  goToSettings(){
+    this.router.navigateByUrl('/data-evaluation/account/settings');
+  }
 }

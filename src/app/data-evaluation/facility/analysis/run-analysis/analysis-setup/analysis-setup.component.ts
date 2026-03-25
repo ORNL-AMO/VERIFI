@@ -41,6 +41,7 @@ export class AnalysisSetupComponent implements OnInit {
 
   analysisItemSub: Subscription;
   isFormChange: boolean = false;
+  account: IdbAccount;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -51,6 +52,7 @@ export class AnalysisSetupComponent implements OnInit {
     private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
+    this.account = this.accountDbService.selectedAccount.getValue();
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
       if (!this.isFormChange) {
         this.analysisItem = item;
@@ -178,5 +180,9 @@ export class AnalysisSetupComponent implements OnInit {
 
   goToSavingsReport(){
     this.router.navigate(['../../../reports'], { relativeTo: this.activatedRoute });
+  }
+
+  goToSettings(){
+    this.router.navigateByUrl('/data-evaluation/account/settings');
   }
 }
