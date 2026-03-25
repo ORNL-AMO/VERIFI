@@ -49,7 +49,7 @@ export class EditMeterComponent implements OnInit {
         this.editMeter = facilityMeters.find(meter => { return meter.guid == meterId });
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
         let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
-        if (meterData.length != 0) {
+        if (meterData.length != 0 && this.meterForm.valid) {
           this.meterDataExists = true;
           this.meterForm.controls.source.disable();
           this.meterForm.controls.startingUnit.disable();
