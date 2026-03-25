@@ -1,3 +1,4 @@
+@if(isMeterInvalid == false){
 @if (meterData.length == 0) {
 <div class="text-center mt-5">
   <h5>No bills found for {{selectedMeter.name}}.</h5>
@@ -108,6 +109,12 @@
   </div>
 </div>
 }
+}@else {
+<div class="alert alert-danger">
+  The meter associated with this data has errors in its configuration. Please click here to <a class="click-link" (click)="editMeter()">edit the meter</a> to resolve these errors
+  before adding meter data.
+</div>
+}
 
 
 
@@ -121,7 +128,7 @@
   }
   <div class="popup-body">
     <p>WARNING: Deleting meter data cannot be undone.
-      Are you sure you want to preform this action?</p>
+      Are you sure you want to perform this action?</p>
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
@@ -137,7 +144,7 @@
   }
   <div class="popup-body">
     <p>WARNING: Deleting meter data cannot be undone.
-      Are you sure you want to preform this action?</p>
+      Are you sure you want to perform this action?</p>
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>

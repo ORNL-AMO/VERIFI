@@ -4,18 +4,22 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { isMeterInvalid } from '../validation/meterValidation';
 
 @Pipe({
-  name: 'invalidMeter',
+  name: 'invalidMeters',
   standalone: false,
   pure: false
 })
-export class InvalidMeterPipe implements PipeTransform {
+export class InvalidMetersPipe implements PipeTransform {
 
   constructor(
     private utilityMeterDbService: UtilityMeterdbService
   ) { }
 
-  transform(meterGuid: string): boolean {
-    let meter: IdbUtilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterGuid);
-    return isMeterInvalid(meter);
+  transform(facilityId: string): boolean {
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(facilityId);
+    let hasInvalidMeter: boolean = facilityMeters.some(meter => {
+      return isMeterInvalid(meter);
+    });
+    return hasInvalidMeter;
   }
+
 }
