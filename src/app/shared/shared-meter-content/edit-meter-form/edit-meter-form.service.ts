@@ -12,6 +12,8 @@ export class EditMeterFormService {
   constructor(private formBuilder: FormBuilder) { }
 
   getFormFromMeter(meter: IdbUtilityMeter): FormGroup {
+    //IF we change validation be sure to update the isMeterInvalid function in meterValidation.ts to match, 
+    //otherwise we will have inconsistencies in when meters are flagged as invalid
     let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source, meter.scope);
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source, meter.scope);
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit, meter.scope);
