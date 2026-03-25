@@ -21,7 +21,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-facility-meter',
   templateUrl: './facility-meter.component.html',
   styleUrl: './facility-meter.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class FacilityMeterComponent {
 
@@ -33,13 +36,11 @@ export class FacilityMeterComponent {
   meterForm: FormGroup;
   showDeleteMeter: boolean = false;
 
-  @HostListener('window:keydown', ['$event'])
   async handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
       if (!this.meterForm.invalid && !this.meterForm.pristine) {
         await this.saveChanges();
-        this.goToMeterList();
       }
     }
   }

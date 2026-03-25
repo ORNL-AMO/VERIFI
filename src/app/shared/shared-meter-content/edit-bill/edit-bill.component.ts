@@ -23,7 +23,10 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   selector: 'app-edit-bill',
   templateUrl: './edit-bill.component.html',
   styleUrls: ['./edit-bill.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditBillComponent implements OnInit {
 
@@ -41,7 +44,6 @@ export class EditBillComponent implements OnInit {
   paramsSub: Subscription;
   isElectron: boolean;
 
-  @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();

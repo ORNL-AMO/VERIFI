@@ -30,7 +30,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-edit-predictor',
   templateUrl: './edit-predictor.component.html',
   styleUrl: './edit-predictor.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditPredictorComponent {
 
@@ -42,7 +45,6 @@ export class EditPredictorComponent {
   latestMeterReading: Date;
   firstMeterReading: Date;
 
-  @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();

@@ -19,7 +19,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-predictors-data-form',
   templateUrl: './predictors-data-form.component.html',
   styleUrl: './predictors-data-form.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class PredictorsDataFormComponent {
 
@@ -30,7 +33,6 @@ export class PredictorsDataFormComponent {
   isSaved: boolean = true;
   paramsSub: Subscription;
 
-  @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();

@@ -20,7 +20,10 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   selector: 'app-edit-meter',
   templateUrl: './edit-meter.component.html',
   styleUrls: ['./edit-meter.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditMeterComponent implements OnInit {
 
@@ -30,7 +33,6 @@ export class EditMeterComponent implements OnInit {
   addOrEdit: 'add' | 'edit';
   selectedFacility: IdbFacility;
 
-  @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();

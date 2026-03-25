@@ -32,7 +32,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-facility-predictor',
   templateUrl: './facility-predictor.component.html',
   styleUrl: './facility-predictor.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class FacilityPredictorComponent {
 
@@ -45,13 +48,11 @@ export class FacilityPredictorComponent {
 
   showDeletePredictor: boolean = false;
 
-  @HostListener('window:keydown', ['$event'])
   async handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
       if (!this.predictorForm.invalid && !this.predictorForm.pristine) {
         await this.saveChanges();
-        this.goToManagePredictors();
       }
     }
   }

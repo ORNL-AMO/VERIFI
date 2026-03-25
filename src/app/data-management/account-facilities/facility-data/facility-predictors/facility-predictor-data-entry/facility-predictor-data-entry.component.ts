@@ -17,7 +17,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-facility-predictor-data-entry',
   templateUrl: './facility-predictor-data-entry.component.html',
   styleUrl: './facility-predictor-data-entry.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class FacilityPredictorDataEntryComponent {
 
@@ -29,7 +32,6 @@ export class FacilityPredictorDataEntryComponent {
   isSaved: boolean = true;
   calculatingDegreeDays: boolean;
 
-  @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
