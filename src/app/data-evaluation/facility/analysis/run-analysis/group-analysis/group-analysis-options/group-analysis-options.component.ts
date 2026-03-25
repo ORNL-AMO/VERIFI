@@ -45,11 +45,11 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   dataEndYear: number;
 
   displayDataAdjustmentModal: boolean = false;
-  dataAdjustmentYearOptions: Array<number>;
+  dataAdjustmentYearOptions: Array<{ value: number, selected: boolean }>;
   deleteDataAdjustmentYear: number;
 
   displayBaselineAdjustmentModal: boolean = false;
-  baselineAdjustmentYearOptions: Array<number>;
+  baselineAdjustmentYearOptions: Array<{ value: number, selected: boolean }>;
   deleteBaselineAdjustmentYear: number;
 
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
@@ -207,17 +207,17 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   setAdjustmentYearOptions() {
     //baselineYearOptions doesn't include end year
-    let yearOptions: Array<number> = this.baselineYearOptions;
-    yearOptions.push(this.dataEndYear);
+    let yearOptions: Array<{ value: number, selected: boolean }> = this.baselineYearOptions.map(year => { return { value: year, selected: false } });
+    yearOptions.push({ value: this.dataEndYear, selected: false });
     let dataAdjustmentYears: Array<number> = this.group.dataAdjustments.map(adjustment => adjustment.year);
     this.dataAdjustmentYearOptions = yearOptions.filter(year => {
-      if (!dataAdjustmentYears.includes(year)) {
+      if (!dataAdjustmentYears.includes(year.value)) {
         return year;
       }
     });
     let baselineAdjustmentYears: Array<number> = this.group.baselineAdjustmentsV2.map(adjustment => adjustment.year);
     this.baselineAdjustmentYearOptions = yearOptions.filter(year => {
-      if (!baselineAdjustmentYears.includes(year)) {
+      if (!baselineAdjustmentYears.includes(year.value)) {
         return year;
       }
     });
@@ -232,8 +232,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.displayDataAdjustmentModal = false;
   }
 
-  async addDataAdjustments(year: number) {
-    this.group.dataAdjustments.push({ year: year, amount: 0 });
+  async addDataAdjustments() {
+    this.dataAdjustmentYearOptions.forEach(yearOption => {
+      if (yearOption.selected) {
+        this.group.dataAdjustments.push({ year: yearOption.value, amount: 0 });
+      }
+    });
     this.group.dataAdjustments.sort((a, b) => a.year - b.year);
     await this.saveItem();
     this.closeDataAdjustmentModal();
@@ -252,16 +256,20 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   //BASELINE ADJUSTMENT
-  openBaselineAdjustmentModal(){
+  openBaselineAdjustmentModal() {
     this.displayBaselineAdjustmentModal = true;
   }
 
   closeBaselineAdjustmentModal() {
     this.displayBaselineAdjustmentModal = false;
   }
-  
-  async addBaselineAdjustments(year: number) {
-    this.group.baselineAdjustmentsV2.push({ year: year, amount: 0 });
+
+  async addBaselineAdjustments() {
+    this.baselineAdjustmentYearOptions.forEach(yearOption => {
+      if (yearOption.selected) {
+        this.group.baselineAdjustmentsV2.push({ year: yearOption.value, amount: 0 });
+      }
+    });
     this.group.baselineAdjustmentsV2.sort((a, b) => a.year - b.year);
     await this.saveItem();
     this.closeBaselineAdjustmentModal();
@@ -277,5 +285,9 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       await this.saveItem();
     }
     this.deleteBaselineAdjustmentYear = undefined;
-  } 
+  }
+
+  toggleAdjustmentOption(yearOption: { value: number, selected: boolean }) {
+    yearOption.selected = !yearOption.selected;
+  }
 }

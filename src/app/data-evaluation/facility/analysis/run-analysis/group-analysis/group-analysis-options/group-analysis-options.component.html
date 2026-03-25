@@ -473,11 +473,23 @@
   <div class="popup-body d-flex justify-content-center flex-wrap">
     @for(year of dataAdjustmentYearOptions; track year) {
     <div class="p-1">
-      <button class="btn action-btn" (click)="addDataAdjustments(year)">
-        {{year | yearDisplay: facility.fiscalYear}}
+      <button class="btn action-btn" (click)="toggleAdjustmentOption(year)" [ngClass]="{'active': year.selected}">
+        @if(year.selected){
+        <span class="fa fa-circle-check"></span>
+        }@else{
+        <span class="fa fa-circle"></span>
+        }
+        {{year.value | yearDisplay: facility.fiscalYear}}
       </button>
     </div>
     }
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="closeDataAdjustmentModal()">Cancel</button>
+    <button class="btn btn-success" (click)="addDataAdjustments()">
+      <span class="fa fa-plus"></span>
+      Add
+    </button>
   </div>
 </div>
 <!--DELETE DATA ADJUSTMENT MODAL-->
@@ -502,11 +514,23 @@
   <div class="popup-body d-flex justify-content-center flex-wrap">
     @for(year of baselineAdjustmentYearOptions; track year) {
     <div class="p-1">
-      <button class="btn action-btn" (click)="addBaselineAdjustments(year)">
-        {{year | yearDisplay: facility.fiscalYear}}
+      <button class="btn action-btn" (click)="toggleAdjustmentOption(year)" [ngClass]="{'active': year.selected}">
+        @if(year.selected){
+        <span class="fa fa-circle-check"></span>
+        }@else{
+        <span class="fa fa-circle"></span>
+        }
+        {{year.value | yearDisplay: facility.fiscalYear}}
       </button>
     </div>
     }
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="closeBaselineAdjustmentModal()">Cancel</button>
+    <button class="btn btn-success" (click)="addBaselineAdjustments()">
+      <span class="fa fa-plus"></span>
+      Add
+    </button>
   </div>
 </div>
 <!--DELETE BASELINE ADJUSTMENT MODAL-->
