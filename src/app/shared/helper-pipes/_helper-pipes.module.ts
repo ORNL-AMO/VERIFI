@@ -36,6 +36,7 @@ import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 import { DisplayPredictorDataDatePipe } from './display-predictor-data-date.pipe';
 import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
 import { InvalidMetersPipe } from './invalid-meters.pipe';
+import { InvalidMeterDataPipe } from './invalid-meter-data.pipe';
 
 @NgModule({
   declarations: [
@@ -74,7 +75,8 @@ import { InvalidMetersPipe } from './invalid-meters.pipe';
     MeterGroupSourcePipe,
     DisplayPredictorDataDatePipe,
     DisplayMeterDataDatePipe,
-    InvalidMetersPipe
+    InvalidMetersPipe,
+    InvalidMeterDataPipe
   ],
   imports: [
     CommonModule
@@ -115,7 +117,8 @@ import { InvalidMetersPipe } from './invalid-meters.pipe';
     MeterGroupSourcePipe,
     DisplayPredictorDataDatePipe,
     DisplayMeterDataDatePipe,
-    InvalidMetersPipe
+    InvalidMetersPipe,
+    InvalidMeterDataPipe
   ]
 })
 export class HelperPipesModule { }

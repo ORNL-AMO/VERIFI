@@ -14,9 +14,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
-import { FormGroup } from '@angular/forms';
 import { EditMeterFormService } from '../../edit-meter-form/edit-meter-form.service';
-// import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter.pipe';
+import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter-data.pipe';
 
 @Component({
   selector: 'app-meter-data-table',
@@ -98,7 +97,10 @@ export class MeterDataTableComponent {
       this.hasNegativeReadings = this.meterData.findIndex(mData => {
         return mData.totalEnergyUse < 0
       }) != -1;
-      // this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
+      this.duplicateReadingDates = getHasDuplicateReadings(this.meterData).map(dateStr => {
+        let dateParts: Array<string> = dateStr.split('_');
+        return new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      });
       this.setHasCheckedItems();
       this.hasEstimatedReadings = this.meterData.findIndex(mData => {
         return mData.isEstimated == true;

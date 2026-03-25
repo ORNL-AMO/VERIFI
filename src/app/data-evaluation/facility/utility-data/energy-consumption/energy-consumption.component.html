@@ -14,9 +14,9 @@
         <a class="nav-link" routerLink="utility-meter/{{meter.guid}}" [routerLinkActive]="['active']">
           <i class="fa fa-file-invoice"></i>
           {{meter.name}}
-          <!-- @if (meter.guid | invalidMeter) {
-              <i class="fa fa-exclamation-circle"></i>
-            } -->
+          @if (meter.guid | invalidMeterData) {
+          <i class="fa fa-exclamation-circle"></i>
+          }
         </a>
       </li>
       }

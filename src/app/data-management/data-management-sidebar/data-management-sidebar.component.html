@@ -128,14 +128,14 @@
           </div>
           @for (meter of facilityMeters; track meter.guid) {
           @let hasInvalidMeterSettings = meter.guid | invalidMeter;
-
+          @let hasInvalidMeterReadings = meter.guid | invalidMeterData;
           <div class="ps-2 nav-item">
             <a class="nav-link" (click)="toggleMeterOpen(meter)"
               [ngClass]="{'active': url | sidebarItemActive: 'meter': meter.guid}">
               <span class="fa"
                 [ngClass]="{'fa-chevron-down': meter.sidebarOpen, 'fa-chevron-right': !meter.sidebarOpen}"></span>
               {{meter.name}}
-              @if (hasInvalidMeterSettings) {
+              @if (hasInvalidMeterSettings || hasInvalidMeterReadings) {
               <i class="fa fa-exclamation-circle"></i>
               }
             </a>
@@ -157,6 +157,9 @@
                 [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-data'"
                 [routerLinkActive]="['active']">
                 <span class="fa fa-table"></span> Meter Readings
+                @if(hasInvalidMeterReadings){
+                <i class="fa fa-exclamation-circle"></i>
+                }
               </a>
             </div>
             <div class="ps-2 nav-item">
