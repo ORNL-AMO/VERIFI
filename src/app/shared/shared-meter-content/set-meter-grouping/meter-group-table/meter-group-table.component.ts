@@ -114,6 +114,8 @@ export class MeterGroupTableComponent {
         this.lastTwelveMonthsEndDate = new Date(latestMonthWithData.year, latestMonthWithData.monthNumValue, 1);
         this.lastTwelveMonthsStartDate = new Date(this.lastTwelveMonthsEndDate);
         this.lastTwelveMonthsStartDate.setFullYear(this.lastTwelveMonthsStartDate.getFullYear() - 1);
+        // add one month to start date, currently 13 months of data, want 12
+        this.lastTwelveMonthsStartDate.setMonth(this.lastTwelveMonthsStartDate.getMonth() + 1);
         this.lastFullYearConsumptionTotal = this.getLastFullYearConsumptionTotal(allMonthlyData);
         this.lastTwelveMonthsConsumptionTotal = this.getLastTwelveMonthsConsumption(allMonthlyData);
         this.calanderizedMeterData.forEach(cMeter => {
