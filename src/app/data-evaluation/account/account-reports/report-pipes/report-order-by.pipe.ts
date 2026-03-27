@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import _ from 'lodash';
-import { AccountReportTypePipe } from './account-report-type.pipe';
+import { AccountReportTypePipe, getAccountReportType } from './account-report-type.pipe';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Pipe({
@@ -9,13 +9,11 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 })
 export class ReportOrderByPipe implements PipeTransform {
 
-  constructor(private accountReportTypePipe: AccountReportTypePipe) { }
+  transform(data: Array<IdbAccountReport>, orderDataBy: string, orderDirection: string, selectedReportType: string): Array<IdbAccountReport> {
 
-  transform(data: Array<{ isValid: boolean, report: IdbAccountReport }>, orderDataBy: string, orderDirection: string, selectedReportType: string): Array<{ isValid: boolean, report: IdbAccountReport }> {
-    
-    let filteredData = data;
+    let filteredData: Array<IdbAccountReport> = data;
     if (selectedReportType) {
-      filteredData = filteredData.filter(val => val.report.reportType === selectedReportType);
+      filteredData = filteredData.filter(report => report.reportType === selectedReportType);
     }
 
     if (!orderDirection) {
@@ -25,7 +23,7 @@ export class ReportOrderByPipe implements PipeTransform {
     if (orderDataBy === 'report.modifiedDate') {
       return _.orderBy(
         filteredData,
-        item => new Date(_.get(item, orderDataBy)),
+        (item: IdbAccountReport) => new Date(item.modifiedDate),
         orderDirection
       );
     }
@@ -33,9 +31,9 @@ export class ReportOrderByPipe implements PipeTransform {
     if (orderDataBy === 'report.reportYearOrEndYear') {
       return _.orderBy(
         filteredData,
-        item => {
-          const endYear = item.report.endYear;
-          const reportYear = item.report.reportYear;
+        (item: IdbAccountReport) => {
+          const endYear = item.endYear;
+          const reportYear = item.reportYear;
           return endYear !== undefined && endYear !== null ? Number(endYear) : Number(reportYear);
         },
         orderDirection
@@ -45,7 +43,7 @@ export class ReportOrderByPipe implements PipeTransform {
     if (orderDataBy === 'report.reportType') {
       return _.orderBy(
         filteredData,
-        item => this.accountReportTypePipe.transform(_.get(item, orderDataBy)),
+        (item: IdbAccountReport) => getAccountReportType(item.reportType),
         orderDirection
       );
     }

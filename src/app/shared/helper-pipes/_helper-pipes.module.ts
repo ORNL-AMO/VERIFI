@@ -41,6 +41,7 @@ import { InvalidGroupAnalysisPipe } from './validation-pipes/invalid-group-analy
 import { InvalidAccountAnalysisPipe } from './validation-pipes/invalid-account-analysis.pipe';
 import { InvalidAnalysisPipe } from './validation-pipes/invalid-analysis.pipe';
 import { AnalysisItemPipe } from './analysis-item.pipe';
+import { InvalidAccountReportPipe } from './validation-pipes/invalid-account-report.pipe';
 
 @NgModule({
   declarations: [
@@ -84,7 +85,8 @@ import { AnalysisItemPipe } from './analysis-item.pipe';
     InvalidGroupAnalysisPipe,
     InvalidAccountAnalysisPipe,
     InvalidAnalysisPipe,
-    AnalysisItemPipe
+    AnalysisItemPipe,
+    InvalidAccountReportPipe
   ],
   imports: [
     CommonModule
@@ -130,7 +132,8 @@ import { AnalysisItemPipe } from './analysis-item.pipe';
     InvalidGroupAnalysisPipe,
     InvalidAccountAnalysisPipe,
     InvalidAnalysisPipe,
-    AnalysisItemPipe
+    AnalysisItemPipe,
+    InvalidAccountReportPipe
   ]
 })
 export class HelperPipesModule { }

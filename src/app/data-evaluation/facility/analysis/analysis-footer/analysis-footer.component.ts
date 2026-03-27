@@ -4,7 +4,6 @@ import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisService } from 'src/app/data-evaluation/account/account-analysis/account-analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisGroup, AnalysisSetupErrors, GroupErrors } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -39,14 +38,11 @@ export class AnalysisFooterComponent implements OnInit {
 
   sidebarWidth: number;
   sidebarWidthSub: Subscription;
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
-    private accountAnalysisService: AccountAnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dataEvaluationService: DataEvaluationService,
     private calanderizationService: CalanderizationService,
@@ -75,10 +71,6 @@ export class AnalysisFooterComponent implements OnInit {
     this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
       this.sidebarWidth = sidebarWidth;
     });
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
-      this.calanderizedMeters = meters;
-      this.setDisableContinue();
-    });
   }
 
   ngOnDestroy() {
@@ -87,7 +79,6 @@ export class AnalysisFooterComponent implements OnInit {
     this.routerSub.unsubscribe();
     this.helpWidthSub.unsubscribe();
     this.sidebarWidthSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
   }
 
   goBack() {
@@ -177,13 +168,14 @@ export class AnalysisFooterComponent implements OnInit {
 
   setDisableContinue() {
     let setupErrors: AnalysisSetupErrors;
-    if (this.analysisItem && this.calanderizedMeters) {
+    if (this.analysisItem) {
       let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
       let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
-      setupErrors = getAnalysisSetupErrors(this.analysisItem, this.calanderizedMeters, facility, facilityPredictorData);
+      let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(facility.guid);
+      setupErrors = getAnalysisSetupErrors(this.analysisItem, calanderizedMeters, facility, facilityPredictorData);
     }
     if (this.router.url.includes('analysis-setup')) {
-      if (setupErrors && setupErrors.hasError) {
+      if (setupErrors && setupErrors.setupHasError) {
         this.disableContinue = true;
       } else {
         this.disableContinue = false;
@@ -203,15 +195,7 @@ export class AnalysisFooterComponent implements OnInit {
         }
       } else if (this.router.url.includes('model-selection') && setupErrors) {
         if (groupErrors.hasErrors) {
-          if (groupErrors.missingRegressionConstant ||
-            groupErrors.missingRegressionModelYear ||
-            groupErrors.missingRegressionModelStartMonth ||
-            groupErrors.missingRegressionStartYear ||
-            groupErrors.missingRegressionModelEndMonth ||
-            groupErrors.missingRegressionEndYear ||
-            groupErrors.invalidModelDateSelection ||
-            groupErrors.missingRegressionModelSelection ||
-            groupErrors.missingRegressionPredictorCoef) {
+          if (groupErrors.hasRegressionErrors) {
             this.disableContinue = true;
           } else {
             this.disableContinue = false;

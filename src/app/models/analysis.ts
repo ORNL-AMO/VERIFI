@@ -210,6 +210,7 @@ export interface SEPValidation {
 
 export interface AnalysisSetupErrors {
   hasError: boolean,
+  setupHasError: boolean,
   missingName: boolean,
   noGroups: boolean,
   groupsHaveErrors: boolean,

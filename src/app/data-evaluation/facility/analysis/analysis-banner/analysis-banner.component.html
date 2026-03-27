@@ -5,14 +5,14 @@
       <li class="nav-item">
         <a class="nav-link" routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">
           @let setupErrors = analysisItem | invalidAnalysis;
-          @if (setupErrors.hasError) {
+          @if (setupErrors.setupHasError) {
           <span class="fa fa-exclamation-circle"></span>
           }
           <i class="fa fa-gears"></i>
           Analysis Setup</a>
       </li>
       @for (group of analysisItem.groups; track group.idbGroupId) {
-      <li class="nav-item" [ngClass]="{'disabled': setupErrors.hasError}">
+      <li class="nav-item" [ngClass]="{'disabled': setupErrors.setupHasError}">
         <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
           [routerLinkActive]="['active']">
           @let groupErrors = group | invalidGroupAnalysis: analysisItem;

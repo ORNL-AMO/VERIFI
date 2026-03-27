@@ -34,11 +34,11 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
     let groupsHaveErrors: boolean = groupErrors.some(groupError => {
         return groupError && groupError.hasErrors;
     });
-
-    let hasError: boolean = (missingName || noGroups || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError || groupsHaveErrors);
-
+    let setupHasError: boolean = (missingName || noGroups || missingBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError);
+    let hasError: boolean = (setupHasError || groupsHaveErrors);
     return {
         hasError: hasError,
+        setupHasError: setupHasError,
         missingName: missingName,
         noGroups: noGroups,
         groupsHaveErrors: groupsHaveErrors,

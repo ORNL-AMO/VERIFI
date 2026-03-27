@@ -11,7 +11,7 @@ import { checkNumberValueValid } from "./validationHelpers";
 export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisItems: Array<IdbAnalysisItem>, calendarizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, facilityPredictorData: Array<IdbPredictorData>): AccountAnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let missingBaselineYear: boolean = checkNumberValueValid(analysisItem.baselineYear) == false;
-    let hasError: boolean = (missingName || missingBaselineYear);
+    let hasSetupError: boolean = (missingName || missingBaselineYear);
     let facilitiesSelectionsErrors: Array<boolean> = [];
     if (analysisItem.facilityAnalysisItems) {
         analysisItem.facilityAnalysisItems.forEach(item => {
@@ -35,7 +35,8 @@ export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisIt
     }
     let facilitiesSelectionsInvalid: boolean = facilitiesSelectionsErrors.includes(true);
     return {
-        hasError: hasError,
+        hasError: hasSetupError || facilitiesSelectionsInvalid,
+        hasSetupErrors: hasSetupError,
         missingName: missingName,
         missingBaselineYear: missingBaselineYear,
         facilitiesSelectionsInvalid: facilitiesSelectionsInvalid
