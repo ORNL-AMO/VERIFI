@@ -51,7 +51,7 @@
         <tbody>
           @for (item of linkedItemsList | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) *
           itemsPerPage): currentPageNumber * itemsPerPage; track item.analysisItem.guid) {
-          @let setupErrors = item.analysisItem | invalidAnalysis: calanderizedMeters;
+          @let setupErrors = item.analysisItem | invalidAnalysis;
           <tr>
             <td class="text-center">
               @if (item.analysisItem.analysisCategory == 'energy') {
@@ -299,8 +299,7 @@
   </div>
   <div class="popup-body">
     @if (analysisItemToView) {
-    <app-analysis-detail-item-card [analysisItem]="analysisItemToView"
-      [calanderizedMeters]="calanderizedMeters"></app-analysis-detail-item-card>
+    <app-analysis-detail-item-card [analysisItem]="analysisItemToView"></app-analysis-detail-item-card>
     }
   </div>
   <div class="saveCancel popup-footer text-end">

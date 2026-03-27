@@ -4,11 +4,9 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-group-analysis-report',
@@ -37,12 +35,8 @@ export class GroupAnalysisReportComponent {
   printSub: Subscription;
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
-
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(private analysisService: AnalysisService, private dataEvaluationService: DataEvaluationService,
-    private facilityReportsDbService: FacilityReportsDbService,
-    private calanderizationService: CalanderizationService
+    private facilityReportsDbService: FacilityReportsDbService
   ) {
   }
 
@@ -54,15 +48,10 @@ export class GroupAnalysisReportComponent {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
     });
-
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
-    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
     this.facilityReportSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
   }
 }

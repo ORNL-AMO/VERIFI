@@ -6,10 +6,12 @@
           [ngClass]="{'active': facilityItem.facilityId == selectedFacility.guid}">
           <i class="pe-2 fa"
             [ngClass]="{'fa-square-minus': !facilityItem.analysisItemId, 'fa-square-check': facilityItem.analysisItemId}"></i>
+          @if(facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
           @let analysisItem = facilityItem.analysisItemId | analysisItem;
-          @let analysisSetupErrors = analysisItem | invalidAnalysis: calanderizedMeters;
+          @let analysisSetupErrors = analysisItem | invalidAnalysis;
           @if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
           <span class="fa fa-exclamation-circle"></span>
+          }
           }
           {{facilityItem.facilityId | facilityName}}</a>
       </div>

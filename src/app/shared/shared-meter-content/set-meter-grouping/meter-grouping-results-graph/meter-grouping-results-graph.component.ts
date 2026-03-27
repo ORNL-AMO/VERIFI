@@ -78,6 +78,7 @@ export class MeterGroupingResultsGraphComponent {
     this.router.navigate(['../../edit-group/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
   }
 
+  //TODO: remove getCalanerizedMeterData
   setCalanderizedMeterData() {
     this.metersInGroup = this.utilityMeterDbService.getGroupMetersByGroupId(this.meterGroup.guid);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();

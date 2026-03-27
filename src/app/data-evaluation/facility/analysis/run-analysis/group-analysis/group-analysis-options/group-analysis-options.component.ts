@@ -12,8 +12,6 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -47,16 +45,11 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   displayBaselineAdjustmentModal: boolean = false;
   baselineAdjustmentYearOptions: Array<{ value: number, selected: boolean }>;
   deleteBaselineAdjustmentYear: number;
-
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private router: Router,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
@@ -65,23 +58,19 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.setShowInUseMessage();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
+      this.setDataEndYear();
+      this.setBaselineYearOptions();
+      this.setAdjustmentYearOptions();
       if (this.analysisItem.hasBanking && this.group.applyBanking) {
         this.setBankedGroup();
         this.setBankedAnalysisYearOptions();
         this.setHasModelsGenerated();
       }
     });
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
-      this.setDataEndYear();
-      this.setBaselineYearOptions();
-      this.setAdjustmentYearOptions();
-    });
   }
 
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
   }
 
   async saveItem() {
@@ -143,9 +132,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   setDataEndYear() {
-    let filteredCMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
-      return cMeter.meter.groupId == this.group.idbGroupId;
-    });
+    let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(this.group.idbGroupId)
     this.dataEndYear = getLatestYearWithData(filteredCMeters, [this.facility]);
   }
 

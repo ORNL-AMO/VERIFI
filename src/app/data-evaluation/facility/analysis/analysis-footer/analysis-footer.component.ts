@@ -75,7 +75,7 @@ export class AnalysisFooterComponent implements OnInit {
     this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
       this.sidebarWidth = sidebarWidth;
     });
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
       this.calanderizedMeters = meters;
       this.setDisableContinue();
     });

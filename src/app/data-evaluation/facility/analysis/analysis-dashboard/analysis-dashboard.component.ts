@@ -70,7 +70,7 @@ export class AnalysisDashboardComponent implements OnInit {
       this.facilityAnalysisItems = items;
     });
 
-    this.calanderizationSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
+    this.calanderizationSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
       this.calanderizedMeters = meters;
     });
   }

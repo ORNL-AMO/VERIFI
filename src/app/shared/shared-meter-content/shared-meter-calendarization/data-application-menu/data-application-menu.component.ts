@@ -12,6 +12,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
+import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from 'src/app/calculations/calanderization/calanderizationHelpers';
+import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-data-application-menu',
@@ -68,7 +70,7 @@ export class DataApplicationMenuComponent implements OnInit {
       } else {
         this.monthlyData = this.monthlyData.splice(0, 4);
       }
-      this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, this.utilityMeterData);
+      this.calanderizationSummary = this.getCalendarizationSummary(this.meter, this.utilityMeterData);
     }
   }
 
@@ -218,4 +220,209 @@ export class DataApplicationMenuComponent implements OnInit {
     let date: Date = new Date(ngbDate.year, ngbDate.month - 1, ngbDate.day);
     this.inspectDate(date);
   }
+
+  //CALANDERIZATION SUMMARIES USED BY CALANDERIZATION MODAL
+  getCalendarizationSummary(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
+    if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {
+      //used as default
+      return this.calanderizationSummaryFullMonth(meter, meterData);
+    } else if (meter.meterReadingDataApplication == 'backward') {
+      return this.calanderizationSummaryBackwards(meter, meterData);
+    }
+  }
+
+  calanderizationSummaryBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
+    let calanderizationSummary: Array<CalendarizationSummaryItem> = new Array();
+    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data).getTime() });
+    if (orderedMeterData.length > 3) {
+      let startDate: Date = getDateFromMeterData(orderedMeterData[0]);
+      startDate.setMonth(startDate.getMonth() + 1);
+
+      let endDate: Date = new Date(startDate.getFullYear(), startDate.getMonth() + 2);
+      while (startDate < endDate) {
+        let month: number = startDate.getMonth();
+        let year: number = startDate.getFullYear();
+        let previousMonthReading: IdbUtilityMeterData = getPreviousMonthsBill(month, year, orderedMeterData);
+        let currentMonthsReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(month, year, orderedMeterData);
+        let nextMonthsReading: IdbUtilityMeterData = getNextMonthsBill(month, year, orderedMeterData);
+        if (nextMonthsReading) {
+          if (currentMonthsReadings.length == 1) {
+            //1. current month has 1 bill
+            let currentMonthReading: IdbUtilityMeterData = currentMonthsReadings[0];
+            let calanderizationSummaryItem: CalendarizationSummaryItem = this.getCalanderizationSummaryItem(previousMonthReading, currentMonthReading, nextMonthsReading, year, month);
+            calanderizationSummary.push(calanderizationSummaryItem);
+
+          } else if (currentMonthsReadings.length > 1) {
+            //2. current month has multiple bills
+            let calanderizationSummaryItem: CalendarizationSummaryItem = {
+              calanderizedMonth: new Date(year, month),
+              monthReadingSummaries: [],
+              totalEnergyUse: 0
+            }
+            for (let readingIndex = 0; readingIndex < currentMonthsReadings.length; readingIndex++) {
+              let currentMonthReading: IdbUtilityMeterData;
+              let nextReading: IdbUtilityMeterData;
+              if (readingIndex == 0) {
+                currentMonthReading = currentMonthsReadings[readingIndex];
+                nextReading = currentMonthsReadings[readingIndex + 1];
+              } else if (readingIndex == (currentMonthsReadings.length - 1)) {
+                previousMonthReading = currentMonthsReadings[readingIndex - 1];
+                currentMonthReading = currentMonthsReadings[readingIndex];
+                nextReading = nextMonthsReading;
+              } else {
+                previousMonthReading = currentMonthsReadings[readingIndex - 1];
+                currentMonthReading = currentMonthsReadings[readingIndex];
+                nextReading = currentMonthsReadings[readingIndex + 1];
+              }
+              let tmpSummary: CalendarizationSummaryItem = this.getCalanderizationSummaryItem(previousMonthReading, currentMonthReading, nextReading, year, month);
+              calanderizationSummaryItem.monthReadingSummaries = calanderizationSummaryItem.monthReadingSummaries.concat(tmpSummary.monthReadingSummaries);
+            }
+            calanderizationSummaryItem.monthReadingSummaries = _.uniqWith(calanderizationSummaryItem.monthReadingSummaries, _.isEqual)
+            calanderizationSummaryItem.totalEnergyUse = _.sumBy(calanderizationSummaryItem.monthReadingSummaries, (summary) => { return summary.totalEnergyFromBill })
+            calanderizationSummary.push(calanderizationSummaryItem);
+          } else if (currentMonthsReadings.length == 0) {
+            //3. current month has 0 bills
+            //find number of days between next month and previous month
+            let previousBillDate: Date = getDateFromMeterData(previousMonthReading);
+            let nextBillDate: Date = getDateFromMeterData(nextMonthsReading);
+            let daysBetween: number = daysBetweenDates(previousBillDate, nextBillDate);
+            //find per day energy use
+            let energyUsePerDay: number = nextMonthsReading.totalEnergyUse / daysBetween;
+            //find number of days in current month
+            let currentMonthDate1: Date = new Date(year, month);
+            let currentMonthDate2: Date = new Date(year, month + 1);
+            let daysInMonth: number = daysBetweenDates(currentMonthDate1, currentMonthDate2);
+            //multiply per day by number of days in current month
+            let energyUseForMonth: number = energyUsePerDay * daysInMonth;
+            calanderizationSummary.push({
+              calanderizedMonth: new Date(year, month),
+              monthReadingSummaries: [{
+                readDate: getDateFromMeterData(nextMonthsReading),
+                daysInBill: daysBetween,
+                energyUsePerDay: energyUsePerDay,
+                daysApplied: daysInMonth,
+                totalEnergyFromBill: energyUseForMonth
+              }],
+              totalEnergyUse: energyUseForMonth
+            });
+          }
+        }
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
+    }
+    return calanderizationSummary;
+  }
+
+  getCalanderizationSummaryItem(previousReading: IdbUtilityMeterData, currentReading: IdbUtilityMeterData, nextReading: IdbUtilityMeterData, year: number, month: number): CalendarizationSummaryItem {
+    let currentDate: Date = getDateFromMeterData(currentReading);
+    let previousReadingDate: Date = getDateFromMeterData(previousReading);
+    //days from previous to current bill reading
+    let daysFromPrevious: number = daysBetweenDates(previousReadingDate, currentDate);
+    //find per day energy use
+    let energyUsePerDayCurrent: number = currentReading.totalEnergyUse / daysFromPrevious;
+    //apply number of days of current bill
+    let daysFromCurrent: number = currentDate.getDate();
+    if (currentDate.getMonth() == previousReadingDate.getMonth()) {
+      daysFromCurrent = currentDate.getDate() - previousReadingDate.getDate();
+    }
+    let energyUseForCurrent: number = energyUsePerDayCurrent * daysFromCurrent;
+
+    //days from next bill to current bill reading
+    let nextMonthsDate: Date = getDateFromMeterData(nextReading);
+    let daysFromNext: number = daysBetweenDates(currentDate, nextMonthsDate);
+    //find days per energy use
+    let energyUsePerDayNext: number = nextReading.totalEnergyUse / daysFromNext;
+    //apply number of days of current bill (days left of month or untill next reading)
+    if (nextMonthsDate.getMonth() != currentDate.getMonth()) {
+      //if next months reading need to find until beginning of that month
+      //otherwise just will be untill that day
+      nextMonthsDate.setMonth(currentDate.getMonth() + 1);
+      nextMonthsDate.setDate(0);
+      nextMonthsDate.setFullYear(currentDate.getFullYear());
+    }
+    let daysTillNext: number = daysBetweenDates(currentDate, nextMonthsDate);
+    let energyUseForMonthNext: number = energyUsePerDayNext * daysTillNext;
+
+    return {
+      calanderizedMonth: new Date(year, month),
+      monthReadingSummaries: [
+        {
+          readDate: getDateFromMeterData(currentReading),
+          daysInBill: daysFromPrevious,
+          energyUsePerDay: energyUsePerDayCurrent,
+          daysApplied: daysFromCurrent,
+          totalEnergyFromBill: energyUseForCurrent
+        },
+        {
+          readDate: getDateFromMeterData(nextReading),
+          daysInBill: daysFromNext,
+          energyUsePerDay: energyUsePerDayNext,
+          daysApplied: daysTillNext,
+          totalEnergyFromBill: energyUseForMonthNext
+        }
+      ],
+      totalEnergyUse: energyUseForCurrent + energyUseForMonthNext
+    };
+  }
+
+
+  calanderizationSummaryFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
+    let calanderizationSummary: Array<CalendarizationSummaryItem> = new Array();
+    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data) });
+    if (orderedMeterData.length != 0) {
+      let startDate: Date = getDateFromMeterData(orderedMeterData[0]);
+      startDate.setMonth(startDate.getMonth() + 1);
+
+      let endDate: Date = new Date(startDate.getFullYear(), startDate.getMonth() + 2);
+      while (startDate < endDate) {
+        let month: number = startDate.getMonth();
+        let year: number = startDate.getFullYear();
+        let monthReadingSummaries: Array<{
+          readDate: Date,
+          daysInBill: number,
+          energyUsePerDay: number,
+          daysApplied: number,
+          totalEnergyFromBill: number
+        }> = new Array();
+        let currentMonthsReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(month, year, orderedMeterData);
+        currentMonthsReadings.forEach(reading => {
+          let totalMonthEnergyConsumption: number = 0;
+          let totalMonthEnergyUse: number = 0;
+
+          //energy use
+          let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
+          if (isEnergyMeter) {
+            totalMonthEnergyUse = reading.totalEnergyUse;
+          }
+          //energy consumption (data input not as energy)
+          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
+          if (!isEnergyUnit) {
+            totalMonthEnergyConsumption = reading.totalVolume;
+          } else {
+            totalMonthEnergyConsumption = totalMonthEnergyUse;
+          }
+          let startOfMonth: Date = getDateFromMeterData(reading);
+          startOfMonth.setDate(1);
+          let nextMonth: Date = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 1);
+          let daysInMonth: number = daysBetweenDates(startOfMonth, nextMonth);
+          monthReadingSummaries.push({
+            readDate: getDateFromMeterData(reading),
+            energyUsePerDay: totalMonthEnergyConsumption / daysInMonth,
+            daysApplied: daysInMonth,
+            totalEnergyFromBill: totalMonthEnergyConsumption,
+            daysInBill: daysInMonth
+          })
+
+        })
+        calanderizationSummary.push({
+          calanderizedMonth: new Date(year, month),
+          monthReadingSummaries: monthReadingSummaries,
+          totalEnergyUse: _.sumBy(monthReadingSummaries, 'totalEnergyFromBill')
+        });
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
+    }
+    return calanderizationSummary;
+  }
+
 }

@@ -11,7 +11,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, ModelingReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { FacilityReportsService } from '../../facility-reports.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-modeling-report-setup',
@@ -31,7 +30,6 @@ export class FacilityModelingReportSetupComponent {
   errorMessage: string;
   errorMessageSub: Subscription;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
   calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
@@ -55,8 +53,7 @@ export class FacilityModelingReportSetupComponent {
     });
     this.setSelectedAnalysisItem(true);
 
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
-      this.calanderizedMeters = meters;
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
       this.setYearOptions();
     });
 

@@ -1,6 +1,17 @@
 import { Component, HostListener } from '@angular/core';
 import { DataEvaluationService } from './data-evaluation.service';
 import { Subscription } from 'rxjs';
+import { CalanderizationService } from '../shared/helper-services/calanderization.service';
+import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
+import { CalanderizedMeter } from '../models/calanderization';
+import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
+import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
+import { AccountdbService } from '../indexedDB/account-db.service';
+import { FacilitydbService } from '../indexedDB/facility-db.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 
 @Component({
   selector: 'app-data-evaluation',
@@ -19,8 +30,15 @@ export class DataEvaluationComponent {
   sidebarCollapsed: boolean = false;
   print: boolean = false;
   printSub: Subscription;
+
+  meterDataSub: Subscription;
   constructor(
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private calanderizationService: CalanderizationService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private accountDbService: AccountdbService,
+    private facilityDbService: FacilitydbService
   ) {
 
   }
@@ -31,6 +49,11 @@ export class DataEvaluationComponent {
     this.setContentWidth();
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
+    });
+    this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(meterData => {
+      if (meterData) {
+        this.setCalanderizedMeterData(meterData);
+      }
     });
   }
 
@@ -118,5 +141,14 @@ export class DataEvaluationComponent {
   @HostListener('window:resize', ['$event'])
   onResize() {
     this.setContentWidth();
+  }
+
+  setCalanderizedMeterData(meterData: Array<IdbUtilityMeterData>) {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    console.log('DATA EVALUATION CALANDERIZATION')
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, undefined, [], [], accountFacilities, account.assessmentReportVersion, []);
+    this.calanderizationService.calanderizedMeters.next(calanderizedMeters);
   }
 }

@@ -9,8 +9,6 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-select-facility-analysis-items',
@@ -26,10 +24,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
   showInUseMessage: boolean;
   facilities: Array<IdbFacility>;
   facilitiesSub: Subscription;
-
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
-
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   constructor(private facilityDbService: FacilitydbService,
@@ -37,8 +31,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private accountAnalysisService: AccountAnalysisService,
-    private accountReportDbService: AccountReportDbService,
-    private calanderizationService: CalanderizationService) { }
+    private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
@@ -48,10 +41,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
     this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
       this.facilities = facilities;
-    });
-
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
     });
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
@@ -71,12 +60,12 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
   ngOnDestroy() {
     this.facilitiesSub.unsubscribe();
     this.selectedAnalysisItemSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
   }
 
   selectFacility(facilityId: string) {
-    this.selectedFacility = this.facilities.find(facility => facility.guid === facilityId);
+    let selectedFacility: IdbFacility = this.facilities.find(facility => facility.guid === facilityId);
+    this.facilityDbService.selectedFacility.next(selectedFacility);
   }
 
   setFacilityAnlaysisItems() {

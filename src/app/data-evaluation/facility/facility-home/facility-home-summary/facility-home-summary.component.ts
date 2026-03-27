@@ -62,7 +62,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
       this.facility = val;
       this.setFacilityStatus();
     });
-    this.calanderizedMetersSub = this.calanderizatonService.calanderizedMeterData.subscribe(calanderizedMeters => {
+    this.calanderizedMetersSub = this.calanderizatonService.calanderizedMeters.subscribe(calanderizedMeters => {
       this.calanderizedMeters = calanderizedMeters;
       this.setEnergyAnalysisHasErrors();
       this.setWaterAnalysisHasErrors();

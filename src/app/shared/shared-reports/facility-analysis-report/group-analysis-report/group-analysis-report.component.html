@@ -1,4 +1,4 @@
-@let groupErrors = groupSummary.group | invalidGroupAnalysis: analysisItem: calanderizedMeters;
+@let groupErrors = groupSummary.group | invalidGroupAnalysis: analysisItem;
 <!--MODEL DETAILS-->
 @if (analysisReportSettings.groupModelDetails && groupItem.group.analysisType == 'regression') {
 <div class="report print-break-before" [ngClass]="{'print': print}">

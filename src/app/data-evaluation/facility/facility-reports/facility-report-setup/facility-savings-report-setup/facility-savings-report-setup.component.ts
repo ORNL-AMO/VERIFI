@@ -19,7 +19,6 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-savings-report-setup',
@@ -50,7 +49,6 @@ export class FacilitySavingsReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   hasDataChanged: boolean = false;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
   calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
@@ -72,8 +70,7 @@ export class FacilitySavingsReportSetupComponent {
       this.analysisTableColumns = this.reportSettings.analysisTableColumns;
     });
 
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
-      this.calanderizedMeters = meters;
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
       this.setYearOptions();
     });
 

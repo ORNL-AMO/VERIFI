@@ -78,7 +78,6 @@ export class AnalysisDetailsTableComponent {
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
   calanderizationSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private router: Router,
     private dbChangesService: DbChangesService,
@@ -115,9 +114,7 @@ export class AnalysisDetailsTableComponent {
       this.itemsPerPage = val;
     });
 
-    this.calanderizationSub = this.calendarizationService.calanderizedMeterData.subscribe(meters => {
-      this.calanderizedMeters = meters;
-      //TODO: PASS CALANDERIZED METERS TO GET YEAR OPTIONS
+    this.calanderizationSub = this.calendarizationService.calanderizedMeters.subscribe(meters => {
       this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', true, this.selectedFacility.guid);
       this.yearOptionsWater = this.calendarizationService.getYearOptions('water', true, this.selectedFacility.guid);
     });

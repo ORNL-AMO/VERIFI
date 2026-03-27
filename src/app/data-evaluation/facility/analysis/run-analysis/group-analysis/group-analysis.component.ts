@@ -6,8 +6,6 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { AnalysisService } from '../../analysis.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-group-analysis',
@@ -27,12 +25,9 @@ export class GroupAnalysisComponent implements OnInit {
   showBanked: boolean;
   routerSub: Subscription;
   hideLabel: boolean = false;
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private calanderizationService: CalanderizationService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
@@ -56,17 +51,12 @@ export class GroupAnalysisComponent implements OnInit {
       }
     });
     this.setLabel(this.router.url);
-
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
-    });
   }
 
   ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.selectedGroupSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
   }
 
   setSelectedGroup() {

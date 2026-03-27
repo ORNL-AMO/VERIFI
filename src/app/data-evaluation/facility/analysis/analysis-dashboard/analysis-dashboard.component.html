@@ -93,8 +93,7 @@
             @for (item of selectedAnalysisItems; track item) {
             <div class="flex-fill min-width-0">
                 <h4 class="fw-bold d-flex justify-content-center mb-4">{{item.name}}</h4>
-                <app-analysis-detail-item-card [analysisItem]="item"
-                    [calanderizedMeters]="calanderizedMeters"></app-analysis-detail-item-card>
+                <app-analysis-detail-item-card [analysisItem]="item"></app-analysis-detail-item-card>
             </div>
             }
         </div>

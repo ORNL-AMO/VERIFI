@@ -8,7 +8,7 @@
             [error]="calculatingEnergy == 'error'">
           </app-calculating-spinner>
         }
-        @let setupErrors = latestEnergyAnalysisItem | invalidAccountAnalysis: calanderizedMeters;
+        @let setupErrors = latestEnergyAnalysisItem | invalidAccountAnalysis;
         @if (setupErrors.hasError) {
           <div class="alert alert-danger">
             Errors found in selected analysis.

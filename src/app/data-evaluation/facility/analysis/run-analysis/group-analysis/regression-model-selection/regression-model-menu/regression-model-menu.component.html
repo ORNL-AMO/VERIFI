@@ -82,7 +82,7 @@
         </div>
         <div class="d-flex flex-column justify-content-center align-items-center">
           <div class="p-0">
-            @let groupErrors = group | invalidGroupAnalysis: analysisItem: calendarizedMeterData;
+            @let groupErrors = group | invalidGroupAnalysis: analysisItem;
             <button class="mt-0 btn action-btn" [disabled]="groupErrors.hasInvalidUserDefinedModel"
               (click)="generateUserDefinedModel()">Evaluate Model</button>
           </div>

@@ -108,7 +108,7 @@
           {{baselineYearWarning}}
         </div>
         }
-        @let setupErrors = analysisItem | invalidAnalysis: calanderizedMeters;
+        @let setupErrors = analysisItem | invalidAnalysis;
         @if (setupErrors.baselineYearAfterMeterDataEnd) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.

@@ -61,7 +61,7 @@
 
             </td>
             <td>
-              @let setupErrors = item | invalidAccountAnalysis: calanderizedMeters;
+              @let setupErrors = item | invalidAccountAnalysis;
               <a (click)="selectAnalysisItem(item, setupErrors)">
                 @if (setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid) {
                 <span class="me-2 fa fa-exclamation-circle error-icon"></span>

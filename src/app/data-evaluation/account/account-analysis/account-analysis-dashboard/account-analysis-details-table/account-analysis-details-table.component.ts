@@ -8,7 +8,6 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -45,17 +44,15 @@ export class AccountAnalysisDetailsTableComponent {
 
   selectedAccountSub: Subscription;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private calendarizationService: CalanderizationService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
     private router: Router,
     private accountReportDbService: AccountReportDbService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService
   ) { }
 
   ngOnInit(): void {
@@ -69,8 +66,8 @@ export class AccountAnalysisDetailsTableComponent {
       this.filterAnalysisItems();
     });
 
-    this.energyYearOptions = this.calendarizationService.getYearOptions('energy', true);
-    this.waterYearOptions = this.calendarizationService.getYearOptions('water', true);
+    this.energyYearOptions = this.calanderizationService.getYearOptions('energy', true);
+    this.waterYearOptions = this.calanderizationService.getYearOptions('water', true);
     this.yearOptions = _.uniq([...this.energyYearOptions, ...this.waterYearOptions]);
     this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
 
@@ -84,17 +81,12 @@ export class AccountAnalysisDetailsTableComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
-
-    this.calanderizedMetersSub = this.calendarizationService.calanderizedMeterData.subscribe(val => {
-      this.calanderizedMeters = val;
-    });
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
   }
 
   setOrderDataField(str: string) {

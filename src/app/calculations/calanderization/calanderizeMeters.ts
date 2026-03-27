@@ -22,6 +22,7 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
     facilities: Array<IdbFacility>,
     assessmentReportVersion: AssessmentReportVersion,
     customGWPs: Array<IdbCustomGWP>): Array<CalanderizedMeter> {
+    console.log('....CALANDERIZING METERS....')
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
         let energyIsSource: boolean = accountOrFacility.energyIsSource;
@@ -132,7 +133,7 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
     //remove first and last month for iteration since they will be used as previous and next month for calanderization
     uniqYearMonths.shift();
     uniqYearMonths.pop();
-    
+
     if (meterData.length > 3) {
         for (let uniqMonth of uniqYearMonths) {
 

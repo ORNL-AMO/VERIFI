@@ -9,7 +9,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom } from 'rxjs';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -32,8 +31,6 @@ export class SelectItemTableComponent implements OnInit {
   selectedAnalysisItem: IdbAccountAnalysisItem;
   @Input()
   facilityAnalysisItems: Array<IdbAnalysisItem>;
-  @Input()
-  calanderizedMeters: Array<CalanderizedMeter>;
 
   selectedFacilityItemId: string;
   itemToEdit: IdbAnalysisItem;
@@ -46,7 +43,6 @@ export class SelectItemTableComponent implements OnInit {
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private analysisService: AnalysisService,
-    private analysisValidationService: AnalysisValidationService,
     private sharedDataService: SharedDataService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictorDbService) { }

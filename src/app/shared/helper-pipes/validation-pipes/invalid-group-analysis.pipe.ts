@@ -5,18 +5,23 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getGroupErrors } from '../../validation/analysisValidation';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { CalanderizationService } from '../../helper-services/calanderization.service';
 
 @Pipe({
   name: 'invalidGroupAnalysis',
   standalone: false,
+  pure: false
 })
 export class InvalidGroupAnalysisPipe implements PipeTransform {
 
-  constructor(private predictorDataDbService: PredictorDataDbService) { }
+  constructor(private predictorDataDbService: PredictorDataDbService,
+    private calanderizationService: CalanderizationService
+  ) { }
 
-  transform(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>): GroupErrors {
+  transform(group: AnalysisGroup, analysisItem: IdbAnalysisItem): GroupErrors {
     let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(analysisItem.facilityId);
-    return  getGroupErrors(group, analysisItem, calendarizedMeters, facilityPredictorData);
+    let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(group.idbGroupId);
+    return getGroupErrors(group, analysisItem, calendarizedMeters, facilityPredictorData);
   }
 
 }

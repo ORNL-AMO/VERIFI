@@ -10,7 +10,8 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let noGroups: boolean = analysisItem.groups.length == 0;
     let missingBaselineYear: boolean = checkNumberValueValid(analysisItem.baselineYear) == false;
-    let yearOptions: Array<number> = getYearsWithFullData(calendarizedMeters, facility);
+    let facilityCalanderizedMeters: Array<CalanderizedMeter> = calendarizedMeters.filter(cMeter => cMeter.meter.facilityId == analysisItem.facilityId);
+    let yearOptions: Array<number> = getYearsWithFullData(facilityCalanderizedMeters, facility);
     let baselineYearAfterMeterDataEnd: boolean = false;
     let baselineYearBeforeMeterDataStart: boolean = false;
     if (yearOptions && yearOptions.length > 0) {
@@ -28,7 +29,7 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
         bankingError = analysisItem.bankedAnalysisItemId == undefined;
     }
     let groupErrors: Array<GroupErrors> = analysisItem.groups.map(group => {
-        return getGroupErrors(group, analysisItem, calendarizedMeters, facilityPredictorData);
+        return getGroupErrors(group, analysisItem, facilityCalanderizedMeters, facilityPredictorData);
     });
     let groupsHaveErrors: boolean = groupErrors.some(groupError => {
         return groupError && groupError.hasErrors;

@@ -8,7 +8,6 @@ import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-account-water-card',
@@ -39,8 +38,7 @@ export class AccountWaterCardComponent {
   calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private accountHomeService: AccountHomeService,
     private accountDbService: AccountdbService,
-    private sharedDataService: SharedDataService,
-    private calanderizationService: CalanderizationService) {
+    private sharedDataService: SharedDataService) {
   }
 
   ngOnInit() {
@@ -70,9 +68,6 @@ export class AccountWaterCardComponent {
     this.annualWaterAnalysisSummarySub = this.accountHomeService.annualWaterAnalysisSummary.subscribe(val => {
       this.annualWaterAnalysisSummary = val;
     });
-    this.calanderizationSub = this.calanderizationService.calanderizedMeterData.subscribe(val => {
-      this.calanderizedMeters = val;
-    });
   }
 
   ngOnDestroy() {
@@ -81,7 +76,6 @@ export class AccountWaterCardComponent {
     this.selectedAccountSub.unsubscribe();
     this.annualWaterAnalysisSummarySub.unsubscribe();
     this.calculatingOverviewSub.unsubscribe();
-    this.calanderizationSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
   }
 

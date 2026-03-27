@@ -48,9 +48,6 @@ export class RegressionModelSelectionComponent implements OnInit {
     }
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
-
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -97,17 +94,11 @@ export class RegressionModelSelectionComponent implements OnInit {
       }
     });
     this.setShowInUseMessage();
-
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
-      this.setYears();
-    });
   }
 
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
     this.generatedModelsPerGroupSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
 
@@ -220,10 +211,8 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   setYears() {
-    if (this.calanderizedMeters && this.selectedGroup) {
-      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
-        return cMeter.meter.groupId == this.selectedGroup.idbGroupId;
-      });
+    if (this.selectedGroup) {
+      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(this.selectedGroup.idbGroupId);
       let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeters, this.selectedFacility);
       fullYearsWithData = fullYearsWithData.filter(year => {
         return year >= this.analysisItem.baselineYear;

@@ -10,13 +10,12 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -43,12 +42,10 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItemSub: Subscription;
   isFormChange: boolean = false;
   account: IdbAccount;
-  calanderizedMeters: Array<CalanderizedMeter>;
   calanderizedMetersSub: Subscription;
 
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
-    private analysisValidationService: AnalysisValidationService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private calanderizationService: CalanderizationService,
@@ -68,9 +65,7 @@ export class AnalysisSetupComponent implements OnInit {
         this.isFormChange = false;
       }
     });
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
-      //TODO: use calanderized meters for year options
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
       this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
     });
   }

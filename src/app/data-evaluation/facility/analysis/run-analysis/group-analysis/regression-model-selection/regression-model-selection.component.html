@@ -10,7 +10,7 @@
 }
 
 @if (!selectedInspectModel) {
-@let groupErrors = selectedGroup | invalidGroupAnalysis: analysisItem: calanderizedMeters;
+@let groupErrors = selectedGroup | invalidGroupAnalysis: analysisItem;
 @if (groupErrors?.hasInvalidRegressionModel) {
 <div class="alert alert-warning w-100 text-center">
   The selected model is invalid.

@@ -9,22 +9,26 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getAccountAnalysisSetupErrors } from '../../validation/accountAnalysisValidation';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
+import { CalanderizationService } from '../../helper-services/calanderization.service';
 
 @Pipe({
   name: 'invalidAccountAnalysis',
   standalone: false,
+  pure: false
 })
 export class InvalidAccountAnalysisPipe implements PipeTransform {
 
   constructor(private predictorDataDbService: PredictorDataDbService,
     private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService
+    private facilityDbService: FacilitydbService,
+    private calanderizationService: CalanderizationService
   ) { }
 
-  transform(analysisItem: IdbAccountAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>): AccountAnalysisSetupErrors {
+  transform(analysisItem: IdbAccountAnalysisItem): AccountAnalysisSetupErrors {
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let allAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
     return getAccountAnalysisSetupErrors(analysisItem, allAnalysisItems, calendarizedMeters, facilities, accountPredictorData);
   }
 

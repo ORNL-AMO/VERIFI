@@ -92,6 +92,8 @@ export class MeterGroupTableComponent {
   }
 
   setCalanderizedMeterData() {
+    //TODO: don't call calanderizeMeterData here unless needed.
+    
     if (!this.calanderizedMeterData && this.meters && this.meterData) {
       this.energyUnit = this.facility.energyUnit;
       this.consumptionUnit = this.facility.volumeLiquidUnit;

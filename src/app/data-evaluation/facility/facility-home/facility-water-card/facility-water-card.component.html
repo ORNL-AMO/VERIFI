@@ -7,7 +7,7 @@
         <app-calculating-spinner [message]="'Calculating Water...'" [error]="calculatingWater == 'error'">
         </app-calculating-spinner>
         }
-        @let setupErrors = latestWaterAnalysisItem | invalidAnalysis: calanderizedMeters;
+        @let setupErrors = latestWaterAnalysisItem | invalidAnalysis;
         @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
         <div class="alert alert-danger">
           Errors found in selected analysis.

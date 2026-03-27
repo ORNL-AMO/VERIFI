@@ -2,9 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -26,12 +24,8 @@ export class AccountAnalysisBannerComponent implements OnInit {
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   accountAnalysisItemsSub: Subscription;
   showDropdown: boolean = false;
-
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
   constructor(private router: Router,
-    private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private calanderizationService: CalanderizationService) { }
+    private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe(event => {
@@ -52,10 +46,6 @@ export class AccountAnalysisBannerComponent implements OnInit {
     this.accountAnalysisItemsSub = this.accountAnalysisDbService.accountAnalysisItems.subscribe(items => {
       this.accountAnalysisItems = items;
     });
-
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(val => {
-      this.calanderizedMeters = val;
-    });
   }
 
   ngOnDestroy() {
@@ -63,7 +53,6 @@ export class AccountAnalysisBannerComponent implements OnInit {
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.accountAnalysisItemsSub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
   }
 
   setInDashboard(url: string) {

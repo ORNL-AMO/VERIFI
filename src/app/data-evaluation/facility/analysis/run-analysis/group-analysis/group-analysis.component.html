@@ -1,5 +1,5 @@
 @if (selectedGroup) {
-@let groupErrors = selectedGroup | invalidGroupAnalysis: analysisItem: calanderizedMeters;
+@let groupErrors = selectedGroup | invalidGroupAnalysis: analysisItem;
 <div class="banner p-0">
   <ul class="nav nav-tabs">
     <li class="nav-item" [ngClass]="{'error': groupErrors.hasSetupErrors}"><a class="nav-link" routerLink="options"

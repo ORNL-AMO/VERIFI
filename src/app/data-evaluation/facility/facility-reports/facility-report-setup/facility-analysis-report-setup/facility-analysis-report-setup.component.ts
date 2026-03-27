@@ -46,8 +46,6 @@ export class FacilityAnalysisReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
 
   hasDataChanged: boolean = false;
-
-  calanderizedMeters: Array<CalanderizedMeter>;
   calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
@@ -76,8 +74,7 @@ export class FacilityAnalysisReportSetupComponent {
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
       this.setYearOptions();
     });
 

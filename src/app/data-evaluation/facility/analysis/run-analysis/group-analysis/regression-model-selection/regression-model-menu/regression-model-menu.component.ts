@@ -12,7 +12,6 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -57,8 +56,8 @@ export class RegressionModelMenuComponent implements OnInit {
   showModelComparison: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
 
-  calendarizedMeterData: Array<CalanderizedMeter>;
-  calanderizedMeterDataSub: Subscription;
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -93,20 +92,19 @@ export class RegressionModelMenuComponent implements OnInit {
     });
     this.setUserDefinedDefaultData();
     this.checkDateValidity();
-    this.calanderizedMeterDataSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
-      this.calendarizedMeterData = calanderizedMeters;
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = this.calanderizationService.getCalanderizerMetersByGroupId(this.group.idbGroupId);
       this.setYears();
     });
   }
 
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
-    this.calanderizedMeterDataSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   setYears() {
-    let filteredCMeterData: Array<CalanderizedMeter> = this.calendarizedMeterData.filter(meter => meter.meter.groupId == this.group.idbGroupId);
-    let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeterData, this.selectedFacility);
+    let fullYearsWithData: Array<number> = getYearsWithFullData(this.calanderizedMeters, this.selectedFacility);
     this.yearOptions = fullYearsWithData.filter(year => {
       return year >= this.analysisItem.baselineYear;
     })
@@ -363,7 +361,7 @@ export class RegressionModelMenuComponent implements OnInit {
     let year: number = this.group.regressionStartYear;
     const endMonth: number = this.group.regressionModelEndMonth;
     const endYear: number = this.group.regressionEndYear;
-    let monthlyData: Array<MonthlyData> = this.calendarizedMeterData.flatMap(meter => {
+    let monthlyData: Array<MonthlyData> = this.calanderizedMeters.flatMap(meter => {
       return meter.monthlyData;
     });
     while (year < endYear || (year === endYear && month <= endMonth)) {
