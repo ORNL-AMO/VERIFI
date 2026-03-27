@@ -15,7 +15,8 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -39,6 +40,9 @@ export class AnalysisDashboardComponent implements OnInit {
   selectedAnalysisItems: Array<IdbAnalysisItem> = [];
   showComparisonDetails: boolean = false;
   analysisItemsSub: Subscription;
+
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizationSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -46,7 +50,7 @@ export class AnalysisDashboardComponent implements OnInit {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private analyticsService: AnalyticsService,
     private predictorDbService: PredictorDbService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {
@@ -65,12 +69,17 @@ export class AnalysisDashboardComponent implements OnInit {
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.facilityAnalysisItems = items;
     });
+
+    this.calanderizationSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
+      this.calanderizedMeters = meters;
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
     this.routerSub.unsubscribe();
+    this.calanderizationSub.unsubscribe();
   }
 
   async createAnalysis() {
@@ -78,10 +87,6 @@ export class AnalysisDashboardComponent implements OnInit {
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
-    newIdbItem.groups.forEach(group => {
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
-    });
-    newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     await this.dbChangesService.setAnalysisItems(account, false, this.selectedFacility);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)

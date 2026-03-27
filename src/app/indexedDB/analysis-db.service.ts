@@ -142,7 +142,6 @@ export class AnalysisDbService {
     });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
-      let hasGroupErrors: boolean = false;
       analysisItem.groups.forEach(group => {
         group.predictorVariables = group.predictorVariables.filter(analysisPredictor => {
           return analysisPredictor.id != predictorToDelete.guid
@@ -176,12 +175,7 @@ export class AnalysisDbService {
             }
           }
         }
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
-        if (group.groupErrors.hasErrors) {
-          hasGroupErrors = true;
-        }
       });
-      analysisItem.setupErrors.groupsHaveErrors = hasGroupErrors;
       await firstValueFrom(this.updateWithObservable(analysisItem));
     };
   }

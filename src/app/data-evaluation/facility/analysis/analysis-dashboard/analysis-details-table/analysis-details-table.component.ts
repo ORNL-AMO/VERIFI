@@ -18,6 +18,7 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisGroupItem } from '../../analysis.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-analysis-details-table',
@@ -77,6 +78,8 @@ export class AnalysisDetailsTableComponent {
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
 
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizationSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private router: Router,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
@@ -90,9 +93,7 @@ export class AnalysisDetailsTableComponent {
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', true, this.selectedFacility.guid);
-      this.yearOptionsWater = this.calendarizationService.getYearOptions('water', true, this.selectedFacility.guid);
-     
+
       if (this.yearOptionsEnergy) {
         this.baselineYearErrorMinEnergy = this.yearOptionsEnergy[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
         this.baselineYearErrorMaxEnergy = this.yearOptionsEnergy[this.yearOptionsEnergy.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
@@ -113,20 +114,24 @@ export class AnalysisDetailsTableComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
+
+    this.calanderizationSub = this.calendarizationService.calanderizedMeterData.subscribe(meters => {
+      this.calanderizedMeters = meters;
+      //TODO: PASS CALANDERIZED METERS TO GET YEAR OPTIONS
+      this.yearOptionsEnergy = this.calendarizationService.getYearOptions('energy', true, this.selectedFacility.guid);
+      this.yearOptionsWater = this.calendarizationService.getYearOptions('water', true, this.selectedFacility.guid);
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.calanderizationSub.unsubscribe();
   }
 
   selectAnalysisItem(analysisItem: IdbAnalysisItem) {
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
-    if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis/facility-analysis');
-    }
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
   }
 
   async setUseItem(analysisItem: IdbAnalysisItem) {
@@ -358,21 +363,13 @@ export class AnalysisDetailsTableComponent {
   goToAccountAnalysis(analysisGuid: string) {
     let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisGuid);
     this.accountAnalysisDbService.selectedAnalysisItem.next(accountAnalysisItem);
-    if (accountAnalysisItem.setupErrors.hasError || accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/results');
-    }
+    this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 
   goToFacilityAnalysis(analysisGuid: string) {
     let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
     this.analysisDbService.selectedAnalysisItem.next(bankedAnalysisItem);
-    if (bankedAnalysisItem.setupErrors.hasError || bankedAnalysisItem.setupErrors.groupsHaveErrors) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis/facility-analysis');
-    }
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
   }
 
   goToSettings() {

@@ -17,6 +17,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-analysis-report-setup',
@@ -45,6 +46,9 @@ export class FacilityAnalysisReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
 
   hasDataChanged: boolean = false;
+
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
@@ -69,15 +73,20 @@ export class FacilityAnalysisReportSetupComponent {
       this.applyFilters();
     });
     this.setSelectedAnalysisItem(true);
-    this.setYearOptions();
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = calanderizedMeters;
+      this.setYearOptions();
+    });
+
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   checkModelData() {
@@ -303,6 +312,7 @@ export class FacilityAnalysisReportSetupComponent {
   }
 
   setYearOptions() {
+    //TODO use calanderized meters
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;

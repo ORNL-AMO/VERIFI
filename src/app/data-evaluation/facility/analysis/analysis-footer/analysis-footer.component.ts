@@ -6,11 +6,16 @@ import { AnalysisService } from '../analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountAnalysisService } from 'src/app/data-evaluation/account/account-analysis/account-analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisGroup } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisSetupErrors, GroupErrors } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { getAnalysisSetupErrors } from 'src/app/shared/validation/analysisValidation';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-analysis-footer',
@@ -34,6 +39,8 @@ export class AnalysisFooterComponent implements OnInit {
 
   sidebarWidth: number;
   sidebarWidthSub: Subscription;
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -41,7 +48,9 @@ export class AnalysisFooterComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisService: AccountAnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private dataEvaluationService: DataEvaluationService) { }
+    private dataEvaluationService: DataEvaluationService,
+    private calanderizationService: CalanderizationService,
+    private predictorDataDbService: PredictorDataDbService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
@@ -66,6 +75,10 @@ export class AnalysisFooterComponent implements OnInit {
     this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
       this.sidebarWidth = sidebarWidth;
     });
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
+      this.calanderizedMeters = meters;
+      this.setDisableContinue();
+    });
   }
 
   ngOnDestroy() {
@@ -74,6 +87,7 @@ export class AnalysisFooterComponent implements OnInit {
     this.routerSub.unsubscribe();
     this.helpWidthSub.unsubscribe();
     this.sidebarWidthSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   goBack() {
@@ -101,9 +115,9 @@ export class AnalysisFooterComponent implements OnInit {
       } else if (this.router.url.includes('options')) {
         let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
         if (groupIndex > 0) {
-          if( this.analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
-          }else{
+          if (this.analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
+            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
+          } else {
             this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
           }
         } else {
@@ -154,7 +168,7 @@ export class AnalysisFooterComponent implements OnInit {
 
   goBackToAccount() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.accountAnalysisService.selectedFacility.next(selectedFacility);
+    // this.accountAnalysisService.selectedFacility.next(selectedFacility);
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.analysisService.accountAnalysisItem.guid })
     this.accountAnalysisDbService.selectedAnalysisItem.next(selectedAnalysisItem);
@@ -162,17 +176,24 @@ export class AnalysisFooterComponent implements OnInit {
   }
 
   setDisableContinue() {
+    let setupErrors: AnalysisSetupErrors;
+    if (this.analysisItem && this.calanderizedMeters) {
+      let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+      let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+      setupErrors = getAnalysisSetupErrors(this.analysisItem, this.calanderizedMeters, facility, facilityPredictorData);
+    }
     if (this.router.url.includes('analysis-setup')) {
-      if (this.analysisItem.setupErrors.hasError) {
+      if (setupErrors && setupErrors.hasError) {
         this.disableContinue = true;
       } else {
         this.disableContinue = false;
       }
-    } else if (this.router.url.includes('group-analysis') && this.selectedGroup) {
+    } else if (this.router.url.includes('group-analysis') && this.selectedGroup && setupErrors) {
+      let groupErrors: GroupErrors = setupErrors.groupErrors.find(groupError => { return groupError.groupId == this.selectedGroup.idbGroupId });
       if (this.router.url.includes('options')) {
-        if (this.selectedGroup.groupErrors.hasErrors) {
-          if (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload
-            || (this.selectedGroup.groupErrors.missingGroupMeters && this.selectedGroup.analysisType !== 'skip') || this.selectedGroup.groupErrors.noProductionVariables || this.selectedGroup.groupErrors.missingProductionVariables) {
+        if (groupErrors.hasErrors) {
+          if (groupErrors.invalidAverageBaseload || groupErrors.invalidMonthlyBaseload
+            || (groupErrors.missingGroupMeters && this.selectedGroup.analysisType !== 'skip') || groupErrors.noProductionVariables || groupErrors.missingProductionVariables) {
             this.disableContinue = true;
           } else {
             this.disableContinue = false;
@@ -180,17 +201,17 @@ export class AnalysisFooterComponent implements OnInit {
         } else {
           this.disableContinue = false;
         }
-      } else if (this.router.url.includes('model-selection')) {
-        if (this.selectedGroup.groupErrors.hasErrors) {
-          if (this.selectedGroup.groupErrors.missingRegressionConstant ||
-            this.selectedGroup.groupErrors.missingRegressionModelYear ||
-            this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
-            this.selectedGroup.groupErrors.missingRegressionStartYear ||
-            this.selectedGroup.groupErrors.missingRegressionModelEndMonth ||
-            this.selectedGroup.groupErrors.missingRegressionEndYear ||
-            this.selectedGroup.groupErrors.invalidModelDateSelection ||
-            this.selectedGroup.groupErrors.missingRegressionModelSelection ||
-            this.selectedGroup.groupErrors.missingRegressionPredictorCoef) {
+      } else if (this.router.url.includes('model-selection') && setupErrors) {
+        if (groupErrors.hasErrors) {
+          if (groupErrors.missingRegressionConstant ||
+            groupErrors.missingRegressionModelYear ||
+            groupErrors.missingRegressionModelStartMonth ||
+            groupErrors.missingRegressionStartYear ||
+            groupErrors.missingRegressionModelEndMonth ||
+            groupErrors.missingRegressionEndYear ||
+            groupErrors.invalidModelDateSelection ||
+            groupErrors.missingRegressionModelSelection ||
+            groupErrors.missingRegressionPredictorCoef) {
             this.disableContinue = true;
           } else {
             this.disableContinue = false;

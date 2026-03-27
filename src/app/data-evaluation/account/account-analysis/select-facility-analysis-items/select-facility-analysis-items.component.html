@@ -1,14 +1,17 @@
 <div class="wrapper">
   <div class="d-flex w-100 h-100">
     <div class="p-2 nav flex-column">
-      @for (listItem of facilitiesList; track listItem) {
-      <div class="nav-item"><a class="nav-link" (click)="selectFacility(listItem.facility)"
-          [ngClass]="{'active': listItem.facility.id == selectedFacility.id}">
-          <i class="pe-2" [ngClass]="listItem.cssClass"></i>
-          @if (listItem.isInvalid) {
+      @for (facilityItem of selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
+      <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
+          [ngClass]="{'active': facilityItem.facilityId == selectedFacility.guid}">
+          <i class="pe-2 fa"
+            [ngClass]="{'fa-square-minus': !facilityItem.analysisItemId, 'fa-square-check': facilityItem.analysisItemId}"></i>
+          @let analysisItem = facilityItem.analysisItemId | analysisItem;
+          @let analysisSetupErrors = analysisItem | invalidAnalysis: calanderizedMeters;
+          @if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
           <span class="fa fa-exclamation-circle"></span>
           }
-          {{listItem.facility.name}}</a>
+          {{facilityItem.facilityId | facilityName}}</a>
       </div>
       }
     </div>

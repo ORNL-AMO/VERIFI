@@ -1,53 +1,51 @@
 @for (groupItem of groupItems; track groupItem; let index = $index; let last = $last) {
-  <div class="d-flex flex-column">
-    <div>
-      @if (groupItem.group.groupErrors.hasErrors) {
-        <span class="me-1 fa fa-exclamation-circle"></span>
-      }
-      <span class="bold larger">
-        {{groupItem.group.idbGroupId | groupName}}
-      </span>
-      @if (!groupItem.group.groupErrors.hasErrors) {
-        <span class="badge bg-secondary ms-2 pull-right">
-          {{groupItem.group.analysisType | analysisTypeLabel }}
-        </span>
-        @if (groupItem.group.analysisType != 'skip') {
-          @for (predictor of groupItem.predictorVariables; track predictor) {
-            <span class="badge bg-info ms-2 pull-right"
-            >{{predictor.name}}</span>
-          }
-        }
-      } @else {
-        <span class="badge bg-danger pull-right">Errors in group setup.</span>
-      }
-    </div>
-    @if (showDetail) {
-      @if (groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors) {
-        <div class="pt-2"
-          >
-          Model Year: {{groupItem.group.regressionModelYear}}<br>
-          Modeled Energy = {{groupItem.regressionEquation}}<br>
-          @if (groupItem.group.userDefinedModel) {
-            Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
-          }
-          @if (!groupItem.group.userDefinedModel) {
-            User defined model.
-          }
-        </div>
-      }
-      @if (analysisItem.hasBanking && groupItem.group.applyBanking && !groupItem.group.groupErrors.hasErrors) {
-        <div class="p-0"
-          >
-          <span class="badge bg-dark">
-            <span class="fa fa-piggy-bank"></span> Has Banked Savings
-          </span>
-        </div>
-      }
+@let groupErrors = groupItem.group | invalidGroupAnalysis: analysisItem: calanderizedMeters;
+<div class="d-flex flex-column">
+  <div>
+    @if (groupErrors.hasErrors) {
+    <span class="me-1 fa fa-exclamation-circle"></span>
     }
-    @if (!last) {
-      <div>
-        <hr>
-        </div>
-      }
-    </div>
+    <span class="bold larger">
+      {{groupItem.group.idbGroupId | groupName}}
+    </span>
+    @if (!groupErrors.hasErrors) {
+    <span class="badge bg-secondary ms-2 pull-right">
+      {{groupItem.group.analysisType | analysisTypeLabel }}
+    </span>
+    @if (groupItem.group.analysisType != 'skip') {
+    @for (predictor of groupItem.predictorVariables; track predictor) {
+    <span class="badge bg-info ms-2 pull-right">{{predictor.name}}</span>
+    }
+    }
+    } @else {
+    <span class="badge bg-danger pull-right">Errors in group setup.</span>
+    }
+  </div>
+  @if (showDetail) {
+  @if (groupItem.group.analysisType == 'regression' && !groupErrors.hasErrors) {
+  <div class="pt-2">
+    Model Year: {{groupItem.group.regressionModelYear}}<br>
+    Modeled Energy = {{groupItem.regressionEquation}}<br>
+    @if (groupItem.group.userDefinedModel) {
+    Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
+    }
+    @if (!groupItem.group.userDefinedModel) {
+    User defined model.
+    }
+  </div>
   }
+  @if (analysisItem.hasBanking && groupItem.group.applyBanking && !groupErrors.hasErrors) {
+  <div class="p-0">
+    <span class="badge bg-dark">
+      <span class="fa fa-piggy-bank"></span> Has Banked Savings
+    </span>
+  </div>
+  }
+  }
+  @if (!last) {
+  <div>
+    <hr>
+  </div>
+  }
+</div>
+}

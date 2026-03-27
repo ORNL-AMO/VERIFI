@@ -25,6 +25,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -32,7 +33,7 @@ import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/c
   standalone: false
 })
 export class RegressionModelMenuComponent implements OnInit {
-  @Output() 
+  @Output()
   setShowUserDefinedModelInspection: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   group: AnalysisGroup;
@@ -48,7 +49,6 @@ export class RegressionModelMenuComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   numVariableOptions: Array<number>;
   months: Array<Month> = Months;
-  isButtonDisabled: boolean = false;
   allMeterReadingsPresent: boolean = true;
   allPredictorReadingsPresent: boolean = true;
   isDateRangeValid: boolean = true;
@@ -56,16 +56,18 @@ export class RegressionModelMenuComponent implements OnInit {
   changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
   showModelComparison: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
+
   calendarizedMeterData: Array<CalanderizedMeter>;
+  calanderizedMeterDataSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private regressionsModelsService: RegressionModelsService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private analysisValidationService: AnalysisValidationService,
     private sharedDataService: SharedDataService,
     private loadingService: LoadingService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private predictorDataDbService: PredictorDataDbService,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -73,8 +75,6 @@ export class RegressionModelMenuComponent implements OnInit {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
-        this.setYears();
-        this.checkUserDefinedModelValues();
         this.setNumVariableOptions();
         if (this.group.models && this.group.models.length != 0) {
           this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.group.idbGroupId);
@@ -93,21 +93,22 @@ export class RegressionModelMenuComponent implements OnInit {
     });
     this.setUserDefinedDefaultData();
     this.checkDateValidity();
+    this.calanderizedMeterDataSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
+      this.calendarizedMeterData = calanderizedMeters;
+      this.setYears();
+    });
   }
 
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
+    this.calanderizedMeterDataSub.unsubscribe();
   }
 
   setYears() {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.group.idbGroupId });
-    this.calendarizedMeterData = getCalanderizedMeterData(groupMeters, facilityMeterData, this.selectedFacility, true, undefined, [], [], [this.selectedFacility], 'AR6', []);
-    let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let fullYearsWithData: Array<number> = getYearsWithFullData(this.calendarizedMeterData, this.selectedFacility);
+    let filteredCMeterData: Array<CalanderizedMeter> = this.calendarizedMeterData.filter(meter => meter.meter.groupId == this.group.idbGroupId);
+    let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeterData, this.selectedFacility);
     this.yearOptions = fullYearsWithData.filter(year => {
-      return year >= selectedAnalysisItem.baselineYear;
+      return year >= this.analysisItem.baselineYear;
     })
   }
 
@@ -142,11 +143,8 @@ export class RegressionModelMenuComponent implements OnInit {
     this.setShowUserDefinedModelInspection.emit(false);
     this.checkDateValidity();
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, this.analysisItem);
     this.setNumVariableOptions();
-    this.checkUserDefinedModelValues();
     this.analysisItem.groups[groupIndex] = this.group;
-    this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
@@ -177,12 +175,12 @@ export class RegressionModelMenuComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     setTimeout(() => {
 
-      let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      //Need calanderization here to ensure that models use site or source data based on selection
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion, []);
-      this.generatedModels = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
+      this.generatedModels = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, this.analysisItem);
       this.analysisDbService.setGeneratedModelsForGroup(this.group.idbGroupId, this.generatedModels);
       let newSelectedModel = this.generatedModels?.find(model => model.modelId === this.group.selectedModelId);
       if (this.generatedModels) {
@@ -353,13 +351,6 @@ export class RegressionModelMenuComponent implements OnInit {
       }
     } else {
       this.group.maxModelVariables = 0;
-    }
-  }
-
-  checkUserDefinedModelValues() {
-    if (!this.group.userDefinedModel) {
-      this.isButtonDisabled = this.group.groupErrors.missingRegressionModelStartMonth || this.group.groupErrors.missingRegressionModelEndMonth || this.group.groupErrors.missingRegressionStartYear ||
-        this.group.groupErrors.missingRegressionEndYear || this.group.groupErrors.invalidModelDateSelection || this.group.groupErrors.missingRegressionConstant || this.group.groupErrors.missingRegressionPredictorCoef;
     }
   }
 

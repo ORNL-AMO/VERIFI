@@ -27,6 +27,8 @@ export class CalanderizationService {
   displayGraphEnergy: "bar" | "scatter" | null = "bar";
   displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';
+
+  calanderizedMeterData: BehaviorSubject<Array<CalanderizedMeter>>;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
@@ -38,6 +40,8 @@ export class CalanderizationService {
       selectedDateMin: undefined,
       dataDateRange: undefined
     });
+
+    this.calanderizedMeterData = new BehaviorSubject([]);
   }
 
   //CALANDERIZATION SUMMARIES USED BY CALANDERIZATION MODAL
@@ -245,6 +249,7 @@ export class CalanderizationService {
   }
 
   getYearOptions(meterCategory: 'water' | 'energy' | 'all', onlyFullYears: boolean, facilityId?: string): Array<number> {
+    console.log('getting year options...');
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityOrAccount: IdbFacility | IdbAccount;
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();

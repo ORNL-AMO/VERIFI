@@ -7,6 +7,8 @@ import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-facility-energy-card',
@@ -33,9 +35,13 @@ export class FacilityEnergyCardComponent {
   energyUnit: string;
   facilityOverviewData: FacilityOverviewData
   facilityOverviewDataSub: Subscription;
+
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(private facilityHomeService: FacilityHomeService,
     private facilityDbService: FacilitydbService,
-    private sharedDataService: SharedDataService) {
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService) {
   }
 
   ngOnInit() {
@@ -61,6 +67,10 @@ export class FacilityEnergyCardComponent {
     this.facilityOverviewDataSub = this.facilityHomeService.facilityOverviewData.subscribe(val => {
       this.facilityOverviewData = val;
     });
+
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = calanderizedMeters;
+    });
   }
 
   ngOnDestroy() {
@@ -70,6 +80,7 @@ export class FacilityEnergyCardComponent {
     this.annualEnergyAnalysisSummarySub.unsubscribe();
     this.facilityOverviewDataSub.unsubscribe();
     this.calculatingOverviewSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   goNext() {

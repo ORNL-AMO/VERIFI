@@ -5,12 +5,9 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisService } from './analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
     selector: 'app-analysis',
@@ -24,14 +21,11 @@ export class AnalysisComponent implements OnInit {
   utilityMeterData: Array<IdbUtilityMeterData>;
   utilityMeterGroups: Array<IdbUtilityMeterGroup>;
   utilityMeterGroupsSub: Subscription;
-  facilityAnalysisItemsSub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
     private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private analysisService: AnalysisService,) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
@@ -41,17 +35,12 @@ export class AnalysisComponent implements OnInit {
     this.utilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(val => {
       this.utilityMeterGroups = val;
     });
-
-    this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(val => {
-      this.updateAccountValidation(val);
-    })
   }
 
   ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
     this.utilityMeterGroupsSub.unsubscribe();
     this.analysisService.accountAnalysisItem = undefined;
-    this.facilityAnalysisItemsSub.unsubscribe();
     this.analysisService.hideInUseMessage = false;
   }
 
@@ -63,9 +52,5 @@ export class AnalysisComponent implements OnInit {
   goToUtilityData() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility')
-  }
-
-  async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {
-    await this.accountAnalysisDbService.updateAccountValidation(allAnalysisItems);
   }
 }

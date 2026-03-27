@@ -16,6 +16,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -42,6 +43,9 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItemSub: Subscription;
   isFormChange: boolean = false;
   account: IdbAccount;
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
+
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -57,14 +61,18 @@ export class AnalysisSetupComponent implements OnInit {
       if (!this.isFormChange) {
         this.analysisItem = item;
         this.facility = this.facilityDbService.selectedFacility.getValue();
-        this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
         this.setBaselineYearWarning();
         this.setComponentBools();
         this.setFacilityAnalysisItems();
       } else {
         this.isFormChange = false;
       }
-    })
+    });
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = calanderizedMeters;
+      //TODO: use calanderized meters for year options
+      this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
+    });
   }
 
   ngOnDestroy() {
@@ -73,7 +81,6 @@ export class AnalysisSetupComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
-    this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -153,7 +160,6 @@ export class AnalysisSetupComponent implements OnInit {
       group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       })
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group, this.analysisItem);
     });
     await this.saveItem();
     this.setComponentBools();
@@ -178,11 +184,11 @@ export class AnalysisSetupComponent implements OnInit {
     await this.saveItem();
   }
 
-  goToSavingsReport(){
+  goToSavingsReport() {
     this.router.navigate(['../../../reports'], { relativeTo: this.activatedRoute });
   }
 
-  goToSettings(){
+  goToSettings() {
     this.router.navigateByUrl('/data-evaluation/account/settings');
   }
 }

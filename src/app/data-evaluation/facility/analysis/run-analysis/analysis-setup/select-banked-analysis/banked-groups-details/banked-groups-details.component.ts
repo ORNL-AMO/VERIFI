@@ -1,6 +1,9 @@
 import { Component, Input } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-banked-groups-details',
@@ -17,10 +20,17 @@ export class BankedGroupsDetailsComponent {
 
   groupItems: Array<AnalysisGroupItem>;
 
-  constructor(private analysisService: AnalysisService) {
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
+  constructor(private analysisService: AnalysisService,
+    private calanderizationService: CalanderizationService
+  ) {
   }
 
   ngOnInit() {
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
+      this.calanderizedMeters = meters;
+    });
     this.initializeGroups();
   }
 

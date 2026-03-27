@@ -1,10 +1,9 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -70,7 +69,6 @@ export class FacilityPredictorComponent {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private weatherDataService: WeatherDataService,
     private routerGuardService: RouterGuardService
   ) {
@@ -231,8 +229,6 @@ export class FacilityPredictorComponent {
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictor);
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.goToManagePredictors();

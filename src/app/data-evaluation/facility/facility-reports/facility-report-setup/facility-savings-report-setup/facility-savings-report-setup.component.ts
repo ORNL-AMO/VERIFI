@@ -19,6 +19,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-facility-savings-report-setup',
@@ -49,6 +50,8 @@ export class FacilitySavingsReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   hasDataChanged: boolean = false;
 
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
@@ -69,7 +72,10 @@ export class FacilitySavingsReportSetupComponent {
       this.analysisTableColumns = this.reportSettings.analysisTableColumns;
     });
 
-    this.setYearOptions();
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(meters => {
+      this.calanderizedMeters = meters;
+      this.setYearOptions();
+    });
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
@@ -80,6 +86,7 @@ export class FacilitySavingsReportSetupComponent {
       this.checkModelData();
     }
 
+    //TODO: create pipe for validation
     this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
       this.errorMessage = message;
     });
@@ -89,6 +96,7 @@ export class FacilitySavingsReportSetupComponent {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
     this.errorMessageSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   async setSelectedAnalysisItem(onInit: boolean) {

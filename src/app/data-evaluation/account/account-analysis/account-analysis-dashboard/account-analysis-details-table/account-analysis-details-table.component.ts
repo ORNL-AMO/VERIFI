@@ -7,6 +7,8 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -43,6 +45,8 @@ export class AccountAnalysisDetailsTableComponent {
 
   selectedAccountSub: Subscription;
 
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
     private calendarizationService: CalanderizationService,
@@ -80,12 +84,17 @@ export class AccountAnalysisDetailsTableComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
+
+    this.calanderizedMetersSub = this.calendarizationService.calanderizedMeterData.subscribe(val => {
+      this.calanderizedMeters = val;
+    });
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   setOrderDataField(str: string) {
@@ -138,9 +147,9 @@ export class AccountAnalysisDetailsTableComponent {
     }
   }
 
-  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem) {
+  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem, setupErrors: AccountAnalysisSetupErrors) {
     this.accountAnalysisDbService.selectedAnalysisItem.next(analysisItem);
-    if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.facilitiesSelectionsInvalid) {
+    if (setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
     } else {
       this.router.navigateByUrl('/data-evaluation/account/analysis/results');

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { IdbAccount } from '../models/idbModels/account';
@@ -50,7 +49,7 @@ export class UpdateDbEntryService {
     if (account.displayEmissions == undefined) {
       if (account.name != 'Cocoa Co. Example') {
         account.displayEmissions = true;
-      }else{
+      } else {
         account.displayEmissions = false;
       }
       isChanged = true;
@@ -85,17 +84,9 @@ export class UpdateDbEntryService {
       analysisItem.analysisCategory = 'energy';
       isChanged = true;
     }
-    if (!analysisItem.setupErrors) {
-      analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+    if (analysisItem['setupError'] != undefined) {
+      delete analysisItem['setupError'];
       isChanged = true;
-    } else {
-      let setupErrors: AnalysisSetupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
-      Object.keys(setupErrors).forEach(key => {
-        if (setupErrors[key] != analysisItem.setupErrors[key]) {
-          analysisItem.setupErrors[key] = setupErrors[key];
-          isChanged = true;
-        }
-      });
     }
     if (!analysisItem.baselineYear) {
       let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
@@ -109,19 +100,10 @@ export class UpdateDbEntryService {
 
     if (analysisItem.groups) {
       analysisItem.groups.forEach(group => {
-        if (!group.groupErrors) {
-          group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
+        if (group['groupErrors'] != undefined) {
+          delete group['groupErrors'];
           isChanged = true;
-        } else {
-          let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
-          Object.keys(groupErrors).forEach(key => {
-            if (groupErrors[key] != group.groupErrors[key]) {
-              group.groupErrors[key] = groupErrors[key];
-              isChanged = true;
-            }
-          });
         }
-
         if (group['baselineAdjustments'] != undefined) {
           group.dataAdjustments = group['baselineAdjustments'];
           delete group['baselineAdjustments'];
@@ -153,18 +135,18 @@ export class UpdateDbEntryService {
           isChanged = true;
         }
 
-        if(group['hasDataAdjustement'] != undefined){
+        if (group['hasDataAdjustement'] != undefined) {
           delete group['hasDataAdjustement'];
           group.dataAdjustments = group.dataAdjustments.filter(adjustment => adjustment.amount != 0);
           isChanged = true;
         }
 
-        if(group['hasBaselineAdjustmentV2'] != undefined){
+        if (group['hasBaselineAdjustmentV2'] != undefined) {
           delete group['hasBaselineAdjustmentV2'];
           group.baselineAdjustmentsV2 = group.baselineAdjustmentsV2.filter(adjustment => adjustment.amount != 0);
           isChanged = true;
         }
-        
+
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
@@ -186,8 +168,8 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
-    if (!analysisItem.setupErrors) {
-      analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
+    if(analysisItem['setupErrors'] != undefined){
+      delete analysisItem['setupErrors'];
       isChanged = true;
     }
     return { analysisItem: analysisItem, isChanged: isChanged };

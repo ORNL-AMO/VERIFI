@@ -7,19 +7,15 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -52,14 +48,16 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   baselineAdjustmentYearOptions: Array<{ value: number, selected: boolean }>;
   deleteBaselineAdjustmentYear: number;
 
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
-    private analysisValidationService: AnalysisValidationService,
     private router: Router,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
@@ -67,28 +65,30 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.setShowInUseMessage();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
-      this.setDataEndYear();
-      this.setBaselineYearOptions();
-      this.setAdjustmentYearOptions();
       if (this.analysisItem.hasBanking && this.group.applyBanking) {
         this.setBankedGroup();
         this.setBankedAnalysisYearOptions();
         this.setHasModelsGenerated();
       }
     });
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = calanderizedMeters;
+      this.setDataEndYear();
+      this.setBaselineYearOptions();
+      this.setAdjustmentYearOptions();
+    });
   }
 
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     analysisItem.isAnalysisVisited = false;
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, analysisItem);
     analysisItem.groups[groupIndex] = this.group;
-    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.facility);
@@ -143,11 +143,10 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   setDataEndYear() {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.group.idbGroupId);
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [facility], 'AR6', []);
-    this.dataEndYear = getLatestYearWithData(calanderizedMeters, [facility]);
+    let filteredCMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
+      return cMeter.meter.groupId == this.group.idbGroupId;
+    });
+    this.dataEndYear = getLatestYearWithData(filteredCMeters, [this.facility]);
   }
 
   setBaselineYearOptions() {

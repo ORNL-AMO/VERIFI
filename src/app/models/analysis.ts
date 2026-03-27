@@ -1,4 +1,4 @@
-import { IdbPredictor } from "./idbModels/predictor"
+// import { IdbPredictor } from "./idbModels/predictor"
 
 export interface MonthlyGroupSummary {
   date: Date,
@@ -216,7 +216,8 @@ export interface AnalysisSetupErrors {
   missingBaselineYear: boolean,
   baselineYearAfterMeterDataEnd: boolean,
   baselineYearBeforeMeterDataStart: boolean,
-  bankingError: boolean
+  bankingError: boolean,
+  groupErrors: Array<GroupErrors>
 }
 
 export interface AnalysisGroup {
@@ -229,7 +230,7 @@ export interface AnalysisGroup {
   regressionModelEndMonth: number,
   regressionEndYear: number,
   regressionConstant: number,
-  groupErrors: GroupErrors,
+  // groupErrors: GroupErrors,
   specifiedMonthlyPercentBaseload: boolean,
   averagePercentBaseload?: number,
   monthlyPercentBaseload: Array<{
@@ -266,6 +267,7 @@ export interface AnalysisGroupPredictorVariable {
 }
 
 export interface GroupErrors {
+  groupId: string,
   hasErrors: boolean,
   missingProductionVariables: boolean,
   missingRegressionConstant: boolean,
@@ -284,7 +286,10 @@ export interface GroupErrors {
   hasInvalidRegressionModel: boolean,
   missingBankingBaselineYear: boolean,
   missingBankingAppliedYear: boolean,
-  invalidBankingYears: boolean
+  invalidBankingYears: boolean,
+  hasSetupErrors: boolean,
+  hasRegressionErrors: boolean,
+  hasInvalidUserDefinedModel: boolean
 }
 
 

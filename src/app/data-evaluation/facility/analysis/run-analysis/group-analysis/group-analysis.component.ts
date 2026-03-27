@@ -6,6 +6,8 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { AnalysisService } from '../../analysis.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-group-analysis',
@@ -24,14 +26,13 @@ export class GroupAnalysisComponent implements OnInit {
   showModelSelection: boolean;
   showBanked: boolean;
   routerSub: Subscription;
-  setupErrors: boolean;
-  regressionErrors: boolean;
-  hasErrors: boolean;
-  hasInvalidRegressionModel: boolean;
   hideLabel: boolean = false;
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
@@ -52,16 +53,20 @@ export class GroupAnalysisComponent implements OnInit {
       if (this.selectedGroup) {
         this.showModelSelection = this.selectedGroup.analysisType == 'regression';
         this.showBanked = this.selectedGroup.applyBanking && this.analysisItem.hasBanking;
-        this.setErrorBools();
       }
     });
     this.setLabel(this.router.url);
+
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = calanderizedMeters;
+    });
   }
 
   ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.selectedGroupSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   setSelectedGroup() {
@@ -89,28 +94,6 @@ export class GroupAnalysisComponent implements OnInit {
       } else {
         this.hideLabel = false;
       }
-    }
-  }
-
-  setErrorBools() {
-    this.hasErrors = this.selectedGroup.groupErrors.hasErrors;
-    this.hasInvalidRegressionModel = this.selectedGroup.groupErrors.hasInvalidRegressionModel;
-    if (this.selectedGroup.groupErrors.hasErrors) {
-      this.regressionErrors = (this.selectedGroup.groupErrors.missingRegressionConstant ||
-        this.selectedGroup.groupErrors.missingRegressionModelYear ||
-        this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
-        this.selectedGroup.groupErrors.missingRegressionStartYear ||
-        this.selectedGroup.groupErrors.missingRegressionModelEndMonth ||
-        this.selectedGroup.groupErrors.missingRegressionEndYear ||
-        this.selectedGroup.groupErrors.invalidModelDateSelection ||
-        this.selectedGroup.groupErrors.missingRegressionModelSelection ||
-        this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
-      this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||
-        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters
-        || this.selectedGroup.groupErrors.invalidBankingYears || this.selectedGroup.groupErrors.missingBankingAppliedYear || this.selectedGroup.groupErrors.missingBankingBaselineYear)
-    } else {
-      this.regressionErrors = false;
-      this.setupErrors = false;
     }
   }
 }

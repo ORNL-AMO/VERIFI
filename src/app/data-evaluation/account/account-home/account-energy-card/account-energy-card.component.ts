@@ -7,6 +7,8 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
     selector: 'app-account-energy-card',
@@ -32,9 +34,13 @@ export class AccountEnergyCardComponent {
   accountOverviewData: AccountOverviewData;
   accountOverviewDataSub: Subscription;
   energyUnit: string;
+
+  calanderizedMetersSub: Subscription;
+  calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private accountHomeService: AccountHomeService,
     private accountDbService: AccountdbService,
-    private sharedDataService: SharedDataService) {
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService) {
   }
 
   ngOnInit() {
@@ -61,6 +67,10 @@ export class AccountEnergyCardComponent {
     this.annualEnergyAnalysisSummarySub = this.accountHomeService.annualEnergyAnalysisSummary.subscribe(val => {
       this.annualEnergyAnalysisSummary = val;
     });
+
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeterData.subscribe(val => {
+      this.calanderizedMeters = val;
+    });
   }
 
   ngOnDestroy() {
@@ -70,6 +80,7 @@ export class AccountEnergyCardComponent {
     this.annualEnergyAnalysisSummarySub.unsubscribe();
     this.calculatingOverviewSub.unsubscribe();
     this.accountOverviewDataSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   goNext() {

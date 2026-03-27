@@ -130,18 +130,18 @@ export class SearchBarComponent implements OnInit {
       this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterGuid);
     } else if (item.type == 'accountAnalysis') {
       this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
-      if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
+      // if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
         this.router.navigateByUrl('account/analysis/setup');
-      } else {
-        this.router.navigateByUrl('account/analysis/results');
-      }
+      // } else {
+      //   this.router.navigateByUrl('account/analysis/results');
+      // }
     } else if (item.type == 'facilityAnalysis') {
       this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
-      if (item.facilityAnalysisItem.setupErrors.hasError || item.facilityAnalysisItem.setupErrors.groupsHaveErrors) {
+      // if (item.facilityAnalysisItem.setupErrors.hasError || item.facilityAnalysisItem.setupErrors.groupsHaveErrors) {
         this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis');
-      } else {
-        this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis/facility-analysis');
-      }
+      // } else {
+      //   this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis/facility-analysis');
+      // }
     } else if (item.type == 'report') {
       this.accountReportsDbService.selectedReport.next(item.idbAccountReport);
       this.router.navigateByUrl('account/reports/setup');

@@ -1,25 +1,26 @@
 @if (!inDashboard) {
 <div class="analysis banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
   <div>
+    @let setupErrors = accountAnalysisItem | invalidAccountAnalysis: calanderizedMeters;
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
-          @if (accountAnalysisItem.setupErrors.hasError) {
+          @if (setupErrors.hasError) {
           <span class="fa fa-exclamation-circle"></span>
           }
           <i class="fa fa-gears"></i>
           Analysis Setup</a>
       </li>
-      <li class="nav-item" [ngClass]="{'disabled': accountAnalysisItem.setupErrors.hasError}">
+      <li class="nav-item" [ngClass]="{'disabled': setupErrors.hasError}">
         <a class="nav-link" routerLink="select-items" [routerLinkActive]="['active']">
-          @if (accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
+          @if (setupErrors.facilitiesSelectionsInvalid) {
           <span class="fa fa-exclamation-circle"></span>
           }
           <i class="fa fa-list-check"></i>
           Select Facility Items</a>
       </li>
       <li class="nav-item"
-        [ngClass]="{'disabled': accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid || accountAnalysisItem.setupErrors.hasError}">
+        [ngClass]="{'disabled': setupErrors.facilitiesSelectionsInvalid || setupErrors.hasError}">
         <a class="nav-link" routerLink="results" [routerLinkActive]="['active']">
           <i class="fa fa-magnifying-glass-chart"></i>
           Analysis Results</a>

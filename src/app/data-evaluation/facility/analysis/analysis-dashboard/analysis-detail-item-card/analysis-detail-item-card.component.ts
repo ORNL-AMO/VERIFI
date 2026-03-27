@@ -8,6 +8,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-analysis-detail-item-card',
@@ -17,8 +18,10 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
   styleUrl: './analysis-detail-item-card.component.css'
 })
 export class AnalysisDetailItemCardComponent {
-  @Input()
+  @Input({required: true})
   analysisItem: IdbAnalysisItem;
+  @Input({required: true})
+  calanderizedMeters: Array<CalanderizedMeter>;
 
   @Output() itemDeleted = new EventEmitter<boolean>();
 
@@ -44,8 +47,7 @@ export class AnalysisDetailItemCardComponent {
     private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, 
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService
-
+    private facilityReportsDbService: FacilityReportsDbService,
   ) { }
 
   ngOnChanges(): void {

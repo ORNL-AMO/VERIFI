@@ -27,7 +27,7 @@ import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
 import { FacilityReportNamePipe } from './facility-report-name.pipe';
 import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 import { CharactersRemainingPipe } from './characters-remaining.pipe';
-import { InvalidMeterPipe } from './invalid-meter.pipe';
+import { InvalidMeterPipe } from './validation-pipes/invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
 import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
@@ -35,8 +35,12 @@ import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
 import { DisplayPredictorDataDatePipe } from './display-predictor-data-date.pipe';
 import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
-import { InvalidMetersPipe } from './invalid-meters.pipe';
-import { InvalidMeterDataPipe } from './invalid-meter-data.pipe';
+import { InvalidMetersPipe } from './validation-pipes/invalid-meters.pipe';
+import { InvalidMeterDataPipe } from './validation-pipes/invalid-meter-data.pipe';
+import { InvalidGroupAnalysisPipe } from './validation-pipes/invalid-group-analysis.pipe';
+import { InvalidAccountAnalysisPipe } from './validation-pipes/invalid-account-analysis.pipe';
+import { InvalidAnalysisPipe } from './validation-pipes/invalid-analysis.pipe';
+import { AnalysisItemPipe } from './analysis-item.pipe';
 
 @NgModule({
   declarations: [
@@ -76,7 +80,11 @@ import { InvalidMeterDataPipe } from './invalid-meter-data.pipe';
     DisplayPredictorDataDatePipe,
     DisplayMeterDataDatePipe,
     InvalidMetersPipe,
-    InvalidMeterDataPipe
+    InvalidMeterDataPipe,
+    InvalidGroupAnalysisPipe,
+    InvalidAccountAnalysisPipe,
+    InvalidAnalysisPipe,
+    AnalysisItemPipe
   ],
   imports: [
     CommonModule
@@ -118,7 +126,11 @@ import { InvalidMeterDataPipe } from './invalid-meter-data.pipe';
     DisplayPredictorDataDatePipe,
     DisplayMeterDataDatePipe,
     InvalidMetersPipe,
-    InvalidMeterDataPipe
+    InvalidMeterDataPipe,
+    InvalidGroupAnalysisPipe,
+    InvalidAccountAnalysisPipe,
+    InvalidAnalysisPipe,
+    AnalysisItemPipe
   ]
 })
 export class HelperPipesModule { }

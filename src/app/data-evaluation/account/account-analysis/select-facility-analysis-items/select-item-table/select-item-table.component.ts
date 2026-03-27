@@ -18,6 +18,7 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 @Component({
     selector: 'app-select-item-table',
     templateUrl: './select-item-table.component.html',
@@ -31,6 +32,8 @@ export class SelectItemTableComponent implements OnInit {
   selectedAnalysisItem: IdbAccountAnalysisItem;
   @Input()
   facilityAnalysisItems: Array<IdbAnalysisItem>;
+  @Input()
+  calanderizedMeters: Array<CalanderizedMeter>;
 
   selectedFacilityItemId: string;
   itemToEdit: IdbAnalysisItem;
@@ -112,11 +115,6 @@ export class SelectItemTableComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.facility, accountMeterGroups, accountPredictors, this.selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
-    // newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
-    newIdbItem.groups.forEach(group => {
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
-    });
-    newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     this.selectedFacilityItemId = newIdbItem.guid;
     await this.dbChangesService.selectAccount(account, false);
