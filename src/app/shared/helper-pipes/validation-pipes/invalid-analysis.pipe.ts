@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { AnalysisSetupErrors } from 'src/app/models/validation';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { getAnalysisSetupErrors } from '../../validation/analysisValidation';
+import { emptyAnalysisSetupErrors, getAnalysisSetupErrors } from '../../validation/analysisValidation';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
@@ -23,9 +23,12 @@ export class InvalidAnalysisPipe implements PipeTransform {
 
   transform(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
     let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(facility.guid);
-    return getAnalysisSetupErrors(analysisItem, calanderizedMeters, facility, facilityPredictorData);
+    if (facility) {
+      let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+      let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(facility.guid);
+      return getAnalysisSetupErrors(analysisItem, calanderizedMeters, facility, facilityPredictorData);
+    }
+    return emptyAnalysisSetupErrors();
   }
 
 }

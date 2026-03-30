@@ -42,30 +42,3 @@ export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisIt
         facilitiesSelectionsInvalid: facilitiesSelectionsInvalid
     }
 }
-
-// export function updateFacilitySelectionErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
-//     let facilitiesSelectionsErrors: Array<boolean> = [];
-//     analysisItem.facilityAnalysisItems.forEach(item => {
-//         if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
-//             let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
-//             if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors) {
-//                 facilitiesSelectionsErrors.push(true)
-//             } else {
-//                 facilitiesSelectionsErrors.push(false);
-//             }
-//         } else {
-//             if (item.analysisItemId == 'skip') {
-//                 facilitiesSelectionsErrors.push(false);
-//             } else {
-//                 facilitiesSelectionsErrors.push(true);
-//             }
-//         }
-//     });
-//     let facilitiesSelectionsInvalid: boolean = facilitiesSelectionsErrors.includes(true);
-//     let isChanged: boolean = false;
-//     if (facilitiesSelectionsInvalid != analysisItem.setupErrors.facilitiesSelectionsInvalid) {
-//         analysisItem.setupErrors.facilitiesSelectionsInvalid = facilitiesSelectionsInvalid;
-//         isChanged = true;
-//     }
-//     return { analysisItem: analysisItem, isChanged: isChanged };
-// }

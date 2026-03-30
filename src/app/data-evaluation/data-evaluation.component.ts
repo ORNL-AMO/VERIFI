@@ -147,7 +147,6 @@ export class DataEvaluationComponent {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    console.log('DATA EVALUATION CALANDERIZATION')
     let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, undefined, [], [], accountFacilities, account.assessmentReportVersion, []);
     this.calanderizationService.calanderizedMeters.next(calanderizedMeters);
   }

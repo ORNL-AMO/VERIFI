@@ -52,6 +52,21 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
 }
 
 
+export function emptyAnalysisSetupErrors(): AnalysisSetupErrors {
+    return {
+        hasError: false,
+        setupHasError: false,
+        missingName: false,
+        noGroups: false,
+        groupsHaveErrors: false,
+        missingBaselineYear: false,
+        baselineYearAfterMeterDataEnd: false,
+        baselineYearBeforeMeterDataStart: false,
+        bankingError: false,
+        groupErrors: []
+    }
+}
+
 export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facilityPredictorData: Array<IdbPredictorData>): GroupAnalysisErrors {
     let missingProductionVariables: boolean = false;
     let missingRegressionConstant: boolean = false;
@@ -148,11 +163,11 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
         if (group.analysisType == 'modifiedEnergyIntensity') {
             if (group.specifiedMonthlyPercentBaseload) {
                 for (let i = 0; i < group.monthlyPercentBaseload.length; i++) {
-                    if (!this.checkValueValid(group.monthlyPercentBaseload[i].percent)) {
+                    if (!checkNumberValueValid(group.monthlyPercentBaseload[i].percent)) {
                         invalidMonthlyBaseload = true;
                     }
                 }
-            } else if (!this.checkValueValid(group.averagePercentBaseload)) {
+            } else if (!checkNumberValueValid(group.averagePercentBaseload)) {
                 invalidAverageBaseload = true;
             }
         }

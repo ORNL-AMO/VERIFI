@@ -22,7 +22,6 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 @Component({
   selector: 'app-facility-savings-report-setup',
   standalone: false,
-
   templateUrl: './facility-savings-report-setup.component.html',
   styleUrl: './facility-savings-report-setup.component.css'
 })
@@ -39,8 +38,6 @@ export class FacilitySavingsReportSetupComponent {
   reportSettings: SavingsFacilityReportSettings;
   reportYears: Array<number>;
   baselineYears: Array<number>;
-  errorMessage: string;
-  errorMessageSub: Subscription;
   months: Array<Month> = Months;
   analysisTableColumns: AnalysisTableColumns;
   selectedBaselineYear: number | 'All' = 'All';
@@ -85,7 +82,6 @@ export class FacilitySavingsReportSetupComponent {
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
-    this.errorMessageSub.unsubscribe();
     this.calanderizedMetersSub.unsubscribe();
   }
 
