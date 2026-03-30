@@ -25,6 +25,9 @@ export class AnalysisComponent implements OnInit {
   utilityMeterGroups: Array<IdbUtilityMeterGroup>;
   utilityMeterGroupsSub: Subscription;
   facilityAnalysisItemsSub: Subscription;
+  facility: IdbFacility;
+  annualKey: string;
+  monthlyKey: string;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
@@ -44,7 +47,11 @@ export class AnalysisComponent implements OnInit {
 
     this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(val => {
       this.updateAccountValidation(val);
-    })
+    });
+
+    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.annualKey = 'annual-' + this.facility?.id;
+    this.monthlyKey = 'monthly-' + this.facility?.id;
   }
 
   ngOnDestroy() {
@@ -53,6 +60,8 @@ export class AnalysisComponent implements OnInit {
     this.analysisService.accountAnalysisItem = undefined;
     this.facilityAnalysisItemsSub.unsubscribe();
     this.analysisService.hideInUseMessage = false;
+    this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
+    this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
   }
 
   goToMeterGroups() {

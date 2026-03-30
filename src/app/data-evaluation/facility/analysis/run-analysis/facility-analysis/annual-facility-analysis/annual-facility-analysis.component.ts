@@ -15,7 +15,6 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 })
 export class AnnualFacilityAnalysisComponent implements OnInit {
 
-  dataDisplay: 'table' | 'graph';
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   calculating: boolean | 'error';
@@ -29,16 +28,18 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
   }>;
   groupSummariesSub: Subscription;
-
+  analysisDisplay: 'table' | 'graph';
+  key: string;
 
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.key = 'annual-' + this.facility?.id;
+    this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
 
     this.calculatingSub = this.analysisService.calculating.subscribe(val => {
       this.calculating = val;
@@ -59,7 +60,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.dataDisplay = display;
-    this.analysisService.dataDisplay.next(this.dataDisplay);
+    this.analysisDisplay = display;
+    this.analysisService.getDisplaySubject(this.key, 'table').next(display);
   }
 }

@@ -2,12 +2,12 @@
   <app-analysis-summary-table-filter [tableContext]="'annualFacility'" [analysisItem]="analysisItem"></app-analysis-summary-table-filter>
 
   <div class="btn-group">
-    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+    <button class="btn toggle-btn" [ngClass]="{'active': analysisDisplay == 'table'}" (click)="setDataDisplay('table')">
       <span class="fa fa-chevron-right"></span>
       Table
       <span class="fa fa-chevron-left"></span>
     </button>
-    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+    <button class="btn toggle-btn" [ngClass]="{'active': analysisDisplay == 'graph'}" (click)="setDataDisplay('graph')">
       <span class="fa fa-chevron-right"></span>
       Graph
       <span class="fa fa-chevron-left"></span>
@@ -17,21 +17,21 @@
 
 @if (calculating == false) {
   <div class="w-100">
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary" [groupSummaries]="groupSummaries"
         [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'">
       </app-annual-analysis-summary-table>
     }
-    @if (dataDisplay == 'graph') {
+    @if (analysisDisplay == 'graph') {
       <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">
       </app-annual-analysis-summary-graph>
     }
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-annual-analysis-group-savings-table [groupSummaries]="groupSummaries"
       [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-table>
     }
-    @if (dataDisplay == 'graph') {
+    @if (analysisDisplay == 'graph') {
       <app-annual-analysis-group-savings-graph [groupSummaries]="groupSummaries"
       [annualAnalysisSummary]="annualAnalysisSummary"></app-annual-analysis-group-savings-graph>
     }
