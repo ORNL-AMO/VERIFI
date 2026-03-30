@@ -21,7 +21,7 @@ export class InvalidGroupAnalysisPipe implements PipeTransform {
 
   transform(group: AnalysisGroup, analysisItem: IdbAnalysisItem): GroupAnalysisErrors {
     let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(analysisItem.facilityId);
-    let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(group.idbGroupId);
+    let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(group.idbGroupId);
     return getGroupErrors(group, analysisItem, calendarizedMeters, facilityPredictorData);
   }
 

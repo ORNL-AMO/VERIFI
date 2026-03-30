@@ -212,7 +212,7 @@ export class RegressionModelSelectionComponent implements OnInit {
 
   setYears() {
     if (this.selectedGroup) {
-      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(this.selectedGroup.idbGroupId);
+      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
       let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeters, this.selectedFacility);
       fullYearsWithData = fullYearsWithData.filter(year => {
         return year >= this.analysisItem.baselineYear;

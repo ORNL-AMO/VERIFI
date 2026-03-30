@@ -93,7 +93,7 @@ export class RegressionUserDefinedModelInspectionComponent {
   generateUserDefinedModel() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     //report year is determined by the latest full year of data
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(this.selectedGroup.idbGroupId);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
     let reportYear: number = getLatestYearWithData(calanderizedMeters, [this.selectedFacility]);
 
     let baselineYear: number = analysisItem.baselineYear;

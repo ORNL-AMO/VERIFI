@@ -30,7 +30,7 @@ export class InvalidAccountReportPipe implements PipeTransform {
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let allAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
+    let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getAccountCalanderizedMeters();
     let allAccountAnalysisItem: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     return getAccountReportErrors(accountReport, allAccountAnalysisItem, allAnalysisItems, calendarizedMeters, facilities, accountPredictorData);
   }

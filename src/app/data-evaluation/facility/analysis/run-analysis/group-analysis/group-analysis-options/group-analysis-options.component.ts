@@ -132,7 +132,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   setDataEndYear() {
-    let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizerMetersByGroupId(this.group.idbGroupId)
+    let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.group.idbGroupId)
     this.dataEndYear = getLatestYearWithData(filteredCMeters, [this.facility]);
   }
 

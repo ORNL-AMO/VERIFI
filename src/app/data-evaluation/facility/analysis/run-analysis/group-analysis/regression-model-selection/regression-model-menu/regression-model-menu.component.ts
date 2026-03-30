@@ -93,7 +93,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.setUserDefinedDefaultData();
     this.checkDateValidity();
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = this.calanderizationService.getCalanderizerMetersByGroupId(this.group.idbGroupId);
+      this.calanderizedMeters = this.calanderizationService.getCalanderizedMetersByGroupId(this.group.idbGroupId);
       this.setYears();
     });
   }

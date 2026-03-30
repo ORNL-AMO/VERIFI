@@ -1,19 +1,18 @@
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizedMeter } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFunctions';
+import { getIsEnergyMeter } from '../sharedHelperFunctions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from 'src/app/calculations/calanderization/calanderizationHelpers';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getDateFromMeterData } from '../dateHelperFunctions';
 import { getAllYearsWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Injectable({
   providedIn: 'root'
@@ -27,10 +26,12 @@ export class CalanderizationService {
   dataDisplay: "table" | "graph" = 'table';
 
   calanderizedMeters: BehaviorSubject<Array<CalanderizedMeter>>;
+  calanderizationWorker: Worker;
   constructor(
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],
       showAllSources: true,
@@ -40,6 +41,51 @@ export class CalanderizationService {
     });
 
     this.calanderizedMeters = new BehaviorSubject([]);
+
+    this.utilityMeterDataDbService.accountMeterData.subscribe(meterData => {
+      if (meterData) {
+        this.setCalanderizedMeterData(meterData);
+      }
+    });
+  }
+
+  setCalanderizedMeterData(accountMeterData: Array<IdbUtilityMeterData>) {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+
+    if (typeof Worker !== 'undefined') {
+      this.calanderizationWorker = new Worker(new URL('../../web-workers/calanderization.worker', import.meta.url));
+      this.calanderizationWorker.onmessage = ({ data }) => {
+        this.calanderizationWorker.terminate();
+        if (!data.error) {
+          this.calanderizedMeters.next(data.calanderizedMeters);
+        } else {
+          console.log('Error in calanderization worker');
+          this.calanderizedMeters.next([]);
+        }
+      };
+      this.calanderizationWorker.postMessage({
+        meters: meters,
+        allMeterData: accountMeterData,
+        accountOrFacility: account,
+        monthDisplayShort: false,
+        calanderizationOptions: undefined,
+        co2Emissions: [],
+        customFuels: [],
+        facilities: accountFacilities,
+        assessmentReportVersion: account.assessmentReportVersion,
+        customGWPs: []
+      });
+
+    } else {
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, accountMeterData, account, false, undefined, [], [], accountFacilities, account.assessmentReportVersion, []);
+      this.calanderizedMeters.next(calanderizedMeters);
+    }
+  }
+
+  getAccountCalanderizedMeters(): Array<CalanderizedMeter> {
+    return this.calanderizedMeters.getValue();
   }
 
   getCalanderizedMetersByFacilityID(facilityID: string): Array<CalanderizedMeter> {
@@ -48,7 +94,7 @@ export class CalanderizationService {
     return facilityCalanderizedMeters;
   }
 
-  getCalanderizerMetersByGroupId(groupId: string): Array<CalanderizedMeter> {
+  getCalanderizedMetersByGroupId(groupId: string): Array<CalanderizedMeter> {
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizedMeters.getValue();
     let filteredCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => cMeter.meter.groupId == groupId);
     return filteredCalanderizedMeters;

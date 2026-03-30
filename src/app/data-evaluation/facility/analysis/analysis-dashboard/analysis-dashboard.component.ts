@@ -41,16 +41,13 @@ export class AnalysisDashboardComponent implements OnInit {
   showComparisonDetails: boolean = false;
   analysisItemsSub: Subscription;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizationSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private analyticsService: AnalyticsService,
-    private predictorDbService: PredictorDbService,
-    private calanderizationService: CalanderizationService) { }
+    private predictorDbService: PredictorDbService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {
@@ -69,17 +66,12 @@ export class AnalysisDashboardComponent implements OnInit {
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.facilityAnalysisItems = items;
     });
-
-    this.calanderizationSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
-      this.calanderizedMeters = meters;
-    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
     this.routerSub.unsubscribe();
-    this.calanderizationSub.unsubscribe();
   }
 
   async createAnalysis() {

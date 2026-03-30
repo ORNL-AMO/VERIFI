@@ -5,12 +5,9 @@ import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { CalanderizationService, CalendarizationSummaryItem } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from 'src/app/calculations/calanderization/calanderizationHelpers';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
@@ -36,8 +33,7 @@ export class DataApplicationMenuComponent implements OnInit {
   displayMonths: number = 4;
   hoverDataDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService,
-    private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService) { }
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
@@ -62,8 +58,7 @@ export class DataApplicationMenuComponent implements OnInit {
   calanderizeMeter() {
     if (this.utilityMeterData.length > 2) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let calanderizedData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.meter], this.utilityMeterData, selectedFacility, false, undefined, [], [], [selectedFacility], account.assessmentReportVersion, []);
+      let calanderizedData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
       this.monthlyData = calanderizedData[0].monthlyData;
       if (this.meter.meterReadingDataApplication == 'backward') {
         this.monthlyData = this.monthlyData.splice(0, 2);
@@ -227,11 +222,11 @@ export class DataApplicationMenuComponent implements OnInit {
       //used as default
       return this.calanderizationSummaryFullMonth(meter, meterData);
     } else if (meter.meterReadingDataApplication == 'backward') {
-      return this.calanderizationSummaryBackwards(meter, meterData);
+      return this.calanderizationSummaryBackwards(meterData);
     }
   }
 
-  calanderizationSummaryBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
+  calanderizationSummaryBackwards(meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
     let calanderizationSummary: Array<CalendarizationSummaryItem> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data).getTime() });
     if (orderedMeterData.length > 3) {
