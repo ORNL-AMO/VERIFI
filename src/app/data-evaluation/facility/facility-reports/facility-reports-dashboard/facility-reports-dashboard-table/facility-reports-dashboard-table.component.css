@@ -77,9 +77,9 @@ thead th.can-click:hover{
     border-color: #2c386b;
 }
 
-.select-width{
+/* .select-width{
     width: 200px;
-}
+} */
 
 tbody td, .action-btn .fa{
     vertical-align: middle;

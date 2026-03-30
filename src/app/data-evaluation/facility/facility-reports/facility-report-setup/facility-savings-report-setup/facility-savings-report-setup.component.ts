@@ -10,7 +10,6 @@ import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { FacilityReportsService } from '../../facility-reports.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -56,7 +55,6 @@ export class FacilitySavingsReportSetupComponent {
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService,
-    private facilityReportsService: FacilityReportsService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService) {
@@ -82,11 +80,6 @@ export class FacilitySavingsReportSetupComponent {
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }
-
-    //TODO: create pipe for validation
-    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
-      this.errorMessage = message;
-    });
   }
 
   ngOnDestroy() {

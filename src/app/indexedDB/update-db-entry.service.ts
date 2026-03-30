@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from './facility-db.service';
-import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeter, MeterCharge } from '../models/idbModels/utilityMeter';
@@ -19,7 +18,7 @@ import { IdbCustomGWP } from '../models/idbModels/customGWP';
 })
 export class UpdateDbEntryService {
 
-  constructor(private analysisValidationService: AnalysisValidationService, private facilityDbService: FacilitydbService) { }
+  constructor(private facilityDbService: FacilitydbService) { }
 
   updateAccount(account: IdbAccount): { account: IdbAccount, isChanged: boolean } {
     let isChanged: boolean = false;

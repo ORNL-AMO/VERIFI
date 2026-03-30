@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AccountReportErrors } from 'src/app/models/accountReports';
+import { AccountReportErrors } from 'src/app/models/validation';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { getAccountReportErrors } from '../../validation/accountReportValidation';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';

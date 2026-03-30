@@ -1,10 +1,11 @@
 import { getYearsWithFullData } from "src/app/calculations/shared-calculations/calculationsHelpers";
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisSetupErrors, GroupErrors, JStatRegressionModel } from "src/app/models/analysis";
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from "src/app/models/analysis";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization"
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem"
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { checkNumberValueValid } from "./validationHelpers";
+import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
 
 export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, facilityPredictorData: Array<IdbPredictorData>): AnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
@@ -28,7 +29,7 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
     if (analysisItem.hasBanking) {
         bankingError = analysisItem.bankedAnalysisItemId == undefined;
     }
-    let groupErrors: Array<GroupErrors> = analysisItem.groups.map(group => {
+    let groupErrors: Array<GroupAnalysisErrors> = analysisItem.groups.map(group => {
         return getGroupErrors(group, analysisItem, facilityCalanderizedMeters, facilityPredictorData);
     });
     let groupsHaveErrors: boolean = groupErrors.some(groupError => {
@@ -51,7 +52,7 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
 }
 
 
-export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facilityPredictorData: Array<IdbPredictorData>): GroupErrors {
+export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facilityPredictorData: Array<IdbPredictorData>): GroupAnalysisErrors {
     let missingProductionVariables: boolean = false;
     let missingRegressionConstant: boolean = false;
     let missingRegressionModelYear: boolean = false;

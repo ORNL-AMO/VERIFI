@@ -1,7 +1,7 @@
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { getAnalysisSetupErrors } from "./analysisValidation";
-import { AnalysisSetupErrors } from "src/app/models/analysis";
+import { AnalysisSetupErrors } from "src/app/models/validation";
 import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbFacility } from "src/app/models/idbModels/facility";

@@ -1,7 +1,5 @@
-import { AccountReportErrors } from "src/app/models/accountReports";
-import { AnalysisSetupErrors } from "src/app/models/analysis";
+import { AccountReportErrors } from "src/app/models/validation";
 import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
-import { getAnalysisSetupErrors } from "./analysisValidation";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { CalanderizedMeter } from "src/app/models/calanderization";
@@ -9,8 +7,6 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { getAccountAnalysisSetupErrors } from "./accountAnalysisValidation";
 import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
-import { error } from "node:console";
-import { report } from "node:process";
 
 export function getAccountReportErrors(accountReport: IdbAccountReport, allAccountAnalysisItem: Array<IdbAccountAnalysisItem>, allAnalysisItems: Array<IdbAnalysisItem>, calendarizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, facilityPredictorData: Array<IdbPredictorData>): AccountReportErrors {
     let errors: AccountReportErrors = {
@@ -32,7 +28,7 @@ export function getAccountReportErrors(accountReport: IdbAccountReport, allAccou
     errors.missingReportType = !accountReport.reportType || accountReport.reportType.toString().trim() === '';
 
     // Report year and baseline year requirements
-    const yearRequiredTypes = ["betterPlants", "performance", "betterClimate", "analysis", "accountEmissionFactors"];
+    const yearRequiredTypes = ["betterPlants", "performance", "betterClimate", "analysis"];
     const endDateRequiredTypes = ["dataOverview", "accountSavings"];
     const startDateRequiredTypes = ["dataOverview"];
 
@@ -41,7 +37,7 @@ export function getAccountReportErrors(accountReport: IdbAccountReport, allAccou
         errors.missingReportYear = accountReport.reportYear === undefined || accountReport.reportYear === null || isNaN(accountReport.reportYear);
     }
     // Baseline year
-    if (["betterClimate", "dataOverview", "performance", "betterPlants", "analysis", "accountEmissionFactors"].includes(accountReport.reportType)) {
+    if (yearRequiredTypes.includes(accountReport.reportType)) {
         errors.missingBaselineYear = accountReport.baselineYear === undefined || accountReport.baselineYear === null || isNaN(accountReport.baselineYear);
     }
 

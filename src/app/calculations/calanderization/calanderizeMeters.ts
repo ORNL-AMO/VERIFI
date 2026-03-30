@@ -22,7 +22,6 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
     facilities: Array<IdbFacility>,
     assessmentReportVersion: AssessmentReportVersion,
     customGWPs: Array<IdbCustomGWP>): Array<CalanderizedMeter> {
-    console.log('....CALANDERIZING METERS....')
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
         let energyIsSource: boolean = accountOrFacility.energyIsSource;

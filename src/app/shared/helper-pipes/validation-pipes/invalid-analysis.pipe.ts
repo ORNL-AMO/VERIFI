@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AnalysisSetupErrors } from 'src/app/models/analysis';
+import { AnalysisSetupErrors } from 'src/app/models/validation';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getAnalysisSetupErrors } from '../../validation/analysisValidation';

@@ -62,6 +62,9 @@
         <th>
           Baseline Year
         </th>
+        <th>
+          View Analysis
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -93,6 +96,9 @@
         </td>
         <td>
           {{item.baselineYear}}
+        </td>
+        <td>
+          <a class="click-link" (click)="goToAnalysis(item)">View Analysis</a>
         </td>
       </tr>
       }

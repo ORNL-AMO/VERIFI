@@ -18,6 +18,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-facility-analysis-report-setup',
@@ -55,7 +56,8 @@ export class FacilityAnalysisReportSetupComponent {
     private calanderizationService: CalanderizationService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService,
+    private router: Router) {
 
   }
 
@@ -328,5 +330,10 @@ export class FacilityAnalysisReportSetupComponent {
   onOptionChange() {
     this.applyFilters();
     this.setSelectedAnalysisItem(true);
+  }
+
+  goToAnalysis(item: IdbAnalysisItem) {
+    this.analysisDbService.selectedAnalysisItem.next(item);
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facilityReport.facilityId + '/analysis/run-analysis');
   }
 }
