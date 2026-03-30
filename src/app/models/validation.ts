@@ -22,20 +22,25 @@ export interface GroupAnalysisErrors {
     invalidBankingYears: boolean,
     hasSetupErrors: boolean,
     hasRegressionErrors: boolean,
-    hasInvalidUserDefinedModel: boolean
+    hasInvalidUserDefinedModel: boolean,
+
+    isDateRangeValid: boolean,
+    isTwelveMonthSelected: boolean,
+    allMeterReadingsPresent: boolean,
+    allPredictorReadingsPresent: boolean
 }
 
 export interface AnalysisSetupErrors {
-  hasError: boolean,
-  setupHasError: boolean,
-  missingName: boolean,
-  noGroups: boolean,
-  groupsHaveErrors: boolean,
-  missingBaselineYear: boolean,
-  baselineYearAfterMeterDataEnd: boolean,
-  baselineYearBeforeMeterDataStart: boolean,
-  bankingError: boolean,
-  groupErrors: Array<GroupAnalysisErrors>
+    hasError: boolean,
+    setupHasError: boolean,
+    missingName: boolean,
+    noGroups: boolean,
+    groupsHaveErrors: boolean,
+    missingBaselineYear: boolean,
+    baselineYearAfterMeterDataEnd: boolean,
+    baselineYearBeforeMeterDataStart: boolean,
+    bankingError: boolean,
+    groupErrors: Array<GroupAnalysisErrors>
 }
 
 export interface AccountReportErrors {

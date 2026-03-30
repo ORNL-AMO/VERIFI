@@ -48,10 +48,6 @@ export class RegressionModelMenuComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   numVariableOptions: Array<number>;
   months: Array<Month> = Months;
-  allMeterReadingsPresent: boolean = true;
-  allPredictorReadingsPresent: boolean = true;
-  isDateRangeValid: boolean = true;
-  isTwelveMonthSelected: boolean = true;
   changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
   showModelComparison: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
@@ -90,11 +86,10 @@ export class RegressionModelMenuComponent implements OnInit {
         this.isFormChange = false;
       }
     });
-    this.setUserDefinedDefaultData();
-    this.checkDateValidity();
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
       this.calanderizedMeters = this.calanderizationService.getCalanderizedMetersByGroupId(this.group.idbGroupId);
       this.setYears();
+      this.setUserDefinedDefaultData();
     });
   }
 
@@ -125,21 +120,10 @@ export class RegressionModelMenuComponent implements OnInit {
     }
   }
 
-  checkDateValidity() {
-    if (!this.group.userDefinedModel) {
-      this.isDateRangeValid = this.checkDateRangeValidity();
-      this.isTwelveMonthSelected = this.checkTwelveMonthSelection();
-      this.allMeterReadingsPresent = this.validateMeterDataForSelectedDates();
-      this.allPredictorReadingsPresent = this.validatePredictorDataForSelectedDates();
-    }
-  }
-
   async saveItem() {
-    this.resetErrors();
     this.isFormChange = true;
     this.analysisItem.isAnalysisVisited = false;
     this.setShowUserDefinedModelInspection.emit(false);
-    this.checkDateValidity();
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.setNumVariableOptions();
     this.analysisItem.groups[groupIndex] = this.group;
@@ -354,87 +338,5 @@ export class RegressionModelMenuComponent implements OnInit {
 
   async generateUserDefinedModel() {
     this.setShowUserDefinedModelInspection.emit(true);
-  }
-
-  validateMeterDataForSelectedDates() {
-    let month: number = this.group.regressionModelStartMonth;
-    let year: number = this.group.regressionStartYear;
-    const endMonth: number = this.group.regressionModelEndMonth;
-    const endYear: number = this.group.regressionEndYear;
-    let monthlyData: Array<MonthlyData> = this.calanderizedMeters.flatMap(meter => {
-      return meter.monthlyData;
-    });
-    while (year < endYear || (year === endYear && month <= endMonth)) {
-      const dataPresent = monthlyData.some(data => {
-        return data.year === year && data.monthNumValue === month;
-      });
-      if (!dataPresent) {
-        return false;
-      }
-      month++;
-      if (month > 11) {
-        month = 0;
-        year++;
-      }
-    }
-    return true;
-  }
-
-  validatePredictorDataForSelectedDates() {
-    let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-    let allPresent: boolean = true;
-    this.group.predictorVariables.forEach(variable => {
-      if (variable.productionInAnalysis) {
-        const variablePredictorData: Array<IdbPredictorData> = facilityPredictorEntries.filter(predictor => predictor.predictorId === variable.id);
-
-        let month: number = this.group.regressionModelStartMonth;
-        let year: number = this.group.regressionStartYear;
-        const endMonth: number = this.group.regressionModelEndMonth;
-        const endYear: number = this.group.regressionEndYear;
-
-        while (year < endYear || (year === endYear && month <= endMonth)) {
-          const dataPresent = variablePredictorData.some(predictorData => {
-            return predictorData.year === year && predictorData.month === month + 1;
-          });
-          if (!dataPresent) {
-            allPresent = false;
-            console.log(`Missing predictor data for variable ${variable.name} for ${month + 1} ${year}`);
-            break;
-          }
-          month++;
-          if (month > 11) {
-            month = 0;
-            year++;
-          }
-        }
-      }
-    });
-    return allPresent;
-  }
-
-  checkDateRangeValidity() {
-    const startMonth = this.group.regressionModelStartMonth;
-    const startYear = this.group.regressionStartYear;
-    const endMonth = this.group.regressionModelEndMonth;
-    const endYear = this.group.regressionEndYear;
-
-    if (endYear < startYear) {
-      return false;
-    } else if (endYear === startYear && endMonth < startMonth) {
-      return false;
-    }
-    return true;
-  }
-
-  checkTwelveMonthSelection() {
-    const totalMonths = (this.group.regressionEndYear - this.group.regressionStartYear) * 12 + (this.group.regressionModelEndMonth - this.group.regressionModelStartMonth) + 1;
-    return totalMonths >= 12;
-  }
-
-  resetErrors() {
-    this.isDateRangeValid = true;
-    this.isTwelveMonthSelected = true;
-    this.allMeterReadingsPresent = true;
-    this.allPredictorReadingsPresent = true;
   }
 }

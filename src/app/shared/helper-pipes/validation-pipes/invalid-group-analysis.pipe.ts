@@ -3,10 +3,10 @@ import { AnalysisGroup } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { getGroupErrors } from '../../validation/analysisValidation';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { CalanderizationService } from '../../helper-services/calanderization.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { getGroupErrors } from '../../validation/groupAnalysisValidation';
 
 @Pipe({
   name: 'invalidGroupAnalysis',

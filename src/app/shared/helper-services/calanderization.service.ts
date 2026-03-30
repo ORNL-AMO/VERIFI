@@ -25,6 +25,10 @@ export class CalanderizationService {
   displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';
 
+  //calanderizedMeters in this service should be used for finding date ranges 
+  //NOT for displaying results for energy use. The units and site/source
+  //is not considered in this calanderizedMeters object.
+  //when needing energy use, calculate at the place using the results
   calanderizedMeters: BehaviorSubject<Array<CalanderizedMeter>>;
   calanderizationWorker: Worker;
   constructor(
