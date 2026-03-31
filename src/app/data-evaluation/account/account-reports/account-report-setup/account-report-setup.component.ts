@@ -9,7 +9,6 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { ReportType } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-account-report-setup',
@@ -24,15 +23,12 @@ export class AccountReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  // reportType: ReportType;
-  // errorMessage: string = '';
-  // errorMessageSub: Subscription;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   showReportYearWarning: boolean = false;
-  // showYearErrorMsg: boolean = false;
-  // showYearErrorMsgSub: Subscription;
   selectedReport: IdbAccountReport;
+
+  calanderizedMeterSub: Subscription;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -44,34 +40,25 @@ export class AccountReportSetupComponent {
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
-    // let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    // this.reportType = selectedReport.reportType;
-    this.setYearOptions();
-
-    // this.errorMessageSub = this.accountReportsService.errorMessage.subscribe(message => {
-    //   this.errorMessage = message;
-    // });
-
-    // this.showYearErrorMsgSub = this.accountReportsService.compareBaselineYearToReportYearError.subscribe(showError => {
-    //   this.showYearErrorMsg = showError;
-    // });
-
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
       if (!this.isFormChange) {
         this.setupForm = this.accountReportsService.getSetupFormFromReport(this.selectedReport);
-        this.checkReportYear();
       }
       else {
         this.isFormChange = false;
       }
     });
+
+    this.calanderizedMeterSub = this.calanderizationService.calanderizedMeters.subscribe(val => {
+      this.setYearOptions();
+      this.checkReportYear();
+    });
   }
 
   ngOnDestroy() {
-    // this.errorMessageSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
-    // this.showYearErrorMsgSub.unsubscribe();
+    this.calanderizedMeterSub.unsubscribe();
   }
 
   async save() {

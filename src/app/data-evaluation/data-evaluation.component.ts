@@ -19,7 +19,6 @@ export class DataEvaluationComponent {
   sidebarCollapsed: boolean = false;
   print: boolean = false;
   printSub: Subscription;
-  calanderizationWorker: Worker;
   constructor(
     private dataEvaluationService: DataEvaluationService
   ) {

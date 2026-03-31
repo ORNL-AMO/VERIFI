@@ -122,7 +122,6 @@ export class FacilityAnalysisReportSetupComponent {
   async saveAnalysisVisitedData() {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    //this.analysisDbService.analysisVisited.next(undefined);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
@@ -311,7 +310,6 @@ export class FacilityAnalysisReportSetupComponent {
   }
 
   setYearOptions() {
-    //TODO use calanderized meters
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;

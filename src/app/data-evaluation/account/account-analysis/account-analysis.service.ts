@@ -10,7 +10,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class AccountAnalysisService {
 
-  // selectedFacility: BehaviorSubject<IdbFacility>;
   calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
@@ -20,7 +19,6 @@ export class AccountAnalysisService {
 
   calanderizedMeters: BehaviorSubject<Array<CalanderizedMeter>>;
   constructor() {
-    // this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);

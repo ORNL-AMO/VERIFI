@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisService } from 'src/app/data-evaluation/account/account-analysis/account-analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-// import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
@@ -27,8 +24,7 @@ export class AccountAnalysisListComponent implements OnInit {
   orderByDirection: string = 'desc';
   canReturnToAccount: boolean;
   constructor(private analysisDbService: AnalysisDbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router, private accountAnalysisService: AccountAnalysisService,
-    private facilityDbService: FacilitydbService, private analysisService: AnalysisService,
+    private router: Router, private analysisService: AnalysisService,
     private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
@@ -50,9 +46,6 @@ export class AccountAnalysisListComponent implements OnInit {
   }
 
   selectAnalysisItem(item: IdbAccountAnalysisItem) {
-    //TODO: Select Facility on Navigation
-    // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    // this.accountAnalysisService.selectedFacility.next(selectedFacility);
     this.accountAnalysisDbService.selectedAnalysisItem.next(item);
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
   }

@@ -17,7 +17,7 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+
 @Component({
     selector: 'app-select-item-table',
     templateUrl: './select-item-table.component.html',

@@ -1,4 +1,3 @@
-import { AccountAnalysisSetupErrors } from "../accountAnalysis"
 import { AnalysisCategory } from "../analysis"
 import { IdbAccount } from "./account"
 import { IdbFacility } from "./facility"
@@ -17,7 +16,6 @@ export interface IdbAccountAnalysisItem extends IdbEntry {
     analysisCategory: AnalysisCategory,
     waterUnit: string,
     baselineYear: number,
-    // setupErrors: AccountAnalysisSetupErrors,
     facilityItemsInitialized?: boolean,
     hasBanking: boolean,
     isAnalysisVisited: boolean
@@ -52,12 +50,6 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         waterUnit: account.volumeLiquidUnit,
         analysisCategory: analysisCategory,
         hasBanking: false,
-        isAnalysisVisited: false,
-        // setupErrors: {
-        //     hasError: true,
-        //     missingName: false,
-        //     missingBaselineYear: false,
-        //     facilitiesSelectionsInvalid: true
-        // }
+        isAnalysisVisited: false
     }
 }
