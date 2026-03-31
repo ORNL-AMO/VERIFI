@@ -148,9 +148,8 @@ export class DbChangesService {
   async setAccountAnalysisItems(account: IdbAccount, skipUpdates: boolean) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     if (!skipUpdates) {
-      let facilityAnalysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllAccountAnalysisItems(account.guid);
       for (let i = 0; i < accountAnalysisItems.length; i++) {
-        let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
+        let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
         if (updateAnalysis.isChanged) {
           accountAnalysisItems[i] = updateAnalysis.analysisItem;
           await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));

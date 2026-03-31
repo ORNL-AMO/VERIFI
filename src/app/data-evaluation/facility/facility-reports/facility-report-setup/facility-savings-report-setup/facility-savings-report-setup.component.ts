@@ -10,7 +10,6 @@ import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { FacilityReportsService } from '../../facility-reports.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -23,7 +22,6 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 @Component({
   selector: 'app-facility-savings-report-setup',
   standalone: false,
-
   templateUrl: './facility-savings-report-setup.component.html',
   styleUrl: './facility-savings-report-setup.component.css'
 })
@@ -40,8 +38,6 @@ export class FacilitySavingsReportSetupComponent {
   reportSettings: SavingsFacilityReportSettings;
   reportYears: Array<number>;
   baselineYears: Array<number>;
-  errorMessage: string;
-  errorMessageSub: Subscription;
   months: Array<Month> = Months;
   analysisTableColumns: AnalysisTableColumns;
   selectedBaselineYear: number | 'All' = 'All';
@@ -49,13 +45,13 @@ export class FacilitySavingsReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   hasDataChanged: boolean = false;
 
+  calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService,
-    private facilityReportsService: FacilityReportsService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService) {
@@ -69,7 +65,9 @@ export class FacilitySavingsReportSetupComponent {
       this.analysisTableColumns = this.reportSettings.analysisTableColumns;
     });
 
-    this.setYearOptions();
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
+      this.setYearOptions();
+    });
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
@@ -79,16 +77,12 @@ export class FacilitySavingsReportSetupComponent {
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }
-
-    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
-      this.errorMessage = message;
-    });
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
-    this.errorMessageSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   async setSelectedAnalysisItem(onInit: boolean) {

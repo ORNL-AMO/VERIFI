@@ -1,3 +1,4 @@
+@let groupErrors = group | invalidGroupAnalysis: analysisItem;
 <div class="row">
   <div class="col-md-4 col-sm-12">
     <label class="bold">Select Modeling Method</label>
@@ -82,23 +83,28 @@
         </div>
         <div class="d-flex flex-column justify-content-center align-items-center">
           <div class="p-0">
-            <button class="mt-0 btn action-btn" [disabled]="isButtonDisabled"
+            <button class="mt-0 btn action-btn" [disabled]="groupErrors.hasInvalidUserDefinedModel"
               (click)="generateUserDefinedModel()">Evaluate Model</button>
           </div>
         </div>
-        @if (!isDateRangeValid) {
+        @if (!groupErrors.isDateRangeValid) {
         <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
           End date must be after the start date. Please check the input values.
         </div>
         }
-        @if (!isTwelveMonthSelected && isDateRangeValid) {
+        @if (!groupErrors.isTwelveMonthSelected && groupErrors.isDateRangeValid) {
         <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
           Model generation requires at least 12 months of data. Please check the input values.
         </div>
         }
-        @if (!allMeterReadingsPresent || !allPredictorReadingsPresent) {
+        @if (!groupErrors.allMeterReadingsPresent){
         <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
-          Data is missing within the provided date range. Please check the data.
+          Meter data is missing within the provided date range. Please check the data.
+        </div>
+        }
+        @if(!groupErrors.allPredictorReadingsPresent) {
+        <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
+          Predictor data is missing within the provided date range. Please check the predictor data.
         </div>
         }
       </div>

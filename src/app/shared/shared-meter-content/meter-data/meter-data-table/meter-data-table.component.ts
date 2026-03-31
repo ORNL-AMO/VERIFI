@@ -15,7 +15,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { EditMeterFormService } from '../../edit-meter-form/edit-meter-form.service';
-import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter-data.pipe';
+import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/validation-pipes/invalid-meter-data.pipe';
 
 @Component({
   selector: 'app-meter-data-table',

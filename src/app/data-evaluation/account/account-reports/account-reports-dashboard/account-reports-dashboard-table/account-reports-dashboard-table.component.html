@@ -1,137 +1,138 @@
-@if (reportList.length != 0) {
-  <div class="wrapper">
-    <div class="row mb-5">
-      <label class="form-label fw-bold">Filter by Report Type:</label>
-      <div class="col-2">
-        <select class="form-select" [(ngModel)]="selectedReportType" (change)="getReports()">
-          <option value="">All</option>
-          @for (type of reportTypes; track type) {
-            <option [value]="type">{{ type | accountReportType}}</option>
-          }
-        </select>
-      </div>
-      <div class="col">
-        <app-table-items-dropdown></app-table-items-dropdown>
-      </div>
+@if (reports.length != 0) {
+<div class="wrapper mt-2 pt-2">
+  <div class="row mb-5">
+    <label class="form-label fw-bold">Filter by Report Type:</label>
+    <div class="col-2">
+      <select class="form-select" [(ngModel)]="selectedReportType">
+        <option value="">All</option>
+        @for (type of reportTypes; track type) {
+        <option [value]="type">{{ type | accountReportType}}</option>
+        }
+      </select>
     </div>
-    <div class="table-responsive mt-4">
-      <table class="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th class="can-click" (click)="setOrderDataField('report.name')"
-              [ngClass]="{'active': orderDataField == 'report.name'}">
-              Report Name
-            </th>
-            <th class="can-click" (click)="setOrderDataField('report.reportType')"
-              [ngClass]="{'active': orderDataField == 'report.reportType'}">
-              Report Type
-            </th>
-            <th class="can-click" (click)="setOrderDataField(yearSortField)"
-              [ngClass]="{'active': orderDataField == yearSortField}">
-              Report Year
-            </th>
-            <th class="can-click" (click)="setOrderDataField('report.modifiedDate')"
-              [ngClass]="{'active': orderDataField == 'report.modifiedDate'}">
-              Last Modified
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (data of reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data) {
-            <tr
-              >
-              <td>
-                @if (!data.isValid) {
-                  <span class="fa fa-exclamation-circle"></span>
-                }
-                <a (click)="selectReport(data.report)">{{ data.report.name }}</a>
-              </td>
-              <td>
-                <span class="badge" [ngClass]="data.report.reportType | reportBadgeClass">{{
-                  data.report.reportType |
-                accountReportType }}</span>
-              </td>
-              <td>
-                @switch (data.report.reportType) {
-                  @case ('accountEmissionFactors') {
-                    @if (data.report.startYear != undefined) {
-                      {{ data.report.startYear }} -
-                    }
-                    @if (data.report.endYear != undefined) {
-                      {{ data.report.endYear }}
-                    }
-                    @if (data.report.startYear === undefined && data.report.endYear === undefined) {
-                      &mdash;
-                    }
-                  }
-                  @case ('dataOverview') {
-                    @if (data.report.startMonth != undefined && data.report.startYear != undefined) {
-                      {{ data.report.startMonth | reportDate: data.report.startYear | date: 'MMM. y' }} -
-                    }
-                    @if (data.report.endMonth != undefined && data.report.endYear != undefined) {
-                      {{ data.report.endMonth | reportDate: data.report.endYear | date: 'MMM. y' }}
-                    }
-                    @if (data.report.startMonth === undefined && data.report.startYear === undefined && data.report.endMonth === undefined && data.report.endYear === undefined) {
-                      &mdash;
-                    }
-                  }
-                  @case ('accountSavings') {
-                    @if (data.report.endYear !== undefined) {
-                      {{ data.report.endYear }}
-                    }
-                    @if (data.report.endYear === undefined) {
-                      &mdash;
-                    }
-                  }
-                  @default {
-                    @if (data.report.reportYear !== undefined && data.report.reportYear !== null) {
-                      {{ data.report.reportYear }}
-                    } @else {
-                      &mdash;
-                    }
-                  }
-                }
-              </td>
-              <td>{{data.report.modifiedDate | date:'short'}}</td>
-              <td class="text-center">
-                <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(data.report)">
-                  <i class="fa fa-copy"></i>
-                </button>
-                <button title="Delete" class="btn action-btn btn-sm me-2" (click)="deleteReport(data.report)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    <div class="d-flex w-100 justify-content-end">
-      <ngb-pagination
-        [collectionSize]="(reportList | reportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
-        [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
-        aria-label="Pagination">
-      </ngb-pagination>
+    <div class="col-2">
+      <app-table-items-dropdown></app-table-items-dropdown>
     </div>
   </div>
+  <div class="table-responsive mt-4">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th class="can-click" (click)="setOrderDataField('name')"
+            [ngClass]="{'active': orderDataField == 'name'}">
+            Report Name
+          </th>
+          <th class="can-click" (click)="setOrderDataField('reportType')"
+            [ngClass]="{'active': orderDataField == 'reportType'}">
+            Report Type
+          </th>
+          <th class="can-click" (click)="setOrderDataField('reportYear')"
+            [ngClass]="{'active': orderDataField == 'reportYear'}">
+            Report Year
+          </th>
+          <th class="can-click" (click)="setOrderDataField('modifiedDate')"
+            [ngClass]="{'active': orderDataField == 'modifiedDate'}">
+            Last Modified
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (report of reports | reportOrderBy: orderDataField: orderByDirection: selectedReportType | slice:
+        ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track report.guid) {
+        <tr>
+          <td>
+            @let reportErrors = report | invalidAccountReport;
+            @if (reportErrors.hasErrors) {
+            <span class="fa fa-exclamation-circle"></span>
+            }
+            <a (click)="selectReport(report)">{{ report.name }}</a>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="report.reportType | reportBadgeClass">{{
+              report.reportType |
+              accountReportType }}</span>
+          </td>
+          <td>
+            @switch (report.reportType) {
+            @case ('accountEmissionFactors') {
+            @if (report.startYear != undefined) {
+            {{ report.startYear }} -
+            }
+            @if (report.endYear != undefined) {
+            {{ report.endYear }}
+            }
+            @if (report.startYear === undefined && report.endYear === undefined) {
+            &mdash;
+            }
+            }
+            @case ('dataOverview') {
+            @if (report.startMonth != undefined && report.startYear != undefined) {
+            {{ report.startMonth | reportDate: report.startYear | date: 'MMM. y' }} -
+            }
+            @if (report.endMonth != undefined && report.endYear != undefined) {
+            {{ report.endMonth | reportDate: report.endYear | date: 'MMM. y' }}
+            }
+            @if (report.startMonth === undefined && report.startYear === undefined && report.endMonth ===
+            undefined && report.endYear === undefined) {
+            &mdash;
+            }
+            }
+            @case ('accountSavings') {
+            @if (report.endYear !== undefined) {
+            {{ report.endYear }}
+            }
+            @if (report.endYear === undefined) {
+            &mdash;
+            }
+            }
+            @default {
+            @if (report.reportYear !== undefined && report.reportYear !== null) {
+            {{ report.reportYear }}
+            } @else {
+            &mdash;
+            }
+            }
+            }
+          </td>
+          <td>{{report.modifiedDate | date:'short'}}</td>
+          <td class="text-center">
+            <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(report)">
+              <i class="fa fa-copy"></i>
+            </button>
+            <button title="Delete" class="btn action-btn btn-sm me-2" (click)="deleteReport(report)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="d-flex w-100 justify-content-end">
+    <ngb-pagination
+      [collectionSize]="(reports | reportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
+      [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+  </div>
+</div>
 }
 
 
-@if (reportList.length == 0) {
-  <div class="card card-body">
-    <div class="text-center bold">
-      No reports found for this account. Click "+Add New Report" to create your first report!
-    </div>
+@if (reports.length == 0) {
+<div class="card card-body">
+  <div class="text-center bold">
+    No reports found for this account. Click "+Add New Report" to create your first report!
   </div>
+</div>
 }
 
 <div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
 <div class="popup" [class.open]="displayDeleteModal">
   @if (displayDeleteModal) {
-    <div class="popup-header">Delete: {{deletedReport.name}}
-      <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
+  <div class="popup-header">Delete: {{deletedReport.name}}
+    <button class="item-right" (click)="cancelDelete()">x</button>
+  </div>
   }
   <div class="popup-body">
     <p>WARNING: Deleting this report cannot be undone.</p>

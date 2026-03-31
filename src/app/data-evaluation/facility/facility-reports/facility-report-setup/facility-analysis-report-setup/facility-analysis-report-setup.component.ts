@@ -17,6 +17,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-facility-analysis-report-setup',
@@ -45,6 +47,7 @@ export class FacilityAnalysisReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
 
   hasDataChanged: boolean = false;
+  calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
@@ -53,7 +56,8 @@ export class FacilityAnalysisReportSetupComponent {
     private calanderizationService: CalanderizationService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService,
+    private router: Router) {
 
   }
 
@@ -69,15 +73,19 @@ export class FacilityAnalysisReportSetupComponent {
       this.applyFilters();
     });
     this.setSelectedAnalysisItem(true);
-    this.setYearOptions();
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
+      this.setYearOptions();
+    });
+
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   checkModelData() {
@@ -114,7 +122,6 @@ export class FacilityAnalysisReportSetupComponent {
   async saveAnalysisVisitedData() {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    //this.analysisDbService.analysisVisited.next(undefined);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
@@ -321,5 +328,10 @@ export class FacilityAnalysisReportSetupComponent {
   onOptionChange() {
     this.applyFilters();
     this.setSelectedAnalysisItem(true);
+  }
+
+  goToAnalysis(item: IdbAnalysisItem) {
+    this.analysisDbService.selectedAnalysisItem.next(item);
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facilityReport.facilityId + '/analysis/run-analysis');
   }
 }

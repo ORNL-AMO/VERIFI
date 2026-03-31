@@ -17,15 +17,15 @@
           <label class="col-5 col-form-label" for="analysisName">Name</label>
           <div class="col-7">
             <input class="form-control" type="text" id="analysisName" name="analysisName"
-              [(ngModel)]="analysisItem.name" (input)="saveItem()">
+              [(ngModel)]="analysisItem.name" (input)="saveItem()" required>
           </div>
+          @if (!analysisItem.name) {
           <div class="col-12">
-            @if (analysisItem.setupErrors.missingName) {
             <div class="alert alert-danger">
               Name Required
             </div>
-            }
           </div>
+          }
         </div>
         @if (analysisItem.analysisCategory == 'energy') {
         <div class="form-group row">
@@ -108,12 +108,13 @@
           {{baselineYearWarning}}
         </div>
         }
-        @if (analysisItem.setupErrors.baselineYearAfterMeterDataEnd) {
+        @let setupErrors = analysisItem | invalidAnalysis;
+        @if (setupErrors.baselineYearAfterMeterDataEnd) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
         </div>
         }
-        @if (analysisItem.setupErrors.baselineYearBeforeMeterDataStart) {
+        @if (setupErrors.baselineYearBeforeMeterDataStart) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
           starts.

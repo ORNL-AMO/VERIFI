@@ -1,4 +1,5 @@
-@if (group.groupErrors.missingGroupMeters) {
+@let groupErrors = group | invalidGroupAnalysis: analysisItem;
+@if (groupErrors.missingGroupMeters) {
 <div class="p-4">
   <div class="alert alert-danger text-center">
     No meters found for this group. Analysis cannot be conducted on this group! Go to the <a
@@ -25,7 +26,7 @@
   </div>
 </div>
 }
-@if (!group.groupErrors.missingGroupMeters) {
+@if (!groupErrors.missingGroupMeters) {
 <div class="row">
   <div class="col-lg-6 col-md-12">
     <form>
@@ -109,14 +110,14 @@
                 }
               </div>
               }
-              @if (group.groupErrors.noProductionVariables) {
+              @if (groupErrors.noProductionVariables) {
               <div class="alert alert-danger text-center small">
                 No production variables found for this facility. Please go to your <a
                   (click)="goToPredictors()">Predictor
                   Variables</a> management page and set your production variables.
               </div>
               }
-              @if (group.groupErrors.missingProductionVariables) {
+              @if (groupErrors.missingProductionVariables) {
               <div class="alert alert-danger text-center small">
                 At least one production variable needs to be selected.
               </div>
@@ -162,7 +163,7 @@
                     <span class="input-group-text">%</span>
                   </div>
                 </div>
-                @if (group.groupErrors.invalidAverageBaseload) {
+                @if (groupErrors.invalidAverageBaseload) {
                 <div class="col-12 mt-2">
                   <div class="alert alert-danger text-center">
                     Average % Baseload value required.
@@ -192,7 +193,7 @@
                   </div>
                   }
                 </div>
-                @if (group.groupErrors.invalidMonthlyBaseload) {
+                @if (groupErrors.invalidMonthlyBaseload) {
                 <div class="col-12">
                   <div class="alert alert-danger text-center">
                     One or more monthly averages is missing.

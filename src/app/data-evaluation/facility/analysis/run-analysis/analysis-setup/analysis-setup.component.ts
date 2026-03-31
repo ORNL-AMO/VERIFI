@@ -10,12 +10,12 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -42,9 +42,10 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItemSub: Subscription;
   isFormChange: boolean = false;
   account: IdbAccount;
+  calanderizedMetersSub: Subscription;
+
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
-    private analysisValidationService: AnalysisValidationService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private calanderizationService: CalanderizationService,
@@ -57,14 +58,16 @@ export class AnalysisSetupComponent implements OnInit {
       if (!this.isFormChange) {
         this.analysisItem = item;
         this.facility = this.facilityDbService.selectedFacility.getValue();
-        this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
         this.setBaselineYearWarning();
         this.setComponentBools();
         this.setFacilityAnalysisItems();
       } else {
         this.isFormChange = false;
       }
-    })
+    });
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
+      this.yearOptions = this.calanderizationService.getYearOptions(this.analysisItem.analysisCategory, true, this.facility.guid);
+    });
   }
 
   ngOnDestroy() {
@@ -73,7 +76,6 @@ export class AnalysisSetupComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
-    this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -153,7 +155,6 @@ export class AnalysisSetupComponent implements OnInit {
       group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       })
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group, this.analysisItem);
     });
     await this.saveItem();
     this.setComponentBools();
@@ -178,11 +179,11 @@ export class AnalysisSetupComponent implements OnInit {
     await this.saveItem();
   }
 
-  goToSavingsReport(){
+  goToSavingsReport() {
     this.router.navigate(['../../../reports'], { relativeTo: this.activatedRoute });
   }
 
-  goToSettings(){
+  goToSettings() {
     this.router.navigateByUrl('/data-evaluation/account/settings');
   }
 }

@@ -10,7 +10,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, ModelingReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { FacilityReportsService } from '../../facility-reports.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-facility-modeling-report-setup',
@@ -27,16 +27,15 @@ export class FacilityModelingReportSetupComponent {
   selectedAnalysisItem: IdbAnalysisItem;
   reportSettings: ModelingReportSettings;
   reportYears: Array<number>;
-  errorMessage: string;
-  errorMessageSub: Subscription;
 
+  calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService,
-    private facilityReportsService: FacilityReportsService
+    private router: Router
   ) {
 
   }
@@ -47,22 +46,20 @@ export class FacilityModelingReportSetupComponent {
       this.reportSettings = this.facilityReport.modelingReportSettings;
     });
 
-    this.setYearOptions();
-
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
     });
     this.setSelectedAnalysisItem(true);
 
-    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
-      this.errorMessage = message;
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
+      this.setYearOptions();
     });
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
-    this.errorMessageSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   async setSelectedAnalysisItem(onInit: boolean) {
@@ -86,5 +83,10 @@ export class FacilityModelingReportSetupComponent {
     //TODO: include partial years for savings reports?
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
+  }
+
+  goToAnalysis(item: IdbAnalysisItem) {
+    this.analysisDbService.selectedAnalysisItem.next(item);
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facilityReport.facilityId + '/analysis/run-analysis');
   }
 }

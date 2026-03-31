@@ -9,7 +9,6 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { ReportType } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-account-report-setup',
@@ -24,14 +23,12 @@ export class AccountReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  reportType: ReportType;
-  errorMessage: string = '';
-  errorMessageSub: Subscription;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   showReportYearWarning: boolean = false;
-  showYearErrorMsg: boolean = false;
-  showYearErrorMsgSub: Subscription;
+  selectedReport: IdbAccountReport;
+
+  calanderizedMeterSub: Subscription;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -43,57 +40,44 @@ export class AccountReportSetupComponent {
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    this.reportType = selectedReport.reportType;
-    this.setYearOptions();
-
-    this.errorMessageSub = this.accountReportsService.errorMessage.subscribe(message => {
-      this.errorMessage = message;
-    });
-
-    this.showYearErrorMsgSub = this.accountReportsService.compareBaselineYearToReportYearError.subscribe(showError => {
-      this.showYearErrorMsg = showError;
-    });
-
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
-      selectedReport = val;
+      this.selectedReport = val;
       if (!this.isFormChange) {
-        this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
-        this.checkReportYear();
+        this.setupForm = this.accountReportsService.getSetupFormFromReport(this.selectedReport);
       }
       else {
         this.isFormChange = false;
       }
     });
+
+    this.calanderizedMeterSub = this.calanderizationService.calanderizedMeters.subscribe(val => {
+      this.setYearOptions();
+      this.checkReportYear();
+    });
   }
 
   ngOnDestroy() {
-    this.errorMessageSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
-    this.showYearErrorMsgSub.unsubscribe();
+    this.calanderizedMeterSub.unsubscribe();
   }
 
   async save() {
     this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
-    selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm);
-    selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
+    this.selectedReport = this.accountReportsService.updateReportFromSetupForm(this.selectedReport, this.setupForm);
+    this.selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(this.selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
+    this.accountReportDbService.selectedReport.next(this.selectedReport);
     this.checkReportYear();
   }
 
   setYearOptions() {
-    //TODO: baseline years less than report year selection
-    //TODO: report years greater than baseline year selection
-    //TODO: get options by water/energy
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }
 
   checkReportYear() {
-    if (this.reportType == 'analysis' && this.setupForm.controls.reportYear.value != undefined) {
+    if (this.selectedReport.reportType == 'analysis' && this.setupForm.controls.reportYear.value != undefined) {
       this.showReportYearWarning = this.calanderizationService.checkReportYearSelection('all', this.setupForm.controls.reportYear.value, true);
     }
   }

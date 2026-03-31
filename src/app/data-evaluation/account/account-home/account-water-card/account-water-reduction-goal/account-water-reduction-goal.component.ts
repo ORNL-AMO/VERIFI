@@ -76,10 +76,6 @@ export class AccountWaterReductionGoalComponent {
 
   goToAnalysisItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
-    if (this.latestAnalysisItem.setupErrors.hasError || this.latestAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/results');
-    }
+    this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

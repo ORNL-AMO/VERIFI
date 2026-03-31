@@ -1,32 +1,33 @@
-@if (!inDashboard) {
+@if (!inDashboard && selectedReport) {
   <div class="reports banner sticky-top d-flex justify-content-between"
     [ngClass]="{'modal-open': modalOpen}">
     <div>
+      @let reportErrors = selectedReport | invalidAccountReport;
       <ul class="nav nav-tabs">
         <li class="nav-item">
           <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
-            @if (!setupValid) {
+            @if (reportErrors.hasErrors) {
               <span class="fa fa-exclamation-circle"></span>
             }
             <i class="fa fa-gears"></i>
           Report Setup</a>
         </li>
          @if (selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'accountSavings') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
             <a class="nav-link" routerLink="report-data-check" [routerLinkActive]="['active']">
               <i class="fa fa-circle-check"></i>
             Data Check</a>
           </li>
         }
         @if (selectedReport.reportType == 'betterPlants') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
             <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
             Better Plants Report</a>
           </li>
         }
         @if (selectedReport.reportType == 'dataOverview') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}"
             >
             <a class="nav-link" routerLink="data-overview-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
@@ -34,14 +35,14 @@
           </li>
         }
         @if (selectedReport.reportType == 'performance') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
             <a class="nav-link" routerLink="performance-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
             Performance Report</a>
           </li>
         }
         @if (selectedReport.reportType == 'betterClimate') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}"
             >
             <a class="nav-link" routerLink="better-climate-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
@@ -49,14 +50,14 @@
           </li>
         }
         @if (selectedReport.reportType == 'analysis') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
             <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
             Modeling Report</a>
           </li>
         }
         @if (selectedReport.reportType == 'accountSavings') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
             <a class="nav-link" routerLink="account-savings-report"
               [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>
@@ -64,7 +65,7 @@
           </li>
         }
         @if (selectedReport.reportType == 'accountEmissionFactors') {
-          <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}"
             >
             <a class="nav-link" routerLink="account-emission-factors-report" [routerLinkActive]="['active']">
               <i class="fa fa-file"></i>

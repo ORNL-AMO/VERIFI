@@ -20,14 +20,6 @@
       </select>
     </div>
   </div>
-
-  @if (errorMessage) {
-  <div class="row justify-content-end">
-    <span class="col-6 alert alert-danger small mt-2">
-      {{errorMessage}}
-    </span>
-  </div>
-  }
 </form>
 <hr>
 
@@ -93,7 +85,8 @@
         </td>
         <td>
           {{item.name}}
-          @if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
+          @let setupErrors = item | invalidAnalysis;
+          @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
           <span class="text-danger ps-1">
             <span class="fa fa-exclamation-circle"></span> Contains Errors
           </span>

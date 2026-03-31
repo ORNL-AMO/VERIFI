@@ -2,11 +2,8 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { AnalysisDbService } from './analysis-db.service';
-import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 
 @Injectable({
   providedIn: 'root'
@@ -17,8 +14,6 @@ export class AccountAnalysisDbService {
   selectedAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private analysisDbService: AnalysisDbService,
-    private analysisValidationService: AnalysisValidationService,
     private loadingService: LoadingService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
@@ -88,27 +83,8 @@ export class AccountAnalysisDbService {
         item.analysisItemId = analysisItemId;
       }
     });
-    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    analysiItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysiItem, analysisItems);
     await firstValueFrom(this.updateWithObservable(analysiItem));
     this.selectedAnalysisItem.next(analysiItem);
-  }
-
-  async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
-    let hasChanges: boolean = false;
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let item: IdbAccountAnalysisItem = accountAnalysisItems[i];
-      let results: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.analysisValidationService.updateFacilitySelectionErrors(item, allAnalysisItems);
-      if (results.isChanged) {
-        accountAnalysisItems[i] = results.analysisItem;
-        await firstValueFrom(this.updateWithObservable(accountAnalysisItems[i]));
-        hasChanges = true;
-      }
-    }
-    if (hasChanges) {
-      this.accountAnalysisItems.next(accountAnalysisItems);
-    }
   }
 
   getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {

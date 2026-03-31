@@ -1,4 +1,3 @@
-
 <div class="row">
   <div class="col-2 text-center">
   </div>
@@ -6,10 +5,10 @@
     Energy Reduction Goal @if (latestAnalysisDate) {
     ({{latestAnalysisDate | date:
     'MMM. y'}})
-  }
-</div>
-<div class="col-2 text-center">
-</div>
+    }
+  </div>
+  <div class="col-2 text-center">
+  </div>
 </div>
 <div class="row">
   <div class="col-2 text-center">
@@ -34,10 +33,10 @@
   </div>
 </div>
 @if (latestAnalysisItem) {
-  <div class="d-flex w-100 justify-content-center">
-    <a class="small click-link" (click)="goToAnalysisItem()">
-      <span class="fa fa-microscope"></span>
-      {{latestAnalysisItem.name}}
-    </a>
-  </div>
+<div class="d-flex w-100 justify-content-center">
+  <a class="small click-link" (click)="goToAnalysisItem()">
+    <span class="fa fa-microscope"></span>
+    {{latestAnalysisItem.name}}
+  </a>
+</div>
 }

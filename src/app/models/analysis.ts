@@ -1,5 +1,3 @@
-import { IdbPredictor } from "./idbModels/predictor"
-
 export interface MonthlyGroupSummary {
   date: Date,
   energyUse: number,
@@ -207,18 +205,6 @@ export interface SEPValidation {
   isValid: boolean
 }
 
-
-export interface AnalysisSetupErrors {
-  hasError: boolean,
-  missingName: boolean,
-  noGroups: boolean,
-  groupsHaveErrors: boolean,
-  missingBaselineYear: boolean,
-  baselineYearAfterMeterDataEnd: boolean,
-  baselineYearBeforeMeterDataStart: boolean,
-  bankingError: boolean
-}
-
 export interface AnalysisGroup {
   idbGroupId: string,
   analysisType: AnalysisType,
@@ -229,7 +215,6 @@ export interface AnalysisGroup {
   regressionModelEndMonth: number,
   regressionEndYear: number,
   regressionConstant: number,
-  groupErrors: GroupErrors,
   specifiedMonthlyPercentBaseload: boolean,
   averagePercentBaseload?: number,
   monthlyPercentBaseload: Array<{
@@ -263,28 +248,6 @@ export interface AnalysisGroupPredictorVariable {
   productionInAnalysis: boolean,
   regressionCoefficient: number,
   unit: string
-}
-
-export interface GroupErrors {
-  hasErrors: boolean,
-  missingProductionVariables: boolean,
-  missingRegressionConstant: boolean,
-  missingRegressionModelYear: boolean,
-  missingRegressionModelStartMonth: boolean,
-  missingRegressionStartYear: boolean,
-  missingRegressionModelEndMonth: boolean,
-  missingRegressionEndYear: boolean,
-  invalidModelDateSelection: boolean,
-  missingRegressionModelSelection: boolean,
-  missingRegressionPredictorCoef: boolean,
-  noProductionVariables: boolean,
-  invalidAverageBaseload: boolean,
-  invalidMonthlyBaseload: boolean,
-  missingGroupMeters: boolean,
-  hasInvalidRegressionModel: boolean,
-  missingBankingBaselineYear: boolean,
-  missingBankingAppliedYear: boolean,
-  invalidBankingYears: boolean
 }
 
 

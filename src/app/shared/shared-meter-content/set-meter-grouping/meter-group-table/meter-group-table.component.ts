@@ -1,18 +1,16 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as _ from 'lodash';
+import { MeterGroupingDataService } from '../meter-grouping-data.service';
 
 @Component({
   selector: 'app-meter-group-table',
@@ -26,8 +24,10 @@ export class MeterGroupTableComponent {
   meterGroup: IdbUtilityMeterGroup | undefined;
   @Input()
   showHeader: boolean;
-  @Input()
-  calanderizedMeterData: Array<CalanderizedMeter>;
+
+
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
 
   meters: Array<IdbUtilityMeter>;
   metersSub: Subscription;
@@ -51,13 +51,20 @@ export class MeterGroupTableComponent {
 
   facility: IdbFacility;
   facilitySub: Subscription;
+
+  calculatingMeterGroups: boolean | 'error' = false ;
+  calculatingMeterGroupsSub: Subscription;
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService
+    private meterGroupingDataService: MeterGroupingDataService
   ) { }
 
   ngOnInit() {
+    this.calculatingMeterGroupsSub = this.meterGroupingDataService.calanderizingMeterData.subscribe(calculating => {
+        this.calculatingMeterGroups = calculating;
+    });
+
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
     });
@@ -69,12 +76,15 @@ export class MeterGroupTableComponent {
           return m.groupId == this.meterGroup.guid;
         }
       });
-      this.setCalanderizedMeterData();
       this.setMeterList();
     });
     this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(meterData => {
       this.meterData = meterData;
-      this.setCalanderizedMeterData();
+      this.setMeterList();
+    });
+
+    this.calanderizedMetersSub = this.meterGroupingDataService.calanderizedMeters.subscribe(calanderizedMeters => {
+      this.calanderizedMeters = calanderizedMeters;
       this.setMeterList();
     });
   }
@@ -83,31 +93,21 @@ export class MeterGroupTableComponent {
     this.metersSub.unsubscribe();
     this.meterDataSub.unsubscribe();
     this.facilitySub.unsubscribe();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['calanderizedMeterData'] && !changes['calanderizedMeterData'].firstChange) {
-      this.setMeterList();
-    }
-  }
-
-  setCalanderizedMeterData() {
-    if (!this.calanderizedMeterData && this.meters && this.meterData) {
-      this.energyUnit = this.facility.energyUnit;
-      this.consumptionUnit = this.facility.volumeLiquidUnit;
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      this.calanderizedMeterData = getCalanderizedMeterData(this.meters, this.meterData, this.facility, false, { energyIsSource: this.facility.energyIsSource, neededUnits: undefined }, [], [], [this.facility], account.assessmentReportVersion, []);
-    }
+    this.calanderizedMetersSub.unsubscribe();
+    this.calculatingMeterGroupsSub.unsubscribe();
   }
 
   setMeterList() {
     this.meterList = new Array();
-    if (this.calanderizedMeterData && this.meterData) {
-      let allMonthlyData: Array<MonthlyData> = this.calanderizedMeterData.flatMap(cMeter => {
+    if (this.calanderizedMeters && this.meterData) {
+      let groupCalanderizedMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
+        return cMeter.meter.groupId == this.meterGroup.guid;
+      });
+      let allMonthlyData: Array<MonthlyData> = groupCalanderizedMeters.flatMap(cMeter => {
         return cMeter.monthlyData;
       });
       if (allMonthlyData.length > 0) {
-        this.lastFullYear = getLatestYearWithData(this.calanderizedMeterData, [this.facility])
+        this.lastFullYear = getLatestYearWithData(groupCalanderizedMeters, [this.facility])
         let latestMonthWithData: MonthlyData = _.maxBy(allMonthlyData, (mData: MonthlyData) => {
           return new Date(mData.year, mData.monthNumValue).getTime();
         });
@@ -118,7 +118,7 @@ export class MeterGroupTableComponent {
         this.lastTwelveMonthsStartDate.setMonth(this.lastTwelveMonthsStartDate.getMonth() + 1);
         this.lastFullYearConsumptionTotal = this.getLastFullYearConsumptionTotal(allMonthlyData);
         this.lastTwelveMonthsConsumptionTotal = this.getLastTwelveMonthsConsumption(allMonthlyData);
-        this.calanderizedMeterData.forEach(cMeter => {
+        groupCalanderizedMeters.forEach(cMeter => {
           let meterReadings: Array<IdbUtilityMeterData> = this.meterData.filter(m => m.meterId == cMeter.meter.guid);
           let lastReading: IdbUtilityMeterData = _.maxBy(meterReadings, (mData: IdbUtilityMeterData) => {
             return new Date(mData.year, mData.month, mData.day).getTime();
@@ -132,10 +132,13 @@ export class MeterGroupTableComponent {
             lastTwelveMonthsConsumption: lastTwelveMonthsConsumption
           });
         })
-      }else{
-        this.meterList = this.calanderizedMeterData.map(cMeter => {
+      } else {
+        let groupMeters: Array<IdbUtilityMeter> = this.meters.filter(m => {
+          return m.groupId == this.meterGroup.guid;
+        });
+        this.meterList = groupMeters.map(meter => {
           return {
-            meter: cMeter.meter,
+            meter: meter,
             lastReading: undefined,
             lastFullYearConsumption: undefined,
             lastTwelveMonthsConsumption: undefined

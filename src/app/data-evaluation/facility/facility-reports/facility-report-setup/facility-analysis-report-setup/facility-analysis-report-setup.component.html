@@ -62,6 +62,9 @@
         <th>
           Baseline Year
         </th>
+        <th>
+          View Analysis
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -76,7 +79,8 @@
         </td>
         <td>
           {{item.name}}
-          @if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
+          @let setupErrors = item | invalidAnalysis;
+          @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
           <span class="text-danger ps-1">
             <span class="fa fa-exclamation-circle"></span> Contains Errors
           </span>
@@ -92,6 +96,9 @@
         </td>
         <td>
           {{item.baselineYear}}
+        </td>
+        <td>
+          <a class="click-link" (click)="goToAnalysis(item)">View Analysis</a>
         </td>
       </tr>
       }

@@ -12,14 +12,6 @@
     </div>
   </div>
 
-  @if (errorMessage) {
-  <div class="row justify-content-end">
-    <span class="col-6 alert alert-danger small mt-2">
-      {{errorMessage}}
-    </span>
-  </div>
-  }
-
   <hr>
   <div>
     <label class="bold">
@@ -41,6 +33,9 @@
           <th>
             Analysis Type
           </th>
+          <th>
+
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -55,7 +50,8 @@
           </td>
           <td>
             {{item.name}}
-            @if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
+            @let setupErrors = item | invalidAnalysis;
+            @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
             <span class="text-danger ps-1">
               <span class="fa fa-exclamation-circle"></span> Contains Errors
             </span>
@@ -71,6 +67,9 @@
             @if (item.analysisCategory == 'energy') {
             Energy
             }
+          </td>
+          <td>
+            <a class="click-link" (click)="goToAnalysis(item)">View Analysis</a>
           </td>
         </tr>
         }
@@ -103,7 +102,8 @@
       </div>
 
       <div class="form-check">
-        <input type="checkbox" class="form-check-input" name="includeDataValidationTables" id="includeDataValidationTables"
+        <input type="checkbox" class="form-check-input" name="includeDataValidationTables"
+          id="includeDataValidationTables"
           [(ngModel)]="facilityReport.modelingReportSettings.includeDataValidationTables" (change)="save()">
         <label class="form-check-label" for="includeDataValidationTables">Data Validation Tables</label>
       </div>

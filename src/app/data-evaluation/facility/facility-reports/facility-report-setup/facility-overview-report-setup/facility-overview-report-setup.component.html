@@ -43,10 +43,11 @@
     </div>
   </div>
 
-  @if (errorMessage) {
+  @let reportErrors = facilityReport | invalidFacilityReport;
+  @if (reportErrors.invalidDateRange) {
   <div class="row justify-content-end">
     <span class="col-6 alert alert-danger small mt-2">
-      {{errorMessage}}
+      Start date cannot be later than the end date.
     </span>
   </div>
   }

@@ -6,19 +6,14 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { NavigationStart, Router } from '@angular/router';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-regression-model-selection',
@@ -28,6 +23,7 @@ import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/c
 })
 export class RegressionModelSelectionComponent implements OnInit {
 
+  analysisItem: IdbAnalysisItem;
   selectedGroup: AnalysisGroup;
   orderDataField: string = 'adjust_R2';
   orderByDirection: 'asc' | 'desc' = 'desc';
@@ -52,18 +48,16 @@ export class RegressionModelSelectionComponent implements OnInit {
     }
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
-
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisValidationService: AnalysisValidationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router) { }
+    private router: Router,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.selectedGroup || group.idbGroupId != this.selectedGroup.idbGroupId) {
         this.selectedGroup = group;
@@ -126,16 +120,13 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   async saveItem() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    analysisItem.isAnalysisVisited = false;
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
-    this.selectedGroup.groupErrors = this.analysisValidationService.getGroupErrors(this.selectedGroup, analysisItem);
-    analysisItem.groups[groupIndex] = this.selectedGroup;
-    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
-    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
+    this.analysisItem.isAnalysisVisited = false;
+    let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
+    this.analysisItem.groups[groupIndex] = this.selectedGroup;
+    await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
     this.analysisService.selectedGroup.next(this.selectedGroup)
   }
 
@@ -166,8 +157,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   setShowInUseMessage() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
     if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
       this.showInUseMessage = true;
     }
@@ -221,16 +211,14 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   setYears() {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.selectedGroup.idbGroupId });
-    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(groupMeters, facilityMeterData, this.selectedFacility, true, undefined, [], [], [this.selectedFacility], 'AR6', []);
-    let fullYearsWithData: Array<number> = getYearsWithFullData(calanderizedMeterData, this.selectedFacility);
-    let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    fullYearsWithData = fullYearsWithData.filter(year => {
-      return year >= selectedAnalysisItem.baselineYear;
-    })
-    this.modelFilterOptions.yearOptionSelections = fullYearsWithData.map(year => { return { year: year, isChecked: true } });
+    if (this.selectedGroup) {
+      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
+      let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeters, this.selectedFacility);
+      fullYearsWithData = fullYearsWithData.filter(year => {
+        return year >= this.analysisItem.baselineYear;
+      })
+      this.modelFilterOptions.yearOptionSelections = fullYearsWithData.map(year => { return { year: year, isChecked: true } });
+    }
   }
 }
 
