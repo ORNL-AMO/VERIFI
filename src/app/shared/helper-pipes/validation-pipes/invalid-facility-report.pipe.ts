@@ -27,7 +27,7 @@ export class InvalidFacilityReportPipe implements PipeTransform {
   transform(facilityReport: IdbFacilityReport): FacilityReportErrors {
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
     let calendarizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(facilityReport.facilityId);
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facilityReport.facilityId);
     let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityReport.facilityId);
     return getFacilityReportErrors(facilityReport,
       analysisItems,

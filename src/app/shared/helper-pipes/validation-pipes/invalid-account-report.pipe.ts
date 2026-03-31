@@ -16,6 +16,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 @Pipe({
   name: 'invalidAccountReport',
   standalone: false,
+  pure: false
 })
 export class InvalidAccountReportPipe implements PipeTransform {
 

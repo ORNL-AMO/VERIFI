@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import _ from 'lodash';
-import { AccountReportTypePipe, getAccountReportType } from './account-report-type.pipe';
+import { getAccountReportType } from './account-report-type.pipe';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Pipe({
@@ -20,7 +20,7 @@ export class ReportOrderByPipe implements PipeTransform {
       orderDirection = 'desc';
     }
 
-    if (orderDataBy === 'report.modifiedDate') {
+    if (orderDataBy === 'modifiedDate') {
       return _.orderBy(
         filteredData,
         (item: IdbAccountReport) => new Date(item.modifiedDate),
@@ -28,7 +28,7 @@ export class ReportOrderByPipe implements PipeTransform {
       );
     }
 
-    if (orderDataBy === 'report.reportYearOrEndYear') {
+    if (orderDataBy === 'reportYear') {
       return _.orderBy(
         filteredData,
         (item: IdbAccountReport) => {
@@ -40,7 +40,7 @@ export class ReportOrderByPipe implements PipeTransform {
       );
     }
 
-    if (orderDataBy === 'report.reportType') {
+    if (orderDataBy === 'reportType') {
       return _.orderBy(
         filteredData,
         (item: IdbAccountReport) => getAccountReportType(item.reportType),

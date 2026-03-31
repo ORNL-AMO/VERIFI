@@ -29,7 +29,7 @@ export class AccountReportsDashboardTableComponent {
   reportSub: Subscription;
   reports: Array<IdbAccountReport> = [];
 
-  orderDataField: string = 'report.reportName';
+  orderDataField: string = 'name';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
   currentPageNumber: number = 1;
@@ -103,9 +103,5 @@ export class AccountReportsDashboardTableComponent {
     } else {
       this.orderDataField = str;
     }
-  }
-
-  get yearSortField(): string {
-    return 'report.reportYearOrEndYear';
   }
 }

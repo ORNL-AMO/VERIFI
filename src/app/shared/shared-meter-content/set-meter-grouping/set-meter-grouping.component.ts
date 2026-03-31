@@ -63,6 +63,9 @@ export class SetMeterGroupingComponent {
     this.facilitySub.unsubscribe();
     this.meterDataSub.unsubscribe();
     this.meterGroupingDataService.calanderizedMeters.next([]);
+    if (this.calanderizationWorker) {
+      this.calanderizationWorker.terminate();
+    }
   }
 
   uploadData() {
@@ -83,6 +86,9 @@ export class SetMeterGroupingComponent {
       this.meterGroupingDataService.calanderizingMeterData.next(true);
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       if (typeof Worker !== 'undefined') {
+        if (this.calanderizationWorker) {
+          this.calanderizationWorker.terminate();
+        }
         this.calanderizationWorker = new Worker(new URL('../../../web-workers/calanderization.worker', import.meta.url));
         this.calanderizationWorker.onmessage = ({ data }) => {
           this.calanderizationWorker.terminate();

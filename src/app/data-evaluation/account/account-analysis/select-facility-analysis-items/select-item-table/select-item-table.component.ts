@@ -24,7 +24,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     styleUrls: ['./select-item-table.component.css'],
     standalone: false
 })
-export class SelectItemTableComponent implements OnInit {
+export class SelectItemTableComponent {
   @Input()
   facility: IdbFacility;
   @Input()
@@ -34,11 +34,10 @@ export class SelectItemTableComponent implements OnInit {
 
   selectedFacilityItemId: string;
   itemToEdit: IdbAnalysisItem;
-  facilities: Array<IdbFacility>
   showCreateItem: boolean;
   selectedFacilityItem: IdbAnalysisItem;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
+    private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
@@ -47,9 +46,6 @@ export class SelectItemTableComponent implements OnInit {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictorDbService) { }
 
-  ngOnInit(): void {
-    this.facilities = this.facilityDbService.accountFacilities.getValue();
-  }
 
   ngOnChanges() {
     this.setSelectedFacilityItemId();
@@ -68,7 +64,7 @@ export class SelectItemTableComponent implements OnInit {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    await this.dbChangesService.setAccountAnalysisItems(account, true);
     this.setSelectedFacilityItem();
   }
 
@@ -122,6 +118,7 @@ export class SelectItemTableComponent implements OnInit {
   }
 
   setSelectedFacilityItem() {
+    console.log('set selected facility item')
     if (this.selectedFacilityItemId) {
       let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
       this.selectedFacilityItem = analysisItems.find(item => { return item.guid == this.selectedFacilityItemId });

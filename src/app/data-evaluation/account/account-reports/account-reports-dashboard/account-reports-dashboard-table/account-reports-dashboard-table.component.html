@@ -18,20 +18,20 @@
     <table class="table table-bordered table-hover">
       <thead>
         <tr>
-          <th class="can-click" (click)="setOrderDataField('report.name')"
-            [ngClass]="{'active': orderDataField == 'report.name'}">
+          <th class="can-click" (click)="setOrderDataField('name')"
+            [ngClass]="{'active': orderDataField == 'name'}">
             Report Name
           </th>
-          <th class="can-click" (click)="setOrderDataField('report.reportType')"
-            [ngClass]="{'active': orderDataField == 'report.reportType'}">
+          <th class="can-click" (click)="setOrderDataField('reportType')"
+            [ngClass]="{'active': orderDataField == 'reportType'}">
             Report Type
           </th>
-          <th class="can-click" (click)="setOrderDataField(yearSortField)"
-            [ngClass]="{'active': orderDataField == yearSortField}">
+          <th class="can-click" (click)="setOrderDataField('reportYear')"
+            [ngClass]="{'active': orderDataField == 'reportYear'}">
             Report Year
           </th>
-          <th class="can-click" (click)="setOrderDataField('report.modifiedDate')"
-            [ngClass]="{'active': orderDataField == 'report.modifiedDate'}">
+          <th class="can-click" (click)="setOrderDataField('modifiedDate')"
+            [ngClass]="{'active': orderDataField == 'modifiedDate'}">
             Last Modified
           </th>
           <th>Actions</th>

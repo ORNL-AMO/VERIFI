@@ -113,6 +113,9 @@ export class SharedMeterCalendarizationComponent {
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
       if (typeof Worker !== 'undefined') {
+        if (this.calanderizationWorker) {
+          this.calanderizationWorker.terminate();
+        }
         this.calanderizationWorker = new Worker(new URL('../../../web-workers/calanderization.worker', import.meta.url));
         this.calanderizationWorker.onmessage = ({ data }) => {
           this.calanderizationWorker.terminate();

@@ -4,8 +4,10 @@
       @for (facilityItem of selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
       <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
           [ngClass]="{'active': facilityItem.facilityId == selectedFacility.guid}">
-          <i class="pe-2 fa"
-            [ngClass]="{'fa-square-minus': !facilityItem.analysisItemId, 'fa-square-check': facilityItem.analysisItemId}"></i>
+          <i class="pe-2 fa" [ngClass]="{
+              'fa-square-minus': !facilityItem.analysisItemId || facilityItem.analysisItemId === 'skip',
+              'fa-square-check': facilityItem.analysisItemId && facilityItem.analysisItemId !== 'skip'
+            }"></i>
           @if(facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
           @let analysisItem = facilityItem.analysisItemId | analysisItem;
           @let analysisSetupErrors = analysisItem | invalidAnalysis;
