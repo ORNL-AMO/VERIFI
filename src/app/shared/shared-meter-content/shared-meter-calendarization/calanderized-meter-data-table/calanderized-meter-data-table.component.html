@@ -114,7 +114,7 @@
   </thead>
   <tbody class="table-group-divider">
     @for (data of calanderizedMeter.monthlyData| orderBy: orderDataField: orderByDirection | slice:
-    ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data.meter.guid) {
+    ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data.date) {
     <tr [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
       <td>{{data.date | date: 'MMMM, y'}}</td>
       @if (calanderizedMeter.showConsumption && !isRECs) {

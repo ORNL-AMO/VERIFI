@@ -119,10 +119,10 @@
   </app-calanderization-chart>
   }
 </div>
-}
 }@else {
 <app-calculating-spinner [message]="'Calanderizing Meter Data...'"
   [error]="calanderizingMeterData == 'error'"></app-calculating-spinner>
+}
 }
 }
 @if (!hasMeterData) {

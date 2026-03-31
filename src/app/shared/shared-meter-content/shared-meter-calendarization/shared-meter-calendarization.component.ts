@@ -145,7 +145,6 @@ export class SharedMeterCalendarizationComponent {
   }
 
   finishSettingsCalanderizedMeterData(allCalanderizedMeterData: Array<CalanderizedMeter>) {
-
     let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
       return cMeter.meter.guid == this.selectedMeter.guid
     });

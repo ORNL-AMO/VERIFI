@@ -17,12 +17,16 @@ export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisIt
         analysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
-                let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
-                let analysisItemErrors: AnalysisSetupErrors = getAnalysisSetupErrors(analysisItem, calendarizedMeters, facility, facilityPredictorData);
-                if (analysisItemErrors.hasError || analysisItemErrors.groupsHaveErrors) {
-                    facilitiesSelectionsErrors.push(true)
-                } else {
-                    facilitiesSelectionsErrors.push(false);
+                if (analysisItem) {
+                    let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
+                    if (facility) {
+                        let analysisItemErrors: AnalysisSetupErrors = getAnalysisSetupErrors(analysisItem, calendarizedMeters, facility, facilityPredictorData);
+                        if (analysisItemErrors.hasError || analysisItemErrors.groupsHaveErrors) {
+                            facilitiesSelectionsErrors.push(true)
+                        } else {
+                            facilitiesSelectionsErrors.push(false);
+                        }
+                    }
                 }
             } else {
                 if (item.analysisItemId == 'skip') {
