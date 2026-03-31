@@ -6,6 +6,7 @@ import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { checkNumberValueValid } from "./validationHelpers";
 
 export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facilityPredictorData: Array<IdbPredictorData>): GroupAnalysisErrors {
+
     let missingProductionVariables: boolean = false;
     let missingRegressionConstant: boolean = false;
     let missingRegressionModelYear: boolean = false;
@@ -29,97 +30,99 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
     let allPredictorReadingsPresent: boolean = true;
     let hasRegressoinErrors: boolean = false;
     let hasInvalidUserDefinedModel: boolean = false;
-
-    let groupCalanderizedMeters: Array<CalanderizedMeter> = calendarizedMeters.filter(data => {
-        return data.meter.groupId == group.idbGroupId;
-    });
     let missingGroupMeters: boolean = false;
-    if (group.analysisType != 'absoluteEnergyConsumption' && group.analysisType != 'skipAnalysis' && group.analysisType != 'skip') {
-        missingGroupMeters = groupCalanderizedMeters.length == 0;
-        missingProductionVariables = checkMissingProductionVariables(group.predictorVariables);
-        if (group.analysisType == 'regression') {
-            missingRegressionConstant = checkNumberValueValid(group.regressionConstant) == false;
-            missingRegressionModelYear = checkNumberValueValid(group.regressionModelYear) == false;
-            if (!group.userDefinedModel) {
-                missingRegressionModelYear = false;
-                missingRegressionModelStartMonth = checkNumberValueValid(group.regressionModelStartMonth) == false;
-                missingRegressionStartYear = checkNumberValueValid(group.regressionStartYear) == false;
-                missingRegressionModelEndMonth = checkNumberValueValid(group.regressionModelEndMonth) == false;
-                missingRegressionEndYear = checkNumberValueValid(group.regressionEndYear) == false;
 
-                isDateRangeValid = checkDateRangeValidity(group);
-                isTwelveMonthSelected = checkTwelveMonthSelection(group);
-                allMeterReadingsPresent = validateMeterDataForSelectedDates(group, groupCalanderizedMeters);
-                allPredictorReadingsPresent = validatePredictorDataForSelectedDates(group, facilityPredictorData);
+    if (calendarizedMeters.length != 0) {
+        let groupCalanderizedMeters: Array<CalanderizedMeter> = calendarizedMeters.filter(data => {
+            return data.meter.groupId == group.idbGroupId;
+        });
+        if (group.analysisType != 'absoluteEnergyConsumption' && group.analysisType != 'skipAnalysis' && group.analysisType != 'skip') {
+            missingGroupMeters = groupCalanderizedMeters.length == 0;
+            missingProductionVariables = checkMissingProductionVariables(group.predictorVariables);
+            if (group.analysisType == 'regression') {
+                missingRegressionConstant = checkNumberValueValid(group.regressionConstant) == false;
+                missingRegressionModelYear = checkNumberValueValid(group.regressionModelYear) == false;
+                if (!group.userDefinedModel) {
+                    missingRegressionModelYear = false;
+                    missingRegressionModelStartMonth = checkNumberValueValid(group.regressionModelStartMonth) == false;
+                    missingRegressionStartYear = checkNumberValueValid(group.regressionStartYear) == false;
+                    missingRegressionModelEndMonth = checkNumberValueValid(group.regressionModelEndMonth) == false;
+                    missingRegressionEndYear = checkNumberValueValid(group.regressionEndYear) == false;
 
-                if (isDateRangeValid && isTwelveMonthSelected && allMeterReadingsPresent && allPredictorReadingsPresent) {
-                    invalidModelDateSelection = false;
-                }
-                else {
-                    invalidModelDateSelection = true;
-                }
-                hasInvalidUserDefinedModel = (missingRegressionModelStartMonth ||
-                    missingRegressionModelEndMonth ||
-                    missingRegressionStartYear ||
-                    missingRegressionEndYear ||
-                    invalidModelDateSelection ||
-                    missingRegressionConstant ||
-                    missingRegressionPredictorCoef)
-            }
-            for (let index = 0; index < group.predictorVariables.length; index++) {
-                let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
-                if (variable.productionInAnalysis && !checkNumberValueValid(variable.regressionCoefficient)) {
-                    missingRegressionPredictorCoef = true;
-                }
-            }
-            if (group.userDefinedModel && !group.selectedModelId) {
-                missingRegressionModelSelection = true;
-            } else if (group.selectedModelId) {
-                let model: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-                hasInvalidRegressionModel = model?.isValid == false;
-            }
+                    isDateRangeValid = checkDateRangeValidity(group);
+                    isTwelveMonthSelected = checkTwelveMonthSelection(group);
+                    allMeterReadingsPresent = validateMeterDataForSelectedDates(group, groupCalanderizedMeters);
+                    allPredictorReadingsPresent = validatePredictorDataForSelectedDates(group, facilityPredictorData);
 
-            hasRegressoinErrors = (missingRegressionConstant ||
-                missingRegressionModelYear ||
-                missingRegressionModelStartMonth ||
-                missingRegressionStartYear ||
-                missingRegressionModelEndMonth ||
-                missingRegressionEndYear ||
-                invalidModelDateSelection ||
-                missingRegressionModelSelection ||
-                missingRegressionPredictorCoef)
-        } else {
-            let hasProductionVariable: boolean = false;
-            for (let index = 0; index < group.predictorVariables.length; index++) {
-                let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
-                if (variable.production) {
-                    hasProductionVariable = true;
+                    if (isDateRangeValid && isTwelveMonthSelected && allMeterReadingsPresent && allPredictorReadingsPresent) {
+                        invalidModelDateSelection = false;
+                    }
+                    else {
+                        invalidModelDateSelection = true;
+                    }
+                    hasInvalidUserDefinedModel = (missingRegressionModelStartMonth ||
+                        missingRegressionModelEndMonth ||
+                        missingRegressionStartYear ||
+                        missingRegressionEndYear ||
+                        invalidModelDateSelection ||
+                        missingRegressionConstant ||
+                        missingRegressionPredictorCoef)
                 }
-            }
-            noProductionVariables = hasProductionVariable == false;
-        }
-        if (group.analysisType == 'modifiedEnergyIntensity') {
-            if (group.specifiedMonthlyPercentBaseload) {
-                for (let i = 0; i < group.monthlyPercentBaseload.length; i++) {
-                    if (!checkNumberValueValid(group.monthlyPercentBaseload[i].percent)) {
-                        invalidMonthlyBaseload = true;
+                for (let index = 0; index < group.predictorVariables.length; index++) {
+                    let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
+                    if (variable.productionInAnalysis && !checkNumberValueValid(variable.regressionCoefficient)) {
+                        missingRegressionPredictorCoef = true;
                     }
                 }
-            } else if (!checkNumberValueValid(group.averagePercentBaseload)) {
-                invalidAverageBaseload = true;
-            }
-        }
+                if (group.userDefinedModel && !group.selectedModelId) {
+                    missingRegressionModelSelection = true;
+                } else if (group.selectedModelId) {
+                    let model: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+                    hasInvalidRegressionModel = model?.isValid == false;
+                }
 
-        if (analysisItem.hasBanking && group.applyBanking) {
-            if (!group.newBaselineYear) {
-                missingBankingBaselineYear = true;
+                hasRegressoinErrors = (missingRegressionConstant ||
+                    missingRegressionModelYear ||
+                    missingRegressionModelStartMonth ||
+                    missingRegressionStartYear ||
+                    missingRegressionModelEndMonth ||
+                    missingRegressionEndYear ||
+                    invalidModelDateSelection ||
+                    missingRegressionModelSelection ||
+                    missingRegressionPredictorCoef)
+            } else {
+                let hasProductionVariable: boolean = false;
+                for (let index = 0; index < group.predictorVariables.length; index++) {
+                    let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
+                    if (variable.production) {
+                        hasProductionVariable = true;
+                    }
+                }
+                noProductionVariables = hasProductionVariable == false;
+            }
+            if (group.analysisType == 'modifiedEnergyIntensity') {
+                if (group.specifiedMonthlyPercentBaseload) {
+                    for (let i = 0; i < group.monthlyPercentBaseload.length; i++) {
+                        if (!checkNumberValueValid(group.monthlyPercentBaseload[i].percent)) {
+                            invalidMonthlyBaseload = true;
+                        }
+                    }
+                } else if (!checkNumberValueValid(group.averagePercentBaseload)) {
+                    invalidAverageBaseload = true;
+                }
             }
 
-            if (!group.bankedAnalysisYear) {
-                missingBankingAppliedYear = true;
-            }
-            if (group.bankedAnalysisYear && group.newBaselineYear) {
-                invalidBankingYears = (group.bankedAnalysisYear >= group.newBaselineYear);
+            if (analysisItem.hasBanking && group.applyBanking) {
+                if (!group.newBaselineYear) {
+                    missingBankingBaselineYear = true;
+                }
+
+                if (!group.bankedAnalysisYear) {
+                    missingBankingAppliedYear = true;
+                }
+                if (group.bankedAnalysisYear && group.newBaselineYear) {
+                    invalidBankingYears = (group.bankedAnalysisYear >= group.newBaselineYear);
+                }
             }
         }
     }
@@ -190,24 +193,31 @@ export function checkTwelveMonthSelection(group: AnalysisGroup) {
     return totalMonths >= 12;
 }
 
-export function validatePredictorDataForSelectedDates(group: AnalysisGroup, facilityPredictorData: Array<IdbPredictorData>) {
-    let allPresent: boolean = true;
-    group.predictorVariables.forEach(variable => {
-        if (variable.productionInAnalysis) {
-            const variablePredictorData = facilityPredictorData.filter(predictor => predictor.predictorId === variable.id);
+export function validatePredictorDataForSelectedDates(group: AnalysisGroup, facilityPredictorData: Array<IdbPredictorData>): boolean {
+    // Build a Map: predictorId -> Set of 'year-month' for fast lookup
+    const predictorDataMap: Map<string, Set<string>> = new Map();
+    for (const pd of facilityPredictorData) {
+        const key = `${pd.year}-${pd.month}`;
+        if (!predictorDataMap.has(pd.predictorId)) {
+            predictorDataMap.set(pd.predictorId, new Set());
+        }
+        predictorDataMap.get(pd.predictorId)!.add(key);
+    }
 
-            let month = group.regressionModelStartMonth;;
+    for (const variable of group.predictorVariables) {
+        if (variable.productionInAnalysis) {
+            const dataSet = predictorDataMap.get(variable.id);
+            if (!dataSet) {
+                return false;
+            }
+            let month = group.regressionModelStartMonth;
             let year = group.regressionStartYear;
             const endMonth = group.regressionModelEndMonth;
             const endYear = group.regressionEndYear;
-
             while (year < endYear || (year === endYear && month <= endMonth)) {
-                const dataPresent = variablePredictorData.some(predictorData => {
-                    return predictorData.year === year && predictorData.month - 1 === month;
-                });
-                if (!dataPresent) {
-                    allPresent = false;
-                    break;
+                const key = `${year}-${month + 1}`; // month+1 because original data uses 1-based months
+                if (!dataSet.has(key)) {
+                    return false;
                 }
                 month++;
                 if (month > 11) {
@@ -216,8 +226,8 @@ export function validatePredictorDataForSelectedDates(group: AnalysisGroup, faci
                 }
             }
         }
-    });
-    return allPresent;
+    }
+    return true;
 }
 
 export function validateMeterDataForSelectedDates(group: AnalysisGroup, groupCalanderizedMeters: Array<CalanderizedMeter>): boolean {

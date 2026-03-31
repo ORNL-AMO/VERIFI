@@ -45,7 +45,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
-      if (this.selectedFacility) {
+      if (this.selectedFacility && this.selectedFacility.accountId == this.selectedAnalysisItem.accountId) {
         this.setFacilityAnlaysisItems();
       } else if (this.facilities.length > 0) {
         this.selectFacility(this.facilities[0].guid);

@@ -8,7 +8,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -26,8 +26,6 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 })
 export class SelectItemTableComponent {
   @Input()
-  facility: IdbFacility;
-  @Input()
   selectedAnalysisItem: IdbAccountAnalysisItem;
   @Input()
   facilityAnalysisItems: Array<IdbAnalysisItem>;
@@ -36,6 +34,10 @@ export class SelectItemTableComponent {
   itemToEdit: IdbAnalysisItem;
   showCreateItem: boolean;
   selectedFacilityItem: IdbAnalysisItem;
+
+  facility: IdbFacility;
+  facilitySub: Subscription;
+
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
@@ -44,11 +46,18 @@ export class SelectItemTableComponent {
     private analysisService: AnalysisService,
     private sharedDataService: SharedDataService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictorDbService) { }
+    private predictorDbService: PredictorDbService,
+    private facilityDbservice: FacilitydbService) { }
 
+  ngOnInit(){
+    this.facilitySub = this.facilityDbservice.selectedFacility.subscribe(facility => {
+      this.facility = facility;
+      this.setSelectedFacilityItemId();
+    })
+  }
 
-  ngOnChanges() {
-    this.setSelectedFacilityItemId();
+  ngOnDestroy() {
+    this.facilitySub.unsubscribe();
   }
 
   setSelectedFacilityItemId() {
@@ -118,7 +127,6 @@ export class SelectItemTableComponent {
   }
 
   setSelectedFacilityItem() {
-    console.log('set selected facility item')
     if (this.selectedFacilityItemId) {
       let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
       this.selectedFacilityItem = analysisItems.find(item => { return item.guid == this.selectedFacilityItemId });

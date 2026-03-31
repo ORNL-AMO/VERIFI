@@ -22,6 +22,9 @@ export function getAccountReportErrors(accountReport: IdbAccountReport, allAccou
         missingEndDate: false,
         analysisHasErrors: false
     };
+    if(calendarizedMeters.length == 0){
+        return errors;
+    }
 
     // Required field checks
     errors.missingName = !accountReport.name || accountReport.name.toString().trim() === '';

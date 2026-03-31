@@ -8,6 +8,9 @@ import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validat
 import { getGroupErrors } from "./groupAnalysisValidation";
 
 export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, facilityPredictorData: Array<IdbPredictorData>): AnalysisSetupErrors {
+    if (calendarizedMeters.length == 0) {
+        return emptyAnalysisSetupErrors();
+    }
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let noGroups: boolean = analysisItem.groups.length == 0;
     let missingBaselineYear: boolean = checkNumberValueValid(analysisItem.baselineYear) == false;

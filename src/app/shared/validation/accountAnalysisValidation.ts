@@ -12,32 +12,34 @@ export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisIt
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let missingBaselineYear: boolean = checkNumberValueValid(analysisItem.baselineYear) == false;
     let hasSetupError: boolean = (missingName || missingBaselineYear);
-    let facilitiesSelectionsErrors: Array<boolean> = [];
-    if (analysisItem.facilityAnalysisItems) {
-        analysisItem.facilityAnalysisItems.forEach(item => {
-            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
-                let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
-                if (analysisItem) {
-                    let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
-                    if (facility) {
-                        let analysisItemErrors: AnalysisSetupErrors = getAnalysisSetupErrors(analysisItem, calendarizedMeters, facility, facilityPredictorData);
-                        if (analysisItemErrors.hasError || analysisItemErrors.groupsHaveErrors) {
-                            facilitiesSelectionsErrors.push(true)
-                        } else {
-                            facilitiesSelectionsErrors.push(false);
+    let facilitiesSelectionsInvalid: boolean = false;
+    if (calendarizedMeters.length != 0) {
+        if (analysisItem.facilityAnalysisItems) {
+            for (const item of analysisItem.facilityAnalysisItems) {
+                let invalid = false;
+                if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+                    let analysisItemObj: IdbAnalysisItem = allAnalysisItems.find(analysisItem => analysisItem.guid == item.analysisItemId);
+                    if (analysisItemObj) {
+                        let facility: IdbFacility = facilities.find(facility => facility.guid == item.facilityId);
+                        if (facility) {
+                            let analysisItemErrors: AnalysisSetupErrors = getAnalysisSetupErrors(analysisItemObj, calendarizedMeters, facility, facilityPredictorData);
+                            if (analysisItemErrors.hasError || analysisItemErrors.groupsHaveErrors) {
+                                invalid = true;
+                            }
                         }
                     }
-                }
-            } else {
-                if (item.analysisItemId == 'skip') {
-                    facilitiesSelectionsErrors.push(false);
                 } else {
-                    facilitiesSelectionsErrors.push(true);
+                    if (item.analysisItemId != 'skip') {
+                        invalid = true;
+                    }
+                }
+                if (invalid) {
+                    facilitiesSelectionsInvalid = true;
+                    break;
                 }
             }
-        });
+        }
     }
-    let facilitiesSelectionsInvalid: boolean = facilitiesSelectionsErrors.includes(true);
     return {
         hasError: hasSetupError || facilitiesSelectionsInvalid,
         hasSetupErrors: hasSetupError,

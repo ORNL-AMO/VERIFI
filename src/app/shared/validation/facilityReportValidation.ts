@@ -23,7 +23,10 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         baselineAfterReportYear: false,
         analysisHasErrors: false
     };
-
+    if(calendarizedMeters.length == 0){
+        return errors;
+    }
+    
     errors.missingName = !facilityReport.name || facilityReport.name.toString().trim() === '';
 
     let linkedAnalysisItemId: string;
