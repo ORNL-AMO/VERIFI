@@ -48,7 +48,7 @@
               <option [ngValue]="undefined">
                 Multiple Facilities
               </option>
-              @for (facility of facilityOptions; track facility) {
+              @for (facility of facilityOptions; track facility.guid) {
                 <option [ngValue]="facility.guid">
                   {{facility.name}}
                 </option>
