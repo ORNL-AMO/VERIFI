@@ -229,7 +229,7 @@ export interface AnalysisGroup {
     year: number,
     amount: number
   }>,
-  userDefinedModel: boolean,
+  isGeneratedModel: boolean,
   models?: Array<JStatRegressionModel>,
   selectedModelId?: string,
   dateModelsGenerated?: Date,

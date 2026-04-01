@@ -27,7 +27,7 @@
   (setShowUserDefinedModelInspection)="setShowUserDefinedModelInspection($event)"></app-regression-model-menu>
 <hr>
 <!--table filters-->
-@if(generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
+@if(generatedModels && generatedModels.length !== 0 && selectedGroup.isGeneratedModel) {
 <div class="d-flex flex-wrap justify-content-start align-items-center gap-3 mb-2">
   <div class="d-flex align-items-center me-3">
     <label class="show-models-label bold me-2" for="showInvalid">
@@ -78,7 +78,7 @@
 }
 
 <!--table-->
-@if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
+@if (generatedModels && generatedModels.length !== 0 && selectedGroup.isGeneratedModel) {
 <div class="table-responsive">
   <table class="table table-sm table-hover utility-data table-bordered">
     <thead>
@@ -253,6 +253,6 @@
   (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
 }
 
-@if (!selectedGroup.userDefinedModel && showUserDefinedModelInspection) {
+@if (!selectedGroup.isGeneratedModel && showUserDefinedModelInspection) {
 <app-regression-user-defined-model-inspection></app-regression-user-defined-model-inspection>
 }

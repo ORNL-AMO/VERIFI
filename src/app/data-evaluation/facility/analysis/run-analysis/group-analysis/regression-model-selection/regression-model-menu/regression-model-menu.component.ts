@@ -75,7 +75,7 @@ export class RegressionModelMenuComponent implements OnInit {
           this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.group.idbGroupId);
           this.checkModelData();
           this.checkHasValidModels();
-        } else if (this.group.models == undefined && this.group.userDefinedModel) {
+        } else if (this.group.models == undefined && this.group.isGeneratedModel) {
           if (group.predictorVariables && group.predictorVariables.length < 7) {
             this.generateModels();
           }
@@ -140,7 +140,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.selectedModelId = undefined;
     this.group.dateModelsGenerated = undefined;
     this.analysisDbService.setGeneratedModelsForGroup(this.group.idbGroupId, this.generatedModels);
-    if (this.group.userDefinedModel) {
+    if (this.group.isGeneratedModel) {
       this.group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       });
@@ -289,7 +289,7 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   togglePredictor() {
-    if (this.group.userDefinedModel && this.group.selectedModelId) {
+    if (this.group.isGeneratedModel && this.group.selectedModelId) {
       this.showConfirmPredictorChangeModel = true;
     } else {
       this.saveItem();

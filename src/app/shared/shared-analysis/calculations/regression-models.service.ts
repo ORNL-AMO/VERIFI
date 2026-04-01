@@ -320,7 +320,7 @@ export class RegressionModelsService {
     let endYear: number;
     let startDate: Date;
     let endDate: Date;
-    if (selectedGroup && !selectedGroup.userDefinedModel) {
+    if (selectedGroup && !selectedGroup.isGeneratedModel) {
       startMonth = selectedGroup.regressionModelStartMonth;
       startYear = selectedGroup.regressionStartYear;
       endMonth = selectedGroup.regressionModelEndMonth;
@@ -347,7 +347,7 @@ export class RegressionModelsService {
       if (fiscalYear == baselineYear) {
         baselineYearPredictorData.push(facilityPredictorData[i]);
       }
-      if (selectedGroup && !selectedGroup.userDefinedModel && startDate && endDate) {
+      if (selectedGroup && !selectedGroup.isGeneratedModel && startDate && endDate) {
         if (predictorDate >= startDate && predictorDate <= endDate) {
           userDefinedModelPredictorData.push(facilityPredictorData[i])
         }
@@ -376,7 +376,7 @@ export class RegressionModelsService {
       });
 
       let modelYearUsage: Array<number>;
-      if (selectedGroup && !selectedGroup.userDefinedModel) {
+      if (selectedGroup && !selectedGroup.isGeneratedModel) {
         modelYearUsage = variableUserDefinedModelPredictorData.map(data => {
           return data.amount;
         });
@@ -557,7 +557,8 @@ export class RegressionModelsService {
       if (group.selectedModelId) {
         selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
         //set model validation?
-      } else if (!group.userDefinedModel) {
+
+      } else if (!group.isGeneratedModel) {
         selectedModel = this.getUserDefinedModel(group, facility, analysisItem, reportYear);
       }
     }

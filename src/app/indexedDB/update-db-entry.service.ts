@@ -117,19 +117,26 @@ export class UpdateDbEntryService {
           group.maxModelVariables = 4;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelStartMonth == undefined) {
+        
+        if(group['userDefinedModel'] != undefined){
+          group.isGeneratedModel = group['userDefinedModel'];
+          delete group['userDefinedModel'];
+          isChanged = true;
+        }
+
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionModelStartMonth == undefined) {
           group.regressionModelStartMonth = 0;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionStartYear == undefined) {
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionStartYear == undefined) {
           group.regressionStartYear = analysisItem.baselineYear;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelEndMonth == undefined) {
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionModelEndMonth == undefined) {
           group.regressionModelEndMonth = 11;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionEndYear == undefined) {
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionEndYear == undefined) {
           group.regressionEndYear = analysisItem.baselineYear;
           isChanged = true;
         }

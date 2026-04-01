@@ -42,7 +42,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
             if (group.analysisType == 'regression') {
                 missingRegressionConstant = checkNumberValueValid(group.regressionConstant) == false;
                 missingRegressionModelYear = checkNumberValueValid(group.regressionModelYear) == false;
-                if (!group.userDefinedModel) {
+                if (!group.isGeneratedModel) {
                     missingRegressionModelYear = false;
                     missingRegressionModelStartMonth = checkNumberValueValid(group.regressionModelStartMonth) == false;
                     missingRegressionStartYear = checkNumberValueValid(group.regressionStartYear) == false;
@@ -74,7 +74,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
                         missingRegressionPredictorCoef = true;
                     }
                 }
-                if (group.userDefinedModel && !group.selectedModelId) {
+                if (group.isGeneratedModel && !group.selectedModelId) {
                     missingRegressionModelSelection = true;
                 } else if (group.selectedModelId) {
                     let model: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
