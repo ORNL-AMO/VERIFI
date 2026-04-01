@@ -10,10 +10,12 @@
             }"></i>
           @if(facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
           @let analysisItem = facilityItem.analysisItemId | analysisItem;
-          @let analysisSetupErrors = analysisItem | invalidAnalysis;
+          @let analysisSetupErrors = analysisItem.guid | invalidAnalysis;
           @if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
           <span class="fa fa-exclamation-circle"></span>
           }
+          }@else if(!facilityItem.analysisItemId){
+          <span class="fa fa-exclamation-circle"></span>
           }
           {{facilityItem.facilityId | facilityName}}</a>
       </div>

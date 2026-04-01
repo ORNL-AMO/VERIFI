@@ -1,5 +1,5 @@
 @for (groupItem of groupItems; track groupItem; let index = $index; let last = $last) {
-@let groupErrors = groupItem.group | invalidGroupAnalysis: analysisItem;
+@let groupErrors = groupItem.group.idbGroupId| invalidGroupAnalysis: analysisItem.bankedAnalysisItemId;
 <div class="d-flex flex-column">
   <div>
     @if (groupErrors.hasErrors) {

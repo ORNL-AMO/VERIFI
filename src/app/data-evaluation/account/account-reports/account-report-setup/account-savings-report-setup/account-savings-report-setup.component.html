@@ -67,7 +67,7 @@
                 </td>
                 <td>
                   {{item.name}}
-                  @let setupErrors = item | invalidAccountAnalysis;
+                  @let setupErrors = item.guid | invalidAccountAnalysis;
                   @if(setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid){
                   <span class="red">
                     <span class="fa fa-exclamation-circle"></span> Contains Errors

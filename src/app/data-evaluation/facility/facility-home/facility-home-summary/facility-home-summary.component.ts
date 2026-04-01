@@ -14,11 +14,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { getDateFromMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getAnalysisSetupErrors } from 'src/app/shared/validation/analysisValidation';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -43,8 +39,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
-  calanderizedMetersSub: Subscription;
+  analysisValidationSub: Subscription;
   energyAnalysisHasErrors: boolean;
   waterAnalysisHasErrors: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -53,8 +48,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
     private loadingService: LoadingService,
-    private calanderizatonService: CalanderizationService,
-    private predictorDataDbService: PredictorDataDbService
+    private analysisValidationService: AnalysisValidationService
   ) { }
 
   ngOnInit(): void {
@@ -62,16 +56,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
       this.facility = val;
       this.setFacilityStatus();
     });
-    this.calanderizedMetersSub = this.calanderizatonService.calanderizedMeters.subscribe(calanderizedMeters => {
-      this.calanderizedMeters = calanderizedMeters;
+
+    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
       this.setEnergyAnalysisHasErrors();
       this.setWaterAnalysisHasErrors();
     });
+
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
-    this.calanderizedMetersSub.unsubscribe();
+    this.analysisValidationSub.unsubscribe();
   }
 
   navigateTo(urlStr: string) {
@@ -130,8 +125,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   setEnergyAnalysisHasErrors() {
     if (this.latestEnergyAnalysisItem) {
-      let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-      this.energyAnalysisHasErrors = getAnalysisSetupErrors(this.latestEnergyAnalysisItem, this.calanderizedMeters, this.facility, predictorData).hasError;
+      this.energyAnalysisHasErrors = this.analysisValidationService.getErrorsByAnalysisId(this.latestEnergyAnalysisItem.guid).hasError;
     } else {
       this.energyAnalysisHasErrors = false;
     }
@@ -139,8 +133,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   setWaterAnalysisHasErrors() {
     if (this.latestWaterAnalysisItem) {
-      let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-      this.waterAnalysisHasErrors = getAnalysisSetupErrors(this.latestWaterAnalysisItem, this.calanderizedMeters, this.facility, predictorData).hasError;
+      this.waterAnalysisHasErrors = this.analysisValidationService.getErrorsByAnalysisId(this.latestWaterAnalysisItem.guid).hasError;
     } else {
       this.waterAnalysisHasErrors = false;
     }

@@ -11,7 +11,7 @@
   </div>
 </h4>
 @if(selectedFacilityItem){
-@let setupErrors = selectedFacilityItem | invalidAnalysis;
+@let setupErrors = selectedFacilityItem.guid | invalidAnalysis;
 @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
 <div class="alert alert-danger w-100 text-center">
   The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
@@ -51,7 +51,7 @@
             (change)="save()">
         </td>
         <td class="w-25">
-          @let setupErrors = analysisItem | invalidAnalysis;
+          @let setupErrors = analysisItem.guid | invalidAnalysis;
           @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
           <span class="fa fa-exclamation-circle"></span>
           }

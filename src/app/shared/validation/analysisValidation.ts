@@ -2,12 +2,10 @@ import { getYearsWithFullData } from "src/app/calculations/shared-calculations/c
 import { CalanderizedMeter } from "src/app/models/calanderization"
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem"
 import { IdbFacility } from "src/app/models/idbModels/facility";
-import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { checkNumberValueValid } from "./validationHelpers";
 import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
-import { getGroupErrors } from "./groupAnalysisValidation";
 
-export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, facilityPredictorData: Array<IdbPredictorData>): AnalysisSetupErrors {
+export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, allGroupsErrors: Array<GroupAnalysisErrors>): AnalysisSetupErrors {
     if (calendarizedMeters.length == 0) {
         return emptyAnalysisSetupErrors();
     }
@@ -33,7 +31,7 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
         bankingError = analysisItem.bankedAnalysisItemId == undefined;
     }
     let groupErrors: Array<GroupAnalysisErrors> = analysisItem.groups.map(group => {
-        return getGroupErrors(group, analysisItem, facilityCalanderizedMeters, facilityPredictorData);
+        return allGroupsErrors.find(groupError => groupError.groupId == group.idbGroupId);
     });
     let groupsHaveErrors: boolean = groupErrors.some(groupError => {
         return groupError && groupError.hasErrors;
@@ -41,6 +39,7 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
     let setupHasError: boolean = (missingName || noGroups || missingBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError);
     let hasError: boolean = (setupHasError || groupsHaveErrors);
     return {
+        analysisId: analysisItem.guid,
         hasError: hasError,
         setupHasError: setupHasError,
         missingName: missingName,
@@ -50,13 +49,15 @@ export function getAnalysisSetupErrors(analysisItem: IdbAnalysisItem, calendariz
         baselineYearAfterMeterDataEnd: baselineYearAfterMeterDataEnd,
         baselineYearBeforeMeterDataStart: baselineYearBeforeMeterDataStart,
         bankingError: bankingError,
-        groupErrors: groupErrors
+        groupErrors: groupErrors,
+        accountId: analysisItem.accountId
     }
 }
 
 
 export function emptyAnalysisSetupErrors(): AnalysisSetupErrors {
     return {
+        analysisId: '',
         hasError: false,
         setupHasError: false,
         missingName: false,
@@ -66,6 +67,7 @@ export function emptyAnalysisSetupErrors(): AnalysisSetupErrors {
         baselineYearAfterMeterDataEnd: false,
         baselineYearBeforeMeterDataStart: false,
         bankingError: false,
-        groupErrors: []
+        groupErrors: [],
+        accountId: ''
     }
 }

@@ -1,4 +1,4 @@
-@let groupErrors = group | invalidGroupAnalysis: analysisItem;
+@let groupErrors = group.idbGroupId| invalidGroupAnalysis: analysisItem.guid;
 @if (groupErrors.missingGroupMeters) {
 <div class="p-4">
   <div class="alert alert-danger text-center">

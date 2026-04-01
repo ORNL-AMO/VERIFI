@@ -1,4 +1,4 @@
-@let groupErrors = groupSummary.group | invalidGroupAnalysis: analysisItem;
+@let groupErrors = groupSummary.group.idbGroupId | invalidGroupAnalysis: analysisItem.guid;
 <!--MODEL DETAILS-->
 @if (analysisReportSettings.groupModelDetails && groupItem.group.analysisType == 'regression') {
 <div class="report print-break-before" [ngClass]="{'print': print}">

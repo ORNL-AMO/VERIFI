@@ -42,7 +42,7 @@
         ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track report.guid) {
         <tr>
           <td>
-            @let reportErrors = report | invalidAccountReport;
+            @let reportErrors = report.guid | invalidAccountReport;
             @if (reportErrors.hasErrors) {
             <span class="fa fa-exclamation-circle"></span>
             }

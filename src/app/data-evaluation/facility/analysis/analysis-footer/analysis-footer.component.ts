@@ -10,12 +10,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { getAnalysisSetupErrors } from 'src/app/shared/validation/analysisValidation';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
+import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
 @Component({
   selector: 'app-analysis-footer',
   templateUrl: './analysis-footer.component.html',
@@ -38,6 +36,9 @@ export class AnalysisFooterComponent implements OnInit {
 
   sidebarWidth: number;
   sidebarWidthSub: Subscription;
+
+  analysisValidationSub: Subscription;
+
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
@@ -45,8 +46,7 @@ export class AnalysisFooterComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dataEvaluationService: DataEvaluationService,
-    private calanderizationService: CalanderizationService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
@@ -58,18 +58,20 @@ export class AnalysisFooterComponent implements OnInit {
     this.setShowContinue();
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
-      this.setDisableContinue();
     });
 
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
-      this.setDisableContinue();
     });
     this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
       this.helpWidth = helpWidth;
     });
     this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
       this.sidebarWidth = sidebarWidth;
+    });
+
+    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
+      this.setDisableContinue();
     });
   }
 
@@ -79,6 +81,7 @@ export class AnalysisFooterComponent implements OnInit {
     this.routerSub.unsubscribe();
     this.helpWidthSub.unsubscribe();
     this.sidebarWidthSub.unsubscribe();
+    this.analysisValidationSub.unsubscribe();
   }
 
   goBack() {
@@ -167,10 +170,7 @@ export class AnalysisFooterComponent implements OnInit {
   setDisableContinue() {
     let setupErrors: AnalysisSetupErrors;
     if (this.analysisItem) {
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
-      let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
-      let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(facility.guid);
-      setupErrors = getAnalysisSetupErrors(this.analysisItem, calanderizedMeters, facility, facilityPredictorData);
+      setupErrors = this.analysisValidationService.getErrorsByAnalysisId(this.analysisItem.guid);
     }
     if (this.router.url.includes('analysis-setup')) {
       if (setupErrors && setupErrors.setupHasError) {

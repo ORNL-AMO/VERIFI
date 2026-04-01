@@ -1,14 +1,9 @@
 import { AccountReportErrors } from "src/app/models/validation";
 import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
-import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
-import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbFacility } from "src/app/models/idbModels/facility";
-import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
-import { getAccountAnalysisSetupErrors } from "./accountAnalysisValidation";
 import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
 
-export function getAccountReportErrors(accountReport: IdbAccountReport, allAccountAnalysisItem: Array<IdbAccountAnalysisItem>, allAnalysisItems: Array<IdbAnalysisItem>, calendarizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, facilityPredictorData: Array<IdbPredictorData>): AccountReportErrors {
+export function getAccountReportErrors(accountReport: IdbAccountReport,
+    accountAnalysisSetupErrors: Array<AccountAnalysisSetupErrors>): AccountReportErrors {
     let errors: AccountReportErrors = {
         reportId: accountReport.guid,
         hasErrors: false,
@@ -22,10 +17,6 @@ export function getAccountReportErrors(accountReport: IdbAccountReport, allAccou
         missingEndDate: false,
         analysisHasErrors: false
     };
-    if(calendarizedMeters.length == 0){
-        return errors;
-    }
-
     // Required field checks
     errors.missingName = !accountReport.name || accountReport.name.toString().trim() === '';
     errors.missingReportType = !accountReport.reportType || accountReport.reportType.toString().trim() === '';
@@ -126,9 +117,10 @@ export function getAccountReportErrors(accountReport: IdbAccountReport, allAccou
     }
     if (!errors.analysisHasErrors && linkedAnalysisItemId) {
         //check if analysis has errors
-        let analysisItem: IdbAccountAnalysisItem = allAccountAnalysisItem.find(item => item.guid == linkedAnalysisItemId);
-        if (analysisItem) {
-            let analysisItemErrors: AccountAnalysisSetupErrors = getAccountAnalysisSetupErrors(analysisItem, allAnalysisItems, calendarizedMeters, facilities, facilityPredictorData);
+        let analysisItemErrors: AccountAnalysisSetupErrors = accountAnalysisSetupErrors.find(error => error.analysisId == linkedAnalysisItemId);
+        if(!analysisItemErrors) {
+            errors.analysisHasErrors = true;
+        } else {
             errors.analysisHasErrors = analysisItemErrors.hasError;
         }
     }
@@ -143,4 +135,20 @@ export function getAccountReportErrors(accountReport: IdbAccountReport, allAccou
         errors.baselineAfterReportYear ||
         errors.analysisHasErrors;
     return errors;
+}
+
+export function emptyAccountReportErrors(): AccountReportErrors {
+    return {
+        reportId: '',
+        hasErrors: false,
+        missingName: false,
+        missingReportType: false,
+        missingReportYear: false,
+        missingBaselineYear: false,
+        missingStartDate: false,
+        missingEndDate: false,
+        invalidDateRange: false,
+        baselineAfterReportYear: false,
+        analysisHasErrors: false
+    }
 }

@@ -28,7 +28,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
     let isTwelveMonthSelected: boolean = true;
     let allMeterReadingsPresent: boolean = true;
     let allPredictorReadingsPresent: boolean = true;
-    let hasRegressoinErrors: boolean = false;
+    let hasRegressionErrors: boolean = false;
     let hasInvalidUserDefinedModel: boolean = false;
     let missingGroupMeters: boolean = false;
 
@@ -81,7 +81,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
                     hasInvalidRegressionModel = model?.isValid == false;
                 }
 
-                hasRegressoinErrors = (missingRegressionConstant ||
+                hasRegressionErrors = (missingRegressionConstant ||
                     missingRegressionModelYear ||
                     missingRegressionModelStartMonth ||
                     missingRegressionStartYear ||
@@ -128,7 +128,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
     }
     let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelStartMonth || missingRegressionStartYear || missingRegressionModelEndMonth || missingRegressionEndYear || invalidModelDateSelection || missingRegressionModelSelection ||
         missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear || missingBankingAppliedYear ||
-        invalidBankingYears);
+        invalidBankingYears || hasRegressionErrors);
 
     let hasSetupErrors: boolean = (invalidAverageBaseload ||
         noProductionVariables ||
@@ -141,6 +141,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
 
     let errors: GroupAnalysisErrors = {
         groupId: group.idbGroupId,
+        analysisId: analysisItem.guid,
         hasErrors: hasErrors,
         missingProductionVariables: missingProductionVariables,
         missingRegressionConstant: missingRegressionConstant,
@@ -161,7 +162,7 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
         missingBankingAppliedYear: missingBankingAppliedYear,
         invalidBankingYears: invalidBankingYears,
         hasSetupErrors: hasSetupErrors,
-        hasRegressionErrors: hasRegressoinErrors,
+        hasRegressionErrors: hasRegressionErrors,
         hasInvalidUserDefinedModel: hasInvalidUserDefinedModel,
         isDateRangeValid: isDateRangeValid,
         isTwelveMonthSelected: isTwelveMonthSelected,
@@ -169,6 +170,39 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
         allPredictorReadingsPresent: allPredictorReadingsPresent
     };
     return errors;
+}
+
+export function emptyGroupAnalysisErrors(): GroupAnalysisErrors {
+    return {
+        groupId: '',
+        analysisId: '',
+        hasErrors: false,
+        missingProductionVariables: false,
+        missingRegressionConstant: false,
+        missingRegressionModelYear: false,
+        missingRegressionModelStartMonth: false,
+        missingRegressionStartYear: false,
+        missingRegressionModelEndMonth: false,
+        missingRegressionEndYear: false,
+        invalidModelDateSelection: false,
+        missingRegressionModelSelection: false,
+        missingRegressionPredictorCoef: false,
+        invalidAverageBaseload: false,
+        invalidMonthlyBaseload: false,
+        noProductionVariables: false,
+        missingGroupMeters: false,
+        hasInvalidRegressionModel: false,
+        missingBankingBaselineYear: false,
+        missingBankingAppliedYear: false,
+        invalidBankingYears: false,
+        hasSetupErrors: false,
+        hasRegressionErrors: false,
+        hasInvalidUserDefinedModel: false,
+        isDateRangeValid: true,
+        isTwelveMonthSelected: true,
+        allMeterReadingsPresent: true,
+        allPredictorReadingsPresent: true
+    }
 }
 
 export function checkMissingProductionVariables(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
