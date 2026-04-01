@@ -11,6 +11,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,7 +22,7 @@ export class RegressionModelsService {
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
     //report year is set to latest year with 
-    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);    
+    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let endYear: number = monthlyStartAndEndDate.endDate.getFullYear();
@@ -503,4 +504,75 @@ export class RegressionModelsService {
     return model;
   }
 
+
+  getUserDefinedModel(selectedGroup: AnalysisGroup, selectedFacility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): JStatRegressionModel {
+    //report year is determined by the latest full year of data
+
+    let baselineYear: number = analysisItem.baselineYear;
+    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(selectedFacility.guid);
+    const selectedPredictors = selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
+
+    let userModel: JStatRegressionModel = {
+      coef: [
+        selectedGroup.regressionConstant,
+        ...selectedPredictors.map(v => v.regressionCoefficient)
+      ],
+      R2: undefined,
+      SSE: undefined,
+      SSR: undefined,
+      SST: undefined,
+      adjust_R2: undefined,
+      df_model: undefined,
+      df_resid: undefined,
+      ybar: undefined,
+      t: {
+        se: undefined,
+        sigmaHat: undefined,
+        p: undefined
+      },
+      f: {
+        pvalue: undefined,
+        F_statistic: undefined
+      },
+      modelYear: selectedGroup.regressionModelYear,
+      predictorVariables: selectedPredictors,
+      modelId: undefined,
+      isValid: false,
+      modelPValue: undefined,
+      modelNotes: [selectedGroup.regressionModelNotes],
+      errorModeling: false,
+      SEPValidation: undefined,
+      SEPValidationPass: undefined,
+      dataValidationNotes: [''],
+      modelValidationNotes: ['']
+    };
+
+    const validatedModel = this.setModelVaildAndNotes(userModel, facilityPredictorData, reportYear, selectedFacility, baselineYear, selectedGroup);
+    return validatedModel;
+  }
+
+  getGroupModelItem(group: AnalysisGroup, facility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): FacilityGroupAnalysisItem {
+    let selectedModel: JStatRegressionModel;
+    if (group.analysisType == 'regression') {
+      if (group.selectedModelId) {
+        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+        //set model validation?
+      } else if (!group.userDefinedModel) {
+        selectedModel = this.getUserDefinedModel(group, facility, analysisItem, reportYear);
+      }
+    }
+    return {
+      group: group,
+      selectedModel: selectedModel,
+      facilityId: facility.guid,
+      baselineYear: analysisItem.baselineYear
+    }
+  }
+}
+
+export interface FacilityGroupAnalysisItem {
+  group: AnalysisGroup,
+  selectedModel: JStatRegressionModel,
+  facilityId: string,
+  baselineYear: number
 }

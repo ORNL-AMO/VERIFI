@@ -6,12 +6,13 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisReportSetup } from 'src/app/models/overview-report';
-import { FacilityGroupAnalysisItem, getGroupItem } from 'src/app/shared/facilityGroupItemFunction';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
   selector: 'app-account-reports-data-check-component',
@@ -24,8 +25,6 @@ export class AccountReportsDataCheckComponent {
   account: IdbAccount;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   facilityAnalysisItems: Array<IdbAnalysisItem> = [];
-  facilityDetails: Array<IdbAnalysisItem> = [];
-  analysisReportSetup: AnalysisReportSetup;
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityAnalysisItemsSub: Subscription;
 
@@ -34,20 +33,19 @@ export class AccountReportsDataCheckComponent {
     private router: Router,
     private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private regressionModelsService: RegressionModelsService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
-    } else {
-      this.analysisReportSetup = this.selectedReport.analysisReportSetup;
     }
     this.account = this.accountDbService.selectedAccount.getValue();
 
     this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
-      this.facilityAnalysisItems = items;
-      this.setFacilityItems();
+      this.setFacilityItems(items);
     });
   }
 
@@ -62,14 +60,13 @@ export class AccountReportsDataCheckComponent {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      await this.dbChangesService.setAccountAnalysisItems(account, false);
+      await this.dbChangesService.setAccountAnalysisItems(account, true);
       this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
     }
   }
 
-  setFacilityItems() {
+  setFacilityItems(allFacilityAnalysisItems: Array<IdbAnalysisItem>) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.facilityDetails = [];
     this.executiveSummaryItems = [];
 
     if (this.selectedReport.reportType == 'betterPlants') {
@@ -82,7 +79,7 @@ export class AccountReportsDataCheckComponent {
       this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
     }
 
-    this.facilityDetails = this.facilityAnalysisItems.filter(item => {
+    this.facilityAnalysisItems = allFacilityAnalysisItems.filter(item => {
       const match = this.selectedAnalysisItem.facilityAnalysisItems.some(facilityItem => {
         return facilityItem.analysisItemId == item.guid;
       });
@@ -95,18 +92,23 @@ export class AccountReportsDataCheckComponent {
 
   initializeGroups() {
     this.executiveSummaryItems = [];
-    if (this.facilityDetails) {
-      this.facilityDetails.forEach(facility => {
-        facility.groups.forEach(group => {
-          let groupItem: FacilityGroupAnalysisItem = getGroupItem(group, facility.facilityId, facility.baselineYear);
+    this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
+      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityAnalysisItem.facilityId);
+      facilityAnalysisItem.groups.forEach(group => {
+        if (group.analysisType == 'regression') {
+          let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);
           if (groupItem) {
             this.executiveSummaryItems.push(groupItem);
           }
-        });
+        } else if (group.analysisType != 'skip') {
+          this.executiveSummaryItems.push({
+            group: group,
+            facilityId: facility.guid,
+            baselineYear: facilityAnalysisItem.baselineYear,
+            selectedModel: undefined
+          });
+        }
       });
-      this.executiveSummaryItems = this.executiveSummaryItems.filter(item => {
-        return item.group.analysisType != 'skip';
-      });
-    }
+    });
   }
 }

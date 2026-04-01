@@ -11,6 +11,9 @@ import { MonthlyAnalysisSummaryGraphComponent } from './monthly-analysis-summary
 import { MonthlyAnalysisSummarySavingsGraphComponent } from './monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 import { AnnualAnalysisGroupSavingsTableComponent } from './annual-analysis-group-savings-table/annual-analysis-group-savings-table.component';
 import { AnnualAnalysisGroupSavingsGraphComponent } from './annual-analysis-group-savings-graph/annual-analysis-group-savings-graph.component';
+import { AnalysisDataValidationTablesComponent } from './data-check/analysis-data-validation-tables/analysis-data-validation-tables.component';
+import { AnalysisFacilityReportComponent } from './data-check/analysis-facility-report/analysis-facility-report.component';
+import { AnalysisProblemsInformationComponent } from './data-check/analysis-problems-information/analysis-problems-information.component';
 
 
 @NgModule({
@@ -22,7 +25,10 @@ import { AnnualAnalysisGroupSavingsGraphComponent } from './annual-analysis-grou
     MonthlyAnalysisSummaryGraphComponent,
     MonthlyAnalysisSummarySavingsGraphComponent,
     AnnualAnalysisGroupSavingsTableComponent,
-    AnnualAnalysisGroupSavingsGraphComponent
+    AnnualAnalysisGroupSavingsGraphComponent,
+    AnalysisDataValidationTablesComponent,
+    AnalysisFacilityReportComponent,
+    AnalysisProblemsInformationComponent
   ],
   imports: [
     CommonModule,
@@ -38,7 +44,10 @@ import { AnnualAnalysisGroupSavingsGraphComponent } from './annual-analysis-grou
     MonthlyAnalysisSummaryGraphComponent,
     MonthlyAnalysisSummarySavingsGraphComponent,
     AnnualAnalysisGroupSavingsTableComponent,
-    AnnualAnalysisGroupSavingsGraphComponent
+    AnnualAnalysisGroupSavingsGraphComponent,
+    AnalysisDataValidationTablesComponent,
+    AnalysisFacilityReportComponent,
+    AnalysisProblemsInformationComponent
   ]
 })
 export class SharedAnalysisModule { }
