@@ -13,7 +13,9 @@ export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisIt
             let invalid = false;
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisSetupErrors: AnalysisSetupErrors = allAnalysisSetupErrors.find(error => error.analysisId == item.analysisItemId);
-                if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
+                if (analysisSetupErrors == undefined) {
+                    invalid = true;
+                } else if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
                     invalid = true;
                 }
             } else {

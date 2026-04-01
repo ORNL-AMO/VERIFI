@@ -118,7 +118,11 @@ export function getAccountReportErrors(accountReport: IdbAccountReport,
     if (!errors.analysisHasErrors && linkedAnalysisItemId) {
         //check if analysis has errors
         let analysisItemErrors: AccountAnalysisSetupErrors = accountAnalysisSetupErrors.find(error => error.analysisId == linkedAnalysisItemId);
-        errors.analysisHasErrors = analysisItemErrors.hasError;
+        if(!analysisItemErrors) {
+            errors.analysisHasErrors = true;
+        } else {
+            errors.analysisHasErrors = analysisItemErrors.hasError;
+        }
     }
 
     errors.hasErrors = errors.missingName ||

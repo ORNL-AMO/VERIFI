@@ -79,7 +79,12 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         if (!linkedAnalysisItemId) {
             errors.analysisHasErrors = true;
         } else {
-            errors.analysisHasErrors = analysisSetupErrors.find(error => error.analysisId === linkedAnalysisItemId)?.hasError || true;
+            let analysisItemErrors: AnalysisSetupErrors = analysisSetupErrors.find(error => error.analysisId == linkedAnalysisItemId);
+            if (!analysisItemErrors) {
+                errors.analysisHasErrors = true;
+            } else {
+                errors.analysisHasErrors = analysisItemErrors.hasError;
+            }
         }
     }
 
