@@ -187,7 +187,8 @@ export interface JStatRegressionModel {
   SEPValidation?: Array<SEPValidation>,
   SEPValidationPass: boolean,
   dataValidationNotes: Array<string>,
-  modelValidationNotes: Array<string>
+  modelValidationNotes: Array<string>,
+  isUserDefinedModel?: boolean
 }
 
 export interface SEPValidation {

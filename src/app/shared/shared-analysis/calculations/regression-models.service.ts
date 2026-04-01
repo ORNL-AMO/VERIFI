@@ -227,41 +227,43 @@ export class RegressionModelsService {
       }
     });
 
-    if (model.f.pvalue > .1) {
-      model['isValid'] = false;
-      modeValidationNotes.push('Model p-Value > .1');
-      // modelNotes.push('Model p-Value > .1');
-    }
-
-    model.t.p?.forEach((val, index) => {
-      if (val > .2 && index != 0) {
-        //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
-        modeValidationNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2');
+    if (!model.isUserDefinedModel) {
+      if (model.f.pvalue > .1) {
         model['isValid'] = false;
+        modeValidationNotes.push('Model p-Value > .1');
+        // modelNotes.push('Model p-Value > .1');
       }
-    })
 
-    //need one p value less than .1
-    let hasLessThan: boolean = false;
-    model.t.p?.forEach((val, index) => {
-      if (val < .1 && index != 0) {
-        hasLessThan = true;
+      model.t.p?.forEach((val, index) => {
+        if (val > .2 && index != 0) {
+          //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
+          modeValidationNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2');
+          model['isValid'] = false;
+        }
+      })
+
+      //need one p value less than .1
+      let hasLessThan: boolean = false;
+      model.t.p?.forEach((val, index) => {
+        if (val < .1 && index != 0) {
+          hasLessThan = true;
+        }
+      });
+      if (!hasLessThan) {
+        model['isValid'] = false;
+        modeValidationNotes.push('No variable p-Value < 0.1');
+        //   modelNotes.push('No variable p-Value < 0.1')
       }
-    });
-    if (!hasLessThan) {
-      model['isValid'] = false;
-      modeValidationNotes.push('No variable p-Value < 0.1');
-      //   modelNotes.push('No variable p-Value < 0.1')
-    }
 
-    if (model.R2 < .5) {
-      model['isValid'] = false;
-      modeValidationNotes.push('R2 < .5');
-      //   modelNotes.push('R2 < .5');
-    }
+      if (model.R2 < .5) {
+        model['isValid'] = false;
+        modeValidationNotes.push('R2 < .5');
+        //   modelNotes.push('R2 < .5');
+      }
 
-    if (model.adjust_R2 < .5) {
-      modelNotes.push('Adjusted R2 < .5');
+      if (model.adjust_R2 < .5) {
+        modelNotes.push('Adjusted R2 < .5');
+      }
     }
 
     let productionVariable: AnalysisGroupPredictorVariable = model.predictorVariables.find(variable => { return variable.production });
@@ -498,11 +500,11 @@ export class RegressionModelsService {
     };
   }
 
-  updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number, group: AnalysisGroup): JStatRegressionModel {
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-    model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, group);
-    return model;
-  }
+  // updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number, group: AnalysisGroup): JStatRegressionModel {
+  //   let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+  //   model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, group);
+  //   return model;
+  // }
 
 
   getUserDefinedModel(selectedGroup: AnalysisGroup, selectedFacility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): JStatRegressionModel {
@@ -544,7 +546,8 @@ export class RegressionModelsService {
       SEPValidation: undefined,
       SEPValidationPass: undefined,
       dataValidationNotes: [''],
-      modelValidationNotes: ['']
+      modelValidationNotes: [''],
+      isUserDefinedModel: true
     };
 
     const validatedModel = this.setModelVaildAndNotes(userModel, facilityPredictorData, reportYear, selectedFacility, baselineYear, selectedGroup);
@@ -556,7 +559,9 @@ export class RegressionModelsService {
     if (group.analysisType == 'regression') {
       if (group.selectedModelId) {
         selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-        //set model validation?
+        //set model validation for report year
+        let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+        selectedModel = this.setModelVaildAndNotes(selectedModel, facilityPredictorData, reportYear, facility, analysisItem.baselineYear, group);
 
       } else if (!group.isGeneratedModel) {
         selectedModel = this.getUserDefinedModel(group, facility, analysisItem, reportYear);

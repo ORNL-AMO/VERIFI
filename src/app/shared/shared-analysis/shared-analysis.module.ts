@@ -14,6 +14,8 @@ import { AnnualAnalysisGroupSavingsGraphComponent } from './annual-analysis-grou
 import { AnalysisDataValidationTablesComponent } from './data-check/analysis-data-validation-tables/analysis-data-validation-tables.component';
 import { AnalysisFacilityReportComponent } from './data-check/analysis-facility-report/analysis-facility-report.component';
 import { AnalysisProblemsInformationComponent } from './data-check/analysis-problems-information/analysis-problems-information.component';
+import { RegressionModelDetailsTable } from './data-check/regression-model-details-table/regression-model-details-table.component';
+import { UserDefineModelDateRangePipe } from './data-check/regression-model-details-table/user-define-model-date-range.pipe';
 
 
 @NgModule({
@@ -28,7 +30,9 @@ import { AnalysisProblemsInformationComponent } from './data-check/analysis-prob
     AnnualAnalysisGroupSavingsGraphComponent,
     AnalysisDataValidationTablesComponent,
     AnalysisFacilityReportComponent,
-    AnalysisProblemsInformationComponent
+    AnalysisProblemsInformationComponent,
+    RegressionModelDetailsTable,
+    UserDefineModelDateRangePipe
   ],
   imports: [
     CommonModule,
