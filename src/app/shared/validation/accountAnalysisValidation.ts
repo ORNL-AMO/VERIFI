@@ -1,50 +1,53 @@
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
-import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { getAnalysisSetupErrors } from "./analysisValidation";
 import { AnalysisSetupErrors } from "src/app/models/validation";
 import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
-import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
-import { IdbFacility } from "src/app/models/idbModels/facility";
-import { CalanderizedMeter } from "src/app/models/calanderization";
 import { checkNumberValueValid } from "./validationHelpers";
 
-export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisItems: Array<IdbAnalysisItem>, calendarizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, facilityPredictorData: Array<IdbPredictorData>): AccountAnalysisSetupErrors {
+export function getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisSetupErrors: Array<AnalysisSetupErrors>): AccountAnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let missingBaselineYear: boolean = checkNumberValueValid(analysisItem.baselineYear) == false;
     let hasSetupError: boolean = (missingName || missingBaselineYear);
     let facilitiesSelectionsInvalid: boolean = false;
-    if (calendarizedMeters.length != 0) {
-        if (analysisItem.facilityAnalysisItems) {
-            for (const item of analysisItem.facilityAnalysisItems) {
-                let invalid = false;
-                if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
-                    let analysisItemObj: IdbAnalysisItem = allAnalysisItems.find(analysisItem => analysisItem.guid == item.analysisItemId);
-                    if (analysisItemObj) {
-                        let facility: IdbFacility = facilities.find(facility => facility.guid == item.facilityId);
-                        if (facility) {
-                            let analysisItemErrors: AnalysisSetupErrors = getAnalysisSetupErrors(analysisItemObj, calendarizedMeters, facility, facilityPredictorData);
-                            if (analysisItemErrors.hasError || analysisItemErrors.groupsHaveErrors) {
-                                invalid = true;
-                            }
-                        }
-                    }
-                } else {
-                    if (item.analysisItemId != 'skip') {
-                        invalid = true;
-                    }
+    if (analysisItem.facilityAnalysisItems) {
+        for (const item of analysisItem.facilityAnalysisItems) {
+            let invalid = false;
+            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+                let analysisSetupErrors: AnalysisSetupErrors = allAnalysisSetupErrors.find(error => error.analysisId == item.analysisItemId);
+                if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
+                    invalid = true;
                 }
-                if (invalid) {
-                    facilitiesSelectionsInvalid = true;
-                    break;
+            } else {
+                if (item.analysisItemId != 'skip') {
+                    invalid = true;
                 }
             }
+            if (invalid) {
+                facilitiesSelectionsInvalid = true;
+                break;
+            }
         }
+    } else {
+        facilitiesSelectionsInvalid = true;
     }
     return {
+        analysisId: analysisItem.guid,
         hasError: hasSetupError || facilitiesSelectionsInvalid,
         hasSetupErrors: hasSetupError,
         missingName: missingName,
         missingBaselineYear: missingBaselineYear,
-        facilitiesSelectionsInvalid: facilitiesSelectionsInvalid
+        facilitiesSelectionsInvalid: facilitiesSelectionsInvalid,
+        accountId: analysisItem.accountId
+    }
+}
+
+export function emptyAccountAnalysisSetupErrors(): AccountAnalysisSetupErrors {
+    return {
+        analysisId: '',
+        hasError: false,
+        hasSetupErrors: false,
+        missingName: false,
+        missingBaselineYear: false,
+        facilitiesSelectionsInvalid: false,
+        accountId: ''
     }
 }

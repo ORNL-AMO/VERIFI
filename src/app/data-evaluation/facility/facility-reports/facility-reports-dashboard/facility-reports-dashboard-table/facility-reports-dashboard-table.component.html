@@ -47,7 +47,7 @@
         @for (facilityReport of facilityReports | facilityReportOrderBy: orderDataField: orderByDirection:
         selectedReportType |
         slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track facilityReport.guid) {
-        @let reportErrors = facilityReport | invalidFacilityReport;
+        @let reportErrors = facilityReport.guid | invalidFacilityReport;
         <tr>
           <td>
             @if (reportErrors.hasErrors) {

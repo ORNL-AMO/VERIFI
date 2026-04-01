@@ -1,18 +1,10 @@
 import { IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
-import { FacilityReportErrors } from "src/app/models/validation";
-import { getAnalysisSetupErrors } from "./analysisValidation";
-import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
-import { IdbFacility } from "src/app/models/idbModels/facility";
-
+import { AnalysisSetupErrors, FacilityReportErrors } from "src/app/models/validation";
 
 export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
-    analysisItems: Array<IdbAnalysisItem>,
-    calendarizedMeters: Array<CalanderizedMeter>,
-    facilityPredictorData: Array<IdbPredictorData>,
-    facility: IdbFacility): FacilityReportErrors {
+    analysisSetupErrors: Array<AnalysisSetupErrors>): FacilityReportErrors {
     let errors: FacilityReportErrors = {
+        reportId: facilityReport.guid,
         hasErrors: false,
         missingName: false,
         missingBaselineYear: false,
@@ -23,10 +15,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         baselineAfterReportYear: false,
         analysisHasErrors: false
     };
-    if(calendarizedMeters.length == 0){
-        return errors;
-    }
-    
+
     errors.missingName = !facilityReport.name || facilityReport.name.toString().trim() === '';
 
     let linkedAnalysisItemId: string;
@@ -90,16 +79,25 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         if (!linkedAnalysisItemId) {
             errors.analysisHasErrors = true;
         } else {
-            //need to check if linked analysis item has errors
-            const analysisItem = analysisItems.find(item => item.guid === linkedAnalysisItemId);
-            if (analysisItem) {
-                errors.analysisHasErrors = getAnalysisSetupErrors(analysisItem, calendarizedMeters, facility, facilityPredictorData).hasError;
-            } else {
-                errors.analysisHasErrors = true;
-            }
+            errors.analysisHasErrors = analysisSetupErrors.find(error => error.analysisId === linkedAnalysisItemId)?.hasError || true;
         }
     }
 
     errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors;
     return errors;
+}
+
+export function emptyFacilityReportErrors(): FacilityReportErrors {
+    return {
+        reportId: '',
+        hasErrors: false,
+        missingName: false,
+        missingBaselineYear: false,
+        missingReportYear: false,
+        missingStartDate: false,
+        missingEndDate: false,
+        invalidDateRange: false,
+        baselineAfterReportYear: false,
+        analysisHasErrors: false
+    }
 }

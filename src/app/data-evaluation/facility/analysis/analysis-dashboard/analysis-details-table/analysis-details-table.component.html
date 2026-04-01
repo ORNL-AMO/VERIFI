@@ -51,7 +51,7 @@
         <tbody>
           @for (item of linkedItemsList | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) *
           itemsPerPage): currentPageNumber * itemsPerPage; track item.analysisItem.guid) {
-          @let setupErrors = item.analysisItem | invalidAnalysis;
+          @let setupErrors = item.analysisItem.guid | invalidAnalysis;
           <tr>
             <td class="text-center">
               @if (item.analysisItem.analysisCategory == 'energy') {

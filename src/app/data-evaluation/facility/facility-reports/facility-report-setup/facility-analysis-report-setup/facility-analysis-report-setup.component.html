@@ -79,7 +79,7 @@
         </td>
         <td>
           {{item.name}}
-          @let setupErrors = item | invalidAnalysis;
+          @let setupErrors = item.guid | invalidAnalysis;
           @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
           <span class="text-danger ps-1">
             <span class="fa fa-exclamation-circle"></span> Contains Errors

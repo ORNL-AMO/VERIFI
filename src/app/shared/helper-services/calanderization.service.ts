@@ -59,6 +59,9 @@ export class CalanderizationService {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     if (typeof Worker !== 'undefined') {
+      if(this.calanderizationWorker){
+        this.calanderizationWorker.terminate();
+      }
       this.calanderizationWorker = new Worker(new URL('../../web-workers/calanderization.worker', import.meta.url));
       this.calanderizationWorker.onmessage = ({ data }) => {
         this.calanderizationWorker.terminate();

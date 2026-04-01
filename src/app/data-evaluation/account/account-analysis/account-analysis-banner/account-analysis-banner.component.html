@@ -1,7 +1,7 @@
 @if (!inDashboard) {
 <div class="analysis banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
   <div>
-    @let setupErrors = accountAnalysisItem | invalidAccountAnalysis;
+    @let setupErrors = accountAnalysisItem.guid | invalidAccountAnalysis;
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">

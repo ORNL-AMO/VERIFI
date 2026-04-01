@@ -10,7 +10,7 @@
 }
 
 @if (!selectedInspectModel) {
-@let groupErrors = selectedGroup | invalidGroupAnalysis: analysisItem;
+@let groupErrors = selectedGroup.idbGroupId| invalidGroupAnalysis: analysisItem.guid;
 @if (groupErrors?.hasInvalidRegressionModel) {
 <div class="alert alert-warning w-100 text-center">
   The selected model is invalid.

@@ -1,6 +1,7 @@
 
 export interface GroupAnalysisErrors {
     groupId: string,
+    analysisId: string,
     hasErrors: boolean,
     missingProductionVariables: boolean,
     missingRegressionConstant: boolean,
@@ -31,6 +32,8 @@ export interface GroupAnalysisErrors {
 }
 
 export interface AnalysisSetupErrors {
+    analysisId: string,
+    accountId: string,
     hasError: boolean,
     setupHasError: boolean,
     missingName: boolean,
@@ -58,6 +61,7 @@ export interface AccountReportErrors {
 }
 
 export interface FacilityReportErrors {
+    reportId: string;
     hasErrors: boolean,
     missingName: boolean,
     missingBaselineYear: boolean,

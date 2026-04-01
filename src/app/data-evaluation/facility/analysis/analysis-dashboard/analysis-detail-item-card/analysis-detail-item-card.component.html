@@ -25,7 +25,7 @@
 
   <hr>
   @for (groupItem of groupItems; track groupItem.group.idbGroupId; let index = $index; let last = $last) {
-  @let groupErrors = groupItem.group | invalidGroupAnalysis: analysisItem;
+  @let groupErrors = groupItem.group.idbGroupId| invalidGroupAnalysis: analysisItem.guid;
   <div>
     <div>
       @if (groupErrors.hasErrors) {

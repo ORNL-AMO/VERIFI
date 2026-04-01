@@ -4,7 +4,7 @@
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link" routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">
-          @let setupErrors = analysisItem | invalidAnalysis;
+          @let setupErrors = analysisItem.guid | invalidAnalysis;
           @if (setupErrors.setupHasError) {
           <span class="fa fa-exclamation-circle"></span>
           }
@@ -15,7 +15,7 @@
       <li class="nav-item" [ngClass]="{'disabled': setupErrors.setupHasError}">
         <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
           [routerLinkActive]="['active']">
-          @let groupErrors = group | invalidGroupAnalysis: analysisItem;
+          @let groupErrors = group.idbGroupId | invalidGroupAnalysis: analysisItem.guid;
           @if (groupErrors?.hasErrors) {
           <span class="fa fa-exclamation-circle"></span>
           }

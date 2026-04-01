@@ -2,7 +2,7 @@
   <div class="reports banner sticky-top d-flex justify-content-between"
     [ngClass]="{'modal-open': modalOpen}">
     <div>
-      @let reportErrors = selectedReport | invalidAccountReport;
+      @let reportErrors = selectedReport.guid | invalidAccountReport;
       <ul class="nav nav-tabs">
         <li class="nav-item">
           <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">

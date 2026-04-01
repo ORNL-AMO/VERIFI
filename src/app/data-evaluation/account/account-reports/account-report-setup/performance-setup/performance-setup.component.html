@@ -65,7 +65,7 @@
               </td>
               <td>
                 {{analysisItem.name}}
-                @let setupErrors = analysisItem | invalidAccountAnalysis;
+                @let setupErrors = analysisItem.guid | invalidAccountAnalysis;
                 @if(setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid){
                 <span class="red">
                   <span class="fa fa-exclamation-circle"></span> Contains Errors

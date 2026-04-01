@@ -1,7 +1,7 @@
 <div class="wrapper main-content p-0">
   <div class="content-padding">
     <h4>{{selectedReport.reportType| accountReportType}} Report Setup</h4>
-    @let reportErrors = selectedReport | invalidAccountReport;
+    @let reportErrors = selectedReport.guid | invalidAccountReport;
     <form [formGroup]="setupForm">
       <div class="row">
         <div class="col-6">
