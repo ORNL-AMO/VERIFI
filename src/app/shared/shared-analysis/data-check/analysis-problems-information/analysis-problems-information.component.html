@@ -15,10 +15,16 @@
     </h3>
   </div>
   }
-  @if (selectedReport) {
+  @if (facilityReport) {
   <div class="text-center">
     <h3>
-      {{selectedReport.name}}
+      {{facilityReport.name}}
+    </h3>
+  </div>
+  }@else if(accountReport) {
+  <div class="text-center">
+    <h3>
+      {{accountReport.name}}
     </h3>
   </div>
   }

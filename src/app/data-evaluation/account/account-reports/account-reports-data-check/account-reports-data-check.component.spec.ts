@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AccountReportsDataCheckComponent } from './account-reports-data-check-component';
+import { AccountReportsDataCheckComponent } from './account-reports-data-check.component';
 
 describe('AccountReportsDataCheckComponent', () => {
   let component: AccountReportsDataCheckComponent;

@@ -1,10 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
   selector: 'app-analysis-problems-information',
@@ -13,34 +10,24 @@ import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunct
   styleUrl: './analysis-problems-information.component.css'
 })
 export class AnalysisProblemsInformationComponent {
-
-  @Input()
-  facilityDetails: Array<IdbAnalysisItem>;
-  @Input()
-  executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
   @Input({ required: false })
   isDataCheck: boolean;
-  @Input({ required: false })
-  isFacilityReport: boolean;
-  
+  @Input()
+  executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
+  @Input()
+  facilityReport: IdbFacilityReport;
+  @Input()
+  accountReport: IdbAccountReport;
+
+
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   criticalItems: Array<FacilityGroupAnalysisItem> = [];
   moderateItems: Array<FacilityGroupAnalysisItem> = [];
   minorItems: Array<FacilityGroupAnalysisItem> = [];
-  selectedReport: IdbAccountReport;
-  facilityReport: IdbFacilityReport;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private facilityReportsDbService: FacilityReportsDbService  
-  ) { }
+  constructor() { }
 
   ngOnChanges() {
-    if(this.isFacilityReport) {
-      this.facilityReport = this.facilityReportsDbService.selectedReport.getValue();
-    }
-    else {
-      this.selectedReport = this.accountReportDbService.selectedReport.getValue();
-    }
     this.getRegressionGroupItems(this.executiveSummaryItems);
     this.getCriticalItems(this.regressionGroupItems);
     this.getModerateItems(this.regressionGroupItems);

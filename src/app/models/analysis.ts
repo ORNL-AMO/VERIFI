@@ -187,7 +187,8 @@ export interface JStatRegressionModel {
   SEPValidation?: Array<SEPValidation>,
   SEPValidationPass: boolean,
   dataValidationNotes: Array<string>,
-  modelValidationNotes: Array<string>
+  modelValidationNotes: Array<string>,
+  isUserDefinedModel?: boolean
 }
 
 export interface SEPValidation {
@@ -229,7 +230,7 @@ export interface AnalysisGroup {
     year: number,
     amount: number
   }>,
-  userDefinedModel: boolean,
+  isGeneratedModel: boolean,
   models?: Array<JStatRegressionModel>,
   selectedModelId?: string,
   dateModelsGenerated?: Date,

@@ -112,7 +112,7 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     averagePercentBaseload: undefined,
     monthlyPercentBaseload: getMonthlyPercentBaseload(),
     dataAdjustments: [],
-    userDefinedModel: true,
+    isGeneratedModel: true,
     models: undefined,
     baselineAdjustmentsV2: [],
     maxModelVariables: 4,

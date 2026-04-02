@@ -3,11 +3,11 @@
   <div class="col-md-4 col-sm-12">
     <label class="bold">Select Modeling Method</label>
     <select required class="form-select" id="userDefinedModel" id="userDefinedModel"
-      [(ngModel)]="group.userDefinedModel" (change)="changeModelType()">
+      [(ngModel)]="group.isGeneratedModel" (change)="changeModelType()">
       <option [ngValue]="true">Calculate Models</option>
       <option [ngValue]="false">User Defined Model</option>
     </select>
-    @if (group.userDefinedModel == true) {
+    @if (group.isGeneratedModel == true) {
     <label class="bold">Max Variable Combinations</label>
     <select required class="form-select" id="maxModelVariables" id="maxModelVariables"
       [(ngModel)]="group.maxModelVariables" (change)="changeModelType()">
@@ -22,7 +22,7 @@
     }
     }
     <div class="d-flex flex-fill justify-content-center align-items-center">
-      @if (group.userDefinedModel) {
+      @if (group.isGeneratedModel) {
       <div class="p-0">
         @if (!generatedModels || generatedModels.length == 0) {
         <div class="p-2">
@@ -75,7 +75,7 @@
         </div>
       </div>
       }
-      @if (!group.userDefinedModel) {
+      @if (!group.isGeneratedModel) {
       <div class="p-2">
         <div class="alert alert-info">
           Manually select production variables and define model coefficients and constants. Click below to
@@ -144,7 +144,7 @@
         @if (predictor.productionInAnalysis) {
         <input class="form-control" type="number" step="any" id="{{'regressionCoefficient_'+predictor.id}}"
           name="{{'regressionCoefficient_'+predictor.id}}" [(ngModel)]="predictor.regressionCoefficient" required
-          (input)="saveItem()" [disabled]="group.userDefinedModel">
+          (input)="saveItem()" [disabled]="group.isGeneratedModel">
         }
         @if (!predictor.productionInAnalysis) {
         <span class="bold ">&mdash;</span>
@@ -160,11 +160,11 @@
       </div>
       <div class="col-6">
         <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
-          [(ngModel)]="group.regressionConstant" required (input)="saveItem()" [disabled]="group.userDefinedModel">
+          [(ngModel)]="group.regressionConstant" required (input)="saveItem()" [disabled]="group.isGeneratedModel">
       </div>
     </div>
 
-    @if (group.userDefinedModel) {
+    @if (group.isGeneratedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelYear">
@@ -173,7 +173,7 @@
       </div>
       <div class="col-6">
         <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
-          [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.userDefinedModel">
+          [(ngModel)]="group.regressionModelYear" (change)="saveItem()" [disabled]="group.isGeneratedModel">
           @for (year of yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -181,7 +181,7 @@
       </div>
     </div>
     }
-    @if (!group.userDefinedModel) {
+    @if (!group.isGeneratedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelStartMonth">
@@ -198,8 +198,6 @@
         </select>
       </div>
     </div>
-    }
-    @if (!group.userDefinedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionStartYear">
@@ -215,8 +213,6 @@
         </select>
       </div>
     </div>
-    }
-    @if (!group.userDefinedModel) {
     <div class="row mb-2 sub-column">
       <div class="col-6">
         <label for="regressionModelEndMonth">
@@ -233,8 +229,6 @@
         </select>
       </div>
     </div>
-    }
-    @if (!group.userDefinedModel) {
     <div class="row sub-column">
       <div class="col-6">
         <label for="regressionEndYear">

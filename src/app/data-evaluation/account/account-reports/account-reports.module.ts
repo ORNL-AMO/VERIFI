@@ -49,9 +49,6 @@ import { TopPerformersChartComponent } from './better-climate-report/top-perform
 import { AccountReportTypePipe } from './report-pipes/account-report-type.pipe';
 import { AnalysisReportComponent } from './analysis-report/analysis-report.component';
 import { AnalysisReportSetupComponent } from './account-report-setup/analysis-report-setup/analysis-report-setup.component';
-import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
-import { AnalysisProblemsInformationComponent } from './analysis-report/analysis-problems-information/analysis-problems-information.component';
-import { AnalysisDataValidationTablesComponent } from './analysis-report/analysis-data-validation-tables/analysis-data-validation-tables.component';
 import { SharedAnalysisModule } from "src/app/shared/shared-analysis/shared-analysis.module";
 import { AccountEmissionFactorsReportComponent } from './account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
 import { AccountEmissionFactorsReportTableComponent } from './account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
@@ -63,7 +60,7 @@ import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
 import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
-import { AccountReportsDataCheckComponent } from './account-reports-data-check-component/account-reports-data-check-component';
+import { AccountReportsDataCheckComponent } from './account-reports-data-check/account-reports-data-check.component';
 
 @NgModule({
   declarations: [
@@ -111,9 +108,6 @@ import { AccountReportsDataCheckComponent } from './account-reports-data-check-c
     AccountReportTypePipe,
     AnalysisReportComponent,
     AnalysisReportSetupComponent,
-    AnalysisFacilityReportComponent,
-    AnalysisProblemsInformationComponent,
-    AnalysisDataValidationTablesComponent,
     AccountSavingsReportComponent,
     AccountSavingsReportSetupComponent,
     AccountEmissionFactorsReportComponent,
@@ -139,12 +133,6 @@ import { AccountReportsDataCheckComponent } from './account-reports-data-check-c
 ],
   providers: [
     AccountReportTypePipe
-  ],
-  exports: [
-    AnalysisProblemsInformationComponent,
-    AnalysisDataValidationTablesComponent,
-    AnalysisFacilityReportComponent
-
   ]
 })
 export class AccountReportsModule { }

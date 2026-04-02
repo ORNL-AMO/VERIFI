@@ -26,10 +26,10 @@
   <div class="pt-2">
     Model Year: {{groupItem.group.regressionModelYear}}<br>
     Modeled Energy = {{groupItem.regressionEquation}}<br>
-    @if (groupItem.group.userDefinedModel) {
+    @if (groupItem.group.isGeneratedModel) {
     Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
     }
-    @if (!groupItem.group.userDefinedModel) {
+    @if (!groupItem.group.isGeneratedModel) {
     User defined model.
     }
   </div>

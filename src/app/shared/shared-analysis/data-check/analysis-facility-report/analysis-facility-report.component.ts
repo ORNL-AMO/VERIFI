@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
   selector: 'app-analysis-facility-report',
@@ -13,17 +13,14 @@ import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunct
   styleUrl: './analysis-facility-report.component.css'
 })
 export class AnalysisFacilityReportComponent {
-
-  @Input()
-  facilityDetails: Array<IdbAnalysisItem>;
-  @Input({ required: false })
-  analysisReportSetup: AnalysisReportSetup;
-  @Input()
-  executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
   @Input({ required: false })
   isDataCheck: boolean;
-  @Input({ required: false })
-  isFacilityReport: boolean;
+  @Input()
+  executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
+  @Input()
+  facilityReport: IdbFacilityReport;
+  @Input()
+  accountReport: IdbAccountReport;
 
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
   classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
@@ -61,17 +58,15 @@ export class AnalysisFacilityReportComponent {
   }
 
   setReportTitle() {
-    if (this.isFacilityReport) {
-      let report = this.facilityReportsDbService.selectedReport.getValue();
-      this.reportTitle = report?.name;
-      if(report && report.facilityReportType === 'modeling' && report.modelingReportSettings && !report.modelingReportSettings.includeIssuesSummary) {
+    if (this.facilityReport) {
+      this.reportTitle = this.facilityReport.name;
+      if(this.facilityReport && this.facilityReport.facilityReportType === 'modeling' && this.facilityReport.modelingReportSettings && !this.facilityReport.modelingReportSettings.includeIssuesSummary) {
         this.showTitle = true;
       }
     }
-    else {
-      let report = this.accountReportDbService.selectedReport.getValue();
-      this.reportTitle = report?.name;
-      if(report && this.analysisReportSetup && !this.analysisReportSetup.includeProblemsInformation) {
+    else if(this.accountReport) {
+      this.reportTitle = this.accountReport.name;
+      if(this.accountReport && this.accountReport.analysisReportSetup && !this.accountReport.analysisReportSetup.includeProblemsInformation) {
         this.showTitle = true;
       }
     }
