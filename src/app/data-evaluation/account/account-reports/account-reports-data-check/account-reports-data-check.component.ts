@@ -15,10 +15,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
-  selector: 'app-account-reports-data-check-component',
+  selector: 'app-account-reports-data-check',
   standalone: false,
-  templateUrl: './account-reports-data-check-component.html',
-  styleUrl: './account-reports-data-check-component.css',
+  templateUrl: './account-reports-data-check.component.html',
+  styleUrl: './account-reports-data-check.component.css',
 })
 export class AccountReportsDataCheckComponent {
   selectedReport: IdbAccountReport;

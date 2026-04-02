@@ -60,7 +60,7 @@ import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
 import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
-import { AccountReportsDataCheckComponent } from './account-reports-data-check-component/account-reports-data-check-component';
+import { AccountReportsDataCheckComponent } from './account-reports-data-check/account-reports-data-check.component';
 
 @NgModule({
   declarations: [
