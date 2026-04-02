@@ -561,6 +561,18 @@ export class RegressionModelsService {
         selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
         //set model validation for report year
         let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+        //check p-variable ids for model object, was not getting updated on import prior to v0.14.9
+        //group p-variable ids will be correctly mapped to data use them to check model variable ids and update if needed
+        let groupPredictorVariableIds: Array<string> = group.predictorVariables.map(variable => variable.id);
+        selectedModel.predictorVariables.forEach(modelVariable => {
+          if (!groupPredictorVariableIds.includes(modelVariable.id)) {
+            let matchVariable: AnalysisGroupPredictorVariable = group.predictorVariables.find(v => v.name == modelVariable.name);
+            if(matchVariable) {
+              modelVariable.id = matchVariable.id;
+            }
+          }
+        });
+
         selectedModel = this.setModelVaildAndNotes(selectedModel, facilityPredictorData, reportYear, facility, analysisItem.baselineYear, group);
 
       } else if (!group.isGeneratedModel) {
