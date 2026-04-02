@@ -12,7 +12,7 @@
         <thead class="text-center">
           <tr>
             <th>Meters</th>
-            <th>Energy Contribution</th>
+            <th>Consumption Contribution</th>
             <th>Unit cost</th>
             <th>Unit cost</th>
           </tr>
@@ -21,18 +21,24 @@
           @for (meter of groupMeters; track meter) {
           <tr>
             <td>{{meter.name}}</td>
-            <td class="text-center">{{energyPercentagePerMeter[meter.guid] | percent}}</td>
+            @if (checkConsumption(meter)) {
+            <td class="text-center">{{consumptionPercentagePerMeter[meter.guid] | percent:'1.2-2'}}</td>
+            }
+            @else {
+            <td>&mdash;</td>
+            }
             <td class="text-center">
               <div class="input-group input-group-sm">
                 <input type="number" class="form-control form-control-sm" [(ngModel)]="unitCostPerMeter[meter.guid]"
-                  (input)="convertEnergyRates(meter)">
-                <span class="input-group-text">$/{{meter.startingUnit}}</span>
+                  (input)="convertConsumptionRates(meter)">
+                <span class="input-group-text">$/{{ getCollectionUnit(meter) }}</span>
               </div>
             </td>
             <td class="text-center">
               <div class="input-group input-group-sm">
-                <input type="number" class="form-control form-control-sm" [value]="convertedEnergyRatePerMeter[meter.guid] || 0" disabled>
-                <span class="input-group-text">$/MMBtu</span>
+                <input type="number" class="form-control form-control-sm"
+                  [value]="(convertedConsumptionRatePerMeter[meter.guid] || 0) | number:'1.2-4'" disabled>
+                <span class="input-group-text">$/{{ finalUnit }}</span>
               </div>
             </td>
           </tr>

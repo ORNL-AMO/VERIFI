@@ -22,6 +22,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
+import { convertConsumptionRate, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-facility-cost-savings-report-results',
@@ -34,8 +35,7 @@ export class FacilityCostSavingsReportResultsComponent {
   facilityReportSub: Subscription;
   facilityReport: IdbFacilityReport;
   reportSettings: CostSavingsReportSettings;
-  selectedAnalysisItem: IdbAnalysisItem;
-  groupSummariesSub: Subscription;
+  selectedAnalysisItem: IdbAnalysisItem ;
   groupSummaries: Array<{
     group: AnalysisGroup,
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
@@ -50,6 +50,7 @@ export class FacilityCostSavingsReportResultsComponent {
   calculating: boolean | 'error' = false;
 
   groupUnits: { [groupId: string]: string } = {};
+  convertedGroupUnits: { [groupId: string]: string } = {};
   costDataTable: YearGroupData = {};
   convertedCostDataTable: YearGroupData = {};
   savingsDataTable: YearGroupData = {};
@@ -71,15 +72,16 @@ export class FacilityCostSavingsReportResultsComponent {
   ngOnInit() {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
+      this.selectedAnalysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
       this.groupUnits = this.reportSettings.groupUnits;
+      this.convertedGroupUnits = JSON.parse(JSON.stringify(this.reportSettings.groupUnits));
+      this.checkGroupUnits();
       this.costDataTable = this.reportSettings.costSavingsTable;
       this.convertedCostDataTable = JSON.parse(JSON.stringify(this.reportSettings.costSavingsTable));
-      this.convertToMMBtu();
-      this.years = Object.keys(this.convertedCostDataTable).map(yearStr => parseInt(yearStr)).sort((a, b) => a - b);
+      this.convertToRequiredUnit();
+      this.setYears();
     });
-
-    this.selectedAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.getGroupSummaries();
   }
 
@@ -87,6 +89,48 @@ export class FacilityCostSavingsReportResultsComponent {
     this.facilityReportSub.unsubscribe();
     if (this.worker) {
       this.worker.terminate();
+    }
+  }
+
+  checkGroupUnits() {
+    for (const group of this.selectedAnalysisItem.groups) {
+      let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == group.idbGroupId);
+      if (groupMeters.length > 1) {
+        this.convertedGroupUnits[group.idbGroupId] = this.selectedAnalysisItem.energyUnit;
+      }
+    }
+  }
+
+  convertToRequiredUnit() {
+    for (const year in this?.convertedCostDataTable) {
+      for (const groupId in this?.convertedCostDataTable[year]) {
+        const cost = this.convertedCostDataTable[year][groupId];
+        const originalUnit = this.convertedGroupUnits[groupId];
+        const finalUnit = this.selectedAnalysisItem.energyUnit;
+        if (originalUnit == finalUnit) {
+          this.convertedCostDataTable[year][groupId] = cost;
+          continue;
+        }
+        else {
+          if (cost != null && originalUnit != null) {
+            //this.convertedCostDataTable[year][groupId] = this.convertConsumptionRate(Number(year), groupId);
+            const groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == groupId);
+            if(groupMeters.length > 0){
+              this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, finalUnit, this.selectedAnalysisItem.analysisCategory);
+            }
+          }
+        }
+
+      }
+    }
+  }
+  
+  setYears() {
+    let baselineYear = this.selectedAnalysisItem.baselineYear;
+    let reportYear = this.reportSettings.reportYear;
+    this.years = [];
+    for (let year = baselineYear; year <= reportYear; year++) {
+      this.years.push(year);
     }
   }
 
@@ -132,27 +176,6 @@ export class FacilityCostSavingsReportResultsComponent {
     }
   }
 
-  convertToMMBtu() {
-    for (const year in this?.convertedCostDataTable) {
-      for (const groupId in this?.convertedCostDataTable[year]) {
-        const cost = this.convertedCostDataTable[year][groupId];
-        const unit = this.groupUnits[groupId];
-        if (cost != null && unit != null) {
-          const originalUnit = unit.replace('$/', '');
-          const unitsPerMMBtu = new ConvertValue(1, 'MMBtu', originalUnit).convertedValue;
-          if (unitsPerMMBtu && unitsPerMMBtu > 0) {
-            this.convertedCostDataTable[year][groupId] = cost * unitsPerMMBtu;
-          } else {
-            this.convertedCostDataTable[year][groupId] = 0;
-          }
-        }
-        else {
-          this.convertedCostDataTable[year][groupId] = 0;
-        }
-      }
-    }
-  }
-
   setGroupSavings() {
     if (this.groupSummaries) {
       this.groupSummaries.forEach(groupSummary => {
@@ -173,6 +196,22 @@ export class FacilityCostSavingsReportResultsComponent {
         });
       });
     }
+  }
+
+  calculateCostSavings(year: number, groupId: string): number {
+    if (this.savingsDataTable[year] && this.savingsDataTable[year][groupId] !== undefined && !isNaN(this.savingsDataTable[year][groupId]) &&
+      this.convertedCostDataTable[year] && this.convertedCostDataTable[year][groupId] !== undefined && !isNaN(this.convertedCostDataTable[year][groupId])) {
+      return this.savingsDataTable[year][groupId] * this.convertedCostDataTable[year][groupId];
+    }
+    return 0;
+  }
+
+  calculateCumulativeCostSavings(year: number, groupId: string): number {
+    if (this.cumulativeSavingsDataTable[year] && this.cumulativeSavingsDataTable[year][groupId] !== undefined && !isNaN(this.cumulativeSavingsDataTable[year][groupId]) &&
+      this.convertedCostDataTable[year] && this.convertedCostDataTable[year][groupId] !== undefined && !isNaN(this.convertedCostDataTable[year][groupId])) {
+      return this.cumulativeSavingsDataTable[year][groupId] * this.convertedCostDataTable[year][groupId];
+    }
+    return 0;
   }
 }
 

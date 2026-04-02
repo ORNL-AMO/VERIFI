@@ -141,7 +141,7 @@ export class FacilityReportsTabsComponent {
         this.setupValid = (this.selectedReport.name != '' &&
           this.selectedReport.costSavingsReportSettings.reportYear != undefined &&
           this.selectedReport.analysisItemId != undefined &&
-          this.errorMessage == undefined);
+          this.errorMessage == undefined && this.selectedReport.costSavingsReportSettings.isDataComplete);
       } else {
         this.setupValid = false;
       }

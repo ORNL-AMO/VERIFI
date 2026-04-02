@@ -240,3 +240,34 @@ export function getWeatherSearchFromFacility(facility: IdbFacility): string {
         return facility.zip;
     }
 }
+
+export function convertConsumptionRate(meter: IdbUtilityMeter, unitCost: number, finalUnit: string, analysisCategory: string): number {
+
+    if (unitCost == 0) return 0;
+
+    if (analysisCategory == 'water' || meter.source == 'Electricity') {
+        const factor = getConversionFactor(finalUnit, meter.startingUnit);
+        return unitCost * factor;
+    }
+
+    if (meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy') {
+        if (getIsEnergyUnit(meter.startingUnit) && !(meter.source == 'Other Fuels' && meter.scope == 2)) {
+            const factor = getConversionFactor(finalUnit, meter.startingUnit);
+            return unitCost * factor;
+        }
+
+        const heatCapacity = meter.heatCapacity;
+        if (!heatCapacity || isNaN(heatCapacity)) return 0;
+        const perEnergyUnit = unitCost / heatCapacity;
+        const collectionUnit = (meter.source == 'Other Fuels' && meter.scope == 2) ? meter.vehicleCollectionUnit : meter.energyUnit;
+        const factor = getConversionFactor(finalUnit, collectionUnit);
+        return perEnergyUnit * factor;
+    }
+
+    return 0;
+}
+
+function getConversionFactor(finalUnit: string, startingUnit: string): number {
+    const factor = new ConvertValue(1, finalUnit, startingUnit).convertedValue;
+    return (factor !== undefined && !isNaN(factor) && factor > 0) ? factor : 0;
+}

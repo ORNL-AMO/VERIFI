@@ -273,7 +273,8 @@ export function getCostSavingsReportSettings(): CostSavingsReportSettings {
     return {
         reportYear: undefined,
         costSavingsTable: {},
-        groupUnits: {}
+        groupUnits: {},
+        isDataComplete: false
     };
 }
 
@@ -282,5 +283,6 @@ export interface CostSavingsReportSettings {
     costSavingsTable: {
         [year: number]: {[groupId: string]: number}
     },
-    groupUnits: {[groupId: string]: string}
+    groupUnits: {[groupId: string]: string},
+    isDataComplete?: boolean
 }
