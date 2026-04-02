@@ -669,7 +669,7 @@ export class BackupDataService {
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUID;
         predictorData.facilityId = newFacilityGUID;
-        predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorV2GUIDs);
+        predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
