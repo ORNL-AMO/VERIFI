@@ -8,7 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -23,8 +23,9 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
+
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -54,6 +55,7 @@ export class RegressionModelMenuComponent implements OnInit {
 
   calanderizedMeters: Array<CalanderizedMeter>;
   calanderizedMetersSub: Subscription;
+
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -62,7 +64,8 @@ export class RegressionModelMenuComponent implements OnInit {
     private sharedDataService: SharedDataService,
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
-    private calanderizationService: CalanderizationService) { }
+    private calanderizationService: CalanderizationService
+  ) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -99,10 +102,23 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   setYears() {
-    let fullYearsWithData: Array<number> = getYearsWithFullData(this.calanderizedMeters, this.selectedFacility);
-    this.yearOptions = fullYearsWithData.filter(year => {
-      return year >= this.analysisItem.baselineYear;
-    })
+    this.yearOptions = [];
+    if (this.calanderizedMeters && this.calanderizedMeters.length > 0) {
+      const allDates = this.calanderizedMeters.flatMap(meter => meter.monthlyData.map(data => data.date));
+      if (allDates.length > 0) {
+        const firstReading = new Date(Math.min(...allDates.map(date => date.getTime())));
+        const latestReading = new Date(Math.max(...allDates.map(date => date.getTime())));
+
+        if (firstReading && latestReading) {
+          let firstYear: number = firstReading.getFullYear();
+          let lastYear: number = latestReading.getFullYear();
+          this.yearOptions = [];
+          for (let year = firstYear; year <= lastYear; year++) {
+            this.yearOptions.push(year);
+          }
+        }
+      }
+    }
   }
 
   setUserDefinedDefaultData() {
