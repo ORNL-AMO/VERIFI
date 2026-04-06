@@ -42,7 +42,7 @@ export class AccountEnergyReductionGoalComponent {
     this.latestSummarySub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
       this.latestAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && this.latestAnalysisItem?.selectedYearAnalysis) {
+      if (this.latestAnalysisSummary && this.latestAnalysisItem?.guid == this.account.selectedEnergyAnalysisId) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {
@@ -76,10 +76,6 @@ export class AccountEnergyReductionGoalComponent {
 
   goToAnalysisItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
-    if (this.latestAnalysisItem.setupErrors.hasError || this.latestAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/results');
-    }
+    this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -26,12 +25,16 @@ import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/wea
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
 import { getDateFromPredictorData } from 'src/app/shared/dateHelperFunctions';
 import { Month, Months } from 'src/app/shared/form-data/months';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-predictor',
   templateUrl: './facility-predictor.component.html',
   styleUrl: './facility-predictor.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class FacilityPredictorComponent {
 
@@ -43,6 +46,16 @@ export class FacilityPredictorComponent {
   firstMeterReading: Date;
 
   showDeletePredictor: boolean = false;
+
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.predictorForm.invalid && !this.predictorForm.pristine) {
+        await this.saveChanges();
+      }
+    }
+  }
+
   constructor(private activatedRoute: ActivatedRoute,
     private predictorDbService: PredictorDbService,
     private toastNotificationService: ToastNotificationsService,
@@ -56,8 +69,8 @@ export class FacilityPredictorComponent {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private routerGuardService: RouterGuardService
   ) {
   }
 
@@ -178,8 +191,16 @@ export class FacilityPredictorComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.predictorForm && this.predictorForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }
@@ -208,8 +229,6 @@ export class FacilityPredictorComponent {
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictor);
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.goToManagePredictors();

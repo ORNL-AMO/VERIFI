@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -6,12 +6,15 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { NavigationStart, Router } from '@angular/router';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+
 @Component({
   selector: 'app-regression-model-selection',
   templateUrl: './regression-model-selection.component.html',
@@ -20,40 +23,56 @@ import { NavigationStart, Router } from '@angular/router';
 })
 export class RegressionModelSelectionComponent implements OnInit {
 
+  analysisItem: IdbAnalysisItem;
   selectedGroup: AnalysisGroup;
-  showInvalid: boolean;
-  showFailedValidationModel: boolean;
-  showInvalidSub: Subscription;
-  showFailedDataValidationSub: Subscription;
   orderDataField: string = 'adjust_R2';
   orderByDirection: 'asc' | 'desc' = 'desc';
   selectedGroupSub: Subscription;
   selectedFacility: IdbFacility;
   selectedInspectModel: JStatRegressionModel;
   showInUseMessage: boolean;
-  generateUserDefinedModel: boolean;
-  showView: boolean = true;
+  showUserDefinedModelInspection: boolean = false;
   generatedModels: Array<JStatRegressionModel>;
   generatedModelsPerGroupSub: Subscription;
   routerSub: Subscription;
+  dropdownOpen: boolean = false;
+
+  modelFilterOptions: {
+    yearOptionSelections: Array<{ year: number, isChecked: boolean }>
+    showInvalid: boolean;
+    showFailedValidationModel: boolean;
+  } = {
+      yearOptionSelections: [],
+      showInvalid: false,
+      showFailedValidationModel: true
+    }
+
+  @ViewChild('dropdown') dropdownRef: ElementRef;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisValidationService: AnalysisValidationService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router) { }
+    private router: Router,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      this.selectedGroup = group;
-
+      if (!this.selectedGroup || group.idbGroupId != this.selectedGroup.idbGroupId) {
+        this.selectedGroup = group;
+        //group change
+        this.setYears();
+      } else {
+        this.selectedGroup = group;
+      }
       this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.selectedGroup.idbGroupId);
-
       if (!this.generatedModels?.length && this.selectedGroup?.models?.length) {
         this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.selectedGroup.models);
         this.generatedModels = this.selectedGroup.models;
       }
+      this.checkHasValidModels();
+      this.checkFailedValidationModels();
     });
 
     this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
@@ -63,6 +82,8 @@ export class RegressionModelSelectionComponent implements OnInit {
       else {
         this.generatedModels = [];
       }
+      this.checkHasValidModels();
+      this.checkFailedValidationModels();
     });
 
     this.routerSub = this.router.events.subscribe(event => {
@@ -72,21 +93,11 @@ export class RegressionModelSelectionComponent implements OnInit {
         }
       }
     });
-
-    this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
-      this.showInvalid = val;
-    });
-    this.showFailedDataValidationSub = this.analysisService.showFailedValidationModels.subscribe(val => {
-      this.showFailedValidationModel = val;
-    });
-
     this.setShowInUseMessage();
-
   }
+
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
-    this.showInvalidSub.unsubscribe();
-    this.showFailedDataValidationSub.unsubscribe();
     this.generatedModelsPerGroupSub.unsubscribe();
     this.routerSub.unsubscribe();
   }
@@ -109,15 +120,13 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   async saveItem() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
-    this.selectedGroup.groupErrors = this.analysisValidationService.getGroupErrors(this.selectedGroup, analysisItem);
-    analysisItem.groups[groupIndex] = this.selectedGroup;
-    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
-    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
+    this.analysisItem.isAnalysisVisited = false;
+    let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
+    this.analysisItem.groups[groupIndex] = this.selectedGroup;
+    await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
     this.analysisService.selectedGroup.next(this.selectedGroup)
   }
 
@@ -148,8 +157,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   setShowInUseMessage() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
     if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
       this.showInUseMessage = true;
     }
@@ -160,11 +168,57 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.analysisService.hideInUseMessage = true;
   }
 
-  onUserDefinedModelClicked(isClicked: boolean) {
-    this.generateUserDefinedModel = isClicked;
+  setShowUserDefinedModelInspection(showUserDefinedModelInspection: boolean) {
+    this.showUserDefinedModelInspection = showUserDefinedModelInspection;
   }
 
-  onFormChanged(isFormChanged: boolean) {
-    this.showView = isFormChanged;
+  checkHasValidModels() {
+    let noValidModels: boolean = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
+    if (!this.modelFilterOptions.showInvalid && noValidModels) {
+      this.modelFilterOptions.showInvalid = true;
+    }
+  }
+
+  checkFailedValidationModels() {
+    let noDataValidationModels: boolean = this.generatedModels?.find(model => {
+      if (model.SEPValidation) {
+        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
+      } else {
+        return undefined;
+      }
+    }) == undefined;
+    if (!this.modelFilterOptions.showFailedValidationModel && noDataValidationModels) {
+      this.modelFilterOptions.showFailedValidationModel = true;
+    }
+  }
+
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  toggleOption(option: number) {
+    const selection = this.modelFilterOptions.yearOptionSelections.find(selection => selection.year == option);
+    if (selection) {
+      selection.isChecked = !selection.isChecked;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
+      this.dropdownOpen = false;
+    }
+  }
+
+  setYears() {
+    if (this.selectedGroup) {
+      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
+      let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeters, this.selectedFacility);
+      fullYearsWithData = fullYearsWithData.filter(year => {
+        return year >= this.analysisItem.baselineYear;
+      })
+      this.modelFilterOptions.yearOptionSelections = fullYearsWithData.map(year => { return { year: year, isChecked: true } });
+    }
   }
 }
+

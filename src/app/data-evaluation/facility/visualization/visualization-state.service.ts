@@ -42,6 +42,7 @@ export class VisualizationStateService {
     this.correlationPlotOptions = new BehaviorSubject<CorrelationPlotOptions>(undefined);
   }
 
+  //TODO: remove
   setCalanderizedMeters(facility: IdbFacility) {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();

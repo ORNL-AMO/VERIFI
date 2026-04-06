@@ -14,6 +14,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { getDateFromMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
+import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -35,16 +36,19 @@ export class FacilityHomeSummaryComponent implements OnInit {
   energyAnalysisNeeded: boolean;
   meterReadingsNeeded: boolean;
   predictorsNeeded: boolean;
-  energyAnalysisHasErrors: boolean;
-  waterAnalysisHasErrors: boolean;
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
+
+  analysisValidationSub: Subscription;
+  energyAnalysisHasErrors: boolean;
+  waterAnalysisHasErrors: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
     private utilityMeterDbService: UtilityMeterdbService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private analysisValidationService: AnalysisValidationService
   ) { }
 
   ngOnInit(): void {
@@ -52,10 +56,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
       this.facility = val;
       this.setFacilityStatus();
     });
+
+    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
+      this.setEnergyAnalysisHasErrors();
+      this.setWaterAnalysisHasErrors();
+    });
+
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.analysisValidationSub.unsubscribe();
   }
 
   navigateTo(urlStr: string) {
@@ -74,7 +85,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.setEnergyAnalysisNeeded();
     this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
     this.setWaterAnalysisNeeded();
-    this.setAnalysisErrors();
     this.setSources();
   }
 
@@ -94,13 +104,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setEnergyAnalysisNeeded() {
-    let currentDate: Date = new Date();
     if (this.latestEnergyAnalysisItem) {
-      if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.energyAnalysisNeeded = true;
-      } else {
-        this.energyAnalysisNeeded = false;
-      }
+      this.energyAnalysisNeeded = false;
     } else if (this.facility.sustainabilityQuestions.energyReductionGoal) {
       this.energyAnalysisNeeded = true;
     } else {
@@ -109,13 +114,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setWaterAnalysisNeeded() {
-    let currentDate: Date = new Date();
     if (this.latestWaterAnalysisItem) {
-      if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-        this.waterAnalysisNeeded = true;
-      } else {
-        this.waterAnalysisNeeded = false;
-      }
+      this.waterAnalysisNeeded = false;
     } else if (this.facility.sustainabilityQuestions.waterReductionGoal) {
       this.waterAnalysisNeeded = true;
     } else {
@@ -123,12 +123,19 @@ export class FacilityHomeSummaryComponent implements OnInit {
     }
   }
 
-  setAnalysisErrors() {
+  setEnergyAnalysisHasErrors() {
     if (this.latestEnergyAnalysisItem) {
-      this.energyAnalysisHasErrors = this.latestEnergyAnalysisItem.setupErrors.hasError || this.latestEnergyAnalysisItem.setupErrors.groupsHaveErrors;
+      this.energyAnalysisHasErrors = this.analysisValidationService.getErrorsByAnalysisId(this.latestEnergyAnalysisItem.guid).hasError;
+    } else {
+      this.energyAnalysisHasErrors = false;
     }
+  }
+
+  setWaterAnalysisHasErrors() {
     if (this.latestWaterAnalysisItem) {
-      this.waterAnalysisHasErrors = this.latestWaterAnalysisItem.setupErrors.hasError || this.latestWaterAnalysisItem.setupErrors.groupsHaveErrors;
+      this.waterAnalysisHasErrors = this.analysisValidationService.getErrorsByAnalysisId(this.latestWaterAnalysisItem.guid).hasError;
+    } else {
+      this.waterAnalysisHasErrors = false;
     }
   }
 

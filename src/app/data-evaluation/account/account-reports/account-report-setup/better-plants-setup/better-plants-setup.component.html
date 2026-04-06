@@ -1,3 +1,31 @@
+<div class="d-flex align-items-center justify-content-center mb-4 p-3 rounded shadow-sm bg-light border">
+  <div class="pe-4 select-width">
+    <label class="form-label fw-bold">
+      <i class="fa fa-filter text-success"></i>
+      Analysis Category
+    </label>
+    <select class="form-select border-success" [(ngModel)]="selectedCategory" (ngModelChange)="onOptionChange()">
+      <option value="All">All</option>
+      <option value="energy">Energy</option>
+      <option value="water">Water</option>
+    </select>
+  </div>
+
+  <div class="ps-4 select-width">
+    <label class="form-label fw-bold">
+      <i class="fa fa-filter text-success"></i>
+      Baseline Year
+    </label>
+    <select class="form-select border-success" [(ngModel)]="selectedBaselineYear" (ngModelChange)="onOptionChange()">
+      <option value="All">All</option>
+      @for (year of baselineYears; track year) {
+      <option [ngValue]="year">{{ year }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
 <form [formGroup]="betterPlantsReportForm">
   <div class="row">
     <div class="col-12">
@@ -18,10 +46,10 @@
                 Analysis Category
               </td>
               <td>
-                Facilities Included
+                Baseline Year
               </td>
               <td>
-                Baseline Year
+                Facilities Included
               </td>
               <td>
               </td>
@@ -29,7 +57,7 @@
           </thead>
 
           <tbody class="table-group-divider">
-            @for (analysisItem of accountAnalysisItems; track analysisItem) {
+            @for (analysisItem of filteredAnalysisItems; track analysisItem.guid) {
             <tr>
               <td class="text-center">
                 <input type="radio" class="form-check-input" formControlName="analysisItemId"
@@ -37,6 +65,12 @@
               </td>
               <td>
                 {{analysisItem.name}}
+                @let setupErrors = analysisItem.guid | invalidAccountAnalysis;
+                @if(setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid){
+                <span class="red">
+                  <span class="fa fa-exclamation-circle"></span> Contains Errors
+                </span>
+                }
               </td>
               <td>
                 @if (analysisItem.analysisCategory == 'energy') {
@@ -47,7 +81,11 @@
                 }
               </td>
               <td>
-                @for (facilityItem of analysisItem.facilityAnalysisItems; track facilityItem; let index = $index) {
+                {{analysisItem.baselineYear}}
+              </td>
+              <td>
+                @for (facilityItem of analysisItem.facilityAnalysisItems; track facilityItem.facilityId; let index =
+                $index) {
                 <span>
                   @if (facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
                   <span>
@@ -60,18 +98,8 @@
                 </span>
                 }
               </td>
-              <td>
-                {{analysisItem.baselineYear}}
-              </td>
               <td class="text-center">
                 <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
-              </td>
-            </tr>
-            }
-            @if (accountAnalysisItems.length == 0) {
-            <tr>
-              <td colspan="4" class="alert alert-warning">
-                No analysis items matching selected report year.
               </td>
             </tr>
             }
@@ -181,6 +209,13 @@
     }
   </div>
 </form>
+}
+
+@if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
+<div class="alert alert-warning text-center">
+  No analysis items matching selected filters. Please adjust filters to view analysis items.
+</div>
+}
 
 <div [ngClass]="{'windowOverlay': itemToEdit}"></div>
 <div class="popup" [class.open]="itemToEdit">

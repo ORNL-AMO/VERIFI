@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
@@ -22,9 +22,10 @@ export class EditPredictorDataEntryFormComponent {
   @Input({ required: true })
   predictorData: IdbPredictorData;
   @Input()
-  isSaved: boolean;
-  @Input()
   calculatingDegreeDays: boolean = false;
+
+  @Output()
+  isSaved = new EventEmitter<boolean>();
 
   constructor(
     // private degreeDaysService: DegreeDaysService,
@@ -50,6 +51,7 @@ export class EditPredictorDataEntryFormComponent {
     this.predictorData.year = Number(yearMonth[0]);
     this.predictorData.month = Number(yearMonth[1]);
     this.setDegreeDayValues();
+    this.setChanged();
   }
 
   async setDegreeDayValues() {
@@ -116,7 +118,7 @@ export class EditPredictorDataEntryFormComponent {
   }
 
   setChanged() {
-    this.isSaved = false;
+    this.isSaved.emit(false);
   }
 
   setWeatherManually() {
@@ -124,6 +126,7 @@ export class EditPredictorDataEntryFormComponent {
       this.predictorData.weatherOverride = true;
       this.predictorData.weatherDataWarning = false;
     }
+    this.setChanged();
   }
 
   async revertManualWeatherData() {
@@ -131,6 +134,6 @@ export class EditPredictorDataEntryFormComponent {
       this.predictorData.weatherOverride = false;
     }
     await this.setDegreeDayValues();
+    this.setChanged();
   }
-
 }

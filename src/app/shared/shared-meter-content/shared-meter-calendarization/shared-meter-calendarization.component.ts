@@ -50,6 +50,9 @@ export class SharedMeterCalendarizationComponent {
   hasMeterData: boolean;
   consumptionLabel: 'Consumption' | 'Distance';
   isRECs: boolean;
+
+  calanderizationWorker: Worker;
+  calanderizingMeterData: boolean | 'error' = false;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
@@ -96,35 +99,72 @@ export class SharedMeterCalendarizationComponent {
     this.calanderizationService.displayGraphCost = this.displayGraphCost;
     this.calanderizationService.displayGraphEnergy = this.displayGraphEnergy;
     this.calanderizationService.dataDisplay = this.dataDisplay;
+    if (this.calanderizationWorker) {
+      this.calanderizationWorker.terminate();
+    }
   }
 
 
   setCalanderizedMeterData() {
     if (this.selectedMeter && this.calanderizedDataFilters) {
+      this.calanderizingMeterData = true;
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
-      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], selectedAccount.assessmentReportVersion, customGWPs);
+      if (typeof Worker !== 'undefined') {
+        if (this.calanderizationWorker) {
+          this.calanderizationWorker.terminate();
+        }
+        this.calanderizationWorker = new Worker(new URL('../../../web-workers/calanderization.worker', import.meta.url));
+        this.calanderizationWorker.onmessage = ({ data }) => {
+          this.calanderizationWorker.terminate();
+          if (!data.error) {
+            this.finishSettingsCalanderizedMeterData(data.calanderizedMeters);
+          } else {
+            console.log('Error in calanderization worker');
+            this.finishSettingsCalanderizedMeterData([]);
+            this.calanderizingMeterData = 'error';
+          }
+        };
+        this.calanderizationWorker.postMessage({
+          meters: [this.selectedMeter],
+          allMeterData: facilityMeterData,
+          accountOrFacility: this.selectedFacility,
+          monthDisplayShort: false,
+          calanderizationOptions: undefined,
+          co2Emissions: this.eGridService.co2Emissions,
+          customFuels: customFuels,
+          facilities: [this.selectedFacility],
+          assessmentReportVersion: selectedAccount.assessmentReportVersion,
+          customGWPs: customGWPs
+        });
 
-      let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
-        return cMeter.meter.guid == this.selectedMeter.guid
-      });
-      calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
-      this.calanderizedMeter = calanderizedMeterData[0];
-      if (this.selectedMeter.scope != 2) {
-        this.consumptionLabel = 'Consumption';
       } else {
-        this.consumptionLabel = 'Distance';
+        let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], selectedAccount.assessmentReportVersion, customGWPs);
+        this.finishSettingsCalanderizedMeterData(allCalanderizedMeterData);
       }
-      if (this.selectedMeter.source != 'Electricity') {
-        this.isRECs = false;
-      } else {
-        this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
-      }
-      this.setDateRange(allCalanderizedMeterData)
     }
+  }
+
+  finishSettingsCalanderizedMeterData(allCalanderizedMeterData: Array<CalanderizedMeter>) {
+    let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
+      return cMeter.meter.guid == this.selectedMeter.guid
+    });
+    calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
+    this.calanderizedMeter = calanderizedMeterData[0];
+    if (this.selectedMeter.scope != 2) {
+      this.consumptionLabel = 'Consumption';
+    } else {
+      this.consumptionLabel = 'Distance';
+    }
+    if (this.selectedMeter.source != 'Electricity') {
+      this.isRECs = false;
+    } else {
+      this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
+    }
+    this.setDateRange(allCalanderizedMeterData);
+    this.calanderizingMeterData = false;
   }
 
   setOrderDataField(str: string) {

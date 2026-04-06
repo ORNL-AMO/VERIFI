@@ -2,13 +2,13 @@
   <div class="content-padding">
     <h4>Analysis Setup</h4>
     @if (showInUseMessage) {
-      <div class="row">
-        <div class="col-12 alert alert-info text-center">
-          <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
-          This analysis is used in one or more reports. Changes to this analysis may effect the results of the
-          corresponding reports.
-        </div>
+    <div class="row">
+      <div class="col-12 alert alert-info text-center">
+        <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+        This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+        corresponding reports.
       </div>
+    </div>
     }
     <form>
       <div class="row">
@@ -21,54 +21,49 @@
             </div>
           </div>
           @if (analysisItem.analysisCategory == 'energy') {
-            <div class="form-group row">
-              <label class="col-5 col-form-label">Analysis Boundary </label>
-              <div class="col-7">
-                <div class="form-check">
-                  <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
-                    id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
-                    (change)="saveItem()" [disabled]="disableForm">
-                  <label class="form-check-label" for="sourceEnergy">Source Energy</label>
-                </div>
-                <div class="form-check">
-                  <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
-                    id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()"
-                    [disabled]="disableForm">
-                  <label class="form-check-label" for="siteEnergy">Site Energy</label>
-                </div>
+          <div class="form-group row">
+            <label class="col-5 col-form-label">Analysis Boundary </label>
+            <div class="col-7">
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsSource" [value]="true" id="sourceEnergy"
+                  [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()" [disabled]="disableForm">
+                <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" class="form-check-input" name="energyIsSource" [value]="false" id="siteEnergy"
+                  [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()" [disabled]="disableForm">
+                <label class="form-check-label" for="siteEnergy">Site Energy</label>
               </div>
             </div>
-            <div class="form-group row">
-              <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
-              <div class="col-7">
-                <select class="form-select" name="energyUnit" id="energyUnit"
-                  [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()"
-                  [disabled]="disableForm">
-                  @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
-                    <option
-                      [ngValue]="energyUnitOption.value">
-                      <span [innerHTML]="energyUnitOption.display"></span>
-                    </option>
-                  }
-                </select>
-              </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
+            <div class="col-7">
+              <select class="form-select" name="energyUnit" id="energyUnit" [(ngModel)]="analysisItem.energyUnit"
+                (change)="saveItem()" [disabled]="disableForm">
+                @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
+                <option [ngValue]="energyUnitOption.value">
+                  <span [innerHTML]="energyUnitOption.display"></span>
+                </option>
+                }
+              </select>
             </div>
+          </div>
           }
           @if (analysisItem.analysisCategory == 'water') {
-            <div class="form-group row">
-              <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
-              <div class="col-7">
-                <select class="form-select" name="waterUnit" id="waterUnit"
-                  [(ngModel)]="analysisItem.waterUnit" (change)="saveItem()" [disabled]="disableForm">
-                  @for (waterUnitOption of waterUnitOptions; track waterUnitOption) {
-                    <option
-                      [ngValue]="waterUnitOption.value">
-                      <span [innerHTML]="waterUnitOption.display"></span>
-                    </option>
-                  }
-                </select>
-              </div>
+          <div class="form-group row">
+            <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
+            <div class="col-7">
+              <select class="form-select" name="waterUnit" id="waterUnit" [(ngModel)]="analysisItem.waterUnit"
+                (change)="saveItem()" [disabled]="disableForm">
+                @for (waterUnitOption of waterUnitOptions; track waterUnitOption) {
+                <option [ngValue]="waterUnitOption.value">
+                  <span [innerHTML]="waterUnitOption.display"></span>
+                </option>
+                }
+              </select>
             </div>
+          </div>
           }
         </div>
         <div class="col-6">
@@ -78,102 +73,51 @@
             </label>
             <div class="col-7">
               <select required class="form-select" id="baselineYear" name="baselineYear"
-                [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
-                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}"
-                [disabled]="disableForm">
+                [(ngModel)]="analysisItem.baselineYear" (change)="changeBaselineYear()" [disabled]="disableForm">
                 @for (year of yearOptions; track year) {
-                  <option [ngValue]="year">
+                <option [ngValue]="year">
                   {{year| yearDisplay: account.fiscalYear}}</option>
                 }
               </select>
             </div>
           </div>
           @if (baselineYearWarning) {
-            <div class="alert alert-warning text-center p-1">
-              {{baselineYearWarning}}
-            </div>
+          <div class="alert alert-warning text-center p-1">
+            {{baselineYearWarning}}
+          </div>
           }
 
-          <div class="form-group row">
-            <label for="reportYear" class="col-5 col-form-label">
-              Report Year
-            </label>
-            <div class="col-7">
-              <select required class="form-select" name="reportYear" id="reportYear"
-                [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
-                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}"
-                [disabled]="disableForm">
-                @for (year of yearOptions; track year) {
-                  <option [ngValue]="year">{{year| yearDisplay:
-                    account.fiscalYear}}
-                  </option>
-                }
-              </select>
-            </div>
-          </div>
-          @if (analysisItem.setupErrors.reportYearBeforeBaselineYear) {
-            <div class="alert alert-danger text-center p-1"
-              >
-              Baseline year must be prior to report year.
-            </div>
-          }
-          <div class="form-group row">
-            <label class="col-5 col-form-label">
-              Reporting Year
-            </label>
-            <div class="col-7">
-              <div class="form-check">
-                <input type="radio" class="form-check-input" [(ngModel)]="account.fiscalYear"
-                  value="calendarYear" name="calendarYear" id="calendarYear" disabled>
-                <label class="form-check-label" for="calendarYear">Calendar Year</label>
-
-              </div>
-              <div class="form-check">
-                <input type="radio" class="form-check-input" for="nonCalendarYear"
-                  [(ngModel)]="account.fiscalYear" value="nonCalendarYear" name="nonCalendarYear"
-                  id="nonCalendarYear" disabled>
-                <label class="form-check-label">Fiscal Year</label>
-              </div>
-            </div>
-          </div>
           @if (account.fiscalYear == 'nonCalendarYear') {
-            <div class="form-group row">
-              <label class="col-5 col-form-label">Start Month</label>
-              <div class="col-7">
-                <select class="form-select" id="startMonth" name="startMonth"
-                  [(ngModel)]="account.fiscalYearMonth" disabled>
-                  @for (month of months; track month) {
-                    <option [ngValue]="month.monthNumValue">{{month.name}}
-                    </option>
-                  }
-                </select>
-              </div>
-            </div>
+          <p class="mb-0 mt-2 italic">
+            The account fiscal year option is set to <b>non-calendar year</b>. For more information, go to the
+            "Financial Reporting" section
+            of the account settings in the "<a class="click-link" (click)="goToSettings()"><span
+                class="fa fa-gear"></span> Settings</a>" tab.
+          </p>
+          }@else {
+          <p class="mb-0 mt-2 italic">
+            The account fiscal year option is set to <b>calendar year</b>. For more information, go to the "Financial
+            Reporting" section
+            of the account settings in the "<a class="click-link" (click)="goToSettings()"><span
+                class="fa fa-gear"></span>
+              Settings</a>" tab.
+          </p>
           }
-          @if (account.fiscalYear == 'nonCalendarYear') {
-            <div class="form-group row">
-              <div class="col-12">
-                <div class="form-check">
-                  <input type="checkbox" class="form-check-input" name="fiscalYearCalendarEnd"
-                    id="fiscalYearCalendarEnd" [(ngModel)]="account.fiscalYearCalendarEnd" disabled>
-                  <label class="form-check-label" for="fiscalYearCalanderEnd">FY is denoted by the
-                    calendar
-                  year in which it ends.</label>
-                </div>
-              </div>
-            </div>
-          }
-          <div class="alert alert-info text-center p-2">
-            Fields set in "<span class="fa fa-gear"></span> Settings" tab.
-          </div>
-          @if (!disableForm && analysisItem.reportYear && analysisItem.baselineYear) {
-            <div class="d-flex w-100 justify-content-end"
-              >
-              <div class="d-flex">
-                <button class="btn btn-outline btn-sm" (click)="openBulkAnalysisModal()">Create Bulk
+          <hr>
+          <p class="mb-0 italic">
+            <span class="fa fa-exclamation-triangle"></span> <b>Report Year Removed:</b>
+            Analyses no longer require setting a "report year" - all years with complete energy and predictor data will
+            generate results. When generating reports, simply select the analysis you want and specify a report year to
+            display results for that year. If you have no changes to your models or modeling techniques, this
+            means you no longer have to update your analysis settings each year.
+          </p>
+          @if (!disableForm && analysisItem.baselineYear) {
+          <div class="d-flex w-100 justify-content-end">
+            <div class="d-flex">
+              <button class="btn btn-outline btn-sm" (click)="openBulkAnalysisModal()">Create Bulk
                 Analysis</button>
-              </div>
             </div>
+          </div>
           }
         </div>
       </div>
@@ -181,17 +125,17 @@
     <div class="row">
       <div class="col">
         <hr>
-        </div>
       </div>
-      @if (disableForm) {
-        <div class="row">
-          <div class="col-12 alert alert-warning text-center">
-            Facility items selected for this analysis. Changing these settings will clear out the current selections
-            for
-            each corresponding facility. If you'd like to change these settings <a class="click-link"
+    </div>
+    @if (disableForm) {
+    <div class="row">
+      <div class="col-12 alert alert-warning text-center">
+        Facility items selected for this analysis. Changing these settings will clear out the current selections
+        for
+        each corresponding facility. If you'd like to change these settings <a class="click-link"
           (click)="showEnableForm()">click here</a>.
-        </div>
       </div>
+    </div>
     }
   </div>
 </div>
@@ -205,47 +149,47 @@
   <div class="popup-body">
     Are you sure you want to clear the existing facility analysis item selections? This cannot be undone!
     <hr>
-      @if (showInUseMessage) {
-        <div class="col-12 alert alert-info text-center">
-          This analysis is used in one or more reports. Changes to this analysis may effect the results of the
-          corresponding reports.
-        </div>
-      }
+    @if (showInUseMessage) {
+    <div class="col-12 alert alert-info text-center">
+      This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+      corresponding reports.
     </div>
-    <div class="saveCancel popup-footer text-end">
-      <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
-      <button class="btn action-btn" (click)="confirmEnableForm()">Change Settings</button>
-    </div>
+    }
   </div>
-  <div class="popup" [class.open]="displayBulkAnalysisModal">
-    <div class="popup-header">Create Bulk Analysis
-      <button class="item-right" (click)="closeBulkAnalysisModal()">x</button>
-    </div>
-    <div class="popup-body">
-      <p>
-        Would you like to create an analysis for every facility in your account using the current settings?
-      </p>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
+    <button class="btn action-btn" (click)="confirmEnableForm()">Change Settings</button>
+  </div>
+</div>
+<div class="popup" [class.open]="displayBulkAnalysisModal">
+  <div class="popup-header">Create Bulk Analysis
+    <button class="item-right" (click)="closeBulkAnalysisModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>
+      Would you like to create an analysis for every facility in your account using the current settings?
+    </p>
 
-      <div class="form-group row">
-        <label class="col-5 col-form-label bold">Analysis Type </label>
-        <div class="col-7">
-          <div class="form-check">
-            <input type="radio" class="form-check-input" name="analysisType"
-              [value]="'absoluteEnergyConsumption'" id="absoluteEnergyConsumption" [(ngModel)]="analysisType">
-            <label class="form-check-label" for="absoluteEnergyConsumption">Absolute</label>
-          </div>
-          <div class="form-check">
-            <input type="radio" class="form-check-input" name="analysisType" [value]="'energyIntensity'"
-              id="energyIntensity" [(ngModel)]="analysisType">
-            <label class="form-check-label" for="energyIntensity">Classic Intensity</label>
+    <div class="form-group row">
+      <label class="col-5 col-form-label bold">Analysis Type </label>
+      <div class="col-7">
+        <div class="form-check">
+          <input type="radio" class="form-check-input" name="analysisType" [value]="'absoluteEnergyConsumption'"
+            id="absoluteEnergyConsumption" [(ngModel)]="analysisType">
+          <label class="form-check-label" for="absoluteEnergyConsumption">Absolute</label>
+        </div>
+        <div class="form-check">
+          <input type="radio" class="form-check-input" name="analysisType" [value]="'energyIntensity'"
+            id="energyIntensity" [(ngModel)]="analysisType">
+          <label class="form-check-label" for="energyIntensity">Classic Intensity</label>
 
-          </div>
         </div>
       </div>
-      <hr>
-      </div>
-      <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="closeBulkAnalysisModal()">Cancel</button>
-        <button class="btn action-btn" (click)="confirmBulkAnalysisCreate()">Create Bulk Analysis</button>
-      </div>
     </div>
+    <hr>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="closeBulkAnalysisModal()">Cancel</button>
+    <button class="btn action-btn" (click)="confirmBulkAnalysisCreate()">Create Bulk Analysis</button>
+  </div>
+</div>

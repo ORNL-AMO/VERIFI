@@ -1,0 +1,74 @@
+<div class="d-flex w-100 pb-2 justify-content-between">
+    <div class="btn-group">
+        <button class="btn toggle-btn" (click)="cancel()" title="Manage All Groups">
+            <i class="fa fa-layer-group"></i>
+        </button>
+        <button class="btn toggle-btn" (click)="editGroup()" title="Edit Group">
+            <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn toggle-btn" (click)="viewGroupDataTable()" title="Group Data Table">
+            <i class="fa fa-table"></i>
+        </button>
+        <button class="btn toggle-btn active" title="Chart Group Data">
+            <i class="fa fa-chart-line"></i>
+        </button>
+    </div>
+</div>
+
+@if(calanderizedMeters && calanderizedMeters.length > 0) {
+<app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        @if(showConsumption || showEnergyUse){
+        <span class="btn-label pe-2">Utility</span>
+        <div class="btn-group pe-2 me-2">
+            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'bar'}"
+                (click)="setDisplayGraphEnergy('bar')">
+                <span class="fa fa-chart-simple"></span>
+            </button>
+            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'scatter'}"
+                (click)="setDisplayGraphEnergy('scatter')">
+                <span class="fa fa-line-chart"></span>
+            </button>
+        </div>
+        }
+        @if(showCost){
+        <span class="btn-label pe-2">Cost</span>
+        <div class="btn-group pe-2 me-2">
+            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'bar'}"
+                (click)="setDisplayGraphCost('bar')">
+                <span class="fa fa-chart-simple"></span>
+            </button>
+            <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'scatter'}"
+                (click)="setDisplayGraphCost('scatter')">
+                <span class="fa fa-line-chart"></span>
+            </button>
+        </div>
+        }
+    </div>
+    @if(showEnergyUse){
+    <div class="btn-group">
+        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
+            [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+            <span class="fa fa-chevron-right"></span>
+            Source Energy
+            <span class="fa fa-chevron-left"></span>
+        </button>
+        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
+            [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+            <span class="fa fa-chevron-right"></span>
+            Site Energy
+            <span class="fa fa-chevron-left"></span>
+        </button>
+    </div>
+    }
+</div>
+}@else if(calculatingMeterGroups){
+<app-calculating-spinner [message]="'Initializing Meter Group Data...'"
+    [error]="calculatingMeterGroups == 'error'"></app-calculating-spinner>
+}@else {
+<div class="alert alert-info p-1 text-center">
+    No meters added to this group. Click the "<span class="fa fa-pencil"></span>" button to add meters to this group.
+</div>
+}
+<div #groupMeterDataChart></div>

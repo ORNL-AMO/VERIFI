@@ -3,119 +3,121 @@
     <div class="col-11 pt-4 pb-4">
       <div class="form-paper">
         <h4>
-          Upload Data From .XLSX Files
+          Upload Data
         </h4>
-        <br>
-          <div class="row">
-            <div class="col-12">
-              <h5>Data Entry Options </h5>
-            </div>
-            <div class="col-12">
-              <p class="large">VERIFI has two options for adding utility data to corporate accounts. Users
-                with
-                only a couple
-                facilities may want to add data manually by filling out data forms for facilities, meters,
-                bills and
-                predictors. Otherwise, accounts with many facilities can use our excel
-                template for uploading
-              all the data tracking information at once.</p>
-              <p>
-                It should be noted that a combination of manual data entry and excel data uploading can be
-                used.
-              </p>
-            </div>
+        <div class="row">
+          <div class="col-12">
+            <h5>Data Entry Options</h5>
           </div>
-          <hr>
+          <div class="col-12">
+            <p class="large">VERIFI has multiple options for adding utility data to corporate accounts: </p>
+            <ol>
+              <li>
+                <b>Direct VERIFI Data Entry:</b> This option allows users to add data by filling out forms for each
+                facility, meter, bill and predictor. This is a good option for users with less historic data, a small
+                number of facilities, or users who are regularly updating.
+              </li>
+              <li>
+                <b>Excel Data Upload (Template):</b> This option allows users to upload data for multiple facilities at
+                once using an Excel template. This is a good option for users with many facilities or years of historic
+                data.
+              </li>
+              <li>
+                <b>Excel Data Upload (Custom):</b> Users who have data in a columnal format (columns for date, each
+                meter, and each predictor) may be able to upload data without using the provided template. This option
+                is best for users whose data can easily match the format and fields in VERIFI. <i>(This option is good
+                  for legacy EnPI files.)</i>
+              </li>
+              <li>
+                <b>Backup Data Upload (JSON):</b> This option allows users to upload data from a JSON backup file. This
+                is a good option for users who have exported data from VERIFI in the past and want to re-import it. This
+                option can also be used to centrally manage facility performance data provided by facility energy
+                managers.
+              </li>
+            </ol>
             <p>
-              An excel template has been created to more easily upload facility and utility data. <a
-              class="click-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx">
-              <span class="fa fa-download"></span>
-            Download Template</a>
-          </p>
-          <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile"
-            (dragenter)="setDragEnter()" (input)="setImportFile($event.target)" multiple accept=".xlsx, .xls"
-            (dragleave)="setDragOut()">
-          @if (fileUploadError) {
-            <div>
-              <div class="p-2 alert-danger">
-                There was an error processing this file. Please try a different file.
-              </div>
-            </div>
-          }
-          <hr>
-            <div class="alert alert-info">
-              <ul class="mb-0">
-                <li>
-                  Select the files you wish to upload data from into facilities.
-                </li>
-                <li>
-                  Data must be in excel (.XLSX) files.
-                </li>
-                <li>
-                  Once the files have been selected we will work through parsing out the relevant data into
-                  the correct
-                  places.
-                </li>
-                <li>
-                  Click the "Choose Files" button or drag and drop files into the grey box.
-                </li>
-                <li>
-                  Multiple files can be uploaded.
-                </li>
-              </ul>
-            </div>
-
-            @if (fileReferences.length != 0) {
-              <div class="table-responsive">
-                <hr>
-                  <table class="table table-hover table-sm table-bordered utility-data">
-                    <thead class="table-mh">
-                      <tr>
-                        <th>
-                          Files
-                        </th>
-                        <th>
-                          <!-- Remove -->
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                      @for (reference of fileReferences; track reference; let index = $index) {
-                        <tr>
-                          <td>
-                            <a class="click-link" (click)="goToFile(reference)">
-                              {{reference.name}}
-                            </a>
-                          </td>
-                          <td class="text-center">
-                            <button class="btn btn-danger btn-sm danger"
-                            (click)="removeReference(index)">Remove</button>
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              }
-            </div>
+              Combinations of these options can be used. For example, a user could upload data for some facilities using
+              the Excel template and then add additional data manually using the data forms within VERIFI.
+            </p>
           </div>
         </div>
-      </div>
-
-
-      <nav class="data-management-footer navbar">
-        <div class="container-fluid justify-content-end">
-          @if (fileReferences.length != 0) {
-            <div class="btn-group">
-              <button class="btn btn-dark" (click)="next()">
-                Process {{fileReferences[0].name}}
-                <span class="fa fa-chevron-right"></span>
-              </button>
-            </div>
-          } @else {
-            <div class="w-100 text-center footer-text">
-              Upload files to get started!
-            </div>
-          }
+        <hr>
+        <h6>Excel File Upload</h6>
+        <p>
+          An excel template has been created to more easily upload facility and utility data. <a class="click-link"
+            href="assets/csv_templates/VERIFI-Import-Data.xlsx">
+            <span class="fa fa-download"></span>
+            Download Template</a>
+        </p>
+        <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile"
+          (dragenter)="setDragEnter()" (input)="setImportFile($event.target)" multiple accept=".xlsx, .xls"
+          (dragleave)="setDragOut()">
+        @if (fileUploadError) {
+        <div>
+          <div class="p-2 alert-danger">
+            There was an error processing this file. Please try a different file.
+          </div>
         </div>
-      </nav>
+        }
+        <hr>
+        @if (fileReferences.length != 0) {
+        <div class="table-responsive">
+          <table class="table table-hover table-sm table-bordered utility-data">
+            <thead class="table-mh">
+              <tr>
+                <th colspan="2">
+                  Files
+                </th>
+              </tr>
+            </thead>
+            <tbody class="table-group-divider">
+              @for (reference of fileReferences; track reference; let index = $index) {
+              <tr>
+                <td>
+                  <a class="click-link" (click)="goToFile(reference)">
+                    {{reference.name}}
+                  </a>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-danger btn-sm danger" (click)="removeReference(index)">Remove</button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }@else {
+        <div>
+          <h6>
+            Upload Data From Backup JSON File
+          </h6>
+          <p>
+            Use the below button to selectively import facilities from a JSON backup data file.
+          </p>
+          <button class="btn btn-secondary" (click)="openImportBackup()">
+            <span class="fa fa-file-import"></span>
+            Import Backup File
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="data-management-footer navbar">
+  <div class="container-fluid justify-content-end">
+    @if (fileReferences.length != 0) {
+    <div class="btn-group">
+      <button class="btn btn-dark" (click)="next()">
+        Process {{fileReferences[0].name}}
+        <span class="fa fa-chevron-right"></span>
+      </button>
+    </div>
+    } @else {
+    <div class="w-100 text-center footer-text">
+      Upload files to get started!
+    </div>
+    }
+  </div>
+</nav>

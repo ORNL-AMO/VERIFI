@@ -1,30 +1,109 @@
 @if (meters.length > 0) {
-  <table class="table table-bordered table-sm">
-    <thead>
-      <tr>
-        <th>Meter</th>
-        <th>Source</th>
-        <th>Scope</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (meter of meters; track meter) {
-        <tr>
-          <td>
-            {{meter.name}}
-          </td>
-          <td>
-            {{meter.source}}
-          </td>
-          <td>
-            <span [innerHTML]="meter.scope | scopeLabel"></span>
-          </td>
-        </tr>
+<table class="table table-bordered table-sm utility-data">
+  <thead>
+    @if(showHeader){
+    <tr class="table-mh">
+      <th colspan="6">
+        Meter Group:
+        {{meterGroup.name}}
+      </th>
+    </tr>
+    }
+    <tr>
+      <th>Meter</th>
+      <th>Source</th>
+      <th>Scope</th>
+      <th>Last Reading</th>
+      @if(meterGroup && (meterGroup.groupType == 'Water' || meterGroup.groupType == 'Energy')) {
+      @let consumptionLabel = meterGroup.groupType == 'Energy' ? 'Energy Use' : 'Consumption';
+      <th>
+        Last 12-months
+        {{consumptionLabel}}<br>
+        @if(lastTwelveMonthsStartDate && lastTwelveMonthsEndDate) {
+        ({{lastTwelveMonthsStartDate | date:'MMM yyyy'}} - {{lastTwelveMonthsEndDate | date:'MMM yyyy'}})
+        }
+      </th>
+      <th colspan="4">
+        Last Full Year
+        {{consumptionLabel}}<br>
+        @if(lastFullYear) {
+        ({{lastFullYear | yearDisplay:facility.fiscalYear}})
+        }
+      </th>
       }
-    </tbody>
-  </table>
+    </tr>
+  </thead>
+  <tbody>
+    @for (meterListItem of meterList; track meterListItem.meter.guid) {
+    <tr>
+      <td class="ps-2">
+        {{meterListItem.meter.name}}
+      </td>
+      <td>
+        {{meterListItem.meter.source}}
+      </td>
+      <td>
+        <span [innerHTML]="meterListItem.meter.scope | scopeLabel"></span>
+      </td>
+      <td>
+        @if (meterListItem.lastReading) {
+        {{meterListItem.lastReading | displayMeterDataDate}}
+        } @else {
+        &mdash;
+        }
+      </td>
+      @if(!calculatingMeterGroups){
+      @if(meterGroup && (meterGroup.groupType == 'Water' || meterGroup.groupType == 'Energy')) {
+      <td class="text-end">
+        @if (meterListItem.lastTwelveMonthsConsumption) {
+        {{meterListItem.lastTwelveMonthsConsumption | customNumber}}
+        } @else {
+        &mdash;
+        }
+      </td>
+      <td class="text-end">
+        @if (meterListItem.lastFullYearConsumption) {
+        {{meterListItem.lastFullYearConsumption | customNumber}}
+        } @else {
+        &mdash;
+        }
+      </td>
+      }
+      }@else{
+      @if(meterGroup && (meterGroup.groupType == 'Water' || meterGroup.groupType == 'Energy')) {
+      <td>
+        <span class="placeholder-glow w-100">
+          <span class="placeholder col-12"></span>
+        </span>
+      </td>
+      <td>
+        <span class="placeholder-glow w-100">
+          <span class="placeholder col-12"></span>
+        </span>
+      </td>
+      }
+      }
+    </tr>
+    }
+  </tbody>
+  @if(meterGroup && (meterGroup.groupType == 'Water' || meterGroup.groupType == 'Energy')) {
+  <tfoot>
+    <tr>
+      <th colspan="4">
+        Total
+      </th>
+      <th class="text-end">
+        {{lastTwelveMonthsConsumptionTotal | customNumber}}
+      </th>
+      <th class="text-end">
+        {{lastFullYearConsumptionTotal | customNumber}}
+      </th>
+    </tr>
+  </tfoot>
+  }
+</table>
 } @else {
-  <div class="alert alert-info p-1">
-    No meters added to this group.
-  </div>
+<div class="alert alert-info p-1">
+  No meters added to this group.
+</div>
 }

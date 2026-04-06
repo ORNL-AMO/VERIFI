@@ -1,0 +1,30 @@
+@if (facilityReport && executiveSummaryItems.length > 0) {
+@if (facilityReport.modelingReportSettings.includeIssuesSummary) {
+<div class="report">
+  <app-analysis-problems-information [facilityReport]="facilityReport"
+    [executiveSummaryItems]="executiveSummaryItems"></app-analysis-problems-information>
+</div>
+}
+
+@if (facilityReport.modelingReportSettings.includeExecutiveSummary) {
+<div class="report">
+  <app-analysis-facility-report [facilityReport]="facilityReport"
+    [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
+</div>
+}
+
+@if (facilityReport.modelingReportSettings.includeDataValidationTables) {
+<div class="report">
+  <app-analysis-data-validation-tables [facilityReport]="facilityReport"
+    [executiveSummaryItems]="executiveSummaryItems"></app-analysis-data-validation-tables>
+</div>
+}
+}
+
+@if (!analysisItem) {
+<div class="w-100 justify-content-center">
+  <div class="pt-5">
+    <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
+  </div>
+</div>
+}

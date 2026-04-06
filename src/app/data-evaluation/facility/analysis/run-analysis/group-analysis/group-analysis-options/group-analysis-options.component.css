@@ -12,3 +12,16 @@
   margin-left: 0.5em;
   vertical-align: middle;
 }
+
+a.click-link .fa, .btn-success .fa, .action-btn.active .fa {
+  color: inherit;
+}
+
+a.click-link-danger .fa{
+  color: red;
+}
+
+.action-btn.active{
+  background-color: #007bff;
+  color: white;
+}

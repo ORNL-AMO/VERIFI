@@ -1,9 +1,10 @@
 
 export interface AccountAnalysisSetupErrors {
+    analysisId: string,
+    accountId: string,
     hasError: boolean,
+    hasSetupErrors: boolean,
     missingName: boolean,
-    missingReportYear: boolean,
     missingBaselineYear: boolean,
-    reportYearBeforeBaselineYear: boolean,
     facilitiesSelectionsInvalid: boolean
 }

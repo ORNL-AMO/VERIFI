@@ -1,0 +1,13 @@
+
+.table thead.sortable tr:not(.table-mh) th.active {
+    text-decoration: underline;
+}
+
+.table thead.sortable tr:not(.table-mh) th:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.row-year{
+    width: 120px;
+}

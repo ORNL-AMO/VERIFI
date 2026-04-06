@@ -10,14 +10,18 @@ import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { FacilityReportsService } from '../../facility-reports.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-facility-savings-report-setup',
   standalone: false,
-
   templateUrl: './facility-savings-report-setup.component.html',
   styleUrl: './facility-savings-report-setup.component.css'
 })
@@ -34,19 +38,23 @@ export class FacilitySavingsReportSetupComponent {
   reportSettings: SavingsFacilityReportSettings;
   reportYears: Array<number>;
   baselineYears: Array<number>;
-  errorMessage: string;
-  errorMessageSub: Subscription;
   months: Array<Month> = Months;
   analysisTableColumns: AnalysisTableColumns;
+  selectedBaselineYear: number | 'All' = 'All';
+  selectedCategory: string = 'All';
+  filteredAnalysisItems: Array<IdbAnalysisItem>;
+  hasDataChanged: boolean = false;
 
+  calanderizedMetersSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService,
-    private facilityReportsService: FacilityReportsService
-  ) {
+    private predictorDataDbService: PredictorDataDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDbService: UtilityMeterdbService) {
 
   }
 
@@ -57,22 +65,24 @@ export class FacilitySavingsReportSetupComponent {
       this.analysisTableColumns = this.reportSettings.analysisTableColumns;
     });
 
-    this.setYearOptions();
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
+      this.setYearOptions();
+    });
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
+      this.applyFilters();
     });
     this.setSelectedAnalysisItem(true);
-
-    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
-      this.errorMessage = message;
-    });
+    if (this.selectedAnalysisItem) {
+      this.checkModelData();
+    }
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
-    this.errorMessageSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   async setSelectedAnalysisItem(onInit: boolean) {
@@ -84,6 +94,46 @@ export class FacilitySavingsReportSetupComponent {
     if (!onInit) {
       await this.save();
     }
+  }
+
+  checkModelData() {
+    this.hasDataChanged = false;
+    if (this.selectedAnalysisItem?.dataCheckedDate) {
+      let dataCheckDate: Date = new Date(this.selectedAnalysisItem?.dataCheckedDate);
+      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+
+      let hasDataChanged = facilityPredictorEntries.find(predictor => {
+        return new Date(predictor.modifiedDate) > dataCheckDate
+      });
+      if (hasDataChanged) {
+        this.hasDataChanged = true;
+        this.saveAnalysisVisitedData();
+      } else {
+        let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+        let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+
+        let groupMeters: Array<IdbUtilityMeter> = this.selectedAnalysisItem.groups.flatMap(group => {
+          return facilityMeters.filter(meter => meter.groupId == group.idbGroupId);
+        });
+        let groupMeterIds: Array<string> = groupMeters.map(meter => meter.guid);
+        let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => groupMeterIds.includes(meterData.meterId));
+
+        let hasDataChanged = groupMeterData.some(meterData => new Date(meterData.dbDate) > dataCheckDate);
+        if (hasDataChanged) {
+          this.hasDataChanged = true;
+          this.saveAnalysisVisitedData();
+        }
+      }
+    }
+  }
+
+  async saveAnalysisVisitedData() {
+    this.selectedAnalysisItem.isAnalysisVisited = false;
+    await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
+    this.analysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
   }
 
   setPredictorVariables() {
@@ -134,7 +184,8 @@ export class FacilitySavingsReportSetupComponent {
   }
 
   setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount('all', this.facilityReport.facilityId);
+    //TODO: include partial years for savings reports?
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }
@@ -260,4 +311,18 @@ export class FacilitySavingsReportSetupComponent {
     await this.save();
   }
 
+  applyFilters() {
+    this.filteredAnalysisItems = [...this.analysisItems];
+    if (this.selectedBaselineYear != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
+    }
+    if (this.selectedCategory != 'All') {
+      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
+    }
+  }
+
+  onOptionChange() {
+    this.applyFilters();
+    this.setSelectedAnalysisItem(true);
+  }
 }

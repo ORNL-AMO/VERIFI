@@ -53,6 +53,7 @@ export class PredictorsDataTableComponent {
   latestMeterDataReading: Date;
   filterErrors: boolean = false;
   hasCalculatedOverride: boolean = false;
+  inDataManagement: boolean;
 
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
@@ -73,6 +74,7 @@ export class PredictorsDataTableComponent {
   }
 
   ngOnInit() {
+    this.setInDataManagement();
     this.predictorDataSub = this.predictorDataDbService.facilityPredictorData.subscribe(() => {
       this.setPredictorData();
     });
@@ -100,6 +102,10 @@ export class PredictorsDataTableComponent {
     this.itemsPerPageSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
     this.paramSub.unsubscribe();
+  }
+
+  setInDataManagement() {
+    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   setInDataWizard() {
@@ -329,5 +335,9 @@ export class PredictorsDataTableComponent {
 
   toggleFilterErrors() {
     this.filterErrors = !this.filterErrors;
+  }
+
+  goToDataQualityReport() {
+    this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/data-quality-report');
   }
 }

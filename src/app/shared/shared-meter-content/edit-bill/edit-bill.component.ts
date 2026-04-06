@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -9,7 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -17,12 +17,16 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { getDateFromMeterData, setMeterDataDateFromDate } from '../../dateHelperFunctions';
+import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-bill',
   templateUrl: './edit-bill.component.html',
   styleUrls: ['./edit-bill.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditBillComponent implements OnInit {
 
@@ -39,12 +43,23 @@ export class EditBillComponent implements OnInit {
   inDataManagement: boolean;
   paramsSub: Subscription;
   isElectron: boolean;
+
+  handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.meterDataForm.invalid && !this.invalidDate) {
+        this.saveAndQuit();
+      }
+    }
+  }
+
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
     private router: Router,
-    private electronService: ElectronService) { }
+    private electronService: ElectronService,
+    private routerGuardService: RouterGuardService) { }
 
   ngOnInit(): void {
     this.setInDataManagement();
@@ -166,11 +181,18 @@ export class EditBillComponent implements OnInit {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-
   canDeactivate(): Observable<boolean> {
-    if (this.meterDataForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+    if (this.meterDataForm && this.meterDataForm.dirty) {
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveAndQuit()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }

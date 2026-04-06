@@ -39,9 +39,9 @@ export class AccountSavingsReport {
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>) {
 
-        selectedAnalysisItem.reportYear = report.endYear;
+        selectedAnalysisItem.calculatedReportYear = report.endYear;
         accountAnalysisItems.forEach(item => {
-            item.reportYear = report.endYear;
+            item.calculatedReportYear = report.endYear;
         });
         this.performanceReport = new PerformanceReport(
             selectedAnalysisItem.baselineYear,

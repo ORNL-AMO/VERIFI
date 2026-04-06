@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -17,13 +18,19 @@ export class EnergyConsumptionComponent implements OnInit {
   facilityMetersSub: Subscription;
 
   meterDataSub: Subscription;
-  meterData: Array<IdbUtilityMeterData>
+  meterData: Array<IdbUtilityMeterData>;
+  facilityId: string;
+  facilitySub: Subscription;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private facilityDbService: FacilitydbService
   ) { }
 
   ngOnInit() {
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.facilityId = facility?.guid;
+    });
     this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
       this.utilityMeters = facilityMeters;
     });
@@ -35,5 +42,6 @@ export class EnergyConsumptionComponent implements OnInit {
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
     this.meterDataSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 }

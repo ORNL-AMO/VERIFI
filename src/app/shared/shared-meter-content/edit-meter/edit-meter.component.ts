@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -9,33 +9,46 @@ import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { Observable, firstValueFrom, of } from 'rxjs';
+import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
+import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-meter',
   templateUrl: './edit-meter.component.html',
   styleUrls: ['./edit-meter.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditMeterComponent implements OnInit {
-
 
   meterForm: FormGroup;
   meterDataExists: boolean;
   editMeter: IdbUtilityMeter;
   addOrEdit: 'add' | 'edit';
   selectedFacility: IdbFacility;
+
+  handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if(!this.meterForm.invalid) {
+        this.saveChanges();
+      }
+    }
+  }
+
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private editMeterFormService: EditMeterFormService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService, private activatedRoute: ActivatedRoute,
-    private router: Router) { }
+    private router: Router,
+    private routerGuardService: RouterGuardService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -47,7 +60,7 @@ export class EditMeterComponent implements OnInit {
         this.editMeter = facilityMeters.find(meter => { return meter.guid == meterId });
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
         let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
-        if (meterData.length != 0) {
+        if (meterData.length != 0 && this.meterForm.valid) {
           this.meterDataExists = true;
           this.meterForm.controls.source.disable();
           this.meterForm.controls.startingUnit.disable();
@@ -121,9 +134,17 @@ export class EditMeterComponent implements OnInit {
   }
 
   canDeactivate(): Observable<boolean> {
-    if (this.meterForm.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+    if (this.meterForm && this.meterForm.dirty) {
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }

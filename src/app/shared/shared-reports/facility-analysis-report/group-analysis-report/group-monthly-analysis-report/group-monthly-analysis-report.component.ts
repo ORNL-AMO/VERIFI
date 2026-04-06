@@ -58,14 +58,14 @@ export class GroupMonthlyAnalysisReportComponent {
 
   setReportYearMonthlyData() {
     this.reportYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
-      return summaryData.fiscalYear == this.analysisItem.reportYear;
+      return summaryData.fiscalYear == this.analysisItem.calculatedReportYear;
     });
   }
 
   setModelYearMonthlyData() {
     if (this.group.analysisType == 'regression') {
       this.modelYearIsBaselineYear = this.group.regressionModelYear == this.analysisItem.baselineYear;
-      this.modelYearIsReportYear = this.group.regressionModelYear == this.analysisItem.reportYear;
+      this.modelYearIsReportYear = this.group.regressionModelYear == this.analysisItem.calculatedReportYear;
       if (!this.modelYearIsBaselineYear && !this.modelYearIsReportYear) {
         this.modelYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
           return summaryData.fiscalYear == this.group.regressionModelYear;

@@ -8,8 +8,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { firstValueFrom } from 'rxjs';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -18,15 +17,14 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+
 @Component({
     selector: 'app-select-item-table',
     templateUrl: './select-item-table.component.html',
     styleUrls: ['./select-item-table.component.css'],
     standalone: false
 })
-export class SelectItemTableComponent implements OnInit {
-  @Input()
-  facility: IdbFacility;
+export class SelectItemTableComponent {
   @Input()
   selectedAnalysisItem: IdbAccountAnalysisItem;
   @Input()
@@ -34,26 +32,32 @@ export class SelectItemTableComponent implements OnInit {
 
   selectedFacilityItemId: string;
   itemToEdit: IdbAnalysisItem;
-  facilities: Array<IdbFacility>
   showCreateItem: boolean;
   selectedFacilityItem: IdbAnalysisItem;
+
+  facility: IdbFacility;
+  facilitySub: Subscription;
+
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
+    private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private analysisService: AnalysisService,
-    private analysisValidationService: AnalysisValidationService,
     private sharedDataService: SharedDataService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictorDbService) { }
+    private predictorDbService: PredictorDbService,
+    private facilityDbservice: FacilitydbService) { }
 
-  ngOnInit(): void {
-    this.facilities = this.facilityDbService.accountFacilities.getValue();
+  ngOnInit(){
+    this.facilitySub = this.facilityDbservice.selectedFacility.subscribe(facility => {
+      this.facility = facility;
+      this.setSelectedFacilityItemId();
+    })
   }
 
-  ngOnChanges() {
-    this.setSelectedFacilityItemId();
+  ngOnDestroy() {
+    this.facilitySub.unsubscribe();
   }
 
   setSelectedFacilityItemId() {
@@ -66,9 +70,10 @@ export class SelectItemTableComponent implements OnInit {
   }
 
   async save() {
+    this.selectedAnalysisItem.isAnalysisVisited = false;
     await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    await this.dbChangesService.setAccountAnalysisItems(account, true);
     this.setSelectedFacilityItem();
   }
 
@@ -111,12 +116,6 @@ export class SelectItemTableComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.facility, accountMeterGroups, accountPredictors, this.selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
-    newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
-    newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
-    newIdbItem.groups.forEach(group => {
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
-    });
-    newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     this.selectedFacilityItemId = newIdbItem.guid;
     await this.dbChangesService.selectAccount(account, false);

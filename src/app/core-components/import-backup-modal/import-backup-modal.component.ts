@@ -73,7 +73,11 @@ export class ImportBackupModalComponent implements OnInit {
         this.backupFile = undefined;
         this.backupFileError = undefined;
         this.backupName = undefined;
-        this.overwriteData = false;
+        if (this.router.url.includes('import-data')) {
+          this.overwriteData = 'selective_import';
+        } else {
+          this.overwriteData = false;
+        }
         this.selectedAccount = this.accountDbService.selectedAccount.getValue();
         this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
         this.accountFacilityNames = this.accountFacilities.map(facility => facility.name);
@@ -86,7 +90,7 @@ export class ImportBackupModalComponent implements OnInit {
     });
 
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
-      if (context === 'import-account-backup' || context === 'import-facility-backup') {
+      if (context === 'import-account-backup' || context === 'import-facility-backup' || context === 'import-selected-facility-backup') {
         this.navigateToUrl();
       }
     });

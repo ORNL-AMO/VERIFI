@@ -1,0 +1,99 @@
+<div class="d-flex w-100 pb-2">
+    <div class="btn-group">
+        <button class="btn toggle-btn" (click)="cancel()" title="Manage All Groups">
+            <i class="fa fa-layer-group"></i>
+        </button>
+        <button class="btn toggle-btn" (click)="editGroup()" title="Edit Group">
+            <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn toggle-btn active" title="Group Data Table">
+            <i class="fa fa-table"></i>
+        </button>
+        <button class="btn toggle-btn" (click)="viewGroupChartData()" title="Chart Group Data">
+            <i class="fa fa-chart-line"></i>
+        </button>
+    </div>
+</div>
+@if(calanderizedMeters && calanderizedMeters.length > 0) {
+<app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
+
+<div class="d-flex w-100 justify-content-end pb-2">
+    @if(showEnergyUse){
+    <div class="btn-group pe-1 mb-2">
+        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
+            [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+            <span class="fa fa-chevron-right"></span>
+            Source Energy
+            <span class="fa fa-chevron-left"></span>
+        </button>
+        <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
+            [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+            <span class="fa fa-chevron-right"></span>
+            Site Energy
+            <span class="fa fa-chevron-left"></span>
+        </button>
+    </div>
+    }
+    <app-table-items-dropdown></app-table-items-dropdown>
+</div>
+
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
+        <tr>
+            <th class="row-year" (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
+                Month</th>
+            @if(showEnergyUse){
+            <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)
+            </th>
+            }
+            @if(showConsumption && !showEnergyUse){
+            <th (click)="setOrderDataField('energyConsumption')"
+                [ngClass]="{'active': orderDataField == 'energyConsumption'}">
+                Total Consumption<br> (<span [innerHTML]="consumptionUnit | settingsLabel"></span>)
+            </th>
+            }
+
+            @if(showCost){
+            <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
+                Cost</th>
+            }
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        @for (data of groupMonthlyData| orderBy: orderDataField: orderByDirection | slice:
+        ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data.date) {
+        <tr>
+            <td>{{data.date | date: 'MMMM, y'}}</td>
+            @if (showConsumption && !showEnergyUse) {
+            <td>{{data.energyConsumption |customNumber}}
+            </td>
+            }
+            @if (showEnergyUse) {
+            <td>{{data.energyUse | customNumber}}
+            </td>
+            }
+            @if(showCost){
+            <td>{{data.energyCost | customNumber:true}}
+            </td>
+            }
+        </tr>
+
+        }
+    </tbody>
+</table>
+
+<div class="d-flex w-100 justify-content-end">
+    <ngb-pagination [collectionSize]="groupMonthlyData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>
+}@else if(calculatingMeterGroups){
+<app-calculating-spinner [message]="'Initializing Meter Group Data...'"
+    [error]="calculatingMeterGroups == 'error'"></app-calculating-spinner>
+}@else {
+<div class="alert alert-info p-1 text-center">
+    No meters added to this group. Click the "<span class="fa fa-pencil"></span>" button to add meters to this group.
+</div>
+}

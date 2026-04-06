@@ -7,6 +7,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -33,40 +34,40 @@ export class AccountAnalysisDetailsTableComponent {
   filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
 
   selectedAnalysisCategory: 'energy' | 'water' | 'all' = 'all';
-  selectedReportYear: number | 'all' = 'all';
   displayDeleteModal: boolean = false;
   itemToDelete: IdbAccountAnalysisItem;
-  errorList: Array<{ year: number, category: string }> = [];
   currentPageNumber: number = 1;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
-  orderDataField: string = 'reportYear';
+  orderDataField: string = 'name';
   orderByDirection: 'asc' | 'desc' = 'desc';
+
+  selectedAccountSub: Subscription;
 
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private calendarizationService: CalanderizationService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
     private router: Router,
     private accountReportDbService: AccountReportDbService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService
   ) { }
 
   ngOnInit(): void {
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.selectedAccount = account;
+    });
     this.accountAnalysisItemsSub = this.accountAnalysisDbService.accountAnalysisItems.subscribe(items => {
       this.analysisItemsList = items;
       this.filteredAnalysisItems = this.analysisItemsList;
       this.selectedAnalysisCategory = 'all';
-      this.selectedReportYear = 'all';
       this.filterAnalysisItems();
-      this.computeSelectionErrors();
     });
 
-    this.energyYearOptions = this.calendarizationService.getYearOptionsAccount('energy');
-    this.waterYearOptions = this.calendarizationService.getYearOptionsAccount('water');
+    this.energyYearOptions = this.calanderizationService.getYearOptions('energy', true);
+    this.waterYearOptions = this.calanderizationService.getYearOptions('water', true);
     this.yearOptions = _.uniq([...this.energyYearOptions, ...this.waterYearOptions]);
     this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
 
@@ -85,6 +86,7 @@ export class AccountAnalysisDetailsTableComponent {
   ngOnDestroy() {
     this.accountAnalysisItemsSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
   }
 
   setOrderDataField(str: string) {
@@ -103,35 +105,19 @@ export class AccountAnalysisDetailsTableComponent {
     this.filteredAnalysisItems = this.analysisItemsList
       .filter(item => {
         const categoryMatch = this.selectedAnalysisCategory === 'all' || item.analysisCategory === this.selectedAnalysisCategory;
-        const yearMatch = this.selectedReportYear === 'all' || item.reportYear === this.selectedReportYear;
-        return categoryMatch && yearMatch;
+        return categoryMatch;
       });
   }
 
   async setUseItem(analysisItem: IdbAccountAnalysisItem) {
     let canSelectItem: boolean = this.getCanSelectItem(this.selectedAccount, analysisItem);
     if (canSelectItem) {
-      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-      let categoryItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.analysisCategory == analysisItem.analysisCategory });
-      for (let i = 0; i < categoryItems.length; i++) {
-        if (categoryItems[i].guid == analysisItem.guid) {
-          if (categoryItems[i].selectedYearAnalysis) {
-            categoryItems[i].selectedYearAnalysis = false;
-          } else {
-            categoryItems[i].selectedYearAnalysis = true;
-          }
-          await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
-        } else if (categoryItems[i].reportYear == analysisItem.reportYear && categoryItems[i].selectedYearAnalysis) {
-          categoryItems[i].selectedYearAnalysis = false;
-          await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
-        }
+      if (analysisItem.analysisCategory == 'energy') {
+        this.selectedAccount.selectedEnergyAnalysisId = analysisItem.guid;
+      } else if (analysisItem.analysisCategory == 'water') {
+        this.selectedAccount.selectedWaterAnalysisId = analysisItem.guid;
       }
-      await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
-      this.analysisItemsList = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-      this.filteredAnalysisItems = this.analysisItemsList;
-      this.selectedAnalysisCategory = 'all';
-      this.selectedReportYear = 'all';
-      this.computeSelectionErrors();
+      await this.dbChangesService.updateAccount(this.selectedAccount);
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match the account baseline year. This analysis cannot be included in reports or figures relating to the account energy goal.", 10000, false, 'alert-danger');
     }
@@ -153,32 +139,13 @@ export class AccountAnalysisDetailsTableComponent {
     }
   }
 
-  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem) {
+  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem, setupErrors: AccountAnalysisSetupErrors) {
     this.accountAnalysisDbService.selectedAnalysisItem.next(analysisItem);
-    if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.facilitiesSelectionsInvalid) {
+    if (setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
     } else {
       this.router.navigateByUrl('/data-evaluation/account/analysis/results');
     }
-  }
-
-  computeSelectionErrors() {
-    this.errorList = [];
-    let yearCategoryPairs = Array.from(new Set(this.filteredAnalysisItems.map(item => item.reportYear + '-' + item.analysisCategory)));
-
-    yearCategoryPairs.forEach(pair => {
-      const [yearStr, category] = pair.split('-');
-      const year = +yearStr;
-      const itemsForYearCategory = this.filteredAnalysisItems.filter(item => item.reportYear === year && item.analysisCategory === category);
-
-      if (itemsForYearCategory.every(item => !item.selectedYearAnalysis)) {
-        this.errorList.push({ year: year, category: category });
-      }
-    });
-  }
-
-  hasSelectionError(year: number, category: string): boolean {
-    return this.errorList.some(error => error.year === year && error.category === category);
   }
 
   deleteItem(analysisItem: IdbAccountAnalysisItem) {
@@ -201,13 +168,18 @@ export class AccountAnalysisDetailsTableComponent {
         updateReportOptions = true;
       }
     }
+    if (this.itemToDelete.guid == this.selectedAccount.selectedEnergyAnalysisId) {
+      this.selectedAccount.selectedEnergyAnalysisId = undefined;
+      await this.dbChangesService.updateAccount(this.selectedAccount);
+    } else if (this.itemToDelete.guid == this.selectedAccount.selectedWaterAnalysisId) {
+      this.selectedAccount.selectedWaterAnalysisId = undefined;
+      await this.dbChangesService.updateAccount(this.selectedAccount);
+    }
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
     this.analysisItemsList = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.filteredAnalysisItems = this.analysisItemsList;
     this.selectedAnalysisCategory = 'all';
-    this.selectedReportYear = 'all';
-    this.computeSelectionErrors();
   }
 }

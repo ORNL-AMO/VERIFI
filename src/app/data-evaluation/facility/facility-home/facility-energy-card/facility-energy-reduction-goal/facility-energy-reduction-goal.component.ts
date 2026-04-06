@@ -42,7 +42,7 @@ export class FacilityEnergyReductionGoalComponent {
     this.latestSummarySub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
       this.latestAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && this.latestAnalysisItem?.selectedYearAnalysis) {
+      if (this.latestAnalysisSummary && this.latestAnalysisItem?.guid == this.facility.selectedEnergyAnalysisId) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {
@@ -76,10 +76,6 @@ export class FacilityEnergyReductionGoalComponent {
 
   goToAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
-    if (this.latestAnalysisItem.setupErrors.hasError || this.latestAnalysisItem.setupErrors.groupsHaveErrors) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis/facility-analysis');
-    }
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
   }
 }

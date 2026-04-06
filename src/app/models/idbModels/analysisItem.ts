@@ -1,4 +1,4 @@
-import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisSetupErrors } from "../analysis";
+import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable } from "../analysis";
 import { IdbAccount } from "./account";
 import { IdbFacility } from "./facility";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
@@ -13,15 +13,15 @@ export interface IdbAnalysisItem extends IdbEntry {
     name: string,
     analysisCategory: AnalysisCategory,
     energyIsSource: boolean,
-    reportYear: number,
+    calculatedReportYear: number,
     energyUnit: string,
     waterUnit: string,
-    setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean,
     baselineYear: number,
     hasBanking: boolean,
-    bankedAnalysisItemId: string
+    bankedAnalysisItemId: string,
+    isAnalysisVisited?: boolean,
+    dataCheckedDate?: Date
 }
 
 export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility, accountMeterGroups: Array<IdbUtilityMeterGroup>, accountPredictors: Array<IdbPredictor>, analysisCategory: AnalysisCategory): IdbAnalysisItem {
@@ -69,28 +69,17 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       facilityId: facility.guid,
       accountId: account.guid,
       name: name,
-      reportYear: undefined,
+      calculatedReportYear: undefined,
       energyIsSource: facility.energyIsSource,
       energyUnit: facility.energyUnit,
       waterUnit: facility.volumeLiquidUnit,
       groups: itemGroups,
-      setupErrors: undefined,
       analysisCategory: analysisCategory,
       baselineYear: baselineYear,
       hasBanking: false,
-      bankedAnalysisItemId: undefined
-    };
-    analysisItem.setupErrors = {
-      hasError: true,
-      missingName: false,
-      noGroups: itemGroups.length == 0,
-      missingReportYear: true,
-      reportYearBeforeBaselineYear: false,
-      groupsHaveErrors: true,
-      missingBaselineYear: false,
-      baselineYearAfterMeterDataEnd: false,
-      baselineYearBeforeMeterDataStart: false,
-      bankingError: false
+      bankedAnalysisItemId: undefined,
+      isAnalysisVisited: false,
+      dataCheckedDate: undefined
     };
     return analysisItem;
 }
@@ -119,41 +108,17 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     regressionModelEndMonth: undefined,
     regressionEndYear: undefined,
     regressionConstant: undefined,
-    groupErrors: undefined,
     specifiedMonthlyPercentBaseload: false,
     averagePercentBaseload: undefined,
     monthlyPercentBaseload: getMonthlyPercentBaseload(),
-    hasDataAdjustement: false,
     dataAdjustments: [],
-    userDefinedModel: true,
+    isGeneratedModel: true,
     models: undefined,
-    hasBaselineAdjustmentV2: false,
     baselineAdjustmentsV2: [],
     maxModelVariables: 4,
     applyBanking: true,
     newBaselineYear: undefined,
     bankedAnalysisYear: undefined
   }
-  analysisGroup.groupErrors = {
-    hasErrors: true,
-    missingProductionVariables: true,
-    missingRegressionConstant: true,
-    missingRegressionModelYear: true,
-    missingRegressionModelStartMonth: true,
-    missingRegressionStartYear: true,
-    missingRegressionModelEndMonth: true,
-    missingRegressionEndYear: true,
-    invalidModelDateSelection: true,
-    missingRegressionModelSelection: true,
-    missingRegressionPredictorCoef: true,
-    invalidAverageBaseload: true,
-    invalidMonthlyBaseload: true,
-    noProductionVariables: true,
-    missingGroupMeters: true,
-    hasInvalidRegressionModel: true,
-    missingBankingBaselineYear: true,
-    missingBankingAppliedYear: true,
-    invalidBankingYears: false
-  };
   return analysisGroup;
 }

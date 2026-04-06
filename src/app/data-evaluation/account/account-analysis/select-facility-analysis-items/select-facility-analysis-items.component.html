@@ -1,20 +1,28 @@
 <div class="wrapper">
   <div class="d-flex w-100 h-100">
     <div class="p-2 nav flex-column">
-      @for (listItem of facilitiesList; track listItem) {
-        <div class="nav-item"><a class="nav-link"
-          (click)="selectFacility(listItem.facility)"
-          [ngClass]="{'active': listItem.facility.id == selectedFacility.id}">
-          <i class="pe-2" [ngClass]="listItem.cssClass"></i>
-          @if (listItem.isInvalid) {
-            <span class="fa fa-exclamation-circle"></span>
+      @for (facilityItem of selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
+      <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
+          [ngClass]="{'active': facilityItem.facilityId == selectedFacility.guid}">
+          <i class="pe-2 fa" [ngClass]="{
+              'fa-square-minus': !facilityItem.analysisItemId || facilityItem.analysisItemId === 'skip',
+              'fa-square-check': facilityItem.analysisItemId && facilityItem.analysisItemId !== 'skip'
+            }"></i>
+          @if(facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
+          @let analysisItem = facilityItem.analysisItemId | analysisItem;
+          @let analysisSetupErrors = analysisItem.guid | invalidAnalysis;
+          @if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
+          <span class="fa fa-exclamation-circle"></span>
           }
-        {{listItem.facility.name}}</a>
+          }@else if(!facilityItem.analysisItemId){
+          <span class="fa fa-exclamation-circle"></span>
+          }
+          {{facilityItem.facilityId | facilityName}}</a>
       </div>
-    }
-  </div>
-  <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
-    @if (showInUseMessage) {
+      }
+    </div>
+    <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
+      @if (showInUseMessage) {
       <div class="p-2">
         <div class="alert alert-info text-center mb-0">
           <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
@@ -22,9 +30,9 @@
           corresponding reports.
         </div>
       </div>
-    }
-    <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
-    [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+      }
+      <app-select-item-table [selectedAnalysisItem]="selectedAnalysisItem"
+        [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+    </div>
   </div>
-</div>
 </div>

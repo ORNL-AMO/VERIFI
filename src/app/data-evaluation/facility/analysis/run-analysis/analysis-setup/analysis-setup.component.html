@@ -17,15 +17,15 @@
           <label class="col-5 col-form-label" for="analysisName">Name</label>
           <div class="col-7">
             <input class="form-control" type="text" id="analysisName" name="analysisName"
-              [(ngModel)]="analysisItem.name" (input)="saveItem()">
+              [(ngModel)]="analysisItem.name" (input)="saveItem()" required>
           </div>
+          @if (!analysisItem.name) {
           <div class="col-12">
-            @if (analysisItem.setupErrors.missingName) {
             <div class="alert alert-danger">
               Name Required
             </div>
-            }
           </div>
+          }
         </div>
         @if (analysisItem.analysisCategory == 'energy') {
         <div class="form-group row">
@@ -94,7 +94,7 @@
           </label>
           <div class="col-7">
             <select required class="form-select" id="baselineYear" name="baselineYear"
-              [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
+              [(ngModel)]="analysisItem.baselineYear" (change)="changeBaselineYear()"
               [disabled]="disableForm || showInUseMessage">
               @for (year of yearOptions; track year) {
               <option [ngValue]="year">
@@ -108,87 +108,42 @@
           {{baselineYearWarning}}
         </div>
         }
-        @if (analysisItem.setupErrors.baselineYearAfterMeterDataEnd) {
+        @let setupErrors = analysisItem.guid | invalidAnalysis;
+        @if (setupErrors.baselineYearAfterMeterDataEnd) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
         </div>
         }
-        @if (analysisItem.setupErrors.baselineYearBeforeMeterDataStart) {
+        @if (setupErrors.baselineYearBeforeMeterDataStart) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
           starts.
         </div>
         }
-        <div class="form-group row">
-          <label for="reportYear" class="col-5 col-form-label">
-            Report Year
-          </label>
-          <div class="col-7">
-            <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="analysisItem.reportYear"
-              (change)="changeReportYear()" [disabled]="disableForm || showInUseMessage">
-              @for (year of reportYears; track year) {
-              <option [ngValue]="year">{{year| yearDisplay:
-                facility.fiscalYear}}
-              </option>
-              }
-            </select>
-          </div>
-        </div>
-        @if (showReportYearWarning) {
-        <div class="alert alert-warning text-center p-1">
-          This facility does not have 12 months of data for the selected report year
-          ({{analysisItem.reportYear}}). An analysis is intended to be run with complete years only. To see
-          mid-year progress, please run a <a class="click-link" (click)="goToSavingsReport()">"Savings
-            Report"</a> for an analysis conducted with a different report year.
-        </div>
+        @if (account.fiscalYear == 'nonCalendarYear') {
+        <p class="mb-0 mt-2 italic">
+          The account fiscal year option is set to <b>non-calendar year</b>. For more information, go to the "Financial
+          Reporting" section
+          of the account settings in the "<a class="click-link" (click)="goToSettings()"><span
+              class="fa fa-gear"></span> Settings</a>" tab.
+        </p>
+        }@else {
+        <p class="mb-0 mt-2 italic">
+          The account fiscal year option is set to <b>calendar year</b>. For more information, go to the "Financial
+          Reporting" section
+          of the account settings in the "<a class="click-link" (click)="goToSettings()"><span
+              class="fa fa-gear"></span>
+            Settings</a>" tab.
+        </p>
         }
-        <div class="form-group row">
-          <label class="col-5 col-form-label">
-            Reporting Year
-          </label>
-          <div class="col-7">
-            <div class="form-check">
-              <input type="radio" class="form-check-input" [(ngModel)]="facility.fiscalYear" value="calendarYear"
-                name="calendarYear" id="calendarYear" disabled>
-              <label class="form-check-label" for="calendarYear">Calendar Year</label>
-
-            </div>
-            <div class="form-check">
-              <input type="radio" class="form-check-input" for="nonCalendarYear" [(ngModel)]="facility.fiscalYear"
-                value="nonCalendarYear" name="nonCalendarYear" id="nonCalendarYear" disabled>
-              <label class="form-check-label">Fiscal Year</label>
-            </div>
-          </div>
-        </div>
-        @if (facility.fiscalYear == 'nonCalendarYear') {
-        <div class="form-group row">
-          <label class="col-5 col-form-label">Start Month</label>
-          <div class="col-7">
-            <select class="form-select" id="startMonth" name="startMonth" [(ngModel)]="facility.fiscalYearMonth"
-              disabled>
-              @for (month of months; track month) {
-              <option [ngValue]="month.monthNumValue">{{month.name}}
-              </option>
-              }
-            </select>
-          </div>
-        </div>
-        }
-        @if (facility.fiscalYear == 'nonCalendarYear') {
-        <div class="form-group row">
-          <div class="col-12">
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" name="fiscalYearCalendarEnd" id="fiscalYearCalendarEnd"
-                [(ngModel)]="facility.fiscalYearCalendarEnd" disabled>
-              <label class="form-check-label" for="fiscalYearCalanderEnd">FY is denoted by the calendar
-                year in which it ends.</label>
-            </div>
-          </div>
-        </div>
-        }
-        <div class="alert alert-info text-center p-1">
-          Fields set in "<span class="fa fa-gear"></span> Settings" tab.
-        </div>
+        <hr>
+        <p class="mb-0 italic">
+          <span class="fa fa-exclamation-triangle"></span> <b>Report Year Removed:</b>
+          Analyses no longer require setting a "report year" - all years with complete energy and predictor data will
+          generate results. When generating reports, simply select the analysis you want and specify a report year to
+          display results for that year. If you have no changes to your models or modeling techniques, this
+          means you no longer have to update your analysis settings each year.
+        </p>
       </div>
     </div>
   </form>
@@ -209,12 +164,6 @@
       One or more groups have regression models generated. These settings were used to create the models and are
       now locked.
       <ul class="mb-0">
-        @if (!showInUseMessage) {
-        <li>
-          <a class="click-link" (click)="showChangeReportYear()">To change the report year and keep your
-            models click here.</a>
-        </li>
-        }
         <li>
           <a class="click-link" (click)="showEnableForm()">To clear the models so that you can modify all
             settings click here</a>
@@ -226,7 +175,7 @@
 </div>
 
 
-<div [ngClass]="{'windowOverlay': displayEnableForm || displayChangeReportYear}"></div>
+<div [ngClass]="{'windowOverlay': displayEnableForm}"></div>
 <div class="popup" [ngClass]="{'open': displayEnableForm}">
   <div class="popup-header">Are you sure?
     <button class="item-right" (click)="cancelEnableForm()">x</button>
@@ -246,32 +195,5 @@
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
     <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
-  </div>
-</div>
-
-
-<div class="popup" [ngClass]="{'open': displayChangeReportYear}">
-  <div class="popup-header">Select New Report Year
-    <button class="item-right" (click)="cancelChangeReportYear()">x</button>
-  </div>
-  <div class="popup-body">
-    <div class="form-group row">
-      <label for="reportYear" class="col-5 col-form-label">
-        Report Year
-      </label>
-      <div class="col-7">
-        <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="newReportYear">
-          @for (year of reportYears; track year) {
-          <option [ngValue]="year">{{year| yearDisplay:
-            facility.fiscalYear}}
-          </option>
-          }
-        </select>
-      </div>
-    </div>
-  </div>
-  <div class="saveCancel popup-footer text-end">
-    <button class="btn btn-secondary" (click)="cancelChangeReportYear()">Cancel</button>
-    <button class="btn action-btn" (click)="saveNewReportYear()">Update Report Year</button>
   </div>
 </div>

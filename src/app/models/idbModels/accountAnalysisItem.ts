@@ -1,4 +1,3 @@
-import { AccountAnalysisSetupErrors } from "../accountAnalysis"
 import { AnalysisCategory } from "../analysis"
 import { IdbAccount } from "./account"
 import { IdbFacility } from "./facility"
@@ -8,19 +7,18 @@ export interface IdbAccountAnalysisItem extends IdbEntry {
     accountId: string,
     name: string,
     energyIsSource: boolean,
-    reportYear: number,
+    calculatedReportYear: number,
     energyUnit: string,
     facilityAnalysisItems: Array<{
         facilityId: string,
         analysisItemId: string
     }>,
-    selectedYearAnalysis?: boolean,
     analysisCategory: AnalysisCategory,
     waterUnit: string,
     baselineYear: number,
-    setupErrors: AccountAnalysisSetupErrors,
     facilityItemsInitialized?: boolean,
-    hasBanking: boolean
+    hasBanking: boolean,
+    isAnalysisVisited: boolean
 }
 
 export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory, account: IdbAccount, accountFacilities: Array<IdbFacility>): IdbAccountAnalysisItem {
@@ -44,7 +42,7 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         ...idbEntry,
         accountId: account.guid,
         name: 'Account Analysis',
-        reportYear: undefined,
+        calculatedReportYear: undefined,
         baselineYear: baselineYear,
         energyUnit: account.energyUnit,
         facilityAnalysisItems: facilityAnalysisItems,
@@ -52,13 +50,6 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         waterUnit: account.volumeLiquidUnit,
         analysisCategory: analysisCategory,
         hasBanking: false,
-        setupErrors: {
-            hasError: true,
-            missingName: false,
-            missingReportYear: true,
-            missingBaselineYear: false,
-            reportYearBeforeBaselineYear: false,
-            facilitiesSelectionsInvalid: true
-        }
+        isAnalysisVisited: false
     }
 }

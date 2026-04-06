@@ -4,13 +4,14 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SE
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestYearWithData, getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,9 +21,11 @@ export class RegressionModelsService {
   constructor(private predictorDataDbService: PredictorDataDbService) { }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
+    //report year is set to latest year with 
+    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let reportYear: number = analysisItem.reportYear;
+    let endYear: number = monthlyStartAndEndDate.endDate.getFullYear();
     let baselineYear: number = getFiscalYear(baselineDate, facility);
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
     let predictorVariableIds: Array<string> = new Array();
@@ -40,7 +43,7 @@ export class RegressionModelsService {
 
       let models: Array<JStatRegressionModel> = new Array();
       let startYear: number = getFiscalYear(baselineDate, facility);
-      while (startYear <= reportYear) {
+      while (startYear <= endYear) {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, startYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {
           let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo, analysisItem.analysisCategory);
@@ -53,7 +56,7 @@ export class RegressionModelsService {
               modelPredictorVariables.push(variable);
             });
             model['predictorVariables'] = modelPredictorVariables;
-            model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, analysisGroup);
+            model = this.setModelVaildAndNotes(model, facilityPredictorData, endYear, facility, baselineYear, analysisGroup);
 
             let modelId: string = '';
             let predictorVariableIds: string = '';
@@ -224,41 +227,43 @@ export class RegressionModelsService {
       }
     });
 
-    if (model.f.pvalue > .1) {
-      model['isValid'] = false;
-      modeValidationNotes.push('Model p-Value > .1');
-      // modelNotes.push('Model p-Value > .1');
-    }
-
-    model.t.p?.forEach((val, index) => {
-      if (val > .2 && index != 0) {
-        //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
-        modeValidationNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2');
+    if (!model.isUserDefinedModel) {
+      if (model.f.pvalue > .1) {
         model['isValid'] = false;
+        modeValidationNotes.push('Model p-Value > .1');
+        // modelNotes.push('Model p-Value > .1');
       }
-    })
 
-    //need one p value less than .1
-    let hasLessThan: boolean = false;
-    model.t.p?.forEach((val, index) => {
-      if (val < .1 && index != 0) {
-        hasLessThan = true;
+      model.t.p?.forEach((val, index) => {
+        if (val > .2 && index != 0) {
+          //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
+          modeValidationNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2');
+          model['isValid'] = false;
+        }
+      })
+
+      //need one p value less than .1
+      let hasLessThan: boolean = false;
+      model.t.p?.forEach((val, index) => {
+        if (val < .1 && index != 0) {
+          hasLessThan = true;
+        }
+      });
+      if (!hasLessThan) {
+        model['isValid'] = false;
+        modeValidationNotes.push('No variable p-Value < 0.1');
+        //   modelNotes.push('No variable p-Value < 0.1')
       }
-    });
-    if (!hasLessThan) {
-      model['isValid'] = false;
-      modeValidationNotes.push('No variable p-Value < 0.1');
-      //   modelNotes.push('No variable p-Value < 0.1')
-    }
 
-    if (model.R2 < .5) {
-      model['isValid'] = false;
-      modeValidationNotes.push('R2 < .5');
-      //   modelNotes.push('R2 < .5');
-    }
+      if (model.R2 < .5) {
+        model['isValid'] = false;
+        modeValidationNotes.push('R2 < .5');
+        //   modelNotes.push('R2 < .5');
+      }
 
-    if (model.adjust_R2 < .5) {
-      modelNotes.push('Adjusted R2 < .5');
+      if (model.adjust_R2 < .5) {
+        modelNotes.push('Adjusted R2 < .5');
+      }
     }
 
     let productionVariable: AnalysisGroupPredictorVariable = model.predictorVariables.find(variable => { return variable.production });
@@ -317,7 +322,7 @@ export class RegressionModelsService {
     let endYear: number;
     let startDate: Date;
     let endDate: Date;
-    if (selectedGroup && !selectedGroup.userDefinedModel) {
+    if (selectedGroup && !selectedGroup.isGeneratedModel) {
       startMonth = selectedGroup.regressionModelStartMonth;
       startYear = selectedGroup.regressionStartYear;
       endMonth = selectedGroup.regressionModelEndMonth;
@@ -344,7 +349,7 @@ export class RegressionModelsService {
       if (fiscalYear == baselineYear) {
         baselineYearPredictorData.push(facilityPredictorData[i]);
       }
-      if (selectedGroup && !selectedGroup.userDefinedModel && startDate && endDate) {
+      if (selectedGroup && !selectedGroup.isGeneratedModel && startDate && endDate) {
         if (predictorDate >= startDate && predictorDate <= endDate) {
           userDefinedModelPredictorData.push(facilityPredictorData[i])
         }
@@ -373,7 +378,7 @@ export class RegressionModelsService {
       });
 
       let modelYearUsage: Array<number>;
-      if (selectedGroup && !selectedGroup.userDefinedModel) {
+      if (selectedGroup && !selectedGroup.isGeneratedModel) {
         modelYearUsage = variableUserDefinedModelPredictorData.map(data => {
           return data.amount;
         });
@@ -495,10 +500,97 @@ export class RegressionModelsService {
     };
   }
 
-  updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number, group: AnalysisGroup): JStatRegressionModel {
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-    model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, group);
-    return model;
+  // updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number, group: AnalysisGroup): JStatRegressionModel {
+  //   let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+  //   model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear, group);
+  //   return model;
+  // }
+
+
+  getUserDefinedModel(selectedGroup: AnalysisGroup, selectedFacility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): JStatRegressionModel {
+    //report year is determined by the latest full year of data
+
+    let baselineYear: number = analysisItem.baselineYear;
+    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(selectedFacility.guid);
+    const selectedPredictors = selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
+
+    let userModel: JStatRegressionModel = {
+      coef: [
+        selectedGroup.regressionConstant,
+        ...selectedPredictors.map(v => v.regressionCoefficient)
+      ],
+      R2: undefined,
+      SSE: undefined,
+      SSR: undefined,
+      SST: undefined,
+      adjust_R2: undefined,
+      df_model: undefined,
+      df_resid: undefined,
+      ybar: undefined,
+      t: {
+        se: undefined,
+        sigmaHat: undefined,
+        p: undefined
+      },
+      f: {
+        pvalue: undefined,
+        F_statistic: undefined
+      },
+      modelYear: selectedGroup.regressionModelYear,
+      predictorVariables: selectedPredictors,
+      modelId: undefined,
+      isValid: false,
+      modelPValue: undefined,
+      modelNotes: [selectedGroup.regressionModelNotes],
+      errorModeling: false,
+      SEPValidation: undefined,
+      SEPValidationPass: undefined,
+      dataValidationNotes: [''],
+      modelValidationNotes: [''],
+      isUserDefinedModel: true
+    };
+
+    const validatedModel = this.setModelVaildAndNotes(userModel, facilityPredictorData, reportYear, selectedFacility, baselineYear, selectedGroup);
+    return validatedModel;
   }
 
+  getGroupModelItem(group: AnalysisGroup, facility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): FacilityGroupAnalysisItem {
+    let selectedModel: JStatRegressionModel;
+    if (group.analysisType == 'regression') {
+      if (group.selectedModelId) {
+        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+        //set model validation for report year
+        let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+        //check p-variable ids for model object, was not getting updated on import prior to v0.14.9
+        //group p-variable ids will be correctly mapped to data use them to check model variable ids and update if needed
+        let groupPredictorVariableIds: Array<string> = group.predictorVariables.map(variable => variable.id);
+        selectedModel.predictorVariables.forEach(modelVariable => {
+          if (!groupPredictorVariableIds.includes(modelVariable.id)) {
+            let matchVariable: AnalysisGroupPredictorVariable = group.predictorVariables.find(v => v.name == modelVariable.name);
+            if(matchVariable) {
+              modelVariable.id = matchVariable.id;
+            }
+          }
+        });
+
+        selectedModel = this.setModelVaildAndNotes(selectedModel, facilityPredictorData, reportYear, facility, analysisItem.baselineYear, group);
+
+      } else if (!group.isGeneratedModel) {
+        selectedModel = this.getUserDefinedModel(group, facility, analysisItem, reportYear);
+      }
+    }
+    return {
+      group: group,
+      selectedModel: selectedModel,
+      facilityId: facility.guid,
+      baselineYear: analysisItem.baselineYear
+    }
+  }
+}
+
+export interface FacilityGroupAnalysisItem {
+  group: AnalysisGroup,
+  selectedModel: JStatRegressionModel,
+  facilityId: string,
+  baselineYear: number
 }
