@@ -13,7 +13,7 @@ import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculat
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getFiscalYear, getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -24,7 +24,6 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
   selector: 'app-regression-model-menu',
@@ -103,21 +102,13 @@ export class RegressionModelMenuComponent implements OnInit {
 
   setYears() {
     this.yearOptions = [];
-    if (this.calanderizedMeters && this.calanderizedMeters.length > 0) {
-      const allDates = this.calanderizedMeters.flatMap(meter => meter.monthlyData.map(data => data.date));
-      if (allDates.length > 0) {
-        const firstReading = new Date(Math.min(...allDates.map(date => date.getTime())));
-        const latestReading = new Date(Math.max(...allDates.map(date => date.getTime())));
-
-        if (firstReading && latestReading) {
-          let firstYear: number = firstReading.getFullYear();
-          let lastYear: number = latestReading.getFullYear();
-          this.yearOptions = [];
-          for (let year = firstYear; year <= lastYear; year++) {
-            this.yearOptions.push(year);
-          }
-        }
-      }
+    if (this.calanderizedMeters && this.calanderizedMeters.length > 0 && this.selectedFacility) {
+      const fiscalYears = this.calanderizedMeters
+        .flatMap(meter => meter.monthlyData.map(data => getFiscalYear(data.date, this.selectedFacility)));
+      const uniqueFiscalYears = Array.from(new Set(fiscalYears)).sort((a, b) => a - b);
+      this.yearOptions = uniqueFiscalYears;
+    } else {
+      this.yearOptions = [];
     }
   }
 
