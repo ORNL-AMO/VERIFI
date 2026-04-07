@@ -20,9 +20,9 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '../form-data/naics-data';
-import { ChargesTypes, MeterChargeType } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { ChargesTypes } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import { getDateFromMeterData } from '../dateHelperFunctions';
 
 @Injectable({
@@ -447,6 +447,9 @@ export class ExportToExcelTemplateV3Service {
   }
 
   getVehicleType(meter: IdbUtilityMeter): string {
+    if(meter.vehicleCategory == 1){
+      return "Material Transport Onsite";
+    }
     let vehicleType = VehicleTypes.find(vType => {
       return vType.value == meter.vehicleType
     });
