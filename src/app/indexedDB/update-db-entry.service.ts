@@ -398,11 +398,17 @@ export class UpdateDbEntryService {
       });
       if (selectedEnergyAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedEnergyAnalysisId = latestItem.guid;
+        if(!latestItem){
+          latestItem = energyAnalysisItems[0];
+        }
+        account.selectedEnergyAnalysisId = latestItem?.guid;
         isChanged = true;
       } else if (energyAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedEnergyAnalysisId = latestItem.guid;
+        if(!latestItem){
+          latestItem = energyAnalysisItems[0];
+        }
+        account.selectedEnergyAnalysisId = latestItem?.guid;
         isChanged = true;
       }
     }
@@ -415,11 +421,17 @@ export class UpdateDbEntryService {
       })
       if (selectedWaterAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedWaterAnalysisId = latestItem.guid;
+        if(!latestItem){
+          latestItem = waterAnalysisItems[0];
+        }
+        account.selectedWaterAnalysisId = latestItem?.guid;
         isChanged = true;
       } else if (waterAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedWaterAnalysisId = latestItem.guid;
+        if(!latestItem){
+          latestItem = waterAnalysisItems[0];
+        }
+        account.selectedWaterAnalysisId = latestItem?.guid;
         isChanged = true;
       }
     }
