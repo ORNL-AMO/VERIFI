@@ -8,22 +8,18 @@ import { WeatherDataReading, WeatherDataService } from './weather-data.service';
 import { firstValueFrom } from 'rxjs';
 import { PredictorDbService } from '../indexedDB/predictor-db.service';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';
-import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import * as _ from 'lodash';
-import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
 import { getDetailedDataForMonth } from './weatherDataCalculations';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { getDegreeDayAmount } from '../shared/sharedHelperFunctions';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
-import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { checkSameMonthPredictorData } from '../data-management/data-management-import/import-services/upload-helper-functions';
 import { Month, Months } from '../shared/form-data/months';
+import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 
 
 @Injectable({
@@ -40,11 +36,10 @@ export class WeatherPredictorManagementService {
     private predictorDbService: PredictorDbService,
     private analysisDbService: AnalysisDbService,
     private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private loadingService: LoadingService,
     private dbChangesService: DbChangesService,
-    private facilityDbService: FacilitydbService
+    private facilityDbService: FacilitydbService,
+    private calanderizationService: CalanderizationService
   ) {
   }
 
@@ -118,10 +113,7 @@ export class WeatherPredictorManagementService {
 
     //create predictor data
     //predictor data created to match start/end of meter data in facility
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, selectedFacility, false, undefined, [], [], [selectedFacility], selectedAccount.assessmentReportVersion, []);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
 

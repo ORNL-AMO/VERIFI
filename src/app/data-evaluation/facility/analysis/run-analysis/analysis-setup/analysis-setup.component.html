@@ -17,15 +17,15 @@
           <label class="col-5 col-form-label" for="analysisName">Name</label>
           <div class="col-7">
             <input class="form-control" type="text" id="analysisName" name="analysisName"
-              [(ngModel)]="analysisItem.name" (input)="saveItem()">
+              [(ngModel)]="analysisItem.name" (input)="saveItem()" required>
           </div>
+          @if (!analysisItem.name) {
           <div class="col-12">
-            @if (analysisItem.setupErrors.missingName) {
             <div class="alert alert-danger">
               Name Required
             </div>
-            }
           </div>
+          }
         </div>
         @if (analysisItem.analysisCategory == 'energy') {
         <div class="form-group row">
@@ -108,12 +108,13 @@
           {{baselineYearWarning}}
         </div>
         }
-        @if (analysisItem.setupErrors.baselineYearAfterMeterDataEnd) {
+        @let setupErrors = analysisItem.guid | invalidAnalysis;
+        @if (setupErrors.baselineYearAfterMeterDataEnd) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
         </div>
         }
-        @if (analysisItem.setupErrors.baselineYearBeforeMeterDataStart) {
+        @if (setupErrors.baselineYearBeforeMeterDataStart) {
         <div class="alert alert-danger text-center p-1">
           Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
           starts.
@@ -135,6 +136,14 @@
             Settings</a>" tab.
         </p>
         }
+        <hr>
+        <p class="mb-0 italic">
+          <span class="fa fa-exclamation-triangle"></span> <b>Report Year Removed:</b>
+          Analyses no longer require setting a "report year" - all years with complete energy and predictor data will
+          generate results. When generating reports, simply select the analysis you want and specify a report year to
+          display results for that year. If you have no changes to your models or modeling techniques, this
+          means you no longer have to update your analysis settings each year.
+        </p>
       </div>
     </div>
   </form>

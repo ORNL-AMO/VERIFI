@@ -4,14 +4,16 @@ import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisService } from 'src/app/data-evaluation/account/account-analysis/account-analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
+import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
 @Component({
   selector: 'app-analysis-footer',
   templateUrl: './analysis-footer.component.html',
@@ -34,14 +36,17 @@ export class AnalysisFooterComponent implements OnInit {
 
   sidebarWidth: number;
   sidebarWidthSub: Subscription;
+
+  analysisValidationSub: Subscription;
+
   constructor(
     private router: Router,
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
-    private accountAnalysisService: AccountAnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private dataEvaluationService: DataEvaluationService) { }
+    private dataEvaluationService: DataEvaluationService,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
@@ -53,18 +58,20 @@ export class AnalysisFooterComponent implements OnInit {
     this.setShowContinue();
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
-      this.setDisableContinue();
     });
 
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
-      this.setDisableContinue();
     });
     this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
       this.helpWidth = helpWidth;
     });
     this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
       this.sidebarWidth = sidebarWidth;
+    });
+
+    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
+      this.setDisableContinue();
     });
   }
 
@@ -74,6 +81,7 @@ export class AnalysisFooterComponent implements OnInit {
     this.routerSub.unsubscribe();
     this.helpWidthSub.unsubscribe();
     this.sidebarWidthSub.unsubscribe();
+    this.analysisValidationSub.unsubscribe();
   }
 
   goBack() {
@@ -101,9 +109,9 @@ export class AnalysisFooterComponent implements OnInit {
       } else if (this.router.url.includes('options')) {
         let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
         if (groupIndex > 0) {
-          if( this.analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
-          }else{
+          if (this.analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
+            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
+          } else {
             this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
           }
         } else {
@@ -153,8 +161,6 @@ export class AnalysisFooterComponent implements OnInit {
   }
 
   goBackToAccount() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.accountAnalysisService.selectedFacility.next(selectedFacility);
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.analysisService.accountAnalysisItem.guid })
     this.accountAnalysisDbService.selectedAnalysisItem.next(selectedAnalysisItem);
@@ -162,17 +168,22 @@ export class AnalysisFooterComponent implements OnInit {
   }
 
   setDisableContinue() {
+    let setupErrors: AnalysisSetupErrors;
+    if (this.analysisItem) {
+      setupErrors = this.analysisValidationService.getErrorsByAnalysisId(this.analysisItem.guid);
+    }
     if (this.router.url.includes('analysis-setup')) {
-      if (this.analysisItem.setupErrors.hasError) {
+      if (setupErrors && setupErrors.setupHasError) {
         this.disableContinue = true;
       } else {
         this.disableContinue = false;
       }
-    } else if (this.router.url.includes('group-analysis') && this.selectedGroup) {
+    } else if (this.router.url.includes('group-analysis') && this.selectedGroup && setupErrors) {
+      let groupErrors: GroupAnalysisErrors = setupErrors.groupErrors.find(groupError => { return groupError.groupId == this.selectedGroup.idbGroupId });
       if (this.router.url.includes('options')) {
-        if (this.selectedGroup.groupErrors.hasErrors) {
-          if (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload
-            || (this.selectedGroup.groupErrors.missingGroupMeters && this.selectedGroup.analysisType !== 'skip') || this.selectedGroup.groupErrors.noProductionVariables || this.selectedGroup.groupErrors.missingProductionVariables) {
+        if (groupErrors.hasErrors) {
+          if (groupErrors.invalidAverageBaseload || groupErrors.invalidMonthlyBaseload
+            || (groupErrors.missingGroupMeters && this.selectedGroup.analysisType !== 'skip') || groupErrors.noProductionVariables || groupErrors.missingProductionVariables) {
             this.disableContinue = true;
           } else {
             this.disableContinue = false;
@@ -180,17 +191,9 @@ export class AnalysisFooterComponent implements OnInit {
         } else {
           this.disableContinue = false;
         }
-      } else if (this.router.url.includes('model-selection')) {
-        if (this.selectedGroup.groupErrors.hasErrors) {
-          if (this.selectedGroup.groupErrors.missingRegressionConstant ||
-            this.selectedGroup.groupErrors.missingRegressionModelYear ||
-            this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
-            this.selectedGroup.groupErrors.missingRegressionStartYear ||
-            this.selectedGroup.groupErrors.missingRegressionModelEndMonth ||
-            this.selectedGroup.groupErrors.missingRegressionEndYear ||
-            this.selectedGroup.groupErrors.invalidModelDateSelection ||
-            this.selectedGroup.groupErrors.missingRegressionModelSelection ||
-            this.selectedGroup.groupErrors.missingRegressionPredictorCoef) {
+      } else if (this.router.url.includes('model-selection') && setupErrors) {
+        if (groupErrors.hasErrors) {
+          if (groupErrors.hasRegressionErrors) {
             this.disableContinue = true;
           } else {
             this.disableContinue = false;

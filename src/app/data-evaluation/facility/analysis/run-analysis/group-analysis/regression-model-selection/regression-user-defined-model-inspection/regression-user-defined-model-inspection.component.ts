@@ -22,6 +22,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-regression-user-defined-model-inspection',
@@ -58,7 +59,8 @@ export class RegressionUserDefinedModelInspectionComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountDbService: AccountdbService,
     private regressionsModelsService: RegressionModelsService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private calanderizationService: CalanderizationService
   ) { }
 
   ngOnInit(): void {
@@ -91,50 +93,9 @@ export class RegressionUserDefinedModelInspectionComponent {
   generateUserDefinedModel() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     //report year is determined by the latest full year of data
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
     let reportYear: number = getLatestYearWithData(calanderizedMeters, [this.selectedFacility]);
-
-    let baselineYear: number = analysisItem.baselineYear;
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedFacility.guid);
-    const selectedPredictors = this.selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
-
-    this.userModel = {
-      coef: [
-        this.selectedGroup.regressionConstant,
-        ...selectedPredictors.map(v => v.regressionCoefficient)
-      ],
-      R2: undefined,
-      SSE: undefined,
-      SSR: undefined,
-      SST: undefined,
-      adjust_R2: undefined,
-      df_model: undefined,
-      df_resid: undefined,
-      ybar: undefined,
-      t: {
-        se: undefined,
-        sigmaHat: undefined,
-        p: undefined
-      },
-      f: {
-        pvalue: undefined,
-        F_statistic: undefined
-      },
-      modelYear: this.selectedGroup.regressionModelYear,
-      predictorVariables: selectedPredictors,
-      modelId: undefined,
-      isValid: false,
-      modelPValue: undefined,
-      modelNotes: [this.selectedGroup.regressionModelNotes],
-      errorModeling: false,
-      SEPValidation: undefined,
-      SEPValidationPass: undefined,
-      dataValidationNotes: [''],
-      modelValidationNotes: ['']
-    };
-
-    const validatedModel = this.regressionsModelsService.setModelVaildAndNotes(this.userModel, facilityPredictorData, reportYear, this.selectedFacility, baselineYear, this.selectedGroup);
-    this.userModel = validatedModel;
+    this.userModel = this.regressionsModelsService.getUserDefinedModel(this.selectedGroup, this.selectedFacility, analysisItem, reportYear);
   }
 
   calculateInspectedModel() {

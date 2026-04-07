@@ -9,7 +9,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { FacilityGroupAnalysisItem, getGroupItem } from 'src/app/shared/facilityGroupItemFunction';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
   selector: 'app-facility-reports-data-check',
@@ -23,23 +23,21 @@ export class FacilityReportsDataCheckComponent {
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
   analysisItem: IdbAnalysisItem;
-  facilityDetails: Array<IdbAnalysisItem> = [];
-
+  
   constructor(private analysisDbService: AnalysisDbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private regressionModelsService: RegressionModelsService
   ) { }
 
   ngOnInit(): void {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
-      this.facilityDetails = [];
       this.executiveSummaryItems = [];
       if (this.analysisItem) {
-        this.facilityDetails.push(this.analysisItem);
         this.initializeFacilityGroups();
         this.setAnalysisVisited();
       }
@@ -53,14 +51,30 @@ export class FacilityReportsDataCheckComponent {
   }
 
   initializeFacilityGroups() {
+    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    let reportYear: number;
+    if (this.facilityReport.facilityReportType == 'analysis') {
+      reportYear = this.facilityReport.analysisReportSettings.reportYear;
+    } else if (this.facilityReport.facilityReportType == 'modeling') {
+      reportYear = this.facilityReport.modelingReportSettings.reportYear;
+    } else if (this.facilityReport.facilityReportType == 'savings') {
+      reportYear = this.facilityReport.savingsReportSettings.endYear;
+    }
+
     this.analysisItem.groups.forEach(group => {
-      let groupItem: FacilityGroupAnalysisItem = getGroupItem(group, this.analysisItem.facilityId, this.analysisItem.baselineYear);
-      if (groupItem) {
-        this.executiveSummaryItems.push(groupItem);
+      if (group.analysisType == 'regression') {
+        let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, this.analysisItem, reportYear);
+        if (groupItem) {
+          this.executiveSummaryItems.push(groupItem);
+        }
+      } else if (group.analysisType != 'skip') {
+        this.executiveSummaryItems.push({
+          group: group,
+          facilityId: facility.guid,
+          baselineYear: this.analysisItem.baselineYear,
+          selectedModel: undefined
+        });
       }
-    });
-    this.executiveSummaryItems = this.executiveSummaryItems.filter(item => {
-      return item.group.analysisType != 'skip';
     });
   }
 

@@ -6,7 +6,6 @@ import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '../models/analysis';
-import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
@@ -28,7 +27,6 @@ export class AnalysisDbService {
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private predictorDbService: PredictorDbService,
-    private analysisValidationService: AnalysisValidationService,
     private loadingService: LoadingService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
@@ -142,7 +140,6 @@ export class AnalysisDbService {
     });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
-      let hasGroupErrors: boolean = false;
       analysisItem.groups.forEach(group => {
         group.predictorVariables = group.predictorVariables.filter(analysisPredictor => {
           return analysisPredictor.id != predictorToDelete.guid
@@ -176,12 +173,7 @@ export class AnalysisDbService {
             }
           }
         }
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
-        if (group.groupErrors.hasErrors) {
-          hasGroupErrors = true;
-        }
       });
-      analysisItem.setupErrors.groupsHaveErrors = hasGroupErrors;
       await firstValueFrom(this.updateWithObservable(analysisItem));
     };
   }

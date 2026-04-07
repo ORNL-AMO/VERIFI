@@ -20,15 +20,16 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 })
 export class AccountReportsDashboardTableComponent {
 
-  reports: Array<IdbAccountReport> = [];
   selectedAccount: IdbAccount;
   reportTypes: Array<ReportType> = ['betterPlants', 'dataOverview', 'performance', 'betterClimate', 'analysis', 'accountEmissionFactors', 'accountSavings'];
-  reportText: string;
   selectedReportType = '';
   displayDeleteModal: boolean;
   deletedReport: IdbAccountReport;
-  reportList: Array<{ isValid: boolean, report: IdbAccountReport }> = [];
-  orderDataField: string = 'report.reportName';
+
+  reportSub: Subscription;
+  reports: Array<IdbAccountReport> = [];
+
+  orderDataField: string = 'name';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
   currentPageNumber: number = 1;
@@ -39,30 +40,23 @@ export class AccountReportsDashboardTableComponent {
     private accountReportDbService: AccountReportDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
-    private accountReportsService: AccountReportsService,
     private sharedDataService: SharedDataService,
     private toastNotificationService: ToastNotificationsService,
   ) { }
 
   ngOnInit() {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-    this.getReports();
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
+    });
+    this.reportSub = this.accountReportDbService.accountReports.subscribe(reports => {
+      this.reports = reports;
     });
   }
 
   ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
-  }
-
-  async getReports() {
-    this.reportList = [];
-    this.reports = await this.accountReportDbService.getAllAccountReports(this.selectedAccount.guid);
-    this.reports.forEach(report => {
-      const isValid = this.accountReportsService.isReportValid(report);
-      this.reportList.push({ isValid, report });
-    });
+    this.reportSub.unsubscribe();
   }
 
   selectReport(report: IdbAccountReport) {
@@ -97,7 +91,6 @@ export class AccountReportsDashboardTableComponent {
     await this.dbChangesService.setAccountReports(this.selectedAccount);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "alert-success");
-    this.getReports();
   }
 
   setOrderDataField(str: string) {
@@ -110,9 +103,5 @@ export class AccountReportsDashboardTableComponent {
     } else {
       this.orderDataField = str;
     }
-  }
-
-  get yearSortField(): string {
-    return 'report.reportYearOrEndYear';
   }
 }

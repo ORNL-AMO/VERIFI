@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -15,13 +14,11 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } f
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getGUID, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
-// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-predictor-table',
@@ -50,15 +47,13 @@ export class PredictorTableComponent {
   displayCopyModal: boolean = false;
   constructor(private predictorDbService: PredictorDbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
-    private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
+    private weatherDataService: WeatherDataService, 
     private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService,
     private predictorDataDbService: PredictorDataDbService,
     private predictorDataHelperService: PredictorDataHelperService,
-    // private degreeDaysService: DegreeDaysService
   ) {
 
   }
@@ -125,8 +120,6 @@ export class PredictorTableComponent {
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.cancelDelete();

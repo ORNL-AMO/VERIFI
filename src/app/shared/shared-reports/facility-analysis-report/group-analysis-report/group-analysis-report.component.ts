@@ -35,7 +35,6 @@ export class GroupAnalysisReportComponent {
   printSub: Subscription;
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
-
   constructor(private analysisService: AnalysisService, private dataEvaluationService: DataEvaluationService,
     private facilityReportsDbService: FacilityReportsDbService
   ) {

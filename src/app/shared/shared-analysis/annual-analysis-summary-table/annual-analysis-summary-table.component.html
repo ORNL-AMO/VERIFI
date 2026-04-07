@@ -155,10 +155,10 @@
         @if (summary.isIntermediateBanked) {
         <span class="fa fa-paint-roller"></span>
         }
-        @if (group?.userDefinedModel && summary.year == modelYear) {
+        @if (group?.isGeneratedModel && summary.year == modelYear) {
         <span class="fa fa-star"></span>
         }
-        @if (!group?.userDefinedModel && isSummaryYear(summary.year)) {
+        @if (!group?.isGeneratedModel && isSummaryYear(summary.year)) {
         <span class="fa fa-star"></span>
         }
         {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}
