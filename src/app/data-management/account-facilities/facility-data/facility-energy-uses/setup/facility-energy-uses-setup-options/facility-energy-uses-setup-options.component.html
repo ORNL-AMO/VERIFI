@@ -23,17 +23,46 @@
                     <h5 class="text-center mb-0">Existing energy use groups found.<br> Would you like to set up new
                         groups or edit
                         existing groups?</h5>
-                    <div class="d-flex justify-content-center">
-                        <button class="btn action-btn" (click)="setupNewGroups()"><i class="fa fa-plus"></i> Set Up New
-                            Groups</button>
-                        <button class="btn action-btn ms-2 me-2" (click)="editExistingGroups()"><i
-                                class="fa fa-pencil"></i> Bulk
-                            Edit
-                            Existing
-                            Groups</button>
-                        <button class="btn action-btn" (click)="addYearOfData()"><i class="fa fa-calendar"></i> Add Year
-                            of
-                            Data</button>
+
+                    <div class="d-flex flex-column col-sm-12 col-md-8 col-lg-6 mx-auto">
+                        <div class="d-flex option-card" (click)="setupNewGroups()">
+                            <div>
+                                <i class="fa fa-plus"></i>
+                            </div>
+                            <div>
+                                <h6>Setup New Groups</h6>
+                                <p class="fw-light">
+                                    This option will allow you to set up new energy use groups. You will be able to
+                                    select which energy uses are included in each group and assign a name to each
+                                    group.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex option-card" (click)="editExistingGroups()">
+                            <div>
+                                <i class="fa fa-pencil"></i>
+                            </div>
+                            <div>
+                                <h6>Bulk Edit Existing Groups</h6>
+                                <p class="fw-light">
+                                    This option will allow you to edit existing energy use groups. You will be able to
+                                    change which energy uses are included in each group and rename groups.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex option-card" (click)="addYearOfData()">
+                            <div>
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <div>
+                                <h6>Add Year of Data</h6>
+                                <p class="fw-light">
+                                    This option will allow you to add a year of data to your existing energy use groups.
+                                    You will be able to select which year of data to add and the energy uses that are
+                                    included in each group for that year.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

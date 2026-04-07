@@ -1,3 +1,31 @@
 .form-check-label{
     font-size: 1.25em;
 }
+
+.option-card{
+    border: 1px solid;
+    border-radius: 5px;
+    padding: 1rem;
+    /* margin-bottom: 10px; */
+    margin-top: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.option-card i{
+    font-size: 2em;
+    margin-right: 10px;
+}
+
+.option-card p{
+    margin-bottom: 0px;
+}
+
+.option-card h6{
+    text-transform: none;
+}
+
+.option-card:hover{
+   background-color: #f0f0f0;
+   cursor: pointer;
+}
