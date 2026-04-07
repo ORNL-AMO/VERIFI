@@ -450,7 +450,6 @@ export class UpdateDbEntryService {
   }
 
   updateSelectedFacilityAnalysis(facility: IdbFacility, facilityAnalysisItems: Array<IdbAnalysisItem>): { facility: IdbFacility, isChanged: boolean } {
-    //TODO: ensure we are selecting with the correct baseline year for goals...
 
     let isChanged: boolean = false;
     if (facility.selectedEnergyAnalysisId == undefined) {

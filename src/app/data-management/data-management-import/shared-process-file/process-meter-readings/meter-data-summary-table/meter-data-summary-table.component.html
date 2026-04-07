@@ -104,11 +104,11 @@
               </th>
               <th class="col-existing can-click" (click)="setOrderDataField('oldReading')"
                 [ngClass]="{'active': orderDataField == 'oldReading'}">
-                Current Total Usage or Distance ({{meterUnit}})
+                Current Total Consumption ({{meterUnit}})
               </th>
               <th class="col-new can-click" (click)="setOrderDataField('newReading')"
                 [ngClass]="{'active': orderDataField == 'newReading'}">
-                Imported Total Usage or Distance ({{meterUnit}})
+                Imported Total Consumption ({{meterUnit}})
               </th>
               <th class="col-difference can-click" (click)="setOrderDataField('difference')"
                 [ngClass]="{'active': orderDataField == 'difference'}">
@@ -132,16 +132,16 @@
                   {{summary.readDate | date}}
                 </td>
                 <td class="col-existing">
-                  {{ summary.oldReading | number: '1.2-4' }}
+                  {{ summary.oldReading | number: '1.0-2' }}
                 </td>
                 <td class="col-new">
-                  {{ summary.newReading | number: '1.2-4' }}
+                  {{ summary.newReading | number: '1.0-2' }}
                 </td>
                 <td class="col-difference">
-                  {{ summary.difference | number: '1.2-4' }}
+                  {{ summary.difference | number: '1.0-2' }}
                 </td>
                 <td class="col-percentage-difference">
-                  {{ summary.percentageDifference | number: '1.2-2' }}%
+                  {{ summary.percentageDifference | number: '1.0-2' }}%
                 </td>
                 <td class="col-different-parameters">
                   @if (summary.parametersWithDifference.length > 0) {
