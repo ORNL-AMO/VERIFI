@@ -430,7 +430,6 @@ export class UpdateDbEntryService {
   }
 
   updateSelectedFacilityAnalysis(facility: IdbFacility, facilityAnalysisItems: Array<IdbAnalysisItem>): { facility: IdbFacility, isChanged: boolean } {
-    //TODO: ensure we are selecting with the correct baseline year for goals...
 
     let isChanged: boolean = false;
     if (facility.selectedEnergyAnalysisId == undefined) {
@@ -442,10 +441,16 @@ export class UpdateDbEntryService {
       });
       if (selectedEnergyAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
+        if(!latestItem){
+          latestItem = selectedEnergyAnalysisItems[0];
+        }
         facility.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
       } else if (energyAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
+        if(!latestItem){
+          latestItem = energyAnalysisItems[0];
+        }
         facility.selectedEnergyAnalysisId = latestItem.guid;
         isChanged = true;
       }
@@ -459,10 +464,16 @@ export class UpdateDbEntryService {
       });
       if (selectedWaterAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
+        if(!latestItem){
+          latestItem = selectedWaterAnalysisItems[0];
+        }
         facility.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
       } else if (waterAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
+        if(!latestItem){
+          latestItem = waterAnalysisItems[0];
+        }
         facility.selectedWaterAnalysisId = latestItem.guid;
         isChanged = true;
       }
