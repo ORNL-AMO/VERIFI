@@ -1,147 +1,158 @@
 @if (facilityReports.length != 0) {
-  <div class="wrapper m-0">
-    <div class="d-flex  align-items-start mb-1">
-      <div class="pe-4 select-width">
-        <label class="form-label fw-bold">
-          <i class="fa fa-filter text-primary"></i>
-          Report Type
-        </label>
-        <select class="form-select" [(ngModel)]="selectedReportType">
-          <option value="">All</option>
-          @for (type of reportTypes; track type) {
-            <option [value]="type">{{ type | facilityReportType}}</option>
-          }
-        </select>
-      </div>
-      <div class="col mt-auto">
-        <app-table-items-dropdown></app-table-items-dropdown>
-      </div>
+<div class="wrapper m-0">
+  <div class="d-flex  align-items-start mb-1">
+    <div class="pe-4 col-2">
+      <label class="form-label fw-bold">
+        <i class="fa fa-filter text-primary"></i>
+        Report Type
+      </label>
+      <select class="form-select" [(ngModel)]="selectedReportType">
+        <option value="">All</option>
+        @for (type of reportTypes; track type) {
+        <option [value]="type">{{ type | facilityReportType}}</option>
+        }
+      </select>
     </div>
-    <div class="table-responsive mt-2">
-      <table class="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th class="can-click" (click)="setOrderDataField('name')"
-              [ngClass]="{'active': orderDataField == 'name'}">
-              Report Name
-            </th>
-            <th class="can-click" (click)="setOrderDataField('facilityReportType')"
-              [ngClass]="{'active': orderDataField == 'facilityReportType'}">
-              Report Type
-            </th>
-            <th class="can-click" (click)="setOrderDataField('analysisItemId')"
-              [ngClass]="{'active': orderDataField == 'analysisItemId'}">
-              Analysis Item
-            </th>
-            <th class="can-click" (click)="setOrderDataField(sortYear)"
-              [ngClass]="{'active': orderDataField == sortYear}">
-              Report Year
-            </th>
-            <th class="can-click" (click)="setOrderDataField('modifiedDate')"
-              [ngClass]="{'active': orderDataField == 'modifiedDate'}">
-              Last Modified
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (data of facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track data) {
-            <tr
-              >
-              <td>
-                <a (click)="selectReport(data)">{{ data.name }}</a>
-              </td>
-              <td>
-                <span class="badge" [ngClass]="data.facilityReportType | facilityReportBadgeClass">{{
-                  data.facilityReportType |
-                facilityReportType }}</span>
-              </td>
-              @if (data.analysisItemId) {
-                <td>{{ data.analysisItemId | facilityAnalysisName}}</td>
-              }
-              @if (!data.analysisItemId) {
-                <td> &mdash; </td>
-              }
-              <td>
-                @switch (data.facilityReportType) {
-                  @case ('emissionFactors') {
-                    @if (data.emissionFactorsReportSettings.startYear != undefined) {
-                      {{ data.emissionFactorsReportSettings.startYear }} -
-                    }
-                    @if (data.emissionFactorsReportSettings.endYear != undefined) {
-                      {{ data.emissionFactorsReportSettings.endYear }}
-                    }
-                    @if (data.emissionFactorsReportSettings.startYear === undefined && data.emissionFactorsReportSettings.endYear === undefined) {
-                      &mdash;
-                    }
-                  }
-                  @case ('overview') {
-                    @if (data.dataOverviewReportSettings.startMonth != undefined && data.dataOverviewReportSettings.startYear != undefined) {
-                      {{ data.dataOverviewReportSettings.startMonth | reportDate:
-                      data.dataOverviewReportSettings.startYear | date: 'MMM. y' }} -
-                    }
-                    @if (data.dataOverviewReportSettings.endMonth != undefined && data.dataOverviewReportSettings.endYear != undefined) {
-                      {{ data.dataOverviewReportSettings.endMonth | reportDate:
-                      data.dataOverviewReportSettings.endYear | date: 'MMM. y' }}
-                    }
-                    @if (data.dataOverviewReportSettings.startMonth === undefined && data.dataOverviewReportSettings.startYear === undefined && data.dataOverviewReportSettings.endMonth === undefined && data.dataOverviewReportSettings.endYear === undefined) {
-                      &mdash;
-                    }
-                  }
-                  @case ('savings') {
-                    @if (data.savingsReportSettings.endYear !== undefined) {
-                      {{ data.savingsReportSettings.endYear }}
-                    }
-                    @if (data.savingsReportSettings.endYear === undefined) {
-                      &mdash;
-                    }
-                  }
-                  @default {
-                    &mdash;
-                  }
-                }
-              </td>
-              <td>
-                {{ data.modifiedDate | date:'short' }}
-              </td>
-              <td class="text-center">
-                <button title="Copy" class="btn action-btn btn-sm m-1" (click)="createCopy(data)">
-                  <i class="fa fa-copy"></i>
-                </button>
-                <button title="Delete" class="btn action-btn btn-sm m-1" (click)="deleteItem(data)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    <div class="d-flex w-100 justify-content-end">
-      <ngb-pagination
-        [collectionSize]="(facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
-        [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true"
-        aria-label="Pagination">
-      </ngb-pagination>
+    <div class="col-2 mt-auto">
+      <app-table-items-dropdown></app-table-items-dropdown>
     </div>
   </div>
+  <div class="table-responsive mt-2">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
+            Report Name
+          </th>
+          <th class="can-click" (click)="setOrderDataField('facilityReportType')"
+            [ngClass]="{'active': orderDataField == 'facilityReportType'}">
+            Report Type
+          </th>
+          <th class="can-click" (click)="setOrderDataField('analysisItemId')"
+            [ngClass]="{'active': orderDataField == 'analysisItemId'}">
+            Analysis Item
+          </th>
+          <th class="can-click" (click)="setOrderDataField(sortYear)"
+            [ngClass]="{'active': orderDataField == sortYear}">
+            Report Year
+          </th>
+          <th class="can-click" (click)="setOrderDataField('modifiedDate')"
+            [ngClass]="{'active': orderDataField == 'modifiedDate'}">
+            Last Modified
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (facilityReport of facilityReports | facilityReportOrderBy: orderDataField: orderByDirection:
+        selectedReportType |
+        slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track facilityReport.guid) {
+        @let reportErrors = facilityReport.guid | invalidFacilityReport;
+        <tr>
+          <td>
+            @if (reportErrors.hasErrors) {
+            <span class="fa fa-exclamation-circle"></span>
+            }
+            <a (click)="selectReport(facilityReport)">{{ facilityReport.name }}</a>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="facilityReport.facilityReportType | facilityReportBadgeClass">{{
+              facilityReport.facilityReportType |
+              facilityReportType }}</span>
+          </td>
+          @if (facilityReport.analysisItemId) {
+          <td>{{ facilityReport.analysisItemId | facilityAnalysisName}}</td>
+          }
+          @if (!facilityReport.analysisItemId) {
+          <td> &mdash; </td>
+          }
+          <td>
+            @switch (facilityReport.facilityReportType) {
+            @case ('emissionFactors') {
+            @if (facilityReport.emissionFactorsReportSettings.startYear != undefined) {
+            {{ facilityReport.emissionFactorsReportSettings.startYear }} -
+            }
+            @if (facilityReport.emissionFactorsReportSettings.endYear != undefined) {
+            {{ facilityReport.emissionFactorsReportSettings.endYear }}
+            }
+            @if (facilityReport.emissionFactorsReportSettings.startYear === undefined &&
+            facilityReport.emissionFactorsReportSettings.endYear === undefined) {
+            &mdash;
+            }
+            }
+            @case ('overview') {
+            @if (facilityReport.dataOverviewReportSettings.startMonth != undefined &&
+            facilityReport.dataOverviewReportSettings.startYear !=
+            undefined) {
+            {{ facilityReport.dataOverviewReportSettings.startMonth | reportDate:
+            facilityReport.dataOverviewReportSettings.startYear | date: 'MMM. y' }} -
+            }
+            @if (facilityReport.dataOverviewReportSettings.endMonth != undefined &&
+            facilityReport.dataOverviewReportSettings.endYear !=
+            undefined) {
+            {{ facilityReport.dataOverviewReportSettings.endMonth | reportDate:
+            facilityReport.dataOverviewReportSettings.endYear | date: 'MMM. y' }}
+            }
+            @if (facilityReport.dataOverviewReportSettings.startMonth === undefined &&
+            facilityReport.dataOverviewReportSettings.startYear
+            === undefined && facilityReport.dataOverviewReportSettings.endMonth === undefined &&
+            facilityReport.dataOverviewReportSettings.endYear === undefined) {
+            &mdash;
+            }
+            }
+            @case ('savings') {
+            @if (facilityReport.savingsReportSettings.endYear !== undefined) {
+            {{ facilityReport.savingsReportSettings.endYear }}
+            }
+            @if (facilityReport.savingsReportSettings.endYear === undefined) {
+            &mdash;
+            }
+            }
+            @default {
+            &mdash;
+            }
+            }
+          </td>
+          <td>
+            {{ facilityReport.modifiedDate | date:'short' }}
+          </td>
+          <td class="text-center">
+            <button title="Copy" class="btn action-btn btn-sm m-1" (click)="createCopy(facilityReport)">
+              <i class="fa fa-copy"></i>
+            </button>
+            <button title="Delete" class="btn action-btn btn-sm m-1" (click)="deleteItem(facilityReport)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="d-flex w-100 justify-content-end">
+    <ngb-pagination
+      [collectionSize]="(facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
+      [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+  </div>
+</div>
 }
 
 
 @if (facilityReports.length == 0) {
-  <div class="card card-body">
-    <div class="text-center bold">
-      No reports found for this facility. Click "+Add New Report" to create your first report!
-    </div>
+<div class="card card-body">
+  <div class="text-center bold">
+    No reports found for this facility. Click "+Add New Report" to create your first report!
   </div>
+</div>
 }
 
 <div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
 <div class="popup" [class.open]="displayDeleteModal">
   @if (displayDeleteModal) {
-    <div class="popup-header">Delete: {{deletedReport.name}}
-      <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
+  <div class="popup-header">Delete: {{deletedReport.name}}
+    <button class="item-right" (click)="cancelDelete()">x</button>
+  </div>
   }
   <div class="popup-body">
     <p>WARNING: Deleting this report cannot be undone.</p>

@@ -38,6 +38,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   calculating: boolean | 'error';
   analysisDisplay: 'graph' | 'table';
   key: string;
+  facilitySub: Subscription;
 
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
@@ -55,9 +56,12 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.key = 'monthly-' + this.facility?.id;
-    this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.key = 'monthly-' + this.facility?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+    });
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
@@ -101,6 +105,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       this.worker.terminate();
     }
     this.itemsPerPageSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {

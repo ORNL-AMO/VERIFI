@@ -7,6 +7,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -45,13 +46,13 @@ export class AccountAnalysisDetailsTableComponent {
 
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private calendarizationService: CalanderizationService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
     private router: Router,
     private accountReportDbService: AccountReportDbService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService
   ) { }
 
   ngOnInit(): void {
@@ -65,8 +66,8 @@ export class AccountAnalysisDetailsTableComponent {
       this.filterAnalysisItems();
     });
 
-    this.energyYearOptions = this.calendarizationService.getYearOptions('energy', true);
-    this.waterYearOptions = this.calendarizationService.getYearOptions('water', true);
+    this.energyYearOptions = this.calanderizationService.getYearOptions('energy', true);
+    this.waterYearOptions = this.calanderizationService.getYearOptions('water', true);
     this.yearOptions = _.uniq([...this.energyYearOptions, ...this.waterYearOptions]);
     this.yearOptions = _.orderBy(this.yearOptions, (year) => { return year }, 'asc');
 
@@ -138,9 +139,9 @@ export class AccountAnalysisDetailsTableComponent {
     }
   }
 
-  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem) {
+  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem, setupErrors: AccountAnalysisSetupErrors) {
     this.accountAnalysisDbService.selectedAnalysisItem.next(analysisItem);
-    if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.facilitiesSelectionsInvalid) {
+    if (setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
     } else {
       this.router.navigateByUrl('/data-evaluation/account/analysis/results');

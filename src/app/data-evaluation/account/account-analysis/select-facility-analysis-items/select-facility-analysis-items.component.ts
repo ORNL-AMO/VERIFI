@@ -1,15 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -22,17 +18,14 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 })
 export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
-  facilitiesList: Array<{
-    facility: IdbFacility,
-    cssClass: string,
-    isInvalid: boolean
-  }>;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   selectedAnalysisItemSub: Subscription;
   facilityAnalysisItems: Array<IdbAnalysisItem>;
-  selectedFacilitySub: Subscription;
-  selectedFacility: IdbFacility;
   showInUseMessage: boolean;
+  facilities: Array<IdbFacility>;
+  facilitiesSub: Subscription;
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
   constructor(private facilityDbService: FacilitydbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -44,40 +37,35 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
       this.selectedAnalysisItem = item;
       this.setShowInUseMessage();
-      this.setFacilitiesList();
+    })
+
+    this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
+      this.facilities = facilities;
+    });
+
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+      this.selectedFacility = selectedFacility;
+      if (this.selectedFacility && this.selectedFacility.accountId == this.selectedAnalysisItem.accountId) {
+        this.setFacilityAnlaysisItems();
+      } else if (this.facilities.length > 0) {
+        this.selectFacility(this.facilities[0].guid);
+      }
     })
 
     if (!this.selectedAnalysisItem) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
     }
-    this.selectedFacilitySub = this.accountAnalysisService.selectedFacility.subscribe(val => {
-      if (val) {
-        this.selectedFacility = val;
-        let checkExists = this.selectedAnalysisItem.facilityAnalysisItems.find(facility => { return this.selectedFacility.guid == facility.facilityId });
-        if (!checkExists) {
-          this.initSelectedFacility();
-        } else {
-          this.setFacilityAnlaysisItems();
-        }
-      } else {
-        this.initSelectedFacility();
-      }
-    });
   }
 
   ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
+    this.facilitiesSub.unsubscribe();
     this.selectedAnalysisItemSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
   }
 
-  initSelectedFacility() {
-    if (this.facilitiesList && this.facilitiesList.length != 0) {
-      this.accountAnalysisService.selectedFacility.next(this.facilitiesList[0].facility);
-    }
-  }
-
-  selectFacility(facility: IdbFacility) {
-    this.accountAnalysisService.selectedFacility.next(facility);
+  selectFacility(facilityId: string) {
+    let selectedFacility: IdbFacility = this.facilities.find(facility => facility.guid === facilityId);
+    this.facilityDbService.selectedFacility.next(selectedFacility);
   }
 
   setFacilityAnlaysisItems() {
@@ -96,43 +84,9 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
           && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
       });
     }
-  }
-
-  getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } {
-    let facilityItem: { facilityId: string, analysisItemId: string } = this.selectedAnalysisItem.facilityAnalysisItems.find(item => { return item.facilityId == facility.guid });
-    let cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square' = 'fa fa-square';
-    let isInvalid: boolean = false;
-    if (facilityItem && facilityItem.analysisItemId) {
-      if (facilityItem.analysisItemId != 'skip') {
-        cssClass = 'fa fa-square-check';
-        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-        let item: IdbAnalysisItem = analysisItems.find(item => { return item.guid == facilityItem.analysisItemId });
-        if (item) {
-          if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
-            isInvalid = true;
-          } else {
-            isInvalid = false;
-          }
-        }
-      } else {
-        cssClass = 'fa fa-square-minus';
-        isInvalid = false;
-      }
-    } else {
-      isInvalid = true;
-    }
-    return { cssClass: cssClass, isInvalid: isInvalid }
-  }
-
-  setFacilitiesList() {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.facilitiesList = facilities.map(facility => {
-      let data: { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } = this.getClassAndValid(facility);
-      return {
-        facility: facility,
-        cssClass: data.cssClass,
-        isInvalid: data.isInvalid
-      }
+    //order by modified date
+    this.facilityAnalysisItems = this.facilityAnalysisItems.sort((a, b) => {
+      return new Date(b.modifiedDate).getTime() - new Date(a.modifiedDate).getTime();
     });
   }
 

@@ -1,52 +1,53 @@
-@if (!inDashboard) {
+@if (!inDashboard && selectedReport) {
 <div class="reports banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
   <div>
+    @let reportErrors = selectedReport.guid | invalidFacilityReport;
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
-          @if (!setupValid) {
+          @if (reportErrors.hasErrors) {
           <span class="fa fa-exclamation-circle"></span>
           }
           <i class="fa fa-gears"></i>
           Report Setup</a>
       </li>
       @if (selectedReport.facilityReportType == 'analysis' || selectedReport.facilityReportType == 'savings') {
-      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
         <a class="nav-link" routerLink="data-check" [routerLinkActive]="['active']">
           <i class="fa fa-circle-check"></i>
           Data Check</a>
       </li>
       }
       @if (selectedReport.facilityReportType == 'analysis') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
         <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Analysis Report</a>
       </li>
       }
       @if (selectedReport.facilityReportType == 'overview') {
-      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
         <a class="nav-link" routerLink="overview-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Data Overview Report</a>
       </li>
       }
       @if (selectedReport.facilityReportType == 'savings') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
         <a class="nav-link" routerLink="savings-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Savings Report</a>
       </li>
       }
       @if (selectedReport.facilityReportType == 'emissionFactors') {
-      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
         <a class="nav-link" routerLink="emission-factors-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Emission Factors Report</a>
       </li>
       }
       @if (selectedReport.facilityReportType == 'modeling') {
-      <li class="nav-item" [ngClass]="{'disabled': !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
         <a class="nav-link" routerLink="modeling-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Modeling Report</a>

@@ -20,6 +20,7 @@ export class AccountAnalysisComponent implements OnInit {
   monthlyKey: string;
   annualKey: string;
   account: IdbAccount;
+  accountSub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountAnalysisService: AccountAnalysisService,
     private analysisService: AnalysisService,
@@ -29,13 +30,16 @@ export class AccountAnalysisComponent implements OnInit {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.utilityMeterData = val;
     });
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.annualKey = 'annual-' + this.account?.id;
-    this.monthlyKey = 'monthly-' + this.account?.id;
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.account = val;
+      this.annualKey = 'annual-' + this.account?.id;
+      this.monthlyKey = 'monthly-' + this.account?.id;
+    });
   }
 
   ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
+    this.accountSub.unsubscribe();
     this.accountAnalysisService.hideInUseMessage = false; 
     this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
     this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');

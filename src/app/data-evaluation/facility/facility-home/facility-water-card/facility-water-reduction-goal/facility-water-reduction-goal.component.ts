@@ -76,10 +76,6 @@ export class FacilityWaterReductionGoalComponent {
 
   goToAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
-    if (this.latestAnalysisItem.setupErrors.hasError || this.latestAnalysisItem.setupErrors.groupsHaveErrors) {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis/facility-analysis');
-    }
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
   }
 }

@@ -28,6 +28,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   monthlyAccountAnalysisDataSub: Subscription;
   analysisDisplay: 'table' | 'graph';
   key: string;
+  accountSub: Subscription;
 
   constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
@@ -35,9 +36,12 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.key = 'monthly-' + this.account?.id;
-    this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.account = val;
+      this.key = 'monthly-' + this.account?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+    });
 
     this.calculatingSub = this.accountAnalysisService.calculating.subscribe(val => {
       this.calculating = val;
@@ -56,6 +60,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     this.calculatingSub.unsubscribe();
     this.monthlyAccountAnalysisDataSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
   
   setDataDisplay(display: 'table' | 'graph') {

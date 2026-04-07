@@ -52,6 +52,7 @@
         &mdash;
         }
       </td>
+      @if(!calculatingMeterGroups){
       @if(meterGroup && (meterGroup.groupType == 'Water' || meterGroup.groupType == 'Energy')) {
       <td class="text-end">
         @if (meterListItem.lastTwelveMonthsConsumption) {
@@ -67,6 +68,20 @@
         &mdash;
         }
       </td>
+      }
+      }@else{
+      @if(meterGroup && (meterGroup.groupType == 'Water' || meterGroup.groupType == 'Energy')) {
+      <td>
+        <span class="placeholder-glow w-100">
+          <span class="placeholder col-12"></span>
+        </span>
+      </td>
+      <td>
+        <span class="placeholder-glow w-100">
+          <span class="placeholder col-12"></span>
+        </span>
+      </td>
+      }
       }
     </tr>
     }

@@ -32,6 +32,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   }>;
   analysisDisplay: 'table' | 'graph';
   key: string;
+  facilitySub: Subscription;
 
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
@@ -39,9 +40,12 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.key = 'monthly-' + this.facility?.id;
-    this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.key = 'monthly-' + this.facility?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+    });
 
     this.calculatingSub = this.analysisService.calculating.subscribe(val => {
       this.calculating = val;
@@ -65,6 +69,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     this.monthlyFacilityAnalysisDataSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
     this.groupSummariesSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {

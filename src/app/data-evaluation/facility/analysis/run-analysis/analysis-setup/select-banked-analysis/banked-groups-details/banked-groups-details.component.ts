@@ -3,10 +3,10 @@ import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/faci
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-    selector: 'app-banked-groups-details',
-    templateUrl: './banked-groups-details.component.html',
-    styleUrl: './banked-groups-details.component.css',
-    standalone: false
+  selector: 'app-banked-groups-details',
+  templateUrl: './banked-groups-details.component.html',
+  styleUrl: './banked-groups-details.component.css',
+  standalone: false
 })
 export class BankedGroupsDetailsComponent {
   @Input({ required: true })
@@ -16,7 +16,6 @@ export class BankedGroupsDetailsComponent {
 
 
   groupItems: Array<AnalysisGroupItem>;
-
   constructor(private analysisService: AnalysisService) {
   }
 

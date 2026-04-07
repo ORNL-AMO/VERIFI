@@ -19,6 +19,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-annual-analysis-summary',
@@ -36,6 +37,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   calculating: boolean | 'error';
   analysisDisplay: 'table' | 'graph';
   key: string;
+  facilitySub: Subscription;
 
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
     private predictorDbService: PredictorDbService,
@@ -49,9 +51,12 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.key = 'annual-' + this.facility?.id;
-    this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.key = 'annual-' + this.facility?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
+    });
 
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
@@ -95,6 +100,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     if (this.worker) {
       this.worker.terminate();
     }
+    this.facilitySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {

@@ -73,19 +73,19 @@ export class AccountAnalysisFooterComponent implements OnInit {
       this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
     } else if (this.router.url.includes('account/analysis/select-items')) {
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let selectedFacility: IdbFacility = this.accountAnalysisService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
       if (facilityIndex == 0) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
       } else {
-        this.accountAnalysisService.selectedFacility.next(facilities[facilityIndex - 1]);
+        this.facilityDbService.selectedFacility.next(facilities[facilityIndex - 1]);
       }
     } else if (this.router.url.includes('results')) {
       if (this.router.url.includes('monthly-analysis')) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
       } else {
         let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        this.accountAnalysisService.selectedFacility.next(facilities[facilities.length - 1]);
+        this.facilityDbService.selectedFacility.next(facilities[facilities.length - 1]);
         this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
       }
     }
@@ -96,12 +96,12 @@ export class AccountAnalysisFooterComponent implements OnInit {
       this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
     } else if (this.router.url.includes('select-items')) {
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let selectedFacility: IdbFacility = this.accountAnalysisService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
       if (facilityIndex == facilities.length - 1) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
       } else {
-        this.accountAnalysisService.selectedFacility.next(facilities[facilityIndex + 1]);
+        this.facilityDbService.selectedFacility.next(facilities[facilityIndex + 1]);
       }
     } else if (this.router.url.includes('results')) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/results/monthly-analysis');

@@ -24,10 +24,6 @@ export class GroupAnalysisComponent implements OnInit {
   showModelSelection: boolean;
   showBanked: boolean;
   routerSub: Subscription;
-  setupErrors: boolean;
-  regressionErrors: boolean;
-  hasErrors: boolean;
-  hasInvalidRegressionModel: boolean;
   hideLabel: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
@@ -52,7 +48,6 @@ export class GroupAnalysisComponent implements OnInit {
       if (this.selectedGroup) {
         this.showModelSelection = this.selectedGroup.analysisType == 'regression';
         this.showBanked = this.selectedGroup.applyBanking && this.analysisItem.hasBanking;
-        this.setErrorBools();
       }
     });
     this.setLabel(this.router.url);
@@ -89,28 +84,6 @@ export class GroupAnalysisComponent implements OnInit {
       } else {
         this.hideLabel = false;
       }
-    }
-  }
-
-  setErrorBools() {
-    this.hasErrors = this.selectedGroup.groupErrors.hasErrors;
-    this.hasInvalidRegressionModel = this.selectedGroup.groupErrors.hasInvalidRegressionModel;
-    if (this.selectedGroup.groupErrors.hasErrors) {
-      this.regressionErrors = (this.selectedGroup.groupErrors.missingRegressionConstant ||
-        this.selectedGroup.groupErrors.missingRegressionModelYear ||
-        this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
-        this.selectedGroup.groupErrors.missingRegressionStartYear ||
-        this.selectedGroup.groupErrors.missingRegressionModelEndMonth ||
-        this.selectedGroup.groupErrors.missingRegressionEndYear ||
-        this.selectedGroup.groupErrors.invalidModelDateSelection ||
-        this.selectedGroup.groupErrors.missingRegressionModelSelection ||
-        this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
-      this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||
-        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters
-        || this.selectedGroup.groupErrors.invalidBankingYears || this.selectedGroup.groupErrors.missingBankingAppliedYear || this.selectedGroup.groupErrors.missingBankingBaselineYear)
-    } else {
-      this.regressionErrors = false;
-      this.setupErrors = false;
     }
   }
 }

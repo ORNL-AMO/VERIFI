@@ -30,6 +30,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
   groupSummariesSub: Subscription;
   analysisDisplay: 'table' | 'graph';
   key: string;
+  facilitySub: Subscription;
 
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
@@ -37,9 +38,12 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.key = 'annual-' + this.facility?.id;
-    this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.key = 'annual-' + this.facility?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
+    });
 
     this.calculatingSub = this.analysisService.calculating.subscribe(val => {
       this.calculating = val;
@@ -57,6 +61,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
     this.calculatingSub.unsubscribe();
     this.annualAnalysisSummarySub.unsubscribe();
     this.groupSummariesSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {

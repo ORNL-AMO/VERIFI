@@ -1,4 +1,4 @@
-import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisSetupErrors } from "../analysis";
+import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable } from "../analysis";
 import { IdbAccount } from "./account";
 import { IdbFacility } from "./facility";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
@@ -16,7 +16,6 @@ export interface IdbAnalysisItem extends IdbEntry {
     calculatedReportYear: number,
     energyUnit: string,
     waterUnit: string,
-    setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
     baselineYear: number,
     hasBanking: boolean,
@@ -75,25 +74,12 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       energyUnit: facility.energyUnit,
       waterUnit: facility.volumeLiquidUnit,
       groups: itemGroups,
-      setupErrors: undefined,
       analysisCategory: analysisCategory,
       baselineYear: baselineYear,
       hasBanking: false,
       bankedAnalysisItemId: undefined,
       isAnalysisVisited: false,
       dataCheckedDate: undefined
-    };
-    analysisItem.setupErrors = {
-      hasError: true,
-      missingName: false,
-      noGroups: itemGroups.length == 0,
-      // missingReportYear: true,
-      // reportYearBeforeBaselineYear: false,
-      groupsHaveErrors: true,
-      missingBaselineYear: false,
-      baselineYearAfterMeterDataEnd: false,
-      baselineYearBeforeMeterDataStart: false,
-      bankingError: false
     };
     return analysisItem;
 }
@@ -122,12 +108,11 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     regressionModelEndMonth: undefined,
     regressionEndYear: undefined,
     regressionConstant: undefined,
-    groupErrors: undefined,
     specifiedMonthlyPercentBaseload: false,
     averagePercentBaseload: undefined,
     monthlyPercentBaseload: getMonthlyPercentBaseload(),
     dataAdjustments: [],
-    userDefinedModel: true,
+    isGeneratedModel: true,
     models: undefined,
     baselineAdjustmentsV2: [],
     maxModelVariables: 4,
@@ -135,26 +120,5 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     newBaselineYear: undefined,
     bankedAnalysisYear: undefined
   }
-  analysisGroup.groupErrors = {
-    hasErrors: true,
-    missingProductionVariables: true,
-    missingRegressionConstant: true,
-    missingRegressionModelYear: true,
-    missingRegressionModelStartMonth: true,
-    missingRegressionStartYear: true,
-    missingRegressionModelEndMonth: true,
-    missingRegressionEndYear: true,
-    invalidModelDateSelection: true,
-    missingRegressionModelSelection: true,
-    missingRegressionPredictorCoef: true,
-    invalidAverageBaseload: true,
-    invalidMonthlyBaseload: true,
-    noProductionVariables: true,
-    missingGroupMeters: true,
-    hasInvalidRegressionModel: true,
-    missingBankingBaselineYear: true,
-    missingBankingAppliedYear: true,
-    invalidBankingYears: false
-  };
   return analysisGroup;
 }
