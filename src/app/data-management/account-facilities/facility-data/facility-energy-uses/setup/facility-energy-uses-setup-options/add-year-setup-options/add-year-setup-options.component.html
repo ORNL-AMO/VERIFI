@@ -16,26 +16,36 @@
                         </div>
                     </div>
                 </h4>
-                <div class="d-flex flex-column col-sm-12 col-md-8 col-lg-6 mx-auto">
-                    <div class="d-flex flex-column">
-                        <div>
-                            <h5 class="mb-0">Add Year To Groups</h5>
-                            <p class="fw-light">
-                                Select the groups you want to add a year of data to. Data will be copied from the most
-                                recent year of data in those groups.
-                            </p>
-                            <div class="d-flex flex-column">
-                                @for(group of facilityEnergyUseGroups; track group.guid;){
-                                <div class="d-flex">
-                                    <label for="{{'group'+group.guid}}" class="form-check-label large">
-                                        <input id="{{'group'+group.guid}}" type="checkbox" [checked]="group.selected"
-                                            (change)="toggleGroupSelection(group);" />
-                                        {{group.name}}
-                                    </label>
-                                </div>
-                                }
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <h5 class="mb-0">Select Groups</h5>
+                        <p class="fw-light">
+                            Choose the groups you want to add a year of data to.
+                        </p>
+                        <div class="d-flex flex-column">
+                            @for(group of facilityEnergyUseGroups; track group.guid;){
+                            <div class="d-flex">
+                                <label for="{{'group'+group.guid}}" class="form-check-label large">
+                                    <input id="{{'group'+group.guid}}" type="checkbox" [checked]="group.selected"
+                                        (change)="toggleGroupSelection(group);" />
+                                    {{group.name}}
+                                </label>
                             </div>
+                            }
                         </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <h5 class="mb-0" for="setupYear">Select Year To Add</h5>
+                        <p class="fw-light">
+                            Data will be copied from the most recent year of data in those groups that can then be
+                            modified in the next screens. If data already
+                            exists for the selected year, no changes will be made to that equipment.
+                        </p>
+                        <select id="setupYear" class="form-select" [(ngModel)]="setupYear" required>
+                            @for(year of yearOptions; track year){
+                            <option [value]="year">{{year}}</option>
+                            }
+                        </select>
                     </div>
                 </div>
             </div>
@@ -45,7 +55,7 @@
 <nav class="data-management-footer navbar">
     <div class="container-fluid justify-content-end">
         <button class="btn nav-btn" (click)="goToEquipmentDetails()">
-            Edit Equipment Groups
+            Add Year of Data
             <i class="fa fa-arrow-right"></i>
         </button>
     </div>

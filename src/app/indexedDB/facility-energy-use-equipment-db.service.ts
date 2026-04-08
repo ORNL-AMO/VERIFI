@@ -86,6 +86,13 @@ export class FacilityEnergyUseEquipmentDbService {
     })
   }
 
+  getByEnergyUseGroupId(groupId: string): Array<IdbFacilityEnergyUseEquipment> {
+    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
+    return accountEnergyUseEquipment.filter(energyUseEquipment => {
+      return energyUseEquipment.energyUseGroupId == groupId;
+    })
+  }
+
   getFacilityEnergyUseEquipmentCopy(facilityId: string): Array<IdbFacilityEnergyUseEquipment> {
     let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.getByFacilityId(facilityId);
     let facilityEnergyUseEquipmentCopy: Array<IdbFacilityEnergyUseEquipment> = JSON.parse(JSON.stringify(facilityEnergyUseEquipment));

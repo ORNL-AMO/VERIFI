@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { calculateTotalEquipmentEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';

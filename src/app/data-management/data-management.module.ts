@@ -106,6 +106,8 @@ import { EditExistingGroupsSetupOptionsComponent } from './account-facilities/fa
 import { AddYearSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component';
 import { FacilityMeterGroupsComponent } from './account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component';
 import { FacilityMeterDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
+import { FacilityEnergyUsesModifyAnnualDataComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component';
+import { EnergyUseGroupModifyAnnualDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/energy-use-group-modify-annual-data-form/energy-use-group-modify-annual-data-form.component';
 
 @NgModule({
   declarations: [
@@ -201,7 +203,9 @@ import { FacilityMeterDataComponent } from './account-facilities/facility-data/f
     EditExistingGroupsSetupOptionsComponent,
     AddYearSetupOptionsComponent,
     FacilityMeterGroupsComponent,
-    FacilityMeterDataComponent
+    FacilityMeterDataComponent,
+    FacilityEnergyUsesModifyAnnualDataComponent,
+    EnergyUseGroupModifyAnnualDataFormComponent
   ],
   imports: [
     CommonModule,

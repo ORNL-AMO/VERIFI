@@ -34,6 +34,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
   showDeleteGroupModal: boolean = false;
 
   isNew: boolean;
+  setupYear: number;
   constructor(private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
@@ -48,6 +49,12 @@ export class FacilityEnergyUsesGroupSetupComponent {
   ) { }
 
   ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      const setupYear: number = parseInt(params['setupYear']);
+      if (setupYear) {
+        this.setupYear = setupYear;
+      }
+    });
     this.isNew = this.router.url.includes('new-setup');
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
