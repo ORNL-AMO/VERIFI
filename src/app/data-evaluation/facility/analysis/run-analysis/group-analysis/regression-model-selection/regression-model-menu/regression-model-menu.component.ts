@@ -24,6 +24,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-regression-model-menu',
@@ -101,15 +102,8 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   setYears() {
-    this.yearOptions = [];
-    if (this.calanderizedMeters && this.calanderizedMeters.length > 0 && this.selectedFacility) {
-      const fiscalYears = this.calanderizedMeters
-        .flatMap(meter => meter.monthlyData.map(data => getFiscalYear(data.date, this.selectedFacility)));
-      const uniqueFiscalYears = Array.from(new Set(fiscalYears)).sort((a, b) => a - b);
-      this.yearOptions = uniqueFiscalYears;
-    } else {
-      this.yearOptions = [];
-    }
+    this.yearOptions = getAllYearsWithData(this.calanderizedMeters, this.selectedFacility);
+    this.yearOptions.sort((a, b) => a - b);
   }
 
   setUserDefinedDefaultData() {
