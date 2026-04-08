@@ -181,9 +181,43 @@ export class WeatherPredictorManagementService {
     }
   }
 
+  addLoadingMessages(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>) {
+    this.loadingService.clearLoadingMessages();
+    for (let i = 0; i < facilityList.length; i++) {
+      let facilityWeatherPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue().filter(predictor => {
+        return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
+      });
+      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityList[i].facilityId);
+      for (let p = 0; p < facilityWeatherPredictors.length; p++) {
+        let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
+        this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);
+        let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue().filter(data => {
+          return data.predictorId == weatherPredictor.guid;
+        });
+        let startDate: Date = new Date(facilityList[i].startDate);
+        let endDate: Date = new Date(facilityList[i].endDate);
+        while (startDate < endDate) {
+          let entryDate: Date = new Date(startDate);
+          let monthPredictorEntry: IdbPredictorData = predictorData.find(data => {
+            return checkSameMonthPredictorData(data, entryDate);
+          });
+          if (!monthPredictorEntry) {
+            let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+            let formatedDate: string = month.abbreviation + ', ' + entryDate.getFullYear();
+          
+            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
+            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
+          }
+          startDate.setMonth(startDate.getMonth() + 1);
+        }
+      }
+    }
+  }
+
   async updateAccountWeatherPredictors(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>): Promise<"success" | "error"> {
     this.loadingService.setContext('updating-weather-predictors');
     this.loadingService.setTitle('Updating Weather Predictors');
+    this.addLoadingMessages(facilityList);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let results: "success" | "error" = "success";
@@ -194,13 +228,13 @@ export class WeatherPredictorManagementService {
       let facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
         return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
       });
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityList[i].facilityId);
+   
       //iterate weather predictors for facility
       for (let p = 0; p < facilityWeatherPredictors.length; p++) {
         let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
         ++index;
         this.loadingService.setCurrentLoadingIndex(index);
-        this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);
+        
         //existing predictor data for this predictor
         let predictorData: Array<IdbPredictorData> = accountPredictorData.filter(data => {
           return data.predictorId == weatherPredictor.guid;
@@ -219,16 +253,13 @@ export class WeatherPredictorManagementService {
             //add predictor data
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
-            let formatedDate: string = month.abbreviation + ', ' + entryDate.getFullYear();
-
-            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
+            
             let nextMonthsDate: Date = new Date(startDate)
             nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
             let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
+            
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {

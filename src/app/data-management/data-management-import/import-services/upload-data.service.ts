@@ -515,6 +515,16 @@ export class UploadDataService {
     return;
   }
 
+  setUploadDataSubmitMessages() {
+    this.loadingService.addLoadingMessage('Uploading Facilities');
+    this.loadingService.addLoadingMessage('Uploading Meters');
+    this.loadingService.addLoadingMessage('Creating Meter Groups');
+    this.loadingService.addLoadingMessage('Uploading Meter Data');
+    this.loadingService.addLoadingMessage('Uploading Predictors');
+    this.loadingService.addLoadingMessage('Uploading Predictor Data');    
+    this.loadingService.addLoadingMessage('Finishing Up');
+  }
+
 
   async submit(fileReference: FileReference): Promise<FileReference> {
     this.importFileReference = fileReference;
@@ -522,8 +532,8 @@ export class UploadDataService {
 
     this.loadingService.setContext('submit-file-data');
     this.loadingService.setTitle('Submitting File Data');
+    this.setUploadDataSubmitMessages();
     this.loadingService.setCurrentLoadingIndex(0);
-    this.loadingService.addLoadingMessage('Uploading Facilities');
 
     for (let i = 0; i < fileReference.importFacilities.length; i++) {
       let facility: IdbFacility = fileReference.importFacilities[i];
@@ -535,7 +545,6 @@ export class UploadDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(1);
-    this.loadingService.addLoadingMessage('Uploading Meters');
     for (let i = 0; i < fileReference.meters.length; i++) {
       let meter: IdbUtilityMeter = fileReference.meters[i];
       if (!meter.skipImport) {
@@ -548,14 +557,12 @@ export class UploadDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(2);
-    this.loadingService.addLoadingMessage('Creating Meter Groups');
     for (let i = 0; i < fileReference.newMeterGroups.length; i++) {
       let meterGroup: IdbUtilityMeterGroup = fileReference.newMeterGroups[i];
       await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(meterGroup));
     }
 
     this.loadingService.setCurrentLoadingIndex(3);
-    this.loadingService.addLoadingMessage('Uploading Meter Data');
     for (let i = 0; i < fileReference.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = fileReference.meterData[i];
       let meter: IdbUtilityMeter = fileReference.meters.find(meter => { return meter.guid == meterData.meterId })
@@ -590,7 +597,6 @@ export class UploadDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(4);
-    this.loadingService.addLoadingMessage('Uploading Predictors');
     for (let i = 0; i < fileReference.predictors.length; i++) {
       let predictor: IdbPredictor = fileReference.predictors[i];
       if (predictor.id) {
@@ -608,7 +614,6 @@ export class UploadDataService {
       }
     }
     this.loadingService.setCurrentLoadingIndex(5);
-    this.loadingService.addLoadingMessage('Uploading Predictor Data');
     for (let i = 0; i < fileReference.predictorData.length; i++) {
       let predictorData: IdbPredictorData = fileReference.predictorData[i];
       if (predictorData.id) {
@@ -627,7 +632,6 @@ export class UploadDataService {
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setCurrentLoadingIndex(6);
-    this.loadingService.addLoadingMessage('Finishing Up');
     await this.dbChangesService.selectAccount(selectedAccount, false);
     fileReference.dataSubmitted = true;
     this.importFileReference = fileReference;

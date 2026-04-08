@@ -31,6 +31,9 @@ import { getDateFromMeterData } from '../dateHelperFunctions';
 export class ExportToExcelTemplateV3Service {
 
   alphabet: Array<string>;
+  exportBlob: Blob;
+  exportFileName: string;
+
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
@@ -39,7 +42,6 @@ export class ExportToExcelTemplateV3Service {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService) { }
-
 
   exportFacilityData(includeWeatherData: boolean, facilityId?: string) {
     this.setAlphabet();
@@ -51,10 +53,7 @@ export class ExportToExcelTemplateV3Service {
       workbook.xlsx.load(request.response).then(() => {
         this.fillWorkbook(workbook, includeWeatherData, facilityId);
         workbook.xlsx.writeBuffer().then(excelData => {
-          let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          let a = document.createElement("a");
-          let url = window.URL.createObjectURL(blob);
-          a.href = url;
+          this.exportBlob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let date = new Date();
           let month: string = (date.getMonth() + 1).toString().padStart(2, '0');
           let day: string = date.getDate().toString().padStart(2, '0');
@@ -63,11 +62,7 @@ export class ExportToExcelTemplateV3Service {
           let accountName: string = account.name;
           accountName = accountName.replaceAll(' ', '-');
           accountName = accountName.replaceAll('.', '_');
-          a.download = accountName + "-" + formatedDate;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+          this.exportFileName = accountName + "-" + formatedDate + ".xlsx";
           this.loadingService.isLoadingComplete.next(true);
         }).catch(error => {
           console.error('Error exporting to Excel:', error);
@@ -78,55 +73,74 @@ export class ExportToExcelTemplateV3Service {
     request.send();
   }
 
+  triggerExportDownload() {
+    if (this.exportBlob && this.exportFileName) {
+      let a = document.createElement("a");
+      let url = window.URL.createObjectURL(this.exportBlob);
+      a.href = url;
+      a.download = this.exportFileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      this.exportBlob = null;
+      this.exportFileName = null;
+    }
+  }
+
+  setExportFacilityDataMessages() {
+    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
+    this.loadingService.addLoadingMessage('Adding Facility Details');
+    this.loadingService.addLoadingMessage('Adding Electricity Meters');
+    this.loadingService.addLoadingMessage('Adding Electricity Data');
+    this.loadingService.addLoadingMessage('Adding Stationary Meters');
+    this.loadingService.addLoadingMessage('Adding Stationary Data');
+    this.loadingService.addLoadingMessage('Adding Mobile Meters');
+    this.loadingService.addLoadingMessage('Adding Mobile Data');
+    this.loadingService.addLoadingMessage('Adding Other Energy Meters');
+    this.loadingService.addLoadingMessage('Adding Other Energy Data');
+    this.loadingService.addLoadingMessage('Adding Other Emissions Meters');
+    this.loadingService.addLoadingMessage('Adding Other Emissions Data');
+    this.loadingService.addLoadingMessage('Adding Water Meters');
+    this.loadingService.addLoadingMessage('Adding Water Data');
+    this.loadingService.addLoadingMessage('Adding Predictors');
+    this.loadingService.addLoadingMessage('Adding Predictor Data');
+    this.loadingService.addLoadingMessage('Finishing up');
+  }
+
   fillWorkbook(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Workbook {
     this.utilityMeterDbService.setTemporaryMeterNumbersForExport();
     this.loadingService.setCurrentLoadingIndex(1);
-    this.loadingService.addLoadingMessage('Adding Facility Details');
     this.setFacilityWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(2);
-    this.loadingService.addLoadingMessage('Adding Electricity Meters');
     this.setElectricityMetersWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(3);
-    this.loadingService.addLoadingMessage('Adding Electricity Data');
     this.setElectricityDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(4);
-    this.loadingService.addLoadingMessage('Adding Stationary Meters');
     this.setStationaryMetersWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(5);
-    this.loadingService.addLoadingMessage('Adding Stationary Data');
     this.setStationaryDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(6);
-    this.loadingService.addLoadingMessage('Adding Mobile Meters');
     this.setMobileMetersWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(7);
-    this.loadingService.addLoadingMessage('Adding Mobile Data');
     this.setMobileDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(8);
-    this.loadingService.addLoadingMessage('Adding Other Energy Meters');
     this.setOtherEnergyMetersWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(9);
-    this.loadingService.addLoadingMessage('Adding Other Energy Data');
     this.setOtherEnergyDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(10);
-    this.loadingService.addLoadingMessage('Adding Other Emissions Meters');
     this.setOtherEmissionsWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(11);
-    this.loadingService.addLoadingMessage('Adding Other Emissions Data');
     this.setOtherEmissionsDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(12);
-    this.loadingService.addLoadingMessage('Adding Water Meters');
     this.setWaterMetersWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(13);
-    this.loadingService.addLoadingMessage('Adding Water Data');
     this.setWaterDataWorksheet(workbook, facilityId);
     this.loadingService.setCurrentLoadingIndex(14);
-    this.loadingService.addLoadingMessage('Adding Predictors');
     this.setPredictorsWorksheet(workbook, includeWeatherData, facilityId);
     this.loadingService.setCurrentLoadingIndex(15);
-    this.loadingService.addLoadingMessage('Adding Predictor Data');
     this.setPredictorDataWorksheet(workbook, includeWeatherData, facilityId);
     this.loadingService.setCurrentLoadingIndex(16);
-    this.loadingService.addLoadingMessage('Finishing up');
     return workbook;
   }
 
@@ -362,11 +376,11 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let mobileMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Fuels' && meter.scope == 2 });
-    if(mobileMeters.length == 0){
+    if (mobileMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
-    
+
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 3;
     mobileMeters.forEach(meter => {
@@ -419,7 +433,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let mobileMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Fuels' && meter.scope == 2 });
-    if(mobileMeters.length == 0){
+    if (mobileMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -447,7 +461,7 @@ export class ExportToExcelTemplateV3Service {
   }
 
   getVehicleType(meter: IdbUtilityMeter): string {
-    if(meter.vehicleCategory == 1){
+    if (meter.vehicleCategory == 1) {
       return "Material Transport Onsite";
     }
     let vehicleType = VehicleTypes.find(vType => {
@@ -495,7 +509,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherEnergyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Energy' });
-    if(otherEnergyMeters.length == 0){
+    if (otherEnergyMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -546,7 +560,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherEnergyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Energy' });
-    if(otherEnergyMeters.length == 0){
+    if (otherEnergyMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -581,7 +595,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other' });
-    if(otherMeters.length == 0){
+    if (otherMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -632,7 +646,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other' });
-    if(otherMeters.length == 0){
+    if (otherMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -666,7 +680,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let waterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
-    if(waterMeters.length == 0){
+    if (waterMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -721,7 +735,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let waterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
-    if(waterMeters.length == 0){
+    if (waterMeters.length == 0) {
       return worksheet;
     }
     worksheet.state = 'visible';
@@ -795,7 +809,7 @@ export class ExportToExcelTemplateV3Service {
     if (facilityId) {
       predictors = predictors.filter(predictor => { return predictor.facilityId == facilityId });
     }
-    if(!includeWeatherData) {
+    if (!includeWeatherData) {
       predictors = predictors.filter(predictor => { return predictor.predictorType != 'Weather' });
     }
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -848,7 +862,7 @@ export class ExportToExcelTemplateV3Service {
         return predictor.facilityId == facility.guid;
       });
 
-      if(!includeWeatherData) {
+      if (!includeWeatherData) {
         facilityPredictors = facilityPredictors.filter(predictor => { return predictor.predictorType != 'Weather' });
       }
 

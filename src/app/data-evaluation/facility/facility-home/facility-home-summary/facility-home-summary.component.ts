@@ -42,6 +42,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
   analysisValidationSub: Subscription;
   energyAnalysisHasErrors: boolean;
   waterAnalysisHasErrors: boolean;
+  loadingSub: Subscription;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
@@ -62,11 +63,17 @@ export class FacilityHomeSummaryComponent implements OnInit {
       this.setWaterAnalysisHasErrors();
     });
 
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'export-facilities-to-excel') {
+        this.exportToExcelTemplateV3Service.triggerExportDownload();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.analysisValidationSub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   navigateTo(urlStr: string) {
@@ -160,8 +167,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facility');
+    this.exportToExcelTemplateV3Service.setExportFacilityDataMessages();
     this.loadingService.setCurrentLoadingIndex(0);
-    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, selectedFacility.guid);
   }
 
