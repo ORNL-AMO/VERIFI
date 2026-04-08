@@ -1,16 +1,11 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-add-year-setup-options',
@@ -36,10 +31,7 @@ export class AddYearSetupOptionsComponent {
     private router: Router,
     private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
     private route: ActivatedRoute,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }
 
   ngOnInit() {
@@ -70,29 +62,6 @@ export class AddYearSetupOptionsComponent {
 
   async goToEquipmentDetails() {
     this.facilityEnergyUsesSetupService.existingGroupsToEdit = this.facilityEnergyUseGroups.filter(group => group.selected).map(group => group.guid);
-    //add year of data to selected groups and then navigate to edit existing groups screen
-    for (let groupId of this.facilityEnergyUsesSetupService.existingGroupsToEdit) {
-      let groupEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByEnergyUseGroupId(groupId);
-      for (let equipment of groupEquipment) {
-        let checkHasDataForYear: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == this.setupYear);
-        if (!checkHasDataForYear) {
-          let mostRecentYearOfData: number = Math.max(...equipment.operatingConditionsData.map(data => data.year));
-          let mostRecentData: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == mostRecentYearOfData);
-          let newData: EnergyEquipmentOperatingConditionsData = {
-            ...mostRecentData,
-            year: this.setupYear
-          }
-          equipment.operatingConditionsData.push(newData);
-          equipment.utilityData.forEach(utility => {
-            let mostRecentYearOfUtilityData: EquipmentUtilityDataEnergyUse = utility.energyUse.find(data => data.year == mostRecentYearOfData);
-            utility.energyUse.push({ year: this.setupYear, energyUse: mostRecentYearOfUtilityData.energyUse, overrideEnergyUse: false })
-          })
-          await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(equipment));
-        }
-      }
-    }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
     this.router.navigate(['../../modify-annual-data', this.setupYear], { relativeTo: this.route });
   }
 

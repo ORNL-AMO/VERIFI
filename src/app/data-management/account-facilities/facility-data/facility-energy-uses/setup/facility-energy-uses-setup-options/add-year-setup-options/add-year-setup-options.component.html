@@ -20,7 +20,7 @@
                     <div class="col-sm-12 col-md-6">
                         <h5 class="mb-0">Select Groups</h5>
                         <p class="fw-light">
-                            Choose the groups you want to add a year of data to.
+                            Choose the groups you want to add or modify annual data.
                         </p>
                         <div class="d-flex flex-column">
                             @for(group of facilityEnergyUseGroups; track group.guid;){
@@ -35,9 +35,9 @@
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6">
-                        <h5 class="mb-0" for="setupYear">Select Year To Add</h5>
+                        <h5 class="mb-0" for="setupYear">Select Year To Add/Modify</h5>
                         <p class="fw-light">
-                            Data will be copied from the most recent year of data in those groups that can then be
+                            Data will be copied from the most recent year of data in the selected groups. Data can then be
                             modified in the next screens. If data already
                             exists for the selected year, no changes will be made to that equipment.
                         </p>
