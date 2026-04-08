@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -14,7 +14,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
-import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter.pipe';
+import { EditMeterFormService } from '../../edit-meter-form/edit-meter-form.service';
+import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/validation-pipes/invalid-meter-data.pipe';
 
 @Component({
   selector: 'app-meter-data-table',
@@ -43,6 +44,7 @@ export class MeterDataTableComponent {
   filteredMeterData: Array<IdbUtilityMeterData>;
   optionSelected: 'all' | 'estimated' = 'all';
   hasEstimatedReadings: boolean = false;
+  isMeterInvalid: boolean = false;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -53,7 +55,8 @@ export class MeterDataTableComponent {
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private editMeterFormService: EditMeterFormService
   ) { }
 
   ngOnInit(): void {
@@ -63,6 +66,7 @@ export class MeterDataTableComponent {
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
       let meterId: string = params['id'];
       this.selectedMeter = this.facilityMeters.find(meter => { return meter.guid == meterId });
+      this.isMeterInvalid = this.editMeterFormService.getFormFromMeter(this.selectedMeter).invalid;
       this.setData();
       this.optionSelected = 'all';
     });
@@ -87,16 +91,21 @@ export class MeterDataTableComponent {
   }
 
   setData() {
-    this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
-    this.filteredMeterData = [...this.meterData];
-    this.hasNegativeReadings = this.meterData.findIndex(mData => {
-      return mData.totalEnergyUse < 0
-    }) != -1;
-    this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
-    this.setHasCheckedItems();
-    this.hasEstimatedReadings = this.meterData.findIndex(mData => {
-      return mData.isEstimated == true;
-    }) != -1;
+    if (this.isMeterInvalid == false) {
+      this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+      this.filteredMeterData = [...this.meterData];
+      this.hasNegativeReadings = this.meterData.findIndex(mData => {
+        return mData.totalEnergyUse < 0
+      }) != -1;
+      this.duplicateReadingDates = getHasDuplicateReadings(this.meterData).map(dateStr => {
+        let dateParts: Array<string> = dateStr.split('_');
+        return new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      });
+      this.setHasCheckedItems();
+      this.hasEstimatedReadings = this.meterData.findIndex(mData => {
+        return mData.isEstimated == true;
+      }) != -1;
+    }
   }
 
   uploadData() {
@@ -119,7 +128,7 @@ export class MeterDataTableComponent {
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, true,  selectedFacility);
+    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -168,21 +177,19 @@ export class MeterDataTableComponent {
 
   meterDataAdd() {
     this.showFilterDropdown = false;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/new-bill');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedMeter.facilityId + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/new-bill');
     }
   }
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
     this.showFilterDropdown = false;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/edit-bill/' + meterData.guid);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/edit-bill/' + meterData.guid);
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedMeter.facilityId + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/edit-bill/' + meterData.guid);
     }
   }
 
@@ -195,9 +202,17 @@ export class MeterDataTableComponent {
   }
 
   filterEstimatedReadings() {
-    if( this.optionSelected === 'estimated') 
+    if (this.optionSelected === 'estimated')
       this.filteredMeterData = this.meterData.filter(data => { return data.isEstimated == true });
     else
       this.filteredMeterData = [...this.meterData];
+  }
+
+  editMeter() {
+    if (this.inDataManagement) {
+      this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid);
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedMeter.facilityId + '/utility/energy-consumption/energy-source/edit-meter/' + this.selectedMeter.guid);
+    }
   }
 }

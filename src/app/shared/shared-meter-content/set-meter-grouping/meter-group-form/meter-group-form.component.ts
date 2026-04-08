@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -23,9 +23,11 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
 @Component({
   selector: 'app-meter-group-form',
   standalone: false,
-
   templateUrl: './meter-group-form.component.html',
-  styleUrl: './meter-group-form.component.css'
+  styleUrl: './meter-group-form.component.css',
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class MeterGroupFormComponent {
 
@@ -38,6 +40,20 @@ export class MeterGroupFormComponent {
   hasWaterMeters: boolean;
 
   showDeleteModal: boolean = false;
+  inDataManagement: boolean = false;
+
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if ((!this.groupForm.invalid && !this.groupForm.pristine) || this.selectionsChanged) {
+        await this.saveChanges();
+        if (!this.inDataManagement) {
+          this.cancel();
+        }
+      }
+    }
+  }
+
   constructor(private facilityDbService: FacilitydbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -55,6 +71,7 @@ export class MeterGroupFormComponent {
   }
 
   ngOnInit() {
+    this.setInDataManagement();
     this.setHasMetersBools();
     this.activatedRoute.params.subscribe(params => {
       let meterGroupId: string = params['id'];
@@ -75,6 +92,10 @@ export class MeterGroupFormComponent {
         this.hasExistingGroups = this.meterGroupOptions.find(option => { return option.inAnotherGroup }) != undefined;
       }
     });
+  }
+
+  setInDataManagement() {
+    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   cancel() {

@@ -99,6 +99,15 @@ import { OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe } from './account
 import { OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-meter-group.pipe';
 import { OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint-table/order-facility-energy-uses-group-footprint-table-by-source.pipe';
 import { FacilityEnergyUsesResultDropdownComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-result-dropdown/facility-energy-uses-result-dropdown.component';
+import { EnergyUseDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/energy-use-data-form/energy-use-data-form.component';
+import { FacilityEnergyUsesSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/facility-energy-uses-setup-options.component';
+import { NewEquipmentGroupSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component';
+import { EditExistingGroupsSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component';
+import { AddYearSetupOptionsComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component';
+import { FacilityMeterGroupsComponent } from './account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component';
+import { FacilityMeterDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
+import { FacilityEnergyUsesModifyAnnualDataComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component';
+import { EnergyUseGroupModifyAnnualDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/energy-use-group-modify-annual-data-form/energy-use-group-modify-annual-data-form.component';
 
 @NgModule({
   declarations: [
@@ -187,7 +196,16 @@ import { FacilityEnergyUsesResultDropdownComponent } from './account-facilities/
     OrderFacilityEnergyUsesFootprintTableByMeterGroupPipe,
     OrderFacilityEnergyUsesGroupFootprintTableByMeterGroupPipe,
     OrderFacilityEnergyUsesGroupFootprintTableBySourcePipe,
-    FacilityEnergyUsesResultDropdownComponent
+    FacilityEnergyUsesResultDropdownComponent,
+    EnergyUseDataFormComponent,
+    FacilityEnergyUsesSetupOptionsComponent,
+    NewEquipmentGroupSetupOptionsComponent,
+    EditExistingGroupsSetupOptionsComponent,
+    AddYearSetupOptionsComponent,
+    FacilityMeterGroupsComponent,
+    FacilityMeterDataComponent,
+    FacilityEnergyUsesModifyAnnualDataComponent,
+    EnergyUseGroupModifyAnnualDataFormComponent
   ],
   imports: [
     CommonModule,

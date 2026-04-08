@@ -10,13 +10,14 @@
 }
 
 @if (!selectedInspectModel) {
-@if (selectedGroup.groupErrors?.hasInvalidRegressionModel) {
+@let groupErrors = selectedGroup.idbGroupId| invalidGroupAnalysis: analysisItem.guid;
+@if (groupErrors?.hasInvalidRegressionModel) {
 <div class="alert alert-warning w-100 text-center">
   The selected model is invalid.
 </div>
 <hr>
 }
-@if (selectedGroup.groupErrors?.missingRegressionModelSelection) {
+@if (groupErrors?.missingRegressionModelSelection) {
 <div class="alert alert-warning w-100 text-center">
   Model selection required.
 </div>
@@ -26,8 +27,8 @@
   (setShowUserDefinedModelInspection)="setShowUserDefinedModelInspection($event)"></app-regression-model-menu>
 <hr>
 <!--table filters-->
-@if(generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
-<div class="d-flex flex-wrap justify-content-end align-items-center gap-3 mb-2">
+@if(generatedModels && generatedModels.length !== 0 && selectedGroup.isGeneratedModel) {
+<div class="d-flex flex-wrap justify-content-start align-items-center gap-3 mb-2">
   <div class="d-flex align-items-center me-3">
     <label class="show-models-label bold me-2" for="showInvalid">
       Show Statistically Invalid Models
@@ -77,7 +78,7 @@
 }
 
 <!--table-->
-@if (generatedModels && generatedModels.length !== 0 && selectedGroup.userDefinedModel) {
+@if (generatedModels && generatedModels.length !== 0 && selectedGroup.isGeneratedModel) {
 <div class="table-responsive">
   <table class="table table-sm table-hover utility-data table-bordered">
     <thead>
@@ -252,6 +253,6 @@
   (emitSelect)="selectFromInspection()"></app-regression-model-inspection>
 }
 
-@if (!selectedGroup.userDefinedModel && showUserDefinedModelInspection) {
+@if (!selectedGroup.isGeneratedModel && showUserDefinedModelInspection) {
 <app-regression-user-defined-model-inspection></app-regression-user-defined-model-inspection>
 }

@@ -1,72 +1,88 @@
-<h4>
-    {{facility.name}} Energy Use Groups
-</h4>
-@if(facilityEnergyUseGroups.length > 0){
-<div class="d-flex w-100 justify-content-end mb-2">
-    <app-table-items-dropdown></app-table-items-dropdown>
-    <!-- <div class="ps-2">
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    {{facility.name}} Energy Use Groups
+                </h4>
+                @if(facilityEnergyUseGroups.length > 0){
+                <div class="d-flex w-100 justify-content-end mb-2">
+                    <app-table-items-dropdown></app-table-items-dropdown>
+                    <!-- <div class="ps-2">
             <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div> -->
-    <div class="ps-2">
-        <button class="btn action-btn" (click)="addGroup()"><i class="fa fa-plus"></i> Add
-            New Group</button>
-    </div>
-    <div class="ps-2">
-        <button class="btn action-btn" (click)="setupEnergyUseGroups()"><i class="fa fa-edit"></i> Bulk Setup</button>
-    </div>
-</div>
-<div class="table-responsive">
-    <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
-        <thead class="sortable">
-            <tr>
-                <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
-                <th>Equipment/Systems</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            @for(group of (facilityEnergyUseGroups | orderBy: orderDataField: orderByDirection | slice:
-            ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage); track group.guid) {
-            <tr>
-                <td>
-                    <a (click)="selectEditGroup(group)">{{group.name}}</a>
-                </td>
-
-                @let groupEquipment = (group.guid | facilityEnergyEquipmentList:facilityEnergyUseEquipment);
-                <td>
-                    @for (equipment of groupEquipment; track equipment.guid) {
-                    <a class="click-link" (click)="goToEquipment(equipment)">{{equipment.name}}</a><br>
-                    }
-                </td>
-                <td class="actions">
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-outline" (click)="selectEditGroup(group)" title="Edit">
-                            <i class="fa fa-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline" (click)="createCopy(group)" title="Copy">
-                            <i class="fa fa-copy"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline" (click)="selectDeleteGroup(group)" title="Delete">
-                            <i class="fa fa-trash"></i>
-                        </button>
+                    <div class="ps-2">
+                        <button class="btn action-btn" (click)="addGroup()"><i class="fa fa-plus"></i> Add
+                            New Group</button>
                     </div>
-                </td>
-            </tr>
-            }
-        </tbody>
-    </table>
-</div>
-} @else {
-<div class="text-center mt-5">
-    <h5>No energy use groups found for this facility.</h5>
-    <div class="d-flex w-100 justify-content-center">
-        <div class="pe-1">
-            <button class="btn action-btn" (click)="setupEnergyUseGroups()"><i class="fa fa-plus"></i> Setup Energy Use
-                Groups</button>
+                    <div class="ps-2">
+                        <button class="btn action-btn" (click)="goToBulkSetup()"><i class="fa fa-edit"></i> Bulk
+                            Setup</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
+                        <thead class="sortable">
+                            <tr>
+                                <th (click)="setOrderDataField('name')"
+                                    [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                                <th>Equipment/Systems</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            @for(group of (facilityEnergyUseGroups | orderBy: orderDataField: orderByDirection | slice:
+                            ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage); track group.guid)
+                            {
+                            <tr>
+                                <td>
+                                    <a (click)="selectEditGroup(group)">{{group.name}}</a>
+                                </td>
+
+                                @let groupEquipment = (group.guid |
+                                facilityEnergyEquipmentList:facilityEnergyUseEquipment);
+                                <td>
+                                    @for (equipment of groupEquipment; track equipment.guid) {
+                                    <a class="click-link" (click)="goToEquipment(equipment)">{{equipment.name}}</a><br>
+                                    }
+                                </td>
+                                <td class="actions">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline" (click)="selectEditGroup(group)"
+                                            title="Edit">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" (click)="createCopy(group)" title="Copy">
+                                            <i class="fa fa-copy"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" (click)="selectDeleteGroup(group)"
+                                            title="Delete">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                } @else {
+                <div class="text-center mt-5">
+                    <h5>No energy use groups found for this facility.</h5>
+                    <div class="d-flex w-100 justify-content-center">
+                        <div class="pe-1">
+                            <button class="btn action-btn" (click)="goToBulkSetup()"><i class="fa fa-plus"></i> Setup
+                                Energy Use
+                                Groups</button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
         </div>
     </div>
 </div>
-}
+
 
 <div [ngClass]="{'windowOverlay': groupToDelete}"></div>
 <div class="popup" [class.open]="groupToDelete">

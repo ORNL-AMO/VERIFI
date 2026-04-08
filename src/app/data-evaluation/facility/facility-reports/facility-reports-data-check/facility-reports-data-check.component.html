@@ -1,13 +1,16 @@
-@if (facilityReport && facilityDetails) {
-    <div class="report">
-        <app-analysis-problems-information [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isFacilityReport]="true" [isDataCheck]="true"></app-analysis-problems-information>
-    </div>
+@if (facilityReport && executiveSummaryItems.length > 0) {
+<div class="report">
+    <app-analysis-problems-information [facilityReport]="facilityReport" [executiveSummaryItems]="executiveSummaryItems"
+        [isDataCheck]="true"></app-analysis-problems-information>
+</div>
 
-    <div class="report">
-        <app-analysis-facility-report [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isFacilityReport]="true" [isDataCheck]="true"></app-analysis-facility-report>
-    </div>
-  
-    <div class="report">
-      <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems" [isFacilityReport]="true" [isDataCheck]="true"></app-analysis-data-validation-tables>
-    </div>
+<div class="report">
+    <app-analysis-facility-report [facilityReport]="facilityReport" [executiveSummaryItems]="executiveSummaryItems"
+        [isDataCheck]="true"></app-analysis-facility-report>
+</div>
+
+<div class="report">
+    <app-analysis-data-validation-tables [facilityReport]="facilityReport"
+        [executiveSummaryItems]="executiveSummaryItems" [isDataCheck]="true"></app-analysis-data-validation-tables>
+</div>
 }

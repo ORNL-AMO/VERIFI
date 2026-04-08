@@ -291,7 +291,7 @@ export class BackupDataService {
     this.loadingService.addLoadingMessage('Adding Predictors');
 
     //migrate old
-    let predictorGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+    let predictorGUIDs: Array<{ oldId: string, newId: string, predictorName: string, facilityId: string }> = new Array();
     if (backupFile.predictorData.length > 0) {
       // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
@@ -318,7 +318,7 @@ export class BackupDataService {
             newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
             newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
             await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-            predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
+            predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid, predictorName: newPredictor.name, facilityId: facilityGuid.newId });
             for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
               let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
               let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
@@ -344,14 +344,17 @@ export class BackupDataService {
       for (let i = 0; i < backupFile.predictors.length; i++) {
         let predictor: IdbPredictor = backupFile.predictors[i];
         let newGUID: string = this.getGUID();
+        let facilityId: string = this.getNewId(predictor.facilityId, facilityGUIDs);
         predictorGUIDs.push({
           newId: newGUID,
-          oldId: predictor.guid
+          oldId: predictor.guid,
+          predictorName: predictor.name,
+          facilityId: facilityId
         });
         delete predictor.id;
         predictor.guid = newGUID;
         predictor.accountId = accountGUIDs.newId;
-        predictor.facilityId = this.getNewId(predictor.facilityId, facilityGUIDs);
+        predictor.facilityId = facilityId;
         await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
       }
     }
@@ -400,6 +403,17 @@ export class BackupDataService {
         group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
         if (group.models) {
           group.models = group.models.map(model => {
+            model.predictorVariables.forEach(variable => {
+              variable.id = this.getNewId(variable.id, predictorGUIDs);
+              if (variable.id == undefined) {
+                let facilityPredictorNewIds: { oldId: string, newId: string, predictorName: string, facilityId: string } = predictorGUIDs.find(predictor => {
+                  return predictor.predictorName === variable.name && predictor.facilityId === facilityAnalysisItem.facilityId;
+                });
+                if (facilityPredictorNewIds) {
+                  variable.id = facilityPredictorNewIds.newId;
+                }
+              }
+            })
             return this.getTrimmedModel(model);
           })
         }
@@ -640,7 +654,7 @@ export class BackupDataService {
     //   await firstValueFrom(this.predictorsDbServiceDeprecated.addWithObservable(predictorEntryDeprecated));
     // }
 
-    let predictorGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+    let predictorGUIDs: Array<{ oldId: string, newId: string, predictorName: string, facilityId: string }> = new Array();
     if (backupFile.predictorData.length > 0) {
       // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
@@ -666,7 +680,7 @@ export class BackupDataService {
           newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
           newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
           await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-          predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
+          predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid, predictorName: newPredictor.name, facilityId: newFacilityGUID });
           for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
             let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
             let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
@@ -692,7 +706,9 @@ export class BackupDataService {
         let newGUID: string = this.getGUID();
         predictorGUIDs.push({
           newId: newGUID,
-          oldId: predictor.guid
+          oldId: predictor.guid,
+          predictorName: predictor.name,
+          facilityId: newFacilityGUID
         });
         delete predictor.id;
         predictor.guid = newGUID;
@@ -721,7 +737,7 @@ export class BackupDataService {
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUID;
         predictorData.facilityId = newFacilityGUID;
-        predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorV2GUIDs);
+        predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
@@ -744,6 +760,19 @@ export class BackupDataService {
         group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
         group.predictorVariables.forEach(variable => {
           variable.id = this.getNewId(variable.id, predictorGUIDs);
+        });
+        group.models.forEach(model => {
+          model.predictorVariables.forEach(variable => {
+            variable.id = this.getNewId(variable.id, predictorGUIDs);
+            if (variable.id == undefined) {
+              let facilityPredictorNewIds: { oldId: string, newId: string, predictorName: string, facilityId: string } = predictorGUIDs.find(predictor => {
+                return predictor.predictorName === variable.name && predictor.facilityId === newFacilityGUID;
+              });
+              if (facilityPredictorNewIds) {
+                variable.id = facilityPredictorNewIds.newId;
+              }
+            }
+          })
         });
       });
       await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));

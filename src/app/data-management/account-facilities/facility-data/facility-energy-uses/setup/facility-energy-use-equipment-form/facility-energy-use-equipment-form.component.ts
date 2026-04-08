@@ -47,6 +47,10 @@ export class FacilityEnergyUseEquipmentFormComponent {
     }
   }
 
+  ngOnDestroy(){
+    this.formSubscriptions.unsubscribe();
+  }
+
   initFormData(){
       this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
       this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);

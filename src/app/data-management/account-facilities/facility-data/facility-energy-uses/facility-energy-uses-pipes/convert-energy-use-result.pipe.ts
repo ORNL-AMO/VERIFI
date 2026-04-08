@@ -14,7 +14,9 @@ export class ConvertEnergyUseResultPipe implements PipeTransform {
         siteToSource = 3;
     }
     energyUse = energyUse * siteToSource;
-    return new ConvertValue(energyUse, calculatedUnit, resultsUnit).convertedValue;
+    let convertedResult: number = new ConvertValue(energyUse, calculatedUnit, resultsUnit).convertedValue;
+    //round to 2 decimals
+    return Math.round(convertedResult * 100) / 100;
   }
 
 }

@@ -116,9 +116,15 @@ export class ProcessPredictorsComponent {
 
   selectExistingPredictor(predictor: IdbPredictor) {
     let importWizardName: string = this.editPredictor.importWizardName;
+    let previousId: string = this.editPredictor.guid;
     this.editPredictor = predictor;
     this.editPredictor.importWizardName = importWizardName;
     this.editPredictorForm = this.editPredictorFormService.getFormFromPredictor(predictor);
+    this.fileReference.predictorData.forEach(pData => {
+      if (pData.predictorId == previousId) {
+        pData.predictorId = predictor.guid;
+      }
+    });
     this.showExisting = false;
   }
 }

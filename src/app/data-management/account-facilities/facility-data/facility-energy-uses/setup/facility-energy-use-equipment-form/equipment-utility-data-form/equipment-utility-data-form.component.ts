@@ -16,8 +16,6 @@ export class EquipmentUtilityDataFormComponent {
   @Input({ required: true })
   utilityDataForm: FormGroup;
   @Input({ required: true })
-  energyUseForms: Array<FormGroup>;
-  @Input({ required: true })
   equipmentDetailsForm: FormGroup;
   @Output('emitRemoveUtilityType')
   emitRemoveUtilityType: EventEmitter<void> = new EventEmitter<void>();
@@ -41,16 +39,5 @@ export class EquipmentUtilityDataFormComponent {
 
   removeUtilityType() {
     this.emitRemoveUtilityType.emit();
-  }
-
-  toggleOverride(energyUseForm: FormGroup) {
-    energyUseForm.patchValue({
-      overrideEnergyUse: !energyUseForm.controls.overrideEnergyUse.value
-    });
-    if (energyUseForm.controls.overrideEnergyUse.value) {
-      energyUseForm.controls.energyUse.enable();
-    } else {
-      energyUseForm.controls.energyUse.disable();
-    }
   }
 }

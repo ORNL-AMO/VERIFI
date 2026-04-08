@@ -3,13 +3,10 @@ import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter.pipe';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -31,9 +28,7 @@ export class UtilityBannerComponent implements OnInit {
   predictorDataSub: Subscription;
   meterDataSub: Subscription;
   predictorsNeedUpdate: boolean;
-  metersHaveErrors: boolean;
   predictorTimer: any;
-  meterDataTimer: any;
   meterData: Array<IdbUtilityMeterData>;
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
@@ -42,7 +37,6 @@ export class UtilityBannerComponent implements OnInit {
     private predictorDataHelperService: PredictorDataHelperService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private loadingService: LoadingService
   ) { }
 
@@ -53,7 +47,6 @@ export class UtilityBannerComponent implements OnInit {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = val;
       this.setPredictorsNeedUpdate();
-      this.setMetersHaveErrors();
     });
     this.predictorDataSub = this.predictorDataDbService.accountPredictorData.subscribe(val => {
       this.setPredictorsNeedUpdate();
@@ -61,7 +54,6 @@ export class UtilityBannerComponent implements OnInit {
     this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.meterData = val;
       this.setPredictorsNeedUpdate();
-      this.setMetersHaveErrors();
     })
   }
 
@@ -98,25 +90,6 @@ export class UtilityBannerComponent implements OnInit {
       let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(this.facility);
       this.predictorsNeedUpdate = (predictorsNeedUpdate.length > 0);
     }, 500);
-  }
-
-  setMetersHaveErrors() {
-    if (this.meterData) {
-      if (this.meterDataTimer) {
-        clearTimeout(this.meterDataTimer)
-      }
-      this.meterDataTimer = setTimeout(() => {
-        let utilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facility.guid);
-        let metersHaveErrors: boolean = false;
-        for (let m = 0; m < utilityMeters.length; m++) {
-          let hasDupReadings: boolean = getHasDuplicateReadings(utilityMeters[m].guid, this.meterData).length > 0;
-          if (hasDupReadings) {
-            metersHaveErrors = true;
-          }
-        }
-        this.metersHaveErrors = metersHaveErrors;
-      }, 500);
-    }
   }
 }
 

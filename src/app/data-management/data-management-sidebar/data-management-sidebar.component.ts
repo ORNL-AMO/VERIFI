@@ -180,7 +180,7 @@ export class DataManagementSidebarComponent {
   async saveFacility(facility: IdbFacility) {
     await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(selectedAccount, false)
+    await this.dbChangesService.selectAccount(selectedAccount, true)
   }
 
   async toggleFacilityPredictorsOpen(facility: IdbFacility) {

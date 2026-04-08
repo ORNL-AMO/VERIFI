@@ -824,10 +824,10 @@ export class UploadDataV3Service {
     return siteToSource;
   }
 
-  getMeterReadingDataApplication(excelSelection: 'Yes' | 'No' | 'Evenly Distribute'): MeterReadingDataApplication {
+  getMeterReadingDataApplication(excelSelection: 'Yes' | 'Do Not Calenderize' | 'Evenly Distribute'): MeterReadingDataApplication {
     if (excelSelection == 'Yes') {
       return 'backward';
-    } else if (excelSelection == 'No') {
+    } else if (excelSelection == 'Do Not Calenderize') {
       return 'fullMonth';
     } else if (excelSelection == 'Evenly Distribute') {
       return 'fullYear';
@@ -846,7 +846,7 @@ export class UploadDataV3Service {
   }
 
   parseHeatCapacity(excelMeter: any, meter: IdbUtilityMeter, isEnergyUnit: boolean): number {
-    let heatCapacity: number = excelMeter['Energy Factor'];
+    let heatCapacity: number = excelMeter['Energy Factor (HHV)'];
     if ((!heatCapacity && !isEnergyUnit) || meter.scope == 2) {
       let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, [], meter.scope, meter.vehicleCategory, meter.vehicleType);
       if (meter.scope != 2) {

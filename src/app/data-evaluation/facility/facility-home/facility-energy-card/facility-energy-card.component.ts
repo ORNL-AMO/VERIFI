@@ -33,6 +33,7 @@ export class FacilityEnergyCardComponent {
   energyUnit: string;
   facilityOverviewData: FacilityOverviewData
   facilityOverviewDataSub: Subscription;
+
   constructor(private facilityHomeService: FacilityHomeService,
     private facilityDbService: FacilitydbService,
     private sharedDataService: SharedDataService) {

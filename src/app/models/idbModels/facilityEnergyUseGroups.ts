@@ -17,7 +17,7 @@ export function getNewIdbFacilityEnergyUseGroup(accountId: string, facilityId: s
         facilityId: facilityId,
         accountId: accountId,
         name: 'Energy Use Group',
-        sidebarOpen: true,
+        sidebarOpen: false,
         notes: '',
         color: getRandomFlatHexColor()
     }

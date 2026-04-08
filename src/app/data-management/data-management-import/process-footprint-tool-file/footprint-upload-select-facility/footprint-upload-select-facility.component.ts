@@ -33,6 +33,10 @@ export class FootprintUploadSelectFacilityComponent {
       this.fileReference = this.fileReferences.find(ref => { return ref.id == id });
     });
     this.facilities = this.facilityDbService.accountFacilities.getValue();
+    if(this.facilities.length == 1 && !this.fileReference.selectedFacilityId){
+      this.fileReference.selectedFacilityId = this.facilities[0].guid;
+      this.setSelectedFacility();
+    }
   }
 
   ngOnDestroy(): void {

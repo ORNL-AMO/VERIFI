@@ -11,9 +11,10 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { FacilityEnergyUsesSetupService } from '../facility-energy-uses-setup.service';
 
 @Component({
   selector: 'app-facility-energy-uses-group-setup',
@@ -31,6 +32,9 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   groupsIdsToDelete: Array<IdbFacilityEnergyUseGroup> = [];
   showDeleteGroupModal: boolean = false;
+
+  isNew: boolean;
+  setupYear: number;
   constructor(private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
@@ -39,10 +43,19 @@ export class FacilityEnergyUsesGroupSetupComponent {
     private toastNotificationsService: ToastNotificationsService,
     private accountDbService: AccountdbService,
     private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
+    private activatedRoute: ActivatedRoute
   ) { }
 
   ngOnInit() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      const setupYear: number = parseInt(params['setupYear']);
+      if (setupYear) {
+        this.setupYear = setupYear;
+      }
+    });
+    this.isNew = this.router.url.includes('new-setup');
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
     });
@@ -57,27 +70,49 @@ export class FacilityEnergyUsesGroupSetupComponent {
     this.groupsIdsToDelete = new Array();
     this.groupSetupIndex = 0;
     this.energyUseGroups = new Array();
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.getByFacilityId(this.facility.guid);
-    if (facilityEnergyUseGroups.length == 0) {
-      //add initial groups
-      let newGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
-      newGroup.name = 'Group ' + (this.energyUseGroups.length + 1);
-      let facilityMeterDataYears: { endYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.facility.guid);
-      let equipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup, facilityMeterDataYears.endYear);
-      this.energyUseGroups.push({
-        ...newGroup,
-        equipment: [equipment]
-      });
+    if (this.isNew) {
+      if (this.facilityEnergyUsesSetupService.newGroups && this.facilityEnergyUsesSetupService.setupYear) {
+        for (let group of this.facilityEnergyUsesSetupService.newGroups) {
+          let newGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
+          newGroup.name = group.groupName;
+          let equipmentArray: Array<IdbFacilityEnergyUseEquipment> = new Array();
+          for (let i = 0; i < group.numberOfEquipment; i++) {
+            let equipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup, this.facilityEnergyUsesSetupService.setupYear);
+            equipment.name = 'Equipment ' + (i + 1);
+            equipment.operatingConditionsData.forEach(operatingCondition => {
+              operatingCondition.hoursOfOperation = group.operatingHours;
+            });
+            equipmentArray.push(equipment);
+          }
+          this.energyUseGroups.push({
+            ...newGroup,
+            equipment: equipmentArray
+          });
+        }
+      } else {
+        console.log('no setup info, going back to options');
+        this.router.navigate(['../setup-options'], { relativeTo: this.activatedRoute });
+      }
     } else {
-      let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(this.facility.guid);
-      for (let group of facilityEnergyUseGroups) {
-        let equipmentForGroup: Array<IdbFacilityEnergyUseEquipment> = facilityEnergyUseEquipment.filter(equip => { return equip.energyUseGroupId == group.guid });
-        let groupCopy: IdbFacilityEnergyUseGroup = _.cloneDeep(group);
-        this.energyUseGroups.push({
-          ...groupCopy,
-          equipment: equipmentForGroup.map(equip => { return _.cloneDeep(equip); })
+      if (this.facilityEnergyUsesSetupService.existingGroupsToEdit) {
+        let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.getByFacilityId(this.facility.guid);
+        let equipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(this.facility.guid);
+        this.facilityEnergyUsesSetupService.existingGroupsToEdit.forEach(groupId => {
+          let group: IdbFacilityEnergyUseGroup = facilityEnergyUseGroups.find(group => group.guid == groupId);
+          if (group) {
+            let groupCopy: IdbFacilityEnergyUseGroup = _.cloneDeep(group);
+            let equipmentForGroup: Array<IdbFacilityEnergyUseEquipment> = equipment.filter(equip => equip.energyUseGroupId == group.guid);
+            this.energyUseGroups.push({
+              ...groupCopy,
+              equipment: equipmentForGroup.map(equip => { return _.cloneDeep(equip); })
+            });
+          }
         });
-      };
+
+      } else {
+        console.log('no setup info, going back to options');
+        this.router.navigate(['../setup-options'], { relativeTo: this.activatedRoute });
+      }
     }
   }
 
@@ -185,5 +220,9 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   leaveGroupSetup() {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
+  }
+
+  startOver() {
+    this.router.navigate(['../setup-options'], { relativeTo: this.activatedRoute });
   }
 }

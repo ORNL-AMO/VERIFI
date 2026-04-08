@@ -20,9 +20,9 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '../form-data/naics-data';
-import { ChargesTypes, MeterChargeType } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { ChargesTypes } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import { getDateFromMeterData } from '../dateHelperFunctions';
 
 @Injectable({
@@ -362,6 +362,11 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let mobileMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Fuels' && meter.scope == 2 });
+    if(mobileMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
+    
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 3;
     mobileMeters.forEach(meter => {
@@ -414,6 +419,10 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let mobileMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Fuels' && meter.scope == 2 });
+    if(mobileMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
     let index: number = 3;
     mobileMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
@@ -438,6 +447,9 @@ export class ExportToExcelTemplateV3Service {
   }
 
   getVehicleType(meter: IdbUtilityMeter): string {
+    if(meter.vehicleCategory == 1){
+      return "Material Transport Onsite";
+    }
     let vehicleType = VehicleTypes.find(vType => {
       return vType.value == meter.vehicleType
     });
@@ -483,6 +495,11 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherEnergyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Energy' });
+    if(otherEnergyMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
+
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 3;
     otherEnergyMeters.forEach(meter => {
@@ -529,6 +546,10 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherEnergyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other Energy' });
+    if(otherEnergyMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
     let index: number = 3;
     otherEnergyMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
@@ -560,6 +581,10 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other' });
+    if(otherMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 3;
     otherMeters.forEach(meter => {
@@ -607,6 +632,10 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let otherMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Other' });
+    if(otherMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
     let index: number = 3;
     otherMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
@@ -637,6 +666,10 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let waterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
+    if(waterMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let index: number = 3;
     waterMeters.forEach(meter => {
@@ -688,6 +721,10 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let waterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
+    if(waterMeters.length == 0){
+      return worksheet;
+    }
+    worksheet.state = 'visible';
     let index: number = 3;
     waterMeters.forEach(meter => {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);

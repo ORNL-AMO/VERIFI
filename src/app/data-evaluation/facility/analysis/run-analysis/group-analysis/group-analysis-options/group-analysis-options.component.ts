@@ -7,19 +7,13 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -45,21 +39,18 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   dataEndYear: number;
 
   displayDataAdjustmentModal: boolean = false;
-  dataAdjustmentYearOptions: Array<number>;
+  dataAdjustmentYearOptions: Array<{ value: number, selected: boolean }>;
   deleteDataAdjustmentYear: number;
 
   displayBaselineAdjustmentModal: boolean = false;
-  baselineAdjustmentYearOptions: Array<number>;
+  baselineAdjustmentYearOptions: Array<{ value: number, selected: boolean }>;
   deleteBaselineAdjustmentYear: number;
-
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
-    private analysisValidationService: AnalysisValidationService,
     private router: Router,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
@@ -86,9 +77,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     analysisItem.isAnalysisVisited = false;
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, analysisItem);
     analysisItem.groups[groupIndex] = this.group;
-    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.facility);
@@ -143,11 +132,8 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   setDataEndYear() {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(this.group.idbGroupId);
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [facility], 'AR6', []);
-    this.dataEndYear = getLatestYearWithData(calanderizedMeters, [facility]);
+    let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.group.idbGroupId)
+    this.dataEndYear = getLatestYearWithData(filteredCMeters, [this.facility]);
   }
 
   setBaselineYearOptions() {
@@ -207,17 +193,17 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   setAdjustmentYearOptions() {
     //baselineYearOptions doesn't include end year
-    let yearOptions: Array<number> = this.baselineYearOptions;
-    yearOptions.push(this.dataEndYear);
+    let yearOptions: Array<{ value: number, selected: boolean }> = this.baselineYearOptions.map(year => { return { value: year, selected: false } });
+    yearOptions.push({ value: this.dataEndYear, selected: false });
     let dataAdjustmentYears: Array<number> = this.group.dataAdjustments.map(adjustment => adjustment.year);
     this.dataAdjustmentYearOptions = yearOptions.filter(year => {
-      if (!dataAdjustmentYears.includes(year)) {
+      if (!dataAdjustmentYears.includes(year.value)) {
         return year;
       }
     });
     let baselineAdjustmentYears: Array<number> = this.group.baselineAdjustmentsV2.map(adjustment => adjustment.year);
     this.baselineAdjustmentYearOptions = yearOptions.filter(year => {
-      if (!baselineAdjustmentYears.includes(year)) {
+      if (!baselineAdjustmentYears.includes(year.value)) {
         return year;
       }
     });
@@ -232,8 +218,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.displayDataAdjustmentModal = false;
   }
 
-  async addDataAdjustments(year: number) {
-    this.group.dataAdjustments.push({ year: year, amount: 0 });
+  async addDataAdjustments() {
+    this.dataAdjustmentYearOptions.forEach(yearOption => {
+      if (yearOption.selected) {
+        this.group.dataAdjustments.push({ year: yearOption.value, amount: 0 });
+      }
+    });
     this.group.dataAdjustments.sort((a, b) => a.year - b.year);
     await this.saveItem();
     this.closeDataAdjustmentModal();
@@ -252,16 +242,20 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   //BASELINE ADJUSTMENT
-  openBaselineAdjustmentModal(){
+  openBaselineAdjustmentModal() {
     this.displayBaselineAdjustmentModal = true;
   }
 
   closeBaselineAdjustmentModal() {
     this.displayBaselineAdjustmentModal = false;
   }
-  
-  async addBaselineAdjustments(year: number) {
-    this.group.baselineAdjustmentsV2.push({ year: year, amount: 0 });
+
+  async addBaselineAdjustments() {
+    this.baselineAdjustmentYearOptions.forEach(yearOption => {
+      if (yearOption.selected) {
+        this.group.baselineAdjustmentsV2.push({ year: yearOption.value, amount: 0 });
+      }
+    });
     this.group.baselineAdjustmentsV2.sort((a, b) => a.year - b.year);
     await this.saveItem();
     this.closeBaselineAdjustmentModal();
@@ -277,5 +271,9 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       await this.saveItem();
     }
     this.deleteBaselineAdjustmentYear = undefined;
-  } 
+  }
+
+  toggleAdjustmentOption(yearOption: { value: number, selected: boolean }) {
+    yearOption.selected = !yearOption.selected;
+  }
 }

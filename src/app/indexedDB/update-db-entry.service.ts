@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
-import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeter, MeterCharge } from '../models/idbModels/utilityMeter';
@@ -20,7 +18,7 @@ import { IdbCustomGWP } from '../models/idbModels/customGWP';
 })
 export class UpdateDbEntryService {
 
-  constructor(private analysisValidationService: AnalysisValidationService, private facilityDbService: FacilitydbService) { }
+  constructor(private facilityDbService: FacilitydbService) { }
 
   updateAccount(account: IdbAccount): { account: IdbAccount, isChanged: boolean } {
     let isChanged: boolean = false;
@@ -50,7 +48,7 @@ export class UpdateDbEntryService {
     if (account.displayEmissions == undefined) {
       if (account.name != 'Cocoa Co. Example') {
         account.displayEmissions = true;
-      }else{
+      } else {
         account.displayEmissions = false;
       }
       isChanged = true;
@@ -85,17 +83,9 @@ export class UpdateDbEntryService {
       analysisItem.analysisCategory = 'energy';
       isChanged = true;
     }
-    if (!analysisItem.setupErrors) {
-      analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+    if (analysisItem['setupErrors'] != undefined) {
+      delete analysisItem['setupErrors'];
       isChanged = true;
-    } else {
-      let setupErrors: AnalysisSetupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
-      Object.keys(setupErrors).forEach(key => {
-        if (setupErrors[key] != analysisItem.setupErrors[key]) {
-          analysisItem.setupErrors[key] = setupErrors[key];
-          isChanged = true;
-        }
-      });
     }
     if (!analysisItem.baselineYear) {
       let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
@@ -109,19 +99,10 @@ export class UpdateDbEntryService {
 
     if (analysisItem.groups) {
       analysisItem.groups.forEach(group => {
-        if (!group.groupErrors) {
-          group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
+        if (group['groupErrors'] != undefined) {
+          delete group['groupErrors'];
           isChanged = true;
-        } else {
-          let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
-          Object.keys(groupErrors).forEach(key => {
-            if (groupErrors[key] != group.groupErrors[key]) {
-              group.groupErrors[key] = groupErrors[key];
-              isChanged = true;
-            }
-          });
         }
-
         if (group['baselineAdjustments'] != undefined) {
           group.dataAdjustments = group['baselineAdjustments'];
           delete group['baselineAdjustments'];
@@ -136,41 +117,48 @@ export class UpdateDbEntryService {
           group.maxModelVariables = 4;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelStartMonth == undefined) {
+
+        if (group['userDefinedModel'] != undefined) {
+          group.isGeneratedModel = group['userDefinedModel'];
+          delete group['userDefinedModel'];
+          isChanged = true;
+        }
+
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionModelStartMonth == undefined) {
           group.regressionModelStartMonth = 0;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionStartYear == undefined) {
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionStartYear == undefined) {
           group.regressionStartYear = analysisItem.baselineYear;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionModelEndMonth == undefined) {
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionModelEndMonth == undefined) {
           group.regressionModelEndMonth = 11;
           isChanged = true;
         }
-        if (group.analysisType == 'regression' && !group.userDefinedModel && group.regressionEndYear == undefined) {
+        if (group.analysisType == 'regression' && !group.isGeneratedModel && group.regressionEndYear == undefined) {
           group.regressionEndYear = analysisItem.baselineYear;
           isChanged = true;
         }
 
-        if(group['hasDataAdjustement'] != undefined){
+        if (group['hasDataAdjustement'] != undefined) {
           delete group['hasDataAdjustement'];
           group.dataAdjustments = group.dataAdjustments.filter(adjustment => adjustment.amount != 0);
           isChanged = true;
         }
 
-        if(group['hasBaselineAdjustmentV2'] != undefined){
+        if (group['hasBaselineAdjustmentV2'] != undefined) {
           delete group['hasBaselineAdjustmentV2'];
           group.baselineAdjustmentsV2 = group.baselineAdjustmentsV2.filter(adjustment => adjustment.amount != 0);
           isChanged = true;
         }
-        
+
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
-  updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, facilityAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+  updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
     if (!analysisItem.analysisCategory) {
       analysisItem.analysisCategory = 'energy';
@@ -186,8 +174,8 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
-    if (!analysisItem.setupErrors) {
-      analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
+    if (analysisItem['setupErrors'] != undefined) {
+      delete analysisItem['setupErrors'];
       isChanged = true;
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
@@ -410,12 +398,22 @@ export class UpdateDbEntryService {
       });
       if (selectedEnergyAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedEnergyAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = energyAnalysisItems[0];
+        }
+        if (latestItem) {
+          account.selectedEnergyAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       } else if (energyAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedEnergyAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = energyAnalysisItems[0];
+        }
+        if (latestItem) {
+          account.selectedEnergyAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       }
     }
     if (account.selectedWaterAnalysisId == undefined) {
@@ -427,12 +425,22 @@ export class UpdateDbEntryService {
       })
       if (selectedWaterAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedWaterAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = waterAnalysisItems[0];
+        }
+        if (latestItem) {
+          account.selectedWaterAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       } else if (waterAnalysisItems.length > 0) {
         let latestItem: IdbAccountAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAccountAnalysisItem) => { return item['reportYear'] });
-        account.selectedWaterAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = waterAnalysisItems[0];
+        }
+        if (latestItem) {
+          account.selectedWaterAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       }
     }
     return {
@@ -442,7 +450,6 @@ export class UpdateDbEntryService {
   }
 
   updateSelectedFacilityAnalysis(facility: IdbFacility, facilityAnalysisItems: Array<IdbAnalysisItem>): { facility: IdbFacility, isChanged: boolean } {
-    //TODO: ensure we are selecting with the correct baseline year for goals...
 
     let isChanged: boolean = false;
     if (facility.selectedEnergyAnalysisId == undefined) {
@@ -454,12 +461,22 @@ export class UpdateDbEntryService {
       });
       if (selectedEnergyAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(selectedEnergyAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
-        facility.selectedEnergyAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = energyAnalysisItems[0];
+        }
+        if (latestItem) {
+          facility.selectedEnergyAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       } else if (energyAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(energyAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
-        facility.selectedEnergyAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = energyAnalysisItems[0];
+        }
+        if (latestItem) {
+          facility.selectedEnergyAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       }
     }
     if (facility.selectedWaterAnalysisId == undefined) {
@@ -471,12 +488,22 @@ export class UpdateDbEntryService {
       });
       if (selectedWaterAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(selectedWaterAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
-        facility.selectedWaterAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = waterAnalysisItems[0];
+        }
+        if (latestItem) {
+          facility.selectedWaterAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       } else if (waterAnalysisItems.length > 0) {
         let latestItem: IdbAnalysisItem = _.maxBy(waterAnalysisItems, (item: IdbAnalysisItem) => { return item['reportYear'] });
-        facility.selectedWaterAnalysisId = latestItem.guid;
-        isChanged = true;
+        if (!latestItem) {
+          latestItem = waterAnalysisItems[0];
+        }
+        if (latestItem) {
+          facility.selectedWaterAnalysisId = latestItem?.guid;
+          isChanged = true;
+        }
       }
     }
     return {

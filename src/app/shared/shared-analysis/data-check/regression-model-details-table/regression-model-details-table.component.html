@@ -1,0 +1,123 @@
+<table class="table table-bordered table-responsive mt-5">
+    <thead class="table-secondary">
+        <tr>
+            <th>
+                Facility
+            </th>
+            <th>
+                Group
+            </th>
+            <th>
+                Model Year
+            </th>
+            <th>
+                Variable p-Values
+            </th>
+            <th>
+                R2
+            </th>
+            <th>
+                Adjusted R2
+            </th>
+            <th>
+                Model p-Value
+            </th>
+            <th>
+                Formula
+            </th>
+            <th>
+                Model Notes
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (model of models; track model.group.idbGroupId) {
+        <tr>
+            <td>
+                {{model.facilityId | facilityName}}
+            </td>
+            <td class="nowrap">
+                @if(model.selectedModel?.isUserDefinedModel) {
+                <span class="fa fa-asterisk"></span>
+                }
+                {{model.group.idbGroupId | groupName}}
+            </td>
+            <td class="nowrap">
+                @if(!model.selectedModel?.isUserDefinedModel) {
+                {{ model.group.regressionModelYear }}
+                }@else{
+                    {{model.group | userDefineModelDateRange}}
+                }
+            </td>
+            @if(!model.selectedModel?.isUserDefinedModel && !model.selectedModel.errorModeling){
+            <td>
+                @for (pVal of model.selectedModel.t.p; track pVal; let index = $index) {
+                <span>
+                    @if (index != 0) {
+                    <span>{{model.selectedModel.predictorVariables[index-1].name}}:
+                        {{pVal | number:'0.2-2'}}
+                        <br>
+                    </span>
+                    }
+                </span>
+                }
+            </td>
+            <td>
+                {{model.selectedModel.R2 | number:'0.3-3'}}
+            </td>
+            <td>
+                {{model.selectedModel.adjust_R2 | number:'0.3-3'}}
+            </td>
+            <td>
+                {{model.selectedModel.modelPValue | number:'0.2-2'}}
+            </td>
+            }@else {
+            <td>
+                &mdash;
+            </td>
+            <td>
+                &mdash;
+            </td>
+            <td>
+                &mdash;
+            </td>
+            <td>
+                &mdash;
+            </td>
+            }
+            <td>
+                @for (coefVal of model.selectedModel.coef; track coefVal; let index = $index) {
+                <span>
+                    @if (index == 0) {
+                    <span>{{coefVal| regressionNumber}}</span>
+                    }
+                    @if (index != 0) {
+                    <span>({{coefVal|
+                        regressionNumber}}*{{model.selectedModel.predictorVariables[index-1].name}})</span>
+                    }
+                    @if (model.selectedModel.coef && index != model.selectedModel.coef.length-1) {
+                    <span> +</span>
+                    }
+                </span>
+                }
+            </td>
+            <td>
+                @for (notes of model.selectedModel.modelNotes; track notes) {
+                <span>
+                    {{notes}}<br>
+                </span>
+                }
+                @if (model.selectedModel.modelNotes.length == 0) {
+                <span>
+                    &mdash;
+                </span>
+                }
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@if(hasUserDefinedModel()){
+<span class="fa fa-asterisk"></span> User Defined Model
+}

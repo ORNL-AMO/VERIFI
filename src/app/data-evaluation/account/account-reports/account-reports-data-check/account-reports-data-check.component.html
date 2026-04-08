@@ -1,0 +1,17 @@
+@if (selectedReport && facilityAnalysisItems) {
+<div class="report">
+  <app-analysis-problems-information [accountReport]="selectedReport" [executiveSummaryItems]="executiveSummaryItems"
+    [isDataCheck]="true"></app-analysis-problems-information>
+</div>
+
+<div class="report">
+  <app-analysis-facility-report [accountReport]="selectedReport" [executiveSummaryItems]="executiveSummaryItems"
+    [isDataCheck]="true"></app-analysis-facility-report>
+</div>
+
+
+<div class="report">
+  <app-analysis-data-validation-tables [accountReport]="selectedReport" [executiveSummaryItems]="executiveSummaryItems"
+    [isDataCheck]="true"></app-analysis-data-validation-tables>
+</div>
+}

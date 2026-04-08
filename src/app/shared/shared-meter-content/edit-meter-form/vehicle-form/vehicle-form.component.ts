@@ -35,19 +35,6 @@ export class VehicleFormComponent {
   }
 
   ngOnInit() {
-    if (this.meterForm.controls.vehicleCategory.value == undefined) {
-      this.meterForm.controls.vehicleCategory.patchValue(1);
-      this.meterForm.controls.vehicleCategory.updateValueAndValidity();
-      this.updateVehicleValidation();
-    };
-    if (this.meterForm.controls.vehicleCollectionType.value == undefined) {
-      this.meterForm.controls.vehicleCollectionType.patchValue(1);
-      this.meterForm.controls.vehicleCollectionType.updateValueAndValidity();
-    }
-    if (this.meterForm.controls.vehicleDistanceUnit.value == undefined) {
-      this.meterForm.controls.vehicleDistanceUnit.patchValue('mi');
-      this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
-    }
     this.setVehicleTypes();
     this.setCollectionUnitOptions();
     this.setFuelOptions();
@@ -93,11 +80,15 @@ export class VehicleFormComponent {
   setFuelOptions() {
     let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.fuelOptions = getMobileFuelTypes(this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value, allFuels)
-    let checkExists: FuelTypeOption = this.fuelOptions.find(option => {
+    let checkFuelExists: boolean = this.fuelOptions.some(option => {
       return option.value == this.meterForm.controls.vehicleFuel.value;
     });
-    if (!checkExists) {
-      this.meterForm.controls.vehicleFuel.patchValue(this.fuelOptions[0].value);
+    if (!checkFuelExists) {
+      if(this.fuelOptions.length > 0){
+        this.meterForm.controls.vehicleFuel.patchValue(this.fuelOptions[0].value);
+      } else {
+        this.meterForm.controls.vehicleFuel.patchValue(undefined);
+      }
     }
     this.setSelectedFuelType();
   }

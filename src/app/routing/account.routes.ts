@@ -36,7 +36,7 @@ import { AnalysisReportComponent } from "src/app/data-evaluation/account/account
 import { AccountEmissionFactorsReportComponent } from "../data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component";
 import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
 import { AccountAnalysisDetailsTableComponent } from "../data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-details-table/account-analysis-details-table.component";
-import { AccountReportsDataCheckComponent } from "../data-evaluation/account/account-reports/account-reports-data-check-component/account-reports-data-check-component";
+import { AccountReportsDataCheckComponent } from "../data-evaluation/account/account-reports/account-reports-data-check/account-reports-data-check.component";
 
 export const AccountRoutes: Route = {
     path: 'account',

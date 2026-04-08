@@ -51,6 +51,7 @@
         <tbody>
           @for (item of linkedItemsList | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) *
           itemsPerPage): currentPageNumber * itemsPerPage; track item.analysisItem.guid) {
+          @let setupErrors = item.analysisItem.guid | invalidAnalysis;
           <tr>
             <td class="text-center">
               @if (item.analysisItem.analysisCategory == 'energy') {
@@ -66,7 +67,7 @@
             </td>
             <td>
               <a (click)="selectAnalysisItem(item.analysisItem)">
-                @if (item.analysisItem.setupErrors.hasError || item.analysisItem.setupErrors.groupsHaveErrors) {
+                @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
                 <span class="me-2 fa fa-exclamation-circle error-icon"></span>
                 }
                 {{item.analysisItem.name}}
@@ -121,8 +122,7 @@
                 <i class="fa fa-solid fa-eye"></i>
               </button>
               <button class="btn action-btn btn-sm m-1 icon-style" (click)="addReport(item.analysisItem)"
-                title="Create Report"
-                [disabled]="item.analysisItem.setupErrors.hasError || item.analysisItem.setupErrors.groupsHaveErrors">
+                title="Create Report" [disabled]="setupErrors.hasError || setupErrors.groupsHaveErrors">
                 <i class="fa fa-file-circle-plus"></i>
               </button>
               <button class="btn action-btn btn-sm m-1 icon-style" (click)="createCopy(item.analysisItem)"

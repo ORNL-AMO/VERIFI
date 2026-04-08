@@ -15,7 +15,7 @@
     </div>
 </div>
 
-@if(metersInGroup.length > 0) {
+@if(calanderizedMeters && calanderizedMeters.length > 0) {
 <app-meter-group-table [meterGroup]="meterGroup" [showHeader]="true"></app-meter-group-table>
 <div class="d-flex w-100 justify-content-end">
     <div>
@@ -63,10 +63,12 @@
     </div>
     }
 </div>
-<div #groupMeterDataChart></div>
-
+}@else if(calculatingMeterGroups){
+<app-calculating-spinner [message]="'Initializing Meter Group Data...'"
+    [error]="calculatingMeterGroups == 'error'"></app-calculating-spinner>
 }@else {
 <div class="alert alert-info p-1 text-center">
     No meters added to this group. Click the "<span class="fa fa-pencil"></span>" button to add meters to this group.
 </div>
 }
+<div #groupMeterDataChart></div>

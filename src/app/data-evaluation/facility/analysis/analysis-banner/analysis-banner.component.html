@@ -4,20 +4,22 @@
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link" routerLink="run-analysis/analysis-setup" [routerLinkActive]="['active']">
-          @if (analysisItem.setupErrors.hasError) {
+          @let setupErrors = analysisItem.guid | invalidAnalysis;
+          @if (setupErrors.setupHasError) {
           <span class="fa fa-exclamation-circle"></span>
           }
           <i class="fa fa-gears"></i>
           Analysis Setup</a>
       </li>
-      @for (group of analysisItem.groups; track group) {
-      <li class="nav-item" [ngClass]="{'disabled': analysisItem.setupErrors.hasError}">
+      @for (group of analysisItem.groups; track group.idbGroupId) {
+      <li class="nav-item" [ngClass]="{'disabled': setupErrors.setupHasError}">
         <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
           [routerLinkActive]="['active']">
-          @if (group.groupErrors?.hasErrors) {
+          @let groupErrors = group.idbGroupId | invalidGroupAnalysis: analysisItem.guid;
+          @if (groupErrors?.hasErrors) {
           <span class="fa fa-exclamation-circle"></span>
           }
-          @if (group.groupErrors?.hasInvalidRegressionModel) {
+          @if (groupErrors?.hasInvalidRegressionModel) {
           <span class="fa fa-exclamation-circle warning"></span>
           }
           <i class="fa fa-file-edit"></i>
@@ -25,7 +27,7 @@
         </a>
       </li>
       }
-      <li class="nav-item" [ngClass]="{'disabled': isDisabled || analysisItem.setupErrors.hasError}">
+      <li class="nav-item" [ngClass]="{'disabled': setupErrors.hasError}">
         <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
           <i class="fa fa-magnifying-glass-chart"></i>Facility
           Summary</a>

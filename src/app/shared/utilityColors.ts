@@ -1,6 +1,6 @@
 export const UtilityColors = {
     "Electricity": {
-        "color": "#F0E442"
+        "color": "#a59a04"
     },
     "Natural Gas": {
         "color": "#D55E00"

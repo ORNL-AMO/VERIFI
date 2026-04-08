@@ -8,7 +8,8 @@
             [error]="calculatingWater == 'error'">
           </app-calculating-spinner>
         }
-        @if (latestWaterAnalysisItem.setupErrors.hasError) {
+        @let setupErrors = latestWaterAnalysisItem.guid | invalidAccountAnalysis;
+        @if (setupErrors.hasError) {
           <div class="alert alert-danger">
             Errors found in selected analysis.
           </div>
