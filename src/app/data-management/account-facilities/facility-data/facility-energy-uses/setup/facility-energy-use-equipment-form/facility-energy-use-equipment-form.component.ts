@@ -118,7 +118,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
   setUtilityTypes() {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.equipmentDetailsForm.controls['utilityMeterGroupId'].value; });
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return this.equipmentDetailsForm.controls['utilityMeterGroupIds'].value.includes(meter.groupId); });
     let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
     sources = _.uniq(sources);
     sources.forEach(source => {
@@ -165,7 +165,8 @@ export class FacilityEnergyUseEquipmentFormComponent {
     this.formSubscriptions.unsubscribe();
     this.formSubscriptions = new Subscription();
     this.formSubscriptions.add(
-      this.equipmentDetailsForm.controls['utilityMeterGroupId'].valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
+      this.equipmentDetailsForm.controls['utilityMeterGroupIds'].valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
+        console.log('meter group change');
         this.setUtilityTypes();
       }));
     this.formSubscriptions.add(

@@ -21,8 +21,10 @@
                                 Meter Groups
                             </th>
                             <td>
-                                @if(equipment.utilityMeterGroupId) {
-                                {{equipment.utilityMeterGroupId |groupName}}
+                                @if(equipment.utilityMeterGroupIds && equipment.utilityMeterGroupIds.length > 0){
+                                @for(id of equipment.utilityMeterGroupIds; track id){
+                                {{id | groupName}}<br>
+                                }
                                 }@else{
                                 &mdash;
                                 }

@@ -108,6 +108,8 @@ import { FacilityMeterGroupsComponent } from './account-facilities/facility-data
 import { FacilityMeterDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
 import { FacilityEnergyUsesModifyAnnualDataComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component';
 import { EnergyUseGroupModifyAnnualDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/energy-use-group-modify-annual-data-form/energy-use-group-modify-annual-data-form.component';
+import { MeterGroupSourceConflictPipe } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/meter-group-source-conflict.pipe';
+
 
 @NgModule({
   declarations: [
@@ -205,7 +207,8 @@ import { EnergyUseGroupModifyAnnualDataFormComponent } from './account-facilitie
     FacilityMeterGroupsComponent,
     FacilityMeterDataComponent,
     FacilityEnergyUsesModifyAnnualDataComponent,
-    EnergyUseGroupModifyAnnualDataFormComponent
+    EnergyUseGroupModifyAnnualDataFormComponent,
+    MeterGroupSourceConflictPipe
   ],
   imports: [
     CommonModule,

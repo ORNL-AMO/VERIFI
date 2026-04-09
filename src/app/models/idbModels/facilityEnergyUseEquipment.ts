@@ -7,7 +7,7 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     facilityId: string,
     accountId: string,
     energyUseGroupId: string,
-    utilityMeterGroupId: string,
+    utilityMeterGroupIds: Array<string>,
     name: string,
     notes: string,
     operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData>,
@@ -23,7 +23,7 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         facilityId: energyUseGroup.facilityId,
         accountId: energyUseGroup.accountId,
         energyUseGroupId: energyUseGroup.guid,
-        utilityMeterGroupId: '',
+        utilityMeterGroupIds: [],
         name: '',
         notes: '',
         operatingConditionsData: [{
