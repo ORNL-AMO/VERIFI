@@ -560,7 +560,9 @@ export class BackupDataService {
       facilityEnergyUseEquipment.accountId = accountGUIDs.newId;
       facilityEnergyUseEquipment.facilityId = this.getNewId(facilityEnergyUseEquipment.facilityId, facilityGUIDs);
       facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
-      facilityEnergyUseEquipment.utilityMeterGroupId = this.getNewId(facilityEnergyUseEquipment.utilityMeterGroupId, meterGroupGUIDs);
+      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
+        return this.getNewId(groupId, meterGroupGUIDs);
+      });
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
     }
 
@@ -874,7 +876,9 @@ export class BackupDataService {
       facilityEnergyUseEquipment.accountId = accountGUID;
       facilityEnergyUseEquipment.facilityId = newFacilityGUID;
       facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
-      facilityEnergyUseEquipment.utilityMeterGroupId = this.getNewId(facilityEnergyUseEquipment.utilityMeterGroupId, meterGroupGUIDs);
+      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
+        return this.getNewId(groupId, meterGroupGUIDs);
+      });
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
     }
 

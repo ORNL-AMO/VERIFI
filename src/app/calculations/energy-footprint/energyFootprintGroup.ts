@@ -157,7 +157,7 @@ export class EnergyFootprintGroup {
 
                 let equipmentEnergyUseData: Array<{ equipmentGuid: string, equipmentName: string, energyUse: number, percentOfTotal: number }> = new Array();
                 this.groupEquipment.forEach(equip => {
-                    if (equip.utilityMeterGroupId == meterGroup.guid) {
+                    if (equip.utilityMeterGroupIds.includes(meterGroup.guid)) {
                         equip.utilityData.forEach(ud => {
                             ud.energyUse.forEach(eu => {
                                 if (eu.year == year) {
@@ -201,7 +201,7 @@ export class EnergyFootprintGroup {
 
             let equipmentAnnualResults: Array<FootprintEquipmentAnnualResult> = new Array();
             this.groupEquipment.forEach(equip => {
-                if (equip.utilityMeterGroupId == meterGroup.guid) {
+                if (equip.utilityMeterGroupIds.includes(meterGroup.guid)) {
                     let equipAnnualResults: Array<{
                         year: number,
                         energyUse: number,
@@ -258,10 +258,10 @@ export class EnergyFootprintGroup {
         let groupMetersIds: Array<string> = new Array();
         this.meterGroups = new Array();
         this.groupEquipment.forEach(equip => {
-            if (equip.utilityMeterGroupId) {
-                let meterGroup: IdbUtilityMeterGroup = utilityMeterGroups.find(umg => umg.guid == equip.utilityMeterGroupId);
-                this.meterGroups.push({ guid: equip.utilityMeterGroupId, name: meterGroup.name });
-                let cMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.groupId == equip.utilityMeterGroupId);
+            if (equip.utilityMeterGroupIds && equip.utilityMeterGroupIds.length > 0) {
+                let meterGroup: IdbUtilityMeterGroup = utilityMeterGroups.find(umg => equip.utilityMeterGroupIds.includes(umg.guid));
+                this.meterGroups.push({ guid: meterGroup.guid, name: meterGroup.name });
+                let cMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.groupId == meterGroup.guid);
                 let cMeterIds: Array<string> = cMeters.map(cm => cm.meter.guid);
                 groupMetersIds = groupMetersIds.concat(cMeterIds);
             } else {
