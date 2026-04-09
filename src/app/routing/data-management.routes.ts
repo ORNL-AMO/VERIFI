@@ -71,6 +71,8 @@ import { AddYearSetupOptionsComponent } from "../data-management/account-facilit
 import { FacilityMeterGroupsComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component";
 import { FacilityMeterDataComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
 import { FacilityEnergyUsesModifyAnnualDataComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component";
+import { MapMeterGroupsToEquipmentComponent } from "../data-management/data-management-import/process-footprint-tool-file/map-meter-groups-to-equipment/map-meter-groups-to-equipment.component";
+import { ConfirmEnergyUsesUploadComponent } from "../data-management/data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -126,7 +128,8 @@ export const DataManagementRoutes: Route = {
                     children: [
                         { path: '', pathMatch: 'full', redirectTo: 'select-facility' },
                         { path: 'select-facility', component: FootprintUploadSelectFacilityComponent },
-                        { path: 'review-and-submit', component: SubmitImportDataComponent }
+                        { path: 'map-meter-groups-to-equipment', component: MapMeterGroupsToEquipmentComponent },
+                        { path: 'review-and-submit', component: ConfirmEnergyUsesUploadComponent }
                     ]
                 }
             ]
