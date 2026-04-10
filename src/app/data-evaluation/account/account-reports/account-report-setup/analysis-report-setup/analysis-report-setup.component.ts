@@ -24,17 +24,11 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class AnalysisReportSetupComponent {
   analysisReportForm: FormGroup;
   account: IdbAccount;
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   selectedAnalysisItem: IdbAccountAnalysisItem;
-  itemToEdit: IdbAccountAnalysisItem;
-  facilityAnalysisItems: Array<IdbAnalysisItem> = [];
-  facilityDetails: Array<IdbAnalysisItem> = [];
-  baselineYears: Array<number> = [];
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
   filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -44,13 +38,12 @@ export class AnalysisReportSetupComponent {
     private calanderizationService: CalanderizationService) {
   }
 
-
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.analysisReportForm = this.accountReportsService.getAnalysisFormFromReport(val.analysisReportSetup);
-        this.setAnalysisOptions();
+        this.setSelectedAnalysisItem();
       } else {
         this.isFormChange = false;
       }
@@ -75,53 +68,23 @@ export class AnalysisReportSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  setAnalysisOptions() {
-    this.setYearOptions();
-    this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
-    if (!this.selectedAnalysisItem) {
+  setSelectedAnalysisItem() {
+    if(!this.filteredAnalysisItems)
+      return;
+    this.selectedAnalysisItem = this.filteredAnalysisItems.find(item => { return item.guid == this.analysisReportForm.controls.analysisItemId.value });
+  }
+
+   onSelectedAnalysisItemChange(item: IdbAccountAnalysisItem) {
+    this.selectedAnalysisItem = item;
+    if(!item) {
       this.analysisReportForm.controls.analysisItemId.patchValue(undefined);
       this.analysisReportForm.controls.analysisItemId.updateValueAndValidity();
-      this.save();
     }
+    this.save();
   }
 
-  setSelectedAnalysisItem() {
-    this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.analysisReportForm.controls.analysisItemId.value });
-  }
-
-  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
-    this.itemToEdit = analysisItem;
-  }
-
-  confirmEditItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-  }
-
-  cancelEditItem() {
-    this.itemToEdit = undefined;
-  }
-
-  setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
-    this.baselineYears = yearOptions;
-  }
-
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.accountAnalysisItems];
-    if(this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if(this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
-  }
-
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
+  onFilteredItemsChange(filteredItems: Array<IdbAccountAnalysisItem>) {
+    this.filteredAnalysisItems = filteredItems;
   }
 }
 

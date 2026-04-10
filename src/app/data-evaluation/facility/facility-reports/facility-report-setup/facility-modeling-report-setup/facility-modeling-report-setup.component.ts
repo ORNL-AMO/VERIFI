@@ -10,7 +10,6 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, ModelingReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-facility-modeling-report-setup',
@@ -29,14 +28,14 @@ export class FacilityModelingReportSetupComponent {
   reportYears: Array<number>;
 
   calanderizedMetersSub: Subscription;
+  filteredAnalysisItems: Array<IdbAnalysisItem>;
+  baselineYears: Array<number>;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService,
-    private router: Router
-  ) {
+    private calanderizationService: CalanderizationService) {
 
   }
 
@@ -49,7 +48,7 @@ export class FacilityModelingReportSetupComponent {
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
     });
-    this.setSelectedAnalysisItem(true);
+    this.setSelectedAnalysisItem();
 
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
       this.setYearOptions();
@@ -62,13 +61,10 @@ export class FacilityModelingReportSetupComponent {
     this.calanderizedMetersSub.unsubscribe();
   }
 
-  async setSelectedAnalysisItem(onInit: boolean) {
+  async setSelectedAnalysisItem() {
     this.selectedAnalysisItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
-    if (!onInit) {
-      await this.save();
-    }
   }
 
   async save() {
@@ -83,10 +79,15 @@ export class FacilityModelingReportSetupComponent {
     //TODO: include partial years for savings reports?
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
+    this.baselineYears = yearOptions;
   }
 
-  goToAnalysis(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facilityReport.facilityId + '/analysis/run-analysis');
+  onSelectedAnalysisItemChange(item: IdbAnalysisItem) {
+    this.selectedAnalysisItem = item;
+    this.save();
+  }
+
+  onFilteredItemsChange(items: Array<IdbAnalysisItem>) {
+    this.filteredAnalysisItems = items;
   }
 }

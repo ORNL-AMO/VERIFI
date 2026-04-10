@@ -1,0 +1,91 @@
+<div class="d-flex align-items-center justify-content-center mb-4 p-3 rounded shadow-sm bg-light border">
+    <div class="pe-4 select-width">
+        <label class="form-label fw-bold">
+            <i class="fa fa-filter text-primary"></i>
+            Analysis Category
+        </label>
+        <select class="form-select border-primary" [(ngModel)]="selectedCategory" (ngModelChange)="onOptionChange()">
+            <option value="All">All</option>
+            <option value="energy">Energy</option>
+            <option value="water">Water</option>
+        </select>
+    </div>
+
+    <div class="ps-4 select-width">
+        <label class="form-label fw-bold">
+            <i class="fa fa-filter text-primary"></i>
+            Baseline Year
+        </label>
+        <select class="form-select border-primary" [(ngModel)]="selectedBaselineYear"
+            (ngModelChange)="onOptionChange()">
+            <option value="All">All</option>
+            @for (year of baselineYears; track year) {
+            <option [ngValue]="year">{{ year }}</option>
+            }
+        </select>
+    </div>
+</div>
+
+@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+<label class="bold mt-2">
+    Select Analysis Item
+</label>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>
+
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Analysis Type
+            </th>
+            <th>
+                Baseline Year
+            </th>
+            <th>
+                View Analysis
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (item of filteredAnalysisItems; track item) {
+        <tr>
+            <td>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="{{item.name + '_item'}}" [value]="item.guid"
+                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId"
+                        (change)="onSelectedItemChange(item)">
+                </div>
+            </td>
+            <td>
+                {{item.name}}
+                @let setupErrors = item.guid | invalidAnalysis;
+                @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
+                <span class="text-danger ps-1">
+                    <span class="fa fa-exclamation-circle"></span> Contains Errors
+                </span>
+                }
+            </td>
+            <td>
+                @if (item.analysisCategory == 'water') {
+                Water
+                }
+                @if (item.analysisCategory == 'energy') {
+                Energy
+                }
+            </td>
+            <td>
+                {{item.baselineYear}}
+            </td>
+            <td>
+                <a class="click-link" (click)="goToAnalysis(item)">View Analysis</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+}
