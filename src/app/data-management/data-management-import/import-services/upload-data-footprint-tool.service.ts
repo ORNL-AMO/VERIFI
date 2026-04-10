@@ -199,8 +199,6 @@ export class UploadDataFootprintToolService {
             let existingEquipment: IdbFacilityEnergyUseEquipment = groupEquipment.find(equip => { return equip.name.toLowerCase() == equipment.name.toLowerCase() });
             if (existingEquipment) {
               equipment.id = existingEquipment.id;
-              //TODO: handle existing utility data. Add new data and update existing data with overrides?
-              // equipment.utilityMeterGroupIds = existingEquipment.utilityMeterGroupIds;
             } else {
               delete equipment.id;
             }
