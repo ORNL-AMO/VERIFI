@@ -34,7 +34,9 @@ export class DataManagementImportNavigationService {
       this.goToPage('confirm-meters', fileReference)
     } else if (currentNavOption == 'meter-readings' && fileReference.isTemplate) {
       this.goToPage('confirm-predictors', fileReference);
-    } else if (currentNavOption == 'select-facility') {
+    } else if (currentNavOption == 'select-facility' && fileReference.isFootprintToolTemplate) {
+      this.goToPage('map-meter-groups-to-equipment', fileReference);
+    } else if (currentNavOption == 'map-meter-groups-to-equipment' && fileReference.isFootprintToolTemplate) {
       this.goToPage('review-and-submit', fileReference);
     }
   }
@@ -69,6 +71,8 @@ export class DataManagementImportNavigationService {
     } else if (currentNavOption == 'select-facility') {
       this.goToPage('upload-files', fileReference)
     } else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
+      this.goToPage('map-meter-groups-to-equipment', fileReference)
+    } else if (currentNavOption == 'map-meter-groups-to-equipment' && fileReference.isFootprintToolTemplate) {
       this.goToPage('select-facility', fileReference)
     }
   }
@@ -121,8 +125,11 @@ export class DataManagementImportNavigationService {
     //footprint tool
     else if (currentNavOption == 'select-facility') {
       optionValues = ['upload-files'];
-    } else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
+    } else if (currentNavOption == 'map-meter-groups-to-equipment') {
       optionValues = ['upload-files', 'select-facility'];
+    }
+    else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
+      optionValues = ['upload-files', 'select-facility', 'map-meter-groups-to-equipment'];
     }
     return optionValues.map(opVal => {
       return this.getGoToOption(opVal)
@@ -153,7 +160,8 @@ export type GoToOptionValue = 'upload-files' |
   'confirm-predictors' |
   'predictor-data' |
   'review-and-submit' |
-  'select-facility';
+  'select-facility' |
+  'map-meter-groups-to-equipment';
 
 export const GoToOptionLabels = {
   'upload-files': 'Upload Files',
@@ -167,5 +175,6 @@ export const GoToOptionLabels = {
   'confirm-predictors': 'Confirm Predictors',
   'predictor-data': 'Predictor Data',
   'review-and-submit': 'Review and Submit',
-  'select-facility': 'Select Facility'
+  'select-facility': 'Select Facility',
+  'map-meter-groups-to-equipment': 'Map Meter Groups to Equipment'
 }

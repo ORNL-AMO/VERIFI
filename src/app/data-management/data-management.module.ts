@@ -109,6 +109,8 @@ import { FacilityMeterDataComponent } from './account-facilities/facility-data/f
 import { FacilityEnergyUsesModifyAnnualDataComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component';
 import { EnergyUseGroupModifyAnnualDataFormComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/energy-use-group-modify-annual-data-form/energy-use-group-modify-annual-data-form.component';
 import { MeterGroupSourceConflictPipe } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/meter-group-source-conflict.pipe';
+import { MapMeterGroupsToEquipmentComponent } from './data-management-import/process-footprint-tool-file/map-meter-groups-to-equipment/map-meter-groups-to-equipment.component';
+import { ConfirmEnergyUsesUploadComponent } from './data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component';
 
 
 @NgModule({
@@ -208,7 +210,9 @@ import { MeterGroupSourceConflictPipe } from './account-facilities/facility-data
     FacilityMeterDataComponent,
     FacilityEnergyUsesModifyAnnualDataComponent,
     EnergyUseGroupModifyAnnualDataFormComponent,
-    MeterGroupSourceConflictPipe
+    MeterGroupSourceConflictPipe,
+    MapMeterGroupsToEquipmentComponent,
+    ConfirmEnergyUsesUploadComponent
   ],
   imports: [
     CommonModule,
