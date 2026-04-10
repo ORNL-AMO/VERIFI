@@ -16,6 +16,81 @@
                     </div>
                 </h4>
 
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex flex-column">
+                            @for (energyUseGroup of fileReference.facilityEnergyUseGroups; track energyUseGroup.guid) {
+                            <div class="card mb-3">
+                                <div class="card-header bold justify-content-between d-flex align-items-center">
+                                    <div>
+                                        Equipment Group: {{energyUseGroup.name}}
+                                    </div>
+                                    <button class="btn action-btn btn-sm">
+                                        <span class="fa fa-link"></span>
+                                        Link Meter Groups
+                                    </button>
+                                </div>
+                                <div class="card-body p-0">
+                                    @let energyUseEquipment = energyUseGroup.guid |
+                                    facilityEnergyEquipmentList:fileReference.facilityEnergyUseEquipment;
+                                    <table class="table table-bordered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="w-33">
+                                                    Equipment
+                                                </th>
+                                                <th class="w-33">
+                                                    Sources
+                                                </th>
+                                                <th class="w-33">
+                                                    Meter Groups
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @for(equipment of energyUseEquipment; track equipment.guid) {
+                                            <tr>
+                                                <td>
+                                                    <span class="fa fa-plug"></span>
+                                                    {{equipment.name}}
+                                                </td>
+                                                <td>
+                                                    @for(utilityData of equipment.utilityData; track
+                                                    utilityData.energySource){
+                                                    <span class="badge me-1"
+                                                        [ngStyle]="{'background-color': utilityData.energySource | meterSourceColor}">{{utilityData.energySource}}</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if(equipment.utilityMeterGroupIds.length > 0) {
+                                                    @for (id of equipment.utilityMeterGroupIds; track id)
+                                                    {
+                                                    <button class="btn action-btn btn-sm me-2"
+                                                        (click)="openLinkMeterTable(equipment)" type="button">
+                                                        <span class="fa fa-link"></span>
+                                                        {{ id | groupName}}
+                                                    </button>
+                                                    }
+                                                    }@else{
+                                                    <button class="btn action-btn btn-sm"
+                                                        (click)="openLinkMeterTable(equipment)" type="button">
+                                                        <span class="fa fa-link"></span>
+                                                        Select Meter Groups
+                                                    </button>
+                                                    }
+
+                                                </td>
+                                            </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -23,3 +98,66 @@
 
 <app-data-management-import-footer [fileReference]="fileReference" [navOption]="'map-meter-groups-to-equipment'"
     [disableNext]="false"></app-data-management-import-footer>
+
+
+
+
+<div [ngClass]="{'windowOverlay': showLinkMeterModal}"></div>
+<!--LINK METER TO ENERGY EQUIPMENT MODAL-->
+<div class="popup" [class.open]="showLinkMeterModal">
+    <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter Group to Equipment
+        {{linkedMeterGroupEquipment?.name}}
+        <!-- <button class="item-right" (click)="cancelLinkMeterGroup()">x</button> -->
+    </div>
+    <div class="popup-body">
+        <p class="fw-light italic">
+            Select utility meter groups to connect to this equipment. <u>You cannot connect two meter groups with the
+                same energy source</u> (e.g., two electricity groups) to a single equipment, as it would not be possible
+            to determine which group the energy is coming from. Connecting a meter group will allow for energy use
+            accounting based on the energy data from the meters in that group.
+        </p>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Meter Group Name</th>
+                    <th>Group Type</th>
+                    <th>Sources</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (meterGroup of linkedMeterGroupOptions; track $index) {
+                @let meterGroupSources = meterGroup.guid | meterGroupSourcesList: utilityMeters;
+                @let meterGroupConflict = meterGroupSources | meterGroupSourceConflict: linkedMeterGroupSources;
+                <tr (click)="changeLinkedMeterGroup(meterGroup)" [ngClass]="{'clickable': !meterGroupConflict}">
+                    <td class="text-center">
+                        @if(linkedMeterGroupIds.includes(meterGroup.guid)){
+                        <span class="fa fa-circle-check"></span>
+                        }@else if(!meterGroupConflict){
+                        <span class="fa fa-circle"></span>
+                        }
+                    </td>
+                    <td>{{ meterGroup.name }}</td>
+                    <td>
+                        {{ meterGroup.groupType }}
+                    </td>
+                    <td>
+                        @for(source of meterGroupSources; track $index) {
+                        <span class="badge me-1"
+                            [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-danger" (click)="cancelLinkMeterGroup()">Unlink Meter Group</button>
+        <button class="btn btn-success" (click)="closeLinkMeterGroup()" [disabled]="!linkedMeterGroupIds.length">Link
+            Meter
+            Group</button>
+    </div>
+</div>

@@ -1,0 +1,20 @@
+.w-33{
+    width: 33%;
+}
+
+td{
+    vertical-align: middle;
+}
+
+.card-header{
+    background-color: rgb(250 96 1 / 15%);
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+.fa.fa-circle-check{
+    color: green;
+    font-size: 1.2em;
+}
