@@ -10,6 +10,7 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 
 @Component({
   selector: 'app-map-meter-groups-to-equipment',
@@ -27,7 +28,10 @@ export class MapMeterGroupsToEquipmentComponent {
   utilityMeters: Array<IdbUtilityMeter>
   utilityMetersSub: Subscription;
 
-  showLinkMeterModal: boolean = false;
+  showLinkMeterEquipmentModal: boolean = false;
+  showLinkMeterGroupModal: boolean = false;
+
+  linkingEnergyUseGroup: IdbFacilityEnergyUseGroup;
 
   linkedMeterGroupEquipment: IdbFacilityEnergyUseEquipment;
   linkedMeterGroups: Array<IdbUtilityMeterGroup> = [];
@@ -63,7 +67,7 @@ export class MapMeterGroupsToEquipmentComponent {
     this.utilityMetersSub.unsubscribe();
   }
 
-  openLinkMeterTable(equipment: IdbFacilityEnergyUseEquipment) {
+  openLinkMeterEquipmentTable(equipment: IdbFacilityEnergyUseEquipment) {
     this.linkedMeterGroupEquipment = equipment;
     let equipmentSources: Array<MeterSource> = equipment.utilityData.map(utilityData => utilityData.energySource);
     this.linkedMeterGroupOptions = this.facilityMeterGroups.filter(group => {
@@ -71,11 +75,15 @@ export class MapMeterGroupsToEquipmentComponent {
       return _.intersection(equipmentSources, groupMeterSources).length > 0;
     });
     this.setLinkedMeterGroups();
-    this.showLinkMeterModal = true;
+    this.showLinkMeterEquipmentModal = true;
   }
 
   setLinkedMeterGroups() {
     this.linkedMeterGroupIds = this.linkedMeterGroupEquipment.utilityMeterGroupIds.map(id => id);
+    this.setLinkedMeterGroupSources();
+  }
+
+  setLinkedMeterGroupSources() {
     let linkedMeters: Array<IdbUtilityMeter> = this.linkedMeterGroupIds.flatMap(id => {
       return this.utilityMeters.filter(meter => meter.groupId == id);
     });
@@ -83,26 +91,84 @@ export class MapMeterGroupsToEquipmentComponent {
     this.linkedMeterGroupSources = _.uniq(sources);
   }
 
-
-  cancelLinkMeterGroup() {
+  cancelLinkMeterEquipment() {
     this.linkedMeterGroupEquipment.utilityMeterGroupIds = [];
     this.linkedMeterGroupEquipment = null;
     this.linkedMeterGroups = [];
     this.linkedMeterGroupIds = [];
     this.linkedMeterGroupSources = [];
-    this.showLinkMeterModal = false;
+    this.linkedMeterGroupSources = [];
+    this.showLinkMeterEquipmentModal = false;
   }
 
-  changeLinkedMeterGroup(meterGroup: IdbUtilityMeterGroup) {
+  changeLinkedMeterGroup(meterGroup: IdbUtilityMeterGroup, meterGroupConflict: boolean) {
     if (this.linkedMeterGroupEquipment.utilityMeterGroupIds.includes(meterGroup.guid)) {
       this.linkedMeterGroupEquipment.utilityMeterGroupIds = this.linkedMeterGroupEquipment.utilityMeterGroupIds.filter(id => id != meterGroup.guid);
     } else {
-      this.linkedMeterGroupEquipment.utilityMeterGroupIds.push(meterGroup.guid);
+      if (!meterGroupConflict) {
+        this.linkedMeterGroupEquipment.utilityMeterGroupIds.push(meterGroup.guid);
+      }
     }
     this.setLinkedMeterGroups();
   }
 
-  closeLinkMeterGroup() {
-    this.showLinkMeterModal = false;
+  closeLinkMeterEquipment() {
+    this.linkedMeterGroupEquipment = null;
+    this.linkedMeterGroups = [];
+    this.linkedMeterGroupIds = [];
+    this.linkedMeterGroupSources = [];
+    this.linkedMeterGroupSources = [];
+    this.showLinkMeterEquipmentModal = false;
   }
+
+  openLinkMeterGroupTable(energyUseGroup: IdbFacilityEnergyUseGroup) {
+    this.linkingEnergyUseGroup = energyUseGroup;
+    let equipmentInGroup: Array<IdbFacilityEnergyUseEquipment> = this.fileReference.facilityEnergyUseEquipment.filter(equipment => equipment.energyUseGroupId == energyUseGroup.guid);
+    let equipmentSources: Array<MeterSource> = equipmentInGroup.flatMap(equipment => equipment.utilityData.map(utilityData => utilityData.energySource));
+    this.linkedMeterGroupOptions = this.facilityMeterGroups.filter(group => {
+      let groupMeterSources: Array<MeterSource> = this.utilityMeters.filter(meter => meter.groupId == group.guid).map(meter => meter.source);
+      return _.intersection(equipmentSources, groupMeterSources).length > 0;
+    });
+    this.showLinkMeterGroupModal = true;
+  }
+
+  changeLinkedMeterGroupForEnergyUseGroup(meterGroup: IdbUtilityMeterGroup, meterGroupConflict: boolean) {
+    if (this.linkedMeterGroupIds.includes(meterGroup.guid)) {
+      this.linkedMeterGroupIds = this.linkedMeterGroupIds.filter(id => id != meterGroup.guid);
+    } else {
+      if (!meterGroupConflict) {
+        this.linkedMeterGroupIds.push(meterGroup.guid);
+      }
+    }
+    this.setLinkedMeterGroupSources();
+  }
+
+  cancelLinkMeterGroup() {
+    this.linkingEnergyUseGroup = undefined;
+    this.linkedMeterGroupIds = [];
+    this.linkedMeterGroupSources = [];
+    this.linkedMeterGroupSources = [];
+    this.showLinkMeterGroupModal = false;
+  }
+
+  submitLinkMeterGroups() {
+    this.fileReference.facilityEnergyUseEquipment.forEach(equipment => {
+      if (equipment.energyUseGroupId == this.linkingEnergyUseGroup.guid) {
+        //check equipment has source that matches linked meter groups
+        let equipmentSources: Array<MeterSource> = equipment.utilityData.map(utilityData => utilityData.energySource);
+        let linkedMeters: Array<IdbUtilityMeter> = this.linkedMeterGroupIds.flatMap(id => {
+          return this.utilityMeters.filter(meter => meter.groupId == id);
+        });
+        equipment.utilityMeterGroupIds = [];
+        linkedMeters.forEach(meter => {
+          if (equipmentSources.includes(meter.source) && !equipment.utilityMeterGroupIds.includes(meter.groupId)) {
+            equipment.utilityMeterGroupIds.push(meter.groupId);
+          }
+        })
+      }
+    });
+    this.cancelLinkMeterGroup();
+  }
+
+
 }

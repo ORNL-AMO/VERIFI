@@ -18,3 +18,7 @@ td{
     color: green;
     font-size: 1.2em;
 }
+
+.popup-header .fa.fa-link{
+    color: white;
+}
