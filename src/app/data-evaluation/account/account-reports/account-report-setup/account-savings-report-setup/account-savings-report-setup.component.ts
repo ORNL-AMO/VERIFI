@@ -204,19 +204,6 @@ export class AccountSavingsReportSetupComponent {
       this.analysisTableColumns.savingsUnbanked
     )
   }
-
-  // onSelectedAnalysisItemChange(item: IdbAccountAnalysisItem) {
-  //   this.selectedAnalysisItem = item;
-  //   if(!item) {
-  //     this.accountSavingsReportForm.controls.analysisItemId.patchValue(undefined);
-  //     this.accountSavingsReportForm.controls.analysisItemId.updateValueAndValidity();
-  //   }
-  //   this.save();
-  // }
-
-  // onFilteredItemsChange(filteredItems: Array<IdbAccountAnalysisItem>) {
-  //   this.filteredAnalysisItems = filteredItems;
-  // }
 }
 
 
