@@ -80,14 +80,7 @@ export class AnalysisService {
 
   getDisplaySubject(key: string, defaultValue: "graph" | "table"): BehaviorSubject<"graph" | "table"> {
     if (!this.analysisDisplay[key]) {
-      let stored = this.localStorageService.retrieve(key) as "graph" | "table";
-      let displaySubject = new BehaviorSubject<"graph" | "table">(stored ? stored : defaultValue);
-      displaySubject.subscribe(value => {
-        if (value) {
-          this.localStorageService.store(key, value);
-        }
-      });
-      this.analysisDisplay[key] = displaySubject;
+      this.analysisDisplay[key] = new BehaviorSubject<"graph" | "table">(defaultValue);
     }
     return this.analysisDisplay[key];
   }
