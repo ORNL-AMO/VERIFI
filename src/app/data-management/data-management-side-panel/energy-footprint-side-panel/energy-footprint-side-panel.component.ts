@@ -1,6 +1,6 @@
 import { Component, computed, signal, inject, Signal, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
+import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
@@ -27,50 +27,60 @@ export class EnergyFootprintSidePanelComponent {
   private calanderizationService = inject(CalanderizationService);
   private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
-  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
-  energyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
-  equipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
-  calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
+  facilities$: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
+  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
+  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
+  calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
 
 
   yearOptions: Signal<Array<number>> = computed(() => {
-    const calanderizedMeters = this.calanderizedMeters();
-    const facilities = this.facilities();
+    const calanderizedMeters = this.calanderizedMeters$();
+    const facilities = this.facilities$();
     if (calanderizedMeters.length === 0 || facilities.length === 0) {
       return [];
     }
     return getYearsWithFullDataAccount(calanderizedMeters, facilities);
   });
 
-  energyFootprintFacilities: Signal<Array<EnergyFootprintFacility>> = computed(() => {
-    const facilities = this.facilities();
-    const energyUseGroups = this.energyUseGroups();
-    const equipment = this.equipment();
-    const calanderizedMeters = this.calanderizedMeters();
-    const utilityMeterGroups = this.utilityMeterGroups();
+  //TODO: potentially make a web worker for this or optimize number of calls 
+  //so as data changes it doesn't have to recalculate everything if not necessary. 
+  //TODO: add loading logic during calculation
+  energyFootprintAnnualFacilityBalance$: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
+    const facilities = this.facilities$();
+    const energyUseGroups = this.energyUseGroups$();
+    const equipment = this.equipment$();
+    //TODO: calanderized meters may not be correct units.
+    const calanderizedMeters = this.calanderizedMeters$();
+    const utilityMeterGroups = this.utilityMeterGroups$();
+    const selectedYear = this.selectedYear();
+    const selectedFacilityId = this.selectedFacilityId();
     if (
-      facilities.length === 0 ||
-      energyUseGroups.length === 0 ||
-      equipment.length === 0 ||
-      calanderizedMeters.length === 0 ||
-      utilityMeterGroups.length === 0
+      !energyUseGroups ||
+      !equipment ||
+      !calanderizedMeters ||
+      !utilityMeterGroups ||
+      !selectedYear ||
+      !selectedFacilityId
     ) {
-      return [];
+      return null;
     }
-    return facilities.map(facility =>
-      new EnergyFootprintFacility(
-        facility,
-        energyUseGroups,
-        equipment,
-        calanderizedMeters,
-        utilityMeterGroups
-      )
-    );
+    const selectedFacility = facilities.find(facility => facility.guid === selectedFacilityId);
+    return new EnergyFootprintAnnualFacilityBalance(
+      selectedFacility,
+      energyUseGroups,
+      equipment,
+      calanderizedMeters,
+      utilityMeterGroups,
+      selectedYear,
+      "both"
+    )
   });
 
   //set to latest year with full data by default, but allow user to select other years to view
   selectedYear = signal<number | null>(null);
+  selectedFacilityId = signal<string | null>(null);
+  displayDataByGroup = signal<boolean>(false);
 
   constructor() {
     // Automatically set selectedYear to the last year in yearOptions when yearOptions changes
@@ -80,7 +90,12 @@ export class EnergyFootprintSidePanelComponent {
         this.selectedYear.set(options[options.length - 1]);
       }
     });
+    // Automatically set selectedFacilityId to the first facility when facilities change
+    effect(() => {
+      const facilities = this.facilities$();
+      if (facilities.length > 0 && !facilities.find(facility => facility.guid === this.selectedFacilityId())) {
+        this.selectedFacilityId.set(facilities[0].guid);
+      }
+    });
   }
-
-
 }
