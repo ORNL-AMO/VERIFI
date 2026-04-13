@@ -19,6 +19,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisGroupItem } from '../../analysis.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-analysis-details-table',
@@ -79,6 +80,9 @@ export class AnalysisDetailsTableComponent {
   itemsPerPageSub: Subscription;
 
   calanderizationSub: Subscription;
+  showDeleteColumn: boolean = false;
+  allChecked: boolean = false;
+  showBulkDelete: boolean = false;
   constructor(private analysisDbService: AnalysisDbService, private router: Router,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
@@ -87,7 +91,9 @@ export class AnalysisDetailsTableComponent {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private facilityDbService: FacilitydbService,
     private sharedDataService: SharedDataService,
-    private calendarizationService: CalanderizationService) { }
+    private calendarizationService: CalanderizationService,
+    private loadingService: LoadingService
+  ) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -234,7 +240,7 @@ export class AnalysisDetailsTableComponent {
     this.analysisItemToDelete = analysisItem;
   }
 
-  async confirmDelete(analysisItem: IdbAnalysisItem) {
+  async confirmDelete(analysisItem: IdbAnalysisItem, isBulkDelete: boolean = false) {
     await firstValueFrom(this.analysisDbService.deleteWithObservable(analysisItem.id));
     //update account analysis items
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -260,8 +266,10 @@ export class AnalysisDetailsTableComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false)
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
+    if(!isBulkDelete){
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
+    }
     this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
     this.filteredAnalysisItems = this.facilityAnalysisItems;
     this.selectedAnalysisCategory = 'all';
@@ -375,5 +383,51 @@ export class AnalysisDetailsTableComponent {
 
   goToUtilityData() {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility');
+  }
+
+  bulkDeleteClicked() {
+    this.showDeleteColumn = true;
+  }
+
+  anyChecked(): boolean {
+    return this.filteredAnalysisItems.some(item => item.checked);
+  }
+
+  checkAll() {
+    this.filteredAnalysisItems.forEach(item => {
+      item.checked = this.allChecked;
+    });
+  }
+
+  toggleChecked() {
+    this.allChecked = this.filteredAnalysisItems.every(item => item.checked);
+  }
+
+  openModal() {
+    this.showBulkDelete = true;
+  }
+
+  cancelBulkDelete() {
+    this.showBulkDelete = false;
+  }
+
+  async bulkDelete() {
+    this.cancelBulkDelete();
+    this.loadingService.setLoadingMessage("Deleting Analysis Items...");
+    this.loadingService.setLoadingStatus(true);
+    let itemsToDelete: Array<IdbAnalysisItem> = new Array();
+    this.filteredAnalysisItems.forEach(item => {
+      if (item.checked) {
+        itemsToDelete.push(item);
+      }
+    });
+
+    for (let index = 0; index < itemsToDelete.length; index++) {
+      await this.confirmDelete(itemsToDelete[index], true);
+    }
+
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast("Analysis Items Deleted!", undefined, undefined, false, "alert-success");
+    this.showDeleteColumn = false;
   }
 }

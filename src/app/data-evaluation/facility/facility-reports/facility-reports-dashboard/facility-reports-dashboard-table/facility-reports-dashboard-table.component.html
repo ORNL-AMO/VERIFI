@@ -13,14 +13,23 @@
         }
       </select>
     </div>
-    <div class="col-2 mt-auto">
+    <div class="col-2 mt-auto pe-4">
       <app-table-items-dropdown></app-table-items-dropdown>
     </div>
+
+    @if(anyChecked()) {
+    <div class="col-1 mt-auto">
+      <button class="btn btn-danger" (click)="openBulkDeleteModal()">Bulk Delete</button>
+    </div>
+    }
   </div>
   <div class="table-responsive mt-2">
     <table class="table table-bordered table-hover">
       <thead>
         <tr>
+          <th class="input">
+            <input type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+          </th>
           <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
             Report Name
           </th>
@@ -49,6 +58,10 @@
         slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track facilityReport.guid) {
         @let reportErrors = facilityReport.guid | invalidFacilityReport;
         <tr>
+          <td class="input text-center">
+            <input type="checkbox" name="reportSelected" (change)="toggleChecked()"
+              [(ngModel)]="facilityReport.checked">
+          </td>
           <td>
             @if (reportErrors.hasErrors) {
             <span class="fa fa-exclamation-circle"></span>
@@ -147,7 +160,7 @@
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
+<div [ngClass]="{'windowOverlay': displayDeleteModal || showBulkDelete}"></div>
 <div class="popup" [class.open]="displayDeleteModal">
   @if (displayDeleteModal) {
   <div class="popup-header">Delete: {{deletedReport.name}}
@@ -160,5 +173,21 @@
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+  </div>
+</div>
+
+<div class="popup" [class.open]="showBulkDelete">
+  @if (showBulkDelete) {
+  <div class="popup-header">Delete Report Items
+    <button class="item-right" (click)="cancelBulkDelete()">x</button>
+  </div>
+  }
+  <div class="popup-body">
+    <p>WARNING: Deleting report items cannot be undone.
+      Are you sure you want to perform this action?</p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+    <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
   </div>
 </div>

@@ -15,8 +15,19 @@
       </select>
     </div>
     @if (linkedItemsList.length > 6) {
-    <div class="select-width">
+    <div class="select-width pe-4">
       <app-table-items-dropdown></app-table-items-dropdown>
+    </div>
+    }
+    @if (!anyChecked() || !showDeleteColumn) {
+    <div class="mt-auto pe-3">
+      <button class="btn btn-danger" (click)="bulkDeleteClicked()">Bulk Delete</button>
+    </div>
+    }
+    @if (showDeleteColumn && anyChecked()) {
+    <div class="mt-auto">
+      <button class="btn btn-danger" (click)="openModal()">
+        <i class="fa fa-trash text-danger"></i> Delete</button>
     </div>
     }
   </div>
@@ -26,7 +37,14 @@
       <table class="table table-bordered table-hover">
         <thead>
           <tr>
+            @if(showDeleteColumn) {
+            <th class="input">
+              <input type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            }
+            @if(!showDeleteColumn) {
             <th></th>
+            }
             <th class="can-click" (click)="setOrderDataField('analysisItem.name')"
               [ngClass]="{'active': orderDataField == 'name'}">
               Analysis Item
@@ -53,6 +71,13 @@
           itemsPerPage): currentPageNumber * itemsPerPage; track item.analysisItem.guid) {
           @let setupErrors = item.analysisItem.guid | invalidAnalysis;
           <tr>
+            @if(showDeleteColumn) {
+            <td class="input text-center">
+              <input type="checkbox" name="analysisSelected" (change)="toggleChecked()"
+                [(ngModel)]="item.analysisItem.checked">
+            </td>
+            }
+            @if(!showDeleteColumn) {
             <td class="text-center">
               @if (item.analysisItem.analysisCategory == 'energy') {
               <span class="energy fa"
@@ -65,6 +90,7 @@
                 (click)="setUseItem(item.analysisItem)"></span>
               }
             </td>
+            }
             <td>
               <a (click)="selectAnalysisItem(item.analysisItem)">
                 @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
@@ -211,7 +237,7 @@
 }
 
 <div
-  [ngClass]="{'windowOverlay': displayLinkedItemModal || displayDeleteModal || displayCreateCopyModal || displayCreateReportModal || displayAnalysisDetailsModal}">
+  [ngClass]="{'windowOverlay': displayLinkedItemModal || displayDeleteModal || displayCreateCopyModal || displayCreateReportModal || displayAnalysisDetailsModal || showBulkDelete}">
 </div>
 
 <div class="popup" [class.open]="displayLinkedItemModal">
@@ -304,5 +330,21 @@
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="closeAnalysisDetails()">Close</button>
+  </div>
+</div>
+
+<div class="popup" [class.open]="showBulkDelete">
+  @if (showBulkDelete) {
+  <div class="popup-header">Delete Analysis Items
+    <button class="item-right" (click)="cancelBulkDelete()">x</button>
+  </div>
+  }
+  <div class="popup-body">
+    <p>WARNING: Deleting analysis items cannot be undone.
+      Are you sure you want to perform this action?</p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+    <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
   </div>
 </div>

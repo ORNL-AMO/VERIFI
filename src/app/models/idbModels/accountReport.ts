@@ -17,6 +17,7 @@ export interface IdbAccountReport extends IdbEntry {
     endMonth: number,
     endYear: number,
     name: string,
+    checked?: boolean,
     reportType: ReportType,
     betterPlantsReportSetup: BetterPlantsReportSetup,
     dataOverviewReportSetup: DataOverviewReportSetup,
@@ -39,6 +40,7 @@ export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<Id
         startMonth: undefined,
         endYear: undefined,
         endMonth: undefined,
+        checked: false,
         betterPlantsReportSetup: {
             analysisItemId: undefined,
             includeFacilityNames: true,
