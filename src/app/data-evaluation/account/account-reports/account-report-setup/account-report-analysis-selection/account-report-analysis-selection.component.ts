@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -14,11 +14,9 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class AccountReportAnalysisSelectionComponent {
 
-  @Input()
+  @Input({ required: true })
   reportForm: FormGroup;
-  @Input()
-  selectedAnalysisItem: IdbAccountAnalysisItem;
-  
+
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   itemToEdit: IdbAccountAnalysisItem;
   baselineYears: Array<number> = [];
@@ -27,17 +25,12 @@ export class AccountReportAnalysisSelectionComponent {
   filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
   calanderizedMeterSub: Subscription;
 
-  @Output()
-  selectedAnalysisItemChange: EventEmitter<IdbAccountAnalysisItem> = new EventEmitter<IdbAccountAnalysisItem>();
-  @Output()
-  filteredItemsChange: EventEmitter<Array<IdbAccountAnalysisItem>> = new EventEmitter<Array<IdbAccountAnalysisItem>>();
-
   constructor(private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private calanderizationService: CalanderizationService) {
   }
 
-  ngOnInit() {    
+  ngOnInit() {
     this.calanderizedMeterSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
       this.setAnalysisOptions();
@@ -70,10 +63,16 @@ export class AccountReportAnalysisSelectionComponent {
 
   setSelectedAnalysisItem() {
     let selectedItem: IdbAccountAnalysisItem;
-    if(!this.reportForm || !this.reportForm.controls['analysisItemId']) 
+    if (!this.reportForm || !this.reportForm.controls['analysisItemId'] || !this.reportForm.controls['analysisItemId'].value) {
       return;
-    selectedItem = this.accountAnalysisItems.find(item => { return item.guid == this.reportForm.controls.analysisItemId.value });
-    this.selectedAnalysisItemChange.emit(selectedItem);    
+    }
+
+    //check item is in filtered list
+    selectedItem = this.filteredAnalysisItems.find(item => { return item.guid == this.reportForm.controls.analysisItemId.value });
+    //if item not in list set undefined
+    if (!selectedItem) {
+      this.reportForm.controls['analysisItemId'].patchValue(undefined);
+    }
   }
 
   setYearOptions() {
@@ -83,22 +82,16 @@ export class AccountReportAnalysisSelectionComponent {
 
   applyFilters() {
     this.filteredAnalysisItems = [...this.accountAnalysisItems];
-    if(this.selectedBaselineYear != 'All') {
+    if (this.selectedBaselineYear != 'All') {
       this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
     }
-    if(this.selectedCategory != 'All') {
+    if (this.selectedCategory != 'All') {
       this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
     }
-    this.filteredItemsChange.emit(this.filteredAnalysisItems);
   }
 
   onOptionChange() {
     this.applyFilters();
     this.setSelectedAnalysisItem();
-  }
-
-  onSelectedItemChange(analysisItem: IdbAccountAnalysisItem) {
-    this.selectedAnalysisItem = analysisItem;
-    this.selectedAnalysisItemChange.emit(analysisItem);
   }
 }

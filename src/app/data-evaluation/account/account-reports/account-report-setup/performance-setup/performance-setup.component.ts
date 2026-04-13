@@ -8,12 +8,13 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
-    selector: 'app-performance-setup',
-    templateUrl: './performance-setup.component.html',
-    styleUrls: ['./performance-setup.component.css'],
-    standalone: false
+  selector: 'app-performance-setup',
+  templateUrl: './performance-setup.component.html',
+  styleUrls: ['./performance-setup.component.css'],
+  standalone: false
 })
 export class PerformanceSetupComponent {
 
@@ -23,12 +24,13 @@ export class PerformanceSetupComponent {
   isFormChange: boolean = false;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+  analysisItemIdSub: Subscription;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private accountAnalysisDbService: AccountAnalysisDbService) {
   }
 
   ngOnInit() {
@@ -37,6 +39,7 @@ export class PerformanceSetupComponent {
       if (!this.isFormChange) {
         this.performanceReportForm = this.accountReportsService.getPerformanceFormFromReport(val.performanceReportSetup);
         this.setSelectedAnalysisItem();
+        this.subscribeAnalysisItemChanges();
       } else {
         this.isFormChange = false;
       }
@@ -45,6 +48,17 @@ export class PerformanceSetupComponent {
 
   ngOnDestroy() {
     this.selectedReportSub.unsubscribe();
+    this.analysisItemIdSub.unsubscribe();
+  }
+
+  subscribeAnalysisItemChanges() {
+    if (this.analysisItemIdSub) {
+      this.analysisItemIdSub.unsubscribe();
+    }
+    
+    this.analysisItemIdSub = this.performanceReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+      await this.save();
+    })
   }
 
   async save() {
@@ -61,21 +75,6 @@ export class PerformanceSetupComponent {
   }
 
   setSelectedAnalysisItem() {
-    if(!this.filteredAnalysisItems)
-      return;
-    this.selectedAnalysisItem = this.filteredAnalysisItems.find(item => { return item.guid == this.performanceReportForm.controls.analysisItemId.value });
-  }
-
-  onSelectedAnalysisItemChange(item: IdbAccountAnalysisItem) {
-    this.selectedAnalysisItem = item;
-    if(!item) {
-      this.performanceReportForm.controls.analysisItemId.patchValue(undefined);
-      this.performanceReportForm.controls.analysisItemId.updateValueAndValidity();
-    }
-    this.save();
-  }
-
-  onFilteredItemsChange(filteredItems: Array<IdbAccountAnalysisItem>) {
-    this.filteredAnalysisItems = filteredItems;
+    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.performanceReportForm.controls.analysisItemId.value);
   }
 }

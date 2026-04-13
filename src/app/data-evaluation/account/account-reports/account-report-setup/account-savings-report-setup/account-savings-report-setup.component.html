@@ -1,11 +1,8 @@
-<app-account-report-analysis-selection [reportForm]="accountSavingsReportForm"
-  (filteredItemsChange)="onFilteredItemsChange($event)"
-  (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"></app-account-report-analysis-selection>
+<app-account-report-analysis-selection [reportForm]="accountSavingsReportForm"></app-account-report-analysis-selection>
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+@if (selectedAnalysisItem) {
 <form [formGroup]="accountSavingsReportForm">
   <div>
-    @if (selectedAnalysisItem) {
     <hr>
     <div>
       <span class="bold">
@@ -146,9 +143,6 @@
         </div>
       </div>
     </div>
-    }
-
-    @if (selectedAnalysisItem) {
     <hr>
     <div formGroupName="analysisTableColumns">
       <div class="d-flex w-100 justify-content-between">
@@ -268,7 +262,6 @@
         </div>
       </div>
     </div>
-    }
   </div>
 </form>
 }

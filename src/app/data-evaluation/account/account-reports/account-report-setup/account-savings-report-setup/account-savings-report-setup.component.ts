@@ -11,6 +11,7 @@ import { AccountReportsService } from '../../account-reports.service';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-account-savings-report-setup',
@@ -22,7 +23,7 @@ import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analy
 export class AccountSavingsReportSetupComponent {
   accountSavingsReportForm: FormGroup;
   account: IdbAccount;
-  
+
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -31,13 +32,14 @@ export class AccountSavingsReportSetupComponent {
   analysisTableColumns: AnalysisTableColumns;
   energyColumnLabel: string;
   actualUseLabel: string;
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+  analysisItemIdSub: Subscription;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisService: AnalysisService) {
+    private analysisService: AnalysisService,
+    private accountAnalysisDbService: AccountAnalysisDbService) {
   }
 
 
@@ -48,7 +50,8 @@ export class AccountSavingsReportSetupComponent {
       if (!this.isFormChange) {
         this.accountSavingsReportForm = this.accountReportsService.getAccountSavingsFormFromReport(val.accountSavingsReportSetup);
         this.reportSetup = val.accountSavingsReportSetup;
-        this.setSelectedAnalysisItem(true);
+        this.subscribeAnalysisItemChanges();
+        this.setSelectedAnalysisItem();
       } else {
         this.isFormChange = false;
       }
@@ -57,6 +60,18 @@ export class AccountSavingsReportSetupComponent {
 
   ngOnDestroy() {
     this.selectedReportSub.unsubscribe();
+    this.analysisItemIdSub.unsubscribe();
+  }
+
+  subscribeAnalysisItemChanges() {
+    if (this.analysisItemIdSub) {
+      this.analysisItemIdSub.unsubscribe();
+    }
+    //skip(1) to avoid triggering on init when we set the form value
+    this.analysisItemIdSub = this.accountSavingsReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+      this.setSelectedAnalysisItem();
+      await this.save();
+    })
   }
 
   setLabels() {
@@ -83,20 +98,14 @@ export class AccountSavingsReportSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  async setSelectedAnalysisItem(onInit: boolean) {
-    if(!this.filteredAnalysisItems)
-      return;
-    this.selectedAnalysisItem = this.filteredAnalysisItems.find(item => { return item.guid == this.accountSavingsReportForm.controls.analysisItemId.value });
+  setSelectedAnalysisItem() {
+    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.accountSavingsReportForm.controls.analysisItemId.value);
     this.setPredictorVariables();
     this.setLabels();
-    if (!onInit) {
-      await this.save();
-    }
   }
 
   setPredictorVariables() {
     this.analysisTableColumns.predictors = [];
-    this.save();
   }
 
   async setDefault() {
@@ -196,18 +205,18 @@ export class AccountSavingsReportSetupComponent {
     )
   }
 
-  onSelectedAnalysisItemChange(item: IdbAccountAnalysisItem) {
-    this.selectedAnalysisItem = item;
-    if(!item) {
-      this.accountSavingsReportForm.controls.analysisItemId.patchValue(undefined);
-      this.accountSavingsReportForm.controls.analysisItemId.updateValueAndValidity();
-    }
-    this.save();
-  }
+  // onSelectedAnalysisItemChange(item: IdbAccountAnalysisItem) {
+  //   this.selectedAnalysisItem = item;
+  //   if(!item) {
+  //     this.accountSavingsReportForm.controls.analysisItemId.patchValue(undefined);
+  //     this.accountSavingsReportForm.controls.analysisItemId.updateValueAndValidity();
+  //   }
+  //   this.save();
+  // }
 
-  onFilteredItemsChange(filteredItems: Array<IdbAccountAnalysisItem>) {
-    this.filteredAnalysisItems = filteredItems;
-  }
+  // onFilteredItemsChange(filteredItems: Array<IdbAccountAnalysisItem>) {
+  //   this.filteredAnalysisItems = filteredItems;
+  // }
 }
 
 
