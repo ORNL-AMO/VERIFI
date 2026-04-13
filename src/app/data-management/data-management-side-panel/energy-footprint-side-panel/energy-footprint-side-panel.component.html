@@ -1,0 +1,13 @@
+<select class="form-select" [(ngModel)]="selectedYear">
+    @for(year of yearOptions(); track year) {
+    <option [value]="year">{{year}}</option>
+    }
+</select>
+
+
+@for(energyFootprintFacility of energyFootprintFacilities(); track energyFootprintFacility.facility.guid) {
+{{energyFootprintFacility.facility.name}}:
+@let annualResult = energyFootprintFacility.includedSourcesAnnualResults | includedSourcesYear:selectedYear():
+'Electricity';
+{{annualResult.percentOfTotal}}<br>
+}

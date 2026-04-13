@@ -13,6 +13,8 @@ import { FacilityListHelpComponent } from './data-management-help-panel/data-man
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { PredictorDataQualityReportHelpComponent } from './data-management-help-panel/data-management-facility-help/predictor-data-quality-report-help/predictor-data-quality-report-help.component';
 import { MeterDataQualityReportHelpComponent } from './data-management-help-panel/data-management-facility-help/meter-data-quality-report-help/meter-data-quality-report-help.component';
+import { EnergyFootprintSidePanelComponent } from './energy-footprint-side-panel/energy-footprint-side-panel.component';
+import { IncludedSourcesYearPipe } from './energy-footprint-side-panel/included-sources-year.pipe';
 
 
 
@@ -25,7 +27,9 @@ import { MeterDataQualityReportHelpComponent } from './data-management-help-pane
     DataManagementFacilityHelpComponent,
     FacilityListHelpComponent,
     PredictorDataQualityReportHelpComponent,
-    MeterDataQualityReportHelpComponent
+    MeterDataQualityReportHelpComponent,
+    EnergyFootprintSidePanelComponent,
+    IncludedSourcesYearPipe
   ],
   imports: [
     CommonModule,

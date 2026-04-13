@@ -187,3 +187,13 @@ export function getAllYearsWithData(calanderizedMeters: Array<CalanderizedMeter>
     let uniqueYears: Array<number> = _.uniq(years);
     return uniqueYears;
 }
+
+export function getYearsWithFullDataAccount(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): Array<number> {
+    let yearsWithFullData: Array<number> = [];
+    facilities.forEach(facility => {
+        let facilityYearsWithFullData: Array<number> = getYearsWithFullData(calanderizedMeters, facility);
+        yearsWithFullData = _.union(yearsWithFullData, facilityYearsWithFullData);
+    });
+    // Sort ascending
+    return _.orderBy(yearsWithFullData, [], ['asc']);
+}
