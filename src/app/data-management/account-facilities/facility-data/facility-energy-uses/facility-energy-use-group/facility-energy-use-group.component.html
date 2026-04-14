@@ -42,13 +42,33 @@
                         </form>
                     </div>
                     <div class="col-12">
-                        <p class="bold">Equipment/System</p>
+                        <div class="d-flex w-100 justify-content-between pb-2">
+                            <div class="bold mt-auto">Energy Use Equipment</div>
+                            <div>
+                                <button class="btn btn-sm btn-danger me-1" [ngClass]="{'hidden': !hasSelectedEquipment}"
+                                    (click)="openBulkDelete()">
+                                    <span class="fa fa-trash"></span>
+                                    Bulk Delete
+                                </button>
+                                <button class="btn btn-sm action-btn me-1" (click)="addEquipment()">
+                                    <span class="fa fa-plus"></span>
+                                    Add Equipment/System
+                                </button>
+                                @let disabled = !hasSelectedEquipment;
+                                <button class="btn btn-sm action-btn" [disabled]="disabled"
+                                    (click)="openBulkTransfer()">
+                                    <span class="fa fa-left-right"></span>
+                                    Transfer Group
+                                </button>
+                            </div>
+                        </div>
                         @let groupEquipment = (energyUseGroup.guid |
-                        facilityEnergyEquipmentList:facilityEnergyUseEquipment);
+                        facilityEnergyEquipmentList:facilityEnergyUseEquipment$());
                         @if(groupEquipment.length != 0){
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th class="w-25">
                                         Name
                                     </th>
@@ -66,6 +86,9 @@
                             <tbody>
                                 @for (equipment of groupEquipment; track $index) {
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" [(ngModel)]="equipment.selected">
+                                    </td>
                                     <td>
                                         <a [routerLink]="'./equipment/'+equipment.guid">
                                             {{equipment.name}}
@@ -92,10 +115,6 @@
                             No equipment/systems have been added to this group.
                         </div>
                         }
-                        <a class="click-link small pull-right" (click)="addEquipment()">
-                            <span class="fa fa-plus"></span>
-                            Add Equipment/System
-                        </a>
                     </div>
                 </div>
 
@@ -114,18 +133,68 @@
 </div>
 
 
-<div [ngClass]="{'windowOverlay': showDeleteGroup}"></div>
+<div [ngClass]="{'windowOverlay': showDeleteGroup || showBulkDelete || showBulkTransfer}"></div>
 <div class="popup" [class.open]="showDeleteGroup">
     <div class="popup-header">Delete Group: {{energyUseGroup?.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
     <div class="popup-body">
-        <p>WARNING: By deleting this group, you are also deleting all of the group data and equipment associated with
+        <p class="text-danger">WARNING: By deleting this group, you are also deleting all of the group data and
+            equipment associated with
             it.
-            Are you sure you want to preform this action?</p>
+            Are you sure you want to perform this action?</p>
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteGroup()">Delete</button>
+    </div>
+</div>
+
+
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header">Bulk Delete Equipment
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <!--list equipment-->
+        <ul>
+            @for(equipment of selectedEquipment; track $index) {
+            <li>{{equipment.name}}</li>
+            }
+        </ul>
+        <p class="text-danger">WARNING: By deleting this equipment, you are also deleting all of the associated data.
+            Are you sure you want to perform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmBulkDelete()">Delete</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="showBulkTransfer">
+    <div class="popup-header">
+        <span class="fa fa-left-right"></span> Transfer Equipment to Other Group
+        <button class="item-right" (click)="cancelBulkTransfer()">x</button>
+    </div>
+    <div class="popup-body">
+        <!--list equipment-->
+        <p class="fw-bold mb-0">Equipment to Transfer:</p>
+        <ul>
+            @for(equipment of selectedEquipment; track $index) {
+            <li>{{equipment.name}}</li>
+            }
+        </ul>
+        <p class="fw-bold mb-0">Select the group to transfer the equipment to:</p>
+        <select class="form-select" [(ngModel)]="selectedTransferGroupId">
+            <option [ngValue]="null">-- Select Group --</option>
+            @for(group of transferGroupOptions; track group.guid) {
+            <option [ngValue]="group.guid">{{group.name}}</option>
+            }
+        </select>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkTransfer()">Cancel</button>
+        <button class="btn action-btn" [disabled]="!selectedTransferGroupId"
+            (click)="confirmBulkTransfer()">Transfer</button>
     </div>
 </div>

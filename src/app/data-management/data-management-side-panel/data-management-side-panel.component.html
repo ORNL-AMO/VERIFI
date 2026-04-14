@@ -21,6 +21,12 @@
                 <i class="fa fa-list-check "></i>
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link mt-auto" (click)="setActivePanel('energyFootprint')"
+                [ngClass]="{'active': activePanel == 'energyFootprint'}">
+                <i class="fa fa-plug-circle-check"></i>
+              </a>
+            </li>
           </ul>
         }
       </nav>
@@ -32,6 +38,9 @@
     }
     @if (activePanel == 'checklist') {
       <app-setup-checklist class="w-100"></app-setup-checklist>
+    }
+    @if (activePanel == 'energyFootprint') {
+      <app-energy-footprint-side-panel class="w-100"></app-energy-footprint-side-panel>
     }
   }
 </div>

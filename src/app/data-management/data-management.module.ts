@@ -111,6 +111,7 @@ import { EnergyUseGroupModifyAnnualDataFormComponent } from './account-facilitie
 import { MeterGroupSourceConflictPipe } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/meter-group-source-conflict.pipe';
 import { MapMeterGroupsToEquipmentComponent } from './data-management-import/process-footprint-tool-file/map-meter-groups-to-equipment/map-meter-groups-to-equipment.component';
 import { ConfirmEnergyUsesUploadComponent } from './data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component';
+import { FacilityEnergyUsesSankeyComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-sankey/facility-energy-uses-sankey.component';
 
 
 @NgModule({
@@ -212,7 +213,8 @@ import { ConfirmEnergyUsesUploadComponent } from './data-management-import/proce
     EnergyUseGroupModifyAnnualDataFormComponent,
     MeterGroupSourceConflictPipe,
     MapMeterGroupsToEquipmentComponent,
-    ConfirmEnergyUsesUploadComponent
+    ConfirmEnergyUsesUploadComponent,
+    FacilityEnergyUsesSankeyComponent
   ],
   imports: [
     CommonModule,

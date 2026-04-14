@@ -161,7 +161,7 @@ export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter
         let uniqueMonths: Array<number> = _.uniq(months);
         return uniqueMonths.length == 12;
     });
-    return uniqueYears;
+    return _.orderBy(uniqueYears, [], ['asc']);
 }
 
 export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): number {
@@ -186,4 +186,14 @@ export function getAllYearsWithData(calanderizedMeters: Array<CalanderizedMeter>
     let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, facility) });
     let uniqueYears: Array<number> = _.uniq(years);
     return uniqueYears;
+}
+
+export function getYearsWithFullDataAccount(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): Array<number> {
+    let yearsWithFullData: Array<number> = [];
+    facilities.forEach(facility => {
+        let facilityYearsWithFullData: Array<number> = getYearsWithFullData(calanderizedMeters, facility);
+        yearsWithFullData = _.union(yearsWithFullData, facilityYearsWithFullData);
+    });
+    // Sort ascending
+    return _.orderBy(yearsWithFullData, [], ['asc']);
 }

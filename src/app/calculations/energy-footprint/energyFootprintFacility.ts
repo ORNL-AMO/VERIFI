@@ -14,10 +14,14 @@ export class EnergyFootprintFacility {
     includedSourcesAnnualResults: Array<IncludedSourcesAnnualResult>;
 
     meterGroupsAnnualResults: Array<MeterGroupAnnualResult> = [];
+    facility: IdbFacility;
     constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
         calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroups: Array<IdbUtilityMeterGroup>) {
-        this.setEnergyFootprintGroups(facility, energyUseGroups, equipment, calanderizedMeters, utilityMeterGroups);
-        this.setIncludedSourcesAnnualResults(calanderizedMeters);
+        this.facility = facility;
+        let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = energyUseGroups.filter(group => group.facilityId == facility.guid);
+        let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
+        this.setEnergyFootprintGroups(facility, facilityEnergyUseGroups, equipment, facilityCalanderizedMeters, utilityMeterGroups);
+        this.setIncludedSourcesAnnualResults(facilityCalanderizedMeters);
         this.setMeterGroupsAnnualResults();
     }
 

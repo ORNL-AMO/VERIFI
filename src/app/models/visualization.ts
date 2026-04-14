@@ -27,12 +27,44 @@ export interface RegressionTableDataItem {
 
 
 export interface FacilityBarChartData {
-  time: string, 
-  energyUse: number, 
-  energyCost: number, 
+  time: string,
+  energyUse: number,
+  energyCost: number,
   marketEmissions: number,
   locationEmissions: number,
   consumption: number,
   year: number,
   fiscalYear: number
+}
+
+/**
+ * SANKEY CHART DATA STRUCTURES
+ */
+export interface SankeyNode {
+  label: string;
+  color?: string;
+}
+
+export interface SankeyLink {
+  source: number;
+  target: number;
+  value: number;
+  color?: string;
+}
+
+export interface SankeyData {
+  type: 'sankey';
+  node: {
+    pad: number;
+    thickness: number;
+    line: { color: string; width: number };
+    label: string[];
+    color?: string[];
+  };
+  link: {
+    source: number[];
+    target: number[];
+    value: number[];
+    color?: string[];
+  };
 }
