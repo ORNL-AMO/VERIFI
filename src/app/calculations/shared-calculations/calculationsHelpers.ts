@@ -161,7 +161,7 @@ export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter
         let uniqueMonths: Array<number> = _.uniq(months);
         return uniqueMonths.length == 12;
     });
-    return uniqueYears;
+    return _.orderBy(uniqueYears, [], ['asc']);
 }
 
 export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): number {

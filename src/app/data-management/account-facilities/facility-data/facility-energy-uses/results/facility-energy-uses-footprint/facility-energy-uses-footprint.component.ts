@@ -1,20 +1,17 @@
-import { Component } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
+import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-energy-uses-footprint',
@@ -24,54 +21,71 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 })
 export class FacilityEnergyUsesFootprintComponent {
 
-  facility: IdbFacility;
-  facilitySub: Subscription;
+  private facilityDbService = inject(FacilitydbService);
+  private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
+  private facilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
+  private calanderizationService = inject(CalanderizationService);
+  private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
-  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
-  facilityEnergyUseGroupsSub: Subscription;
+  selectedFacility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
+  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
+  calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
 
-  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
-  facilityEnergyUseEquipmentSub: Subscription;
 
-  energyFootprintFacility: EnergyFootprintFacility;
-
-  dataTypeMeterGroup: boolean = false;
-
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
-  ) { }
-
-  ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facility = facility;
-    });
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
-      this.facilityEnergyUseGroups = groups;
-    });
-    this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
-      this.facilityEnergyUseEquipment = equipment;
-      this.setEnergyFootprintFacility();
-    });
-  }
-
-  ngOnDestroy() {
-    this.facilitySub.unsubscribe();
-    this.facilityEnergyUseGroupsSub.unsubscribe();
-    this.facilityEnergyUseEquipmentSub.unsubscribe();
-  }
-
-  setEnergyFootprintFacility() {
-    if (this.facilityEnergyUseGroups?.length > 0 && this.facilityEnergyUseEquipment?.length > 0) {
-      let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facility.guid);
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.facility.guid);
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false, { energyIsSource: false, neededUnits: 'MMBtu' }, [], [], [this.facility], 'AR6', []);
-      let utilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.facility.guid);
-      this.energyFootprintFacility = new EnergyFootprintFacility(this.facility, this.facilityEnergyUseGroups, this.facilityEnergyUseEquipment, calanderizedMeters, utilityMeterGroups);
+  yearOptions: Signal<Array<number>> = computed(() => {
+    const calanderizedMeters = this.calanderizedMeters$();
+    const selectedFacility = this.selectedFacility$();
+    if (calanderizedMeters.length === 0 || !selectedFacility) {
+      return [];
     }
-  }
+    return getYearsWithFullData(calanderizedMeters, selectedFacility);
+  });
 
+  //TODO: potentially make a web worker for this or optimize number of calls 
+  //so as data changes it doesn't have to recalculate everything if not necessary. 
+  //TODO: add loading logic during calculation
+  energyFootprintAnnualFacilityBalance$: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
+    const selectedFacility = this.selectedFacility$();
+    const energyUseGroups = this.energyUseGroups$();
+    const equipment = this.equipment$();
+    //TODO: calanderized meters may not be correct units.
+    const calanderizedMeters = this.calanderizedMeters$();
+    const utilityMeterGroups = this.utilityMeterGroups$();
+    const selectedYear = this.selectedYear();
+    if (
+      !energyUseGroups ||
+      !equipment ||
+      !calanderizedMeters ||
+      !utilityMeterGroups ||
+      !selectedYear ||
+      !selectedFacility
+    ) {
+      return null;
+    }
+    return new EnergyFootprintAnnualFacilityBalance(
+      selectedFacility,
+      energyUseGroups,
+      equipment,
+      calanderizedMeters,
+      utilityMeterGroups,
+      selectedYear,
+      "both"
+    )
+  });
+
+  //set to latest year with full data by default, but allow user to select other years to view
+  selectedYear = signal<number | null>(null);
+  displayDataByGroup = signal<boolean>(false);
+
+  constructor() {
+    // Automatically set selectedYear to the last year in yearOptions when yearOptions changes
+    effect(() => {
+      const options = this.yearOptions();
+      if (options.length > 0 && !options.includes(this.selectedYear()!)) {
+        this.selectedYear.set(options[options.length - 1]);
+      }
+    });
+  }
 }

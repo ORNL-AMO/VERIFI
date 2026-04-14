@@ -88,4 +88,71 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
         });
 
     }
+
+    getTotalEnergyUse(): number {
+        return _.sumBy(this.sourcesConsumption, source => source.actualEnergyUse);
+    }
+
+    /**
+     * Gets the total equipment energy use for this meter group across all sources
+     */
+    getTotalEquipmentEnergyUse(): number {
+        return _.sumBy(this.sourcesConsumption, source => source.totalEquipmentEnergyUse);
+    }
+
+    /**
+     * Gets the total unaccounted energy use for this meter group across all sources
+     */
+    getTotalUnaccountedEnergyUse(): number {
+        return _.sumBy(this.sourcesConsumption, source => source.unaccountedEnergyUse);
+    }
+
+    /**
+     * Gets all unique equipment groups in this meter group with their total energy use
+     */
+    getEquipmentGroups(): Array<{guid: string, name: string, totalEnergyUse: number}> {
+        const equipmentGroupMap = new Map<string, {name: string, totalEnergyUse: number}>();
+
+        this.sourcesConsumption.forEach(source => {
+            source.equipmentGroupEnergyUses.forEach(groupUse => {
+                const groupId = groupUse.energyUseGroup.guid;
+                const existing = equipmentGroupMap.get(groupId);
+                if (existing) {
+                    existing.totalEnergyUse += groupUse.energyUse;
+                } else {
+                    equipmentGroupMap.set(groupId, {
+                        name: groupUse.energyUseGroup.name,
+                        totalEnergyUse: groupUse.energyUse
+                    });
+                }
+            });
+        });
+
+        return Array.from(equipmentGroupMap.entries()).map(([guid, data]) => ({
+            guid,
+            name: data.name,
+            totalEnergyUse: data.totalEnergyUse
+        }));
+    }
+
+    /**
+     * Gets the energy use breakdown by source for this meter group
+     */
+    getSourceBreakdown(): Array<{source: string, actualEnergyUse: number, equipmentEnergyUse: number, unaccountedEnergyUse: number}> {
+        return this.sourcesConsumption.map(source => ({
+            source: source.source,
+            actualEnergyUse: source.actualEnergyUse,
+            equipmentEnergyUse: source.totalEquipmentEnergyUse,
+            unaccountedEnergyUse: source.unaccountedEnergyUse
+        }));
+    }
+
+    /**
+     * Gets energy efficiency percentage for this meter group (equipment use / total use)
+     */
+    getEnergyEfficiencyPercentage(): number {
+        const totalEnergyUse = this.getTotalEnergyUse();
+        const totalEquipmentUse = this.getTotalEquipmentEnergyUse();
+        return totalEnergyUse > 0 ? (totalEquipmentUse / totalEnergyUse) * 100 : 0;
+    }
 }
