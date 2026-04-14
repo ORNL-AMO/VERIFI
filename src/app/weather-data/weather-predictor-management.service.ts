@@ -43,7 +43,32 @@ export class WeatherPredictorManagementService {
   ) {
   }
 
+  async setLoadingMessages(selectedFacility: IdbFacility) {
+    this.loadingService.addLoadingMessage('Adding Predictors');
+
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
+
+    let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
+    let startDate: Date = new Date(monthlyData[0].date);
+
+    let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(this.weatherDataService.selectedStation.ID, startDate, endDate, ['wet_bulb_temp'])
+    if (weatherData != "error") {
+      while (startDate <= endDate) {
+        let entryDate: Date = new Date(startDate);
+
+        let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+        let dateStr = month.abbreviation + ', ' + entryDate.getFullYear();
+        this.loadingService.addLoadingMessage('Calculating Predictors: ' + dateStr);
+
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
+    }
+  }
+
   async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
+    let idx: number = 0;
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
@@ -128,7 +153,7 @@ export class WeatherPredictorManagementService {
 
         let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
         let dateStr = month.abbreviation + ', ' + entryDate.getFullYear();
-        this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
+        this.loadingService.setCurrentLoadingIndex(++idx);
 
         //ISSUE: 1822
         let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)

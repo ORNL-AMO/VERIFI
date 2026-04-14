@@ -50,8 +50,8 @@ export class ExportToExcelTemplateV3Service {
     request.open('GET', 'assets/csv_templates/VERIFI-Import-Data.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
-      workbook.xlsx.load(request.response).then(() => {
-        this.fillWorkbook(workbook, includeWeatherData, facilityId);
+      workbook.xlsx.load(request.response).then(async() => {
+        await this.fillWorkbook(workbook, includeWeatherData, facilityId);
         workbook.xlsx.writeBuffer().then(excelData => {
           this.exportBlob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let date = new Date();
@@ -108,39 +108,72 @@ export class ExportToExcelTemplateV3Service {
     this.loadingService.addLoadingMessage('Finishing up');
   }
 
-  fillWorkbook(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Workbook {
+  async fillWorkbook(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): Promise<ExcelJS.Workbook> {
     this.utilityMeterDbService.setTemporaryMeterNumbersForExport();
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(1);
     this.setFacilityWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     this.loadingService.setCurrentLoadingIndex(2);
     this.setElectricityMetersWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(3);
     this.setElectricityDataWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(4);
     this.setStationaryMetersWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(5);
     this.setStationaryDataWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(6);
     this.setMobileMetersWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(7);
     this.setMobileDataWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(8);
     this.setOtherEnergyMetersWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(9);
     this.setOtherEnergyDataWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(10);
     this.setOtherEmissionsWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(11);
     this.setOtherEmissionsDataWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(12);
     this.setWaterMetersWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(13);
     this.setWaterDataWorksheet(workbook, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(14);
     this.setPredictorsWorksheet(workbook, includeWeatherData, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     this.loadingService.setCurrentLoadingIndex(15);
     this.setPredictorDataWorksheet(workbook, includeWeatherData, facilityId);
+    await new Promise(resolve => setTimeout(resolve, 0));
+
     this.loadingService.setCurrentLoadingIndex(16);
+
     return workbook;
   }
 
