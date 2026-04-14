@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { first, firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -17,6 +17,7 @@ import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -25,35 +26,46 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
+  private facilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
+  private activatedRoute = inject(ActivatedRoute);
+  private facilityDbService = inject(FacilitydbService);
+  private router = inject(Router);
+  private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
+  private facilityEnergyUseGroupFormService = inject(FacilityEnergyUseGroupFormService);
+  private sharedDataService = inject(SharedDataService);
+  private loadingService = inject(LoadingService);
+  private accountDbService = inject(AccountdbService);
+  private dbChangesService = inject(DbChangesService);
+  private toastNotificationsService = inject(ToastNotificationsService);
+  private utilityMeterDataDbService = inject(UtilityMeterDatadbService);
+
+  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  facilityEnergyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+
+  // Uses a getter so Angular's change detection picks up checkbox toggles via [(ngModel)]
+  get hasSelectedEquipment(): boolean {
+    return this.facilityEnergyUseEquipment$().some(equip => equip.selected);
+  }
+
+  get selectedEquipment(): Array<IdbFacilityEnergyUseEquipment> {
+    return this.facilityEnergyUseEquipment$().filter(equip => equip.selected);
+  }
+
+  get transferGroupOptions(): Array<IdbFacilityEnergyUseGroup> {
+    let currentGroupId = this.energyUseGroup.guid;
+    return this.facilityEnergyUseGroups$().filter(group => group.guid !== currentGroupId);
+  }
+
 
   energyUseGroup: IdbFacilityEnergyUseGroup;
   form: FormGroup;
-
-  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
-  facilityEnergyUseEquipmentSub: Subscription;
-
   showDeleteGroup: boolean = false;
   sourceOptions: Array<MeterSource> = AllSources;
-  constructor(private activatedRoute: ActivatedRoute,
-    private facilityDbService: FacilitydbService,
-    private router: Router,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseGroupFormService: FacilityEnergyUseGroupFormService,
-    private sharedDataService: SharedDataService,
-    private loadingService: LoadingService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
-    private toastNotificationsService: ToastNotificationsService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
-  ) {
-  }
+  showBulkTransfer: boolean = false;
+  showBulkDelete: boolean = false;
+  selectedTransferGroupId: string;
 
   ngOnInit() {
-    this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
-      this.facilityEnergyUseEquipment = equipment;
-    });
-
     this.activatedRoute.params.subscribe(params => {
       let groupId: string = params['id'];
       this.energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
@@ -63,10 +75,6 @@ export class FacilityEnergyUseGroupComponent {
         this.goToGroupList();
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.facilityEnergyUseEquipmentSub.unsubscribe();
   }
 
   async saveChanges() {
@@ -125,7 +133,7 @@ export class FacilityEnergyUseGroupComponent {
     return of(true);
   }
 
-  async addEquipment() {    
+  async addEquipment() {
     let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.energyUseGroup.facilityId);
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, facilityMeterDataYears.endYear);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
@@ -133,5 +141,62 @@ export class FacilityEnergyUseGroupComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);
+  }
+
+  openBulkTransfer() {
+    this.showBulkTransfer = true;
+  }
+
+  async confirmBulkTransfer() {
+    this.loadingService.setLoadingMessage('Transferring Equipment...');
+    this.loadingService.setLoadingStatus(true);
+    //create copy of selected equipment to modify selected before saving
+    let _selectedEquipment: Array<IdbFacilityEnergyUseEquipment> = this.selectedEquipment.map(equipment => { return { ...equipment } });
+    for (let i = 0; i < _selectedEquipment.length; i++) {
+      let equipment = _selectedEquipment[i];
+      equipment.energyUseGroupId = this.selectedTransferGroupId;
+      equipment.selected = false;
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(equipment));
+    }
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    this.showBulkTransfer = false;
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationsService.showToast("Equipment Transferred", undefined, undefined, false, "alert-success");
+  }
+
+  cancelBulkTransfer() {
+    let facilityEnergyUseEquipment = this.facilityEnergyUseEquipment$();
+    for (let i = 0; i < facilityEnergyUseEquipment.length; i++) {
+      facilityEnergyUseEquipment[i].selected = false;
+    }
+    this.showBulkTransfer = false;
+  }
+
+  openBulkDelete() {
+    this.showBulkDelete = true;
+  }
+
+  async confirmBulkDelete() {
+    this.loadingService.setLoadingMessage('Deleting Equipment...');
+    this.loadingService.setLoadingStatus(true);
+    for (let i = 0; i < this.selectedEquipment.length; i++) {
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.deleteWithObservable(this.selectedEquipment[i].id));
+    }
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    this.showBulkDelete = false;
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationsService.showToast("Equipment Deleted", undefined, undefined, false, "alert-success");
+  }
+
+  cancelBulkDelete() {
+    let facilityEnergyUseEquipment = this.facilityEnergyUseEquipment$();
+    for (let i = 0; i < facilityEnergyUseEquipment.length; i++) {
+      facilityEnergyUseEquipment[i].selected = false;
+    }
+    this.showBulkDelete = false;
   }
 }

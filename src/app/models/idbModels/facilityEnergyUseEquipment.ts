@@ -13,7 +13,8 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     operatingConditionsData: Array<EnergyEquipmentOperatingConditionsData>,
     equipmentType: EquipmentType,
     utilityData: Array<EquipmentUtilityData>,
-    color: string
+    color: string,
+    selected?: boolean
 }
 
 export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup, latestYear: number): IdbFacilityEnergyUseEquipment {

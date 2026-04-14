@@ -10,3 +10,11 @@
 a.click-link.fa-plus{
     color: #007bff !important
 } 
+
+.btn.hidden{
+    display: none;
+}
+
+.popup-header .fa{
+    color: white;
+}
