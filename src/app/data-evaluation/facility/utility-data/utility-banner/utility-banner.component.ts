@@ -32,6 +32,7 @@ export class UtilityBannerComponent implements OnInit {
   meterData: Array<IdbUtilityMeterData>;
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
+  loadingSub: Subscription;
   constructor(private sharedDataService: SharedDataService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service, private facilityDbService: FacilitydbService,
     private predictorDataHelperService: PredictorDataHelperService,
@@ -54,7 +55,12 @@ export class UtilityBannerComponent implements OnInit {
     this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
       this.meterData = val;
       this.setPredictorsNeedUpdate();
-    })
+    });
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'export-facilities-to-excel') {
+        this.exportToExcelTemplateV3Service.triggerExportDownload();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -62,6 +68,7 @@ export class UtilityBannerComponent implements OnInit {
     this.facilitySub.unsubscribe();
     this.predictorDataSub.unsubscribe();
     this.meterDataSub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   openExportModal() {
@@ -77,8 +84,8 @@ export class UtilityBannerComponent implements OnInit {
     this.showExportModal = false;
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facility');
+    this.exportToExcelTemplateV3Service.setExportFacilityDataMessages();
     this.loadingService.setCurrentLoadingIndex(0);
-    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, this.facility.guid);
   }
 

@@ -39,6 +39,7 @@ export class WeatherDataComponent {
   cddBaseTemp: number;
   hddBaseTemp: number;
   selectedValues: Array<{ name: WeatherDataSelection, value?: number }> = [];
+  loadingSub: Subscription;
 
   constructor(
     private weatherDataService: WeatherDataService,
@@ -72,6 +73,12 @@ export class WeatherDataComponent {
       }
     });
 
+    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context === 'create-weather-predictors') {
+        this.navigateToUrl();
+      }
+    });
+
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.urlAfterRedirects);
@@ -82,6 +89,7 @@ export class WeatherDataComponent {
 
   ngOnDestroy() {
     this.applyToFacilitySub.unsubscribe();
+    this.loadingSub.unsubscribe();
   }
 
   cancelApplyToFacility() {
@@ -156,10 +164,13 @@ export class WeatherDataComponent {
   async confirmCreate() {
     this.setSelectedValues();
     //Create weather data predictors and data for selected facility.
+
     this.analyticsService.sendEvent('weather_data_predictors');
     this.weatherDataService.applyToFacility.next(false);
-    this.loadingService.setLoadingMessage('Adding Predictors...');
-    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setContext('create-weather-predictors');
+    this.loadingService.setTitle('Create Weather Predictors');
+    this.weatherPredictorManagementService.setLoadingMessages(this.selectedFacility);
+    this.loadingService.setCurrentLoadingIndex(0);
     let results: "success" | "error" = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(this.selectedFacility, this.selectedValues);
 
     // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -288,15 +299,19 @@ export class WeatherDataComponent {
 
     //   await this.dbChangesService.selectAccount(selectedAccount, true);
     if (results == "success") {
-      this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);
-      if (this.router.url.includes('data-management')) {
-        this.router.navigateByUrl('data-management/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors');
-      } else {
-        this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/predictor-table');
-      }
+      this.loadingService.isLoadingComplete.next(true);
     } else {
+      this.loadingService.isLoadingComplete.next(true);
       this.toastNotificationService.weatherDataErrorToast();
+    }
+  }
+
+  navigateToUrl() {
+    this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('data-management/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors');
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/predictor-table');
     }
   }
 
