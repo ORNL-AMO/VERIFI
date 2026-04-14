@@ -29,19 +29,21 @@ export class EnergyFootprintAnnualFacilityBalance {
     meterGroupsAnnualBalances: Array<EnergyFootprintAnnualBalanceMeterGroup>;
 
     constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
-        calanderizedMeters: Array<CalanderizedMeter>, meterGroups: Array<IdbUtilityMeterGroup>, year: number, resultsBy: "facility" | "meterGroup" | "both") {
+        calanderizedMeters: Array<CalanderizedMeter>, meterGroups: Array<IdbUtilityMeterGroup>, year: number, resultsBy: "facility" | "meterGroup" | "both",
+        useLatestDataAvailable: boolean = true) {
         this.facility = facility;
         this.year = year;
         if (resultsBy == "facility" || resultsBy == "both") {
-            this.setFacilitySourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility);
+            this.setFacilitySourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
         }
         if (resultsBy == "meterGroup" || resultsBy == "both") {
-            this.setMeterGroupAnnualBalances(calanderizedMeters, energyUseGroups, equipment, meterGroups, facility);
+            this.setMeterGroupAnnualBalances(calanderizedMeters, energyUseGroups, equipment, meterGroups, facility, useLatestDataAvailable);
         }
 
     }
 
-    setFacilitySourcesConsumption(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility) {
+    setFacilitySourcesConsumption(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>,
+        equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility, useLatestDataAvailable: boolean) {
         this.sourcesConsumption = new Array();
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
         let facilityEquipment: Array<IdbFacilityEnergyUseEquipment> = equipment.filter(equip => equip.facilityId == facility.guid);
@@ -64,6 +66,17 @@ export class EnergyFootprintAnnualFacilityBalance {
                     equip.utilityData.forEach(ud => {
                         if (ud.energySource == source) {
                             let annualEnergyUseData: EquipmentUtilityDataEnergyUse = ud.energyUse.find(eu => eu.year == this.year);
+                            if (!annualEnergyUseData && useLatestDataAvailable) {
+                                //get closest year that is less than selected year
+                                let closestYearData: EquipmentUtilityDataEnergyUse = ud.energyUse.reduce((closest, current) => {
+                                    if (current.year < this.year && (!closest || current.year > closest.year)) {
+                                        return current;
+                                    }
+                                    return closest;
+                                }, null);
+                                annualEnergyUseData = closestYearData;
+                            }
+
                             if (annualEnergyUseData) {
                                 // new ConvertValue(energyUse, calculatedUnit, resultsUnit)
                                 let calculatedUnit: string = getEnergyUseUnit(ud.units)
@@ -99,14 +112,15 @@ export class EnergyFootprintAnnualFacilityBalance {
         });
     }
 
-    setMeterGroupAnnualBalances(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>, meterGroups: Array<IdbUtilityMeterGroup>, facility: IdbFacility) {
+    setMeterGroupAnnualBalances(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
+        meterGroups: Array<IdbUtilityMeterGroup>, facility: IdbFacility, useLatestDataAvailable: boolean) {
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
         let facilityEquipment: Array<IdbFacilityEnergyUseEquipment> = equipment.filter(equip => equip.facilityId == facility.guid);
         let facilityMeterGroups: Array<IdbUtilityMeterGroup> = meterGroups.filter(mg => mg.facilityId == facility.guid);
         let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = energyUseGroups.filter(eug => eug.facilityId == facility.guid);
         this.meterGroupsAnnualBalances = new Array();
         facilityMeterGroups.forEach(meterGroup => {
-            let meterGroupBalance: EnergyFootprintAnnualBalanceMeterGroup = new EnergyFootprintAnnualBalanceMeterGroup(facilityEnergyUseGroups, facilityEquipment, facilityMeters, meterGroup, this.year, facility);
+            let meterGroupBalance: EnergyFootprintAnnualBalanceMeterGroup = new EnergyFootprintAnnualBalanceMeterGroup(facilityEnergyUseGroups, facilityEquipment, facilityMeters, meterGroup, this.year, facility, useLatestDataAvailable);
             this.meterGroupsAnnualBalances.push(meterGroupBalance);
         });
         //TODO: add equipment that isn't linked to a meter group as its own "meter group" with source = "unlinked" or something similar
@@ -137,8 +151,8 @@ export class EnergyFootprintAnnualFacilityBalance {
      * Gets all unique equipment groups across facility or meter groups
      * @param fromMeterGroups - If true, gets groups from meter groups; if false, from facility sources
      */
-    getUniqueEquipmentGroups(fromMeterGroups: boolean = false): Array<{guid: string, name: string, totalEnergyUse: number}> {
-        const equipmentGroupMap = new Map<string, {name: string, totalEnergyUse: number}>();
+    getUniqueEquipmentGroups(fromMeterGroups: boolean = false): Array<{ guid: string, name: string, totalEnergyUse: number }> {
+        const equipmentGroupMap = new Map<string, { name: string, totalEnergyUse: number }>();
 
         if (fromMeterGroups && this.meterGroupsAnnualBalances) {
             this.meterGroupsAnnualBalances.forEach(meterGroup => {
@@ -185,7 +199,7 @@ export class EnergyFootprintAnnualFacilityBalance {
      * Gets all unique sources across facility or meter groups with their total consumption
      * @param fromMeterGroups - If true, gets sources from meter groups; if false, from facility sources
      */
-    getUniqueSources(fromMeterGroups: boolean = false): Array<{source: string, totalEnergyUse: number}> {
+    getUniqueSources(fromMeterGroups: boolean = false): Array<{ source: string, totalEnergyUse: number }> {
         const sourceMap = new Map<string, number>();
 
         if (fromMeterGroups && this.meterGroupsAnnualBalances) {

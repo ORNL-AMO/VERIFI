@@ -1,6 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { MeterSource } from "src/app/models/constantsAndTypes";
-import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
+import { EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
 import * as _ from 'lodash';
@@ -24,14 +24,15 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
         }>
     }>;
     constructor(energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
-        calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroup: IdbUtilityMeterGroup, year: number, facility: IdbFacility) {
+        calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroup: IdbUtilityMeterGroup, year: number, facility: IdbFacility,
+        useLatestDataAvailable: boolean) {
         this.meterGroup = utilityMeterGroup;
         this.year = year;
-        this.setSourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility);
+        this.setSourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
     }
 
     setSourcesConsumption(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>,
-        equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility) {
+        equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility, useLatestDataAvailable: boolean) {
         this.sourcesConsumption = new Array();
         let metersInGroup: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.groupId == this.meterGroup.guid);
         let sources: Array<MeterSource> = metersInGroup.map(meter => meter.meter.source);
@@ -53,7 +54,17 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
                 if (equipmentGroup) {
                     equip.utilityData.forEach(ud => {
                         if (ud.energySource == source) {
-                            let annualEnergyUse = ud.energyUse.find(eu => eu.year == this.year);
+                            let annualEnergyUse: EquipmentUtilityDataEnergyUse = ud.energyUse.find(eu => eu.year == this.year);
+                            if (!annualEnergyUse && useLatestDataAvailable) {
+                                //get closest year that is less than selected year
+                                let closestYearData: EquipmentUtilityDataEnergyUse = ud.energyUse.reduce((closest, current) => {
+                                    if (current.year < this.year && (!closest || current.year > closest.year)) {
+                                        return current;
+                                    }
+                                    return closest;
+                                }, null);
+                                annualEnergyUse = closestYearData;
+                            }
                             if (annualEnergyUse) {
                                 let calculatedUnit: string = getEnergyUseUnit(ud.units)
                                 let needsConversion: boolean = calculatedUnit != facility.energyUnit;
@@ -110,8 +121,8 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
     /**
      * Gets all unique equipment groups in this meter group with their total energy use
      */
-    getEquipmentGroups(): Array<{guid: string, name: string, totalEnergyUse: number}> {
-        const equipmentGroupMap = new Map<string, {name: string, totalEnergyUse: number}>();
+    getEquipmentGroups(): Array<{ guid: string, name: string, totalEnergyUse: number }> {
+        const equipmentGroupMap = new Map<string, { name: string, totalEnergyUse: number }>();
 
         this.sourcesConsumption.forEach(source => {
             source.equipmentGroupEnergyUses.forEach(groupUse => {
@@ -138,7 +149,7 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
     /**
      * Gets the energy use breakdown by source for this meter group
      */
-    getSourceBreakdown(): Array<{source: string, actualEnergyUse: number, equipmentEnergyUse: number, unaccountedEnergyUse: number}> {
+    getSourceBreakdown(): Array<{ source: string, actualEnergyUse: number, equipmentEnergyUse: number, unaccountedEnergyUse: number }> {
         return this.sourcesConsumption.map(source => ({
             source: source.source,
             actualEnergyUse: source.actualEnergyUse,
