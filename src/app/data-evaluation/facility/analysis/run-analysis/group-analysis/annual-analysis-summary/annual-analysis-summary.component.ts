@@ -19,6 +19,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-annual-analysis-summary',
@@ -28,13 +29,16 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 })
 export class AnnualAnalysisSummaryComponent implements OnInit {
 
-  dataDisplay: 'table' | 'graph';
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
   facility: IdbFacility;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   worker: Worker;
   calculating: boolean | 'error';
+  analysisDisplay: 'table' | 'graph';
+  key: string;
+  facilitySub: Subscription;
+
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
@@ -44,11 +48,16 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.key = 'annual-' + this.facility?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
+    });
+
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
@@ -91,10 +100,11 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     if (this.worker) {
       this.worker.terminate();
     }
+    this.facilitySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.dataDisplay = display;
-    this.analysisService.dataDisplay.next(this.dataDisplay);
+    this.analysisDisplay = display;
+    this.analysisService.getDisplaySubject(this.key, 'table').next(this.analysisDisplay);
   }
 }

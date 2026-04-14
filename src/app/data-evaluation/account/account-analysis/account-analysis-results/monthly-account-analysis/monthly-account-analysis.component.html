@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-between mb-2">
   <div class="p-0">
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-analysis-summary-table-filter [tableContext]="'monthAccount'"
       [analysisItem]="accountAnalysisItem"></app-analysis-summary-table-filter>
     }
@@ -8,17 +8,17 @@
 
   <div class="d-flex">
     <!--Items Per Page-->
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-table-items-dropdown></app-table-items-dropdown>
     }
     <div class="btn-group ps-2">
-      <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
+      <button class="btn toggle-btn" [ngClass]="{'active': analysisDisplay == 'table'}"
         (click)="setDataDisplay('table')">
         <span class="fa fa-chevron-right"></span>
         Table
         <span class="fa fa-chevron-left"></span>
       </button>
-      <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
+      <button class="btn toggle-btn" [ngClass]="{'active': analysisDisplay == 'graph'}"
         (click)="setDataDisplay('graph')">
         <span class="fa fa-chevron-right"></span>
         Graph
@@ -29,19 +29,19 @@
 </div>
 @if (calculating == false) {
   <div class="w-100 x-scroll">
-    @if (dataDisplay == 'graph') {
+    @if (analysisDisplay == 'graph') {
       <app-monthly-analysis-summary-graph
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
         [facilityOrAccount]="account">
       </app-monthly-analysis-summary-graph>
     }
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-monthly-analysis-summary-table
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem" [isAccount]="true"
         [facilityOrAccount]="account" [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
       </app-monthly-analysis-summary-table>
     }
-    @if (dataDisplay == 'graph') {
+    @if (analysisDisplay == 'graph') {
       <app-monthly-analysis-summary-savings-graph [analysisItem]="accountAnalysisItem"
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [facilityOrAccount]="account">
       </app-monthly-analysis-summary-savings-graph>
