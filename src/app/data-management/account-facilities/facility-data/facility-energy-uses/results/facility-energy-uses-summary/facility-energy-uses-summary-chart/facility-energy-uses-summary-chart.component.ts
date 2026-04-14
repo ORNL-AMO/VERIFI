@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { EnergyUsesFacilitySummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -15,11 +15,9 @@ export class FacilityEnergyUsesSummaryChartComponent {
   @Input({ required: true })
   facility: IdbFacility;
 
+  private plotlyService = inject(PlotlyService);
+
   @ViewChild('summaryChart', { static: false }) summaryChart: ElementRef;
-
-  constructor(private plotlyService: PlotlyService) {
-
-  }
 
   ngAfterViewInit() {
     this.drawChart()
@@ -78,14 +76,17 @@ export class FacilityEnergyUsesSummaryChartComponent {
         type: 'linear',
       },
       legend: {
-        // orientation: "h"
+        orientation: 'h',
+        yanchor: 'bottom', // or 'top'
+        y: -.8,
       },
       clickmode: "none",
-      // margin: { t: 10 },
+      // margin: { b: 0 },
+      hovermode: 'x unified',
     };
     let config = {
       modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
-      modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
+      // modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
       displaylogo: false,
       responsive: true,
     };

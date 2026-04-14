@@ -6,13 +6,13 @@
                     {{facility.name}} Energy Use Summary
                 </h4>
                 @if(energyUsesFacilitySummary){
-                <app-facility-energy-uses-summary-table [energyUsesFacilitySummary]="energyUsesFacilitySummary"
-                    [facility]="facility">
-                </app-facility-energy-uses-summary-table>
-                <hr>
                 <app-facility-energy-uses-summary-chart [energyUsesFacilitySummary]="energyUsesFacilitySummary"
                     [facility]="facility">
                 </app-facility-energy-uses-summary-chart>
+                <hr>
+                <app-facility-energy-uses-summary-table [energyUsesFacilitySummary]="energyUsesFacilitySummary"
+                    [facility]="facility">
+                </app-facility-energy-uses-summary-table>
                 }@else{
                 <!--TODO: Message with link to manage energy use groups-->
                 <p>No energy use data available.</p>
