@@ -25,7 +25,7 @@ export class RegressionModelsService {
     analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);
     let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let endYear: number = monthlyStartAndEndDate.endDate.getFullYear();
+    let endYear: number = analysisItem.calculatedReportYear;
     let baselineYear: number = getFiscalYear(baselineDate, facility);
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
     let predictorVariableIds: Array<string> = new Array();
