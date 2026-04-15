@@ -7,7 +7,7 @@ import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { AnnualFootprintGroupSourceResult, FootprintAnnualResult, IncludedSourcesAnnualResult, MeterGroupAnnualResult } from "./energyFootprintModels";
-import { convertMeterDataToSite } from "../calanderization/calanderizeMeters";
+import { convertMeterDataToSite } from "../calanderization/calanderizationHelpers";
 
 export class EnergyFootprintFacility {
 
@@ -21,7 +21,7 @@ export class EnergyFootprintFacility {
         this.facility = facility;
         let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = energyUseGroups.filter(group => group.facilityId == facility.guid);
         let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
-        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters);
+        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters, facility.energyUnit);
         this.setEnergyFootprintGroups(facility, facilityEnergyUseGroups, equipment, siteCalanderizedMeters, utilityMeterGroups);
         this.setIncludedSourcesAnnualResults(siteCalanderizedMeters);
         this.setMeterGroupsAnnualResults();

@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 import { EnergyFootprintAnnualBalanceMeterGroup } from "./energyFootprintAnnualBalanceMeterGroup";
 import { ConvertValue } from "../../conversions/convertValue";
 import { getEnergyUseUnit } from "../energyFootprintCalculations";
-import { convertMeterDataToSite } from "../../calanderization/calanderizeMeters";
+import { convertMeterDataToSite } from "../../calanderization/calanderizationHelpers";
 
 
 export class EnergyFootprintAnnualFacilityBalance {
@@ -33,7 +33,7 @@ export class EnergyFootprintAnnualFacilityBalance {
         calanderizedMeters: Array<CalanderizedMeter>, meterGroups: Array<IdbUtilityMeterGroup>, year: number, resultsBy: "facility" | "meterGroup" | "both",
         useLatestDataAvailable: boolean = true) {
         let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
-        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters);
+                let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters, facility.energyUnit);
         this.facility = facility;
         this.year = year;
         if (resultsBy == "facility" || resultsBy == "both") {
