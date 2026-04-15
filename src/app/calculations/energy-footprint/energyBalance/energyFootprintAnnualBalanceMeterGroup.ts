@@ -89,6 +89,8 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
                     });
                 }
             });
+            //order equipment group energy uses by energy use amount
+            equipmentGroupEnergyUses = _.orderBy(equipmentGroupEnergyUses, ['energyUse'], ['desc']);
             this.sourcesConsumption.push({
                 source: source,
                 actualEnergyUse: actualEnergyUse,

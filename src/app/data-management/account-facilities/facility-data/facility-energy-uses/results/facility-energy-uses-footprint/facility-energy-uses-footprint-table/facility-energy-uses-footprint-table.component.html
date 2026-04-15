@@ -31,7 +31,11 @@
         {
         <tr>
             <td>
-                <span class="ps-4">{{groupConsumption.energyUseGroup.name}}</span>
+                <span class="ps-4">
+                    <a class="click-link" (click)="goToGroupFootprint(groupConsumption.energyUseGroup)">
+                        {{groupConsumption.energyUseGroup.name}}
+                    </a>
+                </span>
             </td>
             <td>&mdash;</td>
             <td>{{groupConsumption.energyUse | number:'1.0-0'}}</td>
@@ -72,7 +76,11 @@
         {
         <tr>
             <td>
-                <span class="ps-4">{{groupConsumption.energyUseGroup.name}}</span>
+                <span class="ps-4">
+                    <a class="click-link" (click)="goToGroupFootprint(groupConsumption.energyUseGroup)">
+                        {{groupConsumption.energyUseGroup.name}}
+                    </a>
+                </span>
             </td>
             <td>&mdash;</td>
             <td>{{groupConsumption.energyUse | number:'1.0-0'}}</td>

@@ -102,6 +102,8 @@ export class EnergyFootprintAnnualFacilityBalance {
                     });
                 }
             });
+            //order equipment group energy uses by energy use amount
+            equipmentGroupEnergyUses = _.orderBy(equipmentGroupEnergyUses, ['energyUse'], ['desc']);
             this.sourcesConsumption.push({
                 source: source,
                 actualEnergyUse: actualEnergyUse,
@@ -123,6 +125,8 @@ export class EnergyFootprintAnnualFacilityBalance {
             let meterGroupBalance: EnergyFootprintAnnualBalanceMeterGroup = new EnergyFootprintAnnualBalanceMeterGroup(facilityEnergyUseGroups, facilityEquipment, facilityMeters, meterGroup, this.year, facility, useLatestDataAvailable);
             this.meterGroupsAnnualBalances.push(meterGroupBalance);
         });
+        //TODO: add meters without meter group
+        
         //TODO: add equipment that isn't linked to a meter group as its own "meter group" with source = "unlinked" or something similar
     }
 

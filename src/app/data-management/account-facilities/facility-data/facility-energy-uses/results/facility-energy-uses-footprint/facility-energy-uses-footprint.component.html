@@ -8,13 +8,13 @@
                             {{selectedFacility$()?.name}} Energy Use Footprint
                         </div>
                         <div class="d-flex">
-                            <div class="me-3">
+                            <!-- <div class="me-3">
                                 <select class="form-select" [(ngModel)]="selectedYear">
                                     @for(year of yearOptions(); track year) {
                                     <option [ngValue]="year">{{year}}</option>
                                     }
                                 </select>
-                            </div>
+                            </div> -->
                             <div class="d-flex my-auto">
                                 <label class="switch ms-auto" for="includeInEnergy">
                                     <input class="checkbox" type="checkbox" id="includeInEnergy"
@@ -22,7 +22,7 @@
                                     <span class="slider round"></span>
                                 </label>
                                 <div class="ps-2 my-auto fw-bold">
-                                    Show By Group
+                                    By Meter Group
                                 </div>
                             </div>
                         </div>
