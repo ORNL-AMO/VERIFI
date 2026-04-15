@@ -42,7 +42,6 @@ export class FacilityEnergyUseGroupComponent {
   facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
   facilityEnergyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
 
-  // Uses a getter so Angular's change detection picks up checkbox toggles via [(ngModel)]
   get hasSelectedEquipment(): boolean {
     return this.facilityEnergyUseEquipment$().some(equip => equip.selected);
   }

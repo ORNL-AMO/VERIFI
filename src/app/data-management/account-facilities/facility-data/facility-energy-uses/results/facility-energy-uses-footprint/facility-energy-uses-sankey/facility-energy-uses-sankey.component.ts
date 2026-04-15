@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { SankeyData, SankeyNode, SankeyLink } from 'src/app/models/visualization';
+import { EnergyFootprintAnnualBalanceMeterGroup } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualBalanceMeterGroup';
 
 @Component({
   selector: 'app-facility-energy-uses-sankey',
@@ -40,11 +41,11 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
   private sankeyData = computed(() => {
     const balance = this.energyFootprintAnnualFacilityBalanceSignal();
     const displayByGroup = this.displayDataByGroupSignal();
-    
+
     if (!balance) {
       return null;
     }
-    
+
     // Check if we have the required data based on display mode
     if (displayByGroup && !balance.meterGroupsAnnualBalances?.length) {
       return null;
@@ -69,7 +70,7 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
     },
     font: { size: 12 },
     margin: { t: 50, l: 10, r: 10, b: 10 },
-    height: 400
+    height: 700
   };
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -140,7 +141,7 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
   }
 
   /**
-   * Creates Sankey data showing meter group flow: Meter Groups -> Sources -> Equipment Groups
+   * Creates Sankey data showing meter group flow: Sources -> Meter Groups -> Equipment Groups
    */
   private transformMeterGroupSankeyData(balance: EnergyFootprintAnnualFacilityBalance): SankeyData | null {
     const meterGroups = balance.meterGroupsAnnualBalances;
@@ -149,22 +150,11 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
     const nodes: SankeyNode[] = [];
     const links: SankeyLink[] = [];
 
-    // Add meter group nodes (left side)
-    meterGroups.forEach(meterGroup => {
-      const totalEnergyUse = meterGroup.getTotalEnergyUse();
-      if (totalEnergyUse > 0) {
-        nodes.push({
-          label: `${meterGroup.meterGroup.name} (${this.formatEnergyValue(totalEnergyUse)})`,
-          color: '#4682B4' // Default color for meter groups
-        });
-      }
-    });
-
     // Collect unique sources across all meter groups
     const allSources = this.collectAllSourcesFromMeterGroups(meterGroups);
-    const sourceNodeStartIndex = nodes.length;
+    if (!allSources.length) return null;
 
-    // Add source nodes (middle)
+    // Add source nodes (left side / start nodes)
     allSources.forEach(source => {
       nodes.push({
         label: `${source.source} (${this.formatEnergyValue(source.totalEnergyUse)})`,
@@ -172,9 +162,22 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
       });
     });
 
+    const meterGroupNodeStartIndex = nodes.length;
+
+    // Add meter group nodes (middle)
+    const activeMeterGroups = meterGroups.filter(mg => mg.getTotalEnergyUse() > 0);
+    activeMeterGroups.forEach(meterGroup => {
+      const totalEnergyUse = meterGroup.getTotalEnergyUse();
+      const source = meterGroup.getSource();
+      nodes.push({
+        label: `${meterGroup.meterGroup.name} (${this.formatEnergyValue(totalEnergyUse)})`,
+        color: source === 'Mixed' ? '#4682B4' : this.getSourceColor(source)
+      });
+    });
+
     // Collect all equipment groups across all meter groups
     const allEquipmentGroups = this.collectAllEquipmentGroupsFromMeterGroups(meterGroups);
-    const equipmentGroupStartIndex = sourceNodeStartIndex + allSources.length;
+    const equipmentGroupStartIndex = meterGroupNodeStartIndex + activeMeterGroups.length;
 
     // Add equipment group nodes (right side)
     allEquipmentGroups.forEach(group => {
@@ -184,11 +187,11 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
       });
     });
 
-    // Create links: meter groups -> sources
-    this.createMeterGroupToSourceLinks(meterGroups, allSources, sourceNodeStartIndex, links);
+    // Create links: sources -> meter groups
+    this.createSourceToMeterGroupLinks(activeMeterGroups, allSources, meterGroupNodeStartIndex, links);
 
-    // Create links: sources -> equipment groups  
-    this.createSourceToEquipmentLinksFromMeterGroups(meterGroups, allSources, allEquipmentGroups, sourceNodeStartIndex, equipmentGroupStartIndex, links);
+    // Create links: meter groups -> equipment groups
+    this.createMeterGroupToEquipmentLinks(activeMeterGroups, allEquipmentGroups, meterGroupNodeStartIndex, equipmentGroupStartIndex, links);
 
     return this.buildSankeyData(nodes, links);
   }
@@ -327,16 +330,16 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
   }
 
   /**
-   * Creates links between meter groups and sources
+   * Creates links between sources and meter groups
    */
-  private createMeterGroupToSourceLinks(meterGroups: any[], allSources: any[], sourceNodeStartIndex: number, links: SankeyLink[]): void {
+  private createSourceToMeterGroupLinks(meterGroups: any[], allSources: any[], meterGroupNodeStartIndex: number, links: SankeyLink[]): void {
     meterGroups.forEach((meterGroup, meterGroupIndex) => {
       meterGroup.sourcesConsumption.forEach(source => {
         const sourceIndex = allSources.findIndex(s => s.source === source.source);
         if (sourceIndex !== -1 && source.actualEnergyUse > 0) {
           links.push({
-            source: meterGroupIndex,
-            target: sourceNodeStartIndex + sourceIndex,
+            source: sourceIndex,
+            target: meterGroupNodeStartIndex + meterGroupIndex,
             value: source.actualEnergyUse,
             color: this.getLinkColor(source.source, false, 0.3)
           });
@@ -346,51 +349,42 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
   }
 
   /**
-   * Creates links between sources and equipment groups for meter group display
+   * Creates links between meter groups and equipment groups
    */
-  private createSourceToEquipmentLinksFromMeterGroups(meterGroups: any[], allSources: any[], allEquipmentGroups: any[], sourceNodeStartIndex: number, equipmentGroupStartIndex: number, links: SankeyLink[]): void {
-    // Create a map to track energy flow from each source to each equipment group
-    const sourceToEquipmentFlow = new Map<string, Map<string, number>>();
+  private createMeterGroupToEquipmentLinks(meterGroups: EnergyFootprintAnnualBalanceMeterGroup[], allEquipmentGroups: {
+    name: string;
+    guid: string;
+    totalEnergyUse: number;
+  }[], meterGroupNodeStartIndex: number, equipmentGroupStartIndex: number, links: SankeyLink[]): void {
+    meterGroups.forEach((meterGroup, meterGroupIndex) => {
+      // Aggregate equipment group energy use across all sources in this meter group
+      const equipmentMap = new Map<string, number>();
 
-    meterGroups.forEach(meterGroup => {
       meterGroup.sourcesConsumption.forEach(source => {
-        const sourceKey = source.source;
-        if (!sourceToEquipmentFlow.has(sourceKey)) {
-          sourceToEquipmentFlow.set(sourceKey, new Map());
-        }
-        const equipmentMap = sourceToEquipmentFlow.get(sourceKey)!;
-
         source.equipmentGroupEnergyUses.forEach(groupUse => {
           const groupKey = groupUse.energyUseGroup.guid;
           const existing = equipmentMap.get(groupKey) || 0;
           equipmentMap.set(groupKey, existing + groupUse.energyUse);
         });
 
-        // Handle unaccounted energy
         if (source.unaccountedEnergyUse > 0.01) {
           const unaccountedKey = `unaccounted-${source.source}`;
           const existing = equipmentMap.get(unaccountedKey) || 0;
           equipmentMap.set(unaccountedKey, existing + source.unaccountedEnergyUse);
         }
       });
-    });
 
-    // Create links from aggregated flow data
-    sourceToEquipmentFlow.forEach((equipmentMap, sourceKey) => {
-      const sourceIndex = allSources.findIndex(s => s.source === sourceKey);
-      if (sourceIndex !== -1) {
-        equipmentMap.forEach((energyUse, equipmentKey) => {
-          const equipmentIndex = allEquipmentGroups.findIndex(g => g.guid === equipmentKey);
-          if (equipmentIndex !== -1 && energyUse > 0) {
-            links.push({
-              source: sourceNodeStartIndex + sourceIndex,
-              target: equipmentGroupStartIndex + equipmentIndex,
-              value: energyUse,
-              color: this.getLinkColor(sourceKey, equipmentKey.startsWith('unaccounted'))
-            });
-          }
-        });
-      }
+      equipmentMap.forEach((energyUse, equipmentKey) => {
+        const equipmentIndex = allEquipmentGroups.findIndex(g => g.guid === equipmentKey);
+        if (equipmentIndex !== -1 && energyUse > 0) {
+          links.push({
+            source: meterGroupNodeStartIndex + meterGroupIndex,
+            target: equipmentGroupStartIndex + equipmentIndex,
+            value: energyUse,
+            color: this.getLinkColor(meterGroup.getSource(), equipmentKey.startsWith('unaccounted'), 0.4)
+          });
+        }
+      });
     });
   }
 

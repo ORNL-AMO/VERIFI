@@ -8,65 +8,38 @@
                             {{selectedFacility$()?.name}} Energy Use Footprint
                         </div>
                         <div class="d-flex">
-                            <label class="switch ms-auto" for="includeInEnergy">
-                                <input class="checkbox" type="checkbox" id="includeInEnergy"
-                                    [(ngModel)]="displayDataByGroup">
-                                <span class="slider round"></span>
-                            </label>
-                            <div class="ps-2 my-auto fw-bold">
-                                Show Result By Group
+                            <div class="me-3">
+                                <select class="form-select" [(ngModel)]="selectedYear">
+                                    @for(year of yearOptions(); track year) {
+                                    <option [ngValue]="year">{{year}}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="d-flex my-auto">
+                                <label class="switch ms-auto" for="includeInEnergy">
+                                    <input class="checkbox" type="checkbox" id="includeInEnergy"
+                                        [(ngModel)]="displayDataByGroup">
+                                    <span class="slider round"></span>
+                                </label>
+                                <div class="ps-2 my-auto fw-bold">
+                                    Show By Group
+                                </div>
                             </div>
                         </div>
                     </div>
                 </h4>
-
-                <select class="form-select" [(ngModel)]="selectedYear">
-                    @for(year of yearOptions(); track year) {
-                    <option [ngValue]="year">{{year}}</option>
-                    }
-                </select>
                 @let energyFootprintAnnualFacilityBalance = energyFootprintAnnualFacilityBalance$();
                 @if(!energyFootprintAnnualFacilityBalance) {
                 <p>Calculating footprint...</p>
                 } @else {
                 <app-facility-energy-uses-sankey
-                    [energyFootprintAnnualFacilityBalance]="energyFootprintAnnualFacilityBalance" [displayDataByGroup]="displayDataByGroup()"></app-facility-energy-uses-sankey>
-                }
-                <!-- @if(energyFootprintFacility){
-                @let dataType = dataTypeMeterGroup ? 'meterGroup' : 'source';
-                <app-facility-energy-uses-footprint-table [energyFootprintFacility]="energyFootprintFacility"
-                    [facility]="facility" [tableType]="dataType"></app-facility-energy-uses-footprint-table>
+                    [energyFootprintAnnualFacilityBalance]="energyFootprintAnnualFacilityBalance"
+                    [displayDataByGroup]="displayDataByGroup()"></app-facility-energy-uses-sankey>
                 <hr>
-                <div class="row justify-content-center">
-                    @if(dataType == 'source'){
-                    @for(sourceResults of energyFootprintFacility.includedSourcesAnnualResults; track $index){
-                    <div class="col-12">
-                        <app-facility-energy-uses-footprint-chart [energyFootprintFacility]="energyFootprintFacility"
-                            [facility]="facility" [chartType]="dataType"
-                            [source]="sourceResults.source"></app-facility-energy-uses-footprint-chart>
-                    </div>
-                    @if($index < energyFootprintFacility.includedSourcesAnnualResults.length - 1){ <hr>
-                        }
-                        }
-                        }@else {
-
-                        @for(groupResult of energyFootprintFacility.meterGroupsAnnualResults; track $index){
-                        <div class="col-12">
-                            <app-facility-energy-uses-footprint-chart
-                                [energyFootprintFacility]="energyFootprintFacility" [facility]="facility"
-                                [chartType]="dataType"
-                                [groupId]="groupResult.meterGroupId"></app-facility-energy-uses-footprint-chart>
-                        </div>
-                        @if($index < energyFootprintFacility.meterGroupsAnnualResults.length - 1){ <hr>
-                            }
-                            }
-                            }
-
-                </div>
-                }@else{
-                <!--TODO: Message with link to manage energy use groups--
-                <p>No energy use data available.</p>
-                } -->
+                <app-facility-energy-uses-footprint-table
+                    [energyFootprintAnnualFacilityBalance]="energyFootprintAnnualFacilityBalance"
+                    [displayDataByGroup]="displayDataByGroup()"></app-facility-energy-uses-footprint-table>
+                }
             </div>
         </div>
     </div>
