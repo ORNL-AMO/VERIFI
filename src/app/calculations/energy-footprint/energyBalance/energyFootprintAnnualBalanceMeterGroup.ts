@@ -166,4 +166,13 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
         const totalEquipmentUse = this.getTotalEquipmentEnergyUse();
         return totalEnergyUse > 0 ? (totalEquipmentUse / totalEnergyUse) * 100 : 0;
     }
+
+    getSource(): MeterSource | 'Mixed' {
+        const uniqueSources = _.uniq(this.sourcesConsumption.map(s => s.source));
+        if (uniqueSources.length === 1) {
+            return uniqueSources[0];
+        } else {
+            return 'Mixed';
+        }
+    }
 }

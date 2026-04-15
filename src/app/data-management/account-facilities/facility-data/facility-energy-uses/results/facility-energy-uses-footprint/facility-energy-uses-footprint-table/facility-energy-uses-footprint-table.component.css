@@ -13,11 +13,11 @@ td.nowrap {
     font-weight: bold;
 }
 
-td {
-    /* background-color: #bfc9ca; */
+th {
+    width: 25%;
 }
 
-td:not(:first-child) {
+td:not(:first-child), th:not(:first-child) {
     text-align: right;
 }
 
