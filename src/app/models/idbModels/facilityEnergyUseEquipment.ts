@@ -14,7 +14,11 @@ export interface IdbFacilityEnergyUseEquipment extends IdbEntry {
     equipmentType: EquipmentType,
     utilityData: Array<EquipmentUtilityData>,
     color: string,
-    selected?: boolean
+    selected?: boolean,
+    noLongerInUse: {
+        isNoLongerInUse: boolean,
+        year: number
+    }
 }
 
 export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityEnergyUseGroup, latestYear: number): IdbFacilityEnergyUseEquipment {
@@ -37,7 +41,11 @@ export function getNewIdbFacilityEnergyUseEquipment(energyUseGroup: IdbFacilityE
         }],
         equipmentType: 'Other',
         utilityData: [],
-        color: getRandomFlatHexColor()
+        color: getRandomFlatHexColor(),
+        noLongerInUse: {
+            isNoLongerInUse: false,
+            year: null
+        }
     }
 }
 

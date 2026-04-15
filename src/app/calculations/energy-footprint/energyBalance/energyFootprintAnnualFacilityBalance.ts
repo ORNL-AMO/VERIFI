@@ -33,7 +33,7 @@ export class EnergyFootprintAnnualFacilityBalance {
         calanderizedMeters: Array<CalanderizedMeter>, meterGroups: Array<IdbUtilityMeterGroup>, year: number, resultsBy: "facility" | "meterGroup" | "both",
         useLatestDataAvailable: boolean = true) {
         let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
-                let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters, facility.energyUnit);
+        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters, facility.energyUnit);
         this.facility = facility;
         this.year = year;
         if (resultsBy == "facility" || resultsBy == "both") {
@@ -64,6 +64,11 @@ export class EnergyFootprintAnnualFacilityBalance {
                 percentageOfTotalEnergyUse: number
             }> = new Array();
             facilityEquipment.forEach(equip => {
+                if (equip.noLongerInUse?.isNoLongerInUse && equip.noLongerInUse.year <= this.year) {
+                    //if equipment is no longer in use and the year it was marked as no longer in use is less than or 
+                    // equal to the selected year, do not include in calculations
+                    return;
+                }
                 let equipmentGroup: IdbFacilityEnergyUseGroup = energyUseGroups.find(group => group.guid == equip.energyUseGroupId);
                 if (equipmentGroup) {
                     equip.utilityData.forEach(ud => {

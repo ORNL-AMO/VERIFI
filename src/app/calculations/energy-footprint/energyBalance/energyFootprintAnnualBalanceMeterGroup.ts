@@ -53,6 +53,11 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
                 percentageOfTotalEnergyUse: number
             }> = new Array();
             equipmentLinkedToMeterGroup.forEach(equip => {
+                if (equip.noLongerInUse?.isNoLongerInUse && equip.noLongerInUse.year <= this.year) {
+                    //if equipment is no longer in use and the year it was marked as no longer in use is less than or 
+                    // equal to the selected year, do not include in calculations
+                    return;
+                }
                 let equipmentGroup: IdbFacilityEnergyUseGroup = energyUseGroups.find(group => group.guid == equip.energyUseGroupId);
                 if (equipmentGroup) {
                     equip.utilityData.forEach(ud => {

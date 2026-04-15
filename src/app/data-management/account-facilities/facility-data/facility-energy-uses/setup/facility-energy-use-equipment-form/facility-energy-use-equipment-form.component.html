@@ -55,13 +55,13 @@
             (emitRemoveOperatingConditionsData)="removeOperatingConditionsData(annualOperatingConditionsDataForm)">
         </app-annual-operating-conditions-form>
         }
-        <div class="d-flex justify-content-end">
-            <div>
-                @if(annualOperatingConditionsDataForms.length < yearOptions.length) { <a class="click-link"
-                    (click)="openAddOperatingConditionsModal()"><span class="fa fa-plus"></span> Add Year</a>
-                    }
-            </div>
+        @if(annualOperatingConditionsDataForms.length < yearOptions.length) { 
+        <div class="w-100 text-end">
+            <a class="click-link" (click)="openAddOperatingConditionsModal()"><span class="fa fa-plus"></span> Add
+                Year
+            </a>
         </div>
+        }
         }@else {
         <div class="d-flex justify-content-center flex-column align-items-center">
             <p class="text-center bold">No operating conditions data found for this equipment.

@@ -21,5 +21,8 @@ span.badge.larger{
 
 .float-right{
     float: right;
+}
 
+a.click-link .fa{
+    color: inherit;
 }
