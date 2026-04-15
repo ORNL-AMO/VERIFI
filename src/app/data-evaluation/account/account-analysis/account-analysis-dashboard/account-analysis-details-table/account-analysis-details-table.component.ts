@@ -47,6 +47,8 @@ export class AccountAnalysisDetailsTableComponent {
   showDeleteColumn: boolean = false;
   allChecked: boolean = false;
   showBulkDelete: boolean = false;
+  displayLinkedItemModal: boolean = false;
+  viewLinkedItem: string;
 
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -195,7 +197,7 @@ export class AccountAnalysisDetailsTableComponent {
     this.showDeleteColumn = true;
   }
 
-  anyChecked(): boolean {
+  get anyChecked(): boolean {
     return this.filteredAnalysisItems.some(item => item.checked);
   }
 
@@ -235,5 +237,44 @@ export class AccountAnalysisDetailsTableComponent {
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Analysis Items Deleted!", undefined, undefined, false, "alert-success");
     this.showDeleteColumn = false;
+  }
+
+  get selectedItemsForBulkDelete() {
+    return this.filteredAnalysisItems.filter(item => item.checked);
+  }
+
+  getLinkedReportItems(item: IdbAccountAnalysisItem) {
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    let linkedReports: Array<IdbAccountReport> = new Array();
+    accountReports.forEach(report => {
+      if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId && report.betterPlantsReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+      else if (report.reportType == 'performance' && report.performanceReportSetup.analysisItemId && report.performanceReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+      else if (report.reportType == 'accountSavings' && report.accountSavingsReportSetup.analysisItemId && report.accountSavingsReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+      else if (report.reportType == 'analysis' && report.analysisReportSetup.analysisItemId && report.analysisReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+    });
+    return linkedReports;
+  }
+
+  openLinkedItemModal(itemGuid: string) {
+    this.displayLinkedItemModal = true;
+    this.viewLinkedItem = itemGuid;
+  }
+
+  cancelViewLinkedItem() {
+    this.displayLinkedItemModal = false;
+  }
+
+  confirmViewLinkedItem(itemGuid: string) {
+    let report: IdbAccountReport = this.accountReportDbService.getByGuid(itemGuid);
+    this.accountReportDbService.selectedReport.next(report);
+    this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
 }

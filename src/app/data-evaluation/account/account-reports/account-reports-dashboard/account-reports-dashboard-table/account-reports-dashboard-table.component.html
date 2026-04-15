@@ -10,12 +10,12 @@
         }
       </select>
     </div>
-    <div class="col-2 pe-4">
+    <div class="col-2 pe-3">
       <app-table-items-dropdown></app-table-items-dropdown>
     </div>
 
-    @if(anyChecked()) {
-    <div class="col-1 mt-auto">
+    @if(anyChecked) {
+    <div class="col-2 mt-auto">
       <button class="btn btn-danger" (click)="openBulkDeleteModal()">Bulk Delete</button>
     </div>
     }
@@ -50,8 +50,7 @@
         ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track report.guid) {
         <tr>
           <td class="input text-center">
-            <input type="checkbox" name="reportSelected" (change)="toggleChecked()"
-              [(ngModel)]="report.checked">
+            <input type="checkbox" name="reportSelected" (change)="toggleChecked()" [(ngModel)]="report.checked">
           </td>
           <td>
             @let reportErrors = report.guid | invalidAccountReport;
@@ -156,14 +155,27 @@
 </div>
 
 <div class="popup" [class.open]="showBulkDelete">
-  @if (showBulkDelete) {
   <div class="popup-header">Delete Report Items
     <button class="item-right" (click)="cancelBulkDelete()">x</button>
   </div>
-  }
   <div class="popup-body">
     <p>WARNING: Deleting report items cannot be undone.
       Are you sure you want to perform this action?</p>
+    @if (selectedItemsForBulkDelete && selectedItemsForBulkDelete.length > 0) {
+    <div class="alert alert-warning my-3 text-center" role="alert">
+      <div class="fw-bold mb-2 fs-5 text-danger">
+        <i class="fa fa-exclamation-triangle me-2 text-danger"></i>
+        Items to be deleted
+      </div>
+      <ul class="mb-0 d-inline-block text-start">
+        @for (item of selectedItemsForBulkDelete; track item.guid) {
+        <li>
+          <span class="fw-semibold">{{item.name}}</span>
+        </li>
+        }
+      </ul>
+    </div>
+    }
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>

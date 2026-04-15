@@ -18,12 +18,12 @@
       <app-table-items-dropdown></app-table-items-dropdown>
     </div>
     }
-    @if (!anyChecked() || !showDeleteColumn) {
+    @if (!anyChecked || !showDeleteColumn) {
     <div class="mt-auto pe-3">
       <button class="btn btn-danger" (click)="bulkDeleteClicked()">Bulk Delete</button>
     </div>
     }
-    @if (showDeleteColumn && anyChecked()) {
+    @if (showDeleteColumn && anyChecked) {
     <div class="mt-auto">
       <button class="btn btn-danger" (click)="openModal()">
         <i class="fa fa-trash text-danger"></i> Delete</button>
@@ -58,6 +58,9 @@
               [ngClass]="{'active': orderDataField == 'modifiedDate'}">
               Last Modified
             </th>
+            <th>
+              Linked Items
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -67,8 +70,7 @@
           <tr>
             @if(showDeleteColumn) {
             <td class="input text-center">
-              <input type="checkbox" name="analysisSelected" (change)="toggleChecked()"
-                [(ngModel)]="item.checked">
+              <input type="checkbox" name="analysisSelected" (change)="toggleChecked()" [(ngModel)]="item.checked">
             </td>
             }
             @if(!showDeleteColumn) {
@@ -107,6 +109,19 @@
             </td>
             <td>
               {{ item.modifiedDate | date:'short'}}
+            </td>
+            <td>
+              @let linkedReports = getLinkedReportItems(item);
+              @if (linkedReports.length > 0) {
+              <div class="d-flex flex-wrap">
+                @for (linkedItem of linkedReports; track linkedItem.guid) {
+                <button class="btn action-btn btn-sm m-1" (click)="openLinkedItemModal(linkedItem.guid)"
+                  title="View Linked Report">
+                  <i class="fa fa-file" title="Report"></i> {{linkedItem.guid | accountReportName}}
+                </button>
+                }
+              </div>
+              }
             </td>
             <td class="text-center">
               <button class="btn action-btn btn-sm m-1 icon-style" (click)="deleteItem(item)" title="Delete Analysis">
@@ -170,7 +185,7 @@
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': displayDeleteModal || showBulkDelete}"></div>
+<div [ngClass]="{'windowOverlay': displayDeleteModal || showBulkDelete || displayLinkedItemModal }"></div>
 
 <div class="popup" [class.open]="displayDeleteModal">
   @if (displayDeleteModal) {
@@ -188,17 +203,66 @@
 </div>
 
 <div class="popup" [class.open]="showBulkDelete">
-  @if (showBulkDelete) {
   <div class="popup-header">Delete Analysis Items
     <button class="item-right" (click)="cancelBulkDelete()">x</button>
   </div>
-  }
   <div class="popup-body">
     <p>WARNING: Deleting analysis items cannot be undone.
       Are you sure you want to perform this action?</p>
+    @if (selectedItemsForBulkDelete && selectedItemsForBulkDelete.length > 0) {
+    <div class="alert alert-warning my-3 text-center" role="alert">
+      <div class="fw-bold mb-2 fs-5 text-danger">
+        <i class="fa fa-exclamation-triangle me-2 text-danger"></i>
+        Items to be deleted
+      </div>
+      <table class="table table-bordered table-sm align-middle my-3">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Linked Reports</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of selectedItemsForBulkDelete; track item.guid) {
+          @let linkedReports = getLinkedReportItems(item);
+          <tr>
+            <td class="fw-semibold text-center">{{item.name}}</td>
+            <td class="text-center">
+              @if (linkedReports.length > 0) {
+              <ul class="mb-0 ps-3 text-start d-inline-block">
+                @for (report of linkedReports; track report.guid) {
+                <li>
+                  {{report.guid | accountReportName}}
+                </li>
+                }
+              </ul>
+              } @else {
+              <span class="text-muted">&mdash;</span>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
+  </div>
+</div>
+
+<div class="popup" [class.open]="displayLinkedItemModal">
+  <div class="popup-header">View Report: {{ viewLinkedItem | accountReportName}}
+    <button class="item-right" (click)="cancelViewLinkedItem()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>Would you like to go to this report?</p>
+  </div>
+
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelViewLinkedItem()">Cancel</button>
+    <button class="btn btn-success" (click)="confirmViewLinkedItem(viewLinkedItem)">View Report</button>
   </div>
 </div>

@@ -179,7 +179,11 @@ export class FacilityReportsDashboardTableComponent {
     this.allChecked = false;
   }
 
-  anyChecked(): boolean {
+  get anyChecked(): boolean {
     return this.facilityReports.some(report => report.checked);
+  }
+
+  get selectedItemsForBulkDelete() {
+    return this.getFilteredReports().filter(report => report.checked);
   }
 }

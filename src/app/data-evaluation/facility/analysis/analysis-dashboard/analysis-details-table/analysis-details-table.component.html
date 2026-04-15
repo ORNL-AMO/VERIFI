@@ -19,12 +19,12 @@
       <app-table-items-dropdown></app-table-items-dropdown>
     </div>
     }
-    @if (!anyChecked() || !showDeleteColumn) {
+    @if (!anyChecked || !showDeleteColumn) {
     <div class="mt-auto pe-3">
       <button class="btn btn-danger" (click)="bulkDeleteClicked()">Bulk Delete</button>
     </div>
     }
-    @if (showDeleteColumn && anyChecked()) {
+    @if (showDeleteColumn && anyChecked) {
     <div class="mt-auto">
       <button class="btn btn-danger" (click)="openModal()">
         <i class="fa fa-trash text-danger"></i> Delete</button>
@@ -334,14 +334,49 @@
 </div>
 
 <div class="popup" [class.open]="showBulkDelete">
-  @if (showBulkDelete) {
   <div class="popup-header">Delete Analysis Items
     <button class="item-right" (click)="cancelBulkDelete()">x</button>
   </div>
-  }
   <div class="popup-body">
     <p>WARNING: Deleting analysis items cannot be undone.
       Are you sure you want to perform this action?</p>
+    @if (selectedItemsForBulkDelete && selectedItemsForBulkDelete.length > 0) {
+    <div class="alert alert-warning my-3" role="alert">
+      <div class="fw-bold mb-2 fs-5 text-danger text-center">
+        <i class="fa fa-exclamation-triangle me-2 text-danger"></i>
+        Items to be deleted
+      </div>
+      <table class="table table-bordered table-sm align-middle my-3">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Linked Reports</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of selectedItemsForBulkDelete; track item.guid) {
+          @let linkedReports = getLinkedReportItems(item);
+          <tr>
+            <td class="fw-semibold text-center">{{item.name}}</td>
+            <td class="text-center">
+              @if (linkedReports.length > 0) {
+              <ul class="mb-0 ps-3 text-start d-inline-block">
+                @for (report of linkedReports; track report.guid) {
+                <li>
+                  {{report.guid | facilityReportName}}
+                </li>
+                }
+              </ul>
+              } @else {
+              <span class="text-muted">&mdash;</span>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>

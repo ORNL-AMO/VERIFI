@@ -266,9 +266,9 @@ export class AnalysisDetailsTableComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false)
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
-    if(!isBulkDelete){
-    this.displayDeleteModal = false;
-    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
+    if (!isBulkDelete) {
+      this.displayDeleteModal = false;
+      this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
     }
     this.facilityAnalysisItems = this.analysisDbService.facilityAnalysisItems.getValue();
     this.filteredAnalysisItems = this.facilityAnalysisItems;
@@ -389,7 +389,7 @@ export class AnalysisDetailsTableComponent {
     this.showDeleteColumn = true;
   }
 
-  anyChecked(): boolean {
+  get anyChecked(): boolean {
     return this.filteredAnalysisItems.some(item => item.checked);
   }
 
@@ -429,5 +429,20 @@ export class AnalysisDetailsTableComponent {
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Analysis Items Deleted!", undefined, undefined, false, "alert-success");
     this.showDeleteColumn = false;
+  }
+
+  get selectedItemsForBulkDelete() {
+    return this.filteredAnalysisItems.filter(item => item.checked);
+  }
+
+  getLinkedReportItems(item: IdbAnalysisItem) {
+    let linkedItems: Array<{ guid: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport' }> = new Array();
+
+    let list = this.linkedItemsList.find(li => li.analysisItem.guid == item.guid);
+    if (list) {
+      linkedItems = list.linkedItems.filter(li => li.type == 'facilityReport');
+    }
+
+    return linkedItems;
   }
 }

@@ -114,7 +114,7 @@ export class AccountReportsDashboardTableComponent {
     this.showBulkDelete = true;
   }
 
-  anyChecked(): boolean {
+  get anyChecked(): boolean {
     return this.reports.some(report => report.checked);
   }
 
@@ -161,5 +161,9 @@ export class AccountReportsDashboardTableComponent {
     this.toastNotificationService.showToast("Report Items Deleted!", undefined, undefined, false, "alert-success");
     this.selectedReportType = '';
     this.allChecked = false;
+  }
+
+  get selectedItemsForBulkDelete() {
+    return this.getFilteredReports().filter(report => report.checked);
   }
 }
