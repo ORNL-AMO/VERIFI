@@ -1,161 +1,37 @@
-@if(tableType == 'source'){
-@let orderAnnualResults = energyFootprintGroup.includedSourcesAnnualResults|
-orderFacilityEnergyUsesGroupFootprintTableBySource:orderByField:orderByYear:orderByDir;
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
-            <th></th>
-            @for (annualSourceResult of orderAnnualResults[0].annualSourceResults; track
-            $index) {
-            <th colspan="3">
-                {{annualSourceResult.year}}
+            <th class="w-50">Source</th>
+            <th>Equipment Use<br>
+                (<span [innerHTML]="energyFootprintAnnualGroupBalance.facility.energyUnit | settingsLabel"></span>)
             </th>
-            }
-        </tr>
-        <tr class="table-mh">
-            <th (click)="setOrderDataField('name', orderByYear)" [ngClass]="{'active': orderByField == 'name'}">Source
-            </th>
-
-            @for (sourceResult of orderAnnualResults[0].annualSourceResults; track
-            $index) {
-            <th (click)="setOrderDataField('energyUse', sourceResult.year)"
-                [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == sourceResult.year}">
-                Equipment Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span>
-            </th>
-            <th (click)="setOrderDataField('totalEnergyUse', sourceResult.year)"
-                [ngClass]="{'active': orderByField == 'totalEnergyUse' && orderByYear == sourceResult.year}">
-                Facility Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span>
-            </th>
-            <th (click)="setOrderDataField('percentOfTotal', sourceResult.year)"
-                [ngClass]="{'active': orderByField == 'percentOfTotal' && orderByYear == sourceResult.year}">% of
-                Facility
-                Total</th>
-            }
         </tr>
     </thead>
     <tbody>
-        @for (sourceResult of orderAnnualResults; track $index){
-        <tr class="section-row">
-            <td class="nowrap clickable" (click)="toggleCollapseEquipmentSource(sourceResult.source)">
-                <span class="fa"
-                    [ngClass]="{'fa-chevron-right': !sourceResult.showEquipmentResults, 'fa-chevron-down': sourceResult.showEquipmentResults}"></span>
-                {{sourceResult.source}}
-            </td>
-            @for(annualEnergyUse of sourceResult.annualSourceResults; track $index){
-            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
-                {{annualEnergyUse.energyUse| number:'1.0-0'}}</td>
-
-            <td> {{annualEnergyUse.totalEnergyUse| number:'1.0-0'}}</td>
-            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
-                {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;</td>
-            }
-        </tr>
-        @if(sourceResult.showEquipmentResults){
-        @for(equipmentResult of sourceResult.equipmentAnnualResults; track $index){
+        @for(sourceConsumption of energyFootprintAnnualGroupBalance.sourcesConsumption; track
+        sourceConsumption.source) {
         <tr>
-            <td class="ps-3 nowrap">
-                <a class="click-link" (click)="goToEquipment(equipmentResult.equipmentGuid)">
-                    <span class="fa fa-plug"></span>
-                    {{equipmentResult.equipmentName}}
-                </a>
+            <td colspan="2" class="fw-bold bg-secondary text-white">{{sourceConsumption.source}}
             </td>
-            @for(annualResult of equipmentResult.annualResults; track $index){
-            <td class="fill-cell" [ngStyle]="{'background-size': annualResult.percentOfTotal + '% 100%'}">
-                {{annualResult.energyUse | number:'1.0-0'}}</td>
+        </tr>
+        @for(equipmentEnergyUse of sourceConsumption.equipmentEnergyUses; track equipmentEnergyUse.equipment.guid)
+        {
+        <tr>
             <td>
-                &mdash;
+                <span class="ps-4">
+                    <a class="click-link" (click)="goToEquipment(equipmentEnergyUse.equipment)">
+                        <span class="fa fa-plug"></span>
+                        {{equipmentEnergyUse.equipment.name}}
+                    </a>
+                </span>
             </td>
-            <td class="fill-cell" [ngStyle]="{'background-size': annualResult.percentOfTotal + '% 100%'}">
-                {{annualResult.percentOfTotal | number:'1.0-0'}}&percnt;</td>
-            }
+            <td>{{equipmentEnergyUse.energyUse | number:'1.0-0'}}</td>
         </tr>
         }
-        }
+        <tr>
+            <th>Total {{sourceConsumption.source}}</th>
+            <th>{{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}</th>
+        </tr>
         }
     </tbody>
 </table>
-}@else {
-@let orderedMeterGroupResults = energyFootprintGroup.meterGroupsAnnualResults|
-orderFacilityEnergyUsesGroupFootprintTableByMeterGroup:orderByField:orderByYear:orderByDir;
-<table class="table table-bordered utility-data">
-    <thead class="sortable">
-        <tr class="table-mh">
-            <th colspan="2"></th>
-            @for (annualSourceResult of orderedMeterGroupResults[0].annualResults; track
-            $index) {
-            <th colspan="3">
-                {{annualSourceResult.year}}
-            </th>
-            }
-        </tr>
-        <tr class="table-mh">
-            <th (click)="setOrderDataField('name', orderByYear)" [ngClass]="{'active': orderByField == 'name'}">Meter
-                Group</th>
-            <th>
-                Sources
-            </th>
-
-            @for (groupResult of orderedMeterGroupResults[0].annualResults; track
-            $index) {
-            <th (click)="setOrderDataField('energyUse', groupResult.year)"
-                [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupResult.year}">
-                Equipment Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span>
-            </th>
-            <th (click)="setOrderDataField('totalEnergyUse', groupResult.year)"
-                [ngClass]="{'active': orderByField == 'totalEnergyUse' && orderByYear == groupResult.year}">
-                Meter Group Energy Use <span class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span>
-            </th>
-            <th (click)="setOrderDataField('percentOfTotal', groupResult.year)"
-                [ngClass]="{'active': orderByField == 'percentOfTotal' && orderByYear == groupResult.year}">%
-                of Meter Group
-                Total</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @for (groupResult of orderedMeterGroupResults; track $index){
-        <tr class="section-row">
-            <td class="nowrap clickable" (click)="toggleCollapseEquipmentGroup(groupResult.meterGroupId)">
-                <span class="fa"
-                    [ngClass]="{'fa-chevron-right': !groupResult.showEquipmentResults, 'fa-chevron-down': groupResult.showEquipmentResults}"></span>
-                {{groupResult.meterGroupName}}
-            </td>
-            <td class="nowrap">
-                @let sources = groupResult.meterGroupId | meterGroupSourcesList:meters;
-                @for(source of sources; track $index){
-                {{source}}@if($index < sources.length - 1){,} } </td>
-                    @for(annualEnergyUse of groupResult.annualResults; track $index){
-            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
-                {{annualEnergyUse.energyUse| number:'1.0-0'}}</td>
-
-            <td> {{annualEnergyUse.totalEnergyUse| number:'1.0-0'}}</td>
-
-            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
-                {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;</td>
-            }
-        </tr>
-        @if(groupResult.showEquipmentResults){
-        @for(equipmentResult of groupResult.equipmentAnnualResults; track $index){
-        <tr>
-            <td class="ps-3 nowrap" colspan="2">
-                <a class="click-link" (click)="goToEquipment(equipmentResult.equipmentGuid)">
-                    <span class="fa fa-plug"></span>
-                    {{equipmentResult.equipmentName}}
-                </a>
-            </td>
-            @for(annualResult of equipmentResult.annualResults; track $index){
-            <td class="fill-cell" [ngStyle]="{'background-size': annualResult.percentOfTotal + '% 100%'}">
-                {{annualResult.energyUse | number:'1.0-0'}}</td>
-            <td>
-                &mdash;
-            </td>
-            <td class="fill-cell" [ngStyle]="{'background-size': annualResult.percentOfTotal + '% 100%'}">
-                {{annualResult.percentOfTotal | number:'1.0-0'}}&percnt;</td>
-            }
-        </tr>
-        }
-        }
-        }
-    </tbody>
-</table>
-}

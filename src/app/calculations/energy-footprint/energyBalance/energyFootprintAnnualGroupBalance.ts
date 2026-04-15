@@ -18,7 +18,8 @@ export class EnergyFootprintAnnualGroupBalance {
         }>
     }>;
     facility: IdbFacility;
-    constructor(energyUseGroups: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, year: number, facility: IdbFacility, useLatestDataAvailable: boolean = true) {
+    constructor(energyUseGroups: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, year: number,
+        facility: IdbFacility, useLatestDataAvailable: boolean = true) {
         this.year = year;
         this.facility = facility;
         this.setSourcesConsumption(energyUseGroups, equipment, useLatestDataAvailable);

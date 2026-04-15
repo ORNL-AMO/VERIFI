@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { getEnergyUseUnit } from "../energyFootprintCalculations";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { ConvertValue } from "../../conversions/convertValue";
+import { convertMeterDataToSite } from "../../calanderization/calanderizeMeters";
 
 export class EnergyFootprintAnnualBalanceMeterGroup {
 
@@ -26,9 +27,11 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
     constructor(energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
         calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroup: IdbUtilityMeterGroup, year: number, facility: IdbFacility,
         useLatestDataAvailable: boolean) {
+        let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
+        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters);
         this.meterGroup = utilityMeterGroup;
         this.year = year;
-        this.setSourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
+        this.setSourcesConsumption(siteCalanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
     }
 
     setSourcesConsumption(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>,

@@ -35,51 +35,9 @@
                 <app-facility-energy-uses-group-sankey
                     [energyFootprintAnnualGroupBalance]="energyFootprintAnnualGroupBalance"></app-facility-energy-uses-group-sankey>
                 <hr>
-                <!-- <app-facility-energy-uses-group-footprint-table
-                    [energyFootprintAnnualGroupBalance]="energyFootprintAnnualGroupBalance"
-                    [displayDataByGroup]="displayDataByGroup()"></app-facility-energy-uses-group-footprint-table> -->
+                <app-facility-energy-uses-group-footprint-table
+                    [energyFootprintAnnualGroupBalance]="energyFootprintAnnualGroupBalance"></app-facility-energy-uses-group-footprint-table>
                 }
-
-
-
-                <!--@let dataType = dataTypeMeterGroup ? 'meterGroup' : 'source';
-                @if(dataType == 'meterGroup'){
-                @if(energyFootprintGroup.meterGroupsAnnualResults.length == 0){
-                <div class="alert alert-warning text-center">
-                    No meter groups have been linked to the equipment in this energy use group.
-                </div>
-                }@else{
-                <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup"
-                    [facility]="facility" [tableType]="'meterGroup'">
-                </app-facility-energy-uses-group-footprint-table>
-                <hr>
-                <div class="row justify-content-center">
-                    @for(groupResult of energyFootprintGroup.meterGroupsAnnualResults; track $index){
-                    <div class="col-12">
-                        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
-                            [facility]="facility" [chartType]="'meterGroup'"
-                            [groupId]="groupResult.meterGroupId"></app-facility-energy-uses-group-footprint-chart>
-                    </div>
-                    @if($index < energyFootprintGroup.meterGroupsAnnualResults.length - 1){ <hr>
-                        }
-                        }
-                </div>
-                }
-                }@else {
-                <app-facility-energy-uses-group-footprint-table [energyFootprintGroup]="energyFootprintGroup"
-                    [facility]="facility" [tableType]="'source'">
-                </app-facility-energy-uses-group-footprint-table>
-                <hr>
-                <div class="row justify-content-center">
-                    @for(sourceResult of energyFootprintGroup.includedSourcesAnnualResults; track $index){
-                    <div class="col-12">
-                        <app-facility-energy-uses-group-footprint-chart [energyFootprintGroup]="energyFootprintGroup"
-                            [facility]="facility" [chartType]="'source'"
-                            [source]="sourceResult.source"></app-facility-energy-uses-group-footprint-chart>
-                    </div>
-                    }
-                </div>
-                } -->
             </div>
         </div>
     </div>

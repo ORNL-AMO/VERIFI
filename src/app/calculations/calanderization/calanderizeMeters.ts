@@ -87,7 +87,8 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showOtherScope2Emissions: showOtherScope2Emissions,
             showFugitiveEmissions: showFugitiveEmissions,
             showMobileEmissions: showMobileEmissions,
-            showProcessEmissions: showProcessEmissions
+            showProcessEmissions: showProcessEmissions,
+            energyIsSource: energyIsSource
         });
     });
     return calanderizedMeterData;
@@ -617,4 +618,23 @@ export interface CalanderizedReadingSummary {
     energyUse: number,
     cost: number,
     emissionsResults: EmissionsResults
+}
+
+export function convertMeterDataToSite(calanderizedMeterData: Array<CalanderizedMeter>): Array<CalanderizedMeter> {
+    let convertedData: Array<CalanderizedMeter> = new Array();
+    calanderizedMeterData.forEach(cMeter => {
+        if (cMeter.energyIsSource) {
+            let monthlyData: Array<MonthlyData> = cMeter.monthlyData.map(monthData => {
+                monthData.energyUse = monthData.energyUse / cMeter.meter.siteToSource;
+                return monthData;
+            });
+            convertedData.push({
+                ...cMeter,
+                monthlyData: monthlyData
+            });
+        } else {
+            convertedData.push(cMeter);
+        }
+    });
+    return convertedData;
 }
