@@ -36,7 +36,7 @@ export class FacilityEnergyUsesGroupSankeyComponent implements OnChanges, OnDest
 
   private readonly layout = {
     title: {
-      text: 'Energy Flow by Source and Equipment',
+      text: 'Energy Flow by Source',
       font: { size: 16 }
     },
     font: { size: 12 },

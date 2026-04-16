@@ -83,7 +83,6 @@ import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/f
 import { FacilityEnergyUsesSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-table/facility-energy-uses-summary-table.component';
 import { OrderFacilityEnergyUsesSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-table/order-facility-energy-uses-summary-table.pipe';
 import { FacilityEnergyUsesGroupSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/facility-energy-uses-group-summary-table.component';
-import { OrderFacilityEnergyUsesGroupSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/order-facility-energy-uses-group-summary-table.pipe';
 import { ProcessFootprintToolFileComponent } from './data-management-import/process-footprint-tool-file/process-footprint-tool-file.component';
 import { FootprintUploadSelectFacilityComponent } from './data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component';
 import { FacilityEnergyUsesSummaryChartComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-chart/facility-energy-uses-summary-chart.component';
@@ -179,7 +178,6 @@ import { FacilityEnergyUsesGroupSankeyComponent } from './account-facilities/fac
     FacilityEnergyUsesSummaryTableComponent,
     OrderFacilityEnergyUsesSummaryTablePipe,
     FacilityEnergyUsesGroupSummaryTableComponent,
-    OrderFacilityEnergyUsesGroupSummaryTablePipe,
     ProcessFootprintToolFileComponent,
     FootprintUploadSelectFacilityComponent,
     FacilityEnergyUsesSummaryChartComponent,

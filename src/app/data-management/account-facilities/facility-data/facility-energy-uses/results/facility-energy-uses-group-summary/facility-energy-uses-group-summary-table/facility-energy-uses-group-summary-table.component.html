@@ -1,10 +1,8 @@
-@let energyUsesGroupSummaryOrdered = energyUsesGroupSummary |
-orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
 <table class="table table-bordered utility-data">
     <thead class="sortable">
         <tr class="table-mh">
-            <th></th>
-            @for (groupData of energyUsesGroupSummaryOrdered.totalAnnualEnergyUse; track $index) {
+            <th [ngClass]="{'w-33': !displayHistory}"></th>
+            @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
             <th colspan="2">
                 {{groupData.year}}
             </th>
@@ -14,18 +12,18 @@ orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
             <th (click)="setOrderDataField('equipmentName', orderByYear)"
                 [ngClass]="{'active': orderByField == 'equipmentName'}">Equipment</th>
 
-            @for (groupData of energyUsesGroupSummaryOrdered.totalAnnualEnergyUse; track $index) {
-            <th (click)="setOrderDataField('energyUse', groupData.year)"
-                [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupData.year}">Energy Use <span
-                    class="fw-light" [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
-            <th (click)="setOrderDataField('percentOfTotal', groupData.year)"
+            @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
+            <th class="text-right" (click)="setOrderDataField('energyUse', groupData.year)"
+                [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupData.year}">Energy Use<br>
+                <span [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
+            <th class="text-right" (click)="setOrderDataField('percentOfTotal', groupData.year)"
                 [ngClass]="{'active': orderByField == 'percentOfTotal' && orderByYear == groupData.year}">% of Group
                 Total</th>
             }
         </tr>
     </thead>
     <tbody>
-        @for (groupData of energyUsesGroupSummaryOrdered.equipmentAnnualEnergyUse; track $index){
+        @for (groupData of filteredEnergyUseGroupSummary.equipmentAnnualEnergyUse; track $index){
         <tr>
             <td class="nowrap">
                 <a class="click-link" (click)="goToEquipment(groupData.equipmentGuid)">
@@ -34,9 +32,9 @@ orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
                 </a>
             </td>
             @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
-            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
+            <td>
                 {{annualEnergyUse.energyUse| number:'1.0-0'}}</td>
-            <td class="fill-cell" [ngStyle]="{'background-size': annualEnergyUse.percentOfTotal + '% 100%'}">
+            <td>
                 {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;</td>
             }
         </tr>
@@ -45,7 +43,7 @@ orderFacilityEnergyUsesGroupSummaryTable:orderByYear:orderByField:orderByDir;
     <tfoot>
         <tr class="table-mh">
             <th>Total</th>
-            @for (groupData of energyUsesGroupSummaryOrdered.totalAnnualEnergyUse; track $index) {
+            @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
             <th>{{groupData.energyUse | number:'1.0-0'}}</th>
             <th>&mdash;</th>
             }

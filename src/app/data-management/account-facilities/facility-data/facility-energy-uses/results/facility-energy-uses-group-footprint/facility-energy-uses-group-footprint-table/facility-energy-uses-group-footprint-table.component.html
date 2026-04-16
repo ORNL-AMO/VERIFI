@@ -3,7 +3,7 @@
         <tr class="table-mh">
             <th class="w-50">Source</th>
             <th>Equipment Use<br>
-                (<span [innerHTML]="energyFootprintAnnualGroupBalance.facility.energyUnit | settingsLabel"></span>)
+                <span [innerHTML]="'(' + energyFootprintAnnualGroupBalance.facility.energyUnit + '/yr)'"></span>
             </th>
         </tr>
     </thead>

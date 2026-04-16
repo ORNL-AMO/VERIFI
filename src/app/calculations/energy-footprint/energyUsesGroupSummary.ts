@@ -68,7 +68,7 @@ export class EnergyUsesGroupSummary {
                 });
                 annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear, percentOfTotal: 0 });
             });
-            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse, equipmentColor: equip.color});
+            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse, equipmentColor: equip.color });
         });
     }
 
@@ -109,5 +109,18 @@ export class EnergyUsesGroupSummary {
         this.equipmentAnnualEnergyUse.forEach(equipData => {
             equipData.annualEnergyUse = _.sortBy(equipData.annualEnergyUse, 'year', 'asc');
         });
+    }
+
+    getIncludedYears(): Array<number> {
+        return this.totalAnnualEnergyUse.map(tau => tau.year);
+    }
+
+    filterHistory(): EnergyUsesGroupSummary {
+        this.equipmentAnnualEnergyUse.forEach(equipAnnualEnergyUse => {
+            //only include last year of data for each equipment
+            equipAnnualEnergyUse.annualEnergyUse = _.orderBy(equipAnnualEnergyUse.annualEnergyUse, ['year'], ['desc']).slice(0, 1);
+        });
+        this.totalAnnualEnergyUse = _.orderBy(this.totalAnnualEnergyUse, ['year'], ['desc']).slice(0, 1);
+        return this;
     }
 }
