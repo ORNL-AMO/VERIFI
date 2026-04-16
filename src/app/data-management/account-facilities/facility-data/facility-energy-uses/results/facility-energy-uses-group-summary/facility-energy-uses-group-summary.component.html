@@ -2,14 +2,33 @@
   <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
     <div class="col-11 pt-4 pb-4">
       <div class="form-paper">
-        <h4>{{energyUseGroup?.name}} Summary</h4>
-        <app-facility-energy-uses-group-summary-table [energyUsesGroupSummary]="energyUsesGroupSummary"
-          [facility]="facility">
-        </app-facility-energy-uses-group-summary-table>
-        <hr>
+        <h4>
+          <div class="d-flex w-100 justify-content-between align-items-center">
+            <div class="h4 mt-auto mb-0">
+              {{energyUseGroup?.name}} Summary
+            </div>
+
+            <div class="d-flex">
+              <div class="d-flex">
+                <label class="switch" for="displayHistory">
+                  <input class="checkbox" type="checkbox" id="displayHistory" [(ngModel)]="displayHistory"
+                    name="displayHistory">
+                  <span class="slider round"></span>
+                </label>
+                <div class="ps-1 my-auto">
+                  Show History
+                </div>
+              </div>
+            </div>
+          </div>
+        </h4>
         <app-facility-energy-uses-group-summary-chart [energyUsesGroupSummary]="energyUsesGroupSummary"
-          [facility]="facility">
+          [facility]="facility" [displayHistory]="displayHistory">
         </app-facility-energy-uses-group-summary-chart>
+        <hr>
+        <app-facility-energy-uses-group-summary-table [energyUsesGroupSummary]="energyUsesGroupSummary"
+          [facility]="facility" [displayHistory]="displayHistory">
+        </app-facility-energy-uses-group-summary-table>
       </div>
     </div>
   </div>

@@ -1,9 +1,9 @@
-import { Component, ElementRef, inject, Input, ViewChild, OnInit, OnDestroy, OnChanges, SimpleChanges, computed, signal } from '@angular/core';
+import { Component, ElementRef, inject, Input, ViewChild, OnDestroy, OnChanges, SimpleChanges, computed, signal } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { UtilityColors } from 'src/app/shared/utilityColors';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { SankeyData, SankeyNode, SankeyLink } from 'src/app/models/visualization';
 import { EnergyFootprintAnnualBalanceMeterGroup } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualBalanceMeterGroup';
+import { buildSankeyData, formatEnergyValue, getEquipmentGroupColor, getLinkColor, getSourceColor } from 'src/app/shared/sankey-utils';
 
 @Component({
   selector: 'app-facility-energy-uses-sankey',
@@ -389,25 +389,10 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
   }
 
   /**
-   * Builds the final SankeyData object
+   * Delegates to the shared buildSankeyData utility to assemble the Plotly SankeyData object.
    */
   private buildSankeyData(nodes: SankeyNode[], links: SankeyLink[]): SankeyData {
-    return {
-      type: 'sankey',
-      node: {
-        pad: 15,
-        thickness: 20,
-        line: { color: '#333', width: 0.5 },
-        label: nodes.map(n => n.label),
-        color: nodes.map(n => n.color)
-      },
-      link: {
-        source: links.map(l => l.source),
-        target: links.map(l => l.target),
-        value: links.map(l => l.value),
-        color: links.map(l => l.color)
-      }
-    };
+    return buildSankeyData(nodes, links);
   }
 
 
@@ -451,36 +436,13 @@ export class FacilityEnergyUsesSankeyComponent implements OnDestroy, OnChanges {
   }
 
   private formatEnergyValue(value: number): string {
+    // Get the facility-specific energy unit, defaulting to MMBtu if unavailable
     const unit = this.energyFootprintAnnualFacilityBalance?.facility?.energyUnit || 'MMBtu';
-    return `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${unit}`;
+    return formatEnergyValue(value, unit);
   }
 
-  private getSourceColor(source: string): string {
-    // Use UtilityColors mapping if available, fallback to default
-    return UtilityColors[source]?.color || '#4682B4';
-  }
-
-  private getEquipmentGroupColor(groupName: string): string {
-    if (groupName === 'Unaccounted') {
-      return '#D3D3D3';
-    }
-    // Use a lighter shade for equipment groups
-    const colors = ['#87CEEB', '#DDA0DD', '#F0E68C', '#98FB98', '#FFA07A', '#87CEFA', '#F5DEB3'];
-    const hash = groupName.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    return colors[Math.abs(hash) % colors.length];
-  }
-
-  private getLinkColor(source: string, isUnaccounted = false, customOpacity?: number): string {
-    const baseColor = this.getSourceColor(source);
-    const opacity = customOpacity || (isUnaccounted ? '0.2' : '0.4');
-    // Convert hex to rgba
-    const hex = baseColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  }
+  // Delegate color helpers to shared utility functions
+  private getSourceColor(source: string): string { return getSourceColor(source); }
+  private getEquipmentGroupColor(groupName: string): string { return getEquipmentGroupColor(groupName); }
+  private getLinkColor(source: string, isUnaccounted = false, customOpacity?: number): string { return getLinkColor(source, isUnaccounted, customOpacity); }
 }

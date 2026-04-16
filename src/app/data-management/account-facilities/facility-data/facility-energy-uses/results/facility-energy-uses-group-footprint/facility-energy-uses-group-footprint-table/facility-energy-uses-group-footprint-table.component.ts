@@ -1,10 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyFootprintGroup } from 'src/app/calculations/energy-footprint/energyFootprintGroup';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { EnergyFootprintAnnualGroupBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualGroupBalance';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Component({
   selector: 'app-facility-energy-uses-group-footprint-table',
@@ -14,55 +11,20 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 })
 export class FacilityEnergyUsesGroupFootprintTableComponent {
   @Input({ required: true })
-  energyFootprintGroup: EnergyFootprintGroup;
-  @Input({ required: true })
-  facility: IdbFacility;
-  @Input({ required: true })
-  tableType: 'source' | 'meterGroup';
-
-
-  orderByField: string = 'name';
-  orderByDir: 'asc' | 'desc' = 'asc';
-  orderByYear: number;
-
-  meters: Array<IdbUtilityMeter>;
-
-  constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router
-  ){}
-
-  ngOnInit(){
-    this.meters = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facility.guid);
+  set energyFootprintAnnualGroupBalance(value: EnergyFootprintAnnualGroupBalance | null) {
+    this.energyFootprintAnnualGroupBalanceSignal.set(value);
+  }
+  get energyFootprintAnnualGroupBalance(): EnergyFootprintAnnualGroupBalance | null {
+    return this.energyFootprintAnnualGroupBalanceSignal();
   }
 
-  setOrderDataField(str: string, year: number) {
-    if (str == this.orderByField && year == this.orderByYear) {
-      if (this.orderByDir == 'desc') {
-        this.orderByDir = 'asc';
-      } else {
-        this.orderByDir = 'desc';
-      }
-    } else {
-      this.orderByField = str;
-      this.orderByYear = year;
-    }
+  private energyFootprintAnnualGroupBalanceSignal = signal<EnergyFootprintAnnualGroupBalance | null>(null);
+  private router = inject(Router);
+
+
+  goToEquipment(equipment: IdbFacilityEnergyUseEquipment) {
+    this.router.navigateByUrl('/data-management/' + equipment.accountId + '/facilities/' + equipment.facilityId + '/energy-uses/' + equipment.energyUseGroupId + '/equipment/' + equipment.guid);
   }
 
-  goToEquipment(equipmentGuid: string) {
-    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses/' + this.energyFootprintGroup.groupId + '/equipment/' + equipmentGuid);
-  }
 
-  toggleCollapseEquipmentSource(source: MeterSource) {
-    let sourceResult = this.energyFootprintGroup.includedSourcesAnnualResults.find(s => s.source == source);
-    if (sourceResult) {
-      sourceResult.showEquipmentResults = !sourceResult.showEquipmentResults;
-    }
-  }
-
-  toggleCollapseEquipmentGroup(groupId: string) {
-    let groupResult = this.energyFootprintGroup.meterGroupsAnnualResults.find(g => g.meterGroupId == groupId);
-    if (groupResult) {
-      groupResult.showEquipmentResults = !groupResult.showEquipmentResults;
-    }
-  }
 }

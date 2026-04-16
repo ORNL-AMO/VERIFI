@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -12,6 +12,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-energy-use-equipment',
@@ -21,20 +25,42 @@ import * as _ from 'lodash';
 })
 export class FacilityEnergyUseEquipmentComponent {
 
-  energyUseEquipment: IdbFacilityEnergyUseEquipment;
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private router: Router = inject(Router);
+  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
+  private calanderizationService = inject(CalanderizationService);
+
+  energyUseEquipmentSignal: WritableSignal<IdbFacilityEnergyUseEquipment> = signal<IdbFacilityEnergyUseEquipment>(null);
+  get energyUseEquipment(): IdbFacilityEnergyUseEquipment {
+    return this.energyUseEquipmentSignal();
+  }
+  set energyUseEquipment(value: IdbFacilityEnergyUseEquipment) {
+    this.energyUseEquipmentSignal.set(value);
+  }
+
+  selectedFacility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+
   showDeleteEquipment: boolean = false;
   dataChanged: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute,
-    private facilityDbService: FacilitydbService,
-    private router: Router,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private sharedDataService: SharedDataService,
-    private loadingService: LoadingService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
-    private toastNotificationsService: ToastNotificationsService
-  ) {
-  }
+  showNoLongerInUseModal: boolean = false;
+  showReinstateEquipmentModal: boolean = false;
+
+  selectedYear: number;
+  yearOptions: Signal<Array<number>> = computed(() => {
+    const calanderizedMeters = this.calanderizedMeters$();
+    const selectedFacility = this.selectedFacility$();
+    if (calanderizedMeters.length === 0 || !selectedFacility) {
+      return [];
+    }
+    return getYearsWithFullData(calanderizedMeters, selectedFacility);
+  });
 
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
@@ -72,6 +98,7 @@ export class FacilityEnergyUseEquipmentComponent {
   }
 
   async deleteEquipment() {
+    this.dataChanged = false;
     this.showDeleteEquipment = false;
     this.loadingService.setLoadingMessage('Deleting Energy Use Equipment...')
     this.loadingService.setLoadingStatus(true);
@@ -93,6 +120,7 @@ export class FacilityEnergyUseEquipmentComponent {
   }
 
   canDeactivate(): Observable<boolean> {
+    //TODO modal with save option if data changed
     if (this.dataChanged) {
       const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
       return of(result);
@@ -103,5 +131,53 @@ export class FacilityEnergyUseEquipmentComponent {
   setDataChanged(updatedEquipment: IdbFacilityEnergyUseEquipment) {
     this.energyUseEquipment = updatedEquipment;
     this.dataChanged = true;
+  }
+
+  openNoLongerInUse() {
+    let yearOptions = this.yearOptions();
+    this.selectedYear = yearOptions[yearOptions.length - 1];
+    this.sharedDataService.modalOpen.next(true);
+    this.showNoLongerInUseModal = true;
+  }
+
+  closeNoLongerInUse() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showNoLongerInUseModal = false;
+  }
+
+  async markNoLongerInUse() {
+    if (!this.energyUseEquipment.noLongerInUse) {
+      this.energyUseEquipment['noLongerInUse'] = {
+        isNoLongerInUse: true,
+        year: this.selectedYear
+      }
+    } else {
+
+      this.energyUseEquipment.noLongerInUse = {
+        isNoLongerInUse: true,
+        year: this.selectedYear
+      }
+    }
+    await this.saveChanges();
+    this.closeNoLongerInUse();
+  }
+
+  openReinstateEquipment() {
+    this.sharedDataService.modalOpen.next(true);
+    this.showReinstateEquipmentModal = true;
+  }
+
+  closeReinstateEquipment() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showReinstateEquipmentModal = false;
+  }
+
+  async reinstateEquipment() {
+    if (this.energyUseEquipment.noLongerInUse) {
+      this.energyUseEquipment.noLongerInUse.isNoLongerInUse = false;
+      this.energyUseEquipment.noLongerInUse.year = null;
+      await this.saveChanges();
+    }
+    this.closeReinstateEquipment();
   }
 }

@@ -1,6 +1,5 @@
-<h6 class="mt-2">Energy Uses Balance</h6>
-<!--dropdown for facility-->
 @let facilities = facilities$();
+<!--dropdown for facility-->
 @if(facilities.length > 1) {
 <select class="form-select" [(ngModel)]="selectedFacilityId">
     @for(facility of facilities; track facility.guid) {
@@ -9,25 +8,17 @@
 </select>
 }
 
-<select class="form-select" [(ngModel)]="selectedYear">
-    @for(year of yearOptions(); track year) {
-    <option [ngValue]="year">{{year}}</option>
-    }
-</select>
 <!--display data by group toggle-->
-<div class="row pt-2 pb-2">
-    <div class="col align-items-center justifiy-content-end">
-        <div class="d-flex">
-            <label class="switch ms-auto" for="includeInEnergySidepanel">
-                <input class="checkbox" type="checkbox" id="includeInEnergySidepanel" [(ngModel)]="displayDataByGroup">
-                <span class="slider round"></span>
-            </label>
-            <div class="ps-2 my-auto fw-bold">
-                Show Result By Group
-            </div>
-        </div>
+<div class="d-flex pt-2 pb-2">
+    <label class="switch ms-auto" for="includeInEnergySidepanel">
+        <input class="checkbox" type="checkbox" id="includeInEnergySidepanel" [(ngModel)]="displayDataByGroup">
+        <span class="slider round"></span>
+    </label>
+    <div class="ps-2 my-auto fw-bold">
+        By Meter Group
     </div>
 </div>
+<h6 class="mt-2 text-center">{{selectedFacilityId() | facilityName: facilities}} Energy Uses Balance ({{selectedYear()}})</h6>
 @let energyFootprintAnnualFacilityBalance = energyFootprintAnnualFacilityBalance$();
 @if(!energyFootprintAnnualFacilityBalance) {
 <p>Calculating footprint...</p>
@@ -54,7 +45,6 @@
         }
     </tbody>
 </table>
-<hr>
 } @else {
 <table class="table table-bordered">
     <thead>
@@ -69,7 +59,8 @@
         @for(meterGroupBalance of energyFootprintAnnualFacilityBalance.meterGroupsAnnualBalances; track
         meterGroupBalance.meterGroup.guid) {
         <tr>
-            <td colspan="4" class="fw-bold bg-secondary text-white">Meter Group: {{meterGroupBalance.meterGroup.name}}</td>
+            <td colspan="4" class="fw-bold bg-secondary text-white">Meter Group: {{meterGroupBalance.meterGroup.name}}
+            </td>
         </tr>
         @for(sourceConsumption of meterGroupBalance.sourcesConsumption; track
         sourceConsumption.source) {
@@ -83,10 +74,17 @@
         }
     </tbody>
 </table>
+}
+<p class="fw-light text-right italic">
+    Energy shown in <span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit"></span>
+</p>
 <hr>
 }
-}
-<p class="fw-light">
+<button class="btn btn-sm action-btn w-100" (click)="goToFacilityFootprint()">
+    <span class="fa fa-paw"></span>
+    View {{selectedFacilityId() | facilityName: facilities}} Energy Footprint
+</button>
+<p class="fw-light mt-2">
     <span class="fa fa-asterisk"></span>
     Unaccounted energy use is the difference between the actual energy use from utility bills and the total energy use
     calculated from equipment. A large unaccounted energy use may indicate missing equipment data or inaccurate energy

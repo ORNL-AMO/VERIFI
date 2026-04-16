@@ -1,5 +1,6 @@
 import { Component, computed, signal, inject, Signal, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -26,6 +27,7 @@ export class EnergyFootprintSidePanelComponent {
   private facilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private calanderizationService = inject(CalanderizationService);
   private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
+  private router: Router = inject(Router);
 
   facilities$: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
   energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
@@ -97,5 +99,13 @@ export class EnergyFootprintSidePanelComponent {
         this.selectedFacilityId.set(facilities[0].guid);
       }
     });
+  }
+
+  goToFacilityFootprint() {
+    const selectedFacilityId = this.selectedFacilityId();
+    const selectedFacility = this.facilityDbService.getFacilityById(selectedFacilityId);
+    if (selectedFacility) {
+      this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacilityId + '/energy-uses/footprint');
+    }
   }
 }

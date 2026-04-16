@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, inject, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
@@ -33,4 +33,9 @@ export class FacilityEnergyUsesFootprintTableComponent {
 
   private energyFootprintAnnualFacilityBalanceSignal = signal<EnergyFootprintAnnualFacilityBalance | null>(null);
 
+  private router: Router = inject(Router);
+
+  goToGroupFootprint(group: IdbFacilityEnergyUseGroup) {
+    this.router.navigateByUrl('data-management/' + group.accountId + '/facilities/' + group.facilityId + '/energy-uses/' + group.guid + '/footprint');
+  }
 }

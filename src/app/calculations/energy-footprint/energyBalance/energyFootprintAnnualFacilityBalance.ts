@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { EnergyFootprintAnnualBalanceMeterGroup } from "./energyFootprintAnnualBalanceMeterGroup";
 import { ConvertValue } from "../../conversions/convertValue";
 import { getEnergyUseUnit } from "../energyFootprintCalculations";
+import { convertMeterDataToSite } from "../../calanderization/calanderizationHelpers";
 
 
 export class EnergyFootprintAnnualFacilityBalance {
@@ -31,13 +32,15 @@ export class EnergyFootprintAnnualFacilityBalance {
     constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
         calanderizedMeters: Array<CalanderizedMeter>, meterGroups: Array<IdbUtilityMeterGroup>, year: number, resultsBy: "facility" | "meterGroup" | "both",
         useLatestDataAvailable: boolean = true) {
+        let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
+        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters, facility.energyUnit);
         this.facility = facility;
         this.year = year;
         if (resultsBy == "facility" || resultsBy == "both") {
-            this.setFacilitySourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
+            this.setFacilitySourcesConsumption(siteCalanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
         }
         if (resultsBy == "meterGroup" || resultsBy == "both") {
-            this.setMeterGroupAnnualBalances(calanderizedMeters, energyUseGroups, equipment, meterGroups, facility, useLatestDataAvailable);
+            this.setMeterGroupAnnualBalances(siteCalanderizedMeters, energyUseGroups, equipment, meterGroups, facility, useLatestDataAvailable);
         }
 
     }
@@ -61,6 +64,11 @@ export class EnergyFootprintAnnualFacilityBalance {
                 percentageOfTotalEnergyUse: number
             }> = new Array();
             facilityEquipment.forEach(equip => {
+                if (equip.noLongerInUse?.isNoLongerInUse && equip.noLongerInUse.year <= this.year) {
+                    //if equipment is no longer in use and the year it was marked as no longer in use is less than or 
+                    // equal to the selected year, do not include in calculations
+                    return;
+                }
                 let equipmentGroup: IdbFacilityEnergyUseGroup = energyUseGroups.find(group => group.guid == equip.energyUseGroupId);
                 if (equipmentGroup) {
                     equip.utilityData.forEach(ud => {
@@ -102,6 +110,8 @@ export class EnergyFootprintAnnualFacilityBalance {
                     });
                 }
             });
+            //order equipment group energy uses by energy use amount
+            equipmentGroupEnergyUses = _.orderBy(equipmentGroupEnergyUses, ['energyUse'], ['desc']);
             this.sourcesConsumption.push({
                 source: source,
                 actualEnergyUse: actualEnergyUse,
@@ -123,6 +133,22 @@ export class EnergyFootprintAnnualFacilityBalance {
             let meterGroupBalance: EnergyFootprintAnnualBalanceMeterGroup = new EnergyFootprintAnnualBalanceMeterGroup(facilityEnergyUseGroups, facilityEquipment, facilityMeters, meterGroup, this.year, facility, useLatestDataAvailable);
             this.meterGroupsAnnualBalances.push(meterGroupBalance);
         });
+        //TODO: add meters without meter group
+        let metersWithoutGroup: Array<CalanderizedMeter> = facilityMeters.filter(cMeter => !cMeter.meter.groupId);
+        if (metersWithoutGroup.length > 0) {
+            let ungroupedMeterGroup: IdbUtilityMeterGroup = {
+                facilityId: facility.guid,
+                accountId: facility.accountId,
+                groupType: 'Energy',
+                name: 'Ungrouped Meters',
+                guid: 'ungrouped-meters',
+                createdDate: new Date(),
+                modifiedDate: new Date()
+            }
+            let ungroupedMeterGroupBalance: EnergyFootprintAnnualBalanceMeterGroup = new EnergyFootprintAnnualBalanceMeterGroup(facilityEnergyUseGroups, facilityEquipment, metersWithoutGroup, ungroupedMeterGroup, this.year, facility, useLatestDataAvailable);
+            this.meterGroupsAnnualBalances.push(ungroupedMeterGroupBalance);
+        }
+
         //TODO: add equipment that isn't linked to a meter group as its own "meter group" with source = "unlinked" or something similar
     }
 

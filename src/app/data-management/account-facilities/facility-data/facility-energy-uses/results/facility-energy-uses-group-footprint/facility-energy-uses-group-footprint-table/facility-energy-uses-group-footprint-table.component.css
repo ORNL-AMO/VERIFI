@@ -13,7 +13,7 @@ td.nowrap {
     font-weight: bold;
 }
 
-td:not(:first-child) {
+td:not(:first-child), th:not(:first-child) {
     text-align: right;
 }
 .fa.fa-chevron-right,

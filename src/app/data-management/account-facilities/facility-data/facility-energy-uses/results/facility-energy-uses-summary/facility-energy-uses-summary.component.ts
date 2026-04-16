@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { EnergyUsesFacilitySummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
@@ -15,45 +15,38 @@ import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEner
   styleUrl: './facility-energy-uses-summary.component.css'
 })
 export class FacilityEnergyUsesSummaryComponent {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
+  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
 
-  facility: IdbFacility;
-  facilitySub: Subscription;
-
-  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
-  facilityEnergyUseGroupsSub: Subscription;
-
-  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
-  facilityEnergyUseEquipmentSub: Subscription;
-
-  energyUsesFacilitySummary: EnergyUsesFacilitySummary;
-
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
-  ) { }
-
-  ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facility = facility;
-    });
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
-      this.facilityEnergyUseGroups = groups;
-    });
-    this.facilityEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.subscribe(equipment => {
-      this.facilityEnergyUseEquipment = equipment;
-      this.setEnergyFootprintFacility();
-    });
+  facility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  get facility(): IdbFacility {
+    return this.facility$();
   }
 
-  ngOnDestroy() {
-    this.facilitySub.unsubscribe();
-    this.facilityEnergyUseGroupsSub.unsubscribe();
-    this.facilityEnergyUseEquipmentSub.unsubscribe();
+  facilityEnergyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+  get facilityEnergyUseGroups(): Array<IdbFacilityEnergyUseGroup> {
+    return this.facilityEnergyUseGroups$();
   }
 
-  setEnergyFootprintFacility() {
-    if (this.facilityEnergyUseGroups?.length > 0 && this.facilityEnergyUseEquipment?.length > 0) {
-      this.energyUsesFacilitySummary = new EnergyUsesFacilitySummary(this.facility, this.facilityEnergyUseGroups, this.facilityEnergyUseEquipment);
+  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  get facilityEnergyUseEquipment(): Array<IdbFacilityEnergyUseEquipment> {
+    return this.facilityEnergyUseEquipment$();
+  }
+
+  energyUsesFacilitySummary$: Signal<EnergyUsesFacilitySummary> = computed(() => {
+    const facility = this.facility$();
+    const facilityEnergyUseGroups = this.facilityEnergyUseGroups$();
+    const facilityEnergyUseEquipment = this.facilityEnergyUseEquipment$();
+    if (!facility || !facilityEnergyUseGroups || !facilityEnergyUseEquipment) {
+      return null;
     }
+    return new EnergyUsesFacilitySummary(facility, facilityEnergyUseGroups, facilityEnergyUseEquipment);    
+  });
+  get energyUsesFacilitySummary(): EnergyUsesFacilitySummary {
+    return this.energyUsesFacilitySummary$();
   }
+  
+  displayHistory: boolean = false;
+
 }

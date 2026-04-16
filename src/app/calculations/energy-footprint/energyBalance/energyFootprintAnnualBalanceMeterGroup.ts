@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { getEnergyUseUnit } from "../energyFootprintCalculations";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { ConvertValue } from "../../conversions/convertValue";
+import { convertMeterDataToSite } from "../../calanderization/calanderizationHelpers";
 
 export class EnergyFootprintAnnualBalanceMeterGroup {
 
@@ -26,9 +27,11 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
     constructor(energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>,
         calanderizedMeters: Array<CalanderizedMeter>, utilityMeterGroup: IdbUtilityMeterGroup, year: number, facility: IdbFacility,
         useLatestDataAvailable: boolean) {
+        let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.facilityId == facility.guid);
+        let siteCalanderizedMeters: Array<CalanderizedMeter> = convertMeterDataToSite(facilityCalanderizedMeters, facility.energyUnit);
         this.meterGroup = utilityMeterGroup;
         this.year = year;
-        this.setSourcesConsumption(calanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
+        this.setSourcesConsumption(siteCalanderizedMeters, energyUseGroups, equipment, facility, useLatestDataAvailable);
     }
 
     setSourcesConsumption(calanderizedMeters: Array<CalanderizedMeter>, energyUseGroups: Array<IdbFacilityEnergyUseGroup>,
@@ -50,6 +53,11 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
                 percentageOfTotalEnergyUse: number
             }> = new Array();
             equipmentLinkedToMeterGroup.forEach(equip => {
+                if (equip.noLongerInUse?.isNoLongerInUse && equip.noLongerInUse.year <= this.year) {
+                    //if equipment is no longer in use and the year it was marked as no longer in use is less than or 
+                    // equal to the selected year, do not include in calculations
+                    return;
+                }
                 let equipmentGroup: IdbFacilityEnergyUseGroup = energyUseGroups.find(group => group.guid == equip.energyUseGroupId);
                 if (equipmentGroup) {
                     equip.utilityData.forEach(ud => {
@@ -89,6 +97,8 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
                     });
                 }
             });
+            //order equipment group energy uses by energy use amount
+            equipmentGroupEnergyUses = _.orderBy(equipmentGroupEnergyUses, ['energyUse'], ['desc']);
             this.sourcesConsumption.push({
                 source: source,
                 actualEnergyUse: actualEnergyUse,

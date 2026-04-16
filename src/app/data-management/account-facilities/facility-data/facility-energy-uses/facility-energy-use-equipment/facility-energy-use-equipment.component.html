@@ -3,6 +3,18 @@
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
                 <h4>{{energyUseEquipment.name}}</h4>
+                <div>
+                    @if(energyUseEquipment.noLongerInUse?.isNoLongerInUse) {
+                    <div class="alert alert-warning text-center">
+                        <span class="fa fa-exclamation-triangle"></span>
+                        This equipment is no longer in use. It was marked as no longer in use starting in
+                        {{energyUseEquipment.noLongerInUse.year}}. Energy use data associated with this equipment
+                        after {{energyUseEquipment.noLongerInUse.year}} will not be accounted for in energy use
+                        calculations. If you would like to reinstate this equipment, please click the "Reinstate
+                        Equipment" button at the bottom of the page.
+                    </div>
+                    }
+                </div>
 
                 <div class="d-flex w-100 justify-content-end">
                     <div>
@@ -19,6 +31,21 @@
                 <hr>
 
                 <div class="d-flex w-100 justify-content-end">
+                    @if(energyUseEquipment.noLongerInUse?.isNoLongerInUse) {
+                    <div class="me-2">
+                        <button class="btn action-btn btn-sm" (click)="openReinstateEquipment()">
+                            <span class="fa fa-plus"></span>
+                            Reinstate Equipment
+                        </button>
+                    </div>
+                    }@else {
+                    <div class="me-2">
+                        <button class="btn action-btn btn-sm" (click)="openNoLongerInUse()">
+                            <span class="fa fa-ban"></span>
+                            Equipment No Longer in Use
+                        </button>
+                    </div>
+                    }
                     <div>
                         <button class="btn btn-danger btn-sm" (click)="showDelete()">
                             <span class="fa fa-trash"></span>
@@ -32,7 +59,7 @@
 </div>
 
 
-<div [ngClass]="{'windowOverlay': showDeleteEquipment}"></div>
+<div [ngClass]="{'windowOverlay': showDeleteEquipment || showNoLongerInUseModal || showReinstateEquipmentModal}"></div>
 <div class="popup" [class.open]="showDeleteEquipment">
     @if(showDeleteEquipment) {
     <div class="popup-header">Delete Equipment: {{energyUseEquipment.name}}
@@ -46,6 +73,50 @@
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteEquipment()">Delete</button>
+    </div>
+    }
+</div>
+
+
+<div class="popup" [class.open]="showNoLongerInUseModal">
+    @if(showNoLongerInUseModal) {
+    <div class="popup-header">Equipment No Longer in Use: {{energyUseEquipment.name}}
+        <button class="item-right" (click)="closeNoLongerInUse()">x</button>
+    </div>
+    <div class="popup-body">
+        <div class="row">
+            <label class="col-5 col-form-label" for="selectedYear">Year No Longer In Use</label>
+            <div class="col-7">
+                <select class="form-select" [(ngModel)]="selectedYear" id="selectedYear">
+                    @for(year of yearOptions(); track year) {
+                    <option [ngValue]="year">{{year}}</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <p class="fw-light italic pt-2">WARNING: By marking this equipment as no longer in use, energy use data
+            associated with this equipment after
+            the specified year will no longer be accounted for in energy use calculations.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeNoLongerInUse()">Cancel</button>
+        <button class="btn btn-danger" (click)="markNoLongerInUse()">Confirm No Longer In Use</button>
+    </div>
+    }
+</div>
+
+<div class="popup" [class.open]="showReinstateEquipmentModal">
+    @if(showReinstateEquipmentModal) {
+    <div class="popup-header">Reinstate Equipment: {{energyUseEquipment.name}}
+        <button class="item-right" (click)="closeReinstateEquipment()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>By reinstating this equipment, all energy use data associated with this equipment will once again be
+            accounted for in energy use calculations. Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeReinstateEquipment()">Cancel</button>
+        <button class="btn btn-primary" (click)="reinstateEquipment()">Reinstate Equipment</button>
     </div>
     }
 </div>
