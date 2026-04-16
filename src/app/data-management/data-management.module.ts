@@ -81,7 +81,6 @@ import { EnergyUseEquipmentInvalidPipe } from './account-facilities/facility-dat
 import { EnergyUseUnitPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/energy-use-unit.pipe';
 import { ConvertEnergyUseResultPipe } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses-pipes/convert-energy-use-result.pipe';
 import { FacilityEnergyUsesSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-table/facility-energy-uses-summary-table.component';
-import { OrderFacilityEnergyUsesSummaryTablePipe } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary-table/order-facility-energy-uses-summary-table.pipe';
 import { FacilityEnergyUsesGroupSummaryTableComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary-table/facility-energy-uses-group-summary-table.component';
 import { ProcessFootprintToolFileComponent } from './data-management-import/process-footprint-tool-file/process-footprint-tool-file.component';
 import { FootprintUploadSelectFacilityComponent } from './data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component';
@@ -176,7 +175,6 @@ import { FacilityEnergyUsesGroupSankeyComponent } from './account-facilities/fac
     EnergyUseUnitPipe,
     ConvertEnergyUseResultPipe,
     FacilityEnergyUsesSummaryTableComponent,
-    OrderFacilityEnergyUsesSummaryTablePipe,
     FacilityEnergyUsesGroupSummaryTableComponent,
     ProcessFootprintToolFileComponent,
     FootprintUploadSelectFacilityComponent,

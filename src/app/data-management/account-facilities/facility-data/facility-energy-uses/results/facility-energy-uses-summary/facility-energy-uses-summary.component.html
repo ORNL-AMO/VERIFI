@@ -2,16 +2,36 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <h4>
+                <!-- <h4>
                     {{facility.name}} Energy Use Summary
+                </h4> -->
+                <h4>
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div class="h4 mt-auto mb-0">
+                            {{facility.name}} Energy Use Summary
+                        </div>
+
+                        <div class="d-flex">
+                            <div class="d-flex">
+                                <label class="switch" for="displayHistory">
+                                    <input class="checkbox" type="checkbox" id="displayHistory"
+                                        [(ngModel)]="displayHistory" name="displayHistory">
+                                    <span class="slider round"></span>
+                                </label>
+                                <div class="ps-1 my-auto">
+                                    Show History
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </h4>
                 @if(energyUsesFacilitySummary){
                 <app-facility-energy-uses-summary-chart [energyUsesFacilitySummary]="energyUsesFacilitySummary"
-                    [facility]="facility">
+                    [facility]="facility" [displayHistory]="displayHistory">
                 </app-facility-energy-uses-summary-chart>
                 <hr>
                 <app-facility-energy-uses-summary-table [energyUsesFacilitySummary]="energyUsesFacilitySummary"
-                    [facility]="facility">
+                    [facility]="facility" [displayHistory]="displayHistory">
                 </app-facility-energy-uses-summary-table>
                 }@else{
                 <!--TODO: Message with link to manage energy use groups-->

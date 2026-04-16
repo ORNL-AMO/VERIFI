@@ -47,17 +47,6 @@ export class FacilityEnergyUsesGroupSummaryComponent {
     return this.energyUsesGroupSummary$();
   }
 
-  yearOptions$: Signal<Array<number>> = computed(() => {
-    const energyUsesGroupSummary = this.energyUsesGroupSummary$();
-    if (!energyUsesGroupSummary) {
-      return [];
-    }
-    return energyUsesGroupSummary.getIncludedYears();
-  });
-  get yearOptions(): Array<number> {
-    return this.yearOptions$();
-  }
-
   displayHistory: boolean = false;
 
   ngOnInit() {

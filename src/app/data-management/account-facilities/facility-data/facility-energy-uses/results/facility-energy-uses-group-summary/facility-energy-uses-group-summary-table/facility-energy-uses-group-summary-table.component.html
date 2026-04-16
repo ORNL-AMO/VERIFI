@@ -15,7 +15,8 @@
             @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
             <th class="text-right" (click)="setOrderDataField('energyUse', groupData.year)"
                 [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupData.year}">Energy Use<br>
-                <span [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span></th>
+                <span [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span>
+            </th>
             <th class="text-right" (click)="setOrderDataField('percentOfTotal', groupData.year)"
                 [ngClass]="{'active': orderByField == 'percentOfTotal' && orderByYear == groupData.year}">% of Group
                 Total</th>
@@ -33,9 +34,23 @@
             </td>
             @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
             <td>
-                {{annualEnergyUse.energyUse| number:'1.0-0'}}</td>
+                @if(annualEnergyUse.isNoLongerInUse){
+                <span class="fa fa-ban" title="This equipment was no longer in use during this year"></span>
+                }@else {
+                @if(annualEnergyUse.isPropegated){
+                <span class="fa fa-asterisk"
+                    title="Energy use for this year was propegated based on most recent data available"></span>
+                }
+                {{annualEnergyUse.energyUse| number:'1.0-0'}}
+                }
+            </td>
             <td>
-                {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;</td>
+                @if(annualEnergyUse.isNoLongerInUse){
+                <span class="fa fa-ban" title="This equipment was no longer in use during this year"></span>
+                }@else {
+                {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;
+                }
+            </td>
             }
         </tr>
         }
@@ -44,9 +59,27 @@
         <tr class="table-mh">
             <th>Total</th>
             @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
-            <th>{{groupData.energyUse | number:'1.0-0'}}</th>
+            <th>
+                @if(groupData.isPropegated){
+                <span class="fa fa-asterisk"
+                    title="Energy use for this year was propegated based on most recent data available"></span>
+                }
+                {{groupData.energyUse | number:'1.0-0'}}
+            </th>
             <th>&mdash;</th>
             }
         </tr>
     </tfoot>
 </table>
+
+@if(hasPropegatedData() == true){
+<p class="fw-light italic">
+    <span class="fa fa-asterisk"></span> Energy use for this year was propegated based on most recent data available.
+</p>
+}
+
+@if(hasNoLongerInUseData() == true){
+<p class="fw-light italic">
+    <span class="fa fa-ban"></span> This equipment was no longer in use during this year.
+</p>
+}

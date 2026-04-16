@@ -6,34 +6,35 @@ import { EnergyUsesGroupSummary } from "./energyUsesGroupSummary";
 
 export class EnergyUsesFacilitySummary {
     footprintGroups: Array<EnergyUsesGroupSummary> = [];
-    footprintGroupSummaries: Array<{
-        groupName: string,
-        groupId: string,
-        groupColor: string,
-        annualEnergyUse: Array<{
-            totalEnergyUse: number,
-            percentOfFacilityUse: number,
-            year: number,
-        }>
-    }>;
+    footprintGroupSummaries: Array<FacilityEnergyUseGroupSummary> = [];
 
     totals: Array<{
         year: number,
         totalEnergyUse: number,
+        isPropegated: boolean
     }>;
-    constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>) {
-        this.setEnergyFootprintGroups(facility, energyUseGroups, equipment);
+    constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>, useLatestDataAvailable: boolean = true) {
+        this.setEnergyFootprintGroups(facility, energyUseGroups, equipment, useLatestDataAvailable);
         this.setTotals();
         this.setFootprintGroupSummaries();
         this.orderResults();
     }
 
-    setEnergyFootprintGroups(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>) {
+    setEnergyFootprintGroups(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>, useLatestDataAvailable: boolean) {
         energyUseGroups.forEach(group => {
             let groupEquipment: Array<IdbFacilityEnergyUseEquipment> = equipment.filter(equip => equip.energyUseGroupId == group.guid);
             let footprintGroup: EnergyUsesGroupSummary = new EnergyUsesGroupSummary(group, groupEquipment, facility);
             this.footprintGroups.push(footprintGroup);
         });
+        if (useLatestDataAvailable) {
+            let years: Array<number> = this.footprintGroups.map(group => group.totalAnnualEnergyUse.map(annualUse => annualUse.year)).flat();
+            years = _.uniq(years);
+            let mostRecentYear: number = Math.max(...years);
+            //iterate groups. If data missing for most recent year, set to closest year with data
+            this.footprintGroups.forEach(group => {
+                group.checkIfYearIncluded(mostRecentYear);
+            });
+        }
     }
 
     setTotals() {
@@ -49,7 +50,11 @@ export class EnergyUsesFacilitySummary {
             });
             return {
                 year: year,
-                totalEnergyUse: totalEnergyUse
+                totalEnergyUse: totalEnergyUse,
+                isPropegated: this.footprintGroups.some(group => {
+                    let yearData = group.totalAnnualEnergyUse.find(annualUse => annualUse.year == year);
+                    return yearData ? yearData.isPropegated : false;
+                })
             }
         });
     }
@@ -62,7 +67,8 @@ export class EnergyUsesFacilitySummary {
                 return {
                     totalEnergyUse: groupEnergyUse,
                     percentOfFacilityUse: percentOfFacilityUse,
-                    year: total.year
+                    year: total.year,
+                    isPropegated: groupYearData ? groupYearData.isPropegated : false
                 }
             });
             return {
@@ -80,4 +86,25 @@ export class EnergyUsesFacilitySummary {
         });
         this.totals = _.orderBy(this.totals, ['year'], ['asc']);
     }
+
+    filterHistory(): EnergyUsesFacilitySummary {
+        this.footprintGroups = this.footprintGroups.map(group => group.filterHistory());
+        //TODO - check if we need to aggregate from latest year of data
+        this.setTotals();
+        this.setFootprintGroupSummaries();
+        return this;
+    }
+}
+
+
+export interface FacilityEnergyUseGroupSummary {
+    groupName: string,
+    groupId: string,
+    groupColor: string,
+    annualEnergyUse: Array<{
+        totalEnergyUse: number,
+        percentOfFacilityUse: number,
+        year: number,
+        isPropegated: boolean
+    }>
 }

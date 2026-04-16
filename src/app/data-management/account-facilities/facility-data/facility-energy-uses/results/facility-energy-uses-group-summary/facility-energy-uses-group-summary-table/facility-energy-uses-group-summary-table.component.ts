@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, Input, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
+import { EnergyUsesGroupSummary, EqupmentAnnualEnergyUse } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import * as _ from 'lodash';
 @Component({
@@ -68,7 +68,7 @@ export class FacilityEnergyUsesGroupSummaryTableComponent {
 
     //order results
     if (this.orderByField != 'equipmentName') {
-      summary.equipmentAnnualEnergyUse = _.orderBy(summary.equipmentAnnualEnergyUse, [(equip) => {
+      summary.equipmentAnnualEnergyUse = _.orderBy(summary.equipmentAnnualEnergyUse, [(equip: EqupmentAnnualEnergyUse) => {
         let yearData = equip.annualEnergyUse.find(annualUse => annualUse.year == this.orderByYear);
         if (yearData) {
           if (this.orderByField == 'energyUse') {
@@ -88,6 +88,22 @@ export class FacilityEnergyUsesGroupSummaryTableComponent {
   get filteredEnergyUseGroupSummary(): EnergyUsesGroupSummary {
     return this.filteredEnergyUseGroupSummary$();
   }
+
+  hasPropegatedData: Signal<boolean | null> = computed(() => {
+    const summary = this.energyUsesGroupSummary$();
+    if (!summary) {
+      return null;
+    }
+    return summary.totalAnnualEnergyUse.some(yearData => yearData.isPropegated == true);
+  });
+
+  hasNoLongerInUseData: Signal<boolean | null> = computed(() => {
+    const summary = this.energyUsesGroupSummary$();
+    if (!summary) {
+      return null;
+    }
+    return summary.equipmentAnnualEnergyUse.some(equipData => equipData.annualEnergyUse.some(yearData => yearData.isNoLongerInUse == true));
+  });
 
   constructor() {
     effect(() => {
