@@ -1,8 +1,7 @@
-<app-account-report-analysis-selection [reportForm]="betterPlantsReportForm"
-  (filteredItemsChange)="onFilteredItemsChange($event)"
-  (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"></app-account-report-analysis-selection>
+<app-account-report-analysis-selection [reportForm]="betterPlantsReportForm"></app-account-report-analysis-selection>
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+<!--removed check for filtered list, using selectedAnalysisItem defined-->
+@if(selectedAnalysisItem) {
 <form [formGroup]="betterPlantsReportForm">
   <div class="row">
     @if (baselineYearWarning) {
@@ -10,7 +9,6 @@
       {{baselineYearWarning}}
     </div>
     }
-    @if (selectedAnalysisItem) {
     <div class="col-12">
       <div class="form-group row">
         <div class="col">
@@ -104,7 +102,6 @@
       </div>
       }
     </div>
-    }
   </div>
 </form>
 }

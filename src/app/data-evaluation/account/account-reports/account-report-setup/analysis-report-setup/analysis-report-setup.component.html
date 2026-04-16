@@ -1,9 +1,7 @@
 
-<app-account-report-analysis-selection [reportForm]="analysisReportForm"
-  (filteredItemsChange)="onFilteredItemsChange($event)"
-  (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"></app-account-report-analysis-selection>
+<app-account-report-analysis-selection [reportForm]="analysisReportForm"></app-account-report-analysis-selection>
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+@if(selectedAnalysisItem) {
 <form [formGroup]="analysisReportForm">
   <div class="row">
     <div class="col-4">
