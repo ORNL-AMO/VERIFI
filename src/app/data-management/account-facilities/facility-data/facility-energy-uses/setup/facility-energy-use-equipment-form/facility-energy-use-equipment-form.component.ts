@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -9,6 +9,8 @@ import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { distinctUntilChanged } from 'rxjs/operators';
+import { getEnergyUseUnit } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-facility-energy-use-equipment-form',
@@ -24,6 +26,14 @@ export class FacilityEnergyUseEquipmentFormComponent {
   @Input()
   inSetup: boolean = false;
 
+
+  private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService = inject(FacilityEnergyUseEquipmentFormService);
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+
+
+
   yearOptions: Array<number> = []
   equipmentDetailsForm: FormGroup;
   utilityDataForms: Array<UtilityDataForm>;
@@ -32,9 +42,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
   showUtilityTypeModal: boolean = false;
   showAddOperatingConditionsModal: boolean = false;
   constructor(
-    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) { }
 
   ngOnInit() {
@@ -47,16 +54,16 @@ export class FacilityEnergyUseEquipmentFormComponent {
     }
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.formSubscriptions.unsubscribe();
   }
 
-  initFormData(){
-      this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
-      this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
-      this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
-      this.setYearOptions();
-      this.subscribeToFormChanges();
+  initFormData() {
+    this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
+    this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
+    this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
+    this.setYearOptions();
+    this.subscribeToFormChanges();
   }
 
   addOperatingConditionsYear(year: number) {
@@ -70,7 +77,8 @@ export class FacilityEnergyUseEquipmentFormComponent {
     let newForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getOperatingConditionsYearForm(newOperatingConditionsData);
     this.annualOperatingConditionsDataForms.push(newForm);
     this.utilityDataForms.forEach(udf => {
-      let energyUseForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getEnergyUseForm({ year: year, energyUse: 0, overrideEnergyUse: false });
+      let energyUseUnit: string = this.facilityDbService.selectedFacility.getValue()?.energyUnit;
+      let energyUseForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getEnergyUseForm({ year: year, energyUse: 0, overrideEnergyUse: false, energyUseUnit: energyUseUnit });
       udf.energyUseForms.push(energyUseForm);
     });
     this.subscribeToFormChanges();
@@ -143,7 +151,8 @@ export class FacilityEnergyUseEquipmentFormComponent {
         return {
           year: year,
           energyUse: 0,
-          overrideEnergyUse: false
+          overrideEnergyUse: false,
+          energyUseUnit: this.facilityDbService.selectedFacility.getValue()?.energyUnit
         };
       })
     };

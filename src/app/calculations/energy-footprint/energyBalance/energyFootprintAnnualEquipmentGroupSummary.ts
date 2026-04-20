@@ -2,7 +2,6 @@ import { MeterSource } from "src/app/models/constantsAndTypes";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups"
-import { getEnergyUseUnit } from "../energyFootprintCalculations";
 import { ConvertValue } from "../../conversions/convertValue";
 
 export class EnergyFootprintAnnualEquipmentGroupSummary {
@@ -53,11 +52,10 @@ export class EnergyFootprintAnnualEquipmentGroupSummary {
                         annualEnergyUseData = closestYearData;
                     }
                     if (annualEnergyUseData) {
-                        let calculatedUnit: string = getEnergyUseUnit(utilityDataForSource.units)
-                        let needsConversion: boolean = calculatedUnit != this.facility.energyUnit;
+                        let needsConversion: boolean = annualEnergyUseData.energyUseUnit != this.facility.energyUnit;
                         let energyUse: number = annualEnergyUseData.energyUse;
                         if (needsConversion) {
-                            energyUse = new ConvertValue(energyUse, calculatedUnit, this.facility.energyUnit).convertedValue;
+                            energyUse = new ConvertValue(energyUse, annualEnergyUseData.energyUseUnit, this.facility.energyUnit).convertedValue;
                         }
                         totalEquipmentEnergyUse += energyUse;
                         equipmentEnergyUses.push({

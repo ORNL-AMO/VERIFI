@@ -1,4 +1,5 @@
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
+import { ConvertValue } from "../conversions/convertValue";
 
 export function setEnergyFootprintEnergyUse(energyUseEquipment: IdbFacilityEnergyUseEquipment) {
     energyUseEquipment.operatingConditionsData.forEach(operatingConditionYear => {
@@ -6,13 +7,13 @@ export function setEnergyFootprintEnergyUse(energyUseEquipment: IdbFacilityEnerg
             let yearIndex: number = utilityData.energyUse.findIndex(eu => eu.year == operatingConditionYear.year);
             if (yearIndex != -1) {
                 let yearIndex: number = utilityData.energyUse.findIndex(eu => eu.year == operatingConditionYear.year);
-                utilityData.energyUse[yearIndex].energyUse = calculateTotalEquipmentEnergyUse(operatingConditionYear, utilityData);
+                utilityData.energyUse[yearIndex].energyUse = calculateTotalEquipmentEnergyUse(operatingConditionYear, utilityData, utilityData.energyUse[yearIndex].energyUseUnit);
             }
         })
     });
 }
 
-export function calculateTotalEquipmentEnergyUse(operatingConditions: EnergyEquipmentOperatingConditionsData, utilityData: EquipmentUtilityData): number {
+export function calculateTotalEquipmentEnergyUse(operatingConditions: EnergyEquipmentOperatingConditionsData, utilityData: EquipmentUtilityData, energyUseUnit: string): number {
     //Basic calculation: Size * Number of Equipment * Hours of Operation * Load Factor * Duty Factor * Efficiency
     let energyUse: number = utilityData.size
         * utilityData.numberOfEquipment
@@ -21,11 +22,14 @@ export function calculateTotalEquipmentEnergyUse(operatingConditions: EnergyEqui
         * (operatingConditions.dutyFactor / 100)
         / (operatingConditions.efficiency / 100);
 
-    // let unitOptions: Array<UnitOption> = getUnitOptionsForUtilityType(utilityData.energySource);
-    // let unitOption: UnitOption = unitOptions.find(uo => uo.value == utilityData.units);
-    // let energyUseUnit: string = getEnergyUseUnit(unitOption.value);
-    // TODO: handle units conversion
-
+    //convert energy use to selected unit if needed
+    let calculatedEnergUseUnit: string = getEnergyUseUnit(utilityData.units);
+    if (energyUseUnit != calculatedEnergUseUnit) {
+        //need to convert energy use to selected unit
+        energyUse = new ConvertValue(energyUse, calculatedEnergUseUnit, energyUseUnit).convertedValue;
+        //round value to 2 decimal places
+        energyUse = Math.round(energyUse * 100) / 100;
+    }
     return energyUse;
 }
 
@@ -58,10 +62,8 @@ export function getEnergyUseUnit(unitOptionValue: string): string {
 
     // If the selected unit is already an energy unit, return it as is
     // (e.g., kWh, MWh, MJ, GJ, Therms, etc.)
-    const energyUnits = [
-        'kWh', 'MWh', 'kJ', 'GJ', 'MJ', 'Therms', 'DTherms', 'MMBtu', 'kcal', 'hph'
-    ];
-    if (energyUnits.includes(unitOptionValue)) {
+
+    if (footprintEnergyUseUnits.includes(unitOptionValue)) {
         return unitOptionValue;
     }
 
@@ -69,3 +71,7 @@ export function getEnergyUseUnit(unitOptionValue: string): string {
     // (e.g., gal, m3, ft3, lb, kg, etc.)
     return unitOptionValue;
 }
+
+export const footprintEnergyUseUnits: Array<string> = [
+    'kWh', 'MWh', 'kJ', 'GJ', 'MJ', 'Therms', 'DTherms', 'MMBtu', 'kcal', 'hph', 'Wh', 'Btu'
+];

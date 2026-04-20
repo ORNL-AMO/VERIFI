@@ -92,7 +92,8 @@ export class FacilityEnergyUseEquipmentFormService {
     return this.formBuilder.group({
       year: [energyUseData.year, Validators.required],
       energyUse: [{ value: energyUseData.energyUse, disabled: energyUseData.overrideEnergyUse === false }, Validators.required],
-      overrideEnergyUse: [energyUseData.overrideEnergyUse, Validators.required]
+      overrideEnergyUse: [energyUseData.overrideEnergyUse, Validators.required],
+      energyUseUnit: [energyUseData.energyUseUnit]
     });
   }
 
@@ -110,7 +111,8 @@ export class FacilityEnergyUseEquipmentFormService {
         utilityData.energyUse.push({
           year: energyUseForm.controls.year.value,
           energyUse: energyUseForm.controls.energyUse.value,
-          overrideEnergyUse: energyUseForm.controls.overrideEnergyUse.value
+          overrideEnergyUse: energyUseForm.controls.overrideEnergyUse.value,
+          energyUseUnit: energyUseForm.controls.energyUseUnit.value
         });
       }
       equipment.utilityData.push(utilityData);
@@ -168,7 +170,7 @@ export class FacilityEnergyUseEquipmentFormService {
           let operatingConditions: FormGroup = annualOperatingConditionsDataForms.find(form => { return form.controls.year.value == year });
           if (operatingConditions && operatingConditions.valid) {
             //Example calculation (Electric Motor): Energy Use (kWh) = Size (kW) x Number of Motors x Load Factor x Duty Factor x Hours of Operation / Efficiency
-            let calculatedEnergyUse: number = calculateTotalEquipmentEnergyUse(operatingConditions.value, utilityDataFormObj.utilityDataForm.value);
+            let calculatedEnergyUse: number = calculateTotalEquipmentEnergyUse(operatingConditions.value, utilityDataFormObj.utilityDataForm.value, energyUseForm.controls.energyUseUnit.value);
             energyUseForm.patchValue({
               energyUse: calculatedEnergyUse
             }, { emitEvent: false });

@@ -3,7 +3,6 @@ import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facility
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
-import { getEnergyUseUnit } from "./energyFootprintCalculations";
 
 export class EnergyUsesGroupSummary {
     groupName: string;
@@ -34,9 +33,8 @@ export class EnergyUsesGroupSummary {
         this.groupEquipment.forEach(equip => {
             let equipmentEnergyUseData: Array<AnnualEnergyUse> = new Array();
             equip.utilityData.forEach(ud => {
-                let energyUseUnits: string = getEnergyUseUnit(ud.units);
                 ud.energyUse.forEach(eu => {
-                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facilityUnits).convertedValue;
+                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, eu.energyUseUnit, facilityUnits).convertedValue;
                     equipmentEnergyUseData.push({
                         year: eu.year,
                         energyUse: convertedEnergyUse,
@@ -60,11 +58,16 @@ export class EnergyUsesGroupSummary {
                             });
                         } else {
                             //find closest previous year with data
-                            let closestYearData: { year: number, energyUse: number } = _.maxBy(ud.energyUse.filter(eu => eu.year < year), 'year');
+                            let closestYearData: { year: number, energyUse: number, energyUseUnit: string } = _.maxBy(ud.energyUse.filter(eu => eu.year < year), 'year');
                             if (closestYearData) {
+                                let needsConversion: boolean = closestYearData.energyUseUnit != facilityUnits;
+                                let energyUse: number = closestYearData.energyUse;
+                                if (needsConversion) {
+                                    energyUse = new ConvertValue(energyUse, closestYearData.energyUseUnit, facilityUnits).convertedValue;
+                                }
                                 equipmentEnergyUseData.push({
                                     year: year,
-                                    energyUse: new ConvertValue(closestYearData.energyUse, energyUseUnits, facilityUnits).convertedValue,
+                                    energyUse: energyUse,
                                     percentOfEquipmentGroupTotal: 0,
                                     isPropegated: true
                                 });

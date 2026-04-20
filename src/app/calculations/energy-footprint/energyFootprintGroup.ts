@@ -2,7 +2,6 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment";
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import * as _ from 'lodash';
-import { getEnergyUseUnit } from "./energyFootprintCalculations";
 import { ConvertValue } from "../conversions/convertValue";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
@@ -67,17 +66,11 @@ export class EnergyFootprintGroup {
                         if (ud.energySource == source) {
                             ud.energyUse.forEach(eu => {
                                 if (eu.year == year) {
-                                    let energyUseUnits: string = getEnergyUseUnit(ud.units);
-                                    let siteToSource: number = 1;
-                                    if (ud.energySource == 'Electricity' && facility.energyIsSource) {
-                                        siteToSource = 3;
-                                    }
-                                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facility.energyUnit).convertedValue;
-                                    // equipmentEnergyUseForYear += (convertedEnergyUse * siteToSource);
+                                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, eu.energyUseUnit, facility.energyUnit).convertedValue;
                                     equipmentEnergyUse.push({
                                         equipmentGuid: equip.guid,
                                         equipmentName: equip.name,
-                                        energyUse: convertedEnergyUse * siteToSource,
+                                        energyUse: convertedEnergyUse,
                                         percentOfTotal: 0
                                     });
                                 }
@@ -164,16 +157,11 @@ export class EnergyFootprintGroup {
                         equip.utilityData.forEach(ud => {
                             ud.energyUse.forEach(eu => {
                                 if (eu.year == year) {
-                                    let energyUseUnits: string = getEnergyUseUnit(ud.units);
-                                    let siteToSource: number = 1;
-                                    if (ud.energySource == 'Electricity' && facility.energyIsSource) {
-                                        siteToSource = 3;
-                                    }
-                                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facility.energyUnit).convertedValue;
+                                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, eu.energyUseUnit, facility.energyUnit).convertedValue;
                                     equipmentEnergyUseData.push({
                                         equipmentGuid: equip.guid,
                                         equipmentName: equip.name,
-                                        energyUse: convertedEnergyUse * siteToSource,
+                                        energyUse: convertedEnergyUse,
                                         percentOfTotal: 0
                                     });
                                 }

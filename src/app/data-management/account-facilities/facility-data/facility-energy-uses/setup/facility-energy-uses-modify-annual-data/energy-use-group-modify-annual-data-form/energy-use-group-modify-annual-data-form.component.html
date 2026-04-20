@@ -126,7 +126,6 @@
 
                 @if(energyUseForm.controls.year.value == year) {
 
-                @let calculatedEnergyUnit = utilityDataFormObj.utilityDataForm.get('units').value | energyUseUnit;
                 <form [formGroup]="energyUseForm">
                     <div class="row mt-3">
                         <div class="col-sm-12 col-md-3">
@@ -135,7 +134,7 @@
                                 Energy Use</span>
                         </div>
 
-                        @let unitsDifferent = (calculatedEnergyUnit !== facilityUnits);
+                        @let unitsDifferent = (energyUseForm.controls.energyUseUnit.value !== facilityUnits);
                         <div class="col-sm-6 col-md-3">
                             <div class="input-group">
                                 <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseForm)">
@@ -147,7 +146,7 @@
                                 </button>
                                 <input class="form-control" type="number" formControlName="energyUse" id="energyUse"
                                     min="0">
-                                <span class="input-group-text" [innerHTML]="calculatedEnergyUnit | settingsLabel">
+                                <span class="input-group-text" [innerHTML]="energyUseForm.controls.energyUseUnit.value | settingsLabel">
                                 </span>
                             </div>
                         </div>
@@ -156,7 +155,7 @@
                             <div class="input-group">
                                 @let convertedEnergyUse = energyUseForm.controls.energyUse.value |
                                 convertEnergyUseResult:
-                                calculatedEnergyUnit : facilityUnits : utilityDataFormObj.energySource;
+                                energyUseForm.controls.energyUseUnit.value : facilityUnits : utilityDataFormObj.energySource;
                                 <input class="form-control" type="number" [value]="convertedEnergyUse"
                                     [disabled]="true">
                                 <span class="input-group-text" [innerHTML]="facilityUnits | settingsLabel">

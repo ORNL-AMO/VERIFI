@@ -97,7 +97,8 @@ export class EnergyUseGroupModifyAnnualDataFormComponent {
             return {
               year: eu.year,
               energyUse: energyUseForm.controls['energyUse'].value,
-              overrideEnergyUse: energyUseForm.controls['overrideEnergyUse'].value
+              overrideEnergyUse: energyUseForm.controls['overrideEnergyUse'].value,
+              energyUseUnit: energyUseForm.controls['energyUseUnit'].value
             }
           } else {
             return eu;
