@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { EnergyUsesFacilitySummary, FacilityEnergyUseGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import * as _ from 'lodash';
+import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
 
 @Component({
   selector: 'app-facility-energy-uses-summary-table',
@@ -71,20 +72,20 @@ export class FacilityEnergyUsesSummaryTableComponent {
 
     //order results
     if (this.orderByField != 'groupName') {
-      summary.footprintGroupSummaries = _.orderBy(summary.footprintGroupSummaries, [(group: FacilityEnergyUseGroupSummary) => {
-        let yearData = group.annualEnergyUse.find(annualUse => annualUse.year == year);
+      summary.footprintGroups = _.orderBy(summary.footprintGroups, [(group: EnergyUsesGroupSummary) => {
+        let yearData = group.totalAnnualEnergyUse.find(annualUse => annualUse.year == year);
         if (yearData) {
           if (this.orderByField == 'totalEnergyUse') {
-            return yearData.totalEnergyUse;
+            return yearData.energyUse;
           } else if (this.orderByField == 'percentOfFacilityUse') {
             return yearData.percentOfFacilityUse;
-          }
+          } 
         }
         return 0;
       }], [this.orderByDir]);
       return summary;
     } else {
-      summary.footprintGroupSummaries = _.orderBy(summary.footprintGroupSummaries, ['groupName'], [this.orderByDir]);
+      summary.footprintGroups = _.orderBy(summary.footprintGroups, ['groupName'], [this.orderByDir]);
     }
     return summary;
   });

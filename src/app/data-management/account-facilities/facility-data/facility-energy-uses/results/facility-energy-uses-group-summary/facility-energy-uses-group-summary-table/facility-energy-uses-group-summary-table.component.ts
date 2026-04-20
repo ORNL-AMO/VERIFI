@@ -74,7 +74,7 @@ export class FacilityEnergyUsesGroupSummaryTableComponent {
           if (this.orderByField == 'energyUse') {
             return yearData.energyUse;
           } else if (this.orderByField == 'percentOfTotal') {
-            return yearData.percentOfTotal;
+            return yearData.percentOfEquipmentGroupTotal;
           }
         }
         return 0;

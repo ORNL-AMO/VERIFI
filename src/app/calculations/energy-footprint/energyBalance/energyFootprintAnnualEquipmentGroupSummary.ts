@@ -5,7 +5,7 @@ import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEner
 import { getEnergyUseUnit } from "../energyFootprintCalculations";
 import { ConvertValue } from "../../conversions/convertValue";
 
-export class EnergyFootprintAnnualGroupBalance {
+export class EnergyFootprintAnnualEquipmentGroupSummary {
 
     year: number;
     sourcesConsumption: Array<{

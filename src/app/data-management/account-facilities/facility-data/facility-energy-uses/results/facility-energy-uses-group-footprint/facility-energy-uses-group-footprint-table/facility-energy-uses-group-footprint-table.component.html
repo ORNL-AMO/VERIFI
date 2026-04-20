@@ -3,12 +3,12 @@
         <tr class="table-mh">
             <th class="w-50">Source</th>
             <th>Equipment Use<br>
-                <span [innerHTML]="'(' + energyFootprintAnnualGroupBalance.facility.energyUnit + '/yr)'"></span>
+                <span [innerHTML]="'(' + energyFootprintAnnualEquipmentGroupSummary.facility.energyUnit + '/yr)'"></span>
             </th>
         </tr>
     </thead>
     <tbody>
-        @for(sourceConsumption of energyFootprintAnnualGroupBalance.sourcesConsumption; track
+        @for(sourceConsumption of energyFootprintAnnualEquipmentGroupSummary.sourcesConsumption; track
         sourceConsumption.source) {
         <tr>
             <td colspan="2" class="fw-bold bg-secondary text-white">{{sourceConsumption.source}}

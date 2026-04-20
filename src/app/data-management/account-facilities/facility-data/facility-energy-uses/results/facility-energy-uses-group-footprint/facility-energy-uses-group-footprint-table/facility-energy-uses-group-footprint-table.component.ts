@@ -1,6 +1,6 @@
 import { Component, inject, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyFootprintAnnualGroupBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualGroupBalance';
+import { EnergyFootprintAnnualEquipmentGroupSummary } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Component({
@@ -11,14 +11,14 @@ import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facility
 })
 export class FacilityEnergyUsesGroupFootprintTableComponent {
   @Input({ required: true })
-  set energyFootprintAnnualGroupBalance(value: EnergyFootprintAnnualGroupBalance | null) {
-    this.energyFootprintAnnualGroupBalanceSignal.set(value);
+  set energyFootprintAnnualEquipmentGroupSummary(value: EnergyFootprintAnnualEquipmentGroupSummary | null) {
+    this.energyFootprintAnnualEquipmentGroupSummarySignal.set(value);
   }
-  get energyFootprintAnnualGroupBalance(): EnergyFootprintAnnualGroupBalance | null {
-    return this.energyFootprintAnnualGroupBalanceSignal();
+  get energyFootprintAnnualEquipmentGroupSummary(): EnergyFootprintAnnualEquipmentGroupSummary | null {
+    return this.energyFootprintAnnualEquipmentGroupSummarySignal();
   }
 
-  private energyFootprintAnnualGroupBalanceSignal = signal<EnergyFootprintAnnualGroupBalance | null>(null);
+  private energyFootprintAnnualEquipmentGroupSummarySignal = signal<EnergyFootprintAnnualEquipmentGroupSummary | null>(null);
   private router = inject(Router);
 
 

@@ -111,11 +111,11 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
     // Build a sorted, de-duplicated list of all years present in the totals
     const years = [...new Set(summary.totals.map(t => t.year))].sort((a, b) => a - b);
 
-    const data = summary.footprintGroupSummaries.map(groupSummary => {
+    const data = summary.footprintGroups.map(groupSummary => {
       // Map each year to the group's energy use for that year (0 if absent)
       const yValues = years.map(year => {
-        const found = groupSummary.annualEnergyUse.find(a => a.year === year);
-        return found ? found.totalEnergyUse : 0;
+        const found = groupSummary.totalAnnualEnergyUse.find(a => a.year === year);
+        return found ? found.energyUse : 0;
       });
 
       return {
@@ -178,14 +178,14 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
     const latestYear = Math.max(...summary.totals.map(t => t.year));
 
     // Collect one entry per group with its latest-year values
-    const entries = summary.footprintGroupSummaries
+    const entries = summary.footprintGroups
       .map(groupSummary => {
-        const yearData = groupSummary.annualEnergyUse.find(a => a.year === latestYear);
+        const yearData = groupSummary.totalAnnualEnergyUse.find(a => a.year === latestYear);
         return {
           name: groupSummary.groupName,
           color: groupSummary.groupColor,
           percent: yearData?.percentOfFacilityUse ?? 0,
-          energyUse: yearData?.totalEnergyUse ?? 0,
+          energyUse: yearData?.energyUse ?? 0,
         };
       })
       // Exclude groups with no energy use so they don't clutter the treemap

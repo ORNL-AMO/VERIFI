@@ -48,7 +48,7 @@
                 @if(annualEnergyUse.isNoLongerInUse){
                 <span class="fa fa-ban" title="This equipment was no longer in use during this year"></span>
                 }@else {
-                {{annualEnergyUse.percentOfTotal| number:'1.0-0'}}&percnt;
+                {{annualEnergyUse.percentOfEquipmentGroupTotal| number:'1.0-0'}}&percnt;
                 }
             </td>
             }
