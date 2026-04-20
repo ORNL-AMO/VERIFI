@@ -1,8 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { footprintEnergyUseUnits } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-energy-use-data-form',
@@ -20,20 +22,15 @@ export class EnergyUseDataFormComponent {
   @Input()
   inSetup: boolean = false;
 
-  facilityUnits: string;
-  facilitySub: Subscription;
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
 
-  constructor(private facilityDbService: FacilitydbService) { }
-
-  ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facilityUnits = facility?.energyUnit;
-    });
+  private facility$: Signal<IdbFacility | null> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  get facilityEnergyUnit(): string {
+    const facility = this.facility$();
+    return facility ? facility.energyUnit : '';
   }
 
-  ngOnDestroy() {
-    this.facilitySub.unsubscribe();
-  }
+  energyUnits: Array<string> = footprintEnergyUseUnits;
 
   toggleOverride(energyUseForm: FormGroup) {
     energyUseForm.patchValue({

@@ -81,7 +81,7 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
               equipment.operatingConditionsData.push(newData);
               equipment.utilityData.forEach(utility => {
                 let mostRecentYearOfUtilityData: EquipmentUtilityDataEnergyUse = utility.energyUse.find(data => data.year == mostRecentYearOfData);
-                utility.energyUse.push({ year: this.selectedYear, energyUse: mostRecentYearOfUtilityData.energyUse, overrideEnergyUse: false })
+                utility.energyUse.push({ year: this.selectedYear, energyUse: mostRecentYearOfUtilityData.energyUse, overrideEnergyUse: false, energyUseUnit: mostRecentYearOfUtilityData.energyUseUnit });
               })
             }
           }

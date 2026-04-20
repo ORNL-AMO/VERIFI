@@ -8,7 +8,7 @@ import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEner
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EnergyFootprintAnnualGroupBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualGroupBalance';
+import { EnergyFootprintAnnualEquipmentGroupSummary } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
@@ -41,7 +41,7 @@ export class FacilityEnergyUsesGroupFootprintComponent {
     return getYearsWithFullData(calanderizedMeters, selectedFacility);
   });
 
-  energyFootprintAnnualGroupBalance$: Signal<EnergyFootprintAnnualGroupBalance> = computed(() => {
+  energyFootprintAnnualEquipmentGroupSummary$: Signal<EnergyFootprintAnnualEquipmentGroupSummary> = computed(() => {
     const energyUseGroup = this.energyUseGroup();
     const equipment = this.facilityEnergyUseEquipment$();
     const selectedYear = this.selectedYear();
@@ -49,8 +49,11 @@ export class FacilityEnergyUsesGroupFootprintComponent {
     if (!energyUseGroup || equipment.length === 0 || !selectedYear || !selectedFacility) {
       return null;
     }
-    return new EnergyFootprintAnnualGroupBalance(energyUseGroup, equipment, selectedYear, selectedFacility);
+    return new EnergyFootprintAnnualEquipmentGroupSummary(energyUseGroup, equipment, selectedYear, selectedFacility);
   });
+  get energyFootprintAnnualEquipmentGroupSummary(): EnergyFootprintAnnualEquipmentGroupSummary {
+    return this.energyFootprintAnnualEquipmentGroupSummary$();
+  }
 
   energyUseGroup: WritableSignal<IdbFacilityEnergyUseGroup> = signal<IdbFacilityEnergyUseGroup>(null);
   selectedYear: WritableSignal<number | null> = signal<number | null>(null);

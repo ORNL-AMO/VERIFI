@@ -1,6 +1,6 @@
 import { Component, computed, ElementRef, inject, Input, OnChanges, OnDestroy, signal, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { EnergyFootprintAnnualGroupBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualGroupBalance';
+import { EnergyFootprintAnnualEquipmentGroupSummary } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SankeyData, SankeyLink, SankeyNode } from 'src/app/models/visualization';
 import { buildSankeyData, formatEnergyValue, getLinkColor, getSourceColor } from 'src/app/shared/sankey-utils';
@@ -14,14 +14,14 @@ import { buildSankeyData, formatEnergyValue, getLinkColor, getSourceColor } from
 export class FacilityEnergyUsesGroupSankeyComponent implements OnChanges, OnDestroy {
 
   @Input({ required: true })
-  set energyFootprintAnnualGroupBalance(value: EnergyFootprintAnnualGroupBalance | null) {
-    this.energyFootprintAnnualGroupBalanceSignal.set(value);
+  set energyFootprintAnnualEquipmentGroupSummary(value: EnergyFootprintAnnualEquipmentGroupSummary | null) {
+    this.energyFootprintAnnualEquipmentGroupSummarySignal.set(value);
   }
-  get energyFootprintAnnualGroupBalance(): EnergyFootprintAnnualGroupBalance | null {
-    return this.energyFootprintAnnualGroupBalanceSignal();
+  get energyFootprintAnnualEquipmentGroupSummary(): EnergyFootprintAnnualEquipmentGroupSummary | null {
+    return this.energyFootprintAnnualEquipmentGroupSummarySignal();
   }
 
-  private energyFootprintAnnualGroupBalanceSignal = signal<EnergyFootprintAnnualGroupBalance | null>(null);
+  private energyFootprintAnnualEquipmentGroupSummarySignal = signal<EnergyFootprintAnnualEquipmentGroupSummary | null>(null);
 
   private plotlyService = inject(PlotlyService);
 
@@ -46,7 +46,7 @@ export class FacilityEnergyUsesGroupSankeyComponent implements OnChanges, OnDest
 
   // Computed signal: rebuilds the Sankey data whenever the balance input changes
   private sankeyData = computed(() => {
-    const balance = this.energyFootprintAnnualGroupBalanceSignal();
+    const balance = this.energyFootprintAnnualEquipmentGroupSummarySignal();
     if (!balance || !balance.sourcesConsumption?.length) {
       return null;
     }
@@ -55,7 +55,7 @@ export class FacilityEnergyUsesGroupSankeyComponent implements OnChanges, OnDest
 
   ngOnChanges(changes: SimpleChanges): void {
     // Re-render the chart whenever the balance or energy unit changes
-    if (changes['energyFootprintAnnualGroupBalance'] || changes['energyUnit']) {
+    if (changes['energyFootprintAnnualEquipmentGroupSummary'] || changes['energyUnit']) {
       this.updateChart();
     }
   }
@@ -85,7 +85,7 @@ export class FacilityEnergyUsesGroupSankeyComponent implements OnChanges, OnDest
    * - Links: one link per (source, equipment) pair, sized by the equipment's energy use
    *   for that source
    */
-  private transformToSankeyFormat(balance: EnergyFootprintAnnualGroupBalance): SankeyData | null {
+  private transformToSankeyFormat(balance: EnergyFootprintAnnualEquipmentGroupSummary): SankeyData | null {
     const nodes: SankeyNode[] = [];
     const links: SankeyLink[] = [];
 
@@ -197,6 +197,6 @@ export class FacilityEnergyUsesGroupSankeyComponent implements OnChanges, OnDest
    * Delegates to the shared formatEnergyValue utility.
    */
   private formatValue(value: number): string {
-    return formatEnergyValue(value, this.energyFootprintAnnualGroupBalanceSignal()?.facility.energyUnit);
+    return formatEnergyValue(value, this.energyFootprintAnnualEquipmentGroupSummarySignal()?.facility.energyUnit);
   }
 }

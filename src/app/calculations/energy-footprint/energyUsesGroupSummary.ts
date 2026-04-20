@@ -3,7 +3,6 @@ import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facility
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
-import { getEnergyUseUnit } from "./energyFootprintCalculations";
 
 export class EnergyUsesGroupSummary {
     groupName: string;
@@ -11,7 +10,7 @@ export class EnergyUsesGroupSummary {
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
     groupColor: string;
     equipmentAnnualEnergyUse: Array<EqupmentAnnualEnergyUse> = [];
-    totalAnnualEnergyUse: Array<{ year: number, energyUse: number, isPropegated: boolean }> = [];
+    totalAnnualEnergyUse: Array<{ year: number, energyUse: number, isPropegated: boolean, percentOfFacilityUse: number, equipmentNotInUse?: boolean }> = [];
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility,
         useLatestDataAvailable: boolean = true
@@ -34,13 +33,12 @@ export class EnergyUsesGroupSummary {
         this.groupEquipment.forEach(equip => {
             let equipmentEnergyUseData: Array<AnnualEnergyUse> = new Array();
             equip.utilityData.forEach(ud => {
-                let energyUseUnits: string = getEnergyUseUnit(ud.units);
                 ud.energyUse.forEach(eu => {
-                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, energyUseUnits, facilityUnits).convertedValue;
+                    let convertedEnergyUse: number = new ConvertValue(eu.energyUse, eu.energyUseUnit, facilityUnits).convertedValue;
                     equipmentEnergyUseData.push({
                         year: eu.year,
                         energyUse: convertedEnergyUse,
-                        percentOfTotal: 0,
+                        percentOfEquipmentGroupTotal: 0,
                         isPropegated: false
                     })
                 });
@@ -54,18 +52,23 @@ export class EnergyUsesGroupSummary {
                             equipmentEnergyUseData.push({
                                 year: year,
                                 energyUse: 0,
-                                percentOfTotal: 0,
+                                percentOfEquipmentGroupTotal: 0,
                                 isPropegated: true,
                                 isNoLongerInUse: true
                             });
                         } else {
                             //find closest previous year with data
-                            let closestYearData: { year: number, energyUse: number } = _.maxBy(ud.energyUse.filter(eu => eu.year < year), 'year');
+                            let closestYearData: { year: number, energyUse: number, energyUseUnit: string } = _.maxBy(ud.energyUse.filter(eu => eu.year < year), 'year');
                             if (closestYearData) {
+                                let needsConversion: boolean = closestYearData.energyUseUnit != facilityUnits;
+                                let energyUse: number = closestYearData.energyUse;
+                                if (needsConversion) {
+                                    energyUse = new ConvertValue(energyUse, closestYearData.energyUseUnit, facilityUnits).convertedValue;
+                                }
                                 equipmentEnergyUseData.push({
                                     year: year,
-                                    energyUse: new ConvertValue(closestYearData.energyUse, energyUseUnits, facilityUnits).convertedValue,
-                                    percentOfTotal: 0,
+                                    energyUse: energyUse,
+                                    percentOfEquipmentGroupTotal: 0,
                                     isPropegated: true
                                 });
                             }
@@ -85,7 +88,7 @@ export class EnergyUsesGroupSummary {
                 });
                 let isPropegated: boolean = energyUseDataForYear.some(eu => eu.isPropegated == true);
                 let isNoLongerInUse: boolean = energyUseDataForYear.some(eu => eu.isNoLongerInUse == true);
-                annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear, percentOfTotal: 0, isPropegated: isPropegated, isNoLongerInUse: isNoLongerInUse });
+                annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear, percentOfEquipmentGroupTotal: 0, isPropegated: isPropegated, isNoLongerInUse: isNoLongerInUse });
             });
             this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse, equipmentColor: equip.color });
         });
@@ -103,7 +106,7 @@ export class EnergyUsesGroupSummary {
                 }
             });
             let isPropegated: boolean = equipmentEnergyUse.some(eu => eu.year == year && eu.isPropegated == true);
-            this.totalAnnualEnergyUse.push({ year: year, energyUse: equipmentEnergyUseForYear, isPropegated: isPropegated });
+            this.totalAnnualEnergyUse.push({ year: year, energyUse: equipmentEnergyUseForYear, isPropegated: isPropegated, percentOfFacilityUse: 0 });
         })
     }
 
@@ -112,9 +115,9 @@ export class EnergyUsesGroupSummary {
             equipData.annualEnergyUse.forEach(yearData => {
                 let totalYearData: { year: number, energyUse: number } = this.totalAnnualEnergyUse.find(tae => tae.year == yearData.year);
                 if (totalYearData && totalYearData.energyUse != 0) {
-                    yearData.percentOfTotal = (yearData.energyUse / totalYearData.energyUse) * 100;
+                    yearData.percentOfEquipmentGroupTotal = (yearData.energyUse / totalYearData.energyUse) * 100;
                 } else {
-                    yearData.percentOfTotal = 0;
+                    yearData.percentOfEquipmentGroupTotal = 0;
                 }
             });
         });
@@ -145,7 +148,7 @@ export class EnergyUsesGroupSummary {
                     equipData.annualEnergyUse.push({
                         year: year,
                         energyUse: equipEnergyUseForMostRecentYear,
-                        percentOfTotal: 0,
+                        percentOfEquipmentGroupTotal: 0,
                         isPropegated: true,
                         isNoLongerInUse: equipClosestYearData.isNoLongerInUse
                     });
@@ -161,10 +164,28 @@ export class EnergyUsesGroupSummary {
                 this.totalAnnualEnergyUse.push({
                     year: year,
                     energyUse: totalEnergyUseForYear,
-                    isPropegated: true
+                    isPropegated: true,
+                    percentOfFacilityUse: 0
                 });
 
                 this.setPercentOfTotalEnergyUse();
+            } else {
+                //if no previous year data, add 0 value for year
+                this.equipmentAnnualEnergyUse.forEach(equipData => {
+                    equipData.annualEnergyUse.push({
+                        year: year,
+                        energyUse: 0,
+                        percentOfEquipmentGroupTotal: 0,
+                        isPropegated: true
+                    });
+                });
+                this.totalAnnualEnergyUse.push({
+                    year: year,
+                    energyUse: 0,
+                    isPropegated: true,
+                    percentOfFacilityUse: 0,
+                    equipmentNotInUse: true
+                });
             }
         }
     }
@@ -178,6 +199,28 @@ export class EnergyUsesGroupSummary {
         this.totalAnnualEnergyUse = _.orderBy(this.totalAnnualEnergyUse, ['year'], ['desc']).slice(0, 1);
         return this;
     }
+
+    setPercentOfFacilityUse(facilityTotals: Array<{ year: number, totalEnergyUse: number }>) {
+        this.totalAnnualEnergyUse.forEach(yearData => {
+            let facilityTotalForYear = facilityTotals.find(ft => ft.year == yearData.year);
+            if (facilityTotalForYear && facilityTotalForYear.totalEnergyUse != 0) {
+                yearData.percentOfFacilityUse = (yearData.energyUse / facilityTotalForYear.totalEnergyUse) * 100;
+            } else {
+                yearData.percentOfFacilityUse = 0;
+            }
+        });
+
+        this.equipmentAnnualEnergyUse.forEach(equipData => {
+            equipData.annualEnergyUse.forEach(yearData => {
+                let facilityTotalForYear = facilityTotals.find(ft => ft.year == yearData.year);
+                if (facilityTotalForYear && facilityTotalForYear.totalEnergyUse != 0) {
+                    yearData.percentOfFacilityUse = (yearData.energyUse / facilityTotalForYear.totalEnergyUse) * 100;
+                } else {
+                    yearData.percentOfFacilityUse = 0;
+                }
+            });
+        });
+    }
 }
 
 export interface EqupmentAnnualEnergyUse {
@@ -190,7 +233,8 @@ export interface EqupmentAnnualEnergyUse {
 export interface AnnualEnergyUse {
     year: number,
     energyUse: number,
-    percentOfTotal: number,
+    percentOfEquipmentGroupTotal: number,
+    percentOfFacilityUse?: number,
     isPropegated: boolean,
     isNoLongerInUse?: boolean
 }

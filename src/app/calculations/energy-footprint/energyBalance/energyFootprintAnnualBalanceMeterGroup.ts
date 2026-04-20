@@ -4,7 +4,6 @@ import { EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from "sr
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
 import * as _ from 'lodash';
-import { getEnergyUseUnit } from "../energyFootprintCalculations";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { ConvertValue } from "../../conversions/convertValue";
 import { convertMeterDataToSite } from "../../calanderization/calanderizationHelpers";
@@ -74,7 +73,7 @@ export class EnergyFootprintAnnualBalanceMeterGroup {
                                 annualEnergyUse = closestYearData;
                             }
                             if (annualEnergyUse) {
-                                let calculatedUnit: string = getEnergyUseUnit(ud.units)
+                                let calculatedUnit: string = annualEnergyUse.energyUseUnit;
                                 let needsConversion: boolean = calculatedUnit != facility.energyUnit;
                                 let energyUse: number = annualEnergyUse.energyUse;
                                 if (needsConversion) {

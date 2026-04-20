@@ -13,30 +13,16 @@
                                 View Facility Footprint
                             </button>
                         </div>
-
-                        <!-- <div class="d-flex">
-                            <div class="d-flex">
-                                <label class="switch" for="dataType">
-                                    <input class="checkbox" type="checkbox" id="dataType"
-                                        [(ngModel)]="dataTypeMeterGroup" name="dataType">
-                                    <span class="slider round"></span>
-                                </label>
-                                <div class="ps-1 my-auto">
-                                    Show by Meter Group
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
                 </h4>
-                @let energyFootprintAnnualGroupBalance = energyFootprintAnnualGroupBalance$();
-                @if(!energyFootprintAnnualGroupBalance) {
+                @if(!energyFootprintAnnualEquipmentGroupSummary) {
                 <p>Calculating footprint...</p>
                 } @else {
                 <app-facility-energy-uses-group-sankey
-                    [energyFootprintAnnualGroupBalance]="energyFootprintAnnualGroupBalance"></app-facility-energy-uses-group-sankey>
+                    [energyFootprintAnnualEquipmentGroupSummary]="energyFootprintAnnualEquipmentGroupSummary"></app-facility-energy-uses-group-sankey>
                 <hr>
                 <app-facility-energy-uses-group-footprint-table
-                    [energyFootprintAnnualGroupBalance]="energyFootprintAnnualGroupBalance"></app-facility-energy-uses-group-footprint-table>
+                    [energyFootprintAnnualEquipmentGroupSummary]="energyFootprintAnnualEquipmentGroupSummary"></app-facility-energy-uses-group-footprint-table>
                 }
             </div>
         </div>

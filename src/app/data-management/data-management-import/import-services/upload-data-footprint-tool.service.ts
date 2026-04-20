@@ -6,7 +6,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { setEnergyFootprintEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
+import { getEnergyUseUnit, setEnergyFootprintEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
@@ -89,7 +89,7 @@ export class UploadDataFootprintToolService {
         equipment.name = equipmentName;
         if (equipment.name) {
           equipment.operatingConditionsData = new Array();
-          let utilityEnergyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean }> = new Array();
+          let utilityEnergyUse: Array<{ year: number, energyUse: number, overrideEnergyUse: boolean, energyUseUnit: string }> = new Array();
 
           years.forEach((year, index) => {
             //need to use yearcolumns to get correct row values
@@ -112,7 +112,8 @@ export class UploadDataFootprintToolService {
               // let energyConsumptionCol = this.getNextExcelColumn(nextColumn);
               // let unitPerYearCol = this.getNextExcelColumn(energyConsumptionCol);
               // let overrideEnergyUseCol = this.getNextExcelColumn(unitPerYearCol);
-              utilityEnergyUse.push({ year: year, energyUse: 0, overrideEnergyUse: false })
+              let energyUseUnit: string = getEnergyUseUnit(unit);
+              utilityEnergyUse.push({ year: year, energyUse: 0, overrideEnergyUse: false, energyUseUnit: energyUseUnit });
             }
           });
 

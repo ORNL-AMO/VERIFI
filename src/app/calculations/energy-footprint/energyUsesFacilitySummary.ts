@@ -6,8 +6,6 @@ import { EnergyUsesGroupSummary } from "./energyUsesGroupSummary";
 
 export class EnergyUsesFacilitySummary {
     footprintGroups: Array<EnergyUsesGroupSummary> = [];
-    footprintGroupSummaries: Array<FacilityEnergyUseGroupSummary> = [];
-
     totals: Array<{
         year: number,
         totalEnergyUse: number,
@@ -29,11 +27,16 @@ export class EnergyUsesFacilitySummary {
         if (useLatestDataAvailable) {
             let years: Array<number> = this.footprintGroups.map(group => group.totalAnnualEnergyUse.map(annualUse => annualUse.year)).flat();
             years = _.uniq(years);
-            let mostRecentYear: number = Math.max(...years);
+            // let mostRecentYear: number = Math.max(...years);
             //iterate groups. If data missing for most recent year, set to closest year with data
-            this.footprintGroups.forEach(group => {
-                group.checkIfYearIncluded(mostRecentYear);
+            years.forEach(year => {
+                this.footprintGroups.forEach(group => {
+                    group.checkIfYearIncluded(year);
+                });
             });
+            // this.footprintGroups.forEach(group => {
+            //     group.checkIfYearIncluded(mostRecentYear);
+            // });
         }
     }
 
@@ -59,30 +62,14 @@ export class EnergyUsesFacilitySummary {
         });
     }
     setFootprintGroupSummaries() {
-        this.footprintGroupSummaries = this.footprintGroups.map(group => {
-            let annualEnergyUse = this.totals.map(total => {
-                let groupYearData = group.totalAnnualEnergyUse.find(annualUse => annualUse.year == total.year);
-                let groupEnergyUse = groupYearData ? groupYearData.energyUse : 0;
-                let percentOfFacilityUse = total.totalEnergyUse > 0 ? (groupEnergyUse / total.totalEnergyUse) * 100 : 0;
-                return {
-                    totalEnergyUse: groupEnergyUse,
-                    percentOfFacilityUse: percentOfFacilityUse,
-                    year: total.year,
-                    isPropegated: groupYearData ? groupYearData.isPropegated : false
-                }
-            });
-            return {
-                groupName: group.groupName,
-                groupId: group.groupId,
-                annualEnergyUse: annualEnergyUse,
-                groupColor: group.groupColor
-            }
+        this.footprintGroups.forEach(group => {
+            group.setPercentOfFacilityUse(this.totals);
         });
     }
 
     orderResults() {
-        this.footprintGroupSummaries.forEach(groupSummary => {
-            groupSummary.annualEnergyUse = _.orderBy(groupSummary.annualEnergyUse, ['year'], ['asc'])
+        this.footprintGroups.forEach(groupSummary => {
+            groupSummary.totalAnnualEnergyUse = _.orderBy(groupSummary.totalAnnualEnergyUse, ['year'], ['asc'])
         });
         this.totals = _.orderBy(this.totals, ['year'], ['asc']);
     }

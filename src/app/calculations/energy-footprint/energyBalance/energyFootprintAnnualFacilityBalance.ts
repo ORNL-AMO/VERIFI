@@ -7,7 +7,6 @@ import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup
 import * as _ from 'lodash';
 import { EnergyFootprintAnnualBalanceMeterGroup } from "./energyFootprintAnnualBalanceMeterGroup";
 import { ConvertValue } from "../../conversions/convertValue";
-import { getEnergyUseUnit } from "../energyFootprintCalculations";
 import { convertMeterDataToSite } from "../../calanderization/calanderizationHelpers";
 
 
@@ -86,12 +85,10 @@ export class EnergyFootprintAnnualFacilityBalance {
                             }
 
                             if (annualEnergyUseData) {
-                                // new ConvertValue(energyUse, calculatedUnit, resultsUnit)
-                                let calculatedUnit: string = getEnergyUseUnit(ud.units)
-                                let needsConversion: boolean = calculatedUnit != facility.energyUnit;
+                                let needsConversion: boolean = annualEnergyUseData.energyUseUnit != facility.energyUnit;
                                 let energyUse: number = annualEnergyUseData.energyUse;
                                 if (needsConversion) {
-                                    energyUse = new ConvertValue(energyUse, calculatedUnit, facility.energyUnit).convertedValue;
+                                    energyUse = new ConvertValue(energyUse, annualEnergyUseData.energyUseUnit, facility.energyUnit).convertedValue;
                                 }
                                 equipmentEnergyUse += energyUse;
                                 let groupIndex: number = equipmentGroupEnergyUses.findIndex(egu => egu.energyUseGroup.guid == equipmentGroup.guid);

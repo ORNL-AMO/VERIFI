@@ -66,7 +66,7 @@ export interface EquipmentUtilityData {
 }
 
 export interface EquipmentUtilityDataEnergyUse {
-    year: number, energyUse: number, overrideEnergyUse: boolean
+    year: number, energyUse: number, overrideEnergyUse: boolean, energyUseUnit: string
 }
 
 export type EquipmentType = "Pump" | "Fan" | "Process Heating" | "Compressed Air" | "Steam" |

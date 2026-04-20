@@ -179,7 +179,7 @@ export class FacilityEnergyUsesGroupSummaryChartComponent implements OnChanges {
         return {
           name: equipmentSummary.equipmentName,
           color: equipmentSummary.equipmentColor,
-          percent: yearData?.percentOfTotal ?? 0,
+          percent: yearData?.percentOfEquipmentGroupTotal ?? 0,
           energyUse: yearData?.energyUse ?? 0,
         };
       })
