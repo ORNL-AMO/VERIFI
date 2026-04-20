@@ -206,6 +206,17 @@ export class EnergyUsesGroupSummary {
                 yearData.percentOfFacilityUse = 0;
             }
         });
+
+        this.equipmentAnnualEnergyUse.forEach(equipData => {
+            equipData.annualEnergyUse.forEach(yearData => {
+                let facilityTotalForYear = facilityTotals.find(ft => ft.year == yearData.year);
+                if (facilityTotalForYear && facilityTotalForYear.totalEnergyUse != 0) {
+                    yearData.percentOfFacilityUse = (yearData.energyUse / facilityTotalForYear.totalEnergyUse) * 100;
+                } else {
+                    yearData.percentOfFacilityUse = 0;
+                }
+            });
+        });
     }
 }
 
@@ -220,6 +231,7 @@ export interface AnnualEnergyUse {
     year: number,
     energyUse: number,
     percentOfEquipmentGroupTotal: number,
+    percentOfFacilityUse?: number,
     isPropegated: boolean,
     isNoLongerInUse?: boolean
 }

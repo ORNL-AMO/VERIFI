@@ -190,6 +190,7 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
               color: groupSummary.groupColor,
               energyUse: equipYear?.energyUse ?? 0,
               percentOfGroup: equipYear?.percentOfEquipmentGroupTotal ?? 0,
+              percentOfFacility: equipYear?.percentOfFacilityUse ?? 0,
             };
           })
           .filter(e => e.energyUse > 0);
@@ -213,13 +214,17 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
     // Root value must equal the sum of all group values when branchvalues='total'
     const rootTotal = groupEntries.reduce((sum, g) => sum + g.energyUse, 0);
 
+    const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
     // Build parallel arrays: root → groups → equipment (one item per node)
     const ids: string[] = [rootId];
     const labels: string[] = [rootLabel];
     const parents: string[] = [''];
     const values: number[] = [rootTotal];
     const colors: string[] = ['rgba(0, 0, 0, 0.2)'];
-    const hoverTemplates: string[] = [`<b>${rootLabel}</b><extra></extra>`];
+    const hoverTemplates: string[] = [
+      `<b>${rootLabel}</b><br>Total Energy: ${fmt(rootTotal)} ${this.facility.energyUnit}/yr<extra></extra>`
+    ];
     const textTemplates: string[] = [rootLabel];
 
     for (const g of groupEntries) {
@@ -229,20 +234,21 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
       values.push(g.energyUse);
       colors.push(g.color);
       hoverTemplates.push(
-        `<b>${g.name}</b><br>% of Facility: ${g.percent.toFixed(1)}%<br>Energy: ${g.energyUse.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${this.facility.energyUnit}<extra></extra>`
+        `<b>${g.name}</b><br>% of Facility: ${g.percent.toFixed(1)}%<br>Energy: ${fmt(g.energyUse)} ${this.facility.energyUnit}/yr<extra></extra>`
       );
-      textTemplates.push(`<b>${g.name}</b><br>${g.percent.toFixed(1)}%`);
+      textTemplates.push(`<b>${g.name}</b><br>${fmt(g.percent)}%`);
 
       for (const equip of g.equipment) {
+        const equipPercentOfFacility = rootTotal > 0 ? (equip.energyUse / rootTotal) * 100 : 0;
         ids.push(equip.id);
         labels.push(equip.name);
         parents.push(g.id);
         values.push(equip.energyUse);
         colors.push(equip.color);
         hoverTemplates.push(
-          `<b>${equip.name}</b><br>% of Group: ${equip.percentOfGroup.toFixed(1)}%<br>Energy: ${equip.energyUse.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${this.facility.energyUnit}<extra></extra>`
+          `<b>${equip.name}</b><br>Energy: ${fmt(equip.energyUse)} ${this.facility.energyUnit}/yr<br>% of Facility: ${equipPercentOfFacility.toFixed(1)}%<br>% of Group: ${equip.percentOfGroup.toFixed(1)}%<extra></extra>`
         );
-        textTemplates.push(`${equip.name}<br>${equip.percentOfGroup.toFixed(1)}%`);
+        textTemplates.push(`${equip.name}<br>${fmt(equip.percentOfFacility)}%`);
       }
     }
 
