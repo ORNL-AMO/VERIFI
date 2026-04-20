@@ -31,14 +31,22 @@
             </td>
             @for(annualEnergyUse of groupData.totalAnnualEnergyUse; track $index){
             <td>
+                @if(annualEnergyUse.equipmentNotInUse){
+                <span class="fa fa-ban"></span>
+                }@else {
                 @if(annualEnergyUse.isPropegated){
                 <span class="fa fa-asterisk"
                     title="Energy use for this year was propegated based on most recent data available"></span>
                 }
                 {{annualEnergyUse.energyUse| number:'1.0-0'}}
+                }
             </td>
             <td>
+                @if(annualEnergyUse.equipmentNotInUse){
+                <span class="fa fa-ban"></span>
+                }@else {
                 {{annualEnergyUse.percentOfFacilityUse| number:'1.0-0'}}&percnt;
+                }
             </td>
             }
         </tr>
@@ -63,5 +71,11 @@
 @if(hasPropegatedData() == true){
 <p class="fw-light italic">
     <span class="fa fa-asterisk"></span> Energy use for this year was propegated based on most recent data available.
+</p>
+}
+
+@if(hasNoLongerInUseData() == true){
+<p class="fw-light italic">
+    <span class="fa fa-ban"></span> This equipment group was not in use during this year.
 </p>
 }

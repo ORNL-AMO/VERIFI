@@ -79,7 +79,7 @@ export class FacilityEnergyUsesSummaryTableComponent {
             return yearData.energyUse;
           } else if (this.orderByField == 'percentOfFacilityUse') {
             return yearData.percentOfFacilityUse;
-          } 
+          }
         }
         return 0;
       }], [this.orderByDir]);
@@ -101,6 +101,15 @@ export class FacilityEnergyUsesSummaryTableComponent {
     }
     return summary.totals.some(total => total.isPropegated);
   });
+
+  hasNoLongerInUseData: Signal<boolean | null> = computed(() => {
+    const summary = this.filteredEnergyUseFacilitySummary$();
+    if (!summary) {
+      return null;
+    }
+    return summary.footprintGroups.some(group => group.totalAnnualEnergyUse.some(annualUse => annualUse.equipmentNotInUse == true));
+  });
+
 
   constructor() {
     effect(() => {

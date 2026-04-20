@@ -11,7 +11,7 @@ export class EnergyUsesGroupSummary {
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
     groupColor: string;
     equipmentAnnualEnergyUse: Array<EqupmentAnnualEnergyUse> = [];
-    totalAnnualEnergyUse: Array<{ year: number, energyUse: number, isPropegated: boolean, percentOfFacilityUse: number }> = [];
+    totalAnnualEnergyUse: Array<{ year: number, energyUse: number, isPropegated: boolean, percentOfFacilityUse: number, equipmentNotInUse?: boolean }> = [];
 
     constructor(group: IdbFacilityEnergyUseGroup, equipment: Array<IdbFacilityEnergyUseEquipment>, facility: IdbFacility,
         useLatestDataAvailable: boolean = true
@@ -166,6 +166,23 @@ export class EnergyUsesGroupSummary {
                 });
 
                 this.setPercentOfTotalEnergyUse();
+            } else {
+                //if no previous year data, add 0 value for year
+                this.equipmentAnnualEnergyUse.forEach(equipData => {
+                    equipData.annualEnergyUse.push({
+                        year: year,
+                        energyUse: 0,
+                        percentOfEquipmentGroupTotal: 0,
+                        isPropegated: true
+                    });
+                });
+                this.totalAnnualEnergyUse.push({
+                    year: year,
+                    energyUse: 0,
+                    isPropegated: true,
+                    percentOfFacilityUse: 0,
+                    equipmentNotInUse: true
+                });
             }
         }
     }
@@ -189,16 +206,6 @@ export class EnergyUsesGroupSummary {
                 yearData.percentOfFacilityUse = 0;
             }
         });
-        // this.equipmentAnnualEnergyUse.forEach(equipData => {
-        //     equipData.annualEnergyUse.forEach(yearData => {
-        //         let totalYearData: { year: number, energyUse: number } = this.totalAnnualEnergyUse.find(tae => tae.year == yearData.year);
-        //         if (totalYearData && totalYearData.energyUse != 0) {
-        //             yearData.percentOfTotal = (yearData.energyUse / totalYearData.energyUse) * 100;
-        //         } else {
-        //             yearData.percentOfTotal = 0;
-        //         }
-        //     });
-        // });
     }
 }
 

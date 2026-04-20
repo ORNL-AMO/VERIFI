@@ -27,11 +27,16 @@ export class EnergyUsesFacilitySummary {
         if (useLatestDataAvailable) {
             let years: Array<number> = this.footprintGroups.map(group => group.totalAnnualEnergyUse.map(annualUse => annualUse.year)).flat();
             years = _.uniq(years);
-            let mostRecentYear: number = Math.max(...years);
+            // let mostRecentYear: number = Math.max(...years);
             //iterate groups. If data missing for most recent year, set to closest year with data
-            this.footprintGroups.forEach(group => {
-                group.checkIfYearIncluded(mostRecentYear);
+            years.forEach(year => {
+                this.footprintGroups.forEach(group => {
+                    group.checkIfYearIncluded(year);
+                });
             });
+            // this.footprintGroups.forEach(group => {
+            //     group.checkIfYearIncluded(mostRecentYear);
+            // });
         }
     }
 
