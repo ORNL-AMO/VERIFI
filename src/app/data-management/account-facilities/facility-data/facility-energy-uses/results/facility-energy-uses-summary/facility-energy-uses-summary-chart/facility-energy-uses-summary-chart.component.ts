@@ -177,50 +177,84 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
     // Use the latest year present in the totals array
     const latestYear = Math.max(...summary.totals.map(t => t.year));
 
-    // Collect one entry per group with its latest-year values
-    const entries = summary.footprintGroups
+    // Collect one entry per group with its latest-year values, then equipment children
+    const groupEntries = summary.footprintGroups
       .map(groupSummary => {
         const yearData = groupSummary.totalAnnualEnergyUse.find(a => a.year === latestYear);
+        const equipment = groupSummary.equipmentAnnualEnergyUse
+          .map(equip => {
+            const equipYear = equip.annualEnergyUse.find(a => a.year === latestYear);
+            return {
+              id: `equip_${equip.equipmentGuid}`,
+              name: equip.equipmentName,
+              color: groupSummary.groupColor,
+              energyUse: equipYear?.energyUse ?? 0,
+              percentOfGroup: equipYear?.percentOfEquipmentGroupTotal ?? 0,
+            };
+          })
+          .filter(e => e.energyUse > 0);
         return {
+          id: `group_${groupSummary.groupId}`,
           name: groupSummary.groupName,
           color: groupSummary.groupColor,
           percent: yearData?.percentOfFacilityUse ?? 0,
           energyUse: yearData?.energyUse ?? 0,
+          equipment,
         };
       })
       // Exclude groups with no energy use so they don't clutter the treemap
-      .filter(e => e.energyUse > 0);
+      .filter(g => g.energyUse > 0);
 
     // Plotly treemap requires a root node; all group tiles are children of it.
     // The root label is shown in the breadcrumb bar at the top of the treemap.
+    const rootId = 'root';
     const rootLabel = `${this.facility.name} (${latestYear})`;
 
-    // Build parallel arrays including the root node first, then one entry per group.
-    // hovertemplate and texttemplate must be the same length as labels/parents/values,
-    // so the root node gets its own (minimal) template entry.
-    const labels = [rootLabel, ...entries.map(e => e.name)];
-    const parents = ['', ...entries.map(() => rootLabel)];
-    const values = [0, ...entries.map(e => e.energyUse)];
-    const colors = ['rgba(0,0,0,0)', ...entries.map(e => e.color)];
-    const hoverTemplates = [
-      `<b>${rootLabel}</b><extra></extra>`,
-      ...entries.map(e =>
-        `<b>${e.name}</b><br>% of Facility: ${e.percent.toFixed(1)}%<br>Energy: ${e.energyUse.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${this.facility.energyUnit}<extra></extra>`
-      )
-    ];
-    const textTemplates = [
-      rootLabel,
-      ...entries.map(e => `<b>${e.name}</b><br>${e.percent.toFixed(1)}%`)
-    ];
+    // Root value must equal the sum of all group values when branchvalues='total'
+    const rootTotal = groupEntries.reduce((sum, g) => sum + g.energyUse, 0);
+
+    // Build parallel arrays: root → groups → equipment (one item per node)
+    const ids: string[] = [rootId];
+    const labels: string[] = [rootLabel];
+    const parents: string[] = [''];
+    const values: number[] = [rootTotal];
+    const colors: string[] = ['rgba(0, 0, 0, 0.2)'];
+    const hoverTemplates: string[] = [`<b>${rootLabel}</b><extra></extra>`];
+    const textTemplates: string[] = [rootLabel];
+
+    for (const g of groupEntries) {
+      ids.push(g.id);
+      labels.push(g.name);
+      parents.push(rootId);
+      values.push(g.energyUse);
+      colors.push(g.color);
+      hoverTemplates.push(
+        `<b>${g.name}</b><br>% of Facility: ${g.percent.toFixed(1)}%<br>Energy: ${g.energyUse.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${this.facility.energyUnit}<extra></extra>`
+      );
+      textTemplates.push(`<b>${g.name}</b><br>${g.percent.toFixed(1)}%`);
+
+      for (const equip of g.equipment) {
+        ids.push(equip.id);
+        labels.push(equip.name);
+        parents.push(g.id);
+        values.push(equip.energyUse);
+        colors.push(equip.color);
+        hoverTemplates.push(
+          `<b>${equip.name}</b><br>% of Group: ${equip.percentOfGroup.toFixed(1)}%<br>Energy: ${equip.energyUse.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${this.facility.energyUnit}<extra></extra>`
+        );
+        textTemplates.push(`${equip.name}<br>${equip.percentOfGroup.toFixed(1)}%`);
+      }
+    }
 
     const trace = {
       type: 'treemap',
+      ids,
       labels,
       parents,
       values,
-      // 'remainder' (default) means the root value is whatever is left after
-      // children are accounted for — safe with a root value of 0.
-      branchvalues: 'remainder',
+      // 'total' means each parent's value is the explicit sum provided,
+      // and children are sized proportionally within it.
+      branchvalues: 'total',
       marker: {
         colors,
         line: { width: 2, color: '#ffffff' }
