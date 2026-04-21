@@ -47,10 +47,11 @@ export class GroupAnalysisOptionsComponent {
   //COMPUTED SIGNALS
   showInUseMessage: Signal<boolean> = computed(() => {
     const allAccountAnalysisItems = this.accountAnalysisItems();
-    const facilityAnalysisItemId = this.analysisItem().guid;
-    if (!allAccountAnalysisItems || !facilityAnalysisItemId) {
+    const analysisItem = this.analysisItem();
+    if (!allAccountAnalysisItems || !analysisItem) {
       return false;
     }
+    const facilityAnalysisItemId = analysisItem.guid;
     let facilityItemIds: Array<string> = allAccountAnalysisItems.flatMap(accountItem => {
       return accountItem.facilityAnalysisItems.map(facilityItem => {
         return facilityItem.analysisItemId;
@@ -160,7 +161,10 @@ export class GroupAnalysisOptionsComponent {
       return null;
     }
     let groupErrors: GroupAnalysisErrors = allGroupErrors.find(groupError => groupError.groupId == group.idbGroupId && groupError.analysisId == analysisItem.guid);
-    return groupErrors;
+    if(groupErrors){
+      return groupErrors;
+    };
+    return null;
   });
 
   //METHODS
