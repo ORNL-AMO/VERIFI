@@ -210,7 +210,7 @@ export class BackupDataService {
       facility.guid = newGUID;
       delete facility.id;
       facility.accountId = accountGUIDs.newId;
-      await firstValueFrom(this.facilityDbService.addWithObservable(facility));
+      backupFile.facilities[i] = await firstValueFrom(this.facilityDbService.addWithObservable(facility));
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
@@ -500,6 +500,37 @@ export class BackupDataService {
       }
       await firstValueFrom(this.accountReportsDbService.addWithObservable(accountReport));
     }
+
+    //update account selected analysis items
+    let needsAccountUpdate: boolean = false;
+    if (newAccount.selectedEnergyAnalysisId) {
+      newAccount.selectedEnergyAnalysisId = this.getNewId(newAccount.selectedEnergyAnalysisId, accountAnalysisGUIDs);
+      needsAccountUpdate = true;
+    }
+    if (newAccount.selectedWaterAnalysisId) {
+      newAccount.selectedWaterAnalysisId = this.getNewId(newAccount.selectedWaterAnalysisId, accountAnalysisGUIDs);
+      needsAccountUpdate = true;
+    }
+    if (needsAccountUpdate) {
+      await firstValueFrom(this.accountDbService.updateWithObservable(newAccount));
+    }
+    //update facility analysis items
+    for (let i = 0; i < backupFile.facilities.length; i++) {
+      let facility: IdbFacility = backupFile.facilities[i];
+      let needsFacilityUpdate: boolean = false;
+      if (facility.selectedEnergyAnalysisId) {
+        facility.selectedEnergyAnalysisId = this.getNewId(facility.selectedEnergyAnalysisId, facilityAnalysisGUIDs);
+        needsFacilityUpdate = true;
+      }
+      if (facility.selectedWaterAnalysisId) {
+        facility.selectedWaterAnalysisId = this.getNewId(facility.selectedWaterAnalysisId, facilityAnalysisGUIDs);
+        needsFacilityUpdate = true;
+      }
+      if (needsFacilityUpdate) {
+        await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
+      }
+    }
+
     return newAccount;
   }
 
@@ -641,7 +672,6 @@ export class BackupDataService {
       }
     }
 
-
     if (backupFile.predictors) {
       for (let i = 0; i < backupFile.predictors.length; i++) {
         let predictor: IdbPredictor = backupFile.predictors[i];
@@ -771,6 +801,18 @@ export class BackupDataService {
       await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }
 
+    let needsFacilityUpdate: boolean = false;
+    if (newFacility.selectedEnergyAnalysisId) {
+      newFacility.selectedEnergyAnalysisId = this.getNewId(newFacility.selectedEnergyAnalysisId, facilityAnalysisGUIDs);
+      needsFacilityUpdate = true;
+    }
+    if (newFacility.selectedWaterAnalysisId) {
+      newFacility.selectedWaterAnalysisId = this.getNewId(newFacility.selectedWaterAnalysisId, facilityAnalysisGUIDs);
+      needsFacilityUpdate = true;
+    }
+    if (needsFacilityUpdate) {
+      await firstValueFrom(this.facilityDbService.updateWithObservable(newFacility));
+    }
     return { facility: newFacility, index: currIdx };
   }
 
