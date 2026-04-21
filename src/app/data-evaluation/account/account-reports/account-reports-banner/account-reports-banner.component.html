@@ -21,7 +21,7 @@
       </li>
       }
       @if (report.reportType == 'betterPlants') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || errors.hasErrors}">
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited() || errors.hasErrors}">
         <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Better Plants Report</a>

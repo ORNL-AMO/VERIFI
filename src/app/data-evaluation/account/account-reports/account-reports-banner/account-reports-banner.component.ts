@@ -27,12 +27,13 @@ export class AccountReportsBannerComponent {
   readonly selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport, { initialValue: null });
   readonly reportList: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports, { initialValue: [] });
   readonly accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
+  readonly accountReportErrors: Signal<Array<AccountReportErrors>> = toSignal(this.accountReportValidationService.accountReportErrors, { initialValue: [] });
 
   readonly analysisVisited: Signal<boolean> = computed(() => {
     const selectedReport = this.selectedReport();
     const accountAnalysisItems = this.accountAnalysisItems();
     if (selectedReport) {
-      let analysisItemId: string;
+      let analysisItemId: string | undefined;
       if (selectedReport.reportType == 'betterPlants') {
         analysisItemId = selectedReport.betterPlantsReportSetup?.analysisItemId;
       }
@@ -59,7 +60,7 @@ export class AccountReportsBannerComponent {
       filter(event => event instanceof NavigationEnd),
       map(() => this.router.url),
       startWith(this.router.url)
-    )
+    ), { initialValue: this.router.url }
   );
   readonly inDashboard: Signal<boolean> = computed(() => {
     const url = this.url();
@@ -70,9 +71,12 @@ export class AccountReportsBannerComponent {
 
   readonly reportErrors: Signal<AccountReportErrors> = computed(() => {
     const selectedReport = this.selectedReport();
-    if (selectedReport) {
-      let _reportErrors = this.accountReportValidationService.getErrorsByReportId(selectedReport.guid);
-      return _reportErrors;
+    const reportErrors = this.accountReportErrors();
+    if (selectedReport && reportErrors) {
+      const selectedReportErrors = reportErrors.find(errors => errors.reportId == selectedReport.guid);
+      if (selectedReportErrors) {
+        return selectedReportErrors;
+      }
     }
     return emptyAccountReportErrors();
   });
@@ -95,6 +99,7 @@ export class AccountReportsBannerComponent {
   selectItem(item: IdbAccountReport) {
     this.accountReportDbService.selectedReport.next(item);
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
+    this.showDropdown.set(false);
   }
 
 }
