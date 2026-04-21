@@ -5,20 +5,12 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-facility-analysis-report-setup',
@@ -42,22 +34,15 @@ export class FacilityAnalysisReportSetupComponent {
   reportYears: Array<number>;
   reportSettings: AnalysisReportSettings;
   baselineYears: Array<number>;
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
   filteredAnalysisItems: Array<IdbAnalysisItem>;
-
-  hasDataChanged: boolean = false;
   calanderizedMetersSub: Subscription;
+
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService,
-    private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router) {
+    private calanderizationService: CalanderizationService) {
 
   }
 
@@ -70,13 +55,11 @@ export class FacilityAnalysisReportSetupComponent {
 
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
-      this.applyFilters();
     });
-    this.setSelectedAnalysisItem(true);
-    if (this.selectedAnalysisItem) {
-      this.checkModelData();
-    }
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(calanderizedMeters => {
+    
+    this.setSelectedAnalysisItem();
+
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
     });
 
@@ -88,55 +71,12 @@ export class FacilityAnalysisReportSetupComponent {
     this.calanderizedMetersSub.unsubscribe();
   }
 
-  checkModelData() {
-    this.hasDataChanged = false;
-    if (this.selectedAnalysisItem?.dataCheckedDate) {
-      let dataCheckDate: Date = new Date(this.selectedAnalysisItem?.dataCheckedDate);
-      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
-
-      let hasDataChanged = facilityPredictorEntries.find(predictor => {
-        return new Date(predictor.modifiedDate) > dataCheckDate
-      });
-      if (hasDataChanged) {
-        this.hasDataChanged = true;
-        this.saveAnalysisVisitedData();
-      } else {
-        let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-        let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-
-        let groupMeters: Array<IdbUtilityMeter> = this.selectedAnalysisItem.groups.flatMap(group => {
-          return facilityMeters.filter(meter => meter.groupId == group.idbGroupId);
-        });
-        let groupMeterIds: Array<string> = groupMeters.map(meter => meter.guid);
-        let groupMeterData: Array<IdbUtilityMeterData> = facilityMeterData.filter(meterData => groupMeterIds.includes(meterData.meterId));
-
-        let hasDataChanged = groupMeterData.some(meterData => new Date(meterData.dbDate) > dataCheckDate);
-        if (hasDataChanged) {
-          this.hasDataChanged = true;
-          this.saveAnalysisVisitedData();
-        }
-      }
-    }
-  }
-
-  async saveAnalysisVisitedData() {
-    this.selectedAnalysisItem.isAnalysisVisited = false;
-    await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
-  }
-
-  async setSelectedAnalysisItem(onInit: boolean) {
+  async setSelectedAnalysisItem() {
     this.selectedAnalysisItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
     this.setPredictorVariables();
     this.setLabels();
-    if (!onInit) {
-      await this.save();
-    }
   }
 
   async save() {
@@ -150,6 +90,7 @@ export class FacilityAnalysisReportSetupComponent {
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(this.facilityReport);
   }
+
   toggleEnergyColumns() {
     if (this.analysisTableColumns.energy == false) {
       this.analysisTableColumns.actualEnergy = false;
@@ -315,23 +256,14 @@ export class FacilityAnalysisReportSetupComponent {
     this.baselineYears = yearOptions;
   }
 
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.analysisItems];
-    if (this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if (this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
+  onSelectedAnalysisItemChange(item: IdbAnalysisItem) {
+    this.selectedAnalysisItem = item;
+    this.setPredictorVariables();
+    this.setLabels();
+    this.save();
   }
 
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem(true);
-  }
-
-  goToAnalysis(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facilityReport.facilityId + '/analysis/run-analysis');
-  }
+  onFilteredItemsChange(items: Array<IdbAnalysisItem>) {
+    this.filteredAnalysisItems = items;
+  } 
 }

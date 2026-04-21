@@ -13,68 +13,13 @@
   </div>
 
   <hr>
+
+  <app-facility-report-analysis-selection [facilityReport]="facilityReport" [baselineYears]="baselineYears"
+    [selectedAnalysisItem]="selectedAnalysisItem" (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"
+    (filteredItemsChange)="onFilteredItemsChange($event)"></app-facility-report-analysis-selection>
+
+  @if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
   <div>
-    <label class="bold">
-      Select Analysis Item
-    </label>
-
-    <table class="table table-bordered table-sm">
-      <thead>
-        <tr>
-          <th>
-
-          </th>
-          <th>
-            Name
-          </th>
-          <th>
-            Baseline Year
-          </th>
-          <th>
-            Analysis Type
-          </th>
-          <th>
-
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of analysisItems; track item) {
-        <tr>
-          <td>
-            <div class="form-check">
-              <input type="radio" class="form-check-input" name="{{item.name + '_item'}}" [value]="item.guid"
-                id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId"
-                (change)="setSelectedAnalysisItem(false)">
-            </div>
-          </td>
-          <td>
-            {{item.name}}
-            @let setupErrors = item.guid | invalidAnalysis;
-            @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
-            <span class="text-danger ps-1">
-              <span class="fa fa-exclamation-circle"></span> Contains Errors
-            </span>
-            }
-          </td>
-          <td>
-            {{item.baselineYear}}
-          </td>
-          <td>
-            @if (item.analysisCategory == 'water') {
-            Water
-            }
-            @if (item.analysisCategory == 'energy') {
-            Energy
-            }
-          </td>
-          <td>
-            <a class="click-link" (click)="goToAnalysis(item)">View Analysis</a>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
     @if (!facilityReport.analysisItemId) {
     <div class="w-100 m-2">
       <div class="alert alert-danger">
@@ -110,4 +55,11 @@
     </div>
   </div>
   }
+  }
 </form>
+
+@if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
+<div class="alert alert-warning text-center">
+  No analysis items matching selected filters. Please adjust filters to view analysis items.
+</div>
+}

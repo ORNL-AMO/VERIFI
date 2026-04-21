@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -10,7 +8,7 @@ import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-better-plants-setup',
@@ -25,23 +23,17 @@ export class BetterPlantsSetupComponent {
   methodsUndertakenLabel: string = 'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to account for economic and other factors that affect energy use:';
   modificationNotesLabel: string = 'Please describe the energy efficient technologies, strategies, and practices employed during the previous year to decrease intensity. Please identify systems impacted and approximate savings from projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000 MMBtu/yr, energy awareness campaign, etc):'
   methodologyNotesLabel: string = 'Please describe the methdology used for calculating water intensity improvements:';
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
-  itemToEdit: IdbAccountAnalysisItem;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   baselineYearWarning: string;
-  baselineYears: Array<number> = [];
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+  analysisItemIdSub: Subscription;
+
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private calanderizationService: CalanderizationService) {
+    private accountAnalysisDbService: AccountAnalysisDbService) {
   }
 
   ngOnInit() {
@@ -49,7 +41,8 @@ export class BetterPlantsSetupComponent {
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.betterPlantsReportForm = this.accountReportsService.getBetterPlantsFormFromReport(val.betterPlantsReportSetup);
-        this.setAnalysisOptions();
+        this.subscribeAnalysisItemChanges();
+        this.setSelectedAnalysisItem();
       } else {
         this.isFormChange = false;
       }
@@ -58,6 +51,17 @@ export class BetterPlantsSetupComponent {
 
   ngOnDestroy() {
     this.selectedReportSub.unsubscribe();
+    this.analysisItemIdSub.unsubscribe();
+  }
+
+  subscribeAnalysisItemChanges() {
+    if (this.analysisItemIdSub) {
+      this.analysisItemIdSub.unsubscribe();
+    }
+    
+    this.analysisItemIdSub = this.betterPlantsReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+      await this.save();
+    })
   }
 
   async save() {
@@ -73,34 +77,8 @@ export class BetterPlantsSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  setAnalysisOptions() {
-    this.setYearOptions();
-    let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.energyIsSource });
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
-    if (!this.selectedAnalysisItem) {
-      this.betterPlantsReportForm.controls.analysisItemId.patchValue(undefined);
-      this.betterPlantsReportForm.controls.analysisItemId.updateValueAndValidity();
-      this.save();
-    }
-  }
-
-  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
-    this.itemToEdit = analysisItem;
-  }
-
-  confirmEditItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-  }
-
-  cancelEditItem() {
-    this.itemToEdit = undefined;
-  }
-
   setSelectedAnalysisItem() {
-    this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.betterPlantsReportForm.controls.analysisItemId.value });
+    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.betterPlantsReportForm.controls.analysisItemId.value);
     if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'water') {
       this.methodsUndertakenLabel = 'If a baseline adjustment was made, please indicate the reason for making the adjustment';
       this.modificationNotesLabel = 'Please briefly describe major technologies, strategies, and practices employed during the previous year to decrease water intensity. Please identify: systems/processes impacted, approximate water savings from projects, and implementation cost';
@@ -128,25 +106,5 @@ export class BetterPlantsSetupComponent {
     } else {
       this.baselineYearWarning = undefined;
     }
-  }
-
-  setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
-    this.baselineYears = yearOptions;
-  }
-
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.accountAnalysisItems];
-    if(this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if(this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
-  }
-
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
   }
 }

@@ -61,6 +61,7 @@ import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/ta
 import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
 import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
 import { AccountReportsDataCheckComponent } from './account-reports-data-check/account-reports-data-check.component';
+import { AccountReportAnalysisSelectionComponent } from './account-report-setup/account-report-analysis-selection/account-report-analysis-selection.component';
 
 @NgModule({
   declarations: [
@@ -115,7 +116,8 @@ import { AccountReportsDataCheckComponent } from './account-reports-data-check/a
     AccountReportsDashboardTableComponent,
     ReportOrderByPipe,
     ReportBadgeClassPipe,
-    AccountReportsDataCheckComponent
+    AccountReportsDataCheckComponent,
+    AccountReportAnalysisSelectionComponent
   ],
   imports: [
     CommonModule,

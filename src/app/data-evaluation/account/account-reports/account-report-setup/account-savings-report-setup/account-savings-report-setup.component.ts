@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -12,8 +11,7 @@ import { AccountReportsService } from '../../account-reports.service';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { Router } from '@angular/router';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-account-savings-report-setup',
@@ -25,7 +23,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class AccountSavingsReportSetupComponent {
   accountSavingsReportForm: FormGroup;
   account: IdbAccount;
-  analysisOptions: Array<IdbAccountAnalysisItem>
+
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -34,20 +32,14 @@ export class AccountSavingsReportSetupComponent {
   analysisTableColumns: AnalysisTableColumns;
   energyColumnLabel: string;
   actualUseLabel: string;
-  itemToEdit: IdbAccountAnalysisItem;
-  baselineYears: Array<number> = [];
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+  analysisItemIdSub: Subscription;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisService: AnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private calanderizationService: CalanderizationService) {
+    private accountAnalysisDbService: AccountAnalysisDbService) {
   }
 
 
@@ -58,7 +50,8 @@ export class AccountSavingsReportSetupComponent {
       if (!this.isFormChange) {
         this.accountSavingsReportForm = this.accountReportsService.getAccountSavingsFormFromReport(val.accountSavingsReportSetup);
         this.reportSetup = val.accountSavingsReportSetup;
-        this.setAnalysisOptions();
+        this.subscribeAnalysisItemChanges();
+        this.setSelectedAnalysisItem();
       } else {
         this.isFormChange = false;
       }
@@ -67,6 +60,18 @@ export class AccountSavingsReportSetupComponent {
 
   ngOnDestroy() {
     this.selectedReportSub.unsubscribe();
+    this.analysisItemIdSub.unsubscribe();
+  }
+
+  subscribeAnalysisItemChanges() {
+    if (this.analysisItemIdSub) {
+      this.analysisItemIdSub.unsubscribe();
+    }
+    //skip(1) to avoid triggering on init when we set the form value
+    this.analysisItemIdSub = this.accountSavingsReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+      this.setSelectedAnalysisItem();
+      await this.save();
+    })
   }
 
   setLabels() {
@@ -93,30 +98,14 @@ export class AccountSavingsReportSetupComponent {
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
-  setAnalysisOptions() {
-    this.setYearOptions();
-    this.analysisOptions = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.applyFilters();
-    this.setSelectedAnalysisItem(true);
-    if (!this.selectedAnalysisItem) {
-      this.accountSavingsReportForm.controls.analysisItemId.patchValue(undefined);
-      this.accountSavingsReportForm.controls.analysisItemId.updateValueAndValidity();
-      this.save();
-    }
-  }
-
-  async setSelectedAnalysisItem(onInit: boolean) {
-    this.selectedAnalysisItem = this.analysisOptions.find(item => { return item.guid == this.accountSavingsReportForm.controls.analysisItemId.value });
+  setSelectedAnalysisItem() {
+    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.accountSavingsReportForm.controls.analysisItemId.value);
     this.setPredictorVariables();
     this.setLabels();
-    if (!onInit) {
-      await this.save();
-    }
   }
 
   setPredictorVariables() {
     this.analysisTableColumns.predictors = [];
-    this.save();
   }
 
   async setDefault() {
@@ -214,39 +203,6 @@ export class AccountSavingsReportSetupComponent {
       this.analysisTableColumns.bankedSavings ||
       this.analysisTableColumns.savingsUnbanked
     )
-  }
-
-  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
-    this.itemToEdit = analysisItem;
-  }
-
-  confirmEditItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-  }
-
-  cancelEditItem() {
-    this.itemToEdit = undefined;
-  }
-
-  setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
-    this.baselineYears = yearOptions;
-  }
-
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.analysisOptions];
-    if(this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if(this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
-  }
-
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem(true);
   }
 }
 
