@@ -8,6 +8,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
   selector: 'app-facility-water-reduction-goal',
@@ -62,7 +63,8 @@ export class FacilityWaterReductionGoalComponent {
       return undefined;
     }
   });
-
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.facilityHomeService.facilityStatusCheck, { initialValue: undefined });
+  
   goToAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/analysis/run-analysis');

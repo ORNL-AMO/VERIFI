@@ -1,0 +1,38 @@
+.status-check-header {
+    color: white;
+}
+
+.status-check-header.bg-warning {
+    color: #212529;
+}
+
+/* Keep the background color when collapsed (Bootstrap resets it on .collapsed) */
+.status-check-header.bg-success,
+.status-check-header.bg-success:not(.collapsed) {
+    background-color: var(--bs-success) !important;
+}
+
+.status-check-header.bg-warning,
+.status-check-header.bg-warning:not(.collapsed) {
+    background-color: var(--bs-warning) !important;
+}
+
+.status-check-header.bg-danger,
+.status-check-header.bg-danger:not(.collapsed) {
+    background-color: var(--bs-danger) !important;
+}
+
+/* White chevron arrow for success/danger headers */
+.status-check-header.bg-success::after,
+.status-check-header.bg-danger::after {
+    filter: brightness(0) invert(1);
+}
+
+.status-check-header .fa {
+    font-size: 1.1rem;
+    color: inherit;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+}

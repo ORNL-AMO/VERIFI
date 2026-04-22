@@ -6,6 +6,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,7 @@ export class FacilityHomeService {
   calculatingWater: BehaviorSubject<boolean | 'error'>;
   calculatingOverview: BehaviorSubject<boolean | 'error'>;
   facilityOverviewData: BehaviorSubject<FacilityOverviewData>;
+  facilityStatusCheck: BehaviorSubject<FacilityStatusCheck>;
   constructor(private analysisDbService: AnalysisDbService) {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyFacilityEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
@@ -36,6 +38,7 @@ export class FacilityHomeService {
     this.facilityOverviewData = new BehaviorSubject<FacilityOverviewData>(undefined);
     this.latestEnergyAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
     this.latestWaterAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
+    this.facilityStatusCheck = new BehaviorSubject<FacilityStatusCheck>(undefined);
   }
 
   setLatestEnergyAnalysisItem(selectedFacility: IdbFacility) {

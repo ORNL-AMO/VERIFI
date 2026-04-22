@@ -1,0 +1,154 @@
+@let _facilityStatusCheck = facilityStatusCheck();
+
+<div class="accordion" id="facilityStatusCheckAccordion">
+    <div class="accordion-item card">
+        <h2 class="accordion-header" id="statusCheckHeading">
+            <button class="accordion-button collapsed status-check-header" type="button"
+                data-bs-toggle="collapse" data-bs-target="#statusCheckCollapse"
+                aria-expanded="false" aria-controls="statusCheckCollapse"
+                [ngClass]="{
+                    'bg-success': _facilityStatusCheck?.status === 'good',
+                    'bg-warning': _facilityStatusCheck?.status === 'warning',
+                    'bg-danger': _facilityStatusCheck?.status !== 'good' && _facilityStatusCheck?.status !== 'warning'
+                }">
+                <span class="fa me-2"
+                    [ngClass]="{
+                        'fa-circle-check': _facilityStatusCheck?.status === 'good',
+                        'fa-exclamation-triangle': _facilityStatusCheck?.status === 'warning',
+                        'fa-circle-xmark': _facilityStatusCheck?.status !== 'good' && _facilityStatusCheck?.status !== 'warning'
+                    }"></span>
+                <strong>Facility Status Check</strong>
+            </button>
+        </h2>
+        <div id="statusCheckCollapse" class="accordion-collapse collapse"
+            aria-labelledby="statusCheckHeading" data-bs-parent="#facilityStatusCheckAccordion">
+            <div class="accordion-body p-3">
+                @if (_facilityStatusCheck) {
+                @if(_facilityStatusCheck.status == 'good') {
+                <div class="alert alert-success mb-2">
+                    <span class="fa fa-check me-1"></span>
+                    All data up to date!
+                </div>
+                }@else if(_facilityStatusCheck.status == 'warning') {
+                <div class="alert alert-warning mb-2">
+                    <span class="fa fa-exclamation-triangle me-1"></span>
+                    Some data may be out of date. Please review the items below.
+                </div>
+                }@else{
+                <div class="alert alert-danger mb-2">
+                    <span class="fa fa-xmark me-1"></span>
+                    No data found. Please review the items below.
+                </div>
+                }
+
+                @if(_facilityStatusCheck.energyAnalysisDataDateCheck.hasAnalysis || _facilityStatusCheck.waterAnalysisDataDateCheck.hasAnalysis){
+                <div class="accordion" id="analysisItemsAccordion">
+                    @if(_facilityStatusCheck.energyAnalysisDataDateCheck.hasAnalysis){
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="energyAnalysisHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#energyAnalysisCollapse" aria-expanded="false"
+                                aria-controls="energyAnalysisCollapse">
+                                <span class="fa fa-bolt me-2"></span>
+                                Energy Analysis
+                            </button>
+                        </h2>
+                        <div id="energyAnalysisCollapse" class="accordion-collapse collapse"
+                            aria-labelledby="energyAnalysisHeading" data-bs-parent="#analysisItemsAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p class="mb-1">
+                                            <strong>Latest Data Date Entered:</strong>
+                                            {{_facilityStatusCheck.energyAnalysisDataDateCheck.latestDataDate | date:'MMMM yyyy'}}
+                                        </p>
+                                        <p class="mb-1">
+                                            <strong>Latest Date Across All Entries:</strong>
+                                            {{_facilityStatusCheck.energyAnalysisDataDateCheck.latestDataAllEntries | date:'MMMM yyyy'}}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>All Data Current:</strong>
+                                            {{_facilityStatusCheck.energyAnalysisDataDateCheck.allDatesCurrent ? 'Yes' : 'No'}}
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Predictors Used:</strong></p>
+                                        <ul class="mb-0">
+                                            @for (predictorData of _facilityStatusCheck.energyAnalysisDataDateCheck.latestPredictorData;
+                                            track predictorData.predictorId) {
+                                            <li>{{predictorData.predictorName}} ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Meters Used:</strong></p>
+                                        <ul class="mb-0">
+                                            @for (meterData of _facilityStatusCheck.energyAnalysisDataDateCheck.latestMeterData;
+                                            track meterData.meterId) {
+                                            <li>{{meterData.meterName}} ({{meterData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    @if(_facilityStatusCheck.waterAnalysisDataDateCheck.hasAnalysis){
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="waterAnalysisHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#waterAnalysisCollapse" aria-expanded="false"
+                                aria-controls="waterAnalysisCollapse">
+                                <span class="fa fa-droplet me-2"></span>
+                                Water Analysis
+                            </button>
+                        </h2>
+                        <div id="waterAnalysisCollapse" class="accordion-collapse collapse"
+                            aria-labelledby="waterAnalysisHeading" data-bs-parent="#analysisItemsAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p class="mb-1">
+                                            <strong>Latest Data Date Entered:</strong>
+                                            {{_facilityStatusCheck.waterAnalysisDataDateCheck.latestDataDate | date:'MMMM yyyy'}}
+                                        </p>
+                                        <p class="mb-1">
+                                            <strong>Latest Date Across All Entries:</strong>
+                                            {{_facilityStatusCheck.waterAnalysisDataDateCheck.latestDataAllEntries | date:'MMMM yyyy'}}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>All Data Current:</strong>
+                                            {{_facilityStatusCheck.waterAnalysisDataDateCheck.allDatesCurrent ? 'Yes' : 'No'}}
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Predictors Used:</strong></p>
+                                        <ul class="mb-0">
+                                            @for (predictorData of _facilityStatusCheck.waterAnalysisDataDateCheck.latestPredictorData;
+                                            track predictorData.predictorId) {
+                                            <li>{{predictorData.predictorName}} ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Meters Used:</strong></p>
+                                        <ul class="mb-0">
+                                            @for (meterData of _facilityStatusCheck.waterAnalysisDataDateCheck.latestMeterData;
+                                            track meterData.meterId) {
+                                            <li>{{meterData.meterName}} ({{meterData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+                }
+            </div>
+        </div>
+    </div>
+</div>

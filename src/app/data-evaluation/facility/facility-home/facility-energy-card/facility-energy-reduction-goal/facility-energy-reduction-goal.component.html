@@ -1,13 +1,9 @@
 <div class="row">
-  <div class="col-2 text-center">
-  </div>
-  <div class="col-8 text-center label-font">
+  <div class="col-12 text-center label-font">
     Energy Reduction Goal @if (latestAnalysisDate()) {
     ({{latestAnalysisDate() | date:
     'MMM. y'}})
     }
-  </div>
-  <div class="col-2 text-center">
   </div>
 </div>
 <div class="row">
@@ -40,3 +36,16 @@
   </a>
 </div>
 }
+<div class="row justify-content-center">
+  <div class="col-12">
+    @let _facilityStatusCheck = facilityStatusCheck();
+    @if(_facilityStatusCheck && !_facilityStatusCheck.energyAnalysisDataDateCheck.allDatesCurrent){
+    <p class="fw-light italic mb-1 mt-1">
+      <span class="fa fa-asterisk"></span>Note: {{_facilityStatusCheck.energyAnalysisDataDateCheck.latestDataAllEntries| date:'MMM. yyyy'}} is the month
+      with the most recent complete predictor and meter data. VERIFI detects data entered after this date for some but not
+      all of the necessary meters and predictors. For more details, please
+      check the Facility Status Check card above.
+    </p>
+    }
+  </div>
+</div>

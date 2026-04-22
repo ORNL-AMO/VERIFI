@@ -3,6 +3,10 @@
   <hr>
   @if (facilityMeters().length > 0) {
   <div class="row">
+    <div class="col-12">
+      <app-facility-status-check></app-facility-status-check>
+      <hr>
+    </div>
     @if (latestEnergyAnalysisItem()) {
     <div [ngClass]="{'col-6': latestWaterAnalysisItem(), 'col-12': !latestWaterAnalysisItem()}">
       <app-facility-energy-card></app-facility-energy-card>

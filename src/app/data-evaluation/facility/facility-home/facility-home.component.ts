@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
