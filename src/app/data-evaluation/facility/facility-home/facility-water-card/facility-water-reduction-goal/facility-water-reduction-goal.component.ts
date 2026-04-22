@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, Signal } from '@angular/core';
 import * as _ from 'lodash';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { Subscription } from 'rxjs';
 import { FacilityHomeService } from '../../facility-home.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-facility-water-reduction-goal',
@@ -16,66 +16,55 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
   standalone: false
 })
 export class FacilityWaterReductionGoalComponent {
-  latestAnalysisSummary: MonthlyAnalysisSummaryData;
-  latestSummarySub: Subscription;
-  percentSavings: number = 0;
-  percentGoal: number;
-  percentTowardsGoal: number = 0;
-  goalYear: number;
-  baselineYear: number;
-  facility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  latestAnalysisDate: Date;
-  latestAnalysisItem: IdbAnalysisItem;
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
+  private router: Router = inject(Router);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
 
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityHomeService: FacilityHomeService,
-    private router: Router,
-    private analysisDbService: AnalysisDbService) { }
+  latestAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  monthlyFacilityWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityWaterAnalysisData, { initialValue: undefined });
 
-  ngOnInit(): void {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.facility = val;
-      this.setGoalYears()
-    });
-
-    this.latestSummarySub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
-      this.latestAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
-      this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && this.latestAnalysisItem?.guid == this.facility.selectedWaterAnalysisId) {
-        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-        this.setProgressPercentages();
-      } else {
-        this.latestAnalysisDate = undefined;
-        this.percentSavings = 0;
-        this.percentTowardsGoal = 0;
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.latestSummarySub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-  }
-
-  setGoalYears() {
-    if (this.facility && this.facility.sustainabilityQuestions) {
-      this.percentGoal = this.facility.sustainabilityQuestions.waterReductionPercent;
-      this.goalYear = this.facility.sustainabilityQuestions.waterReductionTargetYear;
-      this.baselineYear = this.facility.sustainabilityQuestions.waterReductionBaselineYear;
+  latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
+    const monthlyFacilityWaterAnalysisData = this.monthlyFacilityWaterAnalysisData();
+    return _.maxBy(monthlyFacilityWaterAnalysisData, (mData: MonthlyAnalysisSummaryData) => mData.date);
+  });
+  percentGoal: Signal<number> = computed(() => {
+    const facility = this.facility();
+    return facility?.sustainabilityQuestions?.waterReductionPercent || 0;
+  });
+  goalYear: Signal<number> = computed(() => {
+    const facility = this.facility();
+    return facility?.sustainabilityQuestions?.waterReductionTargetYear || 0;
+  });
+  baselineYear: Signal<number> = computed(() => {
+    const facility = this.facility();
+    return facility?.sustainabilityQuestions?.waterReductionBaselineYear || 0;
+  });
+  percentSavings: Signal<number> = computed(() => {
+    const latestAnalysisSummary = this.latestAnalysisSummary();
+    return latestAnalysisSummary?.rolling12MonthImprovement || 0;
+  });
+  percentTowardsGoal: Signal<number> = computed(() => {
+    const percentSavings = this.percentSavings();
+    const percentGoal = this.percentGoal();
+    let percentTowardsGoal = (percentSavings / percentGoal) * 100;
+    if (percentTowardsGoal < 0) {
+      percentTowardsGoal = 0;
     }
-  }
-
-  setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
-    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
-    if (this.percentTowardsGoal < 0) {
-      this.percentTowardsGoal = 0;
+    return percentTowardsGoal;
+  });
+  latestAnalysisDate: Signal<Date> = computed(() => {
+    const latestAnalysisSummary = this.latestAnalysisSummary();
+    if (latestAnalysisSummary) {
+      return new Date(latestAnalysisSummary.date);
+    } else {
+      return undefined;
     }
-  }
+  });
 
   goToAnalysisItem() {
-    this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
+    this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/analysis/run-analysis');
   }
 }
