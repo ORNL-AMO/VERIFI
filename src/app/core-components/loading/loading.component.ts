@@ -60,6 +60,5 @@ export class LoadingComponent implements OnInit {
     this.loadingService.setLoadingComplete(false);
     this.loadingService.setTitle('');
     this.loadingService.setContext(undefined);
-    this.loadingService.navigationAfterLoading.next(undefined);
   }
 }

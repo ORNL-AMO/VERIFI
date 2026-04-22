@@ -63,6 +63,7 @@ export class AccountHomeSummaryComponent {
       const loadingContext = this.navigationAfterLoading();
       if (loadingContext === 'export-facilities-to-excel') {
         this.exportToExcelV3TemplateService.triggerExportDownload();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

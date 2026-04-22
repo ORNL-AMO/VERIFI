@@ -140,6 +140,7 @@ export class FacilityHomeSummaryComponent {
       const loadingContext = this.navigationAfterLoading();
       if (loadingContext === 'export-facilities-to-excel') {
         this.exportToExcelTemplateV3Service.triggerExportDownload();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }
