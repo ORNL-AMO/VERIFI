@@ -1,4 +1,4 @@
-import { Component, computed, inject, Signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountHomeService } from '../account-home.service';
 import * as _ from 'lodash';
@@ -30,6 +30,7 @@ export class AccountHomeSummaryComponent {
 
   latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
   latestWaterAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+  navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
 
   disableButtons: Signal<boolean> = computed(() => {
     const accountMeterData = this.accountMeterData();
@@ -40,6 +41,7 @@ export class AccountHomeSummaryComponent {
     const account = this.account();
     if (latestWaterAnalysisItem) {
       //todo: add check when new data is entered
+      return false;
     }
     return account && account.sustainabilityQuestions.waterReductionGoal ? true : false;
   });
@@ -49,10 +51,21 @@ export class AccountHomeSummaryComponent {
     const account = this.account();
     if (latestEnergyAnalysisItem) {
       //TODO: add check when new data is entered
+      return false;
     }
     return account && account.sustainabilityQuestions.energyReductionGoal ? true : false;
   });
 
+
+
+  constructor() {
+    effect(() => {
+      const loadingContext = this.navigationAfterLoading();
+      if (loadingContext === 'export-facilities-to-excel') {
+        this.exportToExcelV3TemplateService.triggerExportDownload();
+      }
+    });
+  }
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
@@ -61,7 +74,6 @@ export class AccountHomeSummaryComponent {
       this.router.navigateByUrl('/data-management/' + this.account().guid + '/import-data')
     }
   }
-
 
   //Export Modal
   showExportModal: boolean = false;

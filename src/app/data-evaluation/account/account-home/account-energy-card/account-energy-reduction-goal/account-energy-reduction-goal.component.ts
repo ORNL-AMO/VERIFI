@@ -1,5 +1,4 @@
 import { Component, computed, inject, Signal } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AccountHomeService } from '../../account-home.service';
@@ -42,7 +41,8 @@ export class AccountEnergyReductionGoalComponent {
   percentTowardsGoal: Signal<number> = computed(() => {
     const percentSavings = this.percentSavings();
     const percentGoal = this.percentGoal();
-    return percentGoal ? (percentSavings / percentGoal) * 100 : 0;
+    const percentTowardsGoal = percentGoal ? (percentSavings / percentGoal) * 100 : 0;
+    return percentTowardsGoal < 0 ? 0 : percentTowardsGoal;
   });
   goalYear: Signal<number> = computed(() => {
     const account = this.account();

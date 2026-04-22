@@ -49,7 +49,7 @@ export class FacilityEnergyReductionGoalComponent {
     const percentSavings = this.percentSavings();
     const percentGoal = this.percentGoal();
     let percentTowardsGoal = (percentSavings / percentGoal) * 100;
-    if (percentTowardsGoal < 0) {
+    if (percentTowardsGoal < 0 || isNaN(percentTowardsGoal)) {
       percentTowardsGoal = 0;
     }
     return percentTowardsGoal;

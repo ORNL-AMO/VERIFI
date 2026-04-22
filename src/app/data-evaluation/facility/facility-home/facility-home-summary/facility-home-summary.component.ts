@@ -134,6 +134,7 @@ export class FacilityHomeSummaryComponent {
       return false;
     }
   });
+
   constructor() {
     effect(() => {
       const loadingContext = this.navigationAfterLoading();
@@ -141,9 +142,7 @@ export class FacilityHomeSummaryComponent {
         this.exportToExcelTemplateV3Service.triggerExportDownload();
       }
     });
-
   }
-
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
