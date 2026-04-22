@@ -1,18 +1,18 @@
+@let _latestEnergyAnalysisItem = latestEnergyAnalysisItem();
+@let _latestWaterAnalysisItem = latestWaterAnalysisItem();
 <div class="measur-wrapper main-content">
   <app-account-home-summary></app-account-home-summary>
   <hr>
-    <div class="row">
-      @if (latestEnergyAnalysisItem) {
-        <div [ngClass]="{'col-6': latestWaterAnalysisItem, 'col-12': !latestWaterAnalysisItem}"
-          >
-          <app-account-energy-card></app-account-energy-card>
-        </div>
-      }
-      @if (latestWaterAnalysisItem) {
-        <div [ngClass]="{'col-6': latestEnergyAnalysisItem, 'col-12': !latestEnergyAnalysisItem}"
-          >
-          <app-account-water-card></app-account-water-card>
-        </div>
-      }
+  <div class="row">
+    @if (_latestEnergyAnalysisItem) {
+    <div [ngClass]="{'col-6': _latestWaterAnalysisItem, 'col-12': !_latestWaterAnalysisItem}">
+      <app-account-energy-card></app-account-energy-card>
     </div>
+    }
+    @if (_latestWaterAnalysisItem) {
+    <div [ngClass]="{'col-6': _latestEnergyAnalysisItem, 'col-12': !_latestEnergyAnalysisItem}">
+      <app-account-water-card></app-account-water-card>
+    </div>
+    }
   </div>
+</div>

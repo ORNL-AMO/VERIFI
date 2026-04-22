@@ -1,30 +1,35 @@
+@let _account = account();
+@let _disableButtons = disableButtons();
+@let _waterAnalysisNeeded = waterAnalysisNeeded();
+@let _energyAnalysisNeeded = energyAnalysisNeeded();
+
 <div class="card">
   <div class="card-body">
     <div class="row">
       <div class="col">
-        <h1 class="card-title"><span class="fa fa-building"></span> {{account.name}}</h1>
-        @if (account.address) {
-        <p class="card-text mg-0">{{account.address}}, {{account.city}},
-          {{account.state}}
-          {{account.zip}}
-          {{account.country}}
+        <h1 class="card-title"><span class="fa fa-building"></span> {{_account.name}}</h1>
+        @if (_account.address) {
+        <p class="card-text mg-0">{{_account.address}}, {{_account.city}},
+          {{_account.state}}
+          {{_account.zip}}
+          {{_account.country}}
         </p>
         }
       </div>
       <div class="col-8">
         <div class="d-flex justify-content-center flex-wrap">
           <div class="p-1">
-            <button class="btn btn-outline m-0" (click)="navigateTo('overview')" [disabled]="disableButtons">
+            <button class="btn btn-outline m-0" (click)="navigateTo('overview')" [disabled]="_disableButtons">
               <span class="fa fa-chart-column"></span><br>
               View Account <br> Data Overview
             </button>
           </div>
           <div class="p-1">
             <button class="btn btn-outline m-0 position-relative" (click)="navigateTo('analysis')"
-              [disabled]="disableButtons">
+              [disabled]="_disableButtons">
               <span class="fa fa-microscope"></span><br>
               Conduct Account <br> Analysis
-              @if (energyAnalysisNeeded || waterAnalysisNeeded) {
+              @if (_energyAnalysisNeeded || _waterAnalysisNeeded) {
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 <span class="fa fa-exclamation white"></span>
               </span>
@@ -32,7 +37,7 @@
             </button>
           </div>
           <div class="p-1">
-            <button class="btn btn-outline m-0" (click)="navigateTo('reports')" [disabled]="disableButtons">
+            <button class="btn btn-outline m-0" (click)="navigateTo('reports')" [disabled]="_disableButtons">
               <span class="fa fa-folder"></span><br>
               Generate Account <br> Reports
             </button>
@@ -56,10 +61,10 @@
             </button>
           </div>
         </div>
-        @if ((energyAnalysisNeeded || waterAnalysisNeeded) && !disableButtons) {
+        @if ((_energyAnalysisNeeded || _waterAnalysisNeeded) && !_disableButtons) {
         <div class="d-flex justify-content-center">
           <ul class="list-group list-group-flush">
-            @if (energyAnalysisNeeded) {
+            @if (_energyAnalysisNeeded) {
             <li class="list-group-item">
               <a class="nav-link" routerLink="/account/analysis/dashboard/energy">
                 <span class="badge rounded-pill bg-danger">
@@ -77,7 +82,7 @@
               </a>
             </li>
             }
-            @if (waterAnalysisNeeded) {
+            @if (_waterAnalysisNeeded) {
             <li class="list-group-item">
               <a class="nav-link" routerLink="/account/analysis/dashboard/water">
                 <span class="badge rounded-pill bg-danger">
@@ -104,7 +109,7 @@
   </div>
 
 
-  @if (disableButtons) {
+  @if (_disableButtons) {
   <div class="row">
     <div class="col-12">
       <hr>
@@ -123,7 +128,7 @@
 </div>
 
 <div class="popup" [class.open]="showExportModal">
-  <div class="popup-header">Export Account: {{account?.name}}
+  <div class="popup-header">Export Account: {{_account?.name}}
     <button class="item-right" (click)="closeExportModal()">x</button>
   </div>
   <div class="popup-body">

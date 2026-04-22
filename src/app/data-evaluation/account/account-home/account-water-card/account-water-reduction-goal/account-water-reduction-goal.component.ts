@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AccountHomeService } from '../../account-home.service';
@@ -8,6 +7,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-account-water-reduction-goal',
@@ -16,66 +16,47 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class AccountWaterReductionGoalComponent {
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private accountHomeService: AccountHomeService = inject(AccountHomeService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private router: Router = inject(Router);
 
-  latestAnalysisSummary: MonthlyAnalysisSummaryData;
-  latestSummarySub: Subscription;
-  percentSavings: number = 0;
-  percentGoal: number;
-  percentTowardsGoal: number = 0;
-  goalYear: number;
-  baselineYear: number;
-  account: IdbAccount;
-  selectedAccountSub: Subscription;
-  latestAnalysisDate: Date;
-  latestAnalysisItem: IdbAccountAnalysisItem;
-  constructor(private accountDbService: AccountdbService,
-    private accountHomeService: AccountHomeService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router) { }
+  latestAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
+  monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyWaterAnalysisData, { initialValue: [] });
 
-  ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.account = val;
-      this.setGoalYears()
-    });
-
-    this.latestSummarySub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
-      this.latestAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
-      this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary && this.latestAnalysisItem?.guid == this.account.selectedWaterAnalysisId) {
-        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-        this.setProgressPercentages();
-      } else {
-        this.latestAnalysisDate = undefined;
-        this.percentSavings = 0;
-        this.percentTowardsGoal = 0;
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.latestSummarySub.unsubscribe();
-    this.selectedAccountSub.unsubscribe();
-  }
-
-  setGoalYears() {
-    if (this.account && this.account.sustainabilityQuestions) {
-      this.percentGoal = this.account.sustainabilityQuestions.waterReductionPercent;
-      this.goalYear = this.account.sustainabilityQuestions.waterReductionTargetYear;
-      this.baselineYear = this.account.sustainabilityQuestions.waterReductionBaselineYear;
-    }
-  }
-
-  setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
-    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
-    if (this.percentTowardsGoal < 0) {
-      this.percentTowardsGoal = 0;
-    }
-  }
+  latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
+    const monthlyWaterAnalysisData = this.monthlyWaterAnalysisData();
+    return _.maxBy(monthlyWaterAnalysisData, (mData: MonthlyAnalysisSummaryData) => mData.date);
+  });
+  percentSavings: Signal<number> = computed(() => {
+    const latestAnalysisSummary = this.latestAnalysisSummary();
+    return latestAnalysisSummary ? latestAnalysisSummary.rolling12MonthImprovement : 0;
+  });
+  percentGoal: Signal<number> = computed(() => {
+    const account = this.account();
+    return account && account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionPercent : 0;
+  });
+  percentTowardsGoal: Signal<number> = computed(() => {
+    const percentSavings = this.percentSavings();
+    const percentGoal = this.percentGoal();
+    return percentGoal ? (percentSavings / percentGoal) * 100 : 0;
+  });
+  goalYear: Signal<number> = computed(() => {
+    const account = this.account();
+    return account && account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionTargetYear : undefined;
+  });
+  baselineYear: Signal<number> = computed(() => {
+    const account = this.account();
+    return account && account.sustainabilityQuestions ? account.sustainabilityQuestions.waterReductionBaselineYear : undefined;
+  });
+  latestAnalysisDate: Signal<Date> = computed(() => {
+    const latestAnalysisSummary = this.latestAnalysisSummary();
+    return latestAnalysisSummary ? new Date(latestAnalysisSummary.date) : undefined;
+  });
 
   goToAnalysisItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

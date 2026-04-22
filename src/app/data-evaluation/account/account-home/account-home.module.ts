@@ -10,7 +10,6 @@ import { AccountWaterReductionGoalComponent } from './account-water-card/account
 import { AccountEnergyReductionGoalComponent } from './account-energy-card/account-energy-reduction-goal/account-energy-reduction-goal.component';
 import { AccountEnergyCardComponent } from './account-energy-card/account-energy-card.component';
 import { AccountWaterCardComponent } from './account-water-card/account-water-card.component';
-import { AccountAnnualAnalysisTableComponent } from './account-annual-analysis-table/account-annual-analysis-table.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
 
@@ -23,8 +22,7 @@ import { FormsModule } from '@angular/forms';
     AccountWaterReductionGoalComponent,
     AccountEnergyReductionGoalComponent,
     AccountEnergyCardComponent,
-    AccountWaterCardComponent,
-    AccountAnnualAnalysisTableComponent,
+    AccountWaterCardComponent
   ],
   imports: [
     CommonModule,
