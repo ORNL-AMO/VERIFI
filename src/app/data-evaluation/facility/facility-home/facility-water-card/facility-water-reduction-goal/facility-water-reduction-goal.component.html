@@ -43,9 +43,9 @@
 <div class="row justify-content-center">
   <div class="col-12">
     @let _facilityStatusCheck = facilityStatusCheck();
-    @if(_facilityStatusCheck && !_facilityStatusCheck.waterAnalysisDataDateCheck.allDatesCurrent){
+    @if(_facilityStatusCheck && !_facilityStatusCheck.waterAnalysisStatusCheck.allDatesCurrent){
     <p class="fw-light italic mb-1 mt-1">
-      <span class="fa fa-asterisk"></span>Note: {{_facilityStatusCheck.waterAnalysisDataDateCheck.latestDataAllEntries| date:'MMM. yyyy'}} is the month
+      <span class="fa fa-asterisk"></span>Note: {{_facilityStatusCheck.waterAnalysisStatusCheck.latestDataAllEntries| date:'MMM. yyyy'}} is the month
       with the most recent complete predictor and meter data. VERIFI detects data entered after this date for some but not
       all of the necessary meters and predictors. For more details, please
       check the Facility Status Check card above.

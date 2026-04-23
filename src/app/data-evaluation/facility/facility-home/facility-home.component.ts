@@ -99,6 +99,7 @@ export class FacilityHomeComponent implements OnDestroy {
     this.facilityHomeService.calculatingEnergy.next(true);
     this.facilityHomeService.calculatingOverview.next(true);
     this.facilityHomeService.calculatingWater.next(true);
+    this.facilityHomeService.facilityStatusCheck.next(undefined);
   }
 
   navigateToMeters() {

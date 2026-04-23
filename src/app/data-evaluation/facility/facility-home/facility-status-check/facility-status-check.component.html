@@ -41,9 +41,9 @@
                 </div>
                 }
 
-                @if(_facilityStatusCheck.energyAnalysisDataDateCheck.hasAnalysis || _facilityStatusCheck.waterAnalysisDataDateCheck.hasAnalysis){
+                @if(_facilityStatusCheck.energyAnalysisStatusCheck.hasAnalysis || _facilityStatusCheck.waterAnalysisStatusCheck.hasAnalysis){
                 <div class="accordion" id="analysisItemsAccordion">
-                    @if(_facilityStatusCheck.energyAnalysisDataDateCheck.hasAnalysis){
+                    @if(_facilityStatusCheck.energyAnalysisStatusCheck.hasAnalysis){
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="energyAnalysisHeading">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -59,22 +59,22 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <p class="mb-1">
-                                            <strong>Latest Data Date Entered:</strong>
-                                            {{_facilityStatusCheck.energyAnalysisDataDateCheck.latestDataDate | date:'MMMM yyyy'}}
+                                            <strong>Latest Date With Complete Data:</strong>
+                                            {{_facilityStatusCheck.energyAnalysisStatusCheck.latestDataDate | date:'MMMM yyyy'}}
                                         </p>
                                         <p class="mb-1">
-                                            <strong>Latest Date Across All Entries:</strong>
-                                            {{_facilityStatusCheck.energyAnalysisDataDateCheck.latestDataAllEntries | date:'MMMM yyyy'}}
+                                            <strong>Latest Date Any Data Entered:</strong>
+                                            {{_facilityStatusCheck.energyAnalysisStatusCheck.latestDataAllEntries | date:'MMMM yyyy'}}
                                         </p>
                                         <p class="mb-2">
                                             <strong>All Data Current:</strong>
-                                            {{_facilityStatusCheck.energyAnalysisDataDateCheck.allDatesCurrent ? 'Yes' : 'No'}}
+                                            {{_facilityStatusCheck.energyAnalysisStatusCheck.allDatesCurrent ? 'Yes' : 'No'}}
                                         </p>
                                     </div>
                                     <div class="col-6">
                                         <p class="mb-1"><strong>Predictors Used:</strong></p>
                                         <ul class="mb-0">
-                                            @for (predictorData of _facilityStatusCheck.energyAnalysisDataDateCheck.latestPredictorData;
+                                            @for (predictorData of _facilityStatusCheck.energyAnalysisStatusCheck.latestPredictorData;
                                             track predictorData.predictorId) {
                                             <li>{{predictorData.predictorName}} ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})</li>
                                             }
@@ -83,7 +83,7 @@
                                     <div class="col-6">
                                         <p class="mb-1"><strong>Meters Used:</strong></p>
                                         <ul class="mb-0">
-                                            @for (meterData of _facilityStatusCheck.energyAnalysisDataDateCheck.latestMeterData;
+                                            @for (meterData of _facilityStatusCheck.energyAnalysisStatusCheck.latestMeterData;
                                             track meterData.meterId) {
                                             <li>{{meterData.meterName}} ({{meterData.lastDateEntry | date:'MMMM yyyy'}})</li>
                                             }
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                     }
-                    @if(_facilityStatusCheck.waterAnalysisDataDateCheck.hasAnalysis){
+                    @if(_facilityStatusCheck.waterAnalysisStatusCheck.hasAnalysis){
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="waterAnalysisHeading">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -110,22 +110,22 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <p class="mb-1">
-                                            <strong>Latest Data Date Entered:</strong>
-                                            {{_facilityStatusCheck.waterAnalysisDataDateCheck.latestDataDate | date:'MMMM yyyy'}}
+                                            <strong>Latest Date With Complete Data:</strong>
+                                            {{_facilityStatusCheck.waterAnalysisStatusCheck.latestDataDate | date:'MMMM yyyy'}}
                                         </p>
                                         <p class="mb-1">
                                             <strong>Latest Date Across All Entries:</strong>
-                                            {{_facilityStatusCheck.waterAnalysisDataDateCheck.latestDataAllEntries | date:'MMMM yyyy'}}
+                                            {{_facilityStatusCheck.waterAnalysisStatusCheck.latestDataAllEntries | date:'MMMM yyyy'}}
                                         </p>
                                         <p class="mb-2">
                                             <strong>All Data Current:</strong>
-                                            {{_facilityStatusCheck.waterAnalysisDataDateCheck.allDatesCurrent ? 'Yes' : 'No'}}
+                                            {{_facilityStatusCheck.waterAnalysisStatusCheck.allDatesCurrent ? 'Yes' : 'No'}}
                                         </p>
                                     </div>
                                     <div class="col-6">
                                         <p class="mb-1"><strong>Predictors Used:</strong></p>
                                         <ul class="mb-0">
-                                            @for (predictorData of _facilityStatusCheck.waterAnalysisDataDateCheck.latestPredictorData;
+                                            @for (predictorData of _facilityStatusCheck.waterAnalysisStatusCheck.latestPredictorData;
                                             track predictorData.predictorId) {
                                             <li>{{predictorData.predictorName}} ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})</li>
                                             }
@@ -134,7 +134,7 @@
                                     <div class="col-6">
                                         <p class="mb-1"><strong>Meters Used:</strong></p>
                                         <ul class="mb-0">
-                                            @for (meterData of _facilityStatusCheck.waterAnalysisDataDateCheck.latestMeterData;
+                                            @for (meterData of _facilityStatusCheck.waterAnalysisStatusCheck.latestMeterData;
                                             track meterData.meterId) {
                                             <li>{{meterData.meterName}} ({{meterData.lastDateEntry | date:'MMMM yyyy'}})</li>
                                             }
