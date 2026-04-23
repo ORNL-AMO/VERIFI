@@ -8,6 +8,8 @@ import { AnalysisSetupErrors } from "src/app/models/validation";
 import { AnalysisStatusCheck } from "./analysisStatusCheck";
 import { STATUS_CHECK_OPTIONS } from "./statusCheckModels";
 import { MeterStatusCheck } from "./meterStatusCheck";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { PredictorStatusCheck } from "./predictorStatusCheck";
 
 export class FacilityStatusCheck {
 
@@ -15,7 +17,9 @@ export class FacilityStatusCheck {
     waterAnalysisStatusCheck: AnalysisStatusCheck;
 
     metersStatusChecks: Array<MeterStatusCheck>;
-    predictorsStatusChecks: Array<AnalysisStatusCheck>;
+    metersStatus: STATUS_CHECK_OPTIONS;
+    predictorsStatusChecks: Array<PredictorStatusCheck>;
+    predictorsStatus: STATUS_CHECK_OPTIONS;
 
     status: STATUS_CHECK_OPTIONS;
     //TODO: add messages for each status to display in the UI
@@ -23,6 +27,7 @@ export class FacilityStatusCheck {
     constructor(
         facility: IdbFacility,
         calanderizedMeters: Array<CalanderizedMeter>,
+        utilityMeterData: Array<IdbUtilityMeterData>,
         predictors: Array<IdbPredictor>,
         predictorData: Array<IdbPredictorData>,
         energyAnalysisItem: IdbAnalysisItem,
@@ -31,19 +36,59 @@ export class FacilityStatusCheck {
     ) {
         this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, calanderizedMeters, predictors, predictorData, analysisSetupErrors);
         this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, calanderizedMeters, predictors, predictorData, analysisSetupErrors);
-        this.status = this.determineStatus();
+        this.setMetersStatusChecks(calanderizedMeters, utilityMeterData);
+        this.setMetersStatus();
+        this.setPredictorsStatusChecks(predictors, predictorData);
+        this.setPredictorsStatus();
+        this.setStatus();
     }
 
+    private setMetersStatusChecks(calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>) {
+        this.metersStatusChecks = calanderizedMeters.map(calanderizedMeter => {
+            let meterReadings = utilityMeterData.filter(data => data.meterId === calanderizedMeter.meter.guid);
+            return new MeterStatusCheck(calanderizedMeter, meterReadings);
+        });
+    }
 
-    private determineStatus(): STATUS_CHECK_OPTIONS {
-        let analysisStatuses: Array<STATUS_CHECK_OPTIONS> = [this.energyAnalysisStatusCheck.status, this.waterAnalysisStatusCheck.status];
+    private setPredictorsStatusChecks(predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData>) {
+        this.predictorsStatusChecks = predictors.map(predictor => {
+            let predictorReadings = predictorData.filter(data => data.predictorId === predictor.guid);
+            return new PredictorStatusCheck(predictor, predictorReadings);
+        });
+    }
 
-        if (analysisStatuses.includes('error')) {
-            return 'error';
-        } else if (analysisStatuses.includes('warning')) {
-            return 'warning';
+    private setMetersStatus() {
+        let meterStatuses: Array<STATUS_CHECK_OPTIONS> = this.metersStatusChecks.map(check => check.status);
+        if (meterStatuses.includes('error')) {
+            this.metersStatus = 'error';
+        } else if (meterStatuses.includes('warning')) {
+            this.metersStatus = 'warning';
         } else {
-            return 'good';
+            this.metersStatus = 'good';
+        }
+    }
+
+    private setPredictorsStatus() {
+        let predictorStatuses: Array<STATUS_CHECK_OPTIONS> = this.predictorsStatusChecks.map(check => check.status);
+        if (predictorStatuses.includes('error')) {
+            this.predictorsStatus = 'error';
+        } else if (predictorStatuses.includes('warning')) {
+            this.predictorsStatus = 'warning';
+        } else {
+            this.predictorsStatus = 'good';
+        }
+    }
+
+    private setStatus() {
+
+        let statuses: Array<STATUS_CHECK_OPTIONS> = [this.energyAnalysisStatusCheck.status, this.waterAnalysisStatusCheck.status, this.metersStatus, this.predictorsStatus];
+
+        if (statuses.includes('error')) {
+            this.status = 'error';
+        } else if (statuses.includes('warning')) {
+            this.status = 'warning';
+        } else {
+            this.status = 'good';
         }
     }
 }

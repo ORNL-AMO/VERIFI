@@ -13,6 +13,9 @@ import { FacilityWaterCardComponent } from './facility-water-card/facility-water
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
 import { FacilityStatusCheckComponent } from './facility-status-check/facility-status-check.component';
+import { AnalysisStatusCheckComponent } from './facility-status-check/analysis-status-check/analysis-status-check.component';
+import { MetersStatusCheckComponent } from './facility-status-check/meters-status-check/meters-status-check.component';
+import { PredictorsStatusCheckComponent } from './facility-status-check/predictors-status-check/predictors-status-check.component';
 
 
 
@@ -24,7 +27,10 @@ import { FacilityStatusCheckComponent } from './facility-status-check/facility-s
     FacilityWaterReductionGoalComponent,
     FacilityEnergyCardComponent,
     FacilityWaterCardComponent,
-    FacilityStatusCheckComponent
+    FacilityStatusCheckComponent,
+    AnalysisStatusCheckComponent,
+    MetersStatusCheckComponent,
+    PredictorsStatusCheckComponent
   ],
   imports: [
     CommonModule,

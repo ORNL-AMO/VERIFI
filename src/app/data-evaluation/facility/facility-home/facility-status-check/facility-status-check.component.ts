@@ -13,6 +13,8 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { AnalysisSetupErrors } from 'src/app/models/validation';
 import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-facility-status-check',
@@ -28,7 +30,7 @@ export class FacilityStatusCheckComponent {
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisValidationService: AnalysisValidationService = inject(AnalysisValidationService);
-
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
 
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.facilityHomeService.facilityStatusCheck, { initialValue: undefined });
   private calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
@@ -38,7 +40,7 @@ export class FacilityStatusCheckComponent {
   private latestEnergyAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
   private latestWaterAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
   private analysisSetupErrors: Signal<Array<AnalysisSetupErrors>> = toSignal(this.analysisValidationService.analysisSetupErrors, { initialValue: undefined });
-
+  private utilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: [] });
   constructor() {
     effect(() => {
       const facility = this.facility();
@@ -48,10 +50,12 @@ export class FacilityStatusCheckComponent {
       const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem();
       const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
       const analysisSetupErrors = this.analysisSetupErrors();
-      if (facility && calanderizedMeters && predictors && predictorData && (latestEnergyAnalysisItem || latestWaterAnalysisItem) && analysisSetupErrors) {
+      const utilityMeterData = this.utilityMeterData();
+      if (facility && calanderizedMeters && predictors && predictorData && (latestEnergyAnalysisItem || latestWaterAnalysisItem) && analysisSetupErrors && utilityMeterData) {
         const statusCheck = new FacilityStatusCheck(
           facility,
           calanderizedMeters,
+          utilityMeterData,
           predictors,
           predictorData,
           latestEnergyAnalysisItem,
