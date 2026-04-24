@@ -29,16 +29,16 @@ export class EnergyFootprintSidePanelComponent {
   private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
   private router: Router = inject(Router);
 
-  facilities$: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
-  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
-  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
-  calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
-
+  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
+  energyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
+  equipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
+  calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
 
   yearOptions: Signal<Array<number>> = computed(() => {
-    const calanderizedMeters = this.calanderizedMeters$();
-    const facilities = this.facilities$();
+    const calanderizedMeters = this.calanderizedMeters();
+    const facilities = this.facilities();
     if (calanderizedMeters.length === 0 || facilities.length === 0) {
       return [];
     }
@@ -49,12 +49,11 @@ export class EnergyFootprintSidePanelComponent {
   //so as data changes it doesn't have to recalculate everything if not necessary. 
   //TODO: add loading logic during calculation
   energyFootprintAnnualFacilityBalance$: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
-    const facilities = this.facilities$();
-    const energyUseGroups = this.energyUseGroups$();
-    const equipment = this.equipment$();
-    //TODO: calanderized meters may not be correct units.
-    const calanderizedMeters = this.calanderizedMeters$();
-    const utilityMeterGroups = this.utilityMeterGroups$();
+    const facilities = this.facilities();
+    const energyUseGroups = this.energyUseGroups();
+    const equipment = this.equipment();
+    const calanderizedMeters = this.calanderizedMeters();
+    const utilityMeterGroups = this.utilityMeterGroups();
     const selectedYear = this.selectedYear();
     const selectedFacilityId = this.selectedFacilityId();
     if (
@@ -84,6 +83,8 @@ export class EnergyFootprintSidePanelComponent {
   selectedFacilityId = signal<string | null>(null);
   displayDataByGroup = signal<boolean>(false);
 
+  private _lastSelectedFacilityGuid: string | null = null;
+
   constructor() {
     // Automatically set selectedYear to the last year in yearOptions when yearOptions changes
     effect(() => {
@@ -94,9 +95,19 @@ export class EnergyFootprintSidePanelComponent {
     });
     // Automatically set selectedFacilityId to the first facility when facilities change
     effect(() => {
-      const facilities = this.facilities$();
+      const facilities = this.facilities();
       if (facilities.length > 0 && !facilities.find(facility => facility.guid === this.selectedFacilityId())) {
         this.selectedFacilityId.set(facilities[0].guid);
+      }
+    });
+    // Update selectedFacilityId when selectedFacility changes to a different facility
+    effect(() => {
+      const guid = this.selectedFacility()?.guid ?? null;
+      if (guid !== this._lastSelectedFacilityGuid) {
+        this._lastSelectedFacilityGuid = guid;
+        if (guid) {
+          this.selectedFacilityId.set(guid);
+        }
       }
     });
   }

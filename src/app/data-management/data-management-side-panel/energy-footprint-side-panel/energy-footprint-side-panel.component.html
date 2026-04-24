@@ -1,8 +1,8 @@
-@let facilities = facilities$();
+@let _facilities = facilities();
 <!--dropdown for facility-->
-@if(facilities.length > 1) {
+@if(_facilities.length > 1) {
 <select class="form-select" [(ngModel)]="selectedFacilityId">
-    @for(facility of facilities; track facility.guid) {
+    @for(facility of _facilities; track facility.guid) {
     <option [ngValue]="facility.guid">{{facility.name}}</option>
     }
 </select>
@@ -18,7 +18,7 @@
         By Meter Group
     </div>
 </div>
-<h6 class="mt-2 text-center">{{selectedFacilityId() | facilityName: facilities}} Energy Uses Balance ({{selectedYear()}})</h6>
+<h6 class="mt-2 text-center">{{selectedFacilityId() | facilityName: _facilities}} Energy Uses Balance ({{selectedYear()}})</h6>
 @let energyFootprintAnnualFacilityBalance = energyFootprintAnnualFacilityBalance$();
 @if(!energyFootprintAnnualFacilityBalance) {
 <p>Calculating footprint...</p>
@@ -82,7 +82,7 @@
 }
 <button class="btn btn-sm action-btn w-100" (click)="goToFacilityFootprint()">
     <span class="fa fa-paw"></span>
-    View {{selectedFacilityId() | facilityName: facilities}} Energy Footprint
+    View {{selectedFacilityId() | facilityName: _facilities}} Energy Footprint
 </button>
 <p class="fw-light mt-2">
     <span class="fa fa-asterisk"></span>
