@@ -44,7 +44,9 @@ export class PredictorStatusCheck {
         let monthYearSet: Set<string> = new Set(Object.keys(monthYearCounts));
         let hasMissing = false;
         for (let year = firstEntry.year; year <= lastEntry.year; year++) {
-            for (let month = 1; month <= 12; month++) {
+            let startMonth = year === firstEntry.year ? firstEntry.month : 1;
+            let endMonth = year === lastEntry.year ? lastEntry.month : 12;
+            for (let month = startMonth; month <= endMonth; month++) {
                 let key: string = `${month}-${year}`;
                 if (!monthYearSet.has(key)) {
                     hasMissing = true;

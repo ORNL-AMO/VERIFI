@@ -34,7 +34,7 @@ export class MeterStatusCheck {
             [key: string]: number;
         } = {};
         meterReadings.forEach(reading => {
-            let key = `${reading.month}-${reading.year}`;
+            let key = `${reading.month}-${reading.year}-${reading.day}`;
             if (dayMonthYearCounts[key]) {
                 dayMonthYearCounts[key] += 1;
             } else {
@@ -45,8 +45,8 @@ export class MeterStatusCheck {
         this.duplicateEntryDates = Object.keys(dayMonthYearCounts)
             .filter(key => dayMonthYearCounts[key] > 1)
             .map(key => {
-                const [month, year] = key.split('-').map(Number);
-                return new Date(year, month - 1, 1);
+                const [month, year, day] = key.split('-').map(Number);
+                return new Date(year, month - 1, day);
             });
     }
 

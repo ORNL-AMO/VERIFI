@@ -34,9 +34,10 @@ export class FacilityStatusCheck {
         waterAnalysisItem: IdbAnalysisItem,
         analysisSetupErrors: Array<AnalysisSetupErrors>
     ) {
-        this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, calanderizedMeters, predictors, predictorData, analysisSetupErrors);
-        this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, calanderizedMeters, predictors, predictorData, analysisSetupErrors);
-        this.setMetersStatusChecks(calanderizedMeters, utilityMeterData);
+        let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => meter.meter.facilityId === facility.guid);
+        this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, facilityCalanderizedMeters, predictors, predictorData, analysisSetupErrors);
+        this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, predictors, predictorData, analysisSetupErrors);
+        this.setMetersStatusChecks(facilityCalanderizedMeters, utilityMeterData);
         this.setMetersStatus();
         this.setPredictorsStatusChecks(predictors, predictorData);
         this.setPredictorsStatus();
