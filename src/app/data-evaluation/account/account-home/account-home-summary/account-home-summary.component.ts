@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountHomeService } from '../account-home.service';
 import * as _ from 'lodash';
@@ -10,6 +9,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -17,53 +17,68 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
   styleUrls: ['./account-home-summary.component.css'],
   standalone: false
 })
-export class AccountHomeSummaryComponent implements OnInit {
+export class AccountHomeSummaryComponent {
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private accountHomeService: AccountHomeService = inject(AccountHomeService);
+  private router: Router = inject(Router);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
+  private loadingService: LoadingService = inject(LoadingService);
 
-  account: IdbAccount;
-  accountSub: Subscription;
-  disableButtons: boolean;
-  waterAnalysisNeeded: boolean;
-  energyAnalysisNeeded: boolean;
-  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
-  latestWaterAnalysisItem: IdbAccountAnalysisItem;
-  includeWeatherData: boolean = false;
-  showExportModal: boolean = false;
-  loadingSub: Subscription;
-  constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
-    private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service,
-    private loadingService: LoadingService
-  ) { }
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
+  accountMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: [] });
 
-  ngOnInit(): void {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.account = val;
-      this.setAccountStatus();
-      let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-      this.disableButtons = (accountMeterData.length == 0);
-    });
+  latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
+  latestWaterAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+  navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
 
-    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
-      if (context === 'export-facilities-to-excel') {
+  disableButtons: Signal<boolean> = computed(() => {
+    const accountMeterData = this.accountMeterData();
+    return (accountMeterData.length == 0);
+  });
+  waterAnalysisNeeded: Signal<boolean> = computed(() => {
+    const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
+    const account = this.account();
+    if (latestWaterAnalysisItem) {
+      //todo: add check when new data is entered
+      return false;
+    }
+    return account && account.sustainabilityQuestions.waterReductionGoal ? true : false;
+  });
+
+  energyAnalysisNeeded: Signal<boolean> = computed(() => {
+    const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem();
+    const account = this.account();
+    if (latestEnergyAnalysisItem) {
+      //TODO: add check when new data is entered
+      return false;
+    }
+    return account && account.sustainabilityQuestions.energyReductionGoal ? true : false;
+  });
+
+
+
+  constructor() {
+    effect(() => {
+      const loadingContext = this.navigationAfterLoading();
+      if (loadingContext === 'export-facilities-to-excel') {
         this.exportToExcelV3TemplateService.triggerExportDownload();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.accountSub.unsubscribe();
-    this.loadingSub.unsubscribe();
   }
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
       this.router.navigateByUrl('/data-evaluation/account/' + urlStr);
     } else {
-      this.router.navigateByUrl('/data-management/' + this.account.guid + '/import-data')
+      this.router.navigateByUrl('/data-management/' + this.account().guid + '/import-data')
     }
   }
 
+  //Export Modal
+  showExportModal: boolean = false;
+  includeWeatherData: boolean = false;
   openExportModal() {
     this.includeWeatherData = false;
     this.showExportModal = true;
@@ -82,50 +97,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     this.exportToExcelV3TemplateService.exportFacilityData(this.includeWeatherData);
   }
 
-
-  setAccountStatus() {
-    this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
-    this.setEnergyAnalysisNeeded();
-    this.latestWaterAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
-    this.setWaterAnalysisNeeded();
-  }
-
-
-  setEnergyAnalysisNeeded() {
-    // let currentDate: Date = new Date();
-    if (this.latestEnergyAnalysisItem) {
-      //TODO:
-      //add check when new data is entered
-      // if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-      //   this.energyAnalysisNeeded = true;
-      // } else {
-      //   this.energyAnalysisNeeded = false;
-      // }
-    } else if (this.account.sustainabilityQuestions.energyReductionGoal) {
-      this.energyAnalysisNeeded = true;
-    } else {
-      this.energyAnalysisNeeded = false;
-    }
-  }
-
-  setWaterAnalysisNeeded() {
-    // let currentDate: Date = new Date();
-    if (this.latestWaterAnalysisItem) {
-      //TODO:
-      //add check when new data is entered
-      // if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
-      //   this.waterAnalysisNeeded = true;
-      // } else {
-      //   this.waterAnalysisNeeded = false;
-      // }
-    } else if (this.account.sustainabilityQuestions.waterReductionGoal) {
-      this.waterAnalysisNeeded = true;
-    } else {
-      this.waterAnalysisNeeded = false;
-    }
-  }
-
   goToDataManagement() {
-    this.router.navigateByUrl('/data-management/' + this.account.guid + '/import-data');
+    this.router.navigateByUrl('/data-management/' + this.account().guid + '/import-data');
   }
 }

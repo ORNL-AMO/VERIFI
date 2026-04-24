@@ -119,6 +119,7 @@ export class DataManagementHomeComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'updating-weather-predictors') {
         this.showToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

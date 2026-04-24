@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, Signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -15,6 +15,8 @@ import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/e
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { getDateFromMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
 import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AnalysisSetupErrors } from 'src/app/models/validation';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -22,135 +24,133 @@ import { AnalysisValidationService } from 'src/app/shared/validation/services/an
   styleUrls: ['./facility-home-summary.component.css'],
   standalone: false
 })
-export class FacilityHomeSummaryComponent implements OnInit {
+export class FacilityHomeSummaryComponent {
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
+  private router: Router = inject(Router);
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
+  private loadingService: LoadingService = inject(LoadingService);
+  private analysisValidationService: AnalysisValidationService = inject(AnalysisValidationService);
 
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  latestEnergyAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
+  latestWaterAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+  navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
+  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: [] });
+  facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: [] });
+  analysisSetupErrors: Signal<Array<AnalysisSetupErrors>> = toSignal(this.analysisValidationService.analysisSetupErrors, { initialValue: undefined });
 
-  facility: IdbFacility;
-  lastBill: IdbUtilityMeterData;
-  latestEnergyAnalysisItem: IdbAnalysisItem;
-  latestWaterAnalysisItem: IdbAnalysisItem;
-  sources: Array<MeterSource>;
-  selectedFacilitySub: Subscription;
+  lastBill: Signal<IdbUtilityMeterData> = computed(() => {
+    let facilityMeterData = this.facilityMeterData();
+    return getLatestMeterData(facilityMeterData);
+  });
 
-  waterAnalysisNeeded: boolean;
-  energyAnalysisNeeded: boolean;
-  meterReadingsNeeded: boolean;
-  predictorsNeeded: boolean;
+  sources: Signal<Array<MeterSource>> = computed(() => {
+    let facilityMeters = this.facilityMeters();
+    let sources: Array<MeterSource> = facilityMeters.map(meter => { return meter.source });
+    return _.uniq(sources);
+  });
+
+  waterAnalysisNeeded: Signal<boolean> = computed(() => {
+    const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
+    if (latestWaterAnalysisItem) {
+      return false;
+    } else {
+      const facility = this.facility();
+      if (facility?.sustainabilityQuestions.waterReductionGoal) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  });
+  energyAnalysisNeeded: Signal<boolean> = computed(() => {
+    const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem()
+    if (latestEnergyAnalysisItem) {
+      return false;
+    } else {
+      const facility = this.facility();
+      if (facility?.sustainabilityQuestions.energyReductionGoal) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  });
+
+  meterReadingsNeeded: Signal<boolean> = computed(() => {
+    let lastBill = this.lastBill();
+    let currentDate: Date = new Date();
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    if (lastBill) {
+      let lastBillDate: Date = getDateFromMeterData(lastBill);
+      if (lastBillDate < currentDate) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  });
+  // predictorsNeeded: Signal<boolean> = computed(() => {
+  //   const facility = this.facility();
+  //   if (facility?.sustainabilityQuestions.predictorsNeeded) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // });
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
 
-  analysisValidationSub: Subscription;
-  energyAnalysisHasErrors: boolean;
-  waterAnalysisHasErrors: boolean;
-  loadingSub: Subscription;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
-    private router: Router,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
-    private loadingService: LoadingService,
-    private analysisValidationService: AnalysisValidationService
-  ) { }
+  energyAnalysisHasErrors: Signal<boolean> = computed(() => {
+    const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem();
+    const analysisSetupErrors = this.analysisSetupErrors();
+    if (latestEnergyAnalysisItem) {
+      const setupErrors: AnalysisSetupErrors = analysisSetupErrors.find(error => error.analysisId === latestEnergyAnalysisItem.guid);
+      if (setupErrors) {
+        return setupErrors.hasError;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  });
+  waterAnalysisHasErrors: Signal<boolean> = computed(() => {
+    const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
+    const analysisSetupErrors = this.analysisSetupErrors();
+    if (latestWaterAnalysisItem) {
+      const setupErrors: AnalysisSetupErrors = analysisSetupErrors.find(error => error.analysisId === latestWaterAnalysisItem.guid);
+      if (setupErrors) {
+        return setupErrors.hasError;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  });
 
-  ngOnInit(): void {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.facility = val;
-      this.setFacilityStatus();
-    });
-
-    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
-      this.setEnergyAnalysisHasErrors();
-      this.setWaterAnalysisHasErrors();
-    });
-
-    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
-      if (context === 'export-facilities-to-excel') {
+  constructor() {
+    effect(() => {
+      const loadingContext = this.navigationAfterLoading();
+      if (loadingContext === 'export-facilities-to-excel') {
         this.exportToExcelTemplateV3Service.triggerExportDownload();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
-    this.analysisValidationSub.unsubscribe();
-    this.loadingSub.unsubscribe();
   }
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/' + urlStr);
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/' + urlStr);
     } else {
-      this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/import-data');
+      this.router.navigateByUrl('/data-management/' + this.facility().accountId + '/import-data');
     }
-  }
-
-  setFacilityStatus() {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.lastBill = getLatestMeterData(facilityMeterData);
-    this.setMeterReadingsNeeded();
-    this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
-    this.setEnergyAnalysisNeeded();
-    this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
-    this.setWaterAnalysisNeeded();
-    this.setSources();
-  }
-
-  setMeterReadingsNeeded() {
-    let currentDate: Date = new Date();
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    if (this.lastBill) {
-      let lastBillDate: Date = getDateFromMeterData(this.lastBill);
-      if (lastBillDate < currentDate) {
-        this.meterReadingsNeeded = true;
-      } else {
-        this.meterReadingsNeeded = false;
-      }
-    } else {
-      this.meterReadingsNeeded = true;
-    }
-  }
-
-  setEnergyAnalysisNeeded() {
-    if (this.latestEnergyAnalysisItem) {
-      this.energyAnalysisNeeded = false;
-    } else if (this.facility.sustainabilityQuestions.energyReductionGoal) {
-      this.energyAnalysisNeeded = true;
-    } else {
-      this.energyAnalysisNeeded = false;
-    }
-  }
-
-  setWaterAnalysisNeeded() {
-    if (this.latestWaterAnalysisItem) {
-      this.waterAnalysisNeeded = false;
-    } else if (this.facility.sustainabilityQuestions.waterReductionGoal) {
-      this.waterAnalysisNeeded = true;
-    } else {
-      this.waterAnalysisNeeded = false;
-    }
-  }
-
-  setEnergyAnalysisHasErrors() {
-    if (this.latestEnergyAnalysisItem) {
-      this.energyAnalysisHasErrors = this.analysisValidationService.getErrorsByAnalysisId(this.latestEnergyAnalysisItem.guid).hasError;
-    } else {
-      this.energyAnalysisHasErrors = false;
-    }
-  }
-
-  setWaterAnalysisHasErrors() {
-    if (this.latestWaterAnalysisItem) {
-      this.waterAnalysisHasErrors = this.analysisValidationService.getErrorsByAnalysisId(this.latestWaterAnalysisItem.guid).hasError;
-    } else {
-      this.waterAnalysisHasErrors = false;
-    }
-  }
-
-  setSources() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
-    let sources: Array<MeterSource> = facilityMeters.map(meter => { return meter.source });
-    this.sources = _.uniq(sources);
   }
 
   openExportModal() {
@@ -173,6 +173,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   goToDataManagement() {
-    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid);
+    this.router.navigateByUrl('/data-management/' + this.facility().accountId + '/facilities/' + this.facility().guid);
   }
 }

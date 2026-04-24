@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { FacilityHomeService } from '../facility-home.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-facility-water-card',
@@ -15,77 +15,28 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
     standalone: false
 })
 export class FacilityWaterCardComponent {
-  monthlyWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyWaterAnalysisDataSub: Subscription;
-  annualWaterAnalysisSummary: Array<AnnualAnalysisSummary>;
-  annualWaterAnalysisSummarySub: Subscription;
-  calculatingWater: boolean | 'error';
-  calculatingWaterSub: Subscription;
-  calculatingOverview: boolean | 'error';
-  calculatingOverviewSub: Subscription;
+  private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
 
-  latestWaterAnalysisItem: IdbAnalysisItem;
-  facility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  carouselIndex: number = 0;
-  waterUnit: string;
-  facilityOverviewData: FacilityOverviewData;
-  facilityOverviewDataSub: Subscription;
-  constructor(private facilityHomeService: FacilityHomeService,
-    private facilityDbService: FacilitydbService,
-    private sharedDataService: SharedDataService) {
-  }
-
-  ngOnInit() {
-    this.carouselIndex = this.sharedDataService.waterHomeCarouselIndex.getValue();
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
-      this.facility = val;
-      this.waterUnit = this.facility.volumeLiquidUnit;
-    });
-
-    this.calculatingWaterSub = this.facilityHomeService.calculatingWater.subscribe(val => {
-      this.calculatingWater = val;
-    });
-    this.calculatingOverviewSub = this.facilityHomeService.calculatingOverview.subscribe(val => {
-      this.calculatingOverview = val;
-    });
-
-
-    this.monthlyWaterAnalysisDataSub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
-      this.monthlyWaterAnalysisData = val;
-    });
-
-    this.annualWaterAnalysisSummarySub = this.facilityHomeService.annualWaterAnalysisSummary.subscribe(val => {
-      this.annualWaterAnalysisSummary = val;
-    });
-
-    this.facilityOverviewDataSub = this.facilityHomeService.facilityOverviewData.subscribe(val => {
-      this.facilityOverviewData = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.calculatingWaterSub.unsubscribe();
-    this.monthlyWaterAnalysisDataSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-    this.annualWaterAnalysisSummarySub.unsubscribe();
-    this.facilityOverviewDataSub.unsubscribe();
-    this.calculatingOverviewSub.unsubscribe();
-  }
+  monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityWaterAnalysisData, { initialValue: undefined });
+  calculatingWater: Signal<boolean | 'error'> = toSignal(this.facilityHomeService.calculatingWater, { initialValue: true });
+  calculatingOverview: Signal<boolean | 'error'> = toSignal(this.facilityHomeService.calculatingOverview, { initialValue: true });
+  annualWaterAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.facilityHomeService.annualWaterAnalysisSummary, { initialValue: undefined });
+  latestWaterAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  carouselIndex: Signal<number> = toSignal(this.sharedDataService.waterHomeCarouselIndex, { initialValue: 0 });
+  facilityOverviewData: Signal<FacilityOverviewData> = toSignal(this.facilityHomeService.facilityOverviewData, { initialValue: undefined });
 
   goNext() {
-    this.carouselIndex++;
-    this.sharedDataService.waterHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.waterHomeCarouselIndex.next(this.carouselIndex() + 1);
   }
 
   goBack() {
-    this.carouselIndex--;
-    this.sharedDataService.waterHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.waterHomeCarouselIndex.next(this.carouselIndex() - 1);
   }
 
   goToIndex(index: number) {
-    this.carouselIndex = index;
-    this.sharedDataService.waterHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.waterHomeCarouselIndex.next(index);
   }
 }

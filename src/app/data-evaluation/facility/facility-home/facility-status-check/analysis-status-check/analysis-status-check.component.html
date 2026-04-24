@@ -1,0 +1,71 @@
+@if (analysisStatusCheck?.hasAnalysis) {
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
+            [attr.data-bs-target]="type === 'energy' ? '#energyAnalysisCollapse' : '#waterAnalysisCollapse'"
+            aria-expanded="false" [ngClass]="{
+                    'bg-warning': analysisStatusCheck.status === 'warning',
+                    'bg-danger': analysisStatusCheck.status === 'error'
+                }">
+            @if (type === 'energy') {
+            <span class="fa fa-bolt me-2"></span>
+            Energy Analysis
+            } @else {
+            <span class="fa fa-droplet me-2"></span>
+            Water Analysis
+            }
+            <span class="fa ms-2" [ngClass]="{
+                        'fa-circle-check text-success': analysisStatusCheck.status === 'good',
+                        'fa-exclamation-triangle': analysisStatusCheck.status === 'warning',
+                        'fa-circle-xmark': analysisStatusCheck.status === 'error'
+                    }"></span>
+        </button>
+    </h2>
+    <div [id]="type === 'energy' ? 'energyAnalysisCollapse' : 'waterAnalysisCollapse'"
+        class="accordion-collapse collapse">
+        <div class="accordion-body">
+            <div class="row">
+                @if(analysisStatusCheck.hasSetupErrors){
+                <div class="col-12">
+                    <div class="alert alert-danger mb-2">
+                        <span class="fa fa-exclamation-circle me-1"></span>
+                        There are setup errors for the selected analysis. Please visit the analysis to fix the errors
+                    </div>
+                </div>
+                }
+                <div class="col-12">
+                    <p class="mb-1">
+                        <strong>Latest Date With Complete Data:</strong>
+                        {{analysisStatusCheck.latestDataDate | date:'MMMM yyyy'}}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Latest Date Any Data Entered:</strong>
+                        {{analysisStatusCheck.latestDataAllEntries | date:'MMMM yyyy'}}
+                    </p>
+                    <p class="mb-2">
+                        <strong>All Data Current:</strong>
+                        {{analysisStatusCheck.allDatesCurrent ? 'Yes' : 'No'}}
+                    </p>
+                </div>
+                <div class="col-6">
+                    <p class="mb-1"><strong>Predictors Used:</strong></p>
+                    <ul class="mb-0">
+                        @for (predictorData of analysisStatusCheck.latestPredictorData; track predictorData.predictorId)
+                        {
+                        <li>{{predictorData.predictorName}} ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-6">
+                    <p class="mb-1"><strong>Meters Used:</strong></p>
+                    <ul class="mb-0">
+                        @for (meterData of analysisStatusCheck.latestMeterData; track meterData.meterId) {
+                        <li>{{meterData.meterName}} ({{meterData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}

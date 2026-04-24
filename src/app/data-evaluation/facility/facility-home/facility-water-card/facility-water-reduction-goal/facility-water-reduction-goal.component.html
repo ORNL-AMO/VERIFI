@@ -2,10 +2,10 @@
   <div class="col-2 text-center">
   </div>
   <div class="col-8 text-center label-font">
-    Water Reduction Goal @if (latestAnalysisDate) {
-    ({{latestAnalysisDate | date:
+    Water Reduction Goal @if (latestAnalysisDate()) {
+    ({{latestAnalysisDate() | date:
     'MMM. y'}})
-  }
+    }
 </div>
 <div class="col-2 text-center">
 </div>
@@ -13,30 +13,43 @@
 <div class="row">
   <div class="col-2 text-center">
     Baseline<br>
-    {{baselineYear | yearDisplay:facility.fiscalYear}}
+    {{baselineYear() | yearDisplay:facility().fiscalYear}}
   </div>
   <div class="col-8">
     <div class="d-flex flex-column">
       <div class="progress">
-        <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal" aria-valuemin="0"
-          aria-valuemax="percentGoal">
+        <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal()" aria-valuemin="0"
+          aria-valuemax="{{percentGoal()}}">
         </div>
       </div>
       <div class="w-100 text-center bold">
-        {{percentSavings | number:'1.0-0'}}%
+        {{percentSavings() | number:'1.0-0'}}%
       </div>
     </div>
   </div>
   <div class="col-2 text-center">
     Goal<br>
-    {{goalYear | yearDisplay:facility.fiscalYear}} ({{percentGoal}}%)
+    {{goalYear() | yearDisplay:facility().fiscalYear}} ({{percentGoal()}}%)
   </div>
 </div>
-@if (latestAnalysisItem) {
-  <div class="d-flex w-100 justify-content-center">
-    <a class="small click-link" (click)="goToAnalysisItem()">
-      <span class="fa fa-microscope"></span>
-      {{latestAnalysisItem.name}}
-    </a>
-  </div>
+@if (latestAnalysisItem()) {
+<div class="d-flex w-100 justify-content-center">
+  <a class="small click-link" (click)="goToAnalysisItem()">
+    <span class="fa fa-microscope"></span>
+    {{latestAnalysisItem().name}}
+  </a>
+</div>
 }
+<div class="row justify-content-center">
+  <div class="col-12">
+    @let _facilityStatusCheck = facilityStatusCheck();
+    @if(_facilityStatusCheck && !_facilityStatusCheck.waterAnalysisStatusCheck.allDatesCurrent){
+    <p class="fw-light italic mb-1 mt-1">
+      <span class="fa fa-asterisk"></span>Note: {{_facilityStatusCheck.waterAnalysisStatusCheck.latestDataAllEntries| date:'MMM. yyyy'}} is the month
+      with the most recent complete predictor and meter data. VERIFI detects data entered after this date for some but not
+      all of the necessary meters and predictors. For more details, please
+      check the Facility Status Check card above.
+    </p>
+    }
+  </div>
+</div>
