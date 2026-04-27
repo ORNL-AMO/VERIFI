@@ -1,7 +1,7 @@
 import { Component, inject, Signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -18,6 +18,7 @@ import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -26,33 +27,34 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
-  private facilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
-  private activatedRoute = inject(ActivatedRoute);
-  private facilityDbService = inject(FacilitydbService);
-  private router = inject(Router);
-  private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
-  private facilityEnergyUseGroupFormService = inject(FacilityEnergyUseGroupFormService);
-  private sharedDataService = inject(SharedDataService);
-  private loadingService = inject(LoadingService);
-  private accountDbService = inject(AccountdbService);
-  private dbChangesService = inject(DbChangesService);
-  private toastNotificationsService = inject(ToastNotificationsService);
-  private utilityMeterDataDbService = inject(UtilityMeterDatadbService);
+  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private router: Router = inject(Router);
+  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
+  private facilityEnergyUseGroupFormService: FacilityEnergyUseGroupFormService = inject(FacilityEnergyUseGroupFormService);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private routerGuardService: RouterGuardService = inject(RouterGuardService);
 
-  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
-  facilityEnergyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+  facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
 
   get hasSelectedEquipment(): boolean {
-    return this.facilityEnergyUseEquipment$().some(equip => equip.selected);
+    return this.facilityEnergyUseEquipment().some(equip => equip.selected);
   }
 
   get selectedEquipment(): Array<IdbFacilityEnergyUseEquipment> {
-    return this.facilityEnergyUseEquipment$().filter(equip => equip.selected);
+    return this.facilityEnergyUseEquipment().filter(equip => equip.selected);
   }
 
   get transferGroupOptions(): Array<IdbFacilityEnergyUseGroup> {
     let currentGroupId = this.energyUseGroup.guid;
-    return this.facilityEnergyUseGroups$().filter(group => group.guid !== currentGroupId);
+    return this.facilityEnergyUseGroups().filter(group => group.guid !== currentGroupId);
   }
 
 
@@ -126,8 +128,16 @@ export class FacilityEnergyUseGroupComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.form && this.form.dirty) {
-      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
-      return of(result);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
     }
     return of(true);
   }
@@ -166,7 +176,7 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   cancelBulkTransfer() {
-    let facilityEnergyUseEquipment = this.facilityEnergyUseEquipment$();
+    let facilityEnergyUseEquipment = this.facilityEnergyUseEquipment();
     for (let i = 0; i < facilityEnergyUseEquipment.length; i++) {
       facilityEnergyUseEquipment[i].selected = false;
     }
@@ -192,7 +202,7 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   cancelBulkDelete() {
-    let facilityEnergyUseEquipment = this.facilityEnergyUseEquipment$();
+    let facilityEnergyUseEquipment = this.facilityEnergyUseEquipment();
     for (let i = 0; i < facilityEnergyUseEquipment.length; i++) {
       facilityEnergyUseEquipment[i].selected = false;
     }
