@@ -43,6 +43,7 @@ export class FacilitySetupComponent {
 
   async facilityDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/facilities');
   }

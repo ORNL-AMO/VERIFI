@@ -109,6 +109,7 @@ export class FacilitiesListComponent {
     let facilityToDelete: IdbFacility = this.facilityToDelete;
     this.cancelFacilityDelete();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(facilityToDelete, selectedAccount);
   }
 

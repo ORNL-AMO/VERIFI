@@ -188,20 +188,21 @@ export class ImportBackupModalComponent implements OnInit {
       if (this.overwriteData === 'selective_import') {
         this.loadingService.setContext('import-selected-facility-backup');
         this.loadingService.setTitle("Importing selected facilities from backup file");
+        this.setSelectedFacilitiesMessages();
         this.loadingService.setCurrentLoadingIndex(0);
-        this.loadingService.addLoadingMessage("Deleting replaced facilities");
       }
       else {
         this.loadingService.setContext('import-account-backup');
         this.loadingService.setTitle("Importing account backup file");
-        this.loadingService.setCurrentLoadingIndex(0);
         this.loadingService.addLoadingMessage("Adding account");
+        this.backupDataService.accountBackupMessages();
+        this.loadingService.setCurrentLoadingIndex(0);
       }
     } else {
       this.loadingService.setContext('import-facility-backup');
       this.loadingService.setTitle("Importing facility backup file");
-      this.loadingService.setCurrentLoadingIndex(0);
-      this.loadingService.addLoadingMessage("Adding facility");
+      this.dbChangesService.deleteFacilityMessages();
+      this.backupDataService.facilityBackupMessages();
     }
     try {
       let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
@@ -258,8 +259,9 @@ export class ImportBackupModalComponent implements OnInit {
     this.deleteDataService.gatherAndDelete();
   }
 
-  async importNewFacility(backupFile: BackupFile) {
-    let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, 0);
+  async importNewFacility(backupFile: BackupFile, currIdx?: number) {
+    let idx = currIdx !== undefined ? currIdx : 0;
+    let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
     let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(currentAccount, false);
     this.dbChangesService.selectFacility(newFacility);
@@ -267,8 +269,8 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importExistingFacility(backupFile: BackupFile) {
     //delete selected facility and data
-    await this.dbChangesService.deleteFacility(this.overwriteFacility, this.selectedAccount);
-    await this.importNewFacility(backupFile)
+    let currIdx = await this.dbChangesService.deleteFacility(this.overwriteFacility, this.selectedAccount);
+    await this.importNewFacility(backupFile, currIdx);
   }
 
   clearSelectedFacilities() {
@@ -322,6 +324,15 @@ export class ImportBackupModalComponent implements OnInit {
     }
   }
 
+  setSelectedFacilitiesMessages() {
+    this.loadingService.addLoadingMessage("Deleting replaced facilities");
+    for (let facility of this.selectedFacilitiesToImport) {
+      const name = facility.name;
+      this.loadingService.addLoadingMessage("Adding facility: " + name);
+      this.backupDataService.facilityBackupMessages();
+    }
+  }
+
   async importSelectedFacilities(backupFile: BackupFile) {
     let idx = 1;
 
@@ -354,7 +365,7 @@ export class ImportBackupModalComponent implements OnInit {
 
       //import all selected facilities as new
       this.loadingService.setCurrentLoadingIndex(idx);
-      this.loadingService.addLoadingMessage("Adding facility: " + facilityBackupFile.facility.name);
+      //this.loadingService.addLoadingMessage("Adding facility: " + facilityBackupFile.facility.name);
       const { facility: newFacility, index } = await this.backupDataService.importFacilityBackupFile(facilityBackupFile, this.selectedAccount.guid, idx);
       idx = index + 1;
     }

@@ -16,21 +16,28 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 })
 export class AnnualAccountAnalysisComponent implements OnInit {
 
-  dataDisplay: 'table' | 'graph';
   accountAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   calculating: boolean | 'error';
   calculatingSub: Subscription;
   annualAnalysisSummarySub: Subscription;
+  analysisDisplay: 'table' | 'graph';
+  key: string;
+  accountSub: Subscription;
+
   constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
     private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
-    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
+
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.account = val;
+      this.key = 'annual-' + this.account?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
+    });
 
     this.annualAnalysisSummarySub = this.accountAnalysisService.annualAnalysisSummary.subscribe(val => {
       this.annualAnalysisSummary = val;
@@ -44,10 +51,11 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   ngOnDestroy() {
     this.calculatingSub.unsubscribe();
     this.annualAnalysisSummarySub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.dataDisplay = display;
-    this.analysisService.dataDisplay.next(this.dataDisplay);
+    this.analysisDisplay = display;
+    this.analysisService.getDisplaySubject(this.key, 'table').next(this.analysisDisplay);
   }
 }

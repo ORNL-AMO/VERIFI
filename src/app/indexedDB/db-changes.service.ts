@@ -430,7 +430,20 @@ export class DbChangesService {
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 
-  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount, showLoading: boolean = true) {
+  deleteFacilityMessages() {
+    this.loadingService.addLoadingMessage("Deleting Facility Predictors");
+    this.loadingService.addLoadingMessage("Deleting Facility Predictor Data");
+    this.loadingService.addLoadingMessage("Deleting Facility Meter Data");
+    this.loadingService.addLoadingMessage("Deleting Facility Meters");
+    this.loadingService.addLoadingMessage("Deleting Facility Meter Groups");
+    this.loadingService.addLoadingMessage("Deleting Facility Reports");
+    this.loadingService.addLoadingMessage("Updating Account Reports");
+    this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
+    this.loadingService.addLoadingMessage('Updating Account Analysis Items');
+    this.loadingService.addLoadingMessage("Deleting Facility");
+  }
+
+  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount, showLoading: boolean = true): Promise<number> {
     let currIdx = -1;
     if (showLoading) {
       this.loadingService.setContext('delete-facility');
@@ -440,33 +453,27 @@ export class DbChangesService {
     // Delete all info associated with facility
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Predictors");
     }
     await this.predictorsDbServiceDeprecated.deleteAllFacilityPredictors(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Predictor Data");
     }
     await this.predictorDbService.deleteAllFacilityPredictors(facility.guid);
     await this.predictorDataDbService.deleteAllFacilityPredictorData(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Meter Data");
     }
     await this.utilityMeterDataDbService.deleteAllFacilityMeterData(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Meters");
     }
     await this.utilityMeterDbService.deleteAllFacilityMeters(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Meter Groups");
     }
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Reports");
     }
     await this.facilityReportsDbService.deleteFacilityReports(facility.guid);
     if (showLoading) {
@@ -486,12 +493,10 @@ export class DbChangesService {
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
     }
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage('Updating Account Analysis Items');
     }
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
@@ -500,13 +505,13 @@ export class DbChangesService {
     }
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility");
     }
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
     await this.selectAccount(selectedAccount, false);
     if (showLoading) {
       this.loadingService.isLoadingComplete.next(true);
     }
+    return currIdx;
   }
 
   async updateDataNewFacility(newFacility: IdbFacility) {

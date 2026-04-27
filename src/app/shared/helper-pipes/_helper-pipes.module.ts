@@ -47,6 +47,7 @@ import { InvalidAnalysisPipe } from './validation-pipes/invalid-analysis.pipe';
 import { AnalysisItemPipe } from './analysis-item.pipe';
 import { InvalidAccountReportPipe } from './validation-pipes/invalid-account-report.pipe';
 import { InvalidFacilityReportPipe } from './validation-pipes/invalid-facility-report.pipe';
+import { AccountReportNamePipe } from './account-report-name-pipe';
 
 @NgModule({
   declarations: [
@@ -96,7 +97,8 @@ import { InvalidFacilityReportPipe } from './validation-pipes/invalid-facility-r
     InvalidAnalysisPipe,
     AnalysisItemPipe,
     InvalidAccountReportPipe,
-    InvalidFacilityReportPipe
+    InvalidFacilityReportPipe,
+    AccountReportNamePipe
   ],
   imports: [
     CommonModule
@@ -148,7 +150,8 @@ import { InvalidFacilityReportPipe } from './validation-pipes/invalid-facility-r
     InvalidAnalysisPipe,
     AnalysisItemPipe,
     InvalidAccountReportPipe,
-    InvalidFacilityReportPipe
+    InvalidFacilityReportPipe,
+    AccountReportNamePipe
   ]
 })
 export class HelperPipesModule { }

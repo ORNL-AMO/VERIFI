@@ -18,7 +18,8 @@ export interface IdbAccountAnalysisItem extends IdbEntry {
     baselineYear: number,
     facilityItemsInitialized?: boolean,
     hasBanking: boolean,
-    isAnalysisVisited: boolean
+    isAnalysisVisited: boolean,
+    checked?: boolean
 }
 
 export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory, account: IdbAccount, accountFacilities: Array<IdbFacility>): IdbAccountAnalysisItem {
@@ -50,6 +51,7 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         waterUnit: account.volumeLiquidUnit,
         analysisCategory: analysisCategory,
         hasBanking: false,
-        isAnalysisVisited: false
+        isAnalysisVisited: false,
+        checked: false
     }
 }

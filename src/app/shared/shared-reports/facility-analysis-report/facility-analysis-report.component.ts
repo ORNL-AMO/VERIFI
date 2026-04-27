@@ -19,6 +19,8 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { CalanderizationService } from '../../helper-services/calanderization.service';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-analysis-report',
@@ -52,7 +54,8 @@ export class FacilityAnalysisReportComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService
+    private accountDbService: AccountdbService,
+    private calanderizationService: CalanderizationService
   ) { }
 
   ngOnInit(): void {
@@ -65,6 +68,14 @@ export class FacilityAnalysisReportComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (this.analysisReportSettings.reportYear) {
       this.analysisItem.calculatedReportYear = this.analysisReportSettings.reportYear;
+    } else if (this.inQuickReport) {
+      let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
+      let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeterData.filter(meter => meter.meter.facilityId === this.analysisItem.facilityId);
+      let yearOptions: Array<number> = getYearsWithFullData(facilityCalanderizedMeters, this.facility);
+      if (yearOptions.length > 0) {
+        this.analysisItem.calculatedReportYear = Math.max(...yearOptions);
+        this.analysisReportSettings.reportYear = this.analysisItem.calculatedReportYear;
+      }
     }
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
