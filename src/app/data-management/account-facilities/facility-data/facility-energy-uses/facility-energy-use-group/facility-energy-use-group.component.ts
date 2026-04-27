@@ -19,6 +19,9 @@ import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } fr
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -40,6 +43,7 @@ export class FacilityEnergyUseGroupComponent {
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private routerGuardService: RouterGuardService = inject(RouterGuardService);
+  private calanderizationService: CalanderizationService = inject(CalanderizationService);
 
   facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
   facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
@@ -143,11 +147,12 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   async addEquipment() {
-    let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.energyUseGroup.facilityId);
-    let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, facilityMeterDataYears.endYear);
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let latestYear: number = getLatestYearWithData(calanderizedMeters, [facility]);
+    let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, latestYear);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);
   }
