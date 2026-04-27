@@ -3,7 +3,8 @@
         <tr class="table-mh">
             <th class="w-50">Source</th>
             <th>Equipment Use<br>
-                <span [innerHTML]="'(' + energyFootprintAnnualEquipmentGroupSummary.facility.energyUnit + '/yr)'"></span>
+                <span
+                    [innerHTML]="'(' + energyFootprintAnnualEquipmentGroupSummary.facility.energyUnit + '/yr)'"></span>
             </th>
         </tr>
     </thead>
@@ -20,7 +21,10 @@
             <td>
                 <span class="ps-4">
                     <a class="click-link" (click)="goToEquipment(equipmentEnergyUse.equipment)">
-                        <span class="fa fa-plug"></span>
+                        @let icons = (equipmentEnergyUse.equipment | equipmentSourceIcons);
+                        @for(icon of icons; track icon) {
+                        <span class="fa-solid" [class]="icon + ' me-1'"></span>
+                        }
                         {{equipmentEnergyUse.equipment.name}}
                     </a>
                 </span>

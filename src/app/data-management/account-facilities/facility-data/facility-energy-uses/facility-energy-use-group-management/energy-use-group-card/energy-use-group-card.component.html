@@ -32,7 +32,6 @@
         <div class="equipment-chips">
             @for(equipment of _groupEquipment; track equipment.guid) {
             <button class="equipment-chip" (click)="goToEquipment(equipment)" [title]="equipment.name">
-                <!-- <span class="fa fa-plug me-1"></span> -->
                 @let icons = (equipment | equipmentSourceIcons);
                 @for(icon of icons; track icon) {
                 <span class="fa-solid" [class]="icon + ' me-1'"></span>
@@ -49,13 +48,13 @@
     </div>
     <div class="group-card__footer">
         <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit group">
-            <i class="fa fa-pencil"></i> Edit
+            <i class="fa fa-pencil"></i>
         </button>
         <button class="btn btn-sm btn-outline" (click)="createCopy()" title="Copy group">
-            <i class="fa fa-copy"></i> Copy
+            <i class="fa fa-copy"></i>
         </button>
         <button class="btn btn-sm btn-danger" (click)="openDeleteModal()" title="Delete group">
-            <i class="fa fa-trash"></i> Delete
+            <i class="fa fa-trash"></i>
         </button>
     </div>
 </div>
