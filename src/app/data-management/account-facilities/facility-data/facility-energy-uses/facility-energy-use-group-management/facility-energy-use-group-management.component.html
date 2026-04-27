@@ -1,70 +1,38 @@
+@let _facility = facility();
+@let _facilityEnergyUseGroups = facilityEnergyUseGroups();
+
 <div class="data-management-content">
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
                 <h4>
-                    {{facility.name}} Energy Use Groups
+                    {{_facility.name}} Energy Use Groups
                 </h4>
-                @if(facilityEnergyUseGroups.length > 0){
-                <div class="d-flex w-100 justify-content-end mb-2">
-                    <app-table-items-dropdown></app-table-items-dropdown>
-                    <!-- <div class="ps-2">
-            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-        </div> -->
-                    <div class="ps-2">
-                        <button class="btn action-btn" (click)="addGroup()"><i class="fa fa-plus"></i> Add
-                            New Group</button>
+                @if(_facilityEnergyUseGroups.length > 0){
+                <!-- Toolbar -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <div class="group-count-badge">
+                        <span class="fa fa-layer-group me-1"></span>
+                        {{_facilityEnergyUseGroups.length}} Groups
                     </div>
-                    <div class="ps-2">
-                        <button class="btn action-btn" (click)="goToBulkSetup()"><i class="fa fa-edit"></i> Bulk
-                            Setup</button>
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <button class="btn action-btn" (click)="addGroup()">
+                            <i class="fa fa-plus"></i> Add Group
+                        </button>
+                        <button class="btn action-btn" (click)="goToBulkSetup()">
+                            <i class="fa fa-edit"></i> Bulk Setup
+                        </button>
                     </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
-                        <thead class="sortable">
-                            <tr>
-                                <th (click)="setOrderDataField('name')"
-                                    [ngClass]="{'active': orderDataField == 'name'}">Name</th>
-                                <th>Equipment/Systems</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-group-divider">
-                            @for(group of (facilityEnergyUseGroups | orderBy: orderDataField: orderByDirection | slice:
-                            ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage); track group.guid)
-                            {
-                            <tr>
-                                <td>
-                                    <a (click)="selectEditGroup(group)">{{group.name}}</a>
-                                </td>
 
-                                @let groupEquipment = (group.guid |
-                                facilityEnergyEquipmentList:facilityEnergyUseEquipment);
-                                <td>
-                                    @for (equipment of groupEquipment; track equipment.guid) {
-                                    <a class="click-link" (click)="goToEquipment(equipment)">{{equipment.name}}</a><br>
-                                    }
-                                </td>
-                                <td class="actions">
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline" (click)="selectEditGroup(group)"
-                                            title="Edit">
-                                            <i class="fa fa-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline" (click)="createCopy(group)" title="Copy">
-                                            <i class="fa fa-copy"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline" (click)="selectDeleteGroup(group)"
-                                            title="Delete">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
+                <!-- Group Cards -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+                    @for(group of _facilityEnergyUseGroups; track group.guid) {
+                    <div class="col">
+                        <app-energy-use-group-card [group]="group">
+                        </app-energy-use-group-card>
+                    </div>
+                    }
                 </div>
                 } @else {
                 <div class="text-center mt-5">
@@ -83,20 +51,3 @@
     </div>
 </div>
 
-
-<div [ngClass]="{'windowOverlay': groupToDelete}"></div>
-<div class="popup" [class.open]="groupToDelete">
-    <div class="popup-header">Delete Energy Use Group: {{groupToDelete?.name}}
-        <button class="item-right" (click)="cancelDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: By deleting this energy use group, you are also deleting all of the energy use group data and
-            equipment associated with
-            it.
-            Are you sure you want to preform this action?</p>
-    </div>
-    <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="deleteGroup()">Delete</button>
-    </div>
-</div>

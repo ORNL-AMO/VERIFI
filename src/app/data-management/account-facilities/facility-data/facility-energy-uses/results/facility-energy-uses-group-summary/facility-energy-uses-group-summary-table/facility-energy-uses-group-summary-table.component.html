@@ -28,7 +28,9 @@
         <tr>
             <td class="nowrap">
                 <a class="click-link" (click)="goToEquipment(groupData.equipmentGuid)">
-                    <span class="fa fa-plug"></span>
+                    @for(icon of groupData.icons; track icon) {
+                    <span class="fa-solid {{icon}} me-1'"></span>
+                    }
                     {{groupData.equipmentName}}
                 </a>
             </td>

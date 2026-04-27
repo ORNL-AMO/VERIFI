@@ -26,6 +26,9 @@
         <tr>
             <td>
                 <a class="click-link" (click)="goToGroup(groupData.groupId)">
+                    @for(icon of groupData.groupIcons; track icon) {
+                    <span class="fa-solid {{icon}} me-1'"></span>
+                    }
                     {{groupData.groupName}}
                 </a>
             </td>

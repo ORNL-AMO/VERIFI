@@ -319,7 +319,11 @@
               <a class="nav-link"
                 [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/equipment/'+energyUseEquipment.guid"
                 [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                <span class="fa fa-plug"></span> {{energyUseEquipment.name}}
+                @let icons = (energyUseEquipment | equipmentSourceIcons);
+                @for(icon of icons; track icon) {
+                <span class="fa-solid {{icon}} me-1'"></span>
+                }
+                {{energyUseEquipment.name}}
               </a>
             </div>
             }

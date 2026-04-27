@@ -3,12 +3,14 @@ import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facility
 import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
+import { getEnergyUseSourceIcons, EnergyUseIcons } from "src/app/shared/sharedHelperFunctions";
 
 export class EnergyUsesGroupSummary {
     groupName: string;
     groupId: string;
     groupEquipment: Array<IdbFacilityEnergyUseEquipment>;
     groupColor: string;
+    groupIcons: Array<EnergyUseIcons>;
     equipmentAnnualEnergyUse: Array<EqupmentAnnualEnergyUse> = [];
     totalAnnualEnergyUse: Array<{ year: number, energyUse: number, isPropegated: boolean, percentOfFacilityUse: number, equipmentNotInUse?: boolean }> = [];
 
@@ -25,12 +27,14 @@ export class EnergyUsesGroupSummary {
         this.setAnnualEnergyUse(years);
         this.setPercentOfTotalEnergyUse();
         this.orderResults();
+        this.setGroupIcons();
     }
 
     setEquipmentAnnualEnergyUse(facility: IdbFacility, years: Array<number>, useLatestDataAvailable: boolean = true) {
         let facilityUnits: string = facility.energyUnit;
         this.equipmentAnnualEnergyUse = new Array();
         this.groupEquipment.forEach(equip => {
+            let icons: Array<EnergyUseIcons> = getEnergyUseSourceIcons(equip);
             let equipmentEnergyUseData: Array<AnnualEnergyUse> = new Array();
             equip.utilityData.forEach(ud => {
                 ud.energyUse.forEach(eu => {
@@ -90,7 +94,7 @@ export class EnergyUsesGroupSummary {
                 let isNoLongerInUse: boolean = energyUseDataForYear.some(eu => eu.isNoLongerInUse == true);
                 annualEnergyUse.push({ year: year, energyUse: totalEnergyUseForYear, percentOfEquipmentGroupTotal: 0, isPropegated: isPropegated, isNoLongerInUse: isNoLongerInUse });
             });
-            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse, equipmentColor: equip.color });
+            this.equipmentAnnualEnergyUse.push({ equipmentGuid: equip.guid, equipmentName: equip.name, annualEnergyUse: annualEnergyUse, equipmentColor: equip.color, icons: icons });
         });
     }
 
@@ -221,12 +225,26 @@ export class EnergyUsesGroupSummary {
             });
         });
     }
+
+    setGroupIcons() {
+        let icons: Array<EnergyUseIcons> = new Array();
+        this.equipmentAnnualEnergyUse.forEach(equipData => {
+            equipData.icons.forEach(icon => {
+                if (!icons.includes(icon)) {
+                    icons.push(icon);
+                }
+            });
+        });
+        //alpha order
+        this.groupIcons = _.sortBy(icons);
+    }
 }
 
 export interface EqupmentAnnualEnergyUse {
     equipmentGuid: string,
     equipmentName: string,
     equipmentColor: string,
+    icons: Array<EnergyUseIcons>,
     annualEnergyUse: Array<AnnualEnergyUse>
 }
 

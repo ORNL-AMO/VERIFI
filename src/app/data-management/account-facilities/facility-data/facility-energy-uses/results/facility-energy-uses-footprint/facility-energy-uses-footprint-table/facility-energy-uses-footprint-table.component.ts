@@ -1,10 +1,6 @@
 import { Component, inject, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
-import { EnergyFootprintFacility } from 'src/app/calculations/energy-footprint/energyFootprintFacility';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 
 @Component({
