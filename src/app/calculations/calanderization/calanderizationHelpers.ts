@@ -159,7 +159,9 @@ export function convertMeterDataToSite(calanderizedMeterData: Array<Calanderized
                 monthData.energyUse = monthData.energyUse / cMeterCopy.meter.siteToSource;
                 return monthData;
             });
+            cMeterCopy.energyIsSource = false;
         }
+
         if (cMeterCopy.energyUnit != neededUnits) {
             cMeterCopy.monthlyData.forEach(monthData => {
                 monthData.energyUse = new ConvertValue(monthData.energyUse, cMeterCopy.energyUnit, neededUnits).convertedValue;
