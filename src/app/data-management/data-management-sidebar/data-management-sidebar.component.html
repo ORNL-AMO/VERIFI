@@ -321,7 +321,7 @@
                 [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                 @let icons = (energyUseEquipment | equipmentSourceIcons);
                 @for(icon of icons; track icon) {
-                <span class="fa-solid" [class]="icon + ' me-1'"></span>
+                <span class="fa-solid {{icon}} me-1'"></span>
                 }
                 {{energyUseEquipment.name}}
               </a>

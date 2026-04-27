@@ -15,6 +15,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { getGUID } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
     selector: 'app-energy-use-group-card',
@@ -86,7 +87,7 @@ export class EnergyUseGroupCardComponent {
     async createCopy() {
         let copyGroup: IdbFacilityEnergyUseGroup = JSON.parse(JSON.stringify(this.group));
         delete copyGroup.id;
-        copyGroup.guid = Math.random().toString(36).substr(2, 9);
+        copyGroup.guid = getGUID();
         copyGroup.name = copyGroup.name + ' (copy)';
         copyGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(copyGroup));
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();

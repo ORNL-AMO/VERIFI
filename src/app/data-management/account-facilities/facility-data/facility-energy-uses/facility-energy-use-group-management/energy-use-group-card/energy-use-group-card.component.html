@@ -34,7 +34,7 @@
             <button class="equipment-chip" (click)="goToEquipment(equipment)" [title]="equipment.name">
                 @let icons = (equipment | equipmentSourceIcons);
                 @for(icon of icons; track icon) {
-                <span class="fa-solid" [class]="icon + ' me-1'"></span>
+                <span class="fa-solid {{icon}} me-1'"></span>
                 }
                 {{equipment.name}}
             </button>
@@ -68,7 +68,7 @@
         <p>WARNING: By deleting this energy use group, you are also deleting all of the energy use group data and
             equipment associated with
             it.
-            Are you sure you want to preform this action?</p>
+            Are you sure you want to perform this action?</p>
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
