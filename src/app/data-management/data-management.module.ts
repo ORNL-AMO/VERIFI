@@ -59,6 +59,7 @@ import { MeterChargesCorrelationPlotComponent } from './account-facilities/facil
 import { MeterChargesCorrelationsComponent } from './account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlations.component';
 import { UpdateWeatherPredictorsModalComponent } from './data-management-home/update-weather-predictors-modal/update-weather-predictors-modal.component';
 import { FacilityEnergyUseGroupManagementComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component';
+import { EnergyUseGroupCardComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/energy-use-group-card/energy-use-group-card.component';
 import { FacilityEnergyUseGroupComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component';
 import { FacilityEnergyUseEquipmentComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component';
 import { FacilityEnergyUsesComponent } from './account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component';
@@ -153,6 +154,7 @@ import { FacilityEnergyUsesGroupSankeyComponent } from './account-facilities/fac
     UpdateWeatherPredictorsModalComponent,
     FacilityEnergyUseGroupComponent,
     FacilityEnergyUseGroupManagementComponent,
+    EnergyUseGroupCardComponent,
     FacilityEnergyUseEquipmentComponent,
     UtilityTypeOptionsPipe,
     SizeLabelPipe,

@@ -1,12 +1,28 @@
 
-.fa-trash{
+/* Group count badge */
+.group-count-badge {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #2c386b;
+    background: #e8ecf7;
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+/* Sort button */
+.sort-btn {
+    font-size: 0.78rem;
+}
+.sort-btn.active {
+    background-color: #2980b9 !important;
+    color: #fff !important;
+    border-color: #2980b9 !important;
+}
+
+.fa-trash {
     color: inherit;
 }
 
-.fa-save{
+.fa-save {
     color: inherit;
 }
-
-a.click-link.fa-plus{
-    color: #007bff !important
-} 
