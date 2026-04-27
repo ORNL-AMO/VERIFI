@@ -13,7 +13,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class AnalysisService {
 
   selectedGroup: BehaviorSubject<AnalysisGroup>;
-  dataDisplay: BehaviorSubject<"graph" | "table">;
+  analysisDisplay: { [key: string]: BehaviorSubject<"graph" | "table"> };
 
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   calculating: BehaviorSubject<boolean | 'error'>;
@@ -28,12 +28,8 @@ export class AnalysisService {
   }>>;
 
   constructor(private localStorageService: LocalStorageService) {
-    let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
-    if (!dataDisplay) {
-      dataDisplay = "table";
-    }
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
-    this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
+    this.analysisDisplay = {};
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
@@ -69,13 +65,6 @@ export class AnalysisService {
     }
     this.analysisTableColumns = new BehaviorSubject<AnalysisTableColumns>(analysisTableColumns);
 
-
-    this.dataDisplay.subscribe(dataDisplay => {
-      if (dataDisplay) {
-        this.localStorageService.store('analysisDataDisplay', dataDisplay);
-      }
-    });
-
     this.analysisTableColumns.subscribe(analysisTableColumns => {
       if (analysisTableColumns) {
         this.localStorageService.store('analysisTableColumns', analysisTableColumns);
@@ -87,6 +76,13 @@ export class AnalysisService {
       monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
       annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
     }>>(undefined);
+  }
+
+  getDisplaySubject(key: string, defaultValue: "graph" | "table"): BehaviorSubject<"graph" | "table"> {
+    if (!this.analysisDisplay[key]) {
+      this.analysisDisplay[key] = new BehaviorSubject<"graph" | "table">(defaultValue);
+    }
+    return this.analysisDisplay[key];
   }
 
   // setDataAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {

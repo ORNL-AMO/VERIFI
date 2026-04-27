@@ -38,6 +38,7 @@ export class ManageMeterGroupingComponent {
 
   ungroupedMeters: Array<IdbUtilityMeter>;
   groupToDelete: IdbUtilityMeterGroup;
+  ungroupedMeterGroup: IdbUtilityMeterGroup;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
@@ -61,6 +62,8 @@ export class ManageMeterGroupingComponent {
     });
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
+      this.ungroupedMeterGroup = getNewIdbUtilityMeterGroup('Other', "Ungrouped Meters", facility.guid, facility.accountId);
+      this.ungroupedMeterGroup.guid = undefined;
     });
     this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(facilityMeterGroups => {
       this.otherGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Other' });

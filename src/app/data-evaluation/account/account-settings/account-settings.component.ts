@@ -116,6 +116,7 @@ export class AccountSettingsComponent implements OnInit {
 
 
   async facilityDelete() {
+    this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(this.facilityToDelete, this.selectedAccount);
   }
 

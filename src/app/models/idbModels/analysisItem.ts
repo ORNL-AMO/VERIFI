@@ -21,7 +21,8 @@ export interface IdbAnalysisItem extends IdbEntry {
     hasBanking: boolean,
     bankedAnalysisItemId: string,
     isAnalysisVisited?: boolean,
-    dataCheckedDate?: Date
+    dataCheckedDate?: Date,
+    checked?: boolean
 }
 
 export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility, accountMeterGroups: Array<IdbUtilityMeterGroup>, accountPredictors: Array<IdbPredictor>, analysisCategory: AnalysisCategory): IdbAnalysisItem {
@@ -79,7 +80,8 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       hasBanking: false,
       bankedAnalysisItemId: undefined,
       isAnalysisVisited: false,
-      dataCheckedDate: undefined
+      dataCheckedDate: undefined,
+      checked: false
     };
     return analysisItem;
 }

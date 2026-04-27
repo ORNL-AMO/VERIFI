@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -43,6 +44,11 @@ export class AccountAnalysisDetailsTableComponent {
   orderByDirection: 'asc' | 'desc' = 'desc';
 
   selectedAccountSub: Subscription;
+  showDeleteColumn: boolean = false;
+  allChecked: boolean = false;
+  showBulkDelete: boolean = false;
+  displayLinkedItemModal: boolean = false;
+  viewLinkedItem: string;
 
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -52,7 +58,8 @@ export class AccountAnalysisDetailsTableComponent {
     private router: Router,
     private accountReportDbService: AccountReportDbService,
     private sharedDataService: SharedDataService,
-    private calanderizationService: CalanderizationService
+    private calanderizationService: CalanderizationService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit(): void {
@@ -157,29 +164,117 @@ export class AccountAnalysisDetailsTableComponent {
     this.displayDeleteModal = false;
   }
 
-  async confirmDelete() {
-    await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(this.itemToDelete.id));
+  async confirmDelete(item?: IdbAccountAnalysisItem, isBulkDelete: boolean = false) {
+    const deletedItem = item ? item : this.itemToDelete;
+    await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(deletedItem.id));
     let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
     let updateReportOptions: boolean = false;
     for (let i = 0; i < accountReports.length; i++) {
-      if (accountReports[i].betterPlantsReportSetup.analysisItemId == this.itemToDelete.guid) {
+      if (accountReports[i].betterPlantsReportSetup.analysisItemId == deletedItem.guid) {
         accountReports[i].betterPlantsReportSetup.analysisItemId = undefined;
         await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
         updateReportOptions = true;
       }
     }
-    if (this.itemToDelete.guid == this.selectedAccount.selectedEnergyAnalysisId) {
+    if (deletedItem.guid == this.selectedAccount.selectedEnergyAnalysisId) {
       this.selectedAccount.selectedEnergyAnalysisId = undefined;
       await this.dbChangesService.updateAccount(this.selectedAccount);
-    } else if (this.itemToDelete.guid == this.selectedAccount.selectedWaterAnalysisId) {
+    } else if (deletedItem.guid == this.selectedAccount.selectedWaterAnalysisId) {
       this.selectedAccount.selectedWaterAnalysisId = undefined;
       await this.dbChangesService.updateAccount(this.selectedAccount);
     }
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
-    this.displayDeleteModal = false;
-    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
+    if (!isBulkDelete) {
+      this.displayDeleteModal = false;
+      this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
+    }
     this.analysisItemsList = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.filteredAnalysisItems = this.analysisItemsList;
     this.selectedAnalysisCategory = 'all';
+  }
+
+  bulkDeleteClicked() {
+    this.showDeleteColumn = true;
+  }
+
+  get anyChecked(): boolean {
+    return this.filteredAnalysisItems.some(item => item.checked);
+  }
+
+  checkAll() {
+    this.filteredAnalysisItems.forEach(item => {
+      item.checked = this.allChecked;
+    });
+  }
+
+  toggleChecked() {
+    this.allChecked = this.filteredAnalysisItems.every(item => item.checked);
+  }
+
+  openModal() {
+    this.showBulkDelete = true;
+  }
+
+  cancelBulkDelete() {
+    this.showBulkDelete = false;
+  }
+
+  async bulkDelete() {
+    this.cancelBulkDelete();
+    this.loadingService.setLoadingMessage("Deleting Analysis Items...");
+    this.loadingService.setLoadingStatus(true);
+    let itemsToDelete: Array<IdbAccountAnalysisItem> = new Array();
+    this.filteredAnalysisItems.forEach(item => {
+      if (item.checked) {
+        itemsToDelete.push(item);
+      }
+    });
+
+    for (let index = 0; index < itemsToDelete.length; index++) {
+      await this.confirmDelete(itemsToDelete[index], true);
+    }
+
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast("Analysis Items Deleted!", undefined, undefined, false, "alert-success");
+    this.showDeleteColumn = false;
+  }
+
+  get selectedItemsForBulkDelete() {
+    return this.filteredAnalysisItems.filter(item => item.checked);
+  }
+
+  getLinkedReportItems(item: IdbAccountAnalysisItem) {
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    let linkedReports: Array<IdbAccountReport> = new Array();
+    accountReports.forEach(report => {
+      if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId && report.betterPlantsReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+      else if (report.reportType == 'performance' && report.performanceReportSetup.analysisItemId && report.performanceReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+      else if (report.reportType == 'accountSavings' && report.accountSavingsReportSetup.analysisItemId && report.accountSavingsReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+      else if (report.reportType == 'analysis' && report.analysisReportSetup.analysisItemId && report.analysisReportSetup.analysisItemId == item.guid) {
+        linkedReports.push(report);
+      }
+    });
+    return linkedReports;
+  }
+
+  openLinkedItemModal(itemGuid: string) {
+    this.displayLinkedItemModal = true;
+    this.viewLinkedItem = itemGuid;
+  }
+
+  cancelViewLinkedItem() {
+    this.displayLinkedItemModal = false;
+  }
+
+  confirmViewLinkedItem(itemGuid: string) {
+    let report: IdbAccountReport = this.accountReportDbService.getByGuid(itemGuid);
+    this.accountReportDbService.selectedReport.next(report);
+    this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
 }
