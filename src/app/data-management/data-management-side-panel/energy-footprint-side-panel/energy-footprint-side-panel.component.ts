@@ -48,7 +48,7 @@ export class EnergyFootprintSidePanelComponent {
   //TODO: potentially make a web worker for this or optimize number of calls 
   //so as data changes it doesn't have to recalculate everything if not necessary. 
   //TODO: add loading logic during calculation
-  energyFootprintAnnualFacilityBalance$: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
+  energyFootprintAnnualFacilityBalance: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
     const facilities = this.facilities();
     const energyUseGroups = this.energyUseGroups();
     const equipment = this.equipment();
@@ -89,8 +89,15 @@ export class EnergyFootprintSidePanelComponent {
     // Automatically set selectedYear to the last year in yearOptions when yearOptions changes
     effect(() => {
       const options = this.yearOptions();
+      //if new year of data becomes available, automatically switch to it, 
+      //otherwise keep selected year the same (as long as it's still in options)
       if (options.length > 0 && !options.includes(this.selectedYear()!)) {
         this.selectedYear.set(options[options.length - 1]);
+      } else if (options.length > 0 && options.includes(this.selectedYear())) {
+        let maxOption: number = Math.max(...options);
+        if (this.selectedYear() < maxOption) {
+          this.selectedYear.set(maxOption);
+        }
       }
     });
     // Automatically set selectedFacilityId to the first facility when facilities change
@@ -110,6 +117,46 @@ export class EnergyFootprintSidePanelComponent {
         }
       }
     });
+  }
+
+  overallAccountedPercent: Signal<number> = computed(() => {
+    const balance = this.energyFootprintAnnualFacilityBalance();
+    if (!balance || !balance.sourcesConsumption?.length) return 0;
+    const totalActual = balance.sourcesConsumption.reduce((sum, s) => sum + s.actualEnergyUse, 0);
+    const totalEquipment = balance.sourcesConsumption.reduce((sum, s) => sum + s.totalEquipmentEnergyUse, 0);
+    return totalActual > 0 ? Math.min(100, (totalEquipment / totalActual) * 100) : 0;
+  });
+
+  overallIsOverAccounted: Signal<boolean> = computed(() => {
+    const balance = this.energyFootprintAnnualFacilityBalance();
+    if (!balance || !balance.sourcesConsumption?.length) return false;
+    return balance.sourcesConsumption.some(s => s.actualEnergyUse > 0 && s.totalEquipmentEnergyUse > s.actualEnergyUse);
+  });
+
+  getAccountedPercent(actual: number, equipment: number): number {
+    return actual > 0 ? Math.min(100, (equipment / actual) * 100) : 0;
+  }
+
+  isOverAccounted(actual: number, equipment: number): boolean {
+    return actual > 0 && equipment > actual;
+  }
+
+  getRawPercent(actual: number, equipment: number): number {
+    return actual > 0 ? Math.round((equipment / actual) * 100) : 0;
+  }
+
+  getProgressClass(percent: number, isOver: boolean = false): string {
+    if (isOver) return 'bg-over';
+    if (percent >= 70) return 'bg-success';
+    if (percent >= 50) return 'bg-warning';
+    return 'bg-danger';
+  }
+
+  getStatusLabel(percent: number, isOver: boolean = false): string {
+    if (isOver) return 'Over 100%';
+    if (percent >= 70) return 'Good';
+    if (percent >= 50) return 'Fair';
+    return 'Low';
   }
 
   goToFacilityFootprint() {
