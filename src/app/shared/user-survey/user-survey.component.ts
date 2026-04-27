@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -13,8 +13,6 @@ import { SurveyService } from 'src/app/shared/helper-services/survey.service';
   standalone: false
 })
 export class UserSurveyComponent {
-  @Input()
-  inModal: boolean;
 
   userSurvey: UserSurvey;
   completedStatus: "success" | "error" | 'sending';
@@ -33,10 +31,8 @@ export class UserSurveyComponent {
       this.completedStatus = status;
       if (this.completedStatus === 'success') {
         this.setSurveyDone();
-        this.surveyService.showSurveyModal.next(false);
       }
     });
-
   }
 
   ngOnDestroy() {
@@ -108,17 +104,6 @@ export class UserSurveyComponent {
   }
 
   navigateToPrivacyNotice() {
-    this.surveyService.showSurveyModal.next(false);
     this.router.navigate(['/privacy']);
-  }
-
-  async setRemindAndClose() {
-    await firstValueFrom(this.applicationInstanceDbService.setSurveyDone(false));
-    this.surveyService.showSurveyModal.next(false);
-  }
-
-  async close() {
-    await this.setSurveyDone();
-    this.surveyService.showSurveyModal.next(false);
   }
 }

@@ -15,15 +15,11 @@ import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationIns
 })
 export class SurveyService {
   completedStatus: BehaviorSubject<'sending' | 'success' | 'error'>;
-  showSurveyModal: BehaviorSubject<boolean>;
-  showSurveyToast: BehaviorSubject<boolean>;
   userSurvey: BehaviorSubject<UserSurvey>;
 
   constructor(private httpClient: HttpClient,
     private accountDbService: AccountdbService
   ) {
-    this.showSurveyModal = new BehaviorSubject<boolean>(false);
-    this.showSurveyToast = new BehaviorSubject<boolean>(false);
     this.completedStatus = new BehaviorSubject<'sending' | 'success' | 'error'>(undefined);
     this.userSurvey = new BehaviorSubject<UserSurvey>(undefined);
   }

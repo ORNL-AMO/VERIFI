@@ -24,8 +24,6 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
-import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
-import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
 import { DataManagementModule } from './data-management/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
@@ -46,8 +44,6 @@ import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-mo
         ManageAccountsComponent,
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
-        SurveyModalComponent,
-        SurveyToastComponent,
         HomePageComponent,
         SharedRouterGuardModalComponent
     ],
