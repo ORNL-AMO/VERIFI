@@ -23,12 +23,18 @@ export class EmailListSubscribeComponent {
   }
 
   checkValid() {
-    this.invalidEmailMessage = this.emailSubscribeService.checkEmailValid(this.subscriberEmail);
+    const email = this.subscriberEmail?.trim();
+    this.invalidEmailMessage = this.emailSubscribeService.checkEmailValid(email);
   }
 
   submitSubscriber() {
-    if (!this.invalidEmailMessage) {
-      this.emailSubscribeService.submitSubscriberEmail(this.subscriberEmail).subscribe();
+    const email = this.subscriberEmail?.trim();
+    this.invalidEmailMessage = this.emailSubscribeService.checkEmailValid(email);
+
+    if (!email || this.invalidEmailMessage) {
+      return;
     }
+
+    this.emailSubscribeService.submitSubscriberEmail(email).subscribe();
   }
 }
