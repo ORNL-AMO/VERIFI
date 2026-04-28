@@ -20,7 +20,7 @@
         <div class="accordion-body p-0">
             <ul class="list-group list-group-flush">
                 @for (predictorCheck of predictorsStatusChecks; track predictorCheck.predictorId) {
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <li class="list-group-item d-flex justify-content-between align-items-center" (click)="goToPredictor(predictorCheck.predictorId)">
                     <div>
                         <strong>{{predictorCheck.predictorName}}</strong>
                         @if (predictorCheck.latestEntryDate) {
@@ -30,7 +30,7 @@
                         <span class="badge bg-danger ms-2">Duplicate Entries</span>
                         }
                         @if (predictorCheck.hasMissingEntries) {
-                        <span class="badge bg-warning text-dark ms-2">Missing Entries</span>
+                        <span class="badge bg-danger text-dark ms-2">Missing Entries</span>
                         }
                     </div>
                     <span class="fa" [ngClass]="{

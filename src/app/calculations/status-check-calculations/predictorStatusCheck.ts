@@ -10,15 +10,15 @@ export class PredictorStatusCheck {
     predictorName: string;
     hasDuplicateEntries: boolean;
     hasMissingEntries: boolean;
+    missingEntryMonths: Array<{ month: number, year: number }>;
     latestEntryDate: Date;
-    // isPredictorValid: boolean;
 
     constructor(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
-        //TODO: flesh out predictor status check logic and messages
+        console.log('Running status check for predictor: ' + predictor.name);
         this.predictorId = predictor.guid;
         this.predictorName = predictor.name;
+        this.missingEntryMonths = [];
         let predictorReadings: Array<IdbPredictorData> = predictorData.filter(data => data.predictorId === predictor.guid);
-        // this.isPredictorValid = isPredictorInvalid(predictor);
         this.checkEntries(predictorReadings);
         this.setStatus();
     }
@@ -42,29 +42,23 @@ export class PredictorStatusCheck {
         let lastEntry = _.maxBy(predictorData, (data: IdbPredictorData) => new Date(data.year, data.month - 1));
         this.latestEntryDate = new Date(lastEntry.year, lastEntry.month - 1);
         let monthYearSet: Set<string> = new Set(Object.keys(monthYearCounts));
-        let hasMissing = false;
+        this.missingEntryMonths = [];
         for (let year = firstEntry.year; year <= lastEntry.year; year++) {
             let startMonth = year === firstEntry.year ? firstEntry.month : 1;
             let endMonth = year === lastEntry.year ? lastEntry.month : 12;
             for (let month = startMonth; month <= endMonth; month++) {
                 let key: string = `${month}-${year}`;
                 if (!monthYearSet.has(key)) {
-                    hasMissing = true;
-                    break;
+                    this.missingEntryMonths.push({ month, year });
                 }
             }
-            if (hasMissing) {
-                break;
-            }
         }
-        this.hasMissingEntries = hasMissing;
+        this.hasMissingEntries = this.missingEntryMonths.length > 0;
     }
 
     private setStatus() {
-        if (this.hasDuplicateEntries) {
+        if (this.hasDuplicateEntries || this.hasMissingEntries) {
             this.status = 'error';
-        } else if (this.hasMissingEntries) {
-            this.status = 'warning';
         } else {
             this.status = 'good';
         }

@@ -3,7 +3,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getPredictorStatistics, PredictorStatistics } from '../predictorDataQualityStatistics';
 import { Router } from '@angular/router';
-import { getDateFromPredictorData } from '../../dateHelperFunctions';
+import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
 
 @Component({
   selector: 'app-predictor-data-quality-report',
@@ -17,11 +17,10 @@ export class PredictorDataQualityReportComponent {
   @Input({ required: true })
   predictorData: Array<IdbPredictorData>;
 
-  stats: PredictorStatistics
-  outlierCount: number;
-
+  stats: PredictorStatistics;
   hasData: boolean;
-  datesList: Array<{ monthYear: string }> = [];
+  duplicateDatesList: Array<{ monthYear: string }> = [];
+  missingMonthsList: Array<{ monthYear: string }> = [];
   showAlert: boolean = false;
 
   constructor(private router: Router) { }
@@ -29,35 +28,36 @@ export class PredictorDataQualityReportComponent {
   ngOnChanges() {
     this.hasData = this.predictorData && this.predictorData.length > 0;
     if (this.hasData) {
-      const data = this.predictorData?.map(d => d.amount);
+      const data = this.predictorData.map(d => d.amount);
       this.stats = getPredictorStatistics(data);
-      this.outlierCount = this.stats.outliers;
-      this.checkMultipleReadings();
-      if (this.outlierCount > 0 || this.datesList.length > 0) {
-        this.showAlert = true;
-      } else {
-        this.showAlert = false;
-      }
+      const statusCheck = new PredictorStatusCheck(this.selectedPredictor, this.predictorData);
+      this.buildDuplicatesList(statusCheck);
+      this.buildMissingList(statusCheck);
+      this.showAlert = this.duplicateDatesList.length > 0 || this.missingMonthsList.length > 0;
     }
   }
 
-  checkMultipleReadings() {
+  private buildDuplicatesList(statusCheck: PredictorStatusCheck) {
+    if (!statusCheck.hasDuplicateEntries) {
+      this.duplicateDatesList = [];
+      return;
+    }
     let dateCount: { [key: string]: number } = {};
     this.predictorData.forEach(data => {
-      let date = getDateFromPredictorData(data);
-      let month = date.toLocaleString('default', { month: 'short' });
-      let year = date.getFullYear();
-      let monthYear = `${month}, ${year}`;
-      if (dateCount[monthYear]) {
-        dateCount[monthYear]++;
-      } else {
-        dateCount[monthYear] = 1;
-      }
+      let monthYear = new Date(data.year, data.month - 1)
+        .toLocaleString('default', { month: 'short', year: 'numeric' });
+      dateCount[monthYear] = (dateCount[monthYear] ?? 0) + 1;
     });
-    this.datesList = Object.keys(dateCount).filter(key => dateCount[key] > 1)
-      .map(key => {
-        return { monthYear: key };
-      });
+    this.duplicateDatesList = Object.keys(dateCount)
+      .filter(key => dateCount[key] > 1)
+      .map(key => ({ monthYear: key }));
+  }
+
+  private buildMissingList(statusCheck: PredictorStatusCheck) {
+    this.missingMonthsList = statusCheck.missingEntryMonths.map(({ month, year }) => {
+      const label = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+      return { monthYear: label };
+    });
   }
 
   predictorDataAdd() {
