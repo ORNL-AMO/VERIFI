@@ -29,7 +29,7 @@ import { DataManagementModule } from './data-management/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
 import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-modal/shared-router-guard-modal.component';
-import { EmailListSubscribeModule } from "src/app/shared/email-list-subscribe/email-list-subscribe.module";
+import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-list-subscribe.module";
 
 @NgModule({
     declarations: [

@@ -8,7 +8,6 @@ import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
 import { getMinutesBetweenDates } from '../sharedHelperFunctions';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationInstanceData';
 
 @Injectable({
   providedIn: 'root'
@@ -22,14 +21,6 @@ export class SurveyService {
   ) {
     this.completedStatus = new BehaviorSubject<'sending' | 'success' | 'error'>(undefined);
     this.userSurvey = new BehaviorSubject<UserSurvey>(undefined);
-  }
-
-  getHasMetUsageRequirements(applicationData: ApplicationInstanceData) {
-    let firstAppInitDate = new Date(applicationData.createdDate);
-    let currentDate = new Date();
-    let minutesBetween: number = getMinutesBetweenDates(firstAppInitDate, currentDate);
-    let dateDifference: number = new ConvertValue(minutesBetween, 'min', 'd').convertedValue;
-    return dateDifference >= 30 || applicationData.appOpenCount >= 10;
   }
 
   /**

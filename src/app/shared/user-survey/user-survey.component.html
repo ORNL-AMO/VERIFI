@@ -1,8 +1,3 @@
-@if (completedStatus === 'error') {
-<div class="alert alert-danger small mx-2 px-3 py-2">
-  <span>An error has occured. Please verify your network connection and try again.</span>
-</div>
-}
 @if (completedStatus !== 'success' && completedStatus !== 'sending') {
 <p class="fw-light mb-0">
   The VERIFI team is committed to continuously improving and delivering a high-quality tool for our users.
@@ -146,7 +141,7 @@
 
 @if (completedStatus === 'error') {
 <div class="alert-danger small mx-2 px-3 py-2">
-  <span>An error has occured. Please verify your network connection and try again.</span>
+  <span>An error has occurred. Please verify your network connection and try again.</span>
 </div>
 }
 

@@ -12,9 +12,6 @@ import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationIns
 })
 export class EmailListSubscribeService {
   submittedStatus: BehaviorSubject<'error' | 'success' | 'sending'> = undefined;
-  showModal: BehaviorSubject<boolean> = undefined;
-  shouldShowToast: BehaviorSubject<boolean> = undefined;
-  isSubscribed: BehaviorSubject<boolean> = undefined;
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
@@ -25,20 +22,8 @@ export class EmailListSubscribeService {
   API_URL = environment.measurUtilitiesApi + 'verifi-email-subscriber';
   constructor(private httpClient: HttpClient,
     private analyticsService: AnalyticsService,
-    // private appErrorService: AppErrorService,
     private applicationInstanceDbService: ApplicationInstanceDbService) {
     this.submittedStatus = new BehaviorSubject<'error' | 'success' | 'sending'>(undefined);
-    this.shouldShowToast = new BehaviorSubject<boolean>(false);
-    this.isSubscribed = new BehaviorSubject<boolean>(false);
-    this.showModal = new BehaviorSubject<boolean>(false);
-  }
-
-  async setEmailSubscribeVisibility(applicationData: ApplicationInstanceData) {
-    const isEmailSubscriber: boolean = await this.checkSubscriberExists(applicationData);
-    const hasMetUsageRequirement: boolean = this.getHasMetUsageRequirements(applicationData);
-    const shouldShowToast = hasMetUsageRequirement && !isEmailSubscriber && environment.production;
-    this.isSubscribed.next(isEmailSubscriber);
-    this.shouldShowToast.next(shouldShowToast);
   }
 
   submitSubscriberEmail(email: string): Observable<void> {
@@ -99,18 +84,9 @@ export class EmailListSubscribeService {
     }
   }
 
-  getHasMetUsageRequirements(applicationData: ApplicationInstanceData): boolean {
-    if (environment.production) {
-      return applicationData.appOpenCount === 0 || applicationData.appOpenCount == 15;
-    } else {
-      return applicationData.appOpenCount === 0 || applicationData.appOpenCount == 2;
-    }
-  }
-
   setStatus(status: number, error?: any) {
     if (status == 201 || status == 200) {
       this.submittedStatus.next('success');
-      this.isSubscribed.next(true);
     } else if (error && error.status === 400) {
       console.log('Bad Request', error);
       this.submittedStatus.next('error');
