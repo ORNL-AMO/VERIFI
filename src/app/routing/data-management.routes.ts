@@ -285,7 +285,8 @@ export const DataManagementRoutes: Route = {
                                 },
                                 {
                                     path: 'new-setup',
-                                    component: FacilityEnergyUsesGroupSetupComponent
+                                    component: FacilityEnergyUsesGroupSetupComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'modify-annual-data/:year',
