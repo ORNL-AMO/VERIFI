@@ -1,6 +1,5 @@
 import { Component, inject, Signal } from '@angular/core';
 import { RouterGuardService } from './router-guard-service';
-import { Subscription } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 

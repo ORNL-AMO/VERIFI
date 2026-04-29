@@ -71,7 +71,7 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
           let equipmentForGroupCopy: Array<IdbFacilityEnergyUseEquipment> = equipmentForGroup.map(equip => { return _.cloneDeep(equip); });
           //add year to equipment that doesn't have data for the year
           for (let equipment of equipmentForGroupCopy) {
-            if (equipment.utilityData.length > 0) {
+            if (equipment.utilityData.length > 0 && equipment.operatingConditionsData?.length > 0) {
               let checkHasDataForYear: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == this.selectedYear);
               if (!checkHasDataForYear) {
                 let mostRecentYearOfData: number = Math.max(...equipment.operatingConditionsData.map(data => data.year));

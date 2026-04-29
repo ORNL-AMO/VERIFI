@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
+import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
