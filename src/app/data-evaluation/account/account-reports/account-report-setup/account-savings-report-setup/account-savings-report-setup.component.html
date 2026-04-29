@@ -2,6 +2,7 @@
 @let _reportSetup = reportSetup();
 @let _selectedAnalysisItem = selectedAnalysisItem();
 
+@if(_accountSavingsReportForm){
 <app-account-report-analysis-selection [reportForm]="_accountSavingsReportForm"></app-account-report-analysis-selection>
 
 @if (_selectedAnalysisItem) {
@@ -268,4 +269,5 @@
     </div>
   </div>
 </form>
+}
 }

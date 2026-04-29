@@ -4,6 +4,7 @@
 @let _setupForm = setupForm();
 @let _reportDateWarning = reportDateWarning();
 
+@if(_selectedReport && _setupForm){
 <div class="wrapper main-content p-0">
   <div class="content-padding">
     <h4>{{_selectedReport.reportType| accountReportType}} Report Setup</h4>
@@ -126,7 +127,7 @@
         </div>
       </div>
     </form>
-    @if (_selectedReport) {
+    @if (_selectedReport && _setupForm.valid) {
     @if (_selectedReport.reportType == 'betterPlants') {
     <app-better-plants-setup></app-better-plants-setup>
     }
@@ -153,3 +154,4 @@
     }
   </div>
 </div>
+}

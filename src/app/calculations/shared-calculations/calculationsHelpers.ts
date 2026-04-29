@@ -160,7 +160,7 @@ export function getYearsWithFullDataAccount(calanderizedMeters: Array<Calanderiz
         let uniqueMonths: Array<number> = _.uniq(months);
         return uniqueMonths.length == 12;
     });
-    return uniqueYears;
+    return _.sortBy(uniqueYears);
 }
 
 export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility): Array<number> {
@@ -174,7 +174,7 @@ export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter
         let uniqueMonths: Array<number> = _.uniq(months);
         return uniqueMonths.length == 12;
     });
-    return uniqueYears;
+    return _.sortBy(uniqueYears);
 }
 
 export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): number {
@@ -198,14 +198,14 @@ export function getAllYearsWithData(calanderizedMeters: Array<CalanderizedMeter>
     let monthlyData: Array<MonthlyData> = facilityMeters.flatMap(cMeter => { return cMeter.monthlyData });
     let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, facility) });
     let uniqueYears: Array<number> = _.uniq(years);
-    return uniqueYears;
+    return _.sortBy(uniqueYears);
 }
 
 export function getAllYearsWithDataAccount(calanderizedMeters: Array<CalanderizedMeter>, account: IdbAccount): Array<number> {
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     let years: Array<number> = monthlyData.map(mData => { return getFiscalYear(mData.date, account) });
     let uniqueYears: Array<number> = _.uniq(years);
-    return uniqueYears;
+    return _.sortBy(uniqueYears);
 }
 
 export function getLatestDataDate(calanderizedMeters: Array<CalanderizedMeter>): Date {
