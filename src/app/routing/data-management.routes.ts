@@ -281,15 +281,18 @@ export const DataManagementRoutes: Route = {
                                 },
                                 {
                                     path: 'edit-existing',
-                                    component: FacilityEnergyUsesGroupSetupComponent
+                                    component: FacilityEnergyUsesGroupSetupComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'new-setup',
-                                    component: FacilityEnergyUsesGroupSetupComponent
+                                    component: FacilityEnergyUsesGroupSetupComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'modify-annual-data/:year',
-                                    component: FacilityEnergyUsesModifyAnnualDataComponent
+                                    component: FacilityEnergyUsesModifyAnnualDataComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'summary',

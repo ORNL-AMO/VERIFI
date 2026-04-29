@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Component, inject } from '@angular/core';
+import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilityEnergyUsesSetupService } from '../facility-energy-uses-setup.service';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-energy-uses-group-setup',
@@ -23,6 +24,18 @@ import { FacilityEnergyUsesSetupService } from '../facility-energy-uses-setup.se
   styleUrl: './facility-energy-uses-group-setup.component.css'
 })
 export class FacilityEnergyUsesGroupSetupComponent {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
+  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private router: Router = inject(Router);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService = inject(FacilityEnergyUsesSetupService);
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private routerGuardService: RouterGuardService = inject(RouterGuardService);
 
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -35,18 +48,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   isNew: boolean;
   setupYear: number;
-  constructor(private facilityDbService: FacilitydbService,
-    private loadingService: LoadingService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private dbChangesService: DbChangesService,
-    private toastNotificationsService: ToastNotificationsService,
-    private accountDbService: AccountdbService,
-    private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
-    private activatedRoute: ActivatedRoute
-  ) { }
+  routingAfterSubmit: boolean = false;
 
   ngOnInit() {
     this.activatedRoute.queryParams.subscribe(params => {
@@ -165,6 +167,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Added", undefined, undefined, false, "alert-success");
+    this.routingAfterSubmit = true;
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
   }
 
@@ -224,5 +227,21 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   startOver() {
     this.router.navigate(['../setup-options'], { relativeTo: this.activatedRoute });
+  }
+
+
+  canDeactivate(): Observable<boolean> {
+    if (!this.routingAfterSubmit) {
+      this.routerGuardService.setShowSave(false);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
+    }
+    return of(true);
   }
 }

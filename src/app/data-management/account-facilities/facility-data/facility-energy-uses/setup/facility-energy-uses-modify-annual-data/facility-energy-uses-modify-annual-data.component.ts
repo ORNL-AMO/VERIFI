@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
@@ -14,6 +14,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-energy-uses-modify-annual-data',
@@ -22,6 +23,17 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   styleUrl: './facility-energy-uses-modify-annual-data.component.css',
 })
 export class FacilityEnergyUsesModifyAnnualDataComponent {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
+  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService = inject(FacilityEnergyUsesSetupService);
+  private router: Router = inject(Router);
+  private loadingService: LoadingService = inject(LoadingService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
+  private routerGuardService: RouterGuardService = inject(RouterGuardService);
 
   selectedYear: number;
   facility: IdbFacility;
@@ -29,22 +41,11 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
 
   energyUseGroups: Array<IdbFacilityEnergyUseGroup & { equipment: Array<IdbFacilityEnergyUseEquipment> }>;
   groupSetupIndex: number = 0;
-
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private activatedRoute: ActivatedRoute,
-    private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
-    private router: Router,
-    private loadingService: LoadingService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
-    private toastNotificationsService: ToastNotificationsService) { }
+  routingAfterSubmit: boolean = false;
 
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       this.selectedYear = parseInt(params['year']);
-      console.log('selected year: ', this.selectedYear);
     });
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
@@ -70,19 +71,23 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
           let equipmentForGroupCopy: Array<IdbFacilityEnergyUseEquipment> = equipmentForGroup.map(equip => { return _.cloneDeep(equip); });
           //add year to equipment that doesn't have data for the year
           for (let equipment of equipmentForGroupCopy) {
-            let checkHasDataForYear: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == this.selectedYear);
-            if (!checkHasDataForYear) {
-              let mostRecentYearOfData: number = Math.max(...equipment.operatingConditionsData.map(data => data.year));
-              let mostRecentData: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == mostRecentYearOfData);
-              let newData: EnergyEquipmentOperatingConditionsData = {
-                ...mostRecentData,
-                year: this.selectedYear
+            if (equipment.utilityData.length > 0 && equipment.operatingConditionsData?.length > 0) {
+              let checkHasDataForYear: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == this.selectedYear);
+              if (!checkHasDataForYear) {
+                let mostRecentYearOfData: number = Math.max(...equipment.operatingConditionsData.map(data => data.year));
+                let mostRecentData: EnergyEquipmentOperatingConditionsData = equipment.operatingConditionsData.find(data => data.year == mostRecentYearOfData);
+                let newData: EnergyEquipmentOperatingConditionsData = {
+                  ...mostRecentData,
+                  year: this.selectedYear
+                }
+                equipment.operatingConditionsData.push(newData);
+                equipment.utilityData.forEach(utility => {
+                  let mostRecentYearOfUtilityData: EquipmentUtilityDataEnergyUse = utility.energyUse.find(data => data.year == mostRecentYearOfData);
+                  if (mostRecentYearOfUtilityData) {
+                    utility.energyUse.push({ year: this.selectedYear, energyUse: mostRecentYearOfUtilityData.energyUse, overrideEnergyUse: false, energyUseUnit: mostRecentYearOfUtilityData.energyUseUnit });
+                  }
+                })
               }
-              equipment.operatingConditionsData.push(newData);
-              equipment.utilityData.forEach(utility => {
-                let mostRecentYearOfUtilityData: EquipmentUtilityDataEnergyUse = utility.energyUse.find(data => data.year == mostRecentYearOfData);
-                utility.energyUse.push({ year: this.selectedYear, energyUse: mostRecentYearOfUtilityData.energyUse, overrideEnergyUse: false, energyUseUnit: mostRecentYearOfUtilityData.energyUseUnit });
-              })
             }
           }
           this.energyUseGroups.push({
@@ -145,11 +150,27 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Updated", undefined, undefined, false, "alert-success");
+    this.routingAfterSubmit = true;
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
   }
 
 
   leaveGroupSetup() {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
+  }
+
+  canDeactivate(): Observable<boolean> {
+    if (!this.routingAfterSubmit) {
+      this.routerGuardService.setShowSave(false);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
+    }
+    return of(true);
   }
 }

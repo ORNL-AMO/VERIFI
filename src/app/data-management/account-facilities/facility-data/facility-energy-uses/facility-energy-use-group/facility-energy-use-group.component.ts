@@ -132,6 +132,7 @@ export class FacilityEnergyUseGroupComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.form && this.form.dirty) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
