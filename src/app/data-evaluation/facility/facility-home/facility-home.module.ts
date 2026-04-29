@@ -12,6 +12,10 @@ import { FacilityEnergyCardComponent } from './facility-energy-card/facility-ene
 import { FacilityWaterCardComponent } from './facility-water-card/facility-water-card.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
+import { FacilityStatusCheckComponent } from './facility-status-check/facility-status-check.component';
+import { AnalysisStatusCheckComponent } from './facility-status-check/analysis-status-check/analysis-status-check.component';
+import { MetersStatusCheckComponent } from './facility-status-check/meters-status-check/meters-status-check.component';
+import { PredictorsStatusCheckComponent } from './facility-status-check/predictors-status-check/predictors-status-check.component';
 
 
 
@@ -22,7 +26,11 @@ import { FormsModule } from '@angular/forms';
     FacilityEnergyReductionGoalComponent,
     FacilityWaterReductionGoalComponent,
     FacilityEnergyCardComponent,
-    FacilityWaterCardComponent
+    FacilityWaterCardComponent,
+    FacilityStatusCheckComponent,
+    AnalysisStatusCheckComponent,
+    MetersStatusCheckComponent,
+    PredictorsStatusCheckComponent
   ],
   imports: [
     CommonModule,

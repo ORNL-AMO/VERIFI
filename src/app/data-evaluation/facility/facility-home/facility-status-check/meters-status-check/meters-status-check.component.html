@@ -1,0 +1,46 @@
+@if (metersStatusChecks && metersStatusChecks.length > 0) {
+<div class="accordion-item">
+    <h2 class="accordion-header" id="metersStatusHeading">
+        <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
+            data-bs-target="#metersStatusCollapse" aria-expanded="false" aria-controls="metersStatusCollapse" [ngClass]="{
+                    'bg-warning': metersStatus === 'warning',
+                    'bg-danger': metersStatus === 'error'
+                }">
+            <span class="fa fa-gauge me-2"></span>
+            Meters
+            <span class="fa ms-2" [ngClass]="{
+                        'fa-circle-check text-success': metersStatus === 'good',
+                        'fa-exclamation-triangle': metersStatus === 'warning',
+                        'fa-circle-xmark': metersStatus === 'error'
+                    }"></span>
+        </button>
+    </h2>
+    <div id="metersStatusCollapse" class="accordion-collapse collapse" aria-labelledby="metersStatusHeading">
+        <div class="accordion-body p-0">
+            <ul class="list-group list-group-flush">
+                @for (meterCheck of metersStatusChecks; track meterCheck.meterId) {
+                <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" (click)="goToMeter(meterCheck.meterId)">
+                    <div>
+                        <strong>{{meterCheck.meterName}}</strong>
+                        @if (meterCheck.lastDateEntry) {
+                        <span class="text-muted ms-2">({{meterCheck.lastDateEntry | date:'MMMM yyyy'}})</span>
+                        }
+                        @if (meterCheck.hasDuplicateEntries) {
+                        <span class="badge bg-warning text-dark ms-2">Duplicate Entries</span>
+                        }
+                        @if (!meterCheck.isMeterValid) {
+                        <span class="badge bg-danger ms-2">Invalid Setup</span>
+                        }
+                    </div>
+                    <span class="fa" [ngClass]="{
+                            'fa-circle-check text-success': meterCheck.status === 'good',
+                            'fa-exclamation-triangle text-warning': meterCheck.status === 'warning',
+                            'fa-circle-xmark text-danger': meterCheck.status === 'error'
+                        }"></span>
+                </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+}

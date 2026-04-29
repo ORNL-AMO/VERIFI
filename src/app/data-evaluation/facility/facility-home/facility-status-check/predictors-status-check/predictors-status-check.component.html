@@ -1,0 +1,47 @@
+@if (predictorsStatusChecks && predictorsStatusChecks.length > 0) {
+<div class="accordion-item">
+    <h2 class="accordion-header" id="predictorsStatusHeading">
+        <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
+            data-bs-target="#predictorsStatusCollapse" aria-expanded="false" aria-controls="predictorsStatusCollapse"
+            [ngClass]="{
+                    'bg-warning': predictorsStatus === 'warning',
+                    'bg-danger': predictorsStatus === 'error'
+                }">
+            <span class="fa fa-boxes-stacked me-2"></span>
+            Predictors
+            <span class="fa ms-2" [ngClass]="{
+                        'fa-circle-check text-success': predictorsStatus === 'good',
+                        'fa-exclamation-triangle': predictorsStatus === 'warning',
+                        'fa-circle-xmark': predictorsStatus === 'error'
+                    }"></span>
+        </button>
+    </h2>
+    <div id="predictorsStatusCollapse" class="accordion-collapse collapse" aria-labelledby="predictorsStatusHeading">
+        <div class="accordion-body p-0">
+            <ul class="list-group list-group-flush">
+                @for (predictorCheck of predictorsStatusChecks; track predictorCheck.predictorId) {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{predictorCheck.predictorName}}</strong>
+                        @if (predictorCheck.latestEntryDate) {
+                        <span class="text-muted ms-2">({{predictorCheck.latestEntryDate | date:'MMMM yyyy'}})</span>
+                        }
+                        @if (predictorCheck.hasDuplicateEntries) {
+                        <span class="badge bg-danger ms-2">Duplicate Entries</span>
+                        }
+                        @if (predictorCheck.hasMissingEntries) {
+                        <span class="badge bg-warning text-dark ms-2">Missing Entries</span>
+                        }
+                    </div>
+                    <span class="fa" [ngClass]="{
+                            'fa-circle-check text-success': predictorCheck.status === 'good',
+                            'fa-exclamation-triangle text-warning': predictorCheck.status === 'warning',
+                            'fa-circle-xmark text-danger': predictorCheck.status === 'error'
+                        }"></span>
+                </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+}

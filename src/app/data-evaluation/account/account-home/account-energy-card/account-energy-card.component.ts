@@ -1,89 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '../account-home.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-account-energy-card',
-    templateUrl: './account-energy-card.component.html',
-    styleUrls: ['./account-energy-card.component.css'],
-    standalone: false
+  selector: 'app-account-energy-card',
+  templateUrl: './account-energy-card.component.html',
+  styleUrls: ['./account-energy-card.component.css'],
+  standalone: false
 })
 export class AccountEnergyCardComponent {
+  private accountHomeService: AccountHomeService = inject(AccountHomeService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
 
-  monthlyEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyEnergyAnalysisDataSub: Subscription;
-  calculatingEnergy: boolean | 'error';
-  calculatingEnergySub: Subscription;
-  calculatingOverview: boolean | 'error';
-  calculatingOverviewSub: Subscription;
-  annualEnergyAnalysisSummary: Array<AnnualAnalysisSummary>;
-  annualEnergyAnalysisSummarySub: Subscription;
-
-  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
-  account: IdbAccount;
-  selectedAccountSub: Subscription;
-  carouselIndex: number = 0;
-  accountOverviewData: AccountOverviewData;
-  accountOverviewDataSub: Subscription;
-  energyUnit: string;
-  constructor(private accountHomeService: AccountHomeService,
-    private accountDbService: AccountdbService,
-    private sharedDataService: SharedDataService) {
-  }
-
-  ngOnInit() {
-    this.carouselIndex = this.sharedDataService.energyHomeCarouselIndex.getValue();
-
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
-      this.account = val;
-      this.energyUnit = val.energyUnit;
-    });
-    this.calculatingEnergySub = this.accountHomeService.calculatingEnergy.subscribe(val => {
-      this.calculatingEnergy = val;
-    });
-    this.calculatingOverviewSub = this.accountHomeService.calculatingOverview.subscribe(val => {
-      this.calculatingOverview = val;
-    });
-    this.accountOverviewDataSub = this.accountHomeService.accountOverviewData.subscribe(val => {
-      this.accountOverviewData = val;
-    });
-
-    this.monthlyEnergyAnalysisDataSub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
-      this.monthlyEnergyAnalysisData = val;
-    });
-    this.annualEnergyAnalysisSummarySub = this.accountHomeService.annualEnergyAnalysisSummary.subscribe(val => {
-      this.annualEnergyAnalysisSummary = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.calculatingEnergySub.unsubscribe();
-    this.monthlyEnergyAnalysisDataSub.unsubscribe();
-    this.selectedAccountSub.unsubscribe();
-    this.annualEnergyAnalysisSummarySub.unsubscribe();
-    this.calculatingOverviewSub.unsubscribe();
-    this.accountOverviewDataSub.unsubscribe();
-  }
+  monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyEnergyAnalysisData, { initialValue: [] });
+  calculatingEnergy: Signal<boolean | 'error'> = toSignal(this.accountHomeService.calculatingEnergy, { initialValue: false });
+  calculatingOverview: Signal<boolean | 'error'> = toSignal(this.accountHomeService.calculatingOverview, { initialValue: false });
+  annualEnergyAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.accountHomeService.annualEnergyAnalysisSummary, { initialValue: [] });
+  latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: null });
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
+  carouselIndex: Signal<number> = toSignal(this.sharedDataService.energyHomeCarouselIndex, { initialValue: 0 });
+  accountOverviewData: Signal<AccountOverviewData> = toSignal(this.accountHomeService.accountOverviewData, { initialValue: null });
 
   goNext() {
-    this.carouselIndex++;
-    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex() + 1);
   }
 
   goBack() {
-    this.carouselIndex--;
-    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex() - 1);
   }
 
   goToIndex(index: number) {
-    this.carouselIndex = index;
-    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.energyHomeCarouselIndex.next(index);
   }
 }

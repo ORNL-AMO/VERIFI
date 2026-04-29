@@ -39,6 +39,7 @@ export class HomePageComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'load-example-data') {
         this.navigateToAccount();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

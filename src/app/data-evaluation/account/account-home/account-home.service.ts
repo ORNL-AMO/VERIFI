@@ -11,8 +11,8 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 })
 export class AccountHomeService {
 
-  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
-  latestWaterAnalysisItem: IdbAccountAnalysisItem;
+  latestEnergyAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
+  latestWaterAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
   annualEnergyAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyEnergyAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   annualWaterAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
@@ -31,20 +31,22 @@ export class AccountHomeService {
     this.calculatingWater = new BehaviorSubject<boolean | 'error'>(true);
     this.calculatingOverview = new BehaviorSubject<boolean | 'error'>(true);
     this.accountOverviewData = new BehaviorSubject<AccountOverviewData>(undefined);
+    this.latestEnergyAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
+    this.latestWaterAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
   }
 
   setLatestEnergyAnalysisItem(analysisItemId: string) {
     let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     if (analysisItemId) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
-      this.latestEnergyAnalysisItem = selectedAnalysisItem;
+      this.latestEnergyAnalysisItem.next(selectedAnalysisItem);
     } else {
       let energyAnalysisItems: Array<IdbAccountAnalysisItem> = analysisItems.filter(item => { return item.analysisCategory == 'energy' });
       if (energyAnalysisItems.length > 0) {
-        this.latestEnergyAnalysisItem = _.maxBy(energyAnalysisItems, 'reportYear');
+        this.latestEnergyAnalysisItem.next(_.maxBy(energyAnalysisItems, 'modifiedDate'));
       }
       else {
-        this.latestEnergyAnalysisItem = undefined;
+        this.latestEnergyAnalysisItem.next(undefined);
       }
     }
   }
@@ -53,14 +55,14 @@ export class AccountHomeService {
     let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     if (analysisItemId) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
-      this.latestWaterAnalysisItem = selectedAnalysisItem;
+      this.latestWaterAnalysisItem.next(selectedAnalysisItem);
     } else {
       let waterAnalysisItems: Array<IdbAccountAnalysisItem> = analysisItems.filter(item => { return item.analysisCategory == 'water' });
       if (waterAnalysisItems.length > 0) {
-        this.latestWaterAnalysisItem = _.maxBy(waterAnalysisItems, 'reportYear');
+        this.latestWaterAnalysisItem.next(_.maxBy(waterAnalysisItems, 'modifiedDate'));
       }
       else {
-        this.latestWaterAnalysisItem = undefined;
+        this.latestWaterAnalysisItem.next(undefined);
       }
     }
   }

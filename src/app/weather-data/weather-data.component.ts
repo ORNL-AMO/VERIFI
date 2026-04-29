@@ -76,6 +76,7 @@ export class WeatherDataComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'create-weather-predictors') {
         this.navigateToUrl();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
 
