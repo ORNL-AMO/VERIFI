@@ -41,8 +41,6 @@ import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from './models/idbModels/facilityReport';
-import { SurveyService } from './shared/helper-services/survey.service';
-import { ApplicationInstanceData } from './models/idbModels/applicationInstanceData';
 import { ApplicationInstanceDbService } from './indexedDB/application-instance-db.service';
 import { FacilityEnergyUseGroupsDbService } from './indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacilityEnergyUseGroup } from './models/idbModels/facilityEnergyUseGroups';
@@ -65,8 +63,6 @@ export class AppComponent {
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
 
-  showSurveyToast: boolean;
-  showSurveyModal: boolean;
   inDataManagement: boolean = false;
   constructor(
     private accountDbService: AccountdbService,
@@ -94,7 +90,6 @@ export class AppComponent {
     private migratePredictorsService: MigratePredictorsService,
     private dbChangesService: DbChangesService,
     private facilityReportsDbService: FacilityReportsDbService,
-    private surveyService: SurveyService,
     private applicationInstanceDbService: ApplicationInstanceDbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
@@ -113,12 +108,6 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.automaticBackupsService.subscribeData();
-    this.surveyService.showSurveyModal.subscribe(val => {
-      this.showSurveyModal = val;
-    });
-    this.surveyService.showSurveyToast.subscribe(val => {
-      this.showSurveyToast = val;
-    });
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.inDataManagement = this.router.url.includes('data-management');
@@ -175,7 +164,6 @@ export class AppComponent {
         await this.updateFacilityAnalysisSelectedItems();
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
-        this.setAppOpenNotifications();
       } else {
         await this.eGridService.parseEGridData();
         await this.initializeElectronBackups();
@@ -415,7 +403,7 @@ export class AppComponent {
     let accountFacilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = await this.facilityEnergyUseEquipmentDbService.getAllAccountEnergyUseEquipment(account.guid);
     this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.next(accountFacilityEnergyUseEquipment);
   }
-  
+
   async updateAccountAnalysisSelectedItems(account: IdbAccount) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
@@ -441,33 +429,4 @@ export class AppComponent {
       }
     }
   }
-
-  async setAppOpenNotifications() {
-    if (environment.production) {
-      let applicationData: ApplicationInstanceData = this.applicationInstanceDbService.applicationInstanceData.getValue();
-      if (!applicationData.isSurveyDone) {
-        if (applicationData.doSurveyReminder) {
-          setTimeout(() => {
-            this.surveyService.showSurveyModal.next(true);
-          }, 5000);
-          await firstValueFrom(this.applicationInstanceDbService.setSurveyDone());
-        } else {
-          let hasMetUsageRequirement: boolean = this.surveyService.getHasMetUsageRequirements(applicationData);
-          let showModalToExistingUser: boolean = this.surveyService.checkIsExistingUser();
-          let showModal: boolean = showModalToExistingUser || hasMetUsageRequirement;
-
-          setTimeout(() => {
-            this.surveyService.showSurveyModal.next(showModal);
-          }, 5000);
-
-          if (!applicationData.isSurveyToastDone && !showModalToExistingUser) {
-            setTimeout(() => {
-              this.surveyService.showSurveyToast.next(true);
-            }, 5000);
-          }
-        }
-      }
-    }
-  }
-
 }
