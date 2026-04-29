@@ -48,6 +48,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   isNew: boolean;
   setupYear: number;
+  routingAfterSubmit: boolean = false;
 
   ngOnInit() {
     this.activatedRoute.queryParams.subscribe(params => {
@@ -166,6 +167,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Added", undefined, undefined, false, "alert-success");
+    this.routingAfterSubmit = true;
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid + '/energy-uses');
   }
 
@@ -229,14 +231,17 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
 
   canDeactivate(): Observable<boolean> {
-    this.routerGuardService.setShowSave(false);
-    this.routerGuardService.setShowModal(true);
-    return this.routerGuardService.getModalAction().pipe(map(action => {
-      if (action == 'discard') {
-        return of(true);
-      }
-      return of(false);
-    }),
-      take(1), switchAll());
+    if (!this.routingAfterSubmit) {
+      this.routerGuardService.setShowSave(false);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
+    }
+    return of(true);
   }
 }
