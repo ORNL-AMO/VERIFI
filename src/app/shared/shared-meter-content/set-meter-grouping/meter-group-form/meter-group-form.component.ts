@@ -189,6 +189,7 @@ export class MeterGroupFormComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.groupForm.dirty || this.selectionsChanged) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

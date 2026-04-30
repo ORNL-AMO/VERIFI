@@ -106,7 +106,14 @@ export const energy = {
       }
       , to_anchor: 41868000
     },
-
+    hph: {
+      name: {
+        singular: 'Horsepower-hour',
+        plural: 'Horsepower-hours',
+        display: '(hp-h)'
+      },
+      to_anchor: 2685000 // 1 hp-h = 2,685,000 joules
+    }
   },
   imperial: {
     Btu: {

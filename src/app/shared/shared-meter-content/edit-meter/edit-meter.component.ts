@@ -135,6 +135,7 @@ export class EditMeterComponent implements OnInit {
 
   canDeactivate(): Observable<boolean> {
     if (this.meterForm && this.meterForm.dirty) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

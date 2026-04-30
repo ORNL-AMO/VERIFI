@@ -34,6 +34,10 @@ export class DataManagementImportNavigationService {
       this.goToPage('confirm-meters', fileReference)
     } else if (currentNavOption == 'meter-readings' && fileReference.isTemplate) {
       this.goToPage('confirm-predictors', fileReference);
+    } else if (currentNavOption == 'select-facility' && fileReference.isFootprintToolTemplate) {
+      this.goToPage('map-meter-groups-to-equipment', fileReference);
+    } else if (currentNavOption == 'map-meter-groups-to-equipment' && fileReference.isFootprintToolTemplate) {
+      this.goToPage('review-and-submit', fileReference);
     }
   }
 
@@ -54,7 +58,7 @@ export class DataManagementImportNavigationService {
       this.goToPage('map-predictors-to-facilities', fileReference)
     } else if (currentNavOption == 'predictor-data') {
       this.goToPage('confirm-predictors', fileReference)
-    } else if (currentNavOption == 'review-and-submit') {
+    } else if (currentNavOption == 'review-and-submit' && !fileReference.isFootprintToolTemplate) {
       this.goToPage('predictor-data', fileReference)
     } else if (currentNavOption == 'facilities') {
       this.goToPage('upload-files', fileReference)
@@ -64,8 +68,13 @@ export class DataManagementImportNavigationService {
       this.goToPage('confirm-meters', fileReference)
     } else if (currentNavOption == 'confirm-predictors' && fileReference.isTemplate) {
       this.goToPage('meter-readings', fileReference)
-    } 
-
+    } else if (currentNavOption == 'select-facility') {
+      this.goToPage('upload-files', fileReference)
+    } else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
+      this.goToPage('map-meter-groups-to-equipment', fileReference)
+    } else if (currentNavOption == 'map-meter-groups-to-equipment' && fileReference.isFootprintToolTemplate) {
+      this.goToPage('select-facility', fileReference)
+    }
   }
 
   goToPage(goToOption: GoToOptionValue, fileReference: FileReference) {
@@ -74,8 +83,10 @@ export class DataManagementImportNavigationService {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/upload-files');
     } else if (fileReference.isTemplate) {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-template-file/' + fileReference.id + '/' + goToOption);
-    } else if (!fileReference.isTemplate) {
+    } else if (!fileReference.isTemplate && !fileReference.isFootprintToolTemplate) {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-general-file/' + fileReference.id + '/' + goToOption);
+    } else if (fileReference.isFootprintToolTemplate) {
+      this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-footprint-tool-file/' + fileReference.id + '/' + goToOption);
     }
   }
 
@@ -96,7 +107,7 @@ export class DataManagementImportNavigationService {
       optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities'];
     } else if (currentNavOption == 'predictor-data' && !fileReference.isTemplate) {
       optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities', 'confirm-predictors'];
-    } else if (currentNavOption == 'review-and-submit' && !fileReference.isTemplate) {
+    } else if (currentNavOption == 'review-and-submit' && !fileReference.isTemplate && !fileReference.isFootprintToolTemplate) {
       optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities', 'confirm-predictors', 'predictor-data'];
     }
     //Template
@@ -110,6 +121,15 @@ export class DataManagementImportNavigationService {
       optionValues = ['upload-files', 'facilities', 'confirm-meters', 'meter-readings', 'confirm-predictors'];
     } else if (currentNavOption == 'review-and-submit' && fileReference.isTemplate) {
       optionValues = ['upload-files', 'facilities', 'confirm-meters', 'meter-readings', 'confirm-predictors', 'predictor-data'];
+    }
+    //footprint tool
+    else if (currentNavOption == 'select-facility') {
+      optionValues = ['upload-files'];
+    } else if (currentNavOption == 'map-meter-groups-to-equipment') {
+      optionValues = ['upload-files', 'select-facility'];
+    }
+    else if (currentNavOption == 'review-and-submit' && fileReference.isFootprintToolTemplate) {
+      optionValues = ['upload-files', 'select-facility', 'map-meter-groups-to-equipment'];
     }
     return optionValues.map(opVal => {
       return this.getGoToOption(opVal)
@@ -139,7 +159,9 @@ export type GoToOptionValue = 'upload-files' |
   'map-predictors-to-facilities' |
   'confirm-predictors' |
   'predictor-data' |
-  'review-and-submit';
+  'review-and-submit' |
+  'select-facility' |
+  'map-meter-groups-to-equipment';
 
 export const GoToOptionLabels = {
   'upload-files': 'Upload Files',
@@ -152,5 +174,7 @@ export const GoToOptionLabels = {
   'map-predictors-to-facilities': 'Map Predictors to Facilities',
   'confirm-predictors': 'Confirm Predictors',
   'predictor-data': 'Predictor Data',
-  'review-and-submit': 'Review and Submit'
+  'review-and-submit': 'Review and Submit',
+  'select-facility': 'Select Facility',
+  'map-meter-groups-to-equipment': 'Map Meter Groups to Equipment'
 }

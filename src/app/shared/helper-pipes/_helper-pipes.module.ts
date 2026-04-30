@@ -31,8 +31,12 @@ import { InvalidMeterPipe } from './validation-pipes/invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
 import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
+import { FacilityEnergyGroupsListPipe } from './facility-energy-groups-list.pipe';
+import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-list.pipe';
+import { MeterGroupSourcesListPipe } from './meter-group-sources-list.pipe';
 import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
+import { FacilityEnergyEquipmentNamePipe } from './facility-energy-equipment-name.pipe';
 import { DisplayPredictorDataDatePipe } from './display-predictor-data-date.pipe';
 import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
 import { InvalidMetersPipe } from './validation-pipes/invalid-meters.pipe';
@@ -44,6 +48,7 @@ import { AnalysisItemPipe } from './analysis-item.pipe';
 import { InvalidAccountReportPipe } from './validation-pipes/invalid-account-report.pipe';
 import { InvalidFacilityReportPipe } from './validation-pipes/invalid-facility-report.pipe';
 import { AccountReportNamePipe } from './account-report-name-pipe';
+import { EquipmentSourceIconsPipe } from './equipment-source-icons.pipe';
 
 @NgModule({
   declarations: [
@@ -78,8 +83,12 @@ import { AccountReportNamePipe } from './account-report-name-pipe';
     FacilityItemPipe,
     ReportDatePipe,
     ChargeTypeLabelPipe,
+    FacilityEnergyGroupsListPipe,
+    FacilityEnergyEquipmentListPipe,
+    MeterGroupSourcesListPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
+    FacilityEnergyEquipmentNamePipe,
     DisplayPredictorDataDatePipe,
     DisplayMeterDataDatePipe,
     InvalidMetersPipe,
@@ -90,7 +99,8 @@ import { AccountReportNamePipe } from './account-report-name-pipe';
     AnalysisItemPipe,
     InvalidAccountReportPipe,
     InvalidFacilityReportPipe,
-    AccountReportNamePipe
+    AccountReportNamePipe,
+    EquipmentSourceIconsPipe
   ],
   imports: [
     CommonModule
@@ -127,8 +137,12 @@ import { AccountReportNamePipe } from './account-report-name-pipe';
     FacilityItemPipe,
     ReportDatePipe,
     ChargeTypeLabelPipe,
+    FacilityEnergyGroupsListPipe,
+    FacilityEnergyEquipmentListPipe,
+    MeterGroupSourcesListPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
+    FacilityEnergyEquipmentNamePipe,
     DisplayPredictorDataDatePipe,
     DisplayMeterDataDatePipe,
     InvalidMetersPipe,
@@ -139,7 +153,8 @@ import { AccountReportNamePipe } from './account-report-name-pipe';
     AnalysisItemPipe,
     InvalidAccountReportPipe,
     InvalidFacilityReportPipe,
-    AccountReportNamePipe
+    AccountReportNamePipe,
+    EquipmentSourceIconsPipe
   ]
 })
 export class HelperPipesModule { }

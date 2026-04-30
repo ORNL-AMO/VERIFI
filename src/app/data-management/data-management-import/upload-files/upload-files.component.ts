@@ -47,7 +47,7 @@ export class UploadFilesComponent {
     let files: FileList = (event as HTMLInputElement).files;
     if (files) {
       if (files.length !== 0) {
-        let regex3 =  /\.(xlsx|xls)$/i;
+        let regex3 = /\.(xlsx|xls|xlsm)$/i;
         this.loadingService.setLoadingMessage('Uploading Files...');
         this.loadingService.setLoadingStatus(true);
         for (let index = 0; index < files.length; index++) {
@@ -116,7 +116,10 @@ export class UploadFilesComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (fileReference.isTemplate) {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-template-file/' + fileReference.id)
-    } else {
+    } else if (fileReference.isFootprintToolTemplate) {
+      this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-footprint-tool-file/' + fileReference.id)
+    }
+    else {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-general-file/' + fileReference.id)
     }
   }

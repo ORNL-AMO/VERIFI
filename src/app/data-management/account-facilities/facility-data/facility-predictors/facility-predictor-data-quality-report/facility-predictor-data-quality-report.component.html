@@ -1,4 +1,12 @@
-<h4>{{predictor.name}} Data Quality Report
-</h4>
-<app-predictor-data-quality-report [predictorData]="predictorData"
-    [selectedPredictor]="predictor"></app-predictor-data-quality-report>
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>{{predictor.name}} Data Quality Report
+                </h4>
+                <app-predictor-data-quality-report [predictorData]="predictorData"
+                    [selectedPredictor]="predictor"></app-predictor-data-quality-report>
+            </div>
+        </div>
+    </div>
+</div>

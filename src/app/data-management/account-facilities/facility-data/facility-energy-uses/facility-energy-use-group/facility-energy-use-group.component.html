@@ -1,0 +1,200 @@
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>{{energyUseGroup.name}}</h4>
+
+                <div class="d-flex w-100 justify-content-end">
+                    <div>
+                        <button class="btn btn-primary me-2" (click)="saveChanges()"
+                            [disabled]="form.invalid || form.pristine">
+                            <span class="fa fa-save"></span>
+                            Save Changes</button>
+                    </div>
+                </div>
+                <!--FORM-->
+                <div class="row">
+                    <div class="col-12">
+                        <p class="bold">Group Information</p>
+                        <form [formGroup]="form">
+                            <div>
+                                <label class="w-100" for="groupName">Group Name</label>
+                                <div class="mb-3">
+                                    <input id="groupName" class="form-control" type="text" formControlName="name"
+                                        onfocus="this.select();" minlength="0" maxlength="100">
+                                </div>
+                                @if(form.get('name').touched && form.get('name').hasError('required')) {
+                                <div class="alert alert-danger">Group name is
+                                    required</div>
+                                }
+                            </div>
+                            <div>
+                                <label class="w-100" for="groupNotes">Group Notes</label>
+                                <div class="mb-3">
+                                    <textarea id="groupNotes" class="form-control" formControlName="notes"
+                                        onfocus="this.select();" minlength="0" maxlength="500"></textarea>
+                                </div>
+                                @if(form.get('notes').touched && form.get('notes').hasError('required')) {
+                                <div class="alert alert-danger">Group notes are
+                                    required</div>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex w-100 justify-content-between pb-2">
+                            <div class="bold mt-auto">Energy Use Equipment</div>
+                            <div>
+                                <button class="btn btn-sm btn-danger me-1" [ngClass]="{'hidden': !hasSelectedEquipment}"
+                                    (click)="openBulkDelete()">
+                                    <span class="fa fa-trash"></span>
+                                    Bulk Delete
+                                </button>
+                                <button class="btn btn-sm action-btn me-1" (click)="addEquipment()">
+                                    <span class="fa fa-plus"></span>
+                                    Add Equipment/System
+                                </button>
+                                @let disabled = !hasSelectedEquipment;
+                                <button class="btn btn-sm action-btn" [disabled]="disabled"
+                                    (click)="openBulkTransfer()">
+                                    <span class="fa fa-left-right"></span>
+                                    Transfer Group
+                                </button>
+                            </div>
+                        </div>
+                        @let groupEquipment = (energyUseGroup.guid |
+                        facilityEnergyEquipmentList:facilityEnergyUseEquipment());
+                        @if(groupEquipment.length != 0){
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th class="w-25">
+                                        Name
+                                    </th>
+                                    <th class="w-25">
+                                        Industrial System 
+                                    </th>
+                                    <th class="w-25">
+                                        Utility Types
+                                    </th>
+                                    <th class="w-25">
+                                        Notes
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (equipment of groupEquipment; track $index) {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" [(ngModel)]="equipment.selected">
+                                    </td>
+                                    <td>
+                                        <a [routerLink]="'./equipment/'+equipment.guid">
+                                            {{equipment.name}}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{equipment.equipmentType}}
+                                    </td>
+                                    <td>
+                                        @for(utilityData of equipment.utilityData; track $index){
+                                        <span class="badge me-1"
+                                            [ngStyle]="{'background-color': utilityData.energySource | meterSourceColor}">{{utilityData.energySource}}</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        {{equipment.notes}}
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                        }@else {
+                        <div class="alert alert-info">
+                            No equipment/systems have been added to this group.
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <hr>
+                <div class="d-flex w-100 justify-content-end">
+                    <div>
+                        <button class="btn btn-danger btn-sm" (click)="showDelete()">
+                            <span class="fa fa-trash"></span>
+                            Delete Group
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div [ngClass]="{'windowOverlay': showDeleteGroup || showBulkDelete || showBulkTransfer}"></div>
+<div class="popup" [class.open]="showDeleteGroup">
+    <div class="popup-header">Delete Group: {{energyUseGroup?.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p class="text-danger">WARNING: By deleting this group, you are also deleting all of the group data and
+            equipment associated with
+            it.
+            Are you sure you want to perform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteGroup()">Delete</button>
+    </div>
+</div>
+
+
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header">Bulk Delete Equipment
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <!--list equipment-->
+        <ul>
+            @for(equipment of selectedEquipment; track $index) {
+            <li>{{equipment.name}}</li>
+            }
+        </ul>
+        <p class="text-danger">WARNING: By deleting this equipment, you are also deleting all of the associated data.
+            Are you sure you want to perform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmBulkDelete()">Delete</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="showBulkTransfer">
+    <div class="popup-header">
+        <span class="fa fa-left-right"></span> Transfer Equipment to Other Group
+        <button class="item-right" (click)="cancelBulkTransfer()">x</button>
+    </div>
+    <div class="popup-body">
+        <!--list equipment-->
+        <p class="fw-bold mb-0">Equipment to Transfer:</p>
+        <ul>
+            @for(equipment of selectedEquipment; track $index) {
+            <li>{{equipment.name}}</li>
+            }
+        </ul>
+        <p class="fw-bold mb-0">Select the group to transfer the equipment to:</p>
+        <select class="form-select" [(ngModel)]="selectedTransferGroupId">
+            <option [ngValue]="null">-- Select Group --</option>
+            @for(group of transferGroupOptions; track group.guid) {
+            <option [ngValue]="group.guid">{{group.name}}</option>
+            }
+        </select>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkTransfer()">Cancel</button>
+        <button class="btn action-btn" [disabled]="!selectedTransferGroupId"
+            (click)="confirmBulkTransfer()">Transfer</button>
+    </div>
+</div>

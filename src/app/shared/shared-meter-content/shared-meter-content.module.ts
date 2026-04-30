@@ -112,7 +112,8 @@ import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spi
     GeneralUtilityDataTableComponent,
     OtherEmissionsDataTableComponent,
     VehicleDataTableComponent,
-    SetMeterGroupingComponent
+    SetMeterGroupingComponent,
+    MeterDataComponent
   ]
 })
 export class SharedMeterContentModule { }

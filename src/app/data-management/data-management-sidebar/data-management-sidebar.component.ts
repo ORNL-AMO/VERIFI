@@ -16,6 +16,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 
 @Component({
   selector: 'app-data-management-sidebar',
@@ -60,6 +64,13 @@ export class DataManagementSidebarComponent {
 
   url: string;
   routerSub: Subscription;
+
+  accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
+  accountEnergyUseGroupsSub: Subscription;
+
+  accountEnergyUseEquipmentSub: Subscription;
+  accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
+
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataManagementService: DataManagementService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -67,7 +78,9 @@ export class DataManagementSidebarComponent {
     private dbChangesService: DbChangesService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService
+    private predictorDataDbService: PredictorDataDbService,
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
   ) {
   }
 
@@ -102,6 +115,14 @@ export class DataManagementSidebarComponent {
       this.accountPredictorData = accountPredictorData;
     });
 
+    this.accountEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.subscribe(groups => {
+      this.accountEnergyUseGroups = groups;
+    });
+
+    this.accountEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.subscribe(equipment => {
+      this.accountEnergyUseEquipment = equipment;
+    });
+
     this.sidebarOpenSub = this.dataManagementService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
       setTimeout(() => {
@@ -128,6 +149,8 @@ export class DataManagementSidebarComponent {
     this.routerSub.unsubscribe();
     this.accountMeterDataSub.unsubscribe();
     this.accountPredictorDataSub.unsubscribe();
+    this.accountEnergyUseGroupsSub.unsubscribe();
+    this.accountEnergyUseEquipmentSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {
@@ -151,7 +174,7 @@ export class DataManagementSidebarComponent {
 
   async toggleFacilityMetersOpen(facility: IdbFacility) {
     facility.sidebarMetersOpen = !facility.sidebarMetersOpen;
-    this.saveFacility(facility);
+    await this.saveFacility(facility);
   }
 
   async saveFacility(facility: IdbFacility) {
@@ -162,7 +185,7 @@ export class DataManagementSidebarComponent {
 
   async toggleFacilityPredictorsOpen(facility: IdbFacility) {
     facility.sidebarPredictorsOpen = !facility.sidebarPredictorsOpen;
-    this.saveFacility(facility);
+    await this.saveFacility(facility);
   }
 
   async togglePredictorOpen(predictor: IdbPredictor) {
@@ -177,6 +200,19 @@ export class DataManagementSidebarComponent {
     this.account.sidebarCustomDataOpen = !this.account.sidebarCustomDataOpen;
     await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
     await this.accountDbService.selectedAccount.next(this.account);
+  }
+
+  async toggleFacilityEnergyUsesOpen(facility: IdbFacility) {
+    facility.sidebarEnergyUsesOpen = !facility.sidebarEnergyUsesOpen;
+    await this.saveFacility(facility);
+  }
+
+  async toggleEnergyUseGroupOpen(energyUseGroup: IdbFacilityEnergyUseGroup) {
+    energyUseGroup.sidebarOpen = !energyUseGroup.sidebarOpen;
+    await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
   }
 
   toggleSidebar() {

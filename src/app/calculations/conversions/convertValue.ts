@@ -71,6 +71,7 @@ export class ConvertValue {
             this.destination = this.getUnit(to);
 
             if (!this.origin || !this.destination) {
+                console.log('Could not find unit for conversion: ', from, to);
                 this.hasError = true;
                 this.convertedValue = value;
             } else {

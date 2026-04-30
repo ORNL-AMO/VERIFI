@@ -1,0 +1,175 @@
+<div class="card h-100">
+    <div class="card-header text-center bold large">
+        &#35;{{index + 1}}. {{equipment.name}}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+
+                <table class="table table-responsive table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="w-50">
+                                Industrial System
+                            </th>
+                            <td>
+                                {{equipment.equipmentType}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-50">
+                                Meter Groups
+                            </th>
+                            <td>
+                                @if(equipment.utilityMeterGroupIds && equipment.utilityMeterGroupIds.length > 0){
+                                @for(id of equipment.utilityMeterGroupIds; track id){
+                                {{id | groupName}}<br>
+                                }
+                                }@else{
+                                &mdash;
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <table class="table table-responsive table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+                                Utility
+                            </th>
+                            <th>
+                                <!--TODO: label by equipment type-->
+                                Rated Power/Capacity
+                            </th>
+                            <th>
+                                # of Equipment
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for(utilityData of equipment.utilityData; track utilityData.energySource) {
+                        <tr>
+                            <td>
+                                {{utilityData.energySource}}
+                            </td>
+                            <td>
+                                {{utilityData.size}} {{utilityData.units}}
+                            </td>
+                            <td>
+                                {{utilityData.numberOfEquipment}}
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+        <!-- <hr> -->
+        <!--operating conditions data-->
+        <div class="row">
+            <div class="col-12">
+                <h6 class="bold text-center alert alert-secondary p-1">{{year}} {{equipment.name}} Operating Conditions
+                </h6>
+                <form [formGroup]="operatingConditionsForm">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6">
+                            <label for="hoursOfOperation">
+                                Hours of Operation
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" formControlName="hoursOfOperation" min="0"
+                                    id="hoursOfOperation">
+                                <span class="input-group-text">hrs</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <label for="loadFactor">
+                                Load Factor
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
+                                    id="loadFactor">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <label for="dutyFactor">
+                                Duty Factor
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" formControlName="dutyFactor" min="0" max="100"
+                                    id="dutyFactor">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <label for="efficiency">
+                                Efficiency
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" formControlName="efficiency" min="0" max="100"
+                                    id="efficiency">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!--energy use data-->
+            <div class="col-12 text-center">
+                @for(utilityDataFormObj of utilityDataFormsArr; track utilityDataFormObj.energySource) {
+                @for(energyUseForm of utilityDataFormObj.energyUseForms; track energyUseForm.controls.year.value) {
+
+                @if(energyUseForm.controls.year.value == year) {
+
+                <form [formGroup]="energyUseForm">
+                    <div class="row mt-3">
+                        <div class="col-sm-12 col-md-3">
+                            <span class="w-100 badge badge-text h-100"
+                                [ngStyle]="{'background-color': utilityDataFormObj.energySource | meterSourceColor}">{{utilityDataFormObj.energySource}}
+                                Energy Use</span>
+                        </div>
+
+                        @let unitsDifferent = (energyUseForm.controls.energyUseUnit.value !== facilityUnits);
+                        <div class="col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseForm)">
+                                    @if(energyUseForm.controls.overrideEnergyUse.value){
+                                    <span class="fa fa-calculator"></span>
+                                    }@else {
+                                    <span class="fa fa-pencil"></span>
+                                    }
+                                </button>
+                                <input class="form-control" type="number" formControlName="energyUse" id="energyUse"
+                                    min="0">
+                                <span class="input-group-text" [innerHTML]="energyUseForm.controls.energyUseUnit.value | settingsLabel">
+                                </span>
+                            </div>
+                        </div>
+                        @if(unitsDifferent){
+                        <div class="col-sm-6 col-md-3">
+                            <div class="input-group">
+                                @let convertedEnergyUse = energyUseForm.controls.energyUse.value |
+                                convertEnergyUseResult:
+                                energyUseForm.controls.energyUseUnit.value : facilityUnits : utilityDataFormObj.energySource;
+                                <input class="form-control" type="number" [value]="convertedEnergyUse"
+                                    [disabled]="true">
+                                <span class="input-group-text" [innerHTML]="facilityUnits | settingsLabel">
+                                </span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </form>
+                }
+                }
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
