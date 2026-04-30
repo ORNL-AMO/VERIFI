@@ -34,7 +34,7 @@
             <button class="equipment-chip" (click)="goToEquipment(equipment)" [title]="equipment.name">
                 @let icons = (equipment | equipmentSourceIcons);
                 @for(icon of icons; track icon) {
-                <span class="fa-solid {{icon}} me-1'"></span>
+                <span class="fa-solid {{icon}} me-1"></span>
                 }
                 {{equipment.name}}
             </button>

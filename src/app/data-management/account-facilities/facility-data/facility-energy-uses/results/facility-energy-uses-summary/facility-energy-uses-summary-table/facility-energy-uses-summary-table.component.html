@@ -27,7 +27,7 @@
             <td>
                 <a class="click-link" (click)="goToGroup(groupData.groupId)">
                     @for(icon of groupData.groupIcons; track icon) {
-                    <span class="fa-solid {{icon}} me-1'"></span>
+                    <span class="fa-solid {{icon}} me-1"></span>
                     }
                     {{groupData.groupName}}
                 </a>
@@ -37,9 +37,9 @@
                 @if(annualEnergyUse.equipmentNotInUse){
                 <span class="fa fa-ban"></span>
                 }@else {
-                @if(annualEnergyUse.isPropegated){
+                @if(annualEnergyUse.isPropagated){
                 <span class="fa fa-asterisk"
-                    title="Energy use for this year was propegated based on most recent data available"></span>
+                    title="Energy use for this year was propagated based on most recent data available"></span>
                 }
                 {{annualEnergyUse.energyUse| number:'1.0-0'}}
                 }
@@ -60,9 +60,9 @@
             <th>Total</th>
             @for (total of filteredEnergyUseFacilitySummary.totals; track $index) {
             <th>
-                @if(total.isPropegated){
+                @if(total.isPropagated){
                 <span class="fa fa-asterisk"
-                    title="Energy use for this year was propegated based on most recent data available"></span>
+                    title="Energy use for this year was propagated based on most recent data available"></span>
                 }
                 {{total.totalEnergyUse | number:'1.0-0'}}
             </th>
@@ -71,9 +71,9 @@
         </tr>
     </tfoot>
 </table>
-@if(hasPropegatedData() == true){
+@if(hasPropagatedData() == true){
 <p class="fw-light italic">
-    <span class="fa fa-asterisk"></span> Energy use for this year was propegated based on most recent data available.
+    <span class="fa fa-asterisk"></span> Energy use for this year was propagated based on most recent data available.
 </p>
 }
 

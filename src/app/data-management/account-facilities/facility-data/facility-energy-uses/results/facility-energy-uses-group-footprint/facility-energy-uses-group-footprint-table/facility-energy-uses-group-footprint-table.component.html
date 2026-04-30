@@ -23,7 +23,7 @@
                     <a class="click-link" (click)="goToEquipment(equipmentEnergyUse.equipment)">
                         @let icons = (equipmentEnergyUse.equipment | equipmentSourceIcons);
                         @for(icon of icons; track icon) {
-                        <span class="fa-solid {{icon}} me-1'"></span>
+                        <span class="fa-solid {{icon}} me-1"></span>
                         }
                         {{equipmentEnergyUse.equipment.name}}
                     </a>

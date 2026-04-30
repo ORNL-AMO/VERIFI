@@ -39,9 +39,9 @@
                 @if(annualEnergyUse.isNoLongerInUse){
                 <span class="fa fa-ban" title="This equipment was no longer in use during this year"></span>
                 }@else {
-                @if(annualEnergyUse.isPropegated){
+                @if(annualEnergyUse.isPropagated){
                 <span class="fa fa-asterisk"
-                    title="Energy use for this year was propegated based on most recent data available"></span>
+                    title="Energy use for this year was propagated based on most recent data available"></span>
                 }
                 {{annualEnergyUse.energyUse| number:'1.0-0'}}
                 }
@@ -62,9 +62,9 @@
             <th>Total</th>
             @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
             <th>
-                @if(groupData.isPropegated){
+                @if(groupData.isPropagated){
                 <span class="fa fa-asterisk"
-                    title="Energy use for this year was propegated based on most recent data available"></span>
+                    title="Energy use for this year was propagated based on most recent data available"></span>
                 }
                 {{groupData.energyUse | number:'1.0-0'}}
             </th>
@@ -74,9 +74,9 @@
     </tfoot>
 </table>
 
-@if(hasPropegatedData() == true){
+@if(hasPropagatedData() == true){
 <p class="fw-light italic">
-    <span class="fa fa-asterisk"></span> Energy use for this year was propegated based on most recent data available.
+    <span class="fa fa-asterisk"></span> Energy use for this year was propagated based on most recent data available.
 </p>
 }
 

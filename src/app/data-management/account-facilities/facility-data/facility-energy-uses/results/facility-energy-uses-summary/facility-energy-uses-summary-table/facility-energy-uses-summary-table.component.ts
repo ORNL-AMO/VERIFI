@@ -94,12 +94,12 @@ export class FacilityEnergyUsesSummaryTableComponent {
     return this.filteredEnergyUseFacilitySummary$();
   }
 
-  hasPropegatedData: Signal<boolean | null> = computed(() => {
+  hasPropagatedData: Signal<boolean | null> = computed(() => {
     const summary = this.filteredEnergyUseFacilitySummary$();
     if (!summary) {
       return null;
     }
-    return summary.totals.some(total => total.isPropegated);
+    return summary.totals.some(total => total.isPropagated);
   });
 
   hasNoLongerInUseData: Signal<boolean | null> = computed(() => {

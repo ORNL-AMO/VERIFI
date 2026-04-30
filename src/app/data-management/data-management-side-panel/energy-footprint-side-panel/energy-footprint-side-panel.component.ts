@@ -2,7 +2,7 @@ import { Component, computed, signal, inject, Signal, effect } from '@angular/co
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
-import { getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getYearsWithFullData, getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
@@ -38,11 +38,11 @@ export class EnergyFootprintSidePanelComponent {
 
   yearOptions: Signal<Array<number>> = computed(() => {
     const calanderizedMeters = this.calanderizedMeters();
-    const facilities = this.facilities();
-    if (calanderizedMeters.length === 0 || facilities.length === 0) {
+    const selectedFacility = this.selectedFacility();
+    if (calanderizedMeters.length === 0 || !selectedFacility) {
       return [];
     }
-    return getYearsWithFullDataAccount(calanderizedMeters, facilities);
+    return getYearsWithFullData(calanderizedMeters, selectedFacility);
   });
 
   //TODO: potentially make a web worker for this or optimize number of calls 

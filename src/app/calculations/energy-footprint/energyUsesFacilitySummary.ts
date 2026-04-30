@@ -9,7 +9,7 @@ export class EnergyUsesFacilitySummary {
     totals: Array<{
         year: number,
         totalEnergyUse: number,
-        isPropegated: boolean
+        isPropagated: boolean
     }>;
     constructor(facility: IdbFacility, energyUseGroups: Array<IdbFacilityEnergyUseGroup>, equipment: Array<IdbFacilityEnergyUseEquipment>, useLatestDataAvailable: boolean = true) {
         this.setEnergyFootprintGroups(facility, energyUseGroups, equipment, useLatestDataAvailable);
@@ -54,9 +54,9 @@ export class EnergyUsesFacilitySummary {
             return {
                 year: year,
                 totalEnergyUse: totalEnergyUse,
-                isPropegated: this.footprintGroups.some(group => {
+                isPropagated: this.footprintGroups.some(group => {
                     let yearData = group.totalAnnualEnergyUse.find(annualUse => annualUse.year == year);
-                    return yearData ? yearData.isPropegated : false;
+                    return yearData ? yearData.isPropagated : false;
                 })
             }
         });
@@ -92,6 +92,6 @@ export interface FacilityEnergyUseGroupSummary {
         totalEnergyUse: number,
         percentOfFacilityUse: number,
         year: number,
-        isPropegated: boolean
+        isPropagated: boolean
     }>
 }
