@@ -76,7 +76,7 @@
                 </h6>
                 <form [formGroup]="operatingConditionsForm">
                     <div class="row">
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-md-4 col-sm-6">
                             <label for="hoursOfOperation">
                                 Hours of Operation
                             </label>
@@ -86,7 +86,7 @@
                                 <span class="input-group-text">hrs</span>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-md-4 col-sm-6">
                             <label for="loadFactor">
                                 Load Factor
                             </label>
@@ -96,7 +96,7 @@
                                 <span class="input-group-text">%</span>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-md-4 col-sm-6">
                             <label for="dutyFactor">
                                 Duty Factor
                             </label>
@@ -106,7 +106,7 @@
                                 <span class="input-group-text">%</span>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6">
+                        <!-- <div class="col-md-3 col-sm-6">
                             <label for="efficiency">
                                 Efficiency
                             </label>
@@ -115,7 +115,7 @@
                                     id="efficiency">
                                 <span class="input-group-text">%</span>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </form>
             </div>
@@ -128,14 +128,14 @@
 
                 <form [formGroup]="energyUseForm">
                     <div class="row mt-3">
-                        <div class="col-sm-12 col-md-3">
+                        <div class="col-sm-12 col-md-4">
                             <span class="w-100 badge badge-text h-100"
                                 [ngStyle]="{'background-color': utilityDataFormObj.energySource | meterSourceColor}">{{utilityDataFormObj.energySource}}
                                 Energy Use</span>
                         </div>
 
                         @let unitsDifferent = (energyUseForm.controls.energyUseUnit.value !== facilityUnits);
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-4">
                             <div class="input-group">
                                 <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseForm)">
                                     @if(energyUseForm.controls.overrideEnergyUse.value){
@@ -151,7 +151,7 @@
                             </div>
                         </div>
                         @if(unitsDifferent){
-                        <div class="col-sm-6 col-md-3">
+                        <div class="col-sm-6 col-md-4">
                             <div class="input-group">
                                 @let convertedEnergyUse = energyUseForm.controls.energyUse.value |
                                 convertEnergyUseResult:
