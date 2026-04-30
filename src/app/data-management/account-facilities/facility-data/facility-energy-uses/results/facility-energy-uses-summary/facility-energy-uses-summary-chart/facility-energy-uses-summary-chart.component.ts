@@ -215,6 +215,7 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
     const rootTotal = groupEntries.reduce((sum, g) => sum + g.energyUse, 0);
 
     const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmtPct = (n: number) => Number(n.toPrecision(2)).toString();
 
     // Build parallel arrays: root → groups → equipment (one item per node)
     const ids: string[] = [rootId];
@@ -234,9 +235,9 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
       values.push(g.energyUse);
       colors.push(g.color);
       hoverTemplates.push(
-        `<b>${g.name}</b><br>% of Facility: ${g.percent.toFixed(1)}%<br>Energy: ${fmt(g.energyUse)} ${this.facility.energyUnit}/yr<extra></extra>`
+        `<b>${g.name}</b><br>% of Facility: ${fmtPct(g.percent)}%<br>Energy: ${fmt(g.energyUse)} ${this.facility.energyUnit}/yr<extra></extra>`
       );
-      textTemplates.push(`<b>${g.name}</b><br>${fmt(g.percent)}%`);
+      textTemplates.push(`<b>${g.name}</b><br>${fmtPct(g.percent)}%`);
 
       for (const equip of g.equipment) {
         const equipPercentOfFacility = rootTotal > 0 ? (equip.energyUse / rootTotal) * 100 : 0;
@@ -246,9 +247,9 @@ export class FacilityEnergyUsesSummaryChartComponent implements OnChanges {
         values.push(equip.energyUse);
         colors.push(equip.color);
         hoverTemplates.push(
-          `<b>${equip.name}</b><br>Energy: ${fmt(equip.energyUse)} ${this.facility.energyUnit}/yr<br>% of Facility: ${equipPercentOfFacility.toFixed(1)}%<br>% of Group: ${equip.percentOfGroup.toFixed(1)}%<extra></extra>`
+          `<b>${equip.name}</b><br>Energy: ${fmt(equip.energyUse)} ${this.facility.energyUnit}/yr<br>% of Facility: ${fmtPct(equipPercentOfFacility)}%<br>% of Group: ${fmtPct(equip.percentOfGroup)}%<extra></extra>`
         );
-        textTemplates.push(`${equip.name}<br>${fmt(equip.percentOfFacility)}%`);
+        textTemplates.push(`${equip.name}<br>${fmtPct(equip.percentOfFacility)}%`);
       }
     }
 
