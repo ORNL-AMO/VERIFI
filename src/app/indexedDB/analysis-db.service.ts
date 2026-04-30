@@ -36,7 +36,7 @@ export class AnalysisDbService {
         this.localStorageService.store('analysisItemId', analysisItem.id);
       }
     });
-    
+
     this.generatedModelsPerGroup = new BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>({});
   }
 
@@ -214,7 +214,7 @@ export class AnalysisDbService {
             pVariable.unit = predictor.unit;
           }
         })
-        if(group.models){
+        if (group.models) {
           group.models.forEach(model => {
             model.predictorVariables.forEach(pVariable => {
               if (pVariable.id == predictor.guid) {
@@ -240,7 +240,7 @@ export class AnalysisDbService {
     }
   }
 
-  async addGroup(groupId: string) {
+  async addGroup(groupId: string, groupType: 'Energy' | 'Water' | 'Other') {
     let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = predictors.map(predictor => {
       return {
@@ -253,11 +253,15 @@ export class AnalysisDbService {
       }
     });
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    //TODO: I think we only want to add groups to analysis that are the same type..
+    // water -> water, energy -> energy
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
-      let analysisGroup: AnalysisGroup = getNewAnalysisGroup(groupId, predictorVariables);
-      item.groups.push(analysisGroup);
-      await firstValueFrom(this.updateWithObservable(item));
+      if (item.analysisCategory == 'energy' && groupType == 'Energy' || item.analysisCategory == 'water' && groupType == 'Water') {
+        let analysisGroup: AnalysisGroup = getNewAnalysisGroup(groupId, predictorVariables);
+        item.groups.push(analysisGroup);
+        await firstValueFrom(this.updateWithObservable(item));
+      }
     };
   }
 
@@ -305,4 +309,34 @@ export class AnalysisDbService {
   //   }
   //   return values;
   // }
+
+  async changeGroupType(groupId: string, newGroupType: 'Energy' | 'Water' | 'Other', oldGroupType: 'Energy' | 'Water' | 'Other') {
+    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
+    let predictorVariables: Array<AnalysisGroupPredictorVariable> = predictors.map(predictor => {
+      return {
+        id: predictor.guid,
+        name: predictor.name,
+        production: predictor.production,
+        productionInAnalysis: true,
+        regressionCoefficient: undefined,
+        unit: predictor.unit
+      }
+    });
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let item: IdbAnalysisItem = facilityAnalysisItems[index];
+      if (item.analysisCategory == 'energy' && newGroupType == 'Energy' || item.analysisCategory == 'water' && newGroupType == 'Water') {
+        //add group to energy analysis that didn't have it before
+        let analysisGroup: AnalysisGroup = getNewAnalysisGroup(groupId, predictorVariables);
+        item.groups.push(analysisGroup);
+        await firstValueFrom(this.updateWithObservable(item));
+      }
+
+      if (item.analysisCategory == 'energy' && oldGroupType == 'Energy' || item.analysisCategory == 'water' && oldGroupType == 'Water') {
+        //remove group from energy analysis that shouldn't have it anymore
+        item.groups = item.groups.filter(group => { return group.idbGroupId != groupId });
+      }
+      await firstValueFrom(this.updateWithObservable(item));
+    };
+  }
 }

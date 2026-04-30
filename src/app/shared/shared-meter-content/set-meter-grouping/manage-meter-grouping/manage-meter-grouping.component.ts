@@ -87,6 +87,7 @@ export class ManageMeterGroupingComponent {
     let newGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(newGroupType, "New Group", this.facility.guid, this.facility.accountId);
     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.analysisDbService.addGroup(newGroup.guid, newGroup.groupType);
     await this.dbChangesService.setMeterGroups(account, this.facility);
     this.toastNoticationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     this.editGroup(newGroup);
