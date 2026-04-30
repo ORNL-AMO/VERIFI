@@ -825,11 +825,12 @@ export class UploadDataV3Service {
   }
 
   getMeterReadingDataApplication(excelSelection: 'Yes' | 'Do Not Calenderize' | 'Evenly Distribute'): MeterReadingDataApplication {
-    if (excelSelection == 'Yes') {
+    let excelSelectionClean: string = (excelSelection || '').trim().toLowerCase();
+    if (excelSelectionClean == 'yes' || excelSelectionClean == 'calendarize') {
       return 'backward';
-    } else if (excelSelection == 'Do Not Calenderize') {
+    } else if (excelSelectionClean == 'do not calenderize' || excelSelectionClean == 'no') {
       return 'fullMonth';
-    } else if (excelSelection == 'Evenly Distribute') {
+    } else if (excelSelectionClean == 'evenly distribute') {
       return 'fullYear';
     };
   }
