@@ -253,7 +253,7 @@ export class AnalysisDbService {
       }
     });
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
-    //TODO: I think we only want to add groups to analysis that are the same type..
+    // add groups to analysis that are the same type..
     // water -> water, energy -> energy
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
