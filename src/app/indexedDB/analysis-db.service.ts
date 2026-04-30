@@ -327,16 +327,20 @@ export class AnalysisDbService {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
       if (item.analysisCategory == 'energy' && newGroupType == 'Energy' || item.analysisCategory == 'water' && newGroupType == 'Water') {
         //add group to energy analysis that didn't have it before
-        let analysisGroup: AnalysisGroup = getNewAnalysisGroup(groupId, predictorVariables);
-        item.groups.push(analysisGroup);
-        await firstValueFrom(this.updateWithObservable(item));
+        //check if group already exists in analysis item groups (if changing from other to energy/water) and only add if it doesn't already exist
+        let existingGroup: AnalysisGroup = item.groups.find(group => { return group.idbGroupId == groupId });
+        if (!existingGroup) {
+          let analysisGroup: AnalysisGroup = getNewAnalysisGroup(groupId, predictorVariables);
+          item.groups.push(analysisGroup);
+          await firstValueFrom(this.updateWithObservable(item));
+        }
       }
 
       if (item.analysisCategory == 'energy' && oldGroupType == 'Energy' || item.analysisCategory == 'water' && oldGroupType == 'Water') {
         //remove group from energy analysis that shouldn't have it anymore
         item.groups = item.groups.filter(group => { return group.idbGroupId != groupId });
+        await firstValueFrom(this.updateWithObservable(item));
       }
-      await firstValueFrom(this.updateWithObservable(item));
     };
   }
 }
