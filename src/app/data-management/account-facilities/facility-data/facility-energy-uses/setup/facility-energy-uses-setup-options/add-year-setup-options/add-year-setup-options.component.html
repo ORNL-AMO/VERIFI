@@ -43,7 +43,7 @@
                         </p>
                         <select id="setupYear" class="form-select" [(ngModel)]="setupYear" required>
                             @for(year of yearOptions; track year){
-                            <option [value]="year">{{year}}</option>
+                            <option [ngValue]="year">{{year}}</option>
                             }
                         </select>
                     </div>
