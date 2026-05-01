@@ -1,122 +1,120 @@
-@if (!inDashboard && selectedReport) {
-  <div class="reports banner sticky-top d-flex justify-content-between"
-    [ngClass]="{'modal-open': modalOpen}">
-    <div>
-      @let reportErrors = selectedReport.guid | invalidAccountReport;
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
-            @if (reportErrors.hasErrors) {
-              <span class="fa fa-exclamation-circle"></span>
-            }
-            <i class="fa fa-gears"></i>
+@let report = selectedReport();
+@let errors = reportErrors();
+@if (!inDashboard() && report) {
+<div class="reports banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen()}">
+  <div>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
+          @if (errors.hasErrors) {
+          <span class="fa fa-exclamation-circle"></span>
+          }
+          <i class="fa fa-gears"></i>
           Report Setup</a>
-        </li>
-         @if (selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'accountSavings') {
-          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
-            <a class="nav-link" routerLink="report-data-check" [routerLinkActive]="['active']">
-              <i class="fa fa-circle-check"></i>
-            Data Check</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'betterPlants') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
-            <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Better Plants Report</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'dataOverview') {
-          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}"
-            >
-            <a class="nav-link" routerLink="data-overview-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Data Overview</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'performance') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
-            <a class="nav-link" routerLink="performance-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Performance Report</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'betterClimate') {
-          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}"
-            >
-            <a class="nav-link" routerLink="better-climate-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Emissions Report</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'analysis') {
-          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
-            <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Modeling Report</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'accountSavings') {
-          <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
-            <a class="nav-link" routerLink="account-savings-report"
-              [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Savings Report</a>
-          </li>
-        }
-        @if (selectedReport.reportType == 'accountEmissionFactors') {
-          <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}"
-            >
-            <a class="nav-link" routerLink="account-emission-factors-report" [routerLinkActive]="['active']">
-              <i class="fa fa-file"></i>
-            Emission Factors Report</a>
-          </li>
-        }
-      </ul>
-    </div>
+      </li>
+      @if (report.reportType == 'betterPlants' || report.reportType == 'performance' ||
+      report.reportType == 'accountSavings') {
+      <li class="nav-item" [ngClass]="{'disabled': errors.hasErrors}">
+        <a class="nav-link" routerLink="report-data-check" [routerLinkActive]="['active']">
+          <i class="fa fa-circle-check"></i>
+          Data Check</a>
+      </li>
+      }
+      @if (report.reportType == 'betterPlants') {
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited() || errors.hasErrors}">
+        <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Better Plants Report</a>
+      </li>
+      }
+      @if (report.reportType == 'dataOverview') {
+      <li class="nav-item" [ngClass]="{'disabled': errors.hasErrors}">
+        <a class="nav-link" routerLink="data-overview-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Data Overview</a>
+      </li>
+      }
+      @if (report.reportType == 'performance') {
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited() || errors.hasErrors}">
+        <a class="nav-link" routerLink="performance-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Performance Report</a>
+      </li>
+      }
+      @if (report.reportType == 'betterClimate') {
+      <li class="nav-item" [ngClass]="{'disabled': errors.hasErrors}">
+        <a class="nav-link" routerLink="better-climate-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Emissions Report</a>
+      </li>
+      }
+      @if (report.reportType == 'analysis') {
+      <li class="nav-item" [ngClass]="{'disabled': errors.hasErrors}">
+        <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Modeling Report</a>
+      </li>
+      }
+      @if (report.reportType == 'accountSavings') {
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited() || errors.hasErrors}">
+        <a class="nav-link" routerLink="account-savings-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Savings Report</a>
+      </li>
+      }
+      @if (report.reportType == 'accountEmissionFactors') {
+      <li class="nav-item" [ngClass]="{'disabled': errors.hasErrors}">
+        <a class="nav-link" routerLink="account-emission-factors-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Emission Factors Report</a>
+      </li>
+      }
+    </ul>
+  </div>
+  <div>
     <div>
-      <div>
-        <ul class="nav nav-tabs">
-          <li class="nav-item dropdown">
-            <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
-              <i class="fa fa-file"></i>
-              {{selectedReport.name}}
-              @if (selectedReport.reportType != 'dataOverview' && selectedReport.reportType != 'accountSavings' && selectedReport.reportType != 'accountEmissionFactors') {
-                - ({{selectedReport.reportYear}})
-              }
-            </a>
-            <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
-              <div class="menu-scroll-section">
-                @for (report of reportList; track report) {
-                  @if (selectedReport.guid != report.guid && selectedReport.reportType == report.reportType) {
-                    <li
-                      >
-                      <a class="dropdown-item" (click)="selectItem(report)">
-                        <i class="fa fa-file"></i>
-                        {{report.name}}
-                        @if (selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'betterClimate' || selectedReport.reportType == 'analysis' || selectedReport.reportType == 'accountSavings') {
-                          <span class="badge text-bg-secondary ms-2 float-right"
-                            >
-                            {{report.reportYear}}
-                          </span>
-                        }
-                      </a>
-                    </li>
+      <ul class="nav nav-tabs">
+        <li class="nav-item dropdown">
+          <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+            <i class="fa fa-file"></i>
+            {{report.name}}
+            @if (report.reportType != 'dataOverview' && report.reportType != 'accountSavings' &&
+            report.reportType != 'accountEmissionFactors') {
+            - ({{report.reportYear}})
+            }
+          </a>
+          <ul class="dropdown-menu" [ngClass]="{'show': showDropdown()}">
+            <div class="menu-scroll-section">
+              @for (reportListItem of reportList(); track reportListItem.guid) {
+              @if (report.guid != reportListItem.guid && report.reportType == reportListItem.reportType) {
+              <li>
+                <a class="dropdown-item" (click)="selectItem(reportListItem)">
+                  <i class="fa fa-file"></i>
+                  {{reportListItem.name}}
+                  @if (report.reportType == 'betterPlants' || report.reportType == 'performance' ||
+                  report.reportType == 'betterClimate' || report.reportType == 'analysis' ||
+                  report.reportType == 'accountSavings') {
+                  <span class="badge text-bg-secondary ms-2 float-right">
+                    {{reportListItem.reportYear}}
+                  </span>
                   }
-                }
-              </div>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="goToDashboard()">
-                  <i class="fa fa-list"></i> All Account Reports
                 </a>
               </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
+              }
+              }
+            </div>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item" (click)="goToDashboard()">
+                <i class="fa fa-list"></i> All Account Reports
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </div>
+</div>
 }

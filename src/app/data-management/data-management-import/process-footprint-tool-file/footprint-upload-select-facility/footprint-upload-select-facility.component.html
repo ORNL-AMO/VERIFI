@@ -1,0 +1,35 @@
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Select Facility
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+                <p class="text-center bold">
+                    Select the facility you would like to import energy uses data into from the footprint tool file.
+                </p>
+                <div class="d-flex w-100 justify-content-center">
+                    <select class="form-select w-50" [(ngModel)]="fileReference.selectedFacilityId"
+                        (change)="setSelectedFacility()">
+                        <option [ngValue]="null">-- Select Facility --</option>
+                        @for (facility of facilities; track facility.guid) {
+                        <option [ngValue]="facility.guid">{{facility.name}}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<app-data-management-import-footer [fileReference]="fileReference" [navOption]="'select-facility'"
+    [disableNext]="!fileReference.selectedFacilityId"></app-data-management-import-footer>

@@ -20,8 +20,8 @@ import { MeterGroupingDataService } from '../meter-grouping-data.service';
   styleUrl: './meter-group-table.component.css'
 })
 export class MeterGroupTableComponent {
-  @Input()
-  meterGroup: IdbUtilityMeterGroup | undefined;
+  @Input({required: true})
+  meterGroup: IdbUtilityMeterGroup;
   @Input()
   showHeader: boolean;
 

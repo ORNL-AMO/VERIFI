@@ -87,7 +87,8 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showOtherScope2Emissions: showOtherScope2Emissions,
             showFugitiveEmissions: showFugitiveEmissions,
             showMobileEmissions: showMobileEmissions,
-            showProcessEmissions: showProcessEmissions
+            showProcessEmissions: showProcessEmissions,
+            energyIsSource: energyIsSource
         });
     });
     return calanderizedMeterData;

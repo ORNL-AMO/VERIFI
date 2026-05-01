@@ -381,6 +381,56 @@ export class UpdateDbEntryService {
         }
       });
     }
+
+    if (report.reportType == 'accountSavings' && !report.accountSavingsReportSetup) {
+      report.accountSavingsReportSetup = {
+        analysisItemId: undefined,
+        includeAnnualResults: true,
+        includeAnnualResultsTable: true,
+        includeAnnualResultsGraph: true,
+        includeAccountMonthlyTable: true,
+        includeAccountMonthlyResults: true,
+        includeFacilityResults: true,
+        includeFacilityResultsTable: true,
+        includeFacilityResultsGraph: true,
+        includeFacilityMonthlyResultsGraph: true,
+        includePerformanceResults: true,
+        includePerformanceResultsTable: true,
+        includePerformanceResultsGraph: true,
+        includePerformanceActual: true,
+        includePerformanceAdjusted: true,
+        includePerformanceContribution: true,
+        includePerformanceSavings: true,
+        numberOfTopPerformers: 5,
+        analysisTableColumns: {
+          incrementalImprovement: false,
+          SEnPI: false,
+          savings: false,
+          percentSavingsComparedToBaseline: false,
+          yearToDateSavings: false,
+          yearToDatePercentSavings: false,
+          rollingSavings: false,
+          rolling12MonthImprovement: false,
+          productionVariables: false,
+          energy: true,
+          actualEnergy: true,
+          modeledEnergy: true,
+          adjusted: true,
+          baselineAdjustmentForNormalization: true,
+          baselineAdjustmentForOther: true,
+          baselineAdjustment: true,
+          totalSavingsPercentImprovement: true,
+          annualSavingsPercentImprovement: true,
+          cummulativeSavings: true,
+          newSavings: true,
+          predictors: [],
+          predictorGroupId: undefined,
+          bankedSavings: false,
+          savingsUnbanked: false
+        }
+      };
+      isChanged = true;
+    }
     return {
       report: report,
       isChanged: isChanged
@@ -450,7 +500,6 @@ export class UpdateDbEntryService {
   }
 
   updateSelectedFacilityAnalysis(facility: IdbFacility, facilityAnalysisItems: Array<IdbAnalysisItem>): { facility: IdbFacility, isChanged: boolean } {
-    //TODO: ensure we are selecting with the correct baseline year for goals...
 
     let isChanged: boolean = false;
     if (facility.selectedEnergyAnalysisId == undefined) {

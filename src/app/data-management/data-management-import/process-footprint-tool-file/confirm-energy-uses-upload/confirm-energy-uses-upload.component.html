@@ -1,0 +1,109 @@
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Review and Submit Upload Data
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+                @if(!dataSubmitted){
+                <div class="d-flex w-100 justify-content-between pt-2 pb-2">
+                    <div class="me-2 w-75">
+                        <p class="mb-0 fw-light">
+                            The below content will be imported into the selected account. Items marked with an <span
+                                class="fa fa-asterisk"></span> currently exist in the account and will be updated on
+                            import.
+                        </p>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" (click)="submitImport()">
+                            Import Data
+                        </button>
+                    </div>
+                </div>
+                <!--footprint tool import summary table-->
+                <table class="table table-bordered table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                Energy Use Group
+                            </th>
+                            <th>
+                                Number of Equipment
+                            </th>
+                            <th>
+                                New/Existing
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (energyUseGroup of fileReference.facilityEnergyUseGroups; track energyUseGroup.guid) {
+                        @let energyUseEquipment = energyUseGroup.guid |
+                        facilityEnergyEquipmentList:fileReference.facilityEnergyUseEquipment;
+                        <tr>
+                            <td class="bold">
+                                {{energyUseGroup.name}}
+                            </td>
+                            <td>
+                                {{energyUseEquipment.length}}
+                            </td>
+                            <td>
+                                @if(energyUseGroup.id) {
+                                Existing
+                                } @else {
+                                New
+                                }
+                            </td>
+                        </tr>
+                        @if(energyUseEquipment.length != 0) {
+                        @for(equipment of energyUseEquipment; track equipment.guid) {
+                        <tr>
+                            <td class="ps-3" colspan="2">
+                                <span class="fa fa-plug"></span>
+                                {{equipment.name}}
+                            </td>
+                            <td>
+                                @if(equipment.id) {
+                                Existing
+                                } @else {
+                                New
+                                }
+                            </td>
+                        </tr>
+                        }
+                        }
+                        }
+                    </tbody>
+                </table>
+                }@else {
+                <div class="d-flex w-100 flex-column">
+                    <div class="alert alert-success">
+                        Data has been successfully uploaded to the account! Use the button below to upload another file
+                        if needed.
+                    </div>
+                    <div class="w-100 text-center">
+                        <button class="btn btn-outline mb-2 ms-2" (click)="finishSubmit()">
+                            <span class="fa fa-refresh"></span>
+                            Upload Another File
+                        </button>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if(!dataSubmitted){
+<app-data-management-import-footer [fileReference]="fileReference" [navOption]="'review-and-submit'"
+    [disableNext]="false" (emitSubmit)="submitImport()"></app-data-management-import-footer>
+}

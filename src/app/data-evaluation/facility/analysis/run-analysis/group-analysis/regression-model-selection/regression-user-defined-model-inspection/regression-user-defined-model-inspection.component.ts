@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, SimpleChange, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../../analysis.service';
 import { Subscription } from 'rxjs';
@@ -7,7 +7,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { getFiscalYear, getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
@@ -46,6 +46,7 @@ export class RegressionUserDefinedModelInspectionComponent {
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMeterData: Array<IdbUtilityMeterData>;
   account: IdbAccount;
+  analysisItemCopy: IdbAnalysisItem;
 
   @ViewChild('monthlyAnalysisGraph', { static: false }) monthlyAnalysisGraph: ElementRef;
 
@@ -92,10 +93,12 @@ export class RegressionUserDefinedModelInspectionComponent {
 
   generateUserDefinedModel() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.analysisItemCopy = JSON.parse(JSON.stringify(analysisItem));
+    this.analysisItemCopy.baselineYear = this.selectedGroup.regressionStartYear;
     //report year is determined by the latest full year of data
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
     let reportYear: number = getLatestYearWithData(calanderizedMeters, [this.selectedFacility]);
-    this.userModel = this.regressionsModelsService.getUserDefinedModel(this.selectedGroup, this.selectedFacility, analysisItem, reportYear);
+    this.userModel = this.regressionsModelsService.getUserDefinedModel(this.selectedGroup, this.selectedFacility, this.analysisItemCopy, reportYear);
   }
 
   calculateInspectedModel() {
@@ -118,7 +121,7 @@ export class RegressionUserDefinedModelInspectionComponent {
       this.calculating = true;
       this.worker.postMessage({
         selectedGroup: groupCopy,
-        analysisItem: this.analysisItem,
+        analysisItem: this.analysisItemCopy,
         facility: this.selectedFacility,
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
@@ -128,8 +131,8 @@ export class RegressionUserDefinedModelInspectionComponent {
       });
     } else {
       // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItemCopy.energyIsSource, neededUnits: getNeededUnits(this.analysisItemCopy) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItemCopy, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
       this.calculating = false;
       this.loadingService.setLoadingStatus(false);
@@ -141,10 +144,10 @@ export class RegressionUserDefinedModelInspectionComponent {
     if (this.monthlyAnalysisGraph) {
       let name: string = this.getGraphName();
 
-      let yAxisTitle: string = this.analysisItem.energyUnit;
+      let yAxisTitle: string = this.analysisItemCopy.energyUnit;
       let traceColor: string = '#7D3C98'
-      if (this.analysisItem.analysisCategory == 'water') {
-        yAxisTitle = this.analysisItem.waterUnit;
+      if (this.analysisItemCopy.analysisCategory == 'water') {
+        yAxisTitle = this.analysisItemCopy.waterUnit;
         traceColor = '#3498DB';
       }
 
@@ -244,26 +247,26 @@ export class RegressionUserDefinedModelInspectionComponent {
   }
 
   getGraphName(): string {
-    if (this.analysisItem.analysisCategory == 'energy') {
+    if (this.analysisItemCopy.analysisCategory == 'energy') {
       return 'Modeled Energy';
-    } else if (this.analysisItem.analysisCategory == 'water') {
+    } else if (this.analysisItemCopy.analysisCategory == 'water') {
       return 'Modeled Water';
     }
     return '';
   }
 
   getTrace3Name(): string {
-    if (this.analysisItem.analysisCategory == 'energy') {
+    if (this.analysisItemCopy.analysisCategory == 'energy') {
       return 'Actual Energy';
-    } else if (this.analysisItem.analysisCategory == 'water') {
+    } else if (this.analysisItemCopy.analysisCategory == 'water') {
       return 'Actual Consumption';
     }
   }
 
   getGraphTitle(): string {
-    if (this.analysisItem.analysisCategory == 'energy') {
+    if (this.analysisItemCopy.analysisCategory == 'energy') {
       return 'Comparison of Actual and Modeled Energy Use';
-    } else if (this.analysisItem.analysisCategory == 'water') {
+    } else if (this.analysisItemCopy.analysisCategory == 'water') {
       return 'Comparison of Actual and Modeled Water Consumption';
     }
   }

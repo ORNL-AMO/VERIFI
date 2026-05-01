@@ -111,6 +111,7 @@ export class PredictorsDataFormComponent {
 
   canDeactivate(): Observable<boolean> {
     if (!this.isSaved) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

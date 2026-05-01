@@ -84,6 +84,14 @@ export const power = {
       }
       , to_anchor: 1 / 2544.43
     },
+    MMBtuhr: {
+      name: {
+        singular: 'Million British thermal unit per hour',
+        plural: 'Million British thermal unit per hour',
+        display: '(MMBtu/hr)'
+      }
+      , to_anchor: 1000000 / 2544.43
+    },
     MJh: {
       name: {
         singular: 'Megajoule per hour',

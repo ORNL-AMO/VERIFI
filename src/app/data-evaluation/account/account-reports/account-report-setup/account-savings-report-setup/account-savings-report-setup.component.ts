@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { EMPTY, firstValueFrom, map, startWith, switchMap, tap } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -12,8 +11,8 @@ import { AccountReportsService } from '../../account-reports.service';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { Router } from '@angular/router';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-account-savings-report-setup',
@@ -23,104 +22,92 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './account-savings-report-setup.component.css'
 })
 export class AccountSavingsReportSetupComponent {
-  accountSavingsReportForm: FormGroup;
-  account: IdbAccount;
-  analysisOptions: Array<IdbAccountAnalysisItem>
-  selectedReportSub: Subscription;
-  isFormChange: boolean = false;
-  selectedAnalysisItem: IdbAccountAnalysisItem;
-  reportSetup: AccountSavingsReportSetup;
+  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
+  private accountReportsService: AccountReportsService = inject(AccountReportsService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+
+
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  analysisTableColumns: Signal<AnalysisTableColumns> = toSignal(this.analysisService.analysisTableColumns);
+  selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport);
+
+  accountSavingsReportForm: WritableSignal<FormGroup> = signal(undefined);
+
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(
+    toObservable(this.accountSavingsReportForm).pipe(
+      switchMap(form => form
+        ? form.get('analysisItemId').valueChanges.pipe(
+            tap(() => this.save()),
+            startWith(form.get('analysisItemId').value)
+          )
+        : EMPTY
+      ),
+      map(id => this.accountAnalysisDbService.getByGuid(id))
+    )
+  );
+
+  reportSetup: Signal<AccountSavingsReportSetup> = computed(() => {
+    const selectedReport = this.selectedReport();
+    if (selectedReport) {
+      return selectedReport.accountSavingsReportSetup;
+    }
+  });
+  energyColumnLabel: Signal<string> = computed(() => {
+    const selectedAnalysisItem = this.selectedAnalysisItem();
+    if (selectedAnalysisItem) {
+      if (selectedAnalysisItem.analysisCategory == 'water') {
+        return 'Consumption Columns';
+      } else if (selectedAnalysisItem.analysisCategory == 'energy') {
+        return 'Energy Columns';
+      }
+    }
+    return '';
+  });
+  actualUseLabel: Signal<string> = computed(() => {
+    const selectedAnalysisItem = this.selectedAnalysisItem();
+    if (selectedAnalysisItem) {
+      if (selectedAnalysisItem.analysisCategory == 'water') {
+        return 'Actual Consumption';
+      } else if (selectedAnalysisItem.analysisCategory == 'energy') {
+        return 'Actual Energy Use';
+      }
+    }
+    return '';
+  });
+
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  analysisTableColumns: AnalysisTableColumns;
-  energyColumnLabel: string;
-  actualUseLabel: string;
-  itemToEdit: IdbAccountAnalysisItem;
-  baselineYears: Array<number> = [];
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+  currentReportId: string;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private analysisService: AnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private calanderizationService: CalanderizationService) {
-  }
-
-
-  ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
-      if (!this.isFormChange) {
-        this.accountSavingsReportForm = this.accountReportsService.getAccountSavingsFormFromReport(val.accountSavingsReportSetup);
-        this.reportSetup = val.accountSavingsReportSetup;
-        this.setAnalysisOptions();
-      } else {
-        this.isFormChange = false;
+  constructor() {
+    effect(() => {
+      const selectedReport = this.selectedReport();
+      if (selectedReport && this.currentReportId !== selectedReport.guid) {
+        this.currentReportId = selectedReport.guid;
+        const form = this.accountReportsService.getAccountSavingsFormFromReport(selectedReport.accountSavingsReportSetup);
+        this.accountSavingsReportForm.set(form);
       }
     });
   }
 
-  ngOnDestroy() {
-    this.selectedReportSub.unsubscribe();
-  }
-
-  setLabels() {
-    if (this.selectedAnalysisItem) {
-      if (this.selectedAnalysisItem.analysisCategory == 'water') {
-        this.actualUseLabel = 'Actual Consumption';
-        this.energyColumnLabel = 'Consumption Columns';
-      } else if (this.selectedAnalysisItem.analysisCategory == 'energy') {
-        this.actualUseLabel = 'Actual Energy Use';
-        this.energyColumnLabel = 'Energy Columns';
-      }
-    }
-  }
-
   async save() {
-    this.isFormChange = true;
+    // this.isFormChange = true;
     this.setEnergyColumns();
     this.setMonthIncrementalImprovement();
 
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
-    selectedReport.accountSavingsReportSetup = this.accountReportsService.updateAccountSavingsReportFromForm(selectedReport.accountSavingsReportSetup, this.accountSavingsReportForm);
+    let selectedReport: IdbAccountReport = this.selectedReport();
+    selectedReport.accountSavingsReportSetup = this.accountReportsService.updateAccountSavingsReportFromForm(selectedReport.accountSavingsReportSetup, this.accountSavingsReportForm());
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
+    await this.dbChangesService.setAccountReports(this.account());
+    this.accountReportDbService.selectedReport.next({ ...selectedReport });
   }
 
-  setAnalysisOptions() {
-    this.setYearOptions();
-    this.analysisOptions = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.applyFilters();
-    this.setSelectedAnalysisItem(true);
-    if (!this.selectedAnalysisItem) {
-      this.accountSavingsReportForm.controls.analysisItemId.patchValue(undefined);
-      this.accountSavingsReportForm.controls.analysisItemId.updateValueAndValidity();
-      this.save();
-    }
-  }
-
-  async setSelectedAnalysisItem(onInit: boolean) {
-    this.selectedAnalysisItem = this.analysisOptions.find(item => { return item.guid == this.accountSavingsReportForm.controls.analysisItemId.value });
-    this.setPredictorVariables();
-    this.setLabels();
-    if (!onInit) {
-      await this.save();
-    }
-  }
-
-  setPredictorVariables() {
-    this.analysisTableColumns.predictors = [];
-    this.save();
-  }
 
   async setDefault() {
-    const columnsGroup = this.accountSavingsReportForm.get('analysisTableColumns');
+    const accountSavingsReportForm = this.accountSavingsReportForm();
+    const columnsGroup = accountSavingsReportForm.get('analysisTableColumns');
     if (columnsGroup) {
       columnsGroup.patchValue({
         incrementalImprovement: true,
@@ -152,7 +139,8 @@ export class AccountSavingsReportSetupComponent {
   }
 
   toggleEnergyColumns() {
-    const columnsGroup = this.accountSavingsReportForm.get('analysisTableColumns');
+    const accountSavingsReportForm = this.accountSavingsReportForm();
+    const columnsGroup = accountSavingsReportForm.get('analysisTableColumns');
     if (columnsGroup) {
       const energy = columnsGroup.get('energy')?.value;
       columnsGroup.patchValue({
@@ -168,7 +156,8 @@ export class AccountSavingsReportSetupComponent {
   }
 
   toggleIncrementalImprovement() {
-    const columnsGroup = this.accountSavingsReportForm.get('analysisTableColumns');
+    const accountSavingsReportForm = this.accountSavingsReportForm();
+    const columnsGroup = accountSavingsReportForm.get('analysisTableColumns');
     if (columnsGroup) {
       const incremental = columnsGroup.get('incrementalImprovement')?.value;
       columnsGroup.patchValue({
@@ -188,65 +177,34 @@ export class AccountSavingsReportSetupComponent {
   }
 
   setEnergyColumns() {
-    this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy
-      || this.analysisTableColumns.modeledEnergy
-      || this.analysisTableColumns.adjusted
-      || this.analysisTableColumns.baselineAdjustmentForNormalization
-      || this.analysisTableColumns.baselineAdjustmentForOther
-      || this.analysisTableColumns.baselineAdjustment);
+    const analysisTableColumns = this.analysisTableColumns();
+    analysisTableColumns.energy = (analysisTableColumns.actualEnergy
+      || analysisTableColumns.modeledEnergy
+      || analysisTableColumns.adjusted
+      || analysisTableColumns.baselineAdjustmentForNormalization
+      || analysisTableColumns.baselineAdjustmentForOther
+      || analysisTableColumns.baselineAdjustment);
   }
 
   setMonthIncrementalImprovement() {
-    this.analysisTableColumns.incrementalImprovement = (
-      this.analysisTableColumns.SEnPI ||
-      this.analysisTableColumns.savings ||
+    const analysisTableColumns = this.analysisTableColumns();
+    analysisTableColumns.incrementalImprovement = (
+      analysisTableColumns.SEnPI ||
+      analysisTableColumns.savings ||
       // this.analysisTableColumns.percentSavingsComparedToBaseline ||
       // this.analysisTableColumns.yearToDateSavings ||
       // this.analysisTableColumns.yearToDatePercentSavings ||
-      this.analysisTableColumns.rollingSavings ||
-      this.analysisTableColumns.rolling12MonthImprovement ||
-      this.analysisTableColumns.SEnPI ||
-      this.analysisTableColumns.savings ||
-      this.analysisTableColumns.totalSavingsPercentImprovement ||
-      this.analysisTableColumns.annualSavingsPercentImprovement ||
-      this.analysisTableColumns.cummulativeSavings ||
-      this.analysisTableColumns.newSavings ||
-      this.analysisTableColumns.bankedSavings ||
-      this.analysisTableColumns.savingsUnbanked
+      analysisTableColumns.rollingSavings ||
+      analysisTableColumns.rolling12MonthImprovement ||
+      analysisTableColumns.SEnPI ||
+      analysisTableColumns.savings ||
+      analysisTableColumns.totalSavingsPercentImprovement ||
+      analysisTableColumns.annualSavingsPercentImprovement ||
+      analysisTableColumns.cummulativeSavings ||
+      analysisTableColumns.newSavings ||
+      analysisTableColumns.bankedSavings ||
+      analysisTableColumns.savingsUnbanked
     )
-  }
-
-  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
-    this.itemToEdit = analysisItem;
-  }
-
-  confirmEditItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-  }
-
-  cancelEditItem() {
-    this.itemToEdit = undefined;
-  }
-
-  setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
-    this.baselineYears = yearOptions;
-  }
-
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.analysisOptions];
-    if(this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if(this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
-  }
-
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem(true);
   }
 }
 

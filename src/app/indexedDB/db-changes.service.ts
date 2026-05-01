@@ -35,6 +35,10 @@ import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredi
 import { FacilityReportsDbService } from './facility-reports-db.service';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { EGridService } from '../shared/helper-services/e-grid.service';
+import { FacilityEnergyUseGroupsDbService } from './facility-energy-use-groups-db.service';
+import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
+import { FacilityEnergyUseEquipmentDbService } from './facility-energy-use-equipment-db.service';
+import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
 
 @Injectable({
   providedIn: 'root'
@@ -56,8 +60,9 @@ export class DbChangesService {
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private migratePredictorsService: MigratePredictorsService,
-    private facilityReportsDbService: FacilityReportsDbService) {
-  }
+    private facilityReportsDbService: FacilityReportsDbService,
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
@@ -113,6 +118,12 @@ export class DbChangesService {
     await this.setAccountFacilityReports(account);
     //set account analysis
     await this.setAccountAnalysisItems(account, skipUpdates);
+    //set facility energy use groups
+    await this.setAccountFacilityEnergyUseGroups(account);
+    //set facility energy use equipment
+    await this.setAccountFacilityEnergyUseEquipment(account);
+
+    //set account 
     this.accountDbService.selectedAccount.next(account);
     if (needsMigration) {
       await this.migratePredictorsService.migrateAccountPredictors();
@@ -142,6 +153,11 @@ export class DbChangesService {
     this.setFacilityAnalysisItems(facility);
     //set reports
     this.setFacilityReports(facility);
+    //set energy groups
+    this.setFacilityEnergyUseGroups(facility);
+    //set energy equipment
+    this.setFacilityEnergyUseEquipment(facility);
+    //set facility
     this.facilityDbService.selectedFacility.next(facility);
   }
 
@@ -174,9 +190,9 @@ export class DbChangesService {
           await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
         };
       }
-      if(facility) {
+      if (facility) {
         let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, analysisItems);
-        if(updateFacility.isChanged){
+        if (updateFacility.isChanged) {
           facility = updateFacility.facility;
           await this.updateFacilities(facility);
         }
@@ -207,6 +223,36 @@ export class DbChangesService {
     let accountFacilityReports: Array<IdbFacilityReport> = this.facilityReportsDbService.accountFacilityReports.getValue();
     let facilityReports: Array<IdbFacilityReport> = accountFacilityReports.filter(item => { return item.facilityId == facility.guid });
     this.facilityReportsDbService.facilityReports.next(facilityReports);
+  }
+
+  //facility energy uses
+  async setAccountFacilityEnergyUseGroups(account: IdbAccount, facility?: IdbFacility) {
+    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = await this.facilityEnergyUseGroupsDbService.getAllAccountEnergyUseGroups(account.guid);
+    this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.next(facilityEnergyUseGroups);
+    if (facility) {
+      this.setFacilityEnergyUseGroups(facility);
+    }
+  }
+
+  setFacilityEnergyUseGroups(facility: IdbFacility) {
+    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue();
+    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = accountEnergyUseGroups.filter(item => { return item.facilityId == facility.guid });
+    this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.next(facilityEnergyUseGroups);
+  }
+
+  //facility energy uses
+  async setAccountFacilityEnergyUseEquipment(account: IdbAccount, facility?: IdbFacility) {
+    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = await this.facilityEnergyUseEquipmentDbService.getAllAccountEnergyUseEquipment(account.guid);
+    this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.next(facilityEnergyUseEquipment);
+    if (facility) {
+      this.setFacilityEnergyUseEquipment(facility);
+    }
+  }
+
+  setFacilityEnergyUseEquipment(facility: IdbFacility) {
+    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue();
+    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(item => { return item.facilityId == facility.guid });
+    this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.next(facilityEnergyUseEquipment);
   }
 
   async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
@@ -384,7 +430,20 @@ export class DbChangesService {
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 
-  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount, showLoading: boolean = true) {
+  deleteFacilityMessages() {
+    this.loadingService.addLoadingMessage("Deleting Facility Predictors");
+    this.loadingService.addLoadingMessage("Deleting Facility Predictor Data");
+    this.loadingService.addLoadingMessage("Deleting Facility Meter Data");
+    this.loadingService.addLoadingMessage("Deleting Facility Meters");
+    this.loadingService.addLoadingMessage("Deleting Facility Meter Groups");
+    this.loadingService.addLoadingMessage("Deleting Facility Reports");
+    this.loadingService.addLoadingMessage("Updating Account Reports");
+    this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
+    this.loadingService.addLoadingMessage('Updating Account Analysis Items');
+    this.loadingService.addLoadingMessage("Deleting Facility");
+  }
+
+  async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount, showLoading: boolean = true): Promise<number> {
     let currIdx = -1;
     if (showLoading) {
       this.loadingService.setContext('delete-facility');
@@ -394,35 +453,39 @@ export class DbChangesService {
     // Delete all info associated with facility
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Predictors");
     }
     await this.predictorsDbServiceDeprecated.deleteAllFacilityPredictors(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Predictor Data");
     }
     await this.predictorDbService.deleteAllFacilityPredictors(facility.guid);
     await this.predictorDataDbService.deleteAllFacilityPredictorData(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Meter Data");
     }
     await this.utilityMeterDataDbService.deleteAllFacilityMeterData(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Meters");
     }
     await this.utilityMeterDbService.deleteAllFacilityMeters(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Meter Groups");
     }
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Reports");
     }
     await this.facilityReportsDbService.deleteFacilityReports(facility.guid);
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Energy Use Groups");
+    }
+    await this.facilityEnergyUseGroupsDbService.deleteAllFacilityEnergyUseGroups(facility.guid);
+    if (showLoading) {
+      this.loadingService.setCurrentLoadingIndex(++currIdx);
+      this.loadingService.addLoadingMessage("Deleting Facility Energy Use Equipment`");
+    }
+    await this.facilityEnergyUseEquipmentDbService.deleteAllFacilityEnergyUseEquipment(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
       this.loadingService.addLoadingMessage("Updating Account Reports");
@@ -430,12 +493,10 @@ export class DbChangesService {
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility Analysis Items");
     }
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage('Updating Account Analysis Items');
     }
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
@@ -444,13 +505,13 @@ export class DbChangesService {
     }
     if (showLoading) {
       this.loadingService.setCurrentLoadingIndex(++currIdx);
-      this.loadingService.addLoadingMessage("Deleting Facility");
     }
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
     await this.selectAccount(selectedAccount, false);
     if (showLoading) {
       this.loadingService.isLoadingComplete.next(true);
     }
+    return currIdx;
   }
 
   async updateDataNewFacility(newFacility: IdbFacility) {

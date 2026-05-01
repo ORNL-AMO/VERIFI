@@ -61,7 +61,7 @@ export class UploadDataV3Service {
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, meters);
       let importPredictors: Array<IdbPredictor> = this.getPredictors(workbook, importFacilities, selectedAccount);
       let importPredictorData: Array<IdbPredictorData> = this.getPredictorData(workbook, importFacilities, importPredictors);
-      return { importFacilities: importFacilities, importMeters: meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups }
+      return { importFacilities: importFacilities, importMeters: meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups, energyUseEquipment: [], energyUseGroups: [] }
     }
   }
 
@@ -824,12 +824,13 @@ export class UploadDataV3Service {
     return siteToSource;
   }
 
-  getMeterReadingDataApplication(excelSelection: 'Yes' | 'No' | 'Evenly Distribute'): MeterReadingDataApplication {
-    if (excelSelection == 'Yes') {
+  getMeterReadingDataApplication(excelSelection: 'Yes' | 'Do Not Calenderize' | 'Evenly Distribute'): MeterReadingDataApplication {
+    let excelSelectionClean: string = (excelSelection || '').trim().toLowerCase();
+    if (excelSelectionClean == 'yes' || excelSelectionClean == 'calendarize') {
       return 'backward';
-    } else if (excelSelection == 'No') {
+    } else if (excelSelectionClean == 'do not calenderize' || excelSelectionClean == 'no') {
       return 'fullMonth';
-    } else if (excelSelection == 'Evenly Distribute') {
+    } else if (excelSelectionClean == 'evenly distribute') {
       return 'fullYear';
     };
   }
@@ -846,7 +847,7 @@ export class UploadDataV3Service {
   }
 
   parseHeatCapacity(excelMeter: any, meter: IdbUtilityMeter, isEnergyUnit: boolean): number {
-    let heatCapacity: number = excelMeter['Energy Factor'];
+    let heatCapacity: number = excelMeter['Energy Factor (HHV)'];
     if ((!heatCapacity && !isEnergyUnit) || meter.scope == 2) {
       let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, [], meter.scope, meter.vehicleCategory, meter.vehicleType);
       if (meter.scope != 2) {

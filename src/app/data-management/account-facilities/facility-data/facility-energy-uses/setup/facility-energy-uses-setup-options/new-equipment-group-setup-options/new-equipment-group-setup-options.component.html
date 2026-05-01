@@ -1,0 +1,100 @@
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex justify-content-between">
+                        <div class="h4 mb-0 mt-auto">
+                            {{facility.name}} Energy Use Groups Setup
+
+                        </div>
+                        <div class="ps-1">
+                            <button class="btn nav-btn" (click)="leaveGroupSetup()">
+                                <span class="fa fa-times"></span>
+                                Leave Group Setup
+                            </button>
+                        </div>
+                    </div>
+                </h4>
+                <div class="d-flex flex-column">
+                    <p class="text-center">
+                        Fill out a few options to make setting up energy use groups easier. You can always add, edit, or
+                        delete
+                        energy use groups after this setup is complete.
+                    </p>
+                    <div class="d-flex">
+                        <div class="w-50 pe-2">
+                            <label class="bold" for="numberOfGroups">Number of Equipment Groups</label>
+                            <div class="input-group">
+                                <button class="btn action-btn input-group-text" [disabled]="numberOfGroups == 1"
+                                    (click)="removeNewGroup()">
+                                    <span class="fa fa-minus"></span>
+                                </button>
+                                <input id="numberOfGroups" type="number" class="form-control"
+                                    [(ngModel)]="numberOfGroups" required (input)="setNewGroups()" min="1" />
+                                <button class="btn action-btn input-group-text" (click)="addNewGroup()">
+                                    <span class="fa fa-plus"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-50 ps-2">
+                            <label class="bold" for="setupYear">Year to Setup</label>
+                            <select id="setupYear" class="form-select" [(ngModel)]="setupYear" required>
+                                @for(year of yearOptions; track year){
+                                <option [ngValue]="year">{{year}}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <h5>New Groups</h5>
+                    @for(newGroup of newGroups; track newGroup.guid; let index = $index;){
+                    <div class="d-flex pb-2">
+                        <div class="col-4">
+                            @if(index == 0){
+                            <label class="bold" for="groupName{{index}}">Group Name</label>
+                            }
+                            <input id="groupName{{index}}" type="text" class="form-control"
+                                [(ngModel)]="newGroup.groupName" required />
+                        </div>
+                        <div class="col-4 pe-2 ps-2">
+                            @if(index == 0){
+                            <label class="bold" for="numberOfEquipment{{index}}">Number of Equipment</label>
+                            }
+                            <div class="input-group">
+                                <button class="btn action-btn input-group-text" (click)="removeEquipment(newGroup)"
+                                    [disabled]="newGroup.numberOfEquipment == 1">
+                                    <span class="fa fa-minus"></span>
+                                </button>
+                                <input id="numberOfEquipment{{index}}" type="number" class="form-control"
+                                    [(ngModel)]="newGroup.numberOfEquipment" required min="1" />
+                                <button class="btn action-btn input-group-text" (click)="addEquipment(newGroup)">
+                                    <span class="fa fa-plus"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            @if(index == 0){
+                            <label class="bold" for="operatingHours{{index}}">Operating Hours per Year</label>
+                            }
+                            <div class="input-group">
+                                <input id="operatingHours{{index}}" type="number" class="form-control"
+                                    [(ngModel)]="newGroup.operatingHours" required min="0" />
+                                <span class="input-group-text">hrs/yr</span>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="data-management-footer navbar">
+    <div class="container-fluid justify-content-end">
+        <button class="btn nav-btn" (click)="goToEquipmentDetails()" [disabled]="!numberOfGroups || !setupYear">
+            Equipment Details <i class="fa fa-arrow-right"></i>
+        </button>
+    </div>
+</nav>

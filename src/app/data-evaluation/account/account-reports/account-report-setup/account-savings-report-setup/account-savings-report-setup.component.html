@@ -1,116 +1,13 @@
-<div class="d-flex align-items-center justify-content-center mb-4 p-3 rounded shadow-sm bg-light border">
-  <div class="pe-4 select-width">
-    <label class="form-label fw-bold">
-      <i class="fa fa-filter text-success"></i>
-      Analysis Category
-    </label>
-    <select class="form-select border-success" [(ngModel)]="selectedCategory" (ngModelChange)="onOptionChange()">
-      <option value="All">All</option>
-      <option value="energy">Energy</option>
-      <option value="water">Water</option>
-    </select>
-  </div>
+@let _accountSavingsReportForm = accountSavingsReportForm();
+@let _reportSetup = reportSetup();
+@let _selectedAnalysisItem = selectedAnalysisItem();
 
-  <div class="ps-4 select-width">
-    <label class="form-label fw-bold">
-      <i class="fa fa-filter text-success"></i>
-      Baseline Year
-    </label>
-    <select class="form-select border-success" [(ngModel)]="selectedBaselineYear" (ngModelChange)="onOptionChange()">
-      <option value="All">All</option>
-      @for (year of baselineYears; track year) {
-      <option [ngValue]="year">{{ year }}</option>
-      }
-    </select>
-  </div>
-</div>
+@if(_accountSavingsReportForm){
+<app-account-report-analysis-selection [reportForm]="_accountSavingsReportForm"></app-account-report-analysis-selection>
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
-<form [formGroup]="accountSavingsReportForm">
+@if (_selectedAnalysisItem) {
+<form [formGroup]="_accountSavingsReportForm">
   <div>
-    <div class="row mb-4">
-      <div class="col-12">
-        <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
-          [field]="'selectAccountAnalysis'" [isFloatRight]="true">
-        </app-label-with-tooltip>
-
-        <div class="table-responsive">
-          <table class="table table-sm table-hover table-bordered">
-            <thead>
-              <tr>
-                <th>
-
-                </th>
-                <th>
-                  Name
-                </th>
-                <th>
-                  Analysis Type
-                </th>
-                <th>
-                  Baseline Year
-                </th>
-                <th>
-                  Facilities Included
-                </th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of filteredAnalysisItems; track item.guid) {
-              <tr>
-                <td>
-                  <div class="form-check">
-                    <input type="radio" class="form-check-input" formControlName="analysisItemId" [value]="item.guid"
-                      id="{{item.guid + '_selectedAccountItemId'}}" (change)="setSelectedAnalysisItem(false)">
-                  </div>
-                </td>
-                <td>
-                  {{item.name}}
-                  @let setupErrors = item.guid | invalidAccountAnalysis;
-                  @if(setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid){
-                  <span class="red">
-                    <span class="fa fa-exclamation-circle"></span> Contains Errors
-                  </span>
-                  }
-                </td>
-                <td>
-                  @if (item.analysisCategory == 'water') {
-                  Water
-                  }
-                  @if (item.analysisCategory == 'energy') {
-                  Energy
-                  }
-                </td>
-                <td>
-                  {{item.baselineYear}}
-                </td>
-                <td>
-                  @for (facilityItem of item.facilityAnalysisItems; track facilityItem; let index = $index) {
-                  <span>
-                    @if (facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
-                    <span>
-                      {{facilityItem.facilityId | facilityName}}@if (index != item.facilityAnalysisItems.length-1)
-                      {
-                      <span>,</span>
-                      }
-                    </span>
-                    }
-                  </span>
-                  }
-                </td>
-                <td class="text-center">
-                  <a class="click-link" (click)="viewAnalysis(item)">View Analysis</a>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    @if (selectedAnalysisItem) {
     <hr>
     <div>
       <span class="bold">
@@ -124,7 +21,7 @@
             <label class="bold form-check-label" for="includeAnnualResults">Company Results
             </label>
           </div>
-          @if (reportSetup.includeAnnualResults) {
+          @if (_reportSetup.includeAnnualResults) {
           <div class="form-check ms-2">
             <input class="form-check-input" type="checkbox" name="includeAnnualResultsTable"
               id="includeAnnualResultsTable" formControlName="includeAnnualResultsTable" (change)="save()">
@@ -162,7 +59,7 @@
             <label class="bold form-check-label" for="includeFacilityResults">Facility Results
             </label>
           </div>
-          @if (reportSetup.includeFacilityResults) {
+          @if (_reportSetup.includeFacilityResults) {
           <div class="form-check ms-2">
             <input class="form-check-input" type="checkbox" name="includeFacilityResultsTable"
               id="includeFacilityResultsTable" formControlName="includeFacilityResultsTable" (change)="save()">
@@ -195,7 +92,7 @@
             <label class="bold form-check-label" for="includePerformanceResults">Performance Results
             </label>
           </div>
-          @if (reportSetup.includePerformanceResults) {
+          @if (_reportSetup.includePerformanceResults) {
           <div class="form-check ms-2">
             <input class="form-check-input" type="checkbox" name="includePerformanceResultsTable"
               id="includePerformanceResultsTable" formControlName="includePerformanceResultsTable" (change)="save()">
@@ -203,7 +100,7 @@
               Table
             </label>
           </div>
-          @if (reportSetup.includePerformanceResultsTable) {
+          @if (_reportSetup.includePerformanceResultsTable) {
           <div class="form-check ms-4">
             <input class="form-check-input" type="checkbox" name="includePerformanceActual"
               id="includePerformanceActual" formControlName="includePerformanceActual" (change)="save()">
@@ -251,9 +148,6 @@
         </div>
       </div>
     </div>
-    }
-
-    @if (selectedAnalysisItem) {
     <hr>
     <div formGroupName="analysisTableColumns">
       <div class="d-flex w-100 justify-content-between">
@@ -269,13 +163,13 @@
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="energy" formControlName="energy"
               (change)="toggleEnergyColumns()" id="energy">
-            <label class="bold form-check-label" for="energy">{{energyColumnLabel}}
+            <label class="bold form-check-label" for="energy">{{energyColumnLabel()}}
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="actualEnergy" formControlName="actualEnergy"
               (change)="save()" id="actualEnergy">
-            <label class="form-check-label" for="actualEnergy">{{actualUseLabel}}</label>
+            <label class="form-check-label" for="actualEnergy">{{actualUseLabel()}}</label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="adjusted" formControlName="adjusted" (change)="save()"
@@ -373,30 +267,7 @@
         </div>
       </div>
     </div>
-    }
   </div>
 </form>
 }
-
-@if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
-<div class="alert alert-warning text-center">
-  No analysis items matching selected filters. Please adjust filters to view analysis items.
-</div>
 }
-
-<div [ngClass]="{'windowOverlay': itemToEdit}"></div>
-<div class="popup" [class.open]="itemToEdit">
-  @if (itemToEdit) {
-  <div class="popup-header">Go To: {{itemToEdit.name}}
-    <button class="item-right" (click)="cancelEditItem()">x</button>
-  </div>
-  }
-  <div class="popup-body">
-    <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
-      this screen.</p>
-  </div>
-  <div class="saveCancel popup-footer text-end">
-    <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
-    <button class="btn btn-outline" (click)="confirmEditItem()">Go To Analysis</button>
-  </div>
-</div>

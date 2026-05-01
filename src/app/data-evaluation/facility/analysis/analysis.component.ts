@@ -10,10 +10,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-    selector: 'app-analysis',
-    templateUrl: './analysis.component.html',
-    styleUrls: ['./analysis.component.css'],
-    standalone: false
+  selector: 'app-analysis',
+  templateUrl: './analysis.component.html',
+  styleUrls: ['./analysis.component.css'],
+  standalone: false
 })
 export class AnalysisComponent implements OnInit {
 
@@ -21,11 +21,16 @@ export class AnalysisComponent implements OnInit {
   utilityMeterData: Array<IdbUtilityMeterData>;
   utilityMeterGroups: Array<IdbUtilityMeterGroup>;
   utilityMeterGroupsSub: Subscription;
+  facilitySub: Subscription;
+  facility: IdbFacility;
+  annualKey: string;
+  monthlyKey: string;
+
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
     private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,) { }
+    private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
@@ -35,13 +40,22 @@ export class AnalysisComponent implements OnInit {
     this.utilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(val => {
       this.utilityMeterGroups = val;
     });
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.annualKey = 'annual-' + this.facility?.id;
+      this.monthlyKey = 'monthly-' + this.facility?.id;
+    });
   }
 
   ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
     this.utilityMeterGroupsSub.unsubscribe();
+    this.facilitySub.unsubscribe();
     this.analysisService.accountAnalysisItem = undefined;
     this.analysisService.hideInUseMessage = false;
+    this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
+    this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
   }
 
   goToMeterGroups() {
