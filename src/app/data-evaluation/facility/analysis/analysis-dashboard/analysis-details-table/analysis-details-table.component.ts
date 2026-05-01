@@ -24,6 +24,15 @@ import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import * as _ from 'lodash';
 
+interface AnalysisDetailsTableRow {
+  analysisItem: IdbAnalysisItem,
+  isDeleteChecked: boolean,
+  linkedItems: Array<{
+    guid: string,
+    type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport'
+  }>
+}
+
 @Component({
   selector: 'app-analysis-details-table',
   standalone: false,
@@ -448,12 +457,3 @@ export class AnalysisDetailsTableComponent {
   }
 }
 
-
-export interface AnalysisDetailsTableRow {
-  analysisItem: IdbAnalysisItem,
-  isDeleteChecked: boolean,
-  linkedItems: Array<{
-    guid: string,
-    type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport'
-  }>
-}
