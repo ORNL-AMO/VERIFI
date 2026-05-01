@@ -127,7 +127,7 @@
                   (click)="openLinkedItemModal(linkedItem.guid, 'bankedAnalysis')">
                   <i class="fa fa-piggy-bank" title="Banked Analysis"></i>
                   {{linkedItem.guid |
-                  facilityAnalysisName}} (Banked)
+                  facilityAnalysisName}} (Banked Analysis)
                 </button>
                 }
                 @if (linkedItem.type == 'accountAnalysis') {
@@ -358,7 +358,7 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th>Linked Reports</th>
+            <th>Linked Items</th>
           </tr>
         </thead>
         <tbody>
@@ -373,7 +373,7 @@
                 <li>
                   <i class="fa fa-piggy-bank" title="Banked Analysis"></i>
                   {{linkedItem.guid |
-                  facilityAnalysisName}} (Banked
+                  facilityAnalysisName}} (Banked Analysis)
                 </li>
                 }
                 @if (linkedItem.type == 'accountAnalysis') {

@@ -1,4 +1,4 @@
-import { Component, computed, inject, Input, signal, Signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -453,7 +453,7 @@ export class AnalysisDetailsTableComponent {
 
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Analysis Items Deleted!", undefined, undefined, false, "alert-success");
-    this.showDeleteColumn = false;
+    this.toggleBulkDelete();
   }
 }
 

@@ -105,7 +105,7 @@ export class AccountAnalysisDetailsTableComponent {
     const selectedAnalysisCategory = this.selectedAnalysisCategory();
     const accountReports = this.accountReports();
     const accountAnalysisItems = this.accountAnalysisItems();
-    if (selectedAnalysisCategory && accountReports) {
+    if (selectedAnalysisCategory && accountReports && accountAnalysisItems) {
       let analysisItemsList: Array<AnalysisDetailsTableRow> = [];
       let filteredAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => selectedAnalysisCategory == 'all' || item.analysisCategory == selectedAnalysisCategory);
 

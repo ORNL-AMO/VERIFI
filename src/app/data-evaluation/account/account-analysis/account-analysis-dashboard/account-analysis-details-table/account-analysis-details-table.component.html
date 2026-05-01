@@ -151,7 +151,7 @@
       </p>
     </div>
     <div>
-      <ngb-pagination [collectionSize]="orderedAnalysisItems.length" [(page)]="currentPageNumber"
+      <ngb-pagination [collectionSize]="_orderedAnalysisListItems.length" [(page)]="currentPageNumber"
         [pageSize]="itemsPerPage()" [maxSize]="5" [rotate]="true" aria-label="Pagination">
       </ngb-pagination>
     </div>
