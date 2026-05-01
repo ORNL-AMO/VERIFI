@@ -137,6 +137,7 @@ export class MeterGroupFormComponent {
     }
     await this.dbChangesService.setMeterGroups(account, facility);
     await this.dbChangesService.setMeters(account, facility);
+    await this.dbChangesService.setMeterData(account, true, facility);
     this.toastNoticationService.showToast("Meter Group Changes Saved!", undefined, undefined, false, "alert-success");
     this.selectionsChanged = false;
     this.groupForm.markAsPristine();

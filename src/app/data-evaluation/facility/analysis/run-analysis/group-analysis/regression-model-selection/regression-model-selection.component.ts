@@ -44,7 +44,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   } = {
       yearOptionSelections: [],
       showInvalid: false,
-      showFailedValidationModel: true
+      showFailedValidationModel: false
     }
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
