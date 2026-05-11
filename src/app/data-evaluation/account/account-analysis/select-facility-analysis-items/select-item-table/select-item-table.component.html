@@ -1,7 +1,13 @@
+@let _facility = selectedFacility();
+@let _facilityAnalysisItems = facilityAnalysisItems();
+@let _selectedFacilityItem = selectedFacilityItem();
+@let _selectedAnalysisItem = selectedAnalysisItem();
+@let _selectedFacilityItemId = selectedFacilityItemId();
+
 <h4>
   <div class="d-flex justify-content-between">
     <div class="mt-auto">
-      <i class="fa fa-industry pe-2" [ngStyle]="{color: facility.color}"></i>{{facility.name}}
+      <i class="fa fa-industry pe-2" [ngStyle]="{color: _facility.color}"></i>{{_facility.name}}
       Analysis Items
     </div>
 
@@ -10,8 +16,8 @@
     </div>
   </div>
 </h4>
-@if(selectedFacilityItem){
-@let setupErrors = selectedFacilityItem.guid | invalidAnalysis;
+@if(_selectedFacilityItem){
+@let setupErrors = _selectedFacilityItem.guid | invalidAnalysis;
 @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
 <div class="alert alert-danger w-100 text-center">
   The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
@@ -21,7 +27,7 @@
 }
 
 
-@if (selectedFacilityItemId == undefined) {
+@if (_selectedFacilityItemId == null) {
 <div class="alert alert-danger w-100 text-center">
   Analysis item selection required.
 </div>
@@ -43,12 +49,12 @@
       </tr>
     </thead>
     <tbody class="table-group-divider">
-      @for (analysisItem of facilityAnalysisItems; track analysisItem.guid) {
+      @for (analysisItem of _facilityAnalysisItems; track analysisItem.guid) {
       <tr>
         <td class="radio-td">
-          <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="analysisItem.guid"
+          <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="analysisItem.guid"
             name="{{analysisItem.id+'_selectedFacilityItemId'}}" id="{{analysisItem.id+'_selectedFacilityItemId'}}"
-            (change)="save()">
+            (change)="save(analysisItem.guid)">
         </td>
         <td class="w-25">
           @let setupErrors = analysisItem.guid | invalidAnalysis;
@@ -90,13 +96,13 @@
         </td>
       </tr>
       }
-      @if (facilityAnalysisItems.length == 0) {
+      @if (_facilityAnalysisItems.length == 0) {
       <tr>
         <td colspan="7" class="text-center">
-          No @if (selectedAnalysisItem.energyIsSource) {
+          No @if (_selectedAnalysisItem.energyIsSource) {
           <b>source energy</b>
           }
-          @if (!selectedAnalysisItem.energyIsSource) {
+          @if (!_selectedAnalysisItem.energyIsSource) {
           <b>site energy</b>
           } analysis items found for this
           facility that match
@@ -108,8 +114,8 @@
       }
       <tr>
         <td>
-          <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId" [value]="'skip'"
-            name="{{facility.name+'undefined'}}" id="{{facility.name+'undefined'}}" (change)="save()">
+          <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="'skip'"
+            name="{{_facility.name+'undefined'}}" id="{{_facility.name+'undefined'}}" (change)="save('skip')">
         </td>
         <td colspan="6">
           Skip Facility

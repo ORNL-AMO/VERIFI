@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, computed, inject, Input, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -8,7 +8,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -17,64 +17,88 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-select-item-table',
-    templateUrl: './select-item-table.component.html',
-    styleUrls: ['./select-item-table.component.css'],
-    standalone: false
+  selector: 'app-select-item-table',
+  templateUrl: './select-item-table.component.html',
+  styleUrls: ['./select-item-table.component.css'],
+  standalone: false
 })
 export class SelectItemTableComponent {
-  @Input()
-  selectedAnalysisItem: IdbAccountAnalysisItem;
-  @Input()
-  facilityAnalysisItems: Array<IdbAnalysisItem>;
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private router: Router = inject(Router);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
+  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
+  private predictorDbService: PredictorDbService = inject(PredictorDbService);
+  private facilityDbservice: FacilitydbService = inject(FacilitydbService);
 
-  selectedFacilityItemId: string;
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbservice.selectedFacility);
+
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => {
+    const allItems = this.allFacilityAnalysisItems();
+    const selectedItem = this.selectedAnalysisItem();
+    const selectedFacility = this.selectedFacility();
+    if (allItems && selectedItem && selectedFacility) {
+      let filteredItems: Array<IdbAnalysisItem> = [];
+      if (selectedItem.analysisCategory == 'energy') {
+        filteredItems = allItems.filter(item => {
+          return (item.analysisCategory == selectedItem.analysisCategory
+            && item.facilityId == selectedFacility.guid
+            && item.energyIsSource == selectedItem.energyIsSource
+            && (item.baselineYear == selectedItem.baselineYear || selectedFacility.isNewFacility));
+        });
+      } else if (selectedItem.analysisCategory == 'water') {
+        filteredItems = allItems.filter(item => {
+          return (item.analysisCategory == selectedItem.analysisCategory
+            && item.facilityId == selectedFacility.guid
+            && (item.baselineYear == selectedItem.baselineYear || selectedFacility.isNewFacility));
+        });
+      }
+      //order by modified date
+      filteredItems = filteredItems.sort((a, b) => {
+        return new Date(b.modifiedDate).getTime() - new Date(a.modifiedDate).getTime();
+      });
+      return filteredItems;
+    }
+  });
+
+  selectedFacilityItemId: Signal<string> = computed(() => {
+    const selectedItem = this.selectedAnalysisItem();
+    const facility = this.selectedFacility();
+    if (selectedItem && facility) {
+      const facilityItem = selectedItem.facilityAnalysisItems.find(item => item.facilityId == facility.guid);
+      const itemId =  facilityItem ? facilityItem.analysisItemId : null;
+      return itemId;
+    }
+    return null;
+  });
+
+  selectedFacilityItem: Signal<IdbAnalysisItem> = computed(() => {
+    const facilityItemId = this.selectedFacilityItemId();
+    const allItems = this.allFacilityAnalysisItems();
+    return allItems.find(item => item.guid == facilityItemId);
+  });
+
   itemToEdit: IdbAnalysisItem;
   showCreateItem: boolean;
-  selectedFacilityItem: IdbAnalysisItem;
 
-  facility: IdbFacility;
-  facilitySub: Subscription;
+  constructor() { }
 
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private loadingService: LoadingService,
-    private analysisService: AnalysisService,
-    private sharedDataService: SharedDataService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictorDbService,
-    private facilityDbservice: FacilitydbService) { }
-
-  ngOnInit(){
-    this.facilitySub = this.facilityDbservice.selectedFacility.subscribe(facility => {
-      this.facility = facility;
-      this.setSelectedFacilityItemId();
-    })
-  }
-
-  ngOnDestroy() {
-    this.facilitySub.unsubscribe();
-  }
-
-  setSelectedFacilityItemId() {
-    this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-      if (item.facilityId == this.facility.guid) {
-        this.selectedFacilityItemId = item.analysisItemId;
-      }
-    });
-    this.setSelectedFacilityItem();
-  }
-
-  async save() {
-    this.selectedAnalysisItem.isAnalysisVisited = false;
-    await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
+  async save(analysisItemId: string) {
+    const selectedAnalysisItem = this.selectedAnalysisItem();
+    const facility = this.selectedFacility();
+    selectedAnalysisItem.isAnalysisVisited = false;
+    await this.accountAnalysisDbService.updateFacilityItemSelection(selectedAnalysisItem, analysisItemId, facility.guid);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account, true);
-    this.setSelectedFacilityItem();
   }
 
 
@@ -90,9 +114,11 @@ export class SelectItemTableComponent {
 
   confirmEditItem() {
     this.sharedDataService.modalOpen.next(false);
-    this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
+    const facility = this.selectedFacility();
+    const selectedAnalysisItem = this.selectedAnalysisItem();
+    this.analysisService.accountAnalysisItem = selectedAnalysisItem;
     this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.guid + '/analysis/run-analysis');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis');
   }
 
   createNewItem() {
@@ -106,33 +132,25 @@ export class SelectItemTableComponent {
   }
 
   async confirmCreateNew() {
+    const facility = this.selectedFacility();
+    const selectedAnalysisItem = this.selectedAnalysisItem();
+
     this.sharedDataService.modalOpen.next(false);
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
-    this.dbChangesService.selectFacility(this.facility);
+    this.dbChangesService.selectFacility(facility);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.facility, accountMeterGroups, accountPredictors, this.selectedAnalysisItem.analysisCategory);
-    newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
+    let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);
+    newIdbItem.energyIsSource = selectedAnalysisItem.energyIsSource;
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-    this.selectedFacilityItemId = newIdbItem.guid;
     await this.dbChangesService.selectAccount(account, false);
-    await this.save();
+    await this.save(newIdbItem.guid);
     this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
     this.loadingService.setLoadingStatus(false);
-    this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
-    this.router.navigateByUrl("/data-evaluation/facility/" + this.facility.guid + "/analysis/run-analysis/analysis-setup");
-  }
-
-  setSelectedFacilityItem() {
-    if (this.selectedFacilityItemId) {
-      let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-      this.selectedFacilityItem = analysisItems.find(item => { return item.guid == this.selectedFacilityItemId });
-    } else {
-      this.selectedFacilityItem = undefined;
-    }
-
+    this.analysisService.accountAnalysisItem = selectedAnalysisItem;
+    this.router.navigateByUrl("/data-evaluation/facility/" + facility.guid + "/analysis/run-analysis/analysis-setup");
   }
 }
