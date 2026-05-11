@@ -1,4 +1,5 @@
-import { Component, computed, effect, inject, Signal, signal, WritableSignal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
+import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -7,12 +8,10 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { getFiscalYear, getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -27,8 +26,25 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
 import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { RegressionModelsCalculator } from 'src/app/shared/shared-analysis/calculations/regression-models-calculator';
+import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+
+type PredictorVariableForm = FormGroup<{
+  productionInAnalysis: FormControl<boolean>;
+  regressionCoefficient: FormControl<number>;
+}>;
+
+type RegressionMenuForm = FormGroup<{
+  isGeneratedModel: FormControl<boolean>;
+  maxModelVariables: FormControl<number>;
+  regressionConstant: FormControl<number>;
+  regressionModelYear: FormControl<number>;
+  regressionModelStartMonth: FormControl<number>;
+  regressionStartYear: FormControl<number>;
+  regressionModelEndMonth: FormControl<number>;
+  regressionEndYear: FormControl<number>;
+  regressionModelNotes: FormControl<string>;
+  predictorVariables: FormArray<PredictorVariableForm>;
+}>;
 
 @Component({
   selector: 'app-regression-model-menu',
@@ -38,6 +54,7 @@ import { RegressionModelsCalculator } from 'src/app/shared/shared-analysis/calcu
 })
 export class RegressionModelMenuComponent {
 
+  // --- Services (DI) ---
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private analysisService: AnalysisService = inject(AnalysisService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
@@ -48,8 +65,11 @@ export class RegressionModelMenuComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
+  private fb: NonNullableFormBuilder = inject(NonNullableFormBuilder);
   private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private regressionModelsService: RegressionModelsService = inject(RegressionModelsService);
 
+  // --- Signals ---
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
@@ -61,6 +81,7 @@ export class RegressionModelMenuComponent {
   allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
   selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
 
+  // --- Computed Signals ---
   yearOptions: Signal<Array<number>> = computed(() => {
     const calanderizedMeters = this.calanderizedMeters();
     const selectedFacility = this.selectedFacility();
@@ -140,79 +161,164 @@ export class RegressionModelMenuComponent {
     return emptyGroupAnalysisErrors();
   });
 
+  // --- UI State ---
   showUpdateModelsModal: boolean = false;
+  showConfirmModelTypeChange: boolean = false;
   noValidModels: Signal<boolean> = computed(() => {
     const generatedModels = this.generatedModels();
     if (generatedModels.length == 0) {
       return true;
     }
-    return generatedModels.some(model => {
-      return model.isValid === true;
-    }) == false;
+    return generatedModels.some(model => model.isValid === true) == false;
   });
   showConfirmPredictorChangeModel: boolean = false;
   modelingError: WritableSignal<boolean> = signal(false);
   generatingModels: WritableSignal<boolean> = signal(false);
-  // isFormChange: boolean;
   months: Array<Month> = Months;
   changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
   showModelComparison: boolean = false;
-  private worker: Worker;
+  private lastPredictorIds: Array<string> = [];
 
+  // --- Form ---
+  form: RegressionMenuForm = this.fb.group({
+    isGeneratedModel: this.fb.control<boolean>(true),
+    maxModelVariables: this.fb.control<number>(4),
+    regressionConstant: this.fb.control<number>(undefined),
+    regressionModelYear: this.fb.control<number>(undefined),
+    regressionModelStartMonth: this.fb.control<number>(undefined),
+    regressionStartYear: this.fb.control<number>(undefined),
+    regressionModelEndMonth: this.fb.control<number>(undefined),
+    regressionEndYear: this.fb.control<number>(undefined),
+    regressionModelNotes: this.fb.control<string>(''),
+    predictorVariables: this.fb.array<PredictorVariableForm>([]),
+  });
+
+  get predictorVariablesArray(): FormArray<PredictorVariableForm> {
+    return this.form.controls.predictorVariables;
+  }
 
   constructor() {
+    // Rebuild form whenever the group changes
     effect(() => {
-      const years = this.yearOptions();
       const group = this.group();
-      if (group && years.length > 0) {
-        const updates: Partial<AnalysisGroup> = {};
-        if (!group.regressionModelStartMonth) {
-          updates.regressionModelStartMonth = 0;
-        }
-        if (!group.regressionModelEndMonth) {
-          updates.regressionModelEndMonth = 11;
-        }
-        if (!group.regressionStartYear) {
-          updates.regressionStartYear = years[0];
-        }
-        if (!group.regressionEndYear) {
-          updates.regressionEndYear = years[years.length - 1];
-        }
-        if (Object.keys(updates).length > 0) {
-          //TODO: handle update
-          // this.analysisService.updateGroup({ ...group, ...updates });
-        }
+      if (!group) return;
+
+      // Only rebuild FormArray when the predictor list itself changes (IDs added/removed).
+      // For value-only changes (coefficients, productionInAnalysis), patchValue below updates
+      // the existing controls that the template's formControlName directives are bound to.
+      // Rebuilding on value changes creates new FormControl instances that the already-live
+      // formControlName directives are NOT registered with, so the DOM never updates.
+      const incomingIds = group.predictorVariables.map(v => v.id);
+      if (!_.isEqual(this.lastPredictorIds, incomingIds)) {
+        this.lastPredictorIds = incomingIds;
+        this.predictorVariablesArray.clear({ emitEvent: false });
+        group.predictorVariables.forEach(v => {
+          this.predictorVariablesArray.push(
+            this.fb.group({
+              productionInAnalysis: this.fb.control<boolean>(v.productionInAnalysis ?? false),
+              regressionCoefficient: this.fb.control<number>(v.regressionCoefficient),
+            }) as PredictorVariableForm,
+            { emitEvent: false }
+          );
+        });
       }
+      // Patch the scalar fields without triggering valueChanges
+      this.form.patchValue({
+        isGeneratedModel: group.isGeneratedModel,
+        maxModelVariables: group.maxModelVariables,
+        regressionConstant: group.regressionConstant,
+        regressionModelYear: group.regressionModelYear,
+        regressionModelStartMonth: group.regressionModelStartMonth,
+        regressionStartYear: group.regressionStartYear,
+        regressionModelEndMonth: group.regressionModelEndMonth,
+        regressionEndYear: group.regressionEndYear,
+        regressionModelNotes: group.regressionModelNotes ?? '',
+        predictorVariables: group.predictorVariables.map(v => ({
+          productionInAnalysis: v.productionInAnalysis ?? false,
+          regressionCoefficient: v.regressionCoefficient,
+        })),
+      }, { emitEvent: false });
+
+      // Keep generated-model fields disabled/enabled
+      this.updateFieldDisabledStates(group.isGeneratedModel);
     });
 
+    // Clamp maxModelVariables to available options when options change
     effect(() => {
-      let _group: AnalysisGroup = _.cloneDeep(this.group());
       const numVariableOptions = this.numVariableOptions();
-      if (_group && numVariableOptions.length > 0) {
-        if (!numVariableOptions.includes(_group.maxModelVariables)) {
-          _group.maxModelVariables = numVariableOptions[numVariableOptions.length - 1];
-          this.saveItem(_group);
-        }
+      const current = this.form.controls.maxModelVariables.value;
+      if (numVariableOptions.length > 0 && !numVariableOptions.includes(current)) {
+        this.form.controls.maxModelVariables.setValue(
+          numVariableOptions[numVariableOptions.length - 1],
+          { emitEvent: false }
+        );
+        this.saveFormValue();
       }
     });
   }
 
+  // --- Form Helpers ---
+  private updateFieldDisabledStates(isGeneratedModel: boolean): void {
+    const disableWhenGenerated = [
+      this.form.controls.regressionConstant,
+      this.form.controls.regressionModelYear,
+    ];
+    disableWhenGenerated.forEach(ctrl => {
+      isGeneratedModel ? ctrl.disable({ emitEvent: false }) : ctrl.enable({ emitEvent: false });
+    });
+    this.predictorVariablesArray.controls.forEach(ctrl => {
+      isGeneratedModel
+        ? ctrl.controls.regressionCoefficient.disable({ emitEvent: false })
+        : ctrl.controls.regressionCoefficient.enable({ emitEvent: false });
+    });
+  }
+
+  private formValueToGroup(): AnalysisGroup {
+    const raw = this.form.getRawValue();
+    const currentGroup = this.group();
+    return {
+      ...currentGroup,
+      isGeneratedModel: raw.isGeneratedModel,
+      maxModelVariables: raw.maxModelVariables,
+      regressionConstant: raw.regressionConstant,
+      regressionModelYear: raw.regressionModelYear,
+      regressionModelStartMonth: raw.regressionModelStartMonth,
+      regressionStartYear: raw.regressionStartYear,
+      regressionModelEndMonth: raw.regressionModelEndMonth,
+      regressionEndYear: raw.regressionEndYear,
+      regressionModelNotes: raw.regressionModelNotes,
+      predictorVariables: currentGroup.predictorVariables.map((v, i) => {
+        const rawVar = raw.predictorVariables[i];
+        return {
+          ...v,
+          productionInAnalysis: rawVar !== undefined ? rawVar.productionInAnalysis : v.productionInAnalysis,
+          regressionCoefficient: rawVar !== undefined ? rawVar.regressionCoefficient : v.regressionCoefficient,
+        };
+      }),
+    };
+  }
+
+  // --- Lifecycle ---
   ngOnInit() {
     const group = this.group();
     const generatedModels = this.generatedModels();
     if (group && group.models == undefined && group.isGeneratedModel && generatedModels.length == 0) {
       if (group.predictorVariables && group.predictorVariables.length < 7) {
-        untracked(() => this.generateModels());
+        this.generateModels();
       }
     }
   }
 
   ngOnDestroy(): void {
-    this.worker?.terminate();
+    this.regressionModelsService.terminateCurrentWorker();
+  }
+
+  // --- Persistence ---
+  async saveFormValue(): Promise<void> {
+    await this.saveItem(this.formValueToGroup());
   }
 
   async saveItem(group?: AnalysisGroup) {
-    console.log('save...')
     const _group: AnalysisGroup = group ?? this.group();
     const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
     const groupIndex: number = _analysisItemCurrent.groups.findIndex(g => g.idbGroupId == _group.idbGroupId);
@@ -226,124 +332,88 @@ export class RegressionModelMenuComponent {
     this.analysisService.selectedGroup.next(_group);
   }
 
-  async changeModelType() {
-    const _group: AnalysisGroup = _.cloneDeep(this.group());
-    //TODO handle generated models on change model type
-    // this.generatedModels = undefined;
-    _group.models = undefined;
-    _group.selectedModelId = undefined;
-    _group.dateModelsGenerated = undefined;
-    this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
-    if (_group.isGeneratedModel) {
-      _group.predictorVariables.forEach(variable => {
-        variable.regressionCoefficient = undefined;
-      });
-      _group.regressionModelYear = undefined;
-      _group.regressionConstant = undefined;
+  // --- Model Management ---
+  onModelTypeChange() {
+    const generatedModels = this.generatedModels();
+    if (generatedModels.length > 0) {
+      this.showConfirmModelTypeChange = true;
+    } else {
+      this.changeModelType();
     }
+  }
+
+  cancelModelTypeChange() {
+    // Revert the select back to its previous value
+    const current = this.form.controls.isGeneratedModel.value;
+    this.form.controls.isGeneratedModel.setValue(!current, { emitEvent: false });
+    // revert maxModelVariables to previous value if switching back to generated model and options have changed
+    this.form.controls.maxModelVariables.setValue(this.group().maxModelVariables, { emitEvent: false });
+
+    this.showConfirmModelTypeChange = false;
+  }
+
+  async changeModelType() {
+    this.showConfirmModelTypeChange = false;
+    const isGeneratedModel = this.form.controls.isGeneratedModel.value;
+    const currentGroup = this.group();
+    const _group: AnalysisGroup = {
+      ...this.formValueToGroup(),
+      models: undefined,
+      selectedModelId: undefined,
+      dateModelsGenerated: undefined,
+      ...(isGeneratedModel ? {
+        regressionModelYear: undefined,
+        regressionConstant: undefined,
+        predictorVariables: currentGroup.predictorVariables.map(v => ({ ...v, regressionCoefficient: undefined })),
+      } : {}),
+    };
+    this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
+    this.updateFieldDisabledStates(isGeneratedModel);
     await this.saveItem(_group);
   }
 
-  async generateModels(autoSelect?: boolean) {
-    const _group = _.cloneDeep(this.group());
+  async generateModels(autoSelect = false) {
+    const group = _.cloneDeep(this.group());
     const _analysisItem = this.analysisItem();
     const _selectedFacility = this.selectedFacility();
     const _meters = this.facilityMeters();
     const _meterData = this.facilityMeterData();
     const _predictorData = this.facilityPredictorData();
-    const _account = this.selectedAccount();
+    const assessmentReportVersion = this.selectedAccount()?.assessmentReportVersion ?? 'AR6';
 
-    const previousSelectedModelId = _group.selectedModelId;
-    const previousSelectedModel = _group?.models?.find(model => model.modelId === previousSelectedModelId);
+    const previousSelectedModelId = group.selectedModelId;
+    const previousSelectedModel = group?.models?.find(model => model.modelId === previousSelectedModelId);
 
-    this.worker?.terminate();
     this.generatingModels.set(true);
     this.modelingError.set(false);
 
-    const handleResult = async (generatedModels: Array<JStatRegressionModel>) => {
-      if (generatedModels) {
-        _group.dateModelsGenerated = new Date();
-        const newSelectedModel = generatedModels.find(model => model.modelId === _group.selectedModelId);
-
-        if (previousSelectedModelId) {
-          const previousModelExists = generatedModels.find(model => model.modelId === previousSelectedModelId);
-          if (previousModelExists) {
-            _group.selectedModelId = previousSelectedModelId;
-          }
-          this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
-        }
-
-        if (_group.selectedModelId) {
-          const selectedModel = generatedModels.find(model => model.modelId === _group.selectedModelId);
-          _group.models = selectedModel ? [selectedModel] : [];
-          if (selectedModel) {
-            _group.regressionConstant = selectedModel.coef[0];
-            _group.regressionModelYear = selectedModel.modelYear;
-            _group.predictorVariables.forEach(variable => {
-              const coefIndex = selectedModel.predictorVariables.findIndex(pVariable => pVariable.id == variable.id);
-              variable.regressionCoefficient = coefIndex !== -1 ? selectedModel.coef[coefIndex + 1] : 0;
-            });
-          }
-        }
-
-        if (autoSelect) {
-          const bestModel: JStatRegressionModel = _.maxBy(generatedModels, 'adjust_R2');
-          if (bestModel) {
-            _group.selectedModelId = bestModel.modelId;
-            _group.regressionConstant = bestModel.coef[0];
-            _group.regressionModelYear = bestModel.modelYear;
-            _group.predictorVariables.forEach(variable => {
-              const coefIndex = bestModel.predictorVariables.findIndex(pVariable => pVariable.id == variable.id);
-              variable.regressionCoefficient = coefIndex !== -1 ? bestModel.coef[coefIndex + 1] : 0;
-            });
-          }
-          _group.models = bestModel ? [bestModel] : [];
-        }
-
-        this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, generatedModels);
-        await this.saveItem(_group);
-      } else {
-        this.modelingError.set(true);
-      }
+    try {
+      const generatedModels = await this.regressionModelsService.generateModels(
+        group, _analysisItem, _selectedFacility, _meters, _meterData, _predictorData, assessmentReportVersion
+      );
+      await this.handleGenerateResult(generatedModels, group, autoSelect, previousSelectedModelId, previousSelectedModel);
+    } catch {
+      this.modelingError.set(true);
       this.generatingModels.set(false);
-    };
-
-    if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../../../web-workers/regression-models.worker', import.meta.url));
-      this.worker.onmessage = async ({ data }) => {
-        if (!data.error) {
-          await handleResult(data.generatedModels);
-        } else {
-          this.modelingError.set(true);
-          this.generatingModels.set(false);
-        }
-        this.worker.terminate();
-      };
-      this.worker.postMessage({
-        group: JSON.parse(JSON.stringify(_group)),
-        analysisItem: JSON.parse(JSON.stringify(_analysisItem)),
-        facility: _selectedFacility,
-        meters: _meters,
-        meterData: _meterData,
-        facilityPredictorData: _predictorData,
-        assessmentReportVersion: _account?.assessmentReportVersion ?? 'AR6'
-      });
-    } else {
-      // Fallback: no Web Worker support
-      try {
-        const calanderizedMeters = getCalanderizedMeterData(
-          _meters, _meterData, _selectedFacility, false,
-          { energyIsSource: _analysisItem.energyIsSource, neededUnits: getNeededUnits(_analysisItem) },
-          [], [], [_selectedFacility], _account?.assessmentReportVersion ?? 'AR6', []
-        );
-        const calculator = new RegressionModelsCalculator(_predictorData);
-        const generatedModels = calculator.getModels(_group, calanderizedMeters, _selectedFacility, _analysisItem);
-        await handleResult(generatedModels);
-      } catch {
-        this.modelingError.set(true);
-        this.generatingModels.set(false);
-      }
     }
+  }
+
+  private async handleGenerateResult(
+    generatedModels: Array<JStatRegressionModel>,
+    group: AnalysisGroup,
+    autoSelect: boolean,
+    previousSelectedModelId: string | undefined,
+    previousSelectedModel: JStatRegressionModel | undefined
+  ): Promise<void> {
+    const { updatedGroup, newSelectedModel } = this.regressionModelsService.applyGeneratedModelsToGroup(
+      group, generatedModels, autoSelect, previousSelectedModelId
+    );
+    if (previousSelectedModelId) {
+      this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
+    }
+    this.analysisDbService.setGeneratedModelsForGroup(updatedGroup.idbGroupId, generatedModels);
+    await this.saveItem(updatedGroup);
+    this.generatingModels.set(false);
   }
 
   compareUpdatedModel(previousModel: JStatRegressionModel, newModel: JStatRegressionModel) {
@@ -361,6 +431,7 @@ export class RegressionModelMenuComponent {
     }
   }
 
+  // --- Modals ---
   openModelComparisonModal() {
     this.showModelComparison = true;
   }
@@ -385,44 +456,47 @@ export class RegressionModelMenuComponent {
   }
 
 
-  toggledPredictor: AnalysisGroupPredictorVariable;
-  async togglePredictor(predictor: AnalysisGroupPredictorVariable) {
-    this.toggledPredictor = predictor;
-    predictor.productionInAnalysis = !predictor.productionInAnalysis;
+  // --- Predictor Management ---
+  toggledPredictorIndex: number | null = null;
+
+  async onPredictorChange(index: number) {
     const group = this.group();
+    this.toggledPredictorIndex = index;
     if (group.isGeneratedModel && group.selectedModelId) {
       this.showConfirmPredictorChangeModel = true;
     } else if (group.isGeneratedModel) {
       await this.confirmTogglePredictor();
     } else {
-      await this.saveItem();
+      await this.saveFormValue();
     }
   }
 
   async cancelTogglePredictor() {
-    let _group: AnalysisGroup = _.cloneDeep(this.group());
-    _group.predictorVariables.forEach(variable => {
-      if (variable.id === this.toggledPredictor.id) {
-        variable.productionInAnalysis = !variable.productionInAnalysis;
-      }
-    });
-    await this.saveItem(_group);
+    if (this.toggledPredictorIndex !== null) {
+      const ctrl = this.predictorVariablesArray.at(this.toggledPredictorIndex);
+      ctrl.controls.productionInAnalysis.setValue(!ctrl.controls.productionInAnalysis.value, { emitEvent: false });
+    }
     this.showConfirmPredictorChangeModel = false;
-    this.toggledPredictor = undefined;
+    this.toggledPredictorIndex = null;
   }
 
   async confirmTogglePredictor() {
-    const _group: AnalysisGroup = _.cloneDeep(this.group());
-    _group.predictorVariables.forEach(variable => {
-      variable.regressionCoefficient = undefined;
-    });
-    _group.models = undefined;
-    _group.selectedModelId = undefined;
-    _group.dateModelsGenerated = undefined;
-    _group.regressionModelYear = undefined;
-    _group.regressionConstant = undefined;
+    const baseGroup = this.formValueToGroup();
+    const _group: AnalysisGroup = {
+      ...baseGroup,
+      models: undefined,
+      selectedModelId: undefined,
+      dateModelsGenerated: undefined,
+      regressionModelYear: undefined,
+      regressionConstant: undefined,
+      predictorVariables: baseGroup.predictorVariables.map(v => ({
+        ...v,
+        regressionCoefficient: undefined,
+      })),
+    };
     this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
     await this.saveItem(_group);
     this.showConfirmPredictorChangeModel = false;
+    this.toggledPredictorIndex = null;
   }
 }

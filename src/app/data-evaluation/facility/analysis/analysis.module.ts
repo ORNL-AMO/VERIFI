@@ -8,7 +8,7 @@ import { FacilityAnalysisComponent } from './run-analysis/facility-analysis/faci
 import { GroupAnalysisComponent } from './run-analysis/group-analysis/group-analysis.component';
 import { GroupAnalysisOptionsComponent } from './run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
 import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-setup.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
@@ -66,6 +66,7 @@ import { RegressionModelComparison } from './run-analysis/group-analysis/regress
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule,
     HelperPipesModule,
     NgbPaginationModule,

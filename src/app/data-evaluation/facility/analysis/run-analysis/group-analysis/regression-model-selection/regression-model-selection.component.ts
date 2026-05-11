@@ -1,5 +1,5 @@
-import { Component, computed, effect, ElementRef, HostListener, inject, OnInit, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -10,7 +10,6 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { NavigationStart, Router } from '@angular/router';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -50,7 +49,6 @@ export class RegressionModelSelectionComponent {
     const group = this.selectedGroup();
     const generatedModelsPerGroup = this.generatedModelsPerGroup();
     if (group && generatedModelsPerGroup && generatedModelsPerGroup[group.idbGroupId]) {
-      console.log('models from signal: ', generatedModelsPerGroup[group.idbGroupId]);
       return generatedModelsPerGroup[group.idbGroupId];
     }
     return [];
@@ -157,39 +155,41 @@ export class RegressionModelSelectionComponent {
   }
 
   async selectModel(modelId?: string) {
-    let selectedGroup: AnalysisGroup = this.selectedGroup();
-    if (modelId) {
-      selectedGroup.selectedModelId = modelId;
-    }
-    let generatedModels: Array<JStatRegressionModel> = this.generatedModels();
-    let selectedModel: JStatRegressionModel = generatedModels.find(model => { return model.modelId == selectedGroup.selectedModelId });
-    selectedGroup.regressionConstant = selectedModel.coef[0];
-    selectedGroup.regressionModelYear = selectedModel.modelYear;
-    selectedGroup.predictorVariables.forEach(variable => {
-      let coefIndex: number = selectedModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-      if (coefIndex != -1) {
-        variable.regressionCoefficient = selectedModel.coef[coefIndex + 1];
-      } else {
-        variable.regressionCoefficient = 0;
-      }
-    });
-    selectedGroup.models = [selectedModel];
-    await this.saveItem();
-    this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, generatedModels);
+    const currentGroup: AnalysisGroup = this.selectedGroup();
+    const selectedModelId = modelId ?? currentGroup.selectedModelId;
+    const generatedModels: Array<JStatRegressionModel> = this.generatedModels();
+    const selectedModel: JStatRegressionModel = generatedModels.find(model => model.modelId === selectedModelId);
+    const updatedGroup: AnalysisGroup = {
+      ...currentGroup,
+      selectedModelId,
+      regressionConstant: selectedModel.coef[0],
+      regressionModelYear: selectedModel.modelYear,
+      models: [selectedModel],
+      predictorVariables: currentGroup.predictorVariables.map(variable => {
+        const coefIndex = selectedModel.predictorVariables.findIndex(pVariable => pVariable.id === variable.id);
+        return {
+          ...variable,
+          regressionCoefficient: coefIndex !== -1 ? selectedModel.coef[coefIndex + 1] : 0,
+        };
+      }),
+    };
+    await this.saveItem(updatedGroup);
+    this.analysisDbService.setGeneratedModelsForGroup(updatedGroup.idbGroupId, generatedModels);
   }
 
-  async saveItem() {
-    let analysisItem: IdbAnalysisItem = this.analysisItem();
-    let selectedGroup: AnalysisGroup = this.selectedGroup();
-    let selectedFacility: IdbFacility = this.selectedFacility();
-    analysisItem.isAnalysisVisited = false;
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
-    analysisItem.groups[groupIndex] = selectedGroup;
+  async saveItem(selectedGroup?: AnalysisGroup) {
+    const _group: AnalysisGroup = selectedGroup ?? this.selectedGroup();
+    const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
+    const selectedFacility: IdbFacility = this.selectedFacility();
+    const groupIndex: number = _analysisItemCurrent.groups.findIndex(group => group.idbGroupId === _group.idbGroupId);
+    const updatedGroups = [..._analysisItemCurrent.groups];
+    updatedGroups[groupIndex] = _group;
+    const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
-    this.analysisService.selectedGroup.next(selectedGroup);
+    this.analysisService.selectedGroup.next(_group);
   }
 
   setOrderDataField(str: OrderDataBy) {
@@ -221,10 +221,6 @@ export class RegressionModelSelectionComponent {
   hideInUseMessage() {
     this.analysisService.hideInUseMessage = true;
   }
-
-  // setShowUserDefinedModelInspection(showUserDefinedModelInspection: boolean) {
-  //   this.showUserDefinedModelInspection = showUserDefinedModelInspection;
-  // }
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;

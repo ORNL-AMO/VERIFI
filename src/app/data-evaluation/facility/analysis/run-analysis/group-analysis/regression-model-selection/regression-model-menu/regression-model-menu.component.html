@@ -3,23 +3,23 @@
 @let _generatedModels = generatedModels();
 @let _yearOptions = yearOptions();
 @let _generatingModels = generatingModels();
-<div class="row">
+<div class="row" [formGroup]="form">
   <div class="col-md-4 col-sm-12">
     <label class="bold">Select Modeling Method</label>
-    <select required class="form-select" id="userDefinedModel" id="userDefinedModel"
-      [(ngModel)]="_group.isGeneratedModel" (change)="changeModelType()">
+    <select required class="form-select" id="userDefinedModel"
+      formControlName="isGeneratedModel" (change)="onModelTypeChange()">
       <option [ngValue]="true">Calculate Models</option>
       <option [ngValue]="false">User Defined Model</option>
     </select>
     @if (_group.isGeneratedModel == true) {
     <label class="bold">Max Variable Combinations</label>
-    <select required class="form-select" id="maxModelVariables" id="maxModelVariables"
-      [(ngModel)]="_group.maxModelVariables" (change)="changeModelType()">
+    <select required class="form-select" id="maxModelVariables"
+      formControlName="maxModelVariables" (change)="onModelTypeChange()">
       @for (option of numVariableOptions(); track option) {
       <option [ngValue]="option">{{option}}</option>
       }
     </select>
-    @if (_group.maxModelVariables > 6) {
+    @if (form.controls.maxModelVariables.value > 6) {
     <div class="d-flex alert alert-warning">
       Larger numbers of variable combinations will take longer to generate models.
     </div>
@@ -50,7 +50,7 @@
           </div>
         </div>
         }
-        @if (noValidModels()) {
+        @if (noValidModels() && _generatedModels && _generatedModels.length != 0) {
         <div class="p-2">
           <div class="alert alert-danger">
             No valid models found for selected production variables.
@@ -131,26 +131,26 @@
         Regression Coefficient
       </div>
     </div>
-    @for (predictor of _group.predictorVariables; track predictor.id) {
-    <div class="row sub-column">
+    @for (predictor of _group.predictorVariables; track predictor.id; let i = $index) {
+    <div class="row sub-column" [formArrayName]="'predictorVariables'">
       <div class="col-4">
         {{predictor.name}}@if (predictor.unit) {
         <span class="ps-1">({{predictor.unit}})</span>
         }
       </div>
-      <div class="col-4">
+      <div class="col-4" [formGroupName]="i">
         <label class="switch" for="{{'predictor_'+predictor.id}}">
           <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
-            name="{{'predictor_'+predictor.id}}" [(ngModel)]="predictor.productionInAnalysis"
-            (change)="togglePredictor(predictor)">
+            name="{{'predictor_'+predictor.id}}" formControlName="productionInAnalysis"
+            (change)="onPredictorChange(i)">
           <span class="slider round"></span>
         </label>
       </div>
-      <div class="col-4 mdash">
+      <div class="col-4 mdash" [formGroupName]="i">
         @if (predictor.productionInAnalysis) {
         <input class="form-control" type="number" step="any" id="{{'regressionCoefficient_'+predictor.id}}"
-          name="{{'regressionCoefficient_'+predictor.id}}" [(ngModel)]="predictor.regressionCoefficient" required
-          (input)="saveItem()" [disabled]="_group.isGeneratedModel">
+          name="{{'regressionCoefficient_'+predictor.id}}" formControlName="regressionCoefficient" required
+          (input)="saveFormValue()">
         }
         @if (!predictor.productionInAnalysis) {
         <span class="bold ">&mdash;</span>
@@ -166,7 +166,7 @@
       </div>
       <div class="col-6">
         <input class="form-control" type="number" step="any" id="regressionConstant" name="regressionConstant"
-          [(ngModel)]="_group.regressionConstant" required (input)="saveItem()" [disabled]="_group.isGeneratedModel">
+          formControlName="regressionConstant" required (input)="saveFormValue()">
       </div>
     </div>
 
@@ -178,8 +178,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionModelYear" id="regressionModelYear"
-          [(ngModel)]="_group.regressionModelYear" (change)="saveItem()" [disabled]="_group.isGeneratedModel">
+        <select required class="form-select" id="regressionModelYear"
+          formControlName="regressionModelYear" (change)="saveFormValue()">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -195,8 +195,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionModelStartMonth" id="regressionModelStartMonth"
-          [(ngModel)]="_group.regressionModelStartMonth" (change)="saveItem()">
+        <select required class="form-select" id="regressionModelStartMonth"
+          formControlName="regressionModelStartMonth" (change)="saveFormValue()">
           @for (month of months; track month) {
           <option [ngValue]="month.monthNumValue">{{month.name}}
           </option>
@@ -211,8 +211,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionStartYear" id="regressionStartYear"
-          [(ngModel)]="_group.regressionStartYear" (change)="saveItem()">
+        <select required class="form-select" id="regressionStartYear"
+          formControlName="regressionStartYear" (change)="saveFormValue()">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -226,8 +226,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionModelEndMonth" id="regressionModelEndMonth"
-          [(ngModel)]="_group.regressionModelEndMonth" (change)="saveItem()">
+        <select required class="form-select" id="regressionModelEndMonth"
+          formControlName="regressionModelEndMonth" (change)="saveFormValue()">
           @for (month of months; track month) {
           <option [ngValue]="month.monthNumValue">{{month.name}}
           </option>
@@ -242,8 +242,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionEndYear" id="regressionEndYear"
-          [(ngModel)]="_group.regressionEndYear" (change)="saveItem()">
+        <select required class="form-select" id="regressionEndYear"
+          formControlName="regressionEndYear" (change)="saveFormValue()">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -259,7 +259,7 @@
       </div>
       <div class="col-8">
         <textarea class="form-control" name="regressionModelNotes" id="regressionModelNotes"
-          [(ngModel)]="_group.regressionModelNotes" (input)="saveItem()"></textarea>
+          formControlName="regressionModelNotes" (input)="saveFormValue()"></textarea>
       </div>
     </div>
   </div>
@@ -277,8 +277,21 @@
 
 
 
-<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmPredictorChangeModel || showModelComparison}">
+<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmModelTypeChange || showConfirmPredictorChangeModel || showModelComparison}">
 </div>
+<div class="popup" [class.open]="showConfirmModelTypeChange">
+  <div class="popup-header">Are you sure you want to change the modeling method?
+    <button class="item-right" (click)="cancelModelTypeChange()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>WARNING: Changing the modeling method will remove existing models. This cannot be undone.</p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelModelTypeChange()">Cancel</button>
+    <button class="btn btn-success" (click)="changeModelType(); showConfirmModelTypeChange = false">Change Method</button>
+  </div>
+</div>
+
 <div class="popup" [class.open]="showUpdateModelsModal">
   <div class="popup-header">Are you sure you want to update the models?
     <button class="item-right" (click)="closeUpdateModelsModal()">x</button>

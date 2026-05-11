@@ -6,9 +6,10 @@
   An error occurred while calculating the model. Please try again.
 </div>
 }@else if(_calculating) {
-<div class="d-flex justify-content-center my-5">
-  <div class="spinner-border" role="status">
-    <span class="visually-hidden">Loading...</span>
+<div class="d-flex justify-content-center my-2">
+  <div class="p-2 d-flex align-items-center gap-2">
+    <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+    <span>Calculating Model Validation...</span>
   </div>
 </div>
 }
@@ -36,7 +37,7 @@
           <td>
             Mean Latest Year Value
           </td>
-          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation.meanReportYear) {
           <td>
             {{sepValidation.meanReportYear | customNumber}}
           </td>
@@ -48,7 +49,7 @@
           <td>
             Mean Baseline Year Value
           </td>
-          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation.meanBaselineYear) {
           <td>
             {{sepValidation.meanBaselineYear | customNumber}}
           </td>
@@ -61,7 +62,7 @@
           <td>
             Minimum of Model Variable
           </td>
-          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation.modelMin) {
           <td [ngClass]="{'alert-danger': !sepValidation.modelMinValid}">
             {{sepValidation.modelMin | customNumber}}
           </td>
@@ -73,7 +74,7 @@
           <td>
             Maximum of Model Variable
           </td>
-          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation.modelMax) {
           <td [ngClass]="{'alert-danger': !sepValidation.modelMaxValid}">
             {{sepValidation.modelMax | customNumber}}
           </td>
@@ -86,7 +87,7 @@
           <td>
             Model Avg -3 Std Dev
           </td>
-          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation.modelMinus3StdDev) {
           <td [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
             {{sepValidation.modelMinus3StdDev | customNumber}}
           </td>
@@ -98,7 +99,7 @@
           <td>
             Model Avg +3 Std Dev
           </td>
-          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation.modelPlus3StdDev) {
           <td [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">
             {{sepValidation.modelPlus3StdDev | customNumber}}
           </td>
