@@ -1,127 +1,136 @@
-@if (userModel) {
-  <div class="mb-5">
-    <div class="d-flex justify-content-center">
-      <table class="table table-sm sep-table">
-        <thead>
-          <tr>
-            <th>
-            </th>
-            <th>
-            </th>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <th>
-                {{sepValidation.predictorVariable}}
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="bg-white border-top">
-            <td>
-            </td>
-            <td>
-              Mean Latest Year Value
-            </td>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <td>
-                {{sepValidation.meanReportYear | customNumber}}
-              </td>
-            }
-          </tr>
-          <tr class="bg-white">
-            <td>
-            </td>
-            <td>
-              Mean Baseline Year Value
-            </td>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <td>
-                {{sepValidation.meanBaselineYear | customNumber}}
-              </td>
-            }
-          </tr>
-          <tr class="bg-white border-top">
-            <td>
-              Range 1
-            </td>
-            <td>
-              Minimum of Model Variable
-            </td>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <td
-                [ngClass]="{'alert-danger': !sepValidation.modelMinValid}">
-                {{sepValidation.modelMin | customNumber}}
-              </td>
-            }
-          </tr>
-          <tr class="bg-white">
-            <td>
-            </td>
-            <td>
-              Maximum of Model Variable
-            </td>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <td
-                [ngClass]="{'alert-danger': !sepValidation.modelMaxValid}">
-                {{sepValidation.modelMax | customNumber}}
-              </td>
-            }
-          </tr>
-          <tr class="bg-white border-top">
-            <td>
-              Range 2
-            </td>
-            <td>
-              Model Avg -3 Std Dev
-            </td>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <td
-                [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
-                {{sepValidation.modelMinus3StdDev | customNumber}}
-              </td>
-            }
-          </tr>
-          <tr class="bg-white">
-            <td>
-            </td>
-            <td>
-              Model Avg +3 Std Dev
-            </td>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <td
-                [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">
-                {{sepValidation.modelPlus3StdDev | customNumber}}
-              </td>
-            }
-          </tr>
-        </tbody>
-        <tfoot class="border-top">
-          <tr>
-            <th>
-            </th>
-            <th>
-              Validation Check
-            </th>
-            @for (sepValidation of userModel.SEPValidation; track sepValidation) {
-              <th>
-                @if (sepValidation.isValid) {
-                  <span>
-                    Pass
-                  </span>
-                }
-                @if (!sepValidation.isValid) {
-                  <span>
-                    Fail
-                  </span>
-                }
-              </th>
-            }
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <hr>
-    </div>
-  }
+@let _userModel = userModel();
+@let _calculating = calculating();
 
-  <div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>
+@if(_calculating === 'error') {
+<div class="alert alert-danger" role="alert">
+  An error occurred while calculating the model. Please try again.
+</div>
+}@else if(_calculating) {
+<div class="d-flex justify-content-center my-5">
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+}
+@if (_userModel) {
+<div class="mb-5">
+  <div class="d-flex justify-content-center">
+    <table class="table table-sm sep-table">
+      <thead>
+        <tr>
+          <th>
+          </th>
+          <th>
+          </th>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <th>
+            {{sepValidation.predictorVariable}}
+          </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bg-white border-top">
+          <td>
+          </td>
+          <td>
+            Mean Latest Year Value
+          </td>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <td>
+            {{sepValidation.meanReportYear | customNumber}}
+          </td>
+          }
+        </tr>
+        <tr class="bg-white">
+          <td>
+          </td>
+          <td>
+            Mean Baseline Year Value
+          </td>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <td>
+            {{sepValidation.meanBaselineYear | customNumber}}
+          </td>
+          }
+        </tr>
+        <tr class="bg-white border-top">
+          <td>
+            Range 1
+          </td>
+          <td>
+            Minimum of Model Variable
+          </td>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <td [ngClass]="{'alert-danger': !sepValidation.modelMinValid}">
+            {{sepValidation.modelMin | customNumber}}
+          </td>
+          }
+        </tr>
+        <tr class="bg-white">
+          <td>
+          </td>
+          <td>
+            Maximum of Model Variable
+          </td>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <td [ngClass]="{'alert-danger': !sepValidation.modelMaxValid}">
+            {{sepValidation.modelMax | customNumber}}
+          </td>
+          }
+        </tr>
+        <tr class="bg-white border-top">
+          <td>
+            Range 2
+          </td>
+          <td>
+            Model Avg -3 Std Dev
+          </td>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <td [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
+            {{sepValidation.modelMinus3StdDev | customNumber}}
+          </td>
+          }
+        </tr>
+        <tr class="bg-white">
+          <td>
+          </td>
+          <td>
+            Model Avg +3 Std Dev
+          </td>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <td [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">
+            {{sepValidation.modelPlus3StdDev | customNumber}}
+          </td>
+          }
+        </tr>
+      </tbody>
+      <tfoot class="border-top">
+        <tr>
+          <th>
+          </th>
+          <th>
+            Validation Check
+          </th>
+          @for (sepValidation of _userModel.SEPValidation; track sepValidation) {
+          <th>
+            @if (sepValidation.isValid) {
+            <span>
+              Pass
+            </span>
+            }
+            @if (!sepValidation.isValid) {
+            <span>
+              Fail
+            </span>
+            }
+          </th>
+          }
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <hr>
+</div>
+}
+<div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>

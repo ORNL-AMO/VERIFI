@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, inject, OnInit, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -14,6 +14,13 @@ import { NavigationStart, Router } from '@angular/router';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import * as _ from 'lodash';
+import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
+
+type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
 @Component({
   selector: 'app-regression-model-selection',
@@ -21,92 +28,144 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrls: ['./regression-model-selection.component.css'],
   standalone: false
 })
-export class RegressionModelSelectionComponent implements OnInit {
+export class RegressionModelSelectionComponent {
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private calanderizationService: CalanderizationService = inject(CalanderizationService);
+  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
 
-  analysisItem: IdbAnalysisItem;
-  selectedGroup: AnalysisGroup;
-  orderDataField: string = 'adjust_R2';
-  orderByDirection: 'asc' | 'desc' = 'desc';
-  selectedGroupSub: Subscription;
-  selectedFacility: IdbFacility;
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
+  calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
+  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+
+
+  generatedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
+    const group = this.selectedGroup();
+    const generatedModelsPerGroup = this.generatedModelsPerGroup();
+    if (group && generatedModelsPerGroup && generatedModelsPerGroup[group.idbGroupId]) {
+      console.log('models from signal: ', generatedModelsPerGroup[group.idbGroupId]);
+      return generatedModelsPerGroup[group.idbGroupId];
+    }
+    return [];
+  });
+
+  orderDataField: WritableSignal<OrderDataBy> = signal('adjust_R2');
+  orderByDirection: WritableSignal<'asc' | 'desc'> = signal('desc');
+
+  orderedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
+    const models = this.generatedModels();
+    const showInvalid = this.showInvalid();
+    const showFailedValidationModel = this.showFailedValidationModel();
+    const yearOptionSelections = this.yearOptionSelections();
+    const orderDataBy = this.orderDataField();
+    let orderByDirection = this.orderByDirection();
+
+    let filteredModels: Array<JStatRegressionModel> = models.map(model => ({ ...model }));
+    //filter invalid models
+    if (!showInvalid) {
+      filteredModels = filteredModels.filter(model => { return model.isValid });
+    }
+    //filter models that failed validation
+    if (!showFailedValidationModel) {
+      filteredModels = filteredModels.filter(model => {
+        if (model.SEPValidation) {
+          return model.SEPValidation.every(SEPValidation => SEPValidation.isValid)
+        }
+        return false;
+      });
+    }
+    //filter by year
+    if (yearOptionSelections.length > 0) {
+      let includedYears: Array<number> = yearOptionSelections.filter(option => option.isChecked).map(option => option.year);
+      filteredModels = filteredModels.filter(model => includedYears.includes(model.modelYear));
+    }
+    //order models
+    if (!orderByDirection) {
+      orderByDirection = 'desc';
+    }
+    filteredModels = _.orderBy(filteredModels, orderDataBy, orderByDirection);
+    return filteredModels;
+  });
+
+  showInUseMessage: Signal<boolean> = computed(() => {
+    const analysisItem = this.analysisItem();
+    if (analysisItem && this.analysisService.hideInUseMessage == false) {
+      const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+      if (accountAnalysisItems.length != 0) {
+        return true;
+      }
+    }
+    return false;
+  });
+
   selectedInspectModel: JStatRegressionModel;
-  showInUseMessage: boolean;
-  showUserDefinedModelInspection: boolean = false;
-  generatedModels: Array<JStatRegressionModel>;
-  generatedModelsPerGroupSub: Subscription;
-  routerSub: Subscription;
   dropdownOpen: boolean = false;
 
-  modelFilterOptions: {
-    yearOptionSelections: Array<{ year: number, isChecked: boolean }>
-    showInvalid: boolean;
-    showFailedValidationModel: boolean;
-  } = {
-      yearOptionSelections: [],
-      showInvalid: false,
-      showFailedValidationModel: false
+  showInvalid: WritableSignal<boolean> = signal(false);
+  showFailedValidationModel: WritableSignal<boolean> = signal(false);
+  yearOptionSelections: WritableSignal<Array<{ year: number, isChecked: boolean }>> = signal([]);
+
+  groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
+    const selectedGroup = this.selectedGroup();
+    const allGroupErrors = this.allGroupErrors();
+    const analysisItem = this.analysisItem();
+    if (selectedGroup && analysisItem) {
+      const groupError = allGroupErrors.find(groupError => {
+        return groupError.groupId == selectedGroup.idbGroupId && groupError.analysisId == analysisItem.guid
+      });
+      if (groupError) {
+        return groupError;
+      } else {
+        return emptyGroupAnalysisErrors();
+      }
     }
+    return emptyGroupAnalysisErrors();
+  });
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private calanderizationService: CalanderizationService) { }
 
-  ngOnInit(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      if (!this.selectedGroup || group.idbGroupId != this.selectedGroup.idbGroupId) {
-        this.selectedGroup = group;
-        //group change
-        this.setYears();
-      } else {
-        this.selectedGroup = group;
-      }
-      this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.selectedGroup.idbGroupId);
-      if (!this.generatedModels?.length && this.selectedGroup?.models?.length) {
-        this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.selectedGroup.models);
-        this.generatedModels = this.selectedGroup.models;
-      }
-      this.checkHasValidModels();
-      this.checkFailedValidationModels();
-    });
-
-    this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
-      if (this.selectedGroup && this.selectedGroup.idbGroupId) {
-        this.generatedModels = generatedModelsPerGroup[this.selectedGroup.idbGroupId] || [];
-      }
-      else {
-        this.generatedModels = [];
-      }
-      this.checkHasValidModels();
-      this.checkFailedValidationModels();
-    });
-
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        if (!event.url.includes('/analysis/run-analysis/group-analysis')) {
-          this.analysisDbService.clearGeneratedModels();
+  selectedGroupId: string;
+  constructor() {
+    effect(() => {
+      const selectedGroup = this.selectedGroup();
+      const calanderizedMeters = this.calanderizedMeters();
+      const facility = this.selectedFacility();
+      if (selectedGroup && calanderizedMeters && calanderizedMeters.length > 0 && facility) {
+        if (selectedGroup.idbGroupId != this.selectedGroupId) {
+          this.selectedGroupId = selectedGroup.idbGroupId;
+          const groupMeters = calanderizedMeters.filter(cMeter => cMeter.meter.groupId == selectedGroup.idbGroupId);
+          const yearsWithFullData = getYearsWithFullData(groupMeters, facility);
+          this.yearOptionSelections.set(yearsWithFullData.map(year => ({ year, isChecked: true })));
         }
       }
     });
-    this.setShowInUseMessage();
+
+    effect(() => {
+      const selectedGroup = this.selectedGroup();
+      const generatedModelsPerGroup = this.generatedModelsPerGroup();
+      if (selectedGroup && selectedGroup.models && generatedModelsPerGroup && !generatedModelsPerGroup[selectedGroup.idbGroupId]) {
+        this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, selectedGroup.models);
+      }
+    })
   }
 
-  ngOnDestroy() {
-    this.selectedGroupSub.unsubscribe();
-    this.generatedModelsPerGroupSub.unsubscribe();
-    this.routerSub.unsubscribe();
-  }
-
-  selectModel() {
-    let selectedModel: JStatRegressionModel = this.generatedModels.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
-    this.selectedGroup.regressionConstant = selectedModel.coef[0];
-    this.selectedGroup.regressionModelYear = selectedModel.modelYear;
-    this.selectedGroup.predictorVariables.forEach(variable => {
+  async selectModel(modelId?: string) {
+    let selectedGroup: AnalysisGroup = this.selectedGroup();
+    if (modelId) {
+      selectedGroup.selectedModelId = modelId;
+    }
+    let generatedModels: Array<JStatRegressionModel> = this.generatedModels();
+    let selectedModel: JStatRegressionModel = generatedModels.find(model => { return model.modelId == selectedGroup.selectedModelId });
+    selectedGroup.regressionConstant = selectedModel.coef[0];
+    selectedGroup.regressionModelYear = selectedModel.modelYear;
+    selectedGroup.predictorVariables.forEach(variable => {
       let coefIndex: number = selectedModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
       if (coefIndex != -1) {
         variable.regressionCoefficient = selectedModel.coef[coefIndex + 1];
@@ -114,31 +173,35 @@ export class RegressionModelSelectionComponent implements OnInit {
         variable.regressionCoefficient = 0;
       }
     });
-    this.selectedGroup.models = [selectedModel];
-    this.saveItem();
-    this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.generatedModels);
+    selectedGroup.models = [selectedModel];
+    await this.saveItem();
+    this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, generatedModels);
   }
 
   async saveItem() {
-    this.analysisItem.isAnalysisVisited = false;
-    let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
-    this.analysisItem.groups[groupIndex] = this.selectedGroup;
-    await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
+    let analysisItem: IdbAnalysisItem = this.analysisItem();
+    let selectedGroup: AnalysisGroup = this.selectedGroup();
+    let selectedFacility: IdbFacility = this.selectedFacility();
+    analysisItem.isAnalysisVisited = false;
+    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
+    analysisItem.groups[groupIndex] = selectedGroup;
+    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    this.analysisService.selectedGroup.next(this.selectedGroup)
+    this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.analysisService.selectedGroup.next(selectedGroup);
   }
 
-  setOrderDataField(str: string) {
-    if (str == this.orderDataField) {
-      if (this.orderByDirection == 'desc') {
-        this.orderByDirection = 'asc';
+  setOrderDataField(str: OrderDataBy) {
+    const currentOrderDataField = this.orderDataField();
+    if (str == currentOrderDataField) {
+      if (this.orderByDirection() == 'desc') {
+        this.orderByDirection.set('asc');
       } else {
-        this.orderByDirection = 'desc';
+        this.orderByDirection.set('desc');
       }
     } else {
-      this.orderDataField = str;
+      this.orderDataField.set(str);
     }
   }
 
@@ -151,73 +214,32 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   async selectFromInspection() {
-    this.selectedGroup.selectedModelId = this.selectedInspectModel.modelId;
-    await this.selectModel();
+    await this.selectModel(this.selectedInspectModel.modelId);
     this.cancelInspectModel();
   }
 
-  setShowInUseMessage() {
-    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
-    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
-      this.showInUseMessage = true;
-    }
-  }
-
   hideInUseMessage() {
-    this.showInUseMessage = false;
     this.analysisService.hideInUseMessage = true;
   }
 
-  setShowUserDefinedModelInspection(showUserDefinedModelInspection: boolean) {
-    this.showUserDefinedModelInspection = showUserDefinedModelInspection;
-  }
-
-  checkHasValidModels() {
-    let noValidModels: boolean = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
-    if (!this.modelFilterOptions.showInvalid && noValidModels) {
-      this.modelFilterOptions.showInvalid = true;
-    }
-  }
-
-  checkFailedValidationModels() {
-    let noDataValidationModels: boolean = this.generatedModels?.find(model => {
-      if (model.SEPValidation) {
-        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
-      } else {
-        return undefined;
-      }
-    }) == undefined;
-    if (!this.modelFilterOptions.showFailedValidationModel && noDataValidationModels) {
-      this.modelFilterOptions.showFailedValidationModel = true;
-    }
-  }
+  // setShowUserDefinedModelInspection(showUserDefinedModelInspection: boolean) {
+  //   this.showUserDefinedModelInspection = showUserDefinedModelInspection;
+  // }
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
   toggleOption(option: number) {
-    const selection = this.modelFilterOptions.yearOptionSelections.find(selection => selection.year == option);
-    if (selection) {
-      selection.isChecked = !selection.isChecked;
-    }
+    this.yearOptionSelections.update(selections =>
+      selections.map(s => s.year === option ? { ...s, isChecked: !s.isChecked } : s)
+    );
   }
 
   @HostListener('document:click', ['$event'])
   clickOutside(event: Event) {
     if (this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
       this.dropdownOpen = false;
-    }
-  }
-
-  setYears() {
-    if (this.selectedGroup) {
-      let filteredCMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByGroupId(this.selectedGroup.idbGroupId);
-      let fullYearsWithData: Array<number> = getYearsWithFullData(filteredCMeters, this.selectedFacility);
-      fullYearsWithData = fullYearsWithData.filter(year => {
-        return year >= this.analysisItem.baselineYear;
-      })
-      this.modelFilterOptions.yearOptionSelections = fullYearsWithData.map(year => { return { year: year, isChecked: true } });
     }
   }
 }
