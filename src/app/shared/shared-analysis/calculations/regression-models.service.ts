@@ -84,7 +84,6 @@ export class RegressionModelsService {
     previousSelectedModelId: string | undefined
   ): { updatedGroup: AnalysisGroup; newSelectedModel: JStatRegressionModel | undefined } {
     group.dateModelsGenerated = new Date();
-    const newSelectedModel = generatedModels.find(model => model.modelId === group.selectedModelId);
 
     if (previousSelectedModelId) {
       const previousModelExists = generatedModels.find(model => model.modelId === previousSelectedModelId);
@@ -120,6 +119,7 @@ export class RegressionModelsService {
       group.models = bestModel ? [bestModel] : [];
     }
 
+    const newSelectedModel = generatedModels.find(model => model.modelId === group.selectedModelId);
     return { updatedGroup: group, newSelectedModel };
   }
 
