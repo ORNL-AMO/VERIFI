@@ -1,12 +1,5 @@
 @let _facility = facility();
 @let _lastBill = lastBill();
-@let _waterAnalysisNeeded = waterAnalysisNeeded();
-@let _energyAnalysisNeeded = energyAnalysisNeeded();
-@let _meterReadingsNeeded = meterReadingsNeeded();
-@let _energyAnalysisHasErrors = energyAnalysisHasErrors();
-@let _waterAnalysisHasErrors = waterAnalysisHasErrors();
-@let _latestEnergyAnalysisItem = latestEnergyAnalysisItem();
-@let _latestWaterAnalysisItem = latestWaterAnalysisItem();
 
 <div class="card">
   <div class="card-body">
@@ -53,11 +46,6 @@
             <button class="btn btn-outline m-0 position-relative" (click)="navigateTo('utility')">
               <span class="fa fa-book"></span><br>
               Manage Utility <br> Data
-              @if (_meterReadingsNeeded) {
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                <span class="fa fa-exclamation white"></span>
-              </span>
-              }
             </button>
           </div>
           <div class="p-1">
@@ -77,12 +65,6 @@
               [disabled]="!_lastBill">
               <span class="fa fa-microscope"></span><br>
               Conduct Facility <br> Analysis
-              @if (_energyAnalysisNeeded || _waterAnalysisNeeded || _energyAnalysisHasErrors || _waterAnalysisHasErrors)
-              {
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                <span class="fa fa-exclamation white"></span>
-              </span>
-              }
             </button>
           </div>
           <div class="p-1">
@@ -104,86 +86,6 @@
             </button>
           </div>
         </div>
-        @if (_meterReadingsNeeded || _energyAnalysisNeeded || _waterAnalysisNeeded || _energyAnalysisHasErrors ||
-        _waterAnalysisHasErrors) {
-        <div class="d-flex justify-content-center">
-          <ul class="list-group list-group-flush">
-            <!--meters-->
-            @if (_meterReadingsNeeded) {
-            <li class="list-group-item">
-              <a class="nav-link" routerLink="/data-evaluation/facility/{{_facility.guid}}/utility">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Meter readings needed. @if (_lastBill) {
-                <span>Latest entry {{_lastBill |displayMeterDataDate}}.</span>
-                }
-              </a>
-            </li>
-            }
-            @if (_energyAnalysisNeeded && _lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{_facility.guid}}/analysis/analysis-dashboard/energy">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Energy analysis needed.
-                <!-- 
-                TODO: add check when new data is entered to determine if analysis is needed
-                @if (latestEnergyAnalysisItem) {
-                Latest energy
-                analysis conducted for
-                {{latestEnergyAnalysisItem.reportYear |
-                yearDisplay:facility.fiscalYear}}
-              } -->
-              </a>
-            </li>
-            }
-            @if (_waterAnalysisNeeded && _lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{_facility.guid}}/analysis/analysis-dashboard/water">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Water analysis needed.
-                <!-- 
-              TODO: add check when new data is entered to determine if analysis is needed
-              @if (latestWaterAnalysisItem) {
-              Latest water
-              analysis conducted for
-              {{latestWaterAnalysisItem.reportYear |
-              yearDisplay:facility.fiscalYear}}
-            } -->
-              </a>
-            </li>
-            }
-            @if (_energyAnalysisHasErrors && _lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{_facility.guid}}/analysis/analysis-dashboard/energy">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Errors in the energy analysis: {{_latestEnergyAnalysisItem.name}}
-              </a>
-            </li>
-            }
-            @if (_waterAnalysisHasErrors && _lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{_facility.guid}}/analysis/analysis-dashboard/water">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Errors in the water analysis: {{_latestWaterAnalysisItem.name}}
-              </a>
-            </li>
-            }
-          </ul>
-        </div>
-        }
       </div>
     </div>
   </div>

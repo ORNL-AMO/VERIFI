@@ -45,20 +45,25 @@ export class FacilityStatusCheck {
         meters: Array<IdbUtilityMeter> = [],
         meterGroups: Array<IdbUtilityMeterGroup> = []
     ) {
+        const facilityMeters: Array<IdbUtilityMeter> = meters.filter(m => m.facilityId === facility.guid);
+        const facilityPredictors: Array<IdbPredictor> = predictors.filter(p => p.facilityId === facility.guid);
+        const facilityMeterGroups: Array<IdbUtilityMeterGroup> = meterGroups.filter(g => g.facilityId === facility.guid);
         this.facility = facility;
-        this.hasNoMeters = meters.length === 0;
-        this.hasNoMeterGroups = !this.hasNoMeters && meterGroups.length === 0;
-        this.hasNoPredictors = predictors.length === 0;
+        this.hasNoMeters = facilityMeters.length === 0;
+        this.hasNoMeterGroups = !this.hasNoMeters && facilityMeterGroups.length === 0;
+        this.hasNoPredictors = facilityPredictors.length === 0;
         this.facilityLatestEntry = this.computeFacilityLatestEntry(utilityMeterData);
-
+        
+        const facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(pd => pd.facilityId === facility.guid);
         const facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(m => m.meter.facilityId === facility.guid);
-        this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, facilityCalanderizedMeters, predictors, predictorData, analysisSetupErrors);
-        this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, predictors, predictorData, analysisSetupErrors);
-        this.setMetersStatusChecks(meters, facilityCalanderizedMeters, utilityMeterData);
+        const facilityMeterData: Array<IdbUtilityMeterData> = utilityMeterData.filter(md => md.facilityId === facility.guid);
+        this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
+        this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
+        this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
-        this.setPredictorsStatusChecks(predictors, predictorData);
+        this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
         this.setPredictorsStatus();
-        this.setActions(facility, meters, meterGroups, predictors);
+        this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
         this.setStatus();
     }
 

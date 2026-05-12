@@ -129,7 +129,7 @@ export class AnalysisStatusCheck {
     ): PredictorDateEntry {
         const predictor: IdbPredictor | undefined = predictors.find(p => p.guid === predictorId);
         const dataForPredictor: Array<IdbPredictorData> = predictorData.filter(pd => pd.predictorId === predictorId);
-        const lastDateEntry: Date = new Date(Math.max(...dataForPredictor.map(pd => new Date(pd.year, pd.month, 1).getTime())));
+        const lastDateEntry: Date = new Date(Math.max(...dataForPredictor.map(pd => new Date(pd.year, pd.month - 1, 1).getTime())));
         return {
             predictorName: predictor?.name ?? 'Unknown Predictor',
             predictorId,
@@ -144,7 +144,7 @@ export class AnalysisStatusCheck {
     ): MeterDateEntry {
         const calanderizedMeter: CalanderizedMeter | undefined = calanderizedMeters.find(cm => cm.meter.guid === meterId);
         const monthlyData = calanderizedMeter?.monthlyData ?? [];
-        const lastDateEntry: Date = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue, 1).getTime())));
+        const lastDateEntry: Date = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue + 1, 1).getTime())));
         return {
             meterName: calanderizedMeter?.meter.name ?? 'Unknown Meter',
             meterId,

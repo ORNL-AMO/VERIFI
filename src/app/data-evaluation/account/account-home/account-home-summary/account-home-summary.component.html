@@ -1,7 +1,5 @@
 @let _account = account();
 @let _disableButtons = disableButtons();
-@let _waterAnalysisNeeded = waterAnalysisNeeded();
-@let _energyAnalysisNeeded = energyAnalysisNeeded();
 
 <div class="card">
   <div class="card-body">
@@ -29,11 +27,6 @@
               [disabled]="_disableButtons">
               <span class="fa fa-microscope"></span><br>
               Conduct Account <br> Analysis
-              @if (_energyAnalysisNeeded || _waterAnalysisNeeded) {
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                <span class="fa fa-exclamation white"></span>
-              </span>
-              }
             </button>
           </div>
           <div class="p-1">
@@ -61,48 +54,6 @@
             </button>
           </div>
         </div>
-        @if ((_energyAnalysisNeeded || _waterAnalysisNeeded) && !_disableButtons) {
-        <div class="d-flex justify-content-center">
-          <ul class="list-group list-group-flush">
-            @if (_energyAnalysisNeeded) {
-            <li class="list-group-item">
-              <a class="nav-link" routerLink="/account/analysis/dashboard/energy">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Energy analysis needed.
-                <!--
-                TODO: add check when new data is entered to determine if analysis is needed
-                 @if (latestEnergyAnalysisItem) {
-                Latest energy
-                analysis conducted for
-                {{latestEnergyAnalysisItem.reportYear |
-                yearDisplay:account.fiscalYear}}
-                } -->
-              </a>
-            </li>
-            }
-            @if (_waterAnalysisNeeded) {
-            <li class="list-group-item">
-              <a class="nav-link" routerLink="/account/analysis/dashboard/water">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Water analysis needed.
-                <!-- 
-                TODO: add check when new data is entered to determine if analysis is needed
-                @if (latestWaterAnalysisItem) {
-                Latest water
-                analysis conducted for
-                {{latestWaterAnalysisItem.reportYear |
-                yearDisplay:account.fiscalYear}}
-                } -->
-              </a>
-            </li>
-            }
-          </ul>
-        </div>
-        }
       </div>
     </div>
 

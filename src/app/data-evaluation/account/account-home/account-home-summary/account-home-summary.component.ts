@@ -36,26 +36,6 @@ export class AccountHomeSummaryComponent {
     const accountMeterData = this.accountMeterData();
     return (accountMeterData.length == 0);
   });
-  waterAnalysisNeeded: Signal<boolean> = computed(() => {
-    const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
-    const account = this.account();
-    if (latestWaterAnalysisItem) {
-      //todo: add check when new data is entered
-      return false;
-    }
-    return account && account.sustainabilityQuestions.waterReductionGoal ? true : false;
-  });
-
-  energyAnalysisNeeded: Signal<boolean> = computed(() => {
-    const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem();
-    const account = this.account();
-    if (latestEnergyAnalysisItem) {
-      //TODO: add check when new data is entered
-      return false;
-    }
-    return account && account.sustainabilityQuestions.energyReductionGoal ? true : false;
-  });
-
 
 
   constructor() {

@@ -1,22 +1,17 @@
-import { Component, computed, effect, inject, OnInit, Signal } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
-import { FacilityHomeService } from '../facility-home.service';
 import { Router } from '@angular/router';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { getDateFromMeterData, getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
-import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
+import { getLatestMeterData } from 'src/app/shared/dateHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisSetupErrors } from 'src/app/models/validation';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -27,20 +22,15 @@ import { AnalysisSetupErrors } from 'src/app/models/validation';
 export class FacilityHomeSummaryComponent {
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
   private router: Router = inject(Router);
   private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private loadingService: LoadingService = inject(LoadingService);
-  private analysisValidationService: AnalysisValidationService = inject(AnalysisValidationService);
 
   facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
-  latestEnergyAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
-  latestWaterAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
   navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: [] });
   facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: [] });
-  analysisSetupErrors: Signal<Array<AnalysisSetupErrors>> = toSignal(this.analysisValidationService.analysisSetupErrors, { initialValue: undefined });
 
   lastBill: Signal<IdbUtilityMeterData> = computed(() => {
     let facilityMeterData = this.facilityMeterData();
@@ -53,87 +43,8 @@ export class FacilityHomeSummaryComponent {
     return _.uniq(sources);
   });
 
-  waterAnalysisNeeded: Signal<boolean> = computed(() => {
-    const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
-    if (latestWaterAnalysisItem) {
-      return false;
-    } else {
-      const facility = this.facility();
-      if (facility?.sustainabilityQuestions.waterReductionGoal) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  });
-  energyAnalysisNeeded: Signal<boolean> = computed(() => {
-    const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem()
-    if (latestEnergyAnalysisItem) {
-      return false;
-    } else {
-      const facility = this.facility();
-      if (facility?.sustainabilityQuestions.energyReductionGoal) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  });
-
-  meterReadingsNeeded: Signal<boolean> = computed(() => {
-    let lastBill = this.lastBill();
-    let currentDate: Date = new Date();
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    if (lastBill) {
-      let lastBillDate: Date = getDateFromMeterData(lastBill);
-      if (lastBillDate < currentDate) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  });
-  // predictorsNeeded: Signal<boolean> = computed(() => {
-  //   const facility = this.facility();
-  //   if (facility?.sustainabilityQuestions.predictorsNeeded) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // });
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
-
-  energyAnalysisHasErrors: Signal<boolean> = computed(() => {
-    const latestEnergyAnalysisItem = this.latestEnergyAnalysisItem();
-    const analysisSetupErrors = this.analysisSetupErrors();
-    if (latestEnergyAnalysisItem) {
-      const setupErrors: AnalysisSetupErrors = analysisSetupErrors.find(error => error.analysisId === latestEnergyAnalysisItem.guid);
-      if (setupErrors) {
-        return setupErrors.hasError;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  });
-  waterAnalysisHasErrors: Signal<boolean> = computed(() => {
-    const latestWaterAnalysisItem = this.latestWaterAnalysisItem();
-    const analysisSetupErrors = this.analysisSetupErrors();
-    if (latestWaterAnalysisItem) {
-      const setupErrors: AnalysisSetupErrors = analysisSetupErrors.find(error => error.analysisId === latestWaterAnalysisItem.guid);
-      if (setupErrors) {
-        return setupErrors.hasError;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  });
 
   constructor() {
     effect(() => {

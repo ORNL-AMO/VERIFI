@@ -59,7 +59,7 @@ export class AccountStatusCheckService implements OnDestroy {
             analysisItems,
             analysisSetupErrors
         ]) => {
-            if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems || !analysisSetupErrors) {
+            if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || calanderizedMeters.length == 0 || !predictors || !predictorData || !analysisItems || !analysisSetupErrors) {
                 return;
             }
             const statusCheck = new AccountStatusCheck(
