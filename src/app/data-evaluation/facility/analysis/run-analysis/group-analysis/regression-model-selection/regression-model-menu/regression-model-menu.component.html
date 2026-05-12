@@ -147,12 +147,12 @@
         </label>
       </div>
       <div class="col-4 mdash" [formGroupName]="i">
-        @if (predictor.productionInAnalysis) {
+        @if (predictorVariablesArray.at(i).controls.productionInAnalysis.value) {
         <input class="form-control" type="number" step="any" id="{{'regressionCoefficient_'+predictor.id}}"
           name="{{'regressionCoefficient_'+predictor.id}}" formControlName="regressionCoefficient" required
           (input)="saveFormValue()">
         }
-        @if (!predictor.productionInAnalysis) {
+        @if (!predictorVariablesArray.at(i).controls.productionInAnalysis.value) {
         <span class="bold ">&mdash;</span>
         }
       </div>
