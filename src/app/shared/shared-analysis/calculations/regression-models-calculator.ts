@@ -126,7 +126,7 @@ export class RegressionModelsCalculator {
       }
       return models;
     } else {
-      return;
+      return [];
     }
   }
 
