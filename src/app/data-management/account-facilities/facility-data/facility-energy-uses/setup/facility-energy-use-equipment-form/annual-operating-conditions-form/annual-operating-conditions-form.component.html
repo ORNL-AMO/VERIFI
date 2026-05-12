@@ -1,0 +1,130 @@
+@if(!inSetup){
+<form [formGroup]="annualOperatingConditionsDataForm">
+    @let selectedYear = annualOperatingConditionsDataForm.controls.year.value;
+    <div class="row">
+        <div class="col">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <button class="btn-close" (click)="openRemoveOperatingConditionsModal()"></button>
+                </span>
+                <input class="form-control disabled" type="number" formControlName="year" min="0"
+                    id="{{'year_'+selectedYear}}">
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="hoursOfOperation" min="0"
+                    id="{{'hoursOfOperation_'+selectedYear}}">
+                <span class="input-group-text">hrs</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
+                    id="{{'loadFactor_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="dutyFactor" min="0" max="100"
+                    id="{{'dutyFactor_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+        <!-- <div class="col">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="efficiency" min="0" max="100"
+                    id="{{'efficiency_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div> -->
+    </div>
+</form>
+}@else {
+<!--form in setup-->
+<form [formGroup]="annualOperatingConditionsDataForm">
+    @let selectedYear = annualOperatingConditionsDataForm.controls.year.value;
+    <div class="row">
+        <label class="col-5 col-form-label">
+            Year
+        </label>
+        <div class="col-7">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <button class="btn-close" (click)="openRemoveOperatingConditionsModal()"></button>
+                </span>
+                <input class="form-control disabled" type="number" formControlName="year" min="0"
+                    id="{{'year_'+selectedYear}}">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <label class="col-5 col-form-label" for="{{'hoursOfOperation_'+selectedYear}}">
+            Hours of Operation
+        </label>
+        <div class="col-7">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="hoursOfOperation" min="0"
+                    id="{{'hoursOfOperation_'+selectedYear}}">
+                <span class="input-group-text">hrs</span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <label class="col-5 col-form-label" for="{{'loadFactor_'+selectedYear}}">
+            Load Factor
+        </label>
+        <div class="col-7">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
+                    id="{{'loadFactor_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <label class="col-5 col-form-label" for="{{'dutyFactor_'+selectedYear}}">
+            Duty Factor
+        </label>
+        <div class="col-7">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="dutyFactor" min="0" max="100"
+                    id="{{'dutyFactor_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="row">
+        <label class="col-5 col-form-label" for="{{'efficiency_'+selectedYear}}">
+            Efficiency
+        </label>
+        <div class="col-7">
+            <div class="input-group">
+                <input class="form-control" type="number" formControlName="efficiency" min="0" max="100"
+                    id="{{'efficiency_'+selectedYear}}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+    </div> -->
+</form>
+}
+
+
+<div [ngClass]="{'windowOverlay': showRemoveOperatingConditionsModal}"></div>
+<div class="popup" [class.open]="showRemoveOperatingConditionsModal">
+    <div class="popup-header">Remove Year of Operating Conditions Data
+        <button class="item-right" (click)="closeRemoveOperatingConditionsModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>
+            Are you sure you want to remove the operating conditions data for
+            {{annualOperatingConditionsDataForm.controls.year.value}}? This will also remove the energy use data
+            associated with this year.
+        </p>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary small me-2" (click)="closeRemoveOperatingConditionsModal()">Cancel</button>
+        <button class="btn btn-danger small" (click)="confirmRemoveOperatingConditionsData()">Remove</button>
+    </div>
+</div>

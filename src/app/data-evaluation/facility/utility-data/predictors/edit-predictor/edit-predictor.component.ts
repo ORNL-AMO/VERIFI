@@ -48,8 +48,8 @@ export class EditPredictorComponent {
   handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
-      if(!this.predictorForm.invalid) {
-         this.saveChanges();
+      if (!this.predictorForm.invalid) {
+        this.saveChanges();
       }
     }
   }
@@ -206,6 +206,7 @@ export class EditPredictorComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.predictorForm && this.predictorForm.dirty) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

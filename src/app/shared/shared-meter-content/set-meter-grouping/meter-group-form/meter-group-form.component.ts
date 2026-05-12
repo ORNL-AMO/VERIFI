@@ -109,7 +109,15 @@ export class MeterGroupFormComponent {
   }
 
   async saveChanges() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+
     this.meterGroup.name = this.groupForm.controls['name'].value;
+    if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
+      //need to update analysis items if groupType changes
+      await this.analysisDbService.changeGroupType(this.meterGroup.guid, this.groupForm.controls['groupType'].value, this.meterGroup.groupType);
+      await this.dbChangesService.setAnalysisItems(account, true, facility)
+    }
     this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
     this.meterGroup.description = this.groupForm.controls['description'].value;
     await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.meterGroup));
@@ -127,10 +135,10 @@ export class MeterGroupFormComponent {
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeterGroups(account, facility);
     await this.dbChangesService.setMeters(account, facility);
+    await this.dbChangesService.setMeterData(account, true, facility);
+    this.toastNoticationService.showToast("Meter Group Changes Saved!", undefined, undefined, false, "alert-success");
     this.selectionsChanged = false;
     this.groupForm.markAsPristine();
   }
@@ -189,6 +197,7 @@ export class MeterGroupFormComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.groupForm.dirty || this.selectionsChanged) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

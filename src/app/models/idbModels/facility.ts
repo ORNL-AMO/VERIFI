@@ -20,7 +20,8 @@ export interface IdbFacility extends IdbEntry, AccountAndFacility {
     classification?: FacilityClassification,
     sidebarOpen?: boolean,
     sidebarMetersOpen?: boolean,
-    sidebarPredictorsOpen?: boolean
+    sidebarPredictorsOpen?: boolean,
+    sidebarEnergyUsesOpen?: boolean
 }
 
 export function getNewIdbFacility(account: IdbAccount): IdbFacility {

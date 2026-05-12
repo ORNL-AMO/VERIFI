@@ -1,42 +1,46 @@
-@if (selectedGroup) {
-@let groupErrors = selectedGroup.idbGroupId | invalidGroupAnalysis: analysisItem.guid;
+@let _selectedGroup = selectedGroup();
+@let _groupErrors = groupErrors();
+
+@if (_selectedGroup) {
+<!--TABS-->
 <div class="banner p-0">
   <ul class="nav nav-tabs">
-    <li class="nav-item" [ngClass]="{'error': groupErrors.hasSetupErrors}"><a class="nav-link" routerLink="options"
+    <li class="nav-item" [ngClass]="{'error': _groupErrors.hasSetupErrors}"><a class="nav-link" routerLink="options"
         [routerLinkActive]="['active']">
-        @if (groupErrors.hasSetupErrors) {
+        @if (_groupErrors.hasSetupErrors) {
         <span class="fa fa-exclamation-circle"></span>
         }
         <i class="fa fa-gears"></i>
         Analysis Options</a></li>
-    @if (showBanked && selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis') {
+    @if (showBanked() && _selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
     <li class="nav-item">
       <a class="nav-link" routerLink="banked-analysis" [routerLinkActive]="['active']">
         <i class="fa fa-piggy-bank"></i>
         Banked Analysis</a>
     </li>
     }
-    @if (showModelSelection && selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis') {
+    @if (showModelSelection() && _selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis')
+    {
     <li class="nav-item">
       <a class="nav-link" routerLink="model-selection" [routerLinkActive]="['active']">
-        @if (groupErrors.hasRegressionErrors) {
+        @if (_groupErrors.hasRegressionErrors) {
         <span class="fa fa-exclamation-circle"></span>
         }
-        @if (groupErrors.hasInvalidRegressionModel) {
+        @if (_groupErrors.hasInvalidRegressionModel) {
         <span class="fa fa-exclamation-circle warning"></span>
         }
         <i class=" fa fa-arrow-up-right-dots"></i>
         Regression Model</a>
     </li>
     }
-    @if (selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis') {
-    <li class="nav-item" [ngClass]="{'disabled': groupErrors.hasErrors}"><a class="nav-link"
+    @if (_selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
+    <li class="nav-item" [ngClass]="{'disabled': _groupErrors.hasErrors}"><a class="nav-link"
         routerLink="annual-analysis" [routerLinkActive]="['active']">
         <i class="fa fa-magnifying-glass-chart"></i>Annual
         Analysis</a></li>
     }
-    @if (selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis') {
-    <li class="nav-item" [ngClass]="{'disabled': groupErrors.hasErrors}"><a class="nav-link"
+    @if (_selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
+    <li class="nav-item" [ngClass]="{'disabled': _groupErrors.hasErrors}"><a class="nav-link"
         routerLink="monthly-analysis" [routerLinkActive]="['active']">
         <i class="fa fa-magnifying-glass-chart"></i>Monthly
         Analysis</a></li>
@@ -44,8 +48,8 @@
   </ul>
 </div>
 <div class="content-padding">
-  @if (!hideLabel) {
-  <h4>{{label}}</h4>
+  @if (!hideLabel()) {
+  <h4>{{label()}}</h4>
   }
   <router-outlet></router-outlet>
 </div>

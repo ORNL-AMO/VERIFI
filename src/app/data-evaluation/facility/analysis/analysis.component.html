@@ -1,20 +1,23 @@
-@if (utilityMeterData.length != 0 && utilityMeterGroups.length != 0) {
-  <app-analysis-banner></app-analysis-banner>
-  <router-outlet></router-outlet>
+@let _utilityMeterData = utilityMeterData();
+@let _utilityMeterGroups = utilityMeterGroups();
+
+@if (_utilityMeterData.length != 0 && _utilityMeterGroups.length != 0) {
+<app-analysis-banner></app-analysis-banner>
+<router-outlet></router-outlet>
 }
-@if (utilityMeterData.length == 0) {
-  <div class="p-5">
-    <div class="alert alert-danger text-center">
-      No Meter Data Found! Go to <a (click)="goToUtilityData()">Utility Data</a> tab to add meter data.
-    </div>
+@if (_utilityMeterData.length == 0) {
+<div class="p-5">
+  <div class="alert alert-danger text-center">
+    No Meter Data Found! Go to <a (click)="goToUtilityData()">Utility Data</a> tab to add meter data.
   </div>
+</div>
 }
 
-@if (utilityMeterData.length != 0  && utilityMeterGroups.length == 0) {
-  <div class="p-5">
-    <div class="alert alert-danger text-center">
-      No Meter Groups Found! Go to <a (click)="goToMeterGroups()">Utility Data Analysis Groups</a> to set the meter
-      groups for analysis.
-    </div>
+@if (_utilityMeterData.length != 0 && _utilityMeterGroups.length == 0) {
+<div class="p-5">
+  <div class="alert alert-danger text-center">
+    No Meter Groups Found! Go to <a (click)="goToMeterGroups()">Utility Data Analysis Groups</a> to set the meter
+    groups for analysis.
   </div>
+</div>
 }

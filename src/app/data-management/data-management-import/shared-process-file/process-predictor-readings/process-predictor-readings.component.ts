@@ -50,21 +50,15 @@ export class ProcessPredictorReadingsComponent {
 
   comparePredictorReadings() {
     this.readingDifferencesMap = {};
-
+    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     this.fileReference.predictorData.forEach(newData => {
       const key = `${newData.predictorId}_${newData.facilityId}`;
       if (!this.readingDifferencesMap[key]) {
         this.readingDifferencesMap[key] = [];
       }
 
-      const existingPredictorReadings = this.predictorDataDbService.accountPredictorData.getValue().filter(data => (data.predictorId === newData.predictorId && data.facilityId === newData.facilityId));
-
+      const existingPredictorReadings = accountPredictorData.filter(data => (data.predictorId === newData.predictorId && data.facilityId === newData.facilityId));
       existingPredictorReadings.forEach(oldData => {
-        // const oldDateObj = new Date(oldData.date);
-        // const newDateObj = new Date(newData.date);
-        // const existingDateStr = oldData.dateStr;
-        // const newDateStr = newData.dateStr;
-
         if (oldData.month == newData.month && oldData.year == newData.year) {
           let difference: number = Math.abs(newData.amount - oldData.amount);
           let percentageDifference: number = (oldData.amount !== 0) ? (difference / oldData.amount * 100) : null;
@@ -83,10 +77,10 @@ export class ProcessPredictorReadingsComponent {
   }
 
   openModal(summary: PredictorDataSummary) {
-    this.showModal = true;
     this.selectedPredictorName = summary.predictor.name;
     this.selectedPredictorUnit = summary.predictor.unit;
     this.comparisonSummaryWithDifferences = this.readingDifferencesMap[summary.predictor.guid + '_' + summary.predictor.facilityId];
+    this.showModal = true;
   }
 
   hideModal() {

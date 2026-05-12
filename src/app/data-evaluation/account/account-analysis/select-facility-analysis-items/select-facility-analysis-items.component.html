@@ -1,9 +1,12 @@
+@let _selectedAnalysisItem = selectedAnalysisItem();
+
+@if(_selectedAnalysisItem){
 <div class="wrapper">
   <div class="d-flex w-100 h-100">
     <div class="p-2 nav flex-column">
-      @for (facilityItem of selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
+      @for (facilityItem of _selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
       <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
-          [ngClass]="{'active': facilityItem.facilityId == selectedFacility.guid}">
+          [ngClass]="{'active': facilityItem.facilityId == selectedFacility().guid}">
           <i class="pe-2 fa" [ngClass]="{
               'fa-square-minus': !facilityItem.analysisItemId || facilityItem.analysisItemId === 'skip',
               'fa-square-check': facilityItem.analysisItemId && facilityItem.analysisItemId !== 'skip'
@@ -22,7 +25,7 @@
       }
     </div>
     <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
-      @if (showInUseMessage) {
+      @if (showInUseMessage()) {
       <div class="p-2">
         <div class="alert alert-info text-center mb-0">
           <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
@@ -31,8 +34,8 @@
         </div>
       </div>
       }
-      <app-select-item-table [selectedAnalysisItem]="selectedAnalysisItem"
-        [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+      <app-select-item-table></app-select-item-table>
     </div>
   </div>
 </div>
+}

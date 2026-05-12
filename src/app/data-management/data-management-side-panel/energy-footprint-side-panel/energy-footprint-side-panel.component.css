@@ -1,0 +1,203 @@
+/* Balance Header */
+.balance-header {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+.balance-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2c386b;
+}
+.balance-subtitle {
+    font-size: 0.78rem;
+    color: #6c757d;
+    letter-spacing: 0.03em;
+}
+
+/* Overall Score Card */
+.score-card {
+    border-radius: 8px;
+    padding: 0.75rem;
+    border-left: 4px solid #6c757d;
+    background: #f8f9fa;
+}
+.score-card--good {
+    border-left-color: #28a745;
+    background: #f0fff4;
+}
+.score-card--fair {
+    border-left-color: #ffc107;
+    background: #fffdf0;
+}
+.score-card--low {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+.score-card__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+}
+.score-card__value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2c386b;
+}
+.score-card__bar {
+    height: 12px;
+    border-radius: 6px;
+    background-color: #dee2e6;
+}
+.score-card__bar .progress-bar {
+    border-radius: 6px;
+    transition: width 0.8s ease-in-out;
+}
+.score-scale-label {
+    font-size: 0.7rem;
+    color: #adb5bd;
+}
+.score-target-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Over-accounted color */
+.bg-over {
+    background-color: #fd7e14 !important;
+}
+.text-over {
+    color: #d6521a !important;
+    font-weight: 700;
+}
+
+/* Score card over state */
+.score-card--over {
+    border-left-color: #fd7e14;
+    background: #fff8f2;
+}
+
+/* Over warning banner */
+.over-warning {
+    font-size: 0.75rem;
+    color: #7d3200;
+    background: #ffe5cc;
+    border: 1px solid #fd7e14;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+}
+.source-over-warning {
+    font-size: 0.72rem;
+    color: #7d3200;
+    background: #fff3e8;
+    border-left: 3px solid #fd7e14;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.35rem;
+    border-radius: 0 3px 3px 0;
+}
+
+/* Source card over state */
+.source-card--over {
+    border-color: #fd7e14;
+    background: #fff8f2;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #e9ecef;
+    color: #495057;
+}
+.status-badge--over {
+    background: #ffe0c2;
+    color: #7d3200;
+}
+.status-badge--good {
+    background: #d4edda;
+    color: #155724;
+}
+.status-badge--fair {
+    background: #fff3cd;
+    color: #856404;
+}
+.status-badge--low {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Source Cards */
+.source-card {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s;
+}
+.source-card:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+.source-card--nested {
+    background: #fafafa;
+}
+.source-card__header {
+    margin-bottom: 0;
+}
+.source-card__name {
+    font-weight: 600;
+    color: #2c386b;
+}
+.source-pct {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+.source-card__bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+.source-card__bar .progress-bar {
+    border-radius: 4px;
+    transition: width 0.6s ease-in-out;
+}
+
+/* Stats Row */
+.source-card__stats {
+    margin-top: 0.25rem;
+}
+.stat-item {
+    flex: 1;
+}
+.stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #3f4448;
+    margin-bottom: 1px;
+}
+.stat-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Meter Group Section */
+.meter-group-section {
+    border-left: 3px solid #2980b9;
+    padding-left: 0.5rem;
+}
+.meter-group-header {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #2980b9;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}

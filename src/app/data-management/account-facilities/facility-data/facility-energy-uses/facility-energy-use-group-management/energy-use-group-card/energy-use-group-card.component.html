@@ -1,0 +1,77 @@
+@let _groupEquipment = groupEquipment();
+@let _numberOfElectricity = numberOfElectricity();
+@let _numberOfNaturalGas = numberOfNaturalGas();
+@let _numberOfOtherFuels = numberOfOtherFuels();
+
+<div class="group-card h-100">
+    <div class="group-card__header" (click)="editGroup(group)">
+        <span class="group-card__name">{{group.name}}</span>
+        <div class="h-100">
+            @if(_numberOfElectricity > 0){
+            <span class="equipment-count-badge ms-1">
+                {{_numberOfElectricity}}
+                <span class="fa-solid fa-plug-circle-bolt"></span>
+            </span>
+            }
+            @if(_numberOfNaturalGas > 0){
+            <span class="equipment-count-badge ms-1">
+                {{_numberOfNaturalGas}}
+                <span class="fa-solid fa-fire-flame-curved"></span>
+            </span>
+            }
+            @if(_numberOfOtherFuels > 0){
+            <span class="equipment-count-badge ms-1">
+                {{_numberOfOtherFuels}}
+                <span class="fa-solid fa-gas-pump"></span>
+            </span>
+            }
+        </div>
+    </div>
+    <div class="group-card__body">
+        @if(_groupEquipment.length > 0) {
+        <div class="equipment-chips">
+            @for(equipment of _groupEquipment; track equipment.guid) {
+            <button class="equipment-chip" (click)="goToEquipment(equipment)" [title]="equipment.name">
+                @let icons = (equipment | equipmentSourceIcons);
+                @for(icon of icons; track icon) {
+                <span class="fa-solid {{icon}} me-1"></span>
+                }
+                {{equipment.name}}
+            </button>
+            }
+        </div>
+        } @else {
+        <span class="no-equipment-label">
+            <span class="fa fa-circle-info me-1"></span>No equipment added
+        </span>
+        }
+    </div>
+    <div class="group-card__footer">
+        <button class="btn btn-sm btn-outline" (click)="editGroup(group)" title="Edit group">
+            <i class="fa fa-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" (click)="createCopy()" title="Copy group">
+            <i class="fa fa-copy"></i>
+        </button>
+        <button class="btn btn-sm btn-danger" (click)="openDeleteModal()" title="Delete group">
+            <i class="fa fa-trash"></i>
+        </button>
+    </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': showDeleteModal}"></div>
+<div class="popup" [class.open]="showDeleteModal">
+    <div class="popup-header">Delete Energy Use Group: {{group?.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this energy use group, you are also deleting all of the energy use group data and
+            equipment associated with
+            it.
+            Are you sure you want to perform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteGroup()">Delete</button>
+    </div>
+</div>

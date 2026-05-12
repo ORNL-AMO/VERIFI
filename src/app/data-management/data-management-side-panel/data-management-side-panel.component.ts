@@ -17,7 +17,7 @@ export class DataManagementSidePanelComponent {
   helpPanelOpenSub: Subscription;
   helpPanelOpen: boolean;
 
-  activePanel: 'help' | 'checklist' = 'checklist';
+  activePanel: 'help' | 'checklist' | 'energyFootprint' = 'checklist';
 
   constructor(
     private dataManagementService: DataManagementService
@@ -44,7 +44,7 @@ export class DataManagementSidePanelComponent {
   }
 
 
-  setActivePanel(str: 'help' | 'checklist') {
+  setActivePanel(str: 'help' | 'checklist' | 'energyFootprint') {
     this.activePanel = str;
   }
   

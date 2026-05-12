@@ -24,7 +24,7 @@ export interface IdbAccountReport extends IdbEntry {
     performanceReportSetup: PerformanceReportSetup,
     betterClimateReportSetup: BetterClimateReportSetup,
     analysisReportSetup: AnalysisReportSetup,
-    accountSavingsReportSetup?: AccountSavingsReportSetup
+    accountSavingsReportSetup: AccountSavingsReportSetup
 }
 
 export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<IdbFacility>, groups: Array<IdbUtilityMeterGroup>): IdbAccountReport {
@@ -120,6 +120,52 @@ export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<Id
             includeProblemsInformation: true,
             includeExecutiveSummary: true,
             includeDataValidationTables: true
+        },
+        accountSavingsReportSetup: {
+            analysisItemId: undefined,
+            includeAnnualResults: true,
+            includeAnnualResultsTable: true,
+            includeAnnualResultsGraph: true,
+            includeAccountMonthlyTable: true,
+            includeAccountMonthlyResults: true,
+            includeFacilityResults: true,
+            includeFacilityResultsTable: true,
+            includeFacilityResultsGraph: true,
+            includeFacilityMonthlyResultsGraph: true,
+            includePerformanceResults: true,
+            includePerformanceResultsTable: true,
+            includePerformanceResultsGraph: true,
+            includePerformanceActual: true,
+            includePerformanceAdjusted: true,
+            includePerformanceContribution: true,
+            includePerformanceSavings: true,
+            numberOfTopPerformers: 5,
+            analysisTableColumns: {
+                incrementalImprovement: false,
+                SEnPI: false,
+                savings: false,
+                percentSavingsComparedToBaseline: false,
+                yearToDateSavings: false,
+                yearToDatePercentSavings: false,
+                rollingSavings: false,
+                rolling12MonthImprovement: false,
+                productionVariables: false,
+                energy: true,
+                actualEnergy: true,
+                modeledEnergy: true,
+                adjusted: true,
+                baselineAdjustmentForNormalization: true,
+                baselineAdjustmentForOther: true,
+                baselineAdjustment: true,
+                totalSavingsPercentImprovement: true,
+                annualSavingsPercentImprovement: true,
+                cummulativeSavings: true,
+                newSavings: true,
+                predictors: [],
+                predictorGroupId: undefined,
+                bankedSavings: false,
+                savingsUnbanked: false
+            }
         }
     }
 }

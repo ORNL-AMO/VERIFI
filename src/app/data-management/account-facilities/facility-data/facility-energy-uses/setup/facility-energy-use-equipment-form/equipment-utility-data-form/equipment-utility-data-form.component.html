@@ -1,0 +1,40 @@
+<form [formGroup]="utilityDataForm">
+    <div class="form-group row mt-2">
+        <div class="d-flex w-100 justify-content-between">
+            <div>
+                <span class="badge me-1 badge-text"
+                    [ngStyle]="{'background-color': energySource | meterSourceColor}">{{energySource}}
+                    Data</span>
+            </div>
+            <div class="mt-auto">
+                <button type="button" class="btn-close" aria-label="Close" (click)="removeUtilityType()"></button>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-5 col-form-label" for="size_{{energySource}}">
+            {{ equipmentDetailsForm.get('equipmentType').value | sizeLabel }}
+        </label>
+        <div class="col-7 ">
+            <div class="input-group">
+                <input id="size_{{energySource}}" class="form-control" type="number" formControlName="size"
+                    onfocus="this.select();" min="0">
+                <select class="input-group-text" id="units_{{energySource}}" name="units" formControlName="units">
+                    @for(option of (energySource | equipmentUnitOptions); track option.value) {
+                    <option [ngValue]="option.value">
+                        <span [innerHTML]="option.value | settingsLabel"></span>
+                    </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-5 col-form-label" for="numberOfEquipment_{{energySource}}">Number of
+            Equipment</label>
+        <div class="col-7">
+            <input id="numberOfEquipment_{{energySource}}" class="form-control" type="number"
+                formControlName="numberOfEquipment" onfocus="this.select();" min="0">
+        </div>
+    </div>
+</form>

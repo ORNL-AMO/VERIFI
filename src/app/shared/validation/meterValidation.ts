@@ -46,8 +46,8 @@ export function isMeterInvalid(meter: IdbUtilityMeter): boolean {
     if (meter.scope === 2) {
         if (!meter.vehicleCategory || meter.vehicleCategory.toString().trim() === "") return true;
     }
-    // Additional vehicle required if scope == 2 and vehicleCategory != 1
-    if (meter.scope === 2 && meter.vehicleCategory !== 1) {
+    // Additional vehicle required if scope == 2 and vehicleCategory == 2
+    if (meter.scope === 2 && meter.vehicleCategory === 2) {
         if (!meter.vehicleType || meter.vehicleType.toString().trim() === "") return true;
         if (!meter.vehicleCollectionType || meter.vehicleCollectionType.toString().trim() === "") return true;
         if (!meter.vehicleDistanceUnit || meter.vehicleDistanceUnit.toString().trim() === "") return true;

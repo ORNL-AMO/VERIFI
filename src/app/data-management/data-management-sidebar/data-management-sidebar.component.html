@@ -9,8 +9,7 @@
     </div>
   </div>
   <div class="ps-1 w-100" [hidden]="!sidebarOpen">
-    <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/home'" [routerLinkActive]="['active']"
-      [routerLinkActiveOptions]="{ exact: true }">
+    <a class="nav-link" [routerLink]="'/data-management/'+account.guid + '/home'" [routerLinkActive]="['active']">
       <h5 class="ps-2 mb-0">
         <span class="fa fa-list-check"></span>
         {{account.name}}
@@ -248,6 +247,93 @@
           }
         </div>
         }
+        <div class="ps-2 nav-item">
+          <a class="nav-link" (click)="toggleFacilityEnergyUsesOpen(facility)"
+            [ngClass]="{'active': url | sidebarItemActive: 'energy-uses-folder': facility.guid}">
+            <span class="fa"
+              [ngClass]="{'fa-chevron-down': facility.sidebarEnergyUsesOpen, 'fa-chevron-right': !facility.sidebarEnergyUsesOpen}"></span>
+            Energy Uses
+          </a>
+        </div>
+        @if(facility.sidebarEnergyUsesOpen){
+        <div class="sidebar-section">
+          <div class="ps-2 nav-item">
+            <a class="nav-link"
+              [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses'"
+              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+              <span class="fa fa-list"></span> Manage Energy Uses Groups
+            </a>
+          </div>
+          @let energyUseGroups = facility.guid | facilityEnergyGroupsList:accountEnergyUseGroups;
+          @if(energyUseGroups.length > 0){
+          <div class="ps-2 nav-item">
+            <a class="nav-link"
+              [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/summary'"
+              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+              <span class="fa fa-chart-simple"></span> Energy Uses Summary
+            </a>
+          </div>
+          <div class="ps-2 nav-item">
+            <a class="nav-link"
+              [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/footprint'"
+              [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+              <span class="fa fa-paw"></span> Energy Uses Footprint
+            </a>
+          </div>
+          @for(energyUseGroup of energyUseGroups; track energyUseGroup.guid){
+          <div class="ps-2 nav-item">
+            <a class="nav-link" (click)="toggleEnergyUseGroupOpen(energyUseGroup)"
+              [ngClass]="{'active': url | sidebarItemActive: 'energy-use': energyUseGroup.guid}">
+              <span class="fa"
+                [ngClass]="{'fa-chevron-down': energyUseGroup.sidebarOpen, 'fa-chevron-right': !energyUseGroup.sidebarOpen}"></span>
+              {{energyUseGroup.name}}
+            </a>
+          </div>
+          @if(energyUseGroup.sidebarOpen){
+          <div class="sidebar-section">
+            <div class="ps-2 nav-item">
+              <a class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                <span class="fa fa-gear"></span> Group Settings
+              </a>
+            </div>
+            @let groupEquipment = energyUseGroup.guid | facilityEnergyEquipmentList:accountEnergyUseEquipment;
+            @if(groupEquipment.length > 0){
+            <div class="ps-2 nav-item">
+              <a class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/summary'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                <span class="fa fa-chart-simple"></span> Group Summary
+              </a>
+            </div>
+            <div class="ps-2 nav-item">
+              <a class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/footprint'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                <span class="fa fa-paw"></span> Group Footprint
+              </a>
+            </div>
+            @for(energyUseEquipment of groupEquipment; track energyUseEquipment.guid){
+            <div class="ps-2 nav-item">
+              <a class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/energy-uses/'+energyUseGroup.guid+'/equipment/'+energyUseEquipment.guid"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                @let icons = (energyUseEquipment | equipmentSourceIcons);
+                @for(icon of icons; track icon) {
+                <span class="fa-solid {{icon}} me-1'"></span>
+                }
+                {{energyUseEquipment.name}}
+              </a>
+            </div>
+            }
+            }
+          </div>
+          }
+          }
+          }
+        </div>
+        }
       </div>
       }
       }
@@ -317,8 +403,8 @@
     </div>
     <div class="ps-2 pe-2 nav-item">
       <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'"
-        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span
-          [hidden]="!sidebarOpen" class="ps-2 nav-label">Help</span> </a>
+        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i>
+        <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Help</span> </a>
 
     </div>
     <div class="ps-2 pe-2 nav-item">

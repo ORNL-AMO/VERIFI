@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -9,6 +8,8 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-select-facility-analysis-items',
@@ -16,89 +17,64 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   styleUrls: ['./select-facility-analysis-items.component.css'],
   standalone: false
 })
-export class SelectFacilityAnalysisItemsComponent implements OnInit {
+export class SelectFacilityAnalysisItemsComponent {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private router: Router = inject(Router);
+  private accountAnalysisService: AccountAnalysisService = inject(AccountAnalysisService);
+  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
 
-  selectedAnalysisItem: IdbAccountAnalysisItem;
-  selectedAnalysisItemSub: Subscription;
-  facilityAnalysisItems: Array<IdbAnalysisItem>;
-  showInUseMessage: boolean;
-  facilities: Array<IdbFacility>;
-  facilitiesSub: Subscription;
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  constructor(private facilityDbService: FacilitydbService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private accountAnalysisService: AccountAnalysisService,
-    private accountReportDbService: AccountReportDbService) { }
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities);
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
 
-  ngOnInit(): void {
-    this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
-      this.selectedAnalysisItem = item;
-      this.setShowInUseMessage();
-    })
+  showInUseMessage: Signal<boolean> = computed(() => {
+    const selectedItem = this.selectedAnalysisItem();
+    const reports = this.accountReports();
+    if (selectedItem && reports) {
+      const hasCorrespondingReport = reports.some(report => {
+        if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        } else if (report.reportType == 'analysis' && report.analysisReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        } else if (report.reportType == 'accountSavings' && report.accountSavingsReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        } else if (report.reportType == 'performance' && report.performanceReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        }
+        return false;
+      });
+      return hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false;
+    }
+    return false;
+  });
 
-    this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
-      this.facilities = facilities;
+  constructor() {
+    effect(() => {
+      if (!this.selectedAnalysisItem()) {
+        this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
+      }
     });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
-      this.selectedFacility = selectedFacility;
-      if (this.selectedFacility && this.selectedFacility.accountId == this.selectedAnalysisItem.accountId) {
-        this.setFacilityAnlaysisItems();
-      } else if (this.facilities.length > 0) {
-        this.selectFacility(this.facilities[0].guid);
+    effect(() => {
+      const selectedFacility = this.selectedFacility();
+      const facilities = this.facilities();
+      if (!selectedFacility && facilities && facilities.length > 0) {
+        this.facilityDbService.selectedFacility.next(facilities[0]);
       }
-    })
-
-    if (!this.selectedAnalysisItem) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
-    }
-  }
-
-  ngOnDestroy() {
-    this.facilitiesSub.unsubscribe();
-    this.selectedAnalysisItemSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
+    });
   }
 
   selectFacility(facilityId: string) {
-    let selectedFacility: IdbFacility = this.facilities.find(facility => facility.guid === facilityId);
+    const facilities = this.facilities();
+    let selectedFacility: IdbFacility = facilities.find(facility => facility.guid === facilityId);
     this.facilityDbService.selectedFacility.next(selectedFacility);
   }
 
-  setFacilityAnlaysisItems() {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
-      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
-          && item.facilityId == this.selectedFacility.guid
-          && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
-          && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
-      });
-    } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
-      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
-          && item.facilityId == this.selectedFacility.guid
-          && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
-      });
-    }
-    //order by modified date
-    this.facilityAnalysisItems = this.facilityAnalysisItems.sort((a, b) => {
-      return new Date(b.modifiedDate).getTime() - new Date(a.modifiedDate).getTime();
-    });
-  }
-
-  setShowInUseMessage() {
-    let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.selectedAnalysisItem.guid);
-    if (hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false) {
-      this.showInUseMessage = true;
-    }
-  }
-
   hideInUseMessage() {
-    this.showInUseMessage = false;
     this.accountAnalysisService.hideInUseMessage = true;
   }
 }

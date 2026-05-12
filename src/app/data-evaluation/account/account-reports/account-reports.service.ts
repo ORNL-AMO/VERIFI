@@ -31,7 +31,6 @@ export class AccountReportsService {
     if (report.reportType == 'betterClimate' || report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
-        reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, yearValidators],
         baselineYear: [report.baselineYear, yearValidators],
         startMonth: [report.startMonth, startDateValidators],
@@ -44,7 +43,6 @@ export class AccountReportsService {
     else if (report.reportType == 'betterPlants' || report.reportType == 'analysis' || report.reportType == 'performance') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
-        reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, yearValidators],
         baselineYear: [report.baselineYear, ''],
         startMonth: [report.startMonth, startDateValidators],
@@ -57,7 +55,6 @@ export class AccountReportsService {
     else if (report.reportType == 'accountEmissionFactors') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
-        reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, ''],
         baselineYear: [report.baselineYear, ''],
         startMonth: [report.startMonth, ''],
@@ -71,7 +68,6 @@ export class AccountReportsService {
 
   updateReportFromSetupForm(report: IdbAccountReport, form: FormGroup): IdbAccountReport {
     report.name = form.controls.reportName.value;
-    report.reportType = form.controls.reportType.value;
     report.reportYear = form.controls.reportYear.value;
     report.baselineYear = form.controls.baselineYear.value;
     report.startMonth = form.controls.startMonth.value;
@@ -278,83 +274,6 @@ export class AccountReportsService {
   }
 
   getAccountSavingsFormFromReport(accountSavingsReportSetup: AccountSavingsReportSetup): FormGroup {
-    if (!accountSavingsReportSetup) {
-      accountSavingsReportSetup = {
-        analysisItemId: undefined,
-        includeAnnualResults: true,
-        includeAnnualResultsTable: true,
-        includeAnnualResultsGraph: true,
-        includeAccountMonthlyTable: true,
-        includeAccountMonthlyResults: true,
-        includeFacilityResults: true,
-        includeFacilityResultsTable: true,
-        includeFacilityResultsGraph: true,
-        includeFacilityMonthlyResultsGraph: true,
-        includePerformanceResults: true,
-        includePerformanceResultsTable: true,
-        includePerformanceResultsGraph: true,
-        includePerformanceActual: true,
-        includePerformanceAdjusted: true,
-        includePerformanceContribution: true,
-        includePerformanceSavings: true,
-        numberOfTopPerformers: 5,
-        analysisTableColumns: {
-          incrementalImprovement: false,
-          SEnPI: false,
-          savings: false,
-          percentSavingsComparedToBaseline: false,
-          yearToDateSavings: false,
-          yearToDatePercentSavings: false,
-          rollingSavings: false,
-          rolling12MonthImprovement: false,
-          productionVariables: false,
-          energy: true,
-          actualEnergy: true,
-          modeledEnergy: true,
-          adjusted: true,
-          baselineAdjustmentForNormalization: true,
-          baselineAdjustmentForOther: true,
-          baselineAdjustment: true,
-          totalSavingsPercentImprovement: true,
-          annualSavingsPercentImprovement: true,
-          cummulativeSavings: true,
-          newSavings: true,
-          predictors: [],
-          predictorGroupId: undefined,
-          bankedSavings: false,
-          savingsUnbanked: false
-        }
-      };
-    }
-
-    if (!accountSavingsReportSetup.analysisTableColumns) {
-      accountSavingsReportSetup.analysisTableColumns = {
-        incrementalImprovement: false,
-        SEnPI: false,
-        savings: false,
-        percentSavingsComparedToBaseline: false,
-        yearToDateSavings: false,
-        yearToDatePercentSavings: false,
-        rollingSavings: false,
-        rolling12MonthImprovement: false,
-        productionVariables: false,
-        energy: true,
-        actualEnergy: true,
-        modeledEnergy: true,
-        adjusted: true,
-        baselineAdjustmentForNormalization: true,
-        baselineAdjustmentForOther: true,
-        baselineAdjustment: true,
-        totalSavingsPercentImprovement: true,
-        annualSavingsPercentImprovement: true,
-        cummulativeSavings: true,
-        newSavings: true,
-        predictors: [],
-        predictorGroupId: undefined,
-        bankedSavings: false,
-        savingsUnbanked: false
-      };
-    }
     let form: FormGroup = this.formBuilder.group({
       analysisItemId: [accountSavingsReportSetup.analysisItemId, Validators.required],
       includeAnnualResults: [accountSavingsReportSetup.includeAnnualResults],

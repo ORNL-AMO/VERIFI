@@ -218,7 +218,7 @@ export class EditMeterFormService {
   }
 
   getAdditionalVehicleValidation(scope: number, vehicleCategory: number): Array<ValidatorFn> {
-    if (scope == 2 && vehicleCategory != 1) {
+    if (scope == 2 && vehicleCategory == 2) {
       return [Validators.required]
     }
     return [];

@@ -1,0 +1,14 @@
+.card-header {
+    background-color: rgb(250 96 1 / 15%);
+}
+
+h6{
+    text-transform: none;
+}
+
+.badge-text{
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

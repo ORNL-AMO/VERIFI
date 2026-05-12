@@ -1,0 +1,118 @@
+<form [formGroup]="equipmentDetailsForm">
+    <div class="row">
+        <div class="col-12">
+            <p class="bold mb-0">Equipment / System Information</p>
+            <div class="form-group row">
+                <label class="col-5 col-form-label" for="equipmentName">Name</label>
+                <div class="col-7">
+                    <input id="equipmentName" class="form-control" type="text" formControlName="name"
+                        onfocus="this.select();" minlength="0" maxlength="100">
+                    @let nameControl = equipmentDetailsForm.get('name');
+                    @if(nameControl.touched && nameControl.hasError('required')){
+                    <div class="alert alert-danger mt-1">Name is
+                        required</div>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <label class="col-sm-5 col-form-label" for="equipmentType">Industrial System</label>
+                <div class="col-sm-7">
+                    <select name="equipmentType" class="form-select" id="equipmentType" formControlName="equipmentType">
+                        @for(option of equipmentTypes; track option) {
+                        <option [ngValue]="option">
+                            {{option}}
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-5 col-form-label" for="equipmentNotes">Notes</label>
+                <div class="col-7">
+                    <textarea id="equipmentNotes" class="form-control" formControlName="notes" onfocus="this.select();"
+                        minlength="0" maxlength="500"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <label class="col-5 col-form-label">Connect Utility Meter Group</label>
+                <div class="col-7">
+                    @if(equipmentDetailsForm.controls.utilityMeterGroupIds.value?.length > 0) {
+                    @for (id of equipmentDetailsForm.controls.utilityMeterGroupIds.value; track id) {
+                    <button class="btn action-btn me-2" (click)="openLinkMeterTable()" type="button">
+                        <span class="fa fa-link"></span>
+                        {{ id | groupName}}
+                    </button>
+                    }
+                    }@else{
+                    <button class="btn action-btn" (click)="openLinkMeterTable()" type="button">
+                        <span class="fa fa-link"></span>
+                        Select Meter Groups
+                    </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<div [ngClass]="{'windowOverlay': showLinkMeterModal}"></div>
+<!--LINK METER TO ENERGY EQUIPMENT MODAL-->
+<div class="popup" [class.open]="showLinkMeterModal">
+    <div class="popup-header"><span class="fa fa-link"></span> Connect Utility Meter Group to Equipment
+        <button class="item-right" (click)="cancelLinkMeterGroup()">x</button>
+    </div>
+    <div class="popup-body">
+        <p class="fw-light italic">
+            Select utility meter groups to connect to this equipment. <u>You cannot connect two meter groups with the
+                same energy source</u> (e.g., two electricity groups) to a single equipment, as it would not be possible
+            to determine which group the energy is coming from. Connecting a meter group will allow for energy use
+            accounting based on the energy data from the meters in that group.
+        </p>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Meter Group Name</th>
+                    <th>Group Type</th>
+                    <th>Sources</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (meterGroup of utilityMeterGroups; track $index) {
+                @let meterGroupSources = meterGroup.guid | meterGroupSourcesList: utilityMeters;
+                @let meterGroupConflict = meterGroupSources | meterGroupSourceConflict: linkedMeterGroupSources;
+                <tr (click)="changeLinkedMeterGroup(meterGroup)" [ngClass]="{'clickable': !meterGroupConflict}">
+                    <td class="text-center">
+                        @if(linkedMeterGroupIds.includes(meterGroup.guid)){
+                        <span class="fa fa-circle-check"></span>
+                        }@else if(!meterGroupConflict){
+                        <span class="fa fa-circle"></span>
+                        }
+                    </td>
+                    <td>{{ meterGroup.name }}</td>
+                    <td>
+                        {{ meterGroup.groupType }}
+                    </td>
+                    <td>
+                        @for(source of meterGroupSources; track $index) {
+                        <span class="badge me-1"
+                            [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-danger" (click)="cancelLinkMeterGroup()">Unlink Meter Group</button>
+        <button class="btn btn-success" (click)="closeLinkMeterGroup()" [disabled]="!linkedMeterGroupIds.length">Link
+            Meter
+            Group</button>
+    </div>
+</div>

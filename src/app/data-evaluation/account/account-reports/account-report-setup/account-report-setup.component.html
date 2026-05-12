@@ -1,8 +1,15 @@
+@let _selectedReport = selectedReport();
+@let _account = account();
+@let _reportYears = reportYears();
+@let _setupForm = setupForm();
+@let _reportDateWarning = reportDateWarning();
+
+@if(_selectedReport && _setupForm){
 <div class="wrapper main-content p-0">
   <div class="content-padding">
-    <h4>{{selectedReport.reportType| accountReportType}} Report Setup</h4>
-    @let reportErrors = selectedReport.guid | invalidAccountReport;
-    <form [formGroup]="setupForm">
+    <h4>{{_selectedReport.reportType| accountReportType}} Report Setup</h4>
+    @let reportErrors = _selectedReport.guid | invalidAccountReport;
+    <form [formGroup]="_setupForm">
       <div class="row">
         <div class="col-6">
           <div class="row form-group">
@@ -13,20 +20,19 @@
             </div>
           </div>
         </div>
-        @if (setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value !=
-        'accountEmissionFactors' && setupForm.controls.reportType.value != 'accountSavings') {
+        @if (_selectedReport.reportType != 'dataOverview' && _selectedReport.reportType !=
+        'accountEmissionFactors' && _selectedReport.reportType != 'accountSavings') {
         <div class="col-6">
-          @if (setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value !=
-          'analysis' && setupForm.controls.reportType.value != 'accountSavings' && setupForm.controls.reportType.value
-          != 'performance') {
+          @if (_selectedReport.reportType != 'betterPlants' && _selectedReport.reportType !=
+          'analysis' && _selectedReport.reportType != 'performance') {
           <div class="row form-group">
             <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
             <div class="col-7">
               <select id="baselineYear" name="baselineYear" formControlName="baselineYear" class="form-select" required
                 (change)="save()">
-                @for (year of baselineYears; track year) {
+                @for (year of _reportYears; track year) {
                 <option [ngValue]="year">{{year | yearDisplay:
-                  account.fiscalYear}}</option>
+                  _account.fiscalYear}}</option>
                 }
               </select>
             </div>
@@ -37,18 +43,11 @@
             <div class="col-7">
               <select id="reportYear" name="reportYear" formControlName="reportYear" class="form-select" required
                 (change)="save()">
-                @for (year of reportYears; track year) {
+                @for (year of _reportYears; track year) {
                 <option [ngValue]="year">{{year | yearDisplay:
-                  account.fiscalYear}}</option>
+                  _account.fiscalYear}}</option>
                 }
               </select>
-              @if (showReportYearWarning) {
-              <div class="alert alert-warning mt-2">
-                Your final year does not include 12 months of data. Please update to a year with
-                complete data. To view mid-year progress, return to the reports dashboard and run a
-                "Savings Report".
-              </div>
-              }
             </div>
           </div>
           @if (reportErrors.baselineAfterReportYear) {
@@ -60,13 +59,13 @@
           }
         </div>
         }
-        @if (setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value ==
-        'accountSavings' || setupForm.controls.reportType.value == 'accountEmissionFactors') {
+        @if (_selectedReport.reportType == 'dataOverview' || _selectedReport.reportType ==
+        'accountSavings' || _selectedReport.reportType == 'accountEmissionFactors') {
         <div class="col-6">
-          @if (setupForm.controls.reportType.value != 'accountSavings') {
+          @if (_selectedReport.reportType != 'accountSavings') {
           <div class="row form-group">
             <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
-            @if(setupForm.controls.reportType.value != 'accountEmissionFactors') {
+            @if(_selectedReport.reportType != 'accountEmissionFactors') {
             <div class="col-3">
               <select name="startMonth" formControlName="startMonth" class="form-select" (change)="save()">
                 @for (month of months; track month) {
@@ -78,7 +77,7 @@
             }
             <div class="col-3">
               <select name="startYear" formControlName="startYear" class="form-select" (change)="save()">
-                @for (year of baselineYears; track year) {
+                @for (year of _reportYears; track year) {
                 <option class="pe-2" [ngValue]="year">{{year}}
                 </option>
                 }
@@ -88,7 +87,7 @@
           }
           <div class="row form-group">
             <label class="col-5 col-form-label semibold" for="endMonth">End Date</label>
-            @if(setupForm.controls.reportType.value != 'accountEmissionFactors') {
+            @if(_selectedReport.reportType != 'accountEmissionFactors') {
             <div class="col-3">
               <select name="endMonth" formControlName="endMonth" class="form-select" (change)="save()">
                 @for (month of months; track month) {
@@ -100,7 +99,7 @@
             }
             <div class="col-3">
               <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
-                @for (year of reportYears; track year) {
+                @for (year of _reportYears; track year) {
                 <option class="pe-2" [ngValue]="year">{{year}}
                 </option>
                 }
@@ -112,6 +111,15 @@
             Start date cannot be later than the end date.
           </span>
           }
+          @if(_reportDateWarning){
+          <div class="row">
+            <div class="col-12 text-center">
+              <span class="alert alert-warning">
+                {{_reportDateWarning}}
+              </span>
+            </div>
+          </div>
+          }
         </div>
         }
         <div class="col-12">
@@ -119,30 +127,31 @@
         </div>
       </div>
     </form>
-    @if (setupForm.valid) {
-    @if (setupForm.controls.reportType.value == 'betterPlants') {
+    @if (_selectedReport && _setupForm.valid) {
+    @if (_selectedReport.reportType == 'betterPlants') {
     <app-better-plants-setup></app-better-plants-setup>
     }
-    @if (setupForm.controls.reportType.value == 'dataOverview') { <app-data-overview-setup>
+    @if (_selectedReport.reportType == 'dataOverview') { <app-data-overview-setup>
     </app-data-overview-setup>
     }
-    @if (setupForm.controls.reportType.value == 'performance') {
+    @if (_selectedReport.reportType == 'performance') {
     <app-performance-setup></app-performance-setup>
     }
-    @if (setupForm.controls.reportType.value == 'betterClimate') {
+    @if (_selectedReport.reportType == 'betterClimate') {
     <app-better-climate-setup></app-better-climate-setup>
     }
-    @if (setupForm.controls.reportType.value == 'analysis') {
+    @if (_selectedReport.reportType == 'analysis') {
     <app-analysis-report-setup></app-analysis-report-setup>
     }
-    @if (setupForm.controls.reportType.value == 'accountSavings') {
+    @if (_selectedReport.reportType == 'accountSavings') {
     <app-account-savings-report-setup></app-account-savings-report-setup>
     }
     }
-    @if (setupForm.valid == false) {
+    @if (_setupForm.valid == false) {
     <div class="alert alert-warning text-center">
       Additional report detail options will appear once report dates are selected.
     </div>
     }
   </div>
 </div>
+}

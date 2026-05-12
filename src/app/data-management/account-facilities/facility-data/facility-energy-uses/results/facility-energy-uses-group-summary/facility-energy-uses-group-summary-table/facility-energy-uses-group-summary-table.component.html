@@ -1,0 +1,87 @@
+<table class="table table-bordered utility-data">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th [ngClass]="{'w-33': !displayHistory}"></th>
+            @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
+            <th colspan="2">
+                {{groupData.year}}
+            </th>
+            }
+        </tr>
+        <tr class="table-mh">
+            <th (click)="setOrderDataField('equipmentName', orderByYear)"
+                [ngClass]="{'active': orderByField == 'equipmentName'}">Equipment</th>
+
+            @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
+            <th class="text-right" (click)="setOrderDataField('energyUse', groupData.year)"
+                [ngClass]="{'active': orderByField == 'energyUse' && orderByYear == groupData.year}">Energy Use<br>
+                <span [innerHTML]="'(' + facility.energyUnit + '/yr)'"></span>
+            </th>
+            <th class="text-right" (click)="setOrderDataField('percentOfTotal', groupData.year)"
+                [ngClass]="{'active': orderByField == 'percentOfTotal' && orderByYear == groupData.year}">% of Group
+                Total</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (groupData of filteredEnergyUseGroupSummary.equipmentAnnualEnergyUse; track $index){
+        <tr>
+            <td class="nowrap">
+                <a class="click-link" (click)="goToEquipment(groupData.equipmentGuid)">
+                    @for(icon of groupData.icons; track icon) {
+                    <span class="fa-solid {{icon}} me-1'"></span>
+                    }
+                    {{groupData.equipmentName}}
+                </a>
+            </td>
+            @for(annualEnergyUse of groupData.annualEnergyUse; track $index){
+            <td>
+                @if(annualEnergyUse.isNoLongerInUse){
+                <span class="fa fa-ban" title="This equipment was no longer in use during this year"></span>
+                }@else {
+                @if(annualEnergyUse.isPropagated){
+                <span class="fa fa-asterisk"
+                    title="Energy use for this year was propagated based on most recent data available"></span>
+                }
+                {{annualEnergyUse.energyUse| number:'1.0-0'}}
+                }
+            </td>
+            <td>
+                @if(annualEnergyUse.isNoLongerInUse){
+                <span class="fa fa-ban" title="This equipment was no longer in use during this year"></span>
+                }@else {
+                {{annualEnergyUse.percentOfEquipmentGroupTotal| number:'1.0-0'}}&percnt;
+                }
+            </td>
+            }
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="table-mh">
+            <th>Total</th>
+            @for (groupData of filteredEnergyUseGroupSummary.totalAnnualEnergyUse; track $index) {
+            <th>
+                @if(groupData.isPropagated){
+                <span class="fa fa-asterisk"
+                    title="Energy use for this year was propagated based on most recent data available"></span>
+                }
+                {{groupData.energyUse | number:'1.0-0'}}
+            </th>
+            <th>&mdash;</th>
+            }
+        </tr>
+    </tfoot>
+</table>
+
+@if(hasPropagatedData() == true){
+<p class="fw-light italic">
+    <span class="fa fa-asterisk"></span> Energy use for this year was propagated based on most recent data available.
+</p>
+}
+
+@if(hasNoLongerInUseData() == true){
+<p class="fw-light italic">
+    <span class="fa fa-ban"></span> This equipment was no longer in use during this year.
+</p>
+}

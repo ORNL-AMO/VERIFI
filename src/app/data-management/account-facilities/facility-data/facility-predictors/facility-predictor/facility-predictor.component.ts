@@ -191,6 +191,7 @@ export class FacilityPredictorComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.predictorForm && this.predictorForm.dirty) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

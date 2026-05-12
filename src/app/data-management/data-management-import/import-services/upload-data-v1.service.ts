@@ -186,7 +186,10 @@ export class UploadDataV1Service {
     //predictors
     let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
     let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
-    return { importFacilities: importFacilities, importMeters: importMeters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups }
+    return {
+      importFacilities: importFacilities, importMeters: importMeters, predictors: importPredictors,
+      predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups, energyUseEquipment: [], energyUseGroups: []
+    }
   }
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
