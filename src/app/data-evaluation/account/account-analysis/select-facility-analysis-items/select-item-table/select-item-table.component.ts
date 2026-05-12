@@ -1,4 +1,4 @@
-import { Component, computed, inject, Input, OnInit, Signal } from '@angular/core';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -46,8 +46,8 @@ export class SelectItemTableComponent {
     const allItems = this.allFacilityAnalysisItems();
     const selectedItem = this.selectedAnalysisItem();
     const selectedFacility = this.selectedFacility();
+    let filteredItems: Array<IdbAnalysisItem> = [];
     if (allItems && selectedItem && selectedFacility) {
-      let filteredItems: Array<IdbAnalysisItem> = [];
       if (selectedItem.analysisCategory == 'energy') {
         filteredItems = allItems.filter(item => {
           return (item.analysisCategory == selectedItem.analysisCategory
@@ -66,8 +66,8 @@ export class SelectItemTableComponent {
       filteredItems = filteredItems.sort((a, b) => {
         return new Date(b.modifiedDate).getTime() - new Date(a.modifiedDate).getTime();
       });
-      return filteredItems;
     }
+    return filteredItems;
   });
 
   selectedFacilityItemId: Signal<string> = computed(() => {
@@ -75,7 +75,7 @@ export class SelectItemTableComponent {
     const facility = this.selectedFacility();
     if (selectedItem && facility) {
       const facilityItem = selectedItem.facilityAnalysisItems.find(item => item.facilityId == facility.guid);
-      const itemId =  facilityItem ? facilityItem.analysisItemId : null;
+      const itemId = facilityItem ? facilityItem.analysisItemId : null;
       return itemId;
     }
     return null;

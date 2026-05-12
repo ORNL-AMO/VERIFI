@@ -54,10 +54,18 @@ export class SelectFacilityAnalysisItemsComponent {
 
   constructor() {
     effect(() => {
-      if(!this.selectedAnalysisItem()) {
+      if (!this.selectedAnalysisItem()) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
       }
-    })
+    });
+
+    effect(() => {
+      const selectedFacility = this.selectedFacility();
+      const facilities = this.facilities();
+      if (!selectedFacility && facilities && facilities.length > 0) {
+        this.facilityDbService.selectedFacility.next(facilities[0]);
+      }
+    });
   }
 
   selectFacility(facilityId: string) {

@@ -1,7 +1,10 @@
+@let _selectedAnalysisItem = selectedAnalysisItem();
+
+@if(_selectedAnalysisItem){
 <div class="wrapper">
   <div class="d-flex w-100 h-100">
     <div class="p-2 nav flex-column">
-      @for (facilityItem of selectedAnalysisItem().facilityAnalysisItems; track facilityItem.facilityId) {
+      @for (facilityItem of _selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
       <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
           [ngClass]="{'active': facilityItem.facilityId == selectedFacility().guid}">
           <i class="pe-2 fa" [ngClass]="{
@@ -35,3 +38,4 @@
     </div>
   </div>
 </div>
+}
