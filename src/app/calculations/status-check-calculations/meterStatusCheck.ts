@@ -1,10 +1,9 @@
-import { formatDate } from "@angular/common";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { isMeterInvalid } from "src/app/shared/validation/meterValidation";
-import { StatusCheckAction } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 
 export class MeterStatusCheck {
 
@@ -14,12 +13,22 @@ export class MeterStatusCheck {
     lastDateEntry: Date;
     hasDuplicateEntries: boolean;
     duplicateEntryDates: Array<Date>;
-    status: 'good' | 'warning' | 'error';
+    hasNoData: boolean;
+    hasNoCalendarizationMethod: boolean;
+    isDataCurrent: boolean;
+    status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
 
-    constructor(meter: IdbUtilityMeter, meterReadings: Array<IdbUtilityMeterData>, calanderizedMeter: CalanderizedMeter | undefined, outdatedDays: number) {
+    constructor(
+        meter: IdbUtilityMeter,
+        meterReadings: Array<IdbUtilityMeterData>,
+        calanderizedMeter: CalanderizedMeter | undefined,
+        facilityLatestEntry: { month: number; year: number } | undefined
+    ) {
         this.meterId = meter.guid;
         this.meterName = meter.name;
+        this.hasNoData = meterReadings.length === 0;
+        this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
         if (calanderizedMeter) {
             this.isMeterValid = isMeterInvalid(calanderizedMeter.meter) == false;
             this.setLastDateEntry(meterReadings);
@@ -29,8 +38,9 @@ export class MeterStatusCheck {
             this.hasDuplicateEntries = false;
             this.duplicateEntryDates = [];
         }
+        this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
         this.setStatus();
-        this.setActions(meter, meterReadings, outdatedDays);
+        this.setActions(meter, facilityLatestEntry);
     }
 
     private setLastDateEntry(meterReadings: Array<IdbUtilityMeterData>) {
@@ -61,53 +71,66 @@ export class MeterStatusCheck {
             });
     }
 
+    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined): boolean {
+        if (this.hasNoData || !facilityLatestEntry || !this.lastDateEntry) return false;
+        const entryYear = this.lastDateEntry.getFullYear();
+        const entryMonth = this.lastDateEntry.getMonth() + 1;
+        return entryYear > facilityLatestEntry.year ||
+            (entryYear === facilityLatestEntry.year && entryMonth >= facilityLatestEntry.month);
+    }
+
     private setStatus() {
-        if (!this.isMeterValid) {
+        if (!this.isMeterValid || this.hasNoData) {
             this.status = 'error';
-        } else if (this.hasDuplicateEntries) {
+        } else if (this.hasDuplicateEntries || this.hasNoCalendarizationMethod || !this.isDataCurrent) {
             this.status = 'warning';
         } else {
             this.status = 'good';
         }
     }
 
-    private setActions(meter: IdbUtilityMeter, meterReadings: Array<IdbUtilityMeterData>, outdatedDays: number) {
+    private setActions(meter: IdbUtilityMeter, facilityLatestEntry: { month: number; year: number } | undefined) {
         this.actions = [];
         const baseUrl = `/data-management/${meter.accountId}/facilities/${meter.facilityId}/meters/${meter.guid}`;
-        if (meterReadings.length === 0) {
+        if (this.hasNoData) {
             this.actions.push({
-                label: 'Add utility meter data for ' + meter.name,
+                label: 'Add meter data for ' + meter.name,
                 url: baseUrl + '/meter-data',
-                description: 'Add utility meter data for the meter. This data is used to analyze resource usage and trends.',
+                description: 'No data has been entered for this meter.',
                 facilityId: meter.facilityId,
                 type: 'meter',
+                status: 'error',
                 trackGuid: meter.guid + '_add'
             });
         } else {
-            if (!meter.meterReadingDataApplication) {
+            if (this.hasNoCalendarizationMethod) {
                 this.actions.push({
                     label: 'Set calendarization method for ' + meter.name,
                     url: baseUrl + '/meter-monthly-data',
-                    description: 'Select the method with which to calendarize the meter data for this meter. Calendarization is the process of properly applying the correct amount of energy use to a month.',
+                    description: 'A calendarization method is required to properly assign energy use to calendar months.',
                     facilityId: meter.facilityId,
                     type: 'meter',
+                    status: 'warning',
                     trackGuid: meter.guid + '_calendarization'
                 });
             }
-            if (this.lastDateEntry) {
-                const outdatedMs = outdatedDays * 24 * 60 * 60 * 1000;
-                if (this.lastDateEntry.getTime() < (new Date().getTime() - outdatedMs) && meter.meterReadingDataApplication !== 'fullYear') {
-                    const formattedDate = formatDate(this.lastDateEntry, 'MM/dd/yyyy', 'en-US');
-                    this.actions.push({
-                        label: 'Update utility meter data for ' + meter.name,
-                        url: baseUrl + '/meter-data',
-                        description: `Update utility meter data for the meter. The latest reading (${formattedDate}) is more than ${outdatedDays} days old.`,
-                        facilityId: meter.facilityId,
-                        type: 'meter',
-                        trackGuid: meter.guid + '_update'
-                    });
-                }
+            if (!this.isDataCurrent && facilityLatestEntry) {
+                const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
+                this.actions.push({
+                    label: 'Update meter data for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: `Facility data runs through ${latestLabel} but this meter has not been updated to match.`,
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'warning',
+                    trackGuid: meter.guid + '_update'
+                });
             }
         }
+    }
+
+    private monthLabel(month: number, year: number): string {
+        const date = new Date(year, month - 1, 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
 }

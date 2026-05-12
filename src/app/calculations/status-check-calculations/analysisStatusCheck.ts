@@ -160,9 +160,11 @@ export class AnalysisStatusCheck {
     private setStatus() {
         if (this.hasSetupErrors || !this.hasAnalysis) {
             this.status = 'error';
-        } else if (!this.allDatesCurrent) {
-            this.status = 'warning';
-        } else {
+        }
+        // else if (!this.allDatesCurrent) {
+        //     this.status = 'warning';
+        // } 
+        else {
             this.status = 'good';
         }
     }

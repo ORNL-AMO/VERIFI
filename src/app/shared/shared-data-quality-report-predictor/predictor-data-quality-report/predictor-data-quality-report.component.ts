@@ -30,7 +30,7 @@ export class PredictorDataQualityReportComponent {
     if (this.hasData) {
       const data = this.predictorData.map(d => d.amount);
       this.stats = getPredictorStatistics(data);
-      const statusCheck = new PredictorStatusCheck(this.selectedPredictor, this.predictorData);
+      const statusCheck = new PredictorStatusCheck(this.selectedPredictor, this.predictorData, undefined);
       this.buildDuplicatesList(statusCheck);
       this.buildMissingList(statusCheck);
       this.showAlert = this.duplicateDatesList.length > 0 || this.missingMonthsList.length > 0;

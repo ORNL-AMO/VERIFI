@@ -13,6 +13,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class PredictorsStatusCheckComponent {
   @Input({ required: true }) predictorsStatusChecks: Array<PredictorStatusCheck>;
   @Input({ required: true }) predictorsStatus: 'good' | 'warning' | 'error';
+  @Input({ required: true }) hasNoPredictors: boolean;
+  @Input({ required: true }) facilityPredictorActionUrl: string;
 
   private router: Router = inject(Router);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);

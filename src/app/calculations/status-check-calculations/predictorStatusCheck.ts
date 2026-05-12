@@ -1,5 +1,4 @@
 
-import { formatDate } from "@angular/common";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
@@ -13,16 +12,24 @@ export class PredictorStatusCheck {
     hasMissingEntries: boolean;
     missingEntryMonths: Array<{ month: number, year: number }>;
     latestEntryDate: Date;
+    hasNoData: boolean;
+    isDataCurrent: boolean;
     actions: Array<StatusCheckAction>;
 
-    constructor(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>, outdatedDays: number = 60) {
+    constructor(
+        predictor: IdbPredictor,
+        predictorData: Array<IdbPredictorData>,
+        facilityLatestEntry: { month: number; year: number } | undefined
+    ) {
         this.predictorId = predictor.guid;
         this.predictorName = predictor.name;
         this.missingEntryMonths = [];
-        let predictorReadings: Array<IdbPredictorData> = predictorData.filter(data => data.predictorId === predictor.guid);
+        const predictorReadings: Array<IdbPredictorData> = predictorData.filter(data => data.predictorId === predictor.guid);
+        this.hasNoData = predictorReadings.length === 0;
         this.checkEntries(predictorReadings);
+        this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
         this.setStatus();
-        this.setActions(predictor, predictorReadings, outdatedDays);
+        this.setActions(predictor, facilityLatestEntry);
     }
 
     private checkEntries(predictorData: Array<IdbPredictorData>) {
@@ -64,44 +71,56 @@ export class PredictorStatusCheck {
         this.hasMissingEntries = this.missingEntryMonths.length > 0;
     }
 
+    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined): boolean {
+        if (this.hasNoData || !facilityLatestEntry || !this.latestEntryDate) return false;
+        const entryYear = this.latestEntryDate.getFullYear();
+        const entryMonth = this.latestEntryDate.getMonth() + 1;
+        return entryYear > facilityLatestEntry.year ||
+            (entryYear === facilityLatestEntry.year && entryMonth >= facilityLatestEntry.month);
+    }
+
     private setStatus() {
-        if (this.hasDuplicateEntries || this.hasMissingEntries) {
+        if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries) {
             this.status = 'error';
+        } else if (!this.isDataCurrent) {
+            this.status = 'warning';
         } else {
             this.status = 'good';
         }
     }
 
-    private setActions(predictor: IdbPredictor, predictorReadings: Array<IdbPredictorData>, outdatedDays: number) {
+    private setActions(predictor: IdbPredictor, facilityLatestEntry: { month: number; year: number } | undefined) {
         this.actions = [];
         const baseUrl = `/data-management/${predictor.accountId}/facilities/${predictor.facilityId}/predictors/${predictor.guid}`;
         const isWeather = predictor.predictorType === 'Weather';
-        if (predictorReadings.length === 0) {
+        if (this.hasNoData) {
             this.actions.push({
                 label: 'Add predictor data for ' + predictor.name,
                 url: baseUrl + '/predictor-data',
-                description: 'Add predictor data for the predictor. This data is used to analyze and forecast resource usage based on various factors.',
+                description: 'No data has been entered for this predictor.',
                 facilityId: predictor.facilityId,
                 type: 'predictor',
+                status: 'error',
                 isWeather,
-                trackGuid: predictor.guid
+                trackGuid: predictor.guid + '_add'
             });
-        } else if (this.latestEntryDate) {
-            // Set readingDate to end of the month
-            const endOfMonth = new Date(this.latestEntryDate.getFullYear(), this.latestEntryDate.getMonth() + 1, 0);
-            const outdatedMs = outdatedDays * 24 * 60 * 60 * 1000;
-            if (endOfMonth.getTime() < (new Date().getTime() - outdatedMs)) {
-                const formattedDate = formatDate(endOfMonth, 'MM/yyyy', 'en-US');
-                this.actions.push({
-                    label: 'Update predictor data for ' + predictor.name,
-                    url: baseUrl + '/predictor-data',
-                    description: `Update predictor data for the predictor. The latest reading (${formattedDate}) is more than ${outdatedDays} days old.`,
-                    facilityId: predictor.facilityId,
-                    type: 'predictor',
-                    isWeather,
-                    trackGuid: predictor.guid
-                });
-            }
+        } else if (!this.isDataCurrent && facilityLatestEntry) {
+            const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
+            this.actions.push({
+                label: 'Update predictor data for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `Facility data runs through ${latestLabel} but this predictor has not been updated to match.`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'warning',
+                isWeather,
+                trackGuid: predictor.guid + '_update'
+            });
         }
+    }
+
+    private monthLabel(month: number, year: number): string {
+        const date = new Date(year, month - 1, 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
 }

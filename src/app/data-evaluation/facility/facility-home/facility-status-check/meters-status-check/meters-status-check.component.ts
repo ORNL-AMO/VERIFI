@@ -13,6 +13,9 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class MetersStatusCheckComponent {
     @Input({ required: true }) metersStatusChecks: Array<MeterStatusCheck>;
     @Input({ required: true }) metersStatus: 'good' | 'warning' | 'error';
+    @Input({ required: true }) hasNoMeters: boolean;
+    @Input({ required: true }) hasNoMeterGroups: boolean;
+    @Input({ required: true }) facilityMeterActionUrl: string;
 
     private router: Router = inject(Router);
     private facilityDbService: FacilitydbService = inject(FacilitydbService);

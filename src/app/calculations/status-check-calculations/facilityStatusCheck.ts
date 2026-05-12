@@ -1,4 +1,4 @@
-import { AnalysisGroup, JStatRegressionModel } from "src/app/models/analysis";
+import * as _ from 'lodash';
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbFacility } from "src/app/models/idbModels/facility";
@@ -28,6 +28,11 @@ export class FacilityStatusCheck {
     statusMessage: string;
     actions: Array<StatusCheckAction>;
 
+    hasNoMeters: boolean;
+    hasNoMeterGroups: boolean;
+    hasNoPredictors: boolean;
+    facilityLatestEntry: { month: number; year: number } | undefined;
+
     constructor(
         facility: IdbFacility,
         calanderizedMeters: Array<CalanderizedMeter>,
@@ -38,16 +43,20 @@ export class FacilityStatusCheck {
         waterAnalysisItem: IdbAnalysisItem,
         analysisSetupErrors: Array<AnalysisSetupErrors>,
         meters: Array<IdbUtilityMeter> = [],
-        meterGroups: Array<IdbUtilityMeterGroup> = [],
-        outdatedDays: number = 60
+        meterGroups: Array<IdbUtilityMeterGroup> = []
     ) {
         this.facility = facility;
-        let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => meter.meter.facilityId === facility.guid);
+        this.hasNoMeters = meters.length === 0;
+        this.hasNoMeterGroups = !this.hasNoMeters && meterGroups.length === 0;
+        this.hasNoPredictors = predictors.length === 0;
+        this.facilityLatestEntry = this.computeFacilityLatestEntry(utilityMeterData);
+
+        const facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(m => m.meter.facilityId === facility.guid);
         this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, facilityCalanderizedMeters, predictors, predictorData, analysisSetupErrors);
         this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, predictors, predictorData, analysisSetupErrors);
-        this.setMetersStatusChecks(meters, facilityCalanderizedMeters, utilityMeterData, outdatedDays);
+        this.setMetersStatusChecks(meters, facilityCalanderizedMeters, utilityMeterData);
         this.setMetersStatus();
-        this.setPredictorsStatusChecks(predictors, predictorData, outdatedDays);
+        this.setPredictorsStatusChecks(predictors, predictorData);
         this.setPredictorsStatus();
         this.setActions(facility, meters, meterGroups, predictors);
         this.setStatus();
@@ -60,26 +69,31 @@ export class FacilityStatusCheck {
         return actions;
     }
 
-    private setMetersStatusChecks(meters: Array<IdbUtilityMeter>, calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>, outdatedDays: number) {
+    private computeFacilityLatestEntry(utilityMeterData: Array<IdbUtilityMeterData>): { month: number; year: number } | undefined {
+        if (!utilityMeterData || utilityMeterData.length === 0) return undefined;
+        const latest = _.maxBy(utilityMeterData, d => d.year * 12 + d.month);
+        return latest ? { month: latest.month, year: latest.year } : undefined;
+    }
+
+    private setMetersStatusChecks(meters: Array<IdbUtilityMeter>, calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>) {
         this.metersStatusChecks = meters.map(meter => {
             const calanderizedMeter = calanderizedMeters.find(cm => cm.meter.guid === meter.guid);
             const meterReadings = utilityMeterData.filter(data => data.meterId === meter.guid);
-            return new MeterStatusCheck(meter, meterReadings, calanderizedMeter, outdatedDays);
+            return new MeterStatusCheck(meter, meterReadings, calanderizedMeter, this.facilityLatestEntry);
         });
     }
 
-    private setPredictorsStatusChecks(predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData>, outdatedDays: number) {
+    private setPredictorsStatusChecks(predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData>) {
         this.predictorsStatusChecks = predictors.map(predictor => {
-            let predictorReadings = predictorData.filter(data => data.predictorId === predictor.guid);
-            return new PredictorStatusCheck(predictor, predictorReadings, outdatedDays);
+            const predictorReadings = predictorData.filter(data => data.predictorId === predictor.guid);
+            return new PredictorStatusCheck(predictor, predictorReadings, this.facilityLatestEntry);
         });
     }
 
     private setMetersStatus() {
-        let meterStatuses: Array<STATUS_CHECK_OPTIONS> = this.metersStatusChecks.map(check => check.status);
-        if (meterStatuses.includes('error')) {
+        if (this.hasNoMeters || this.metersStatusChecks.some(c => c.status === 'error')) {
             this.metersStatus = 'error';
-        } else if (meterStatuses.includes('warning')) {
+        } else if (this.hasNoMeterGroups || this.metersStatusChecks.some(c => c.status === 'warning')) {
             this.metersStatus = 'warning';
         } else {
             this.metersStatus = 'good';
@@ -87,10 +101,9 @@ export class FacilityStatusCheck {
     }
 
     private setPredictorsStatus() {
-        let predictorStatuses: Array<STATUS_CHECK_OPTIONS> = this.predictorsStatusChecks.map(check => check.status);
-        if (predictorStatuses.includes('error')) {
+        if (this.hasNoPredictors || this.predictorsStatusChecks.some(c => c.status === 'error')) {
             this.predictorsStatus = 'error';
-        } else if (predictorStatuses.includes('warning')) {
+        } else if (this.predictorsStatusChecks.some(c => c.status === 'warning')) {
             this.predictorsStatus = 'warning';
         } else {
             this.predictorsStatus = 'good';
@@ -104,18 +117,20 @@ export class FacilityStatusCheck {
             this.actions.push({
                 label: 'Add utility meters for ' + facility.name,
                 url: facilityBaseUrl + '/meters',
-                description: 'Add utility meters to the facility. Utility meters are used to track energy, water, and other resource usage.',
+                description: 'Utility meters are required to track energy, water, and other resource usage.',
                 facilityId: facility.guid,
                 type: 'meter',
+                status: 'error',
                 trackGuid: facility.guid + '_add_meters'
             });
         } else if (meterGroups.length === 0) {
             this.actions.push({
-                label: 'Add utility meter groups for ' + facility.name,
+                label: 'Add meter groups for ' + facility.name,
                 url: facilityBaseUrl + '/meter-grouping',
-                description: 'Add utility meter groups to the facility. Utility meter groups are used to group meters for analysis and reporting.',
+                description: 'Meter groups are required for analysis and reporting.',
                 facilityId: facility.guid,
                 type: 'meter',
+                status: 'error',
                 trackGuid: facility.guid + '_add_meter_groups'
             });
         }
@@ -123,9 +138,10 @@ export class FacilityStatusCheck {
             this.actions.push({
                 label: 'Add predictors for ' + facility.name,
                 url: facilityBaseUrl + '/predictors',
-                description: 'Add predictors to the facility. Predictors are used to analyze and forecast resource usage based on various factors.',
+                description: 'Predictors are required to analyze and forecast resource usage.',
                 facilityId: facility.guid,
                 type: 'predictor',
+                status: 'error',
                 trackGuid: facility.guid + '_add_predictors'
             });
         }

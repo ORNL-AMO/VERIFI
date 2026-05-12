@@ -1,78 +1,73 @@
 <div class="pt-2 pe-1 ps-1">
-  <h6>{{account.name}} To Do List:</h6>
-  <p>
-    The following items have been identified as needing action for this account.
-  </p>
+  <h6>{{account.name}} To Do List</h6>
   @if (hasTodoItems) {
-    <ul class="list-group" [ngClass]="{'list-group-flush': totalTodoItems > 10}">
-      <!--Other Todo Items-->
-      @for (item of toDoItems.otherItems; track item.trackGuid; let index = $index) {
-        <li class="list-group-item list-group-item-action bold"
-          [routerLink]="item.url">
-          {{item.label}}
+    <ul class="list-group list-group-flush">
+      <!--Account-level items-->
+      @for (item of toDoItems.otherItems; track item.trackGuid) {
+        <li class="list-group-item list-group-item-action" [routerLink]="item.url">
+          <div class="d-flex align-items-center gap-2">
+            <span class="fa fa-fw"
+              [ngClass]="{
+                'fa-circle-xmark text-danger': item.status === 'error',
+                'fa-exclamation-triangle text-warning': item.status === 'warning'
+              }"></span>
+            <span class="flex-grow-1 small">{{item.label}}</span>
+            <span class="fa fa-chevron-right text-muted small"></span>
+          </div>
         </li>
       }
-      <!--Items shown by facility-->
-      @if (totalTodoItems > 10) {
-        @for (facilityItem of toDoItems.facilityTodoItems; track facilityItem.facility.guid; let facilityIndex = $index) {
-          <li class="list-group-item bold">
+      <!--Facility-grouped items-->
+      @for (facilityItem of toDoItems.facilityTodoItems; track facilityItem.facility.guid) {
+        <!--Facility header-->
+        <li class="list-group-item">
+          <div class="d-flex align-items-center gap-2">
+            <span class="fa fa-fw"
+              [ngClass]="{
+                'fa-circle-xmark text-danger': facilityItem.facilityStatus === 'error',
+                'fa-exclamation-triangle text-warning': facilityItem.facilityStatus === 'warning'
+              }"></span>
             <span class="fa fa-industry" [ngStyle]="{'color': facilityItem.facility.color}"></span>
-            {{facilityItem.facility.name}}
-            <span class="badge bg-secondary float-end">
-              {{facilityItem.numberOfItems}} items
-            </span>
+            <strong class="flex-grow-1 small">{{facilityItem.facility.name}}</strong>
+            <span class="badge bg-secondary">{{facilityItem.numberOfItems}}</span>
+          </div>
+        </li>
+        @for (meterItem of facilityItem.meterTodoItems; track meterItem.trackGuid) {
+          <li class="list-group-item list-group-item-action ps-4" [routerLink]="meterItem.url">
+            <div class="d-flex align-items-center gap-2">
+              <span class="fa fa-fw"
+                [ngClass]="{
+                  'fa-circle-xmark text-danger': meterItem.status === 'error',
+                  'fa-exclamation-triangle text-warning': meterItem.status === 'warning'
+                }"></span>
+              <span class="flex-grow-1 small">{{meterItem.label}}</span>
+              <span class="fa fa-chevron-right text-muted small"></span>
+            </div>
           </li>
-          <li class="list-group-item list-group-item-action"
-            (click)="toggleShowMeterItem(facilityIndex)">
-            <span class="fa"
-            [ngClass]="{'fa-chevron-right': !facilityItem.showMeterItems, 'fa-chevron-down': facilityItem.showMeterItems}"></span>
-            Meter To Do Items: {{facilityItem.meterTodoItems.length}}
-          </li>
-          @if (facilityItem.showMeterItems) {
-            @for (meterItem of facilityItem.meterTodoItems; track meterItem.trackGuid; let meterIndex = $index) {
-              <li class="list-group-item list-group-item-action"
-                [routerLink]="meterItem.url">
-                {{meterItem.label}}
-              </li>
-            }
-          }
-          <li class="list-group-item list-group-item-action"
-            (click)="toggleShowPredictorItem(facilityIndex)">
-            <span class="fa"
-            [ngClass]="{'fa-chevron-right': !facilityItem.showPredictorItems, 'fa-chevron-down': facilityItem.showPredictorItems}"></span>
-            Predictor To Do Items: {{facilityItem.predictorTodoItems.length}}
-          </li>
-          @if (facilityItem.showPredictorItems) {
-            @for (predictorItem of facilityItem.predictorTodoItems; track predictorItem.trackGuid; let predictorIndex = $index) {
-              <li class="list-group-item list-group-item-action"
-                [routerLink]="predictorItem.url">
+        }
+        @for (predictorItem of facilityItem.predictorTodoItems; track predictorItem.trackGuid) {
+          <li class="list-group-item list-group-item-action ps-4" [routerLink]="predictorItem.url">
+            <div class="d-flex align-items-center gap-2">
+              <span class="fa fa-fw"
+                [ngClass]="{
+                  'fa-circle-xmark text-danger': predictorItem.status === 'error',
+                  'fa-exclamation-triangle text-warning': predictorItem.status === 'warning'
+                }"></span>
+              <span class="flex-grow-1 small">
                 @if (predictorItem.isWeather) {
-                  <span class="fa fa-temperature-half pe-2"></span>
+                  <span class="fa fa-temperature-half pe-1"></span>
                 }
                 {{predictorItem.label}}
-              </li>
-            }
-          }
-        }
-      } @else {
-        @for (todoItem of allTodoItems; track todoItem.trackGuid; let meterIndex = $index) {
-          <li class="list-group-item list-group-item-action"
-            [routerLink]="todoItem.url">
-            <div class="p-0 bold">
-              @if (todoItem.isWeather) {
-                <span class="fa fa-temperature-half pe-2"></span>
-              }
-              {{todoItem.label}} ({{todoItem.facilityId | facilityName}})
+              </span>
+              <span class="fa fa-chevron-right text-muted small"></span>
             </div>
           </li>
         }
       }
-      <!--List of all To Do Items-->
     </ul>
   } @else {
     <div class="alert alert-info" role="alert">
       <i class="fa fa-check-circle"></i>
-      No items to do at this time. Proceed to data evaluation and analysis!
+      No items to do at this time!
     </div>
   }
 </div>

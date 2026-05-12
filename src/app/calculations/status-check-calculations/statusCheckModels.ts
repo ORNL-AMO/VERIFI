@@ -18,6 +18,7 @@ export interface StatusCheckAction {
     description: string;
     facilityId: string;
     type: 'account' | 'facility' | 'meter' | 'predictor';
+    status: STATUS_CHECK_OPTIONS;
     isWeather?: boolean;
     trackGuid: string;
 }

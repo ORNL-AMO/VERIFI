@@ -10,10 +10,11 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { StatusCheckAction } from 'src/app/calculations/status-check-calculations/statusCheckModels';
+import { STATUS_CHECK_OPTIONS, StatusCheckAction } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 
 interface FacilityActionGroup {
   facility: IdbFacility;
+  facilityStatus: STATUS_CHECK_OPTIONS;
   showMeterItems: boolean;
   meterTodoItems: Array<StatusCheckAction>;
   showPredictorItems: boolean;
@@ -33,7 +34,6 @@ export class DataManagementHomeComponent {
   account: IdbAccount;
   accountSub: Subscription;
 
-  outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
   showWeatherButton: boolean = false;
 
   showWeatherPredictorModal: boolean = false;
@@ -66,9 +66,6 @@ export class DataManagementHomeComponent {
   ngOnInit() {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.account = account;
-      if (!this.account.toDoListOutdatedDays) {
-        this.account.toDoListOutdatedDays = 60;
-      }
     });
 
     this.statusCheckSub = this.accountStatusCheckService.accountStatusCheck.subscribe(statusCheck => {
@@ -99,6 +96,7 @@ export class DataManagementHomeComponent {
         const predictorActions = [...fc.actions.filter(a => a.type === 'predictor'), ...fc.predictorsStatusChecks.flatMap(p => p.actions)];
         return {
           facility: fc.facility,
+          facilityStatus: fc.status,
           showMeterItems: false,
           meterTodoItems: meterActions,
           showPredictorItems: false,
@@ -117,7 +115,7 @@ export class DataManagementHomeComponent {
     this.showWeatherButton = this.allTodoItems.some(item => item.isWeather && item.type === 'predictor');
     this.hasTodoItems = this.allTodoItems.length > 0 || statusCheck.actions.length > 0;
     this.totalTodoItems = this.allTodoItems.length + statusCheck.actions.length;
-    this.hasInitialSetupItems = statusCheck.actions.some(item => item.label === 'Upload data');
+    this.hasInitialSetupItems = statusCheck.actions.some(item => item.trackGuid?.endsWith('_upload_data'));
   }
 
   async showToast() {
@@ -129,11 +127,6 @@ export class DataManagementHomeComponent {
     } else {
       this.toastNotificationService.showToast("Weather Predictors Updated", "No gaps in data found while calculating weather predictors.", undefined, false, "alert-success")
     }
-  }
-
-  async updateIncludedItems() {
-    this.account = await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
-    this.accountDbService.selectedAccount.next(this.account);
   }
 
   openWeatherPredictorModal() {

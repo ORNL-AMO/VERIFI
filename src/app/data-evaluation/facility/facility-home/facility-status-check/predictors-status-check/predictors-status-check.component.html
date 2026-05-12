@@ -1,4 +1,3 @@
-@if (predictorsStatusChecks && predictorsStatusChecks.length > 0) {
 <div class="accordion-item">
     <h2 class="accordion-header" id="predictorsStatusHeading">
         <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
@@ -19,29 +18,47 @@
     <div id="predictorsStatusCollapse" class="accordion-collapse collapse" aria-labelledby="predictorsStatusHeading">
         <div class="accordion-body p-0">
             <ul class="list-group list-group-flush">
-                @for (predictorCheck of predictorsStatusChecks; track predictorCheck.predictorId) {
-                <li class="list-group-item d-flex justify-content-between align-items-center" (click)="goToPredictor(predictorCheck.predictorId)">
-                    <div>
-                        <strong>{{predictorCheck.predictorName}}</strong>
-                        @if (predictorCheck.latestEntryDate) {
-                        <span class="text-muted ms-2">({{predictorCheck.latestEntryDate | date:'MMMM yyyy'}})</span>
-                        }
-                        @if (predictorCheck.hasDuplicateEntries) {
-                        <span class="badge bg-danger ms-2">Duplicate Entries</span>
-                        }
-                        @if (predictorCheck.hasMissingEntries) {
-                        <span class="badge bg-danger text-dark ms-2">Missing Entries</span>
-                        }
+                @if (hasNoPredictors) {
+                <li class="list-group-item list-group-item-action d-flex align-items-center gap-2" [routerLink]="facilityPredictorActionUrl + '/predictors'">
+                    <span class="fa fa-circle-xmark text-danger"></span>
+                    <div class="flex-grow-1">
+                        <strong>No predictors</strong>
+                        <p class="mb-0 text-muted small">Add predictors to analyze and forecast resource usage.</p>
                     </div>
-                    <span class="fa" [ngClass]="{
+                    <span class="fa fa-chevron-right text-muted small"></span>
+                </li>
+                }
+                @for (predictorCheck of predictorsStatusChecks; track predictorCheck.predictorId) {
+                <li class="list-group-item list-group-item-action" (click)="goToPredictor(predictorCheck.predictorId)">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fa fa-fw" [ngClass]="{
                             'fa-circle-check text-success': predictorCheck.status === 'good',
                             'fa-exclamation-triangle text-warning': predictorCheck.status === 'warning',
                             'fa-circle-xmark text-danger': predictorCheck.status === 'error'
                         }"></span>
+                        <div class="flex-grow-1">
+                            <strong>{{predictorCheck.predictorName}}</strong>
+                            @if (predictorCheck.hasNoData) {
+                            <span class="badge bg-danger ms-2">No Data</span>
+                            }
+                            @if (predictorCheck.hasDuplicateEntries) {
+                            <span class="badge bg-danger ms-2">Duplicate Entries</span>
+                            }
+                            @if (predictorCheck.hasMissingEntries) {
+                            <span class="badge bg-warning text-dark ms-2">Missing Entries</span>
+                            }
+                            @if (!predictorCheck.isDataCurrent && !predictorCheck.hasNoData) {
+                            <span class="badge bg-warning text-dark ms-2">Data Not Current</span>
+                            }
+                            @if (predictorCheck.latestEntryDate && !predictorCheck.hasNoData) {
+                            <span class="text-muted ms-2 small">({{predictorCheck.latestEntryDate | date:'MMMM yyyy'}})</span>
+                            }
+                        </div>
+                        <span class="fa fa-chevron-right text-muted small"></span>
+                    </div>
                 </li>
                 }
             </ul>
         </div>
     </div>
 </div>
-}

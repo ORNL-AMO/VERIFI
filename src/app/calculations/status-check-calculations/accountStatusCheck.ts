@@ -30,7 +30,6 @@ export class AccountStatusCheck {
         facilityAnalysisItems: Array<IdbAnalysisItem>,
         analysisSetupErrors: Array<AnalysisSetupErrors>
     ) {
-        const outdatedDays = account.toDoListOutdatedDays ?? 60;
         this.setAccountActions(account, facilities);
         this.facilityStatusChecks = facilities.map(facility => {
             const facilityMeters = meters.filter(m => m.facilityId === facility.guid);
@@ -50,8 +49,7 @@ export class AccountStatusCheck {
                 waterAnalysisItem,
                 analysisSetupErrors,
                 facilityMeters,
-                facilityMeterGroups,
-                outdatedDays
+                facilityMeterGroups
             );
         });
         this.setStatus();
@@ -72,9 +70,10 @@ export class AccountStatusCheck {
             this.actions.push({
                 label: 'Setup account settings',
                 url: '/data-management/' + account.guid + '/account-setup',
-                description: 'Set the account name, unit settings, location and organizational goals. This will help you manage your data effectively.',
+                description: 'Set the account name, unit settings, location and organizational goals.',
                 facilityId: undefined,
                 type: 'account',
+                status: 'warning',
                 trackGuid: account.guid + '_setup_account'
             });
         }
@@ -82,17 +81,19 @@ export class AccountStatusCheck {
             this.actions.push({
                 label: 'Upload data',
                 url: '/data-management/' + account.guid + '/import-data',
-                description: "For accounts with large amounts of facility data, upload data to the account. Use VERIFI's upload data features to get data into VERIFI via excel.",
+                description: "Use VERIFI's upload features to import facility data via Excel.",
                 facilityId: undefined,
                 type: 'account',
+                status: 'error',
                 trackGuid: account.guid + '_upload_data'
             });
             this.actions.push({
                 label: 'Add data manually',
                 url: '/data-management/' + account.guid + '/facilities',
-                description: 'For smaller accounts. Manual data entry is possible. Create one or more facilities for this account manually.',
+                description: 'Create one or more facilities and enter data manually.',
                 facilityId: undefined,
                 type: 'account',
+                status: 'error',
                 trackGuid: account.guid + '_add_facility'
             });
         }

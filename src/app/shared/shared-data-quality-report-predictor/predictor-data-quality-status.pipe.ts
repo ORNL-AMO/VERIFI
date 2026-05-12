@@ -15,7 +15,7 @@ export class PredictorDataQualityStatusPipe implements PipeTransform {
     if (predictorData.length === 0) {
       return isBtn ? "btn-danger" : "danger";
     }
-    let statusCheck = new PredictorStatusCheck(predictor, allPredictorData);
+    let statusCheck = new PredictorStatusCheck(predictor, allPredictorData, undefined);
     if (statusCheck.hasDuplicateEntries || statusCheck.hasMissingEntries) {
       return isBtn ? "btn-danger" : "danger";
     }

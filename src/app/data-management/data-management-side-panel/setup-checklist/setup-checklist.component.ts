@@ -5,13 +5,12 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { StatusCheckAction } from 'src/app/calculations/status-check-calculations/statusCheckModels';
+import { STATUS_CHECK_OPTIONS, StatusCheckAction } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 
 interface FacilityActionGroup {
   facility: IdbFacility;
-  showMeterItems: boolean;
+  facilityStatus: STATUS_CHECK_OPTIONS;
   meterTodoItems: Array<StatusCheckAction>;
-  showPredictorItems: boolean;
   predictorTodoItems: Array<StatusCheckAction>;
   numberOfItems: number;
 }
@@ -35,8 +34,6 @@ export class SetupChecklistComponent {
   hasTodoItems: boolean = false;
   totalTodoItems: number = 0;
   allTodoItems: Array<StatusCheckAction> = [];
-
-  outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
 
   statusCheckSub: Subscription;
 
@@ -72,9 +69,8 @@ export class SetupChecklistComponent {
         const predictorActions = [...fc.actions.filter(a => a.type === 'predictor'), ...fc.predictorsStatusChecks.flatMap(p => p.actions)];
         return {
           facility: fc.facility,
-          showMeterItems: false,
+          facilityStatus: fc.status,
           meterTodoItems: meterActions,
-          showPredictorItems: false,
           predictorTodoItems: predictorActions,
           numberOfItems: meterActions.length + predictorActions.length
         };
@@ -88,13 +84,5 @@ export class SetupChecklistComponent {
     this.allTodoItems = facilityTodoItems.flatMap(f => f.meterTodoItems.concat(f.predictorTodoItems));
     this.hasTodoItems = this.allTodoItems.length > 0 || statusCheck.actions.length > 0;
     this.totalTodoItems = this.allTodoItems.length + statusCheck.actions.length;
-  }
-
-  toggleShowPredictorItem(facilityIndex: number) {
-    this.toDoItems.facilityTodoItems[facilityIndex].showPredictorItems = !this.toDoItems.facilityTodoItems[facilityIndex].showPredictorItems;
-  }
-
-  toggleShowMeterItem(facilityIndex: number) {
-    this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems = !this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems;
   }
 }
