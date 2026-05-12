@@ -104,12 +104,13 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_add'
             });
-        } else if (!this.isDataCurrent && facilityLatestEntry) {
+        } else if (!this.isDataCurrent && facilityLatestEntry && this.latestEntryDate) {
             const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
+            const dataLabel = this.monthLabel(this.latestEntryDate.getMonth() + 1, this.latestEntryDate.getFullYear());
             this.actions.push({
                 label: 'Update predictor data for ' + predictor.name,
                 url: baseUrl + '/predictor-data',
-                description: `Facility data runs through ${latestLabel} but this predictor has not been updated to match.`,
+                description: `Facility data runs through ${latestLabel} but this predictor has data through ${dataLabel}.`,
                 facilityId: predictor.facilityId,
                 type: 'predictor',
                 status: 'warning',

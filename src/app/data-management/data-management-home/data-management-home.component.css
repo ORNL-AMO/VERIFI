@@ -37,3 +37,7 @@ label.form-label {
     width: auto;
     font-weight: bold;
 }
+
+.list-group-item.facility-item{
+    background-color: #efefef;
+}

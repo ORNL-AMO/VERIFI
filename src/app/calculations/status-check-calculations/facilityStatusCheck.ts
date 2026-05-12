@@ -31,6 +31,9 @@ export class FacilityStatusCheck {
     hasNoMeters: boolean;
     hasNoMeterGroups: boolean;
     hasNoPredictors: boolean;
+    hasNonCurrentPredictors: boolean;
+    hasNonCurrentMeters: boolean;
+
     facilityLatestEntry: { month: number; year: number } | undefined;
 
     constructor(
@@ -61,8 +64,10 @@ export class FacilityStatusCheck {
         this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
+        this.setHasNonCurrentMeters();
         this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
         this.setPredictorsStatus();
+        this.setHasNonCurrentPredictors();
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
         this.setStatus();
     }
@@ -150,6 +155,14 @@ export class FacilityStatusCheck {
                 trackGuid: facility.guid + '_add_predictors'
             });
         }
+    }
+
+    private setHasNonCurrentMeters() {
+        this.hasNonCurrentMeters = this.metersStatusChecks.some(check => !check.isDataCurrent);
+    }
+
+    private setHasNonCurrentPredictors() {
+        this.hasNonCurrentPredictors = this.predictorsStatusChecks.some(check => !check.isDataCurrent);
     }
 
     private setStatus() {

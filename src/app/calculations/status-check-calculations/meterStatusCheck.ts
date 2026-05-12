@@ -114,12 +114,14 @@ export class MeterStatusCheck {
                     trackGuid: meter.guid + '_calendarization'
                 });
             }
-            if (!this.isDataCurrent && facilityLatestEntry) {
+            if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {
                 const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
+
+                const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
                 this.actions.push({
                     label: 'Update meter data for ' + meter.name,
                     url: baseUrl + '/meter-data',
-                    description: `Facility data runs through ${latestLabel} but this meter has not been updated to match.`,
+                    description: `Facility data runs through ${latestLabel} but this meter has data through ${dataLabel}.`,
                     facilityId: meter.facilityId,
                     type: 'meter',
                     status: 'warning',

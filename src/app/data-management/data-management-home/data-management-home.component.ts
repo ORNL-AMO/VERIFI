@@ -104,6 +104,13 @@ export class DataManagementHomeComponent {
           numberOfItems: meterActions.length + predictorActions.length
         };
       });
+    //order facility items by status (error, then warning, then good) and then alphabetically by facility name
+    facilityTodoItems.sort((a, b) => {
+      const statusOrder = { 'error': 0, 'warning': 1, 'good': 2 };
+      const statusComparison = statusOrder[a.facilityStatus] - statusOrder[b.facilityStatus];
+      if (statusComparison !== 0) return statusComparison;
+      return a.facility.name.localeCompare(b.facility.name);
+    });
 
     this.toDoItems = {
       facilityTodoItems,
@@ -121,7 +128,7 @@ export class DataManagementHomeComponent {
   async showToast() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(selectedAccount, true);
-     let hasWarning = this.weatherPredictorManagementService.hasWarning;
+    let hasWarning = this.weatherPredictorManagementService.hasWarning;
     if (hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")
     } else {

@@ -1,73 +1,74 @@
 <div class="pt-2 pe-1 ps-1">
   <h6>{{account.name}} To Do List</h6>
   @if (hasTodoItems) {
-    <ul class="list-group list-group-flush">
-      <!--Account-level items-->
-      @for (item of toDoItems.otherItems; track item.trackGuid) {
-        <li class="list-group-item list-group-item-action" [routerLink]="item.url">
-          <div class="d-flex align-items-center gap-2">
-            <span class="fa fa-fw"
-              [ngClass]="{
+  <ul class="list-group list-group-flush">
+    <!--Account-level items-->
+    @for (item of toDoItems.otherItems; track item.trackGuid) {
+    <li class="list-group-item list-group-item-action todo-item" [routerLink]="item.url">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fa fa-fw" [ngClass]="{
                 'fa-circle-xmark text-danger': item.status === 'error',
                 'fa-exclamation-triangle text-warning': item.status === 'warning'
               }"></span>
-            <span class="flex-grow-1 small">{{item.label}}</span>
-            <span class="fa fa-chevron-right text-muted small"></span>
-          </div>
-        </li>
+        <span class="flex-grow-1 small">{{item.label}}</span>
+        <span class="fa fa-chevron-right text-muted small"></span>
+      </div>
+      @if (item.description) {
+      <div class="todo-description text-muted">{{item.description}}</div>
       }
-      <!--Facility-grouped items-->
-      @for (facilityItem of toDoItems.facilityTodoItems; track facilityItem.facility.guid) {
-        <!--Facility header-->
-        <li class="list-group-item">
-          <div class="d-flex align-items-center gap-2">
-            <span class="fa fa-fw"
-              [ngClass]="{
-                'fa-circle-xmark text-danger': facilityItem.facilityStatus === 'error',
-                'fa-exclamation-triangle text-warning': facilityItem.facilityStatus === 'warning'
-              }"></span>
-            <span class="fa fa-industry" [ngStyle]="{'color': facilityItem.facility.color}"></span>
-            <strong class="flex-grow-1 small">{{facilityItem.facility.name}}</strong>
-            <span class="badge bg-secondary">{{facilityItem.numberOfItems}}</span>
-          </div>
-        </li>
-        @for (meterItem of facilityItem.meterTodoItems; track meterItem.trackGuid) {
-          <li class="list-group-item list-group-item-action ps-4" [routerLink]="meterItem.url">
-            <div class="d-flex align-items-center gap-2">
-              <span class="fa fa-fw"
-                [ngClass]="{
+    </li>
+    }
+    <!--Facility-grouped items-->
+    @for (facilityItem of toDoItems.facilityTodoItems; track facilityItem.facility.guid) {
+    <!--Facility header-->
+    <li class="list-group-item facility-item">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fa fa-industry" [ngStyle]="{'color': facilityItem.facility.color}"></span>
+        <strong class="flex-grow-1 small">{{facilityItem.facility.name}}</strong>
+        <span class="badge bg-secondary">{{facilityItem.numberOfItems}}</span>
+      </div>
+    </li>
+    @for (meterItem of facilityItem.meterTodoItems; track meterItem.trackGuid) {
+    <li class="list-group-item list-group-item-action ps-4 todo-item" [routerLink]="meterItem.url">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fa fa-fw" [ngClass]="{
                   'fa-circle-xmark text-danger': meterItem.status === 'error',
                   'fa-exclamation-triangle text-warning': meterItem.status === 'warning'
                 }"></span>
-              <span class="flex-grow-1 small">{{meterItem.label}}</span>
-              <span class="fa fa-chevron-right text-muted small"></span>
-            </div>
-          </li>
-        }
-        @for (predictorItem of facilityItem.predictorTodoItems; track predictorItem.trackGuid) {
-          <li class="list-group-item list-group-item-action ps-4" [routerLink]="predictorItem.url">
-            <div class="d-flex align-items-center gap-2">
-              <span class="fa fa-fw"
-                [ngClass]="{
+        <span class="flex-grow-1 small">{{meterItem.label}}</span>
+        <span class="fa fa-chevron-right text-muted small"></span>
+      </div>
+      @if (meterItem.description) {
+      <div class="todo-description text-muted">{{meterItem.description}}</div>
+      }
+    </li>
+    }
+    @for (predictorItem of facilityItem.predictorTodoItems; track predictorItem.trackGuid) {
+    <li class="list-group-item list-group-item-action ps-4 todo-item" [routerLink]="predictorItem.url">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fa fa-fw" [ngClass]="{
                   'fa-circle-xmark text-danger': predictorItem.status === 'error',
                   'fa-exclamation-triangle text-warning': predictorItem.status === 'warning'
                 }"></span>
-              <span class="flex-grow-1 small">
-                @if (predictorItem.isWeather) {
-                  <span class="fa fa-temperature-half pe-1"></span>
-                }
-                {{predictorItem.label}}
-              </span>
-              <span class="fa fa-chevron-right text-muted small"></span>
-            </div>
-          </li>
-        }
+        <span class="flex-grow-1 small">
+          @if (predictorItem.isWeather) {
+          <span class="fa fa-temperature-half pe-1"></span>
+          }
+          {{predictorItem.label}}
+        </span>
+        <span class="fa fa-chevron-right text-muted small"></span>
+      </div>
+      @if (predictorItem.description) {
+      <div class="todo-description text-muted">{{predictorItem.description}}</div>
       }
-    </ul>
+    </li>
+    }
+    }
+  </ul>
   } @else {
-    <div class="alert alert-info" role="alert">
-      <i class="fa fa-check-circle"></i>
-      No items to do at this time!
-    </div>
+  <div class="alert alert-info" role="alert">
+    <i class="fa fa-check-circle"></i>
+    No items to do at this time!
+  </div>
   }
 </div>

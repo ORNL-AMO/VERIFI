@@ -12,6 +12,7 @@ import { AccountEnergyCardComponent } from './account-energy-card/account-energy
 import { AccountWaterCardComponent } from './account-water-card/account-water-card.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
+import { AccountStatusCheckComponent } from './account-status-check/account-status-check.component';
 
 
 
@@ -22,7 +23,8 @@ import { FormsModule } from '@angular/forms';
     AccountWaterReductionGoalComponent,
     AccountEnergyReductionGoalComponent,
     AccountEnergyCardComponent,
-    AccountWaterCardComponent
+    AccountWaterCardComponent,
+    AccountStatusCheckComponent
   ],
   imports: [
     CommonModule,
