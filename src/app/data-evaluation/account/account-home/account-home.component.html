@@ -1,8 +1,93 @@
 @let _latestEnergyAnalysisItem = latestEnergyAnalysisItem();
 @let _latestWaterAnalysisItem = latestWaterAnalysisItem();
+@let _accountStatusCheck = accountStatusCheck();
 <div class="measur-wrapper main-content">
   <app-account-home-summary></app-account-home-summary>
   <hr>
+  @if (_accountStatusCheck) {
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="accordion" id="accountStatusCheckAccordion">
+        <div class="accordion-item card">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
+              data-bs-target="#accountStatusCollapse" aria-expanded="false"
+              [ngClass]="{
+                'bg-warning': _accountStatusCheck.status === 'warning',
+                'bg-danger': _accountStatusCheck.status === 'error'
+              }">
+              <span class="fa me-2" [ngClass]="{
+                'fa-circle-check text-success': _accountStatusCheck.status === 'good',
+                'fa-exclamation-triangle': _accountStatusCheck.status === 'warning',
+                'fa-circle-xmark': _accountStatusCheck.status === 'error'
+              }"></span>
+              <strong>Account Status</strong>
+              @if (_accountStatusCheck.totalActionCount > 0) {
+              <span class="badge bg-secondary ms-2">{{_accountStatusCheck.totalActionCount}} action{{_accountStatusCheck.totalActionCount !== 1 ? 's' : ''}}</span>
+              }
+            </button>
+          </h2>
+          <div id="accountStatusCollapse" class="accordion-collapse collapse">
+            <div class="accordion-body p-3">
+              @if (_accountStatusCheck.actions.length > 0) {
+              <h6 class="fw-bold"><span class="fa fa-list-check me-2"></span>Account Actions</h6>
+              <ul class="list-group mb-3">
+                @for (action of _accountStatusCheck.actions; track action.trackGuid) {
+                <li class="list-group-item list-group-item-action" [routerLink]="action.url">
+                  <div class="fw-semibold">{{action.label}}</div>
+                  @if (action.description) {
+                  <p class="fw-light mb-0 ms-3 small">{{action.description}}</p>
+                  }
+                </li>
+                }
+              </ul>
+              }
+              @if (_accountStatusCheck.facilityStatusChecks.length > 0) {
+              <h6 class="fw-bold"><span class="fa fa-industry me-2"></span>Facility Status</h6>
+              <ul class="list-group">
+                @for (fc of _accountStatusCheck.facilityStatusChecks; track fc.facility.guid) {
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                      <span class="fa me-2" [ngClass]="{
+                        'fa-circle-check text-success': fc.status === 'good',
+                        'fa-exclamation-triangle text-warning': fc.status === 'warning',
+                        'fa-circle-xmark text-danger': fc.status === 'error'
+                      }"></span>
+                      <span [ngStyle]="{'color': fc.facility.color}"><span class="fa fa-industry me-1"></span></span>
+                      {{fc.facility.name}}
+                    </span>
+                    @if (fc.allActions.length > 0) {
+                    <span class="badge bg-secondary">{{fc.allActions.length}} action{{fc.allActions.length !== 1 ? 's' : ''}}</span>
+                    }
+                  </div>
+                  @if (fc.allActions.length > 0) {
+                  <ul class="list-group list-group-flush mt-2">
+                    @for (action of fc.allActions; track action.trackGuid) {
+                    <li class="list-group-item list-group-item-action ps-4" [routerLink]="action.url">
+                      <div class="fw-semibold small">
+                        @if (action.isWeather) { <span class="fa fa-temperature-half pe-1"></span> }
+                        {{action.label}}
+                      </div>
+                      @if (action.description) {
+                      <p class="fw-light mb-0 ms-3 small">{{action.description}}</p>
+                      }
+                    </li>
+                    }
+                  </ul>
+                  }
+                </li>
+                }
+              </ul>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+  }
   <div class="row">
     @if (_latestEnergyAnalysisItem) {
     <div [ngClass]="{'col-6': _latestWaterAnalysisItem, 'col-12': !_latestWaterAnalysisItem}">

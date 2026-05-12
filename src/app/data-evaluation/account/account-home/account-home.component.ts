@@ -28,6 +28,8 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 
 @Component({
   selector: 'app-account-home',
@@ -47,9 +49,11 @@ export class AccountHomeComponent implements OnDestroy {
   private eGridService: EGridService = inject(EGridService);
   private customFuelDbService: CustomFuelDbService = inject(CustomFuelDbService);
   private customGWPDbService: CustomGWPDbService = inject(CustomGWPDbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
   accountFacilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
 
   latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
   latestWaterAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });

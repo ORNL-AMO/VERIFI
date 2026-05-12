@@ -53,6 +53,29 @@
                         [type]="'water'">
                     </app-analysis-status-check>
                 </div>
+
+                @if (_facilityStatusCheck.allActions.length > 0) {
+                <div class="mt-3">
+                    <h6 class="fw-bold"><span class="fa fa-list-check me-2"></span>Actions</h6>
+                    <ul class="list-group">
+                        @for (action of _facilityStatusCheck.allActions; track action.trackGuid) {
+                        <li class="list-group-item list-group-item-action" [routerLink]="action.url">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div class="fw-semibold">
+                                    @if (action.isWeather) {
+                                    <span class="fa fa-temperature-half pe-2"></span>
+                                    }
+                                    {{action.label}}
+                                </div>
+                            </div>
+                            @if (action.description) {
+                            <p class="fw-light mb-0 ms-3 small">{{action.description}}</p>
+                            }
+                        </li>
+                        }
+                    </ul>
+                </div>
+                }
                 }
             </div>
         </div>
