@@ -17,6 +17,7 @@
   </div>
 </div>
 }
+
 @if (_orderedMeterList.length > 0) {
 <div>
   <div class="d-flex w-100 justify-content-end mb-2">
@@ -29,19 +30,28 @@
         New Meter</button>
     </div>
   </div>
+
   <div class="table-responsive">
     <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
       <thead class="sortable">
         <tr>
-          <th (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField == 'name'}">Name</th>
-          <th (click)="setOrderDataField('source')" [ngClass]="{'active': _orderDataField == 'source'}">Source
+          <th class="text-center status-col">Status</th>
+          <th (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField == 'name'}">
+            Name <span class="fa ms-1" [ngClass]="getSortIcon('name')"></span>
           </th>
-          <th (click)="setOrderDataField('fuel')" [ngClass]="{'active': _orderDataField == 'fuel'}">Fuel
+          <th (click)="setOrderDataField('source')" [ngClass]="{'active': _orderDataField == 'source'}">
+            Source <span class="fa ms-1" [ngClass]="getSortIcon('source')"></span>
           </th>
-          <th (click)="setOrderDataField('scope')" [ngClass]="{'active': _orderDataField == 'scope'}">Scope
+          <th (click)="setOrderDataField('fuel')" [ngClass]="{'active': _orderDataField == 'fuel'}">
+            Fuel <span class="fa ms-1" [ngClass]="getSortIcon('fuel')"></span>
+          </th>
+          <th (click)="setOrderDataField('scope')" [ngClass]="{'active': _orderDataField == 'scope'}">
+            Scope <span class="fa ms-1" [ngClass]="getSortIcon('scope')"></span>
           </th>
           <th (click)="setOrderDataField('startingUnit')" [ngClass]="{'active': _orderDataField == 'startingUnit'}">
-            Collection Units</th>
+            Units <span class="fa ms-1" [ngClass]="getSortIcon('startingUnit')"></span>
+          </th>
+          <th class="text-nowrap">Latest Reading</th>
           @if (!copyingTable) {
           <th>Actions</th>
           }
@@ -50,16 +60,59 @@
       <tbody class="table-group-divider">
         @for (meterListItem of _orderedMeterList | slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
         _itemsPerPage; track meterListItem.meter.guid) {
-        <tr>
-          <td [ngClass]="{'invalid': meterListItem.meterStatusCheck.status != 'good'}">
-            <a (click)="selectEditMeter(meterListItem.meter)">{{meterListItem.meter.name}}</a>
-            @if (meterListItem.meterStatusCheck.status != 'good') {
-            <i class="fa fa-exclamation-triangle"></i>
+        <tr [ngClass]="{
+            'meter-row-warning': meterListItem.meterStatusCheck.status === 'warning',
+            'meter-row-error': meterListItem.meterStatusCheck.status === 'error'
+          }">
+
+          <!-- Status column -->
+          <td class="text-center align-middle status-col">
+            <span class="fa fa-fw fa-lg" [ngClass]="{
+                'fa-circle-check text-success': meterListItem.meterStatusCheck.status === 'good',
+                'fa-exclamation-triangle text-warning': meterListItem.meterStatusCheck.status === 'warning',
+                'fa-circle-xmark text-danger': meterListItem.meterStatusCheck.status === 'error'
+              }"></span>
+            @if (meterListItem.meterStatusCheck.status !== 'good') {
+            <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+              @if (meterListItem.meterStatusCheck.hasNoData) {
+              <span class="badge bg-danger issue-badge">No Data</span>
+              }
+              @if (!meterListItem.meterStatusCheck.isMeterValid) {
+              <span class="badge bg-danger issue-badge">Invalid Setup</span>
+              }
+              @if (meterListItem.meterStatusCheck.hasDuplicateEntries) {
+              <span class="badge bg-warning text-dark issue-badge">Duplicates</span>
+              }
+              @if (meterListItem.meterStatusCheck.hasNoCalendarizationMethod) {
+              <span class="badge bg-warning text-dark issue-badge">No Calend. Method</span>
+              }
+              @if (!meterListItem.meterStatusCheck.isDataCurrent && !meterListItem.meterStatusCheck.hasNoData) {
+              <span class="badge bg-warning text-dark issue-badge">Not Current</span>
+              }
+            </div>
             }
           </td>
-          <!-- <td>{{meter.meterNumber}}</td> -->
-          <td>{{meterListItem.meter.source}}</td>
-          <td>
+
+          <!-- Name column -->
+          <td class="align-middle">
+            <a class="meter-name-link fw-semibold" (click)="selectEditMeter(meterListItem.meter)">
+              {{meterListItem.meter.name}}
+            </a>
+            @for (action of meterListItem.meterStatusCheck.actions; track action.trackGuid) {
+            <p class="mb-0 mt-1 small action-description">
+              <span class="fa fa-fw me-1" [ngClass]="{
+                  'fa-circle-xmark text-danger': action.status === 'error',
+                  'fa-exclamation-triangle text-warning': action.status === 'warning'
+                }"></span>{{action.description}}
+            </p>
+            }
+          </td>
+
+          <!-- Source column -->
+          <td class="align-middle">{{meterListItem.meter.source}}</td>
+
+          <!-- Fuel column -->
+          <td class="align-middle">
             @if (meterListItem.meter.source == 'Other Fuels' || meterListItem.meter.source == 'Other Energy') {
             @if (meterListItem.meter.scope != 2) {
             {{meterListItem.meter.fuel}}
@@ -72,10 +125,14 @@
             &mdash;
             }
           </td>
-          <td>
+
+          <!-- Scope column -->
+          <td class="align-middle">
             <span [innerHTML]="meterListItem.meter.scope | scopeLabel"></span>
           </td>
-          <td>
+
+          <!-- Collection Units column -->
+          <td class="align-middle">
             @if (meterListItem.meter.scope != 2) {
             <span [innerHTML]="meterListItem.meter.startingUnit | settingsLabel"></span>
             }
@@ -88,16 +145,37 @@
             }
             }
           </td>
+
+          <!-- Latest Reading column -->
+          <td class="align-middle text-nowrap">
+            @if (meterListItem.meterStatusCheck.lastDateEntry && !meterListItem.meterStatusCheck.hasNoData) {
+            <a class="meter-data-link" (click)="navigateToMeterData(meterListItem.meter)"
+              title="View meter data">
+              <span class="fa fa-calendar-alt me-1 small"></span>
+              {{meterListItem.meterStatusCheck.lastDateEntry | date:'MMM yyyy'}}
+            </a>
+            } @else {
+            <span class="text-muted fst-italic small">No data</span>
+            }
+          </td>
+
           @if (!copyingTable) {
-          <td class="actions">
+          <!-- Actions column -->
+          <td class="actions align-middle">
             <div class="btn-group">
-              <button class="btn btn-sm btn-outline" (click)="selectEditMeter(meterListItem.meter)" title="Edit">
+              <button class="btn btn-sm btn-outline" (click)="selectEditMeter(meterListItem.meter)"
+                title="Edit meter settings">
                 <i class="fa fa-pencil"></i>
               </button>
-              <button class="btn btn-sm btn-outline" (click)="createCopy(meterListItem.meter)" title="Copy">
+              <button class="btn btn-sm btn-outline" (click)="navigateToMeterData(meterListItem.meter)"
+                title="View meter data">
+                <i class="fa fa-table"></i>
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="createCopy(meterListItem.meter)" title="Copy meter">
                 <i class="fa fa-copy"></i>
               </button>
-              <button class="btn btn-sm btn-outline" (click)="selectDeleteMeter(meterListItem.meter)" title="Delete">
+              <button class="btn btn-sm btn-outline" (click)="selectDeleteMeter(meterListItem.meter)"
+                title="Delete meter">
                 <i class="fa fa-trash"></i>
               </button>
             </div>
@@ -108,6 +186,7 @@
       </tbody>
     </table>
   </div>
+
   <div class="d-flex w-100 justify-content-between">
     <div>
       <button class="btn action-btn btn-sm" (click)="copyTable()">

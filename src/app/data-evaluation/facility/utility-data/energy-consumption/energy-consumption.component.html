@@ -5,7 +5,7 @@
           <i class="fa fa-gauge-high"></i>
           Meters
           @if (facilityStatusCheck()?.metersStatus != 'good') {
-        <i class="fa fa-exclamation-triangle"></i>
+        <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>
@@ -15,7 +15,7 @@
           <i class="fa fa-file-invoice"></i>
           {{meterListItem.meter.name}}
           @if (meterListItem.meterStatusCheck?.status != 'good') {
-        <i class="fa fa-exclamation-triangle"></i>
+        <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>

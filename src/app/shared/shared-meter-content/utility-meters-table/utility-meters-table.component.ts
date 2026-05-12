@@ -26,7 +26,8 @@ import * as _ from 'lodash';
 
 interface MetersListItem {
   meter: IdbUtilityMeter,
-  meterStatusCheck: MeterStatusCheck
+  meterStatusCheck: MeterStatusCheck,
+  meterDataUrl: string
 }
 
 type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit';
@@ -66,10 +67,12 @@ export class UtilityMetersTableComponent {
   metersList: Signal<Array<MetersListItem>> = computed(() => {
     const utilityMeters = this.meters();
     const facilityStatusCheck = this.facilityStatusCheck();
-    if (!utilityMeters || !facilityStatusCheck) return [];
+    const facility = this.selectedFacility();
+    if (!utilityMeters || !facilityStatusCheck || !facility) return [];
     return utilityMeters.map(meter => ({
       meter,
-      meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid)
+      meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid),
+      meterDataUrl: `/data-evaluation/facility/${facility.guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`
     }));
   });
 
@@ -158,6 +161,15 @@ export class UtilityMetersTableComponent {
 
   selectEditMeter(meter: IdbUtilityMeter) {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
+  }
+
+  navigateToMeterData(meter: IdbUtilityMeter) {
+    this.router.navigateByUrl(`/data-evaluation/facility/${this.selectedFacility().guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`);
+  }
+
+  getSortIcon(field: OrderMeterListField): string {
+    if (this.orderDataField() !== field) return 'fa-sort text-muted';
+    return this.orderByDirection() === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
   }
 
   async createCopy(meter: IdbUtilityMeter) {

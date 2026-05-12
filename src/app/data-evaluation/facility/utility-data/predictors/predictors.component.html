@@ -5,7 +5,7 @@
           <i class="fa fa-gauge-high"></i>
           Predictors
           @if(facilityStatusCheck()?.predictorsStatus != 'good') {
-          <i class="fa fa-exclamation-triangle"></i>
+          <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>
@@ -15,7 +15,7 @@
           <i class="fa fa-file-invoice"></i>
           {{predictorItem.predictor.name}}
           @if (predictorItem.predictorStatusCheck.status != 'good') {
-          <i class="fa fa-exclamation-triangle"></i>
+          <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>
