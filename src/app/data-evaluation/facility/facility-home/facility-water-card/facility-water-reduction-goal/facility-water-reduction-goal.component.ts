@@ -9,6 +9,8 @@ import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 
 @Component({
   selector: 'app-facility-water-reduction-goal',
@@ -21,10 +23,12 @@ export class FacilityWaterReductionGoalComponent {
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
   private router: Router = inject(Router);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   latestAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
   facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
   monthlyFacilityWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityWaterAnalysisData, { initialValue: undefined });
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
 
   latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
     const monthlyFacilityWaterAnalysisData = this.monthlyFacilityWaterAnalysisData();
@@ -63,8 +67,14 @@ export class FacilityWaterReductionGoalComponent {
       return undefined;
     }
   });
-  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.facilityHomeService.facilityStatusCheck, { initialValue: undefined });
-  
+
+  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
+    const accountStatusCheck = this.accountStatusCheck();
+    const facility = this.facility();
+    if (!accountStatusCheck || !facility) return;
+    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === facility.guid);
+  });
+
   goToAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/analysis/run-analysis');

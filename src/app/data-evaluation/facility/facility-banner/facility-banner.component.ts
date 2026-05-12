@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-facility-banner',
@@ -11,36 +12,42 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrls: ['./facility-banner.component.css'],
   standalone: false
 })
-export class FacilityBannerComponent implements OnInit {
+export class FacilityBannerComponent {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   @ViewChild('navTabs') navTabs: ElementRef;
 
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription;
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
 
-  facilityMeterData: Array<IdbUtilityMeterData>;
-  facilityMeterDataSub: Subscription;
+  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
+    const accountStatusCheck = this.accountStatusCheck();
+    const selectedFacility = this.selectedFacility();
+    if (!accountStatusCheck || !selectedFacility) return;
+    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
+  });
+
+  disableTabs: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    return facilityStatusCheck ? facilityStatusCheck.hasNoMeterData : true;
+  });
+
+  hasUtilityDataWarning: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.metersStatus != 'good' || facilityStatusCheck.predictorsStatus != 'good';
+  });
+
+  hasAnalysisWarning: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.energyAnalysisStatusCheck.status != 'good' || facilityStatusCheck.waterAnalysisStatusCheck.status != 'good';
+  });
 
   hideTabText: boolean = false;
   hideAllText: boolean = false;
-  constructor(private facilityDbService: FacilitydbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private cd: ChangeDetectorRef) { }
-
-  ngOnInit(): void {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.selectedFacility = val;
-    });
-
-    this.facilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
-      this.facilityMeterData = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
-    this.facilityMeterDataSub.unsubscribe();
-  }
 
   ngAfterViewInit() {
     this.setHideTabText();

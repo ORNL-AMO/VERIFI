@@ -1,47 +1,54 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+
+interface MetersListItem {
+  meter: IdbUtilityMeter;
+  meterStatusCheck: MeterStatusCheck;
+}
 
 @Component({
-    selector: 'app-energy-consumption',
-    templateUrl: './energy-consumption.component.html',
-    styleUrls: ['./energy-consumption.component.css'],
-    standalone: false
+  selector: 'app-energy-consumption',
+  templateUrl: './energy-consumption.component.html',
+  styleUrls: ['./energy-consumption.component.css'],
+  standalone: false
 })
-export class EnergyConsumptionComponent implements OnInit {
+export class EnergyConsumptionComponent {
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  utilityMeters: Array<IdbUtilityMeter>;
-  facilityMetersSub: Subscription;
+  utilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: undefined });
+  meterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: undefined });
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
 
-  meterDataSub: Subscription;
-  meterData: Array<IdbUtilityMeterData>;
-  facilityId: string;
-  facilitySub: Subscription;
-  constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService
-  ) { }
+  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
+    const accountStatusCheck = this.accountStatusCheck();
+    const selectedFacility = this.facility();
+    if (!accountStatusCheck || !selectedFacility) return;
+    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
+  });
 
-  ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facilityId = facility?.guid;
-    });
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.utilityMeters = facilityMeters;
-    });
-    this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(fMeterData => {
-      this.meterData = fMeterData;
-    })
-  }
+  metersList: Signal<Array<MetersListItem>> = computed(() => {
+    const utilityMeters = this.utilityMeters();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!utilityMeters || !facilityStatusCheck) return [];
+    return utilityMeters.map(meter => ({
+      meter,
+      meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid)
+    }));
+  });
 
-  ngOnDestroy() {
-    this.facilityMetersSub.unsubscribe();
-    this.meterDataSub.unsubscribe();
-    this.facilitySub.unsubscribe();
-  }
 }

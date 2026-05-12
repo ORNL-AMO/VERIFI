@@ -4,34 +4,42 @@
       <a class="nav-link" routerLink="energy-consumption" [routerLinkActive]="['active']">
         <i class="fa fa-file-pen"></i>
         Meter Management
-        @if (facility.guid | invalidMeters) {
-          <i class="fa fa-exclamation-circle"></i>
+        @if (hasMeterError()) {
+        <i class="fa fa-exclamation-triangle"></i>
         }
       </a>
     </li>
     <li class="nav-item">
       <a class="nav-link" routerLink="monthly-meter-data" [routerLinkActive]="['active']">
         <i class="fa fa-calendar-days"></i>
-      Monthly Data</a>
+        Monthly Data
+        @if (hasMonthlyDataError()) {
+        <i class="fa fa-exclamation-triangle"></i>
+        }
+      </a>
     </li>
     <li class="nav-item">
       <a class="nav-link" routerLink="meter-groups" [routerLinkActive]="['active']">
         <i class="fa fa-layer-group"></i>
-      Analysis Groups</a>
+        Analysis Groups
+        @if (hasMeterGroupsError()) {
+        <i class="fa fa-exclamation-triangle"></i>
+        }
+      </a>
     </li>
     <li class="nav-item">
       <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">
         <i class="fa fa-boxes-stacked"></i>
         Predictors
-        @if (predictorsNeedUpdate) {
-          <i class="fa fa-exclamation-triangle weather-update"></i>
+        @if (hasPredictorError()) {
+        <i class="fa fa-exclamation-triangle"></i>
         }
       </a>
     </li>
   </ul>
   <div>
     <button class="btn action-btn m-0" (click)="openExportModal()" title="Export Data"><span
-    class="fa fa-download"></span></button>
+        class="fa fa-download"></span></button>
   </div>
 </div>
 

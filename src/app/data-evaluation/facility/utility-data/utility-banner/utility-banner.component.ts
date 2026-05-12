@@ -1,14 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
-import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -17,59 +15,61 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
   styleUrls: ['./utility-banner.component.css'],
   standalone: false
 })
-export class UtilityBannerComponent implements OnInit {
+export class UtilityBannerComponent {
+  private sharedDataService: SharedDataService = inject(SharedDataService);
+  private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  modalOpen: boolean;
-  modalOpenSub: Subscription;
+  modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen, { initialValue: false });
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
 
-  facility: IdbFacility;
-  facilitySub: Subscription;
+  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
+    const accountStatusCheck = this.accountStatusCheck();
+    const selectedFacility = this.facility();
+    if (!accountStatusCheck || !selectedFacility) return;
+    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
+  });
 
-  predictorDataSub: Subscription;
-  meterDataSub: Subscription;
-  predictorsNeedUpdate: boolean;
-  predictorTimer: any;
-  meterData: Array<IdbUtilityMeterData>;
+  hasPredictorError: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.predictorsStatus != 'good';
+  });
+
+  hasMeterError: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.metersStatus != 'good';
+  });
+
+  hasMonthlyDataError: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.metersStatusChecks.some(msc => {
+      return msc.hasNoCalendarizationMethod
+    });
+  });
+
+  hasMeterGroupsError: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.hasNoMeterGroups;
+  });
+
   includeWeatherData: boolean = false;
   showExportModal: boolean = false;
-  loadingSub: Subscription;
-  constructor(private sharedDataService: SharedDataService,
-    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service, private facilityDbService: FacilitydbService,
-    private predictorDataHelperService: PredictorDataHelperService,
-    private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private loadingService: LoadingService
-  ) { }
-
-  ngOnInit(): void {
-    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
-      this.modalOpen = val;
-    });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.facility = val;
-      this.setPredictorsNeedUpdate();
-    });
-    this.predictorDataSub = this.predictorDataDbService.accountPredictorData.subscribe(val => {
-      this.setPredictorsNeedUpdate();
-    });
-    this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.meterData = val;
-      this.setPredictorsNeedUpdate();
-    });
-    this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+  constructor() {
+    effect(() => {
+      const context = this.navigationAfterLoading();
       if (context === 'export-facilities-to-excel') {
         this.exportToExcelTemplateV3Service.triggerExportDownload();
         this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.modalOpenSub.unsubscribe();
-    this.facilitySub.unsubscribe();
-    this.predictorDataSub.unsubscribe();
-    this.meterDataSub.unsubscribe();
-    this.loadingSub.unsubscribe();
   }
 
   openExportModal() {
@@ -87,18 +87,18 @@ export class UtilityBannerComponent implements OnInit {
     this.loadingService.setTitle('Exporting Facility');
     this.exportToExcelTemplateV3Service.setExportFacilityDataMessages();
     this.loadingService.setCurrentLoadingIndex(0);
-    this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, this.facility.guid);
+    this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData, this.facility()?.guid);
   }
 
-  setPredictorsNeedUpdate() {
-    if (this.predictorTimer) {
-      clearTimeout(this.predictorTimer)
-    }
-    this.predictorTimer = setTimeout(() => {
-      let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(this.facility);
-      this.predictorsNeedUpdate = (predictorsNeedUpdate.length > 0);
-    }, 500);
-  }
+  // setPredictorsNeedUpdate() {
+  //   if (this.predictorTimer) {
+  //     clearTimeout(this.predictorTimer)
+  //   }
+  //   this.predictorTimer = setTimeout(() => {
+  //     let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(this.facility);
+  //     this.predictorsNeedUpdate = (predictorsNeedUpdate.length > 0);
+  //   }, 500);
+  // }
 }
 
 

@@ -24,7 +24,7 @@ export class FacilityHomeService {
   calculatingWater: BehaviorSubject<boolean | 'error'>;
   calculatingOverview: BehaviorSubject<boolean | 'error'>;
   facilityOverviewData: BehaviorSubject<FacilityOverviewData>;
-  facilityStatusCheck: BehaviorSubject<FacilityStatusCheck>;
+  // facilityStatusCheck: BehaviorSubject<FacilityStatusCheck>;
   constructor(private analysisDbService: AnalysisDbService) {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyFacilityEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
@@ -38,7 +38,7 @@ export class FacilityHomeService {
     this.facilityOverviewData = new BehaviorSubject<FacilityOverviewData>(undefined);
     this.latestEnergyAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
     this.latestWaterAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
-    this.facilityStatusCheck = new BehaviorSubject<FacilityStatusCheck>(undefined);
+    // this.facilityStatusCheck = new BehaviorSubject<FacilityStatusCheck>(undefined);
   }
 
   setLatestEnergyAnalysisItem(selectedFacility: IdbFacility) {

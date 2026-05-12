@@ -122,3 +122,11 @@
 a.nav-link .fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa-exclamation-circle{
     color: red;
 }
+
+
+.banner a.nav-link:not(.active) .fa.fa-exclamation-triangle{
+    color: yellow !important;;
+}
+.banner a.nav-link.active .fa.fa-exclamation-triangle{
+    color: black !important;
+}
