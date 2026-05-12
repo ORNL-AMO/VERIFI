@@ -35,6 +35,7 @@ export class FacilityMeterComponent {
   utilityMeter: IdbUtilityMeter;
   meterForm: FormGroup;
   showDeleteMeter: boolean = false;
+  meterDataExists: boolean = false;
 
   async handleKeyDown(event: KeyboardEvent) {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
@@ -44,7 +45,7 @@ export class FacilityMeterComponent {
       }
     }
   }
-  
+
   constructor(private activatedRoute: ActivatedRoute,
     private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
@@ -73,6 +74,29 @@ export class FacilityMeterComponent {
       if (this.utilityMeter) {
         this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.utilityMeter);
+        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.utilityMeter.guid);
+        if (meterData.length != 0 && this.meterForm.valid) {
+          this.meterDataExists = true;
+          this.meterForm.controls.source.disable();
+          this.meterForm.controls.startingUnit.disable();
+          this.meterForm.controls.phase.disable();
+          this.meterForm.controls.fuel.disable();
+          this.meterForm.controls.heatCapacity.disable();
+          this.meterForm.controls.energyUnit.disable();
+
+          this.meterForm.controls.scope.disable();
+
+          this.meterForm.controls.waterIntakeType.disable();
+          this.meterForm.controls.waterDischargeType.disable();
+
+          this.meterForm.controls.vehicleCategory.disable();
+          this.meterForm.controls.vehicleType.disable();
+          this.meterForm.controls.vehicleCollectionType.disable();
+          this.meterForm.controls.vehicleCollectionUnit.disable();
+          this.meterForm.controls.vehicleFuel.disable();
+          this.meterForm.controls.vehicleFuelEfficiency.disable();
+          this.meterForm.controls.vehicleDistanceUnit.disable();
+        }
       } else {
         this.goToMeterList();
       }
