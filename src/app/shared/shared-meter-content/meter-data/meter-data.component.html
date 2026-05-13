@@ -1,2 +1,5 @@
-<h4>{{selectedMeter.name}} Meter Readings <span class="badge float-end" [ngStyle]="{'background-color': selectedMeter.source | meterSourceColor}">{{selectedMeter.source}}</span></h4>
+@let _selectedMeter = selectedMeter();
+
+<h4>{{_selectedMeter.name}} Meter Readings <span class="badge float-end"
+        [ngStyle]="{'background-color': _selectedMeter.source | meterSourceColor}">{{_selectedMeter.source}}</span></h4>
 <router-outlet></router-outlet>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -214,5 +214,12 @@ export class MeterDataTableComponent {
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedMeter.facilityId + '/utility/energy-consumption/energy-source/edit-meter/' + this.selectedMeter.guid);
     }
+  }
+
+
+
+  checkedItemGuids: WritableSignal<Set<string>> = signal(new Set<string>());
+  setCheckedItemGuids(valsFromChildren: Set<string>) {
+    this.checkedItemGuids.set(valsFromChildren);
   }
 }
