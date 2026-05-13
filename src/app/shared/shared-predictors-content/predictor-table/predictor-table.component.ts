@@ -1,6 +1,6 @@
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -18,7 +18,6 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getGUID, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
-import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
@@ -46,7 +45,6 @@ export class PredictorTableComponent {
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
-  private predictorDataHelperService: PredictorDataHelperService = inject(PredictorDataHelperService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
@@ -90,25 +88,6 @@ export class PredictorTableComponent {
   displayDeletePredictor: boolean = false;
   selectedCopyFacilityGuid: string;
   displayCopyModal: boolean = false;
-  constructor(
-  ) {
-
-  }
-
-  // ngOnInit() {
-  //   // this.facilities = this.facilitydbService.accountFacilities.getValue();
-  //   // this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
-  //   //   this.selectedFacility = facility;
-  //   // });
-  //   // this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
-  //   //   this.setPredictors(val);
-  //   // });
-  // }
-
-  // ngOnDestroy() {
-  //   this.facilityPredictorsSub.unsubscribe();
-  //   this.selectedFacilitySub.unsubscribe();
-  // }
 
   selectDelete(predictor: IdbPredictor) {
     this.predictorToDelete = predictor;

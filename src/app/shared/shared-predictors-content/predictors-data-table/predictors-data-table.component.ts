@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
-import { filter, firstValueFrom, map, startWith, Subscription } from 'rxjs';
+import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
@@ -119,6 +119,21 @@ export class PredictorsDataTableComponent {
     return displayedItems.some(item => checkedIds.has(item.guid));
   });
 
+  orderDataField: WritableSignal<OrderDataField> = signal('date');
+  orderByDirection: WritableSignal<'asc' | 'desc'> = signal('desc');
+  filterErrors: WritableSignal<boolean> = signal(false);
+  checkedItemGuids: WritableSignal<Set<string>> = signal(new Set<string>());
+
+  predictorDataToDelete: IdbPredictorData;
+  inDataManagement: boolean;
+  currentPageNumber: number = 1;
+  allChecked: boolean = false;
+  showBulkDelete: boolean = false;
+
+  ngOnInit() {
+    this.inDataManagement = this.router.url.includes('data-management');
+  }
+
   isChecked(guid: string): boolean {
     return this.checkedItemGuids().has(guid);
   }
@@ -132,27 +147,6 @@ export class PredictorsDataTableComponent {
     const orderedData = this.orderedPredictorData();
     const displayedItems = orderedData.slice(((this.currentPageNumber - 1) * this.itemsPerPage()), (this.currentPageNumber * this.itemsPerPage()));
     this.allChecked = displayedItems.every(item => this.checkedItemGuids().has(item.guid));
-  }
-
-  orderDataField: WritableSignal<OrderDataField> = signal('date');
-  orderByDirection: WritableSignal<'asc' | 'desc'> = signal('desc');
-  filterErrors: WritableSignal<boolean> = signal(false);
-  checkedItemGuids: WritableSignal<Set<string>> = signal(new Set<string>());
-
-
-  predictorDataToDelete: IdbPredictorData;
-  inDataManagement: boolean;
-  currentPageNumber: number = 1;
-  allChecked: boolean = false;
-  showBulkDelete: boolean = false;
-
-  constructor(
-  ) {
-
-  }
-
-  ngOnInit() {
-    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   async addPredictorEntry() {
