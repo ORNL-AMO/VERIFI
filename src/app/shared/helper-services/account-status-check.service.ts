@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { debounceTime, map } from 'rxjs/operators';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -20,6 +21,8 @@ export class AccountStatusCheckService implements OnDestroy {
 
     accountStatusCheck: BehaviorSubject<AccountStatusCheck | undefined> = new BehaviorSubject<AccountStatusCheck | undefined>(undefined);
 
+    selectedFacilityStatusCheck$: Observable<FacilityStatusCheck | undefined>;
+
     private sub: Subscription;
 
     constructor(
@@ -34,6 +37,15 @@ export class AccountStatusCheckService implements OnDestroy {
         private analysisDbService: AnalysisDbService,
         private analysisValidationService: AnalysisValidationService
     ) {
+        this.selectedFacilityStatusCheck$ = combineLatest([
+            this.accountStatusCheck,
+            this.facilityDbService.selectedFacility
+        ]).pipe(
+            map(([accountCheck, facility]) =>
+                accountCheck?.facilityStatusChecks.find(fc => fc.facility.guid === facility?.guid)
+            )
+        );
+
         this.sub = combineLatest([
             this.accountDbService.selectedAccount,
             this.facilityDbService.accountFacilities,
@@ -62,7 +74,7 @@ export class AccountStatusCheckService implements OnDestroy {
             if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems || !analysisSetupErrors) {
                 return;
             }
-            if(meters.length != calanderizedMeters.length){
+            if (meters.length != calanderizedMeters.length) {
                 return;
             }
             const statusCheck = new AccountStatusCheck(
@@ -84,4 +96,5 @@ export class AccountStatusCheckService implements OnDestroy {
     ngOnDestroy() {
         this.sub.unsubscribe();
     }
+
 }

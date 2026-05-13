@@ -38,6 +38,9 @@
                         }"></span>
                         <div class="flex-grow-1">
                             <strong>{{predictorCheck.predictorName}}</strong>
+                            @if (predictorCheck.latestEntryDate && !predictorCheck.hasNoData) {
+                            <span class="text-muted ms-2 small">({{predictorCheck.latestEntryDate | date:'MMMM yyyy'}})</span>
+                            }
                             @if (predictorCheck.hasNoData) {
                             <span class="badge bg-danger ms-2">No Data</span>
                             }
@@ -45,13 +48,13 @@
                             <span class="badge bg-danger ms-2">Duplicate Entries</span>
                             }
                             @if (predictorCheck.hasMissingEntries) {
-                            <span class="badge bg-warning text-dark ms-2">Missing Entries</span>
+                            <span class="badge bg-danger ms-2">Missing Entries</span>
                             }
                             @if (!predictorCheck.isDataCurrent && !predictorCheck.hasNoData) {
                             <span class="badge bg-warning text-dark ms-2">Data Not Current</span>
                             }
-                            @if (predictorCheck.latestEntryDate && !predictorCheck.hasNoData) {
-                            <span class="text-muted ms-2 small">({{predictorCheck.latestEntryDate | date:'MMMM yyyy'}})</span>
+                            @if(predictorCheck.hasWeatherDataWarning) {
+                            <span class="badge bg-warning text-dark ms-2">Weather Data Warning</span>
                             }
                         </div>
                         <span class="fa fa-chevron-right text-muted small"></span>

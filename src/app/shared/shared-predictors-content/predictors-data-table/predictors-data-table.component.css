@@ -41,3 +41,11 @@
 .btn .fa{
     color: inherit;
 }
+
+.h-fit-content {
+  height: fit-content;
+} 
+
+.badge.bg-danger {
+  font-size: 1rem;
+}

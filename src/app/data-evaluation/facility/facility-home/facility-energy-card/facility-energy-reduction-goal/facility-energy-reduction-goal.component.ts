@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-facility-energy-reduction-goal',
@@ -21,10 +22,12 @@ export class FacilityEnergyReductionGoalComponent {
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
   private router: Router = inject(Router);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   latestAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
   facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
   monthlyFacilityEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityEnergyAnalysisData, { initialValue: undefined });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
     const monthlyFacilityEnergyAnalysisData = this.monthlyFacilityEnergyAnalysisData();
@@ -49,7 +52,7 @@ export class FacilityEnergyReductionGoalComponent {
   percentTowardsGoal: Signal<number> = computed(() => {
     const percentSavings = this.percentSavings();
     const percentGoal = this.percentGoal();
-    if(percentGoal === 0){
+    if (percentGoal === 0) {
       return 0;
     }
     let percentTowardsGoal = (percentSavings / percentGoal) * 100;
@@ -66,8 +69,6 @@ export class FacilityEnergyReductionGoalComponent {
       return undefined;
     }
   });
-
-  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.facilityHomeService.facilityStatusCheck, { initialValue: undefined });
 
   goToAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());

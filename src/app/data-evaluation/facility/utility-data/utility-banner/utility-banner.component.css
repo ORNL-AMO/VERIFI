@@ -36,10 +36,6 @@ li.disabled:hover .navigation-warning{
     color: #ff6000;
 }
 
-.banner a.nav-link:not(.active) .fa.fa-exclamation-triangle.weather-update{
-    color: yellow;
-}
-
 .nav-link{
     white-space: nowrap;
 }

@@ -1,181 +1,272 @@
-@if (facilityPredictors.length != 0) {
-  <div class="d-flex w-100 justify-content-end mb-2">
-    @if (hasUpdateWarning) {
-      <div class="alert alert-warning small mb-0 p-1">
-        <span>
-          <i class="fa fa-exclamation-triangle"></i>
-          Latest Meter Reading: {{hasUpdateWarning| date:'MMM, yyyy'}}
-        </span>
-      </div>
-    }
-    <div class="ps-2">
-      <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-    </div>
-    <div class="ps-2">
-      <button class="btn action-btn" (click)="addPredictor()"><i class="fa fa-plus"></i> Add
-    New Predictor</button>
+@let _facilityPredictors = facilityPredictors();
+@let _standardPredictors = standardPredictors();
+@let _degreeDayPredictors = degreeDayPredictors();
+
+@if (_facilityPredictors.length != 0) {
+<div class="d-flex w-100 justify-content-end mb-2">
+  <div class="ps-2">
+    <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+  </div>
+  <div class="ps-2">
+    <button class="btn action-btn" (click)="addPredictor()"><i class="fa fa-plus"></i> Add
+      New Predictor</button>
   </div>
 </div>
 }
 
-@if (standardPredictors.length != 0) {
-  <h5>Standard</h5>
-  <div class="table-responsive">
-    <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
-      <thead class="sortable">
-        <tr>
-          <th>
-            Name
-          </th>
-          <th>
-            Units
-          </th>
-          <th class="is-production">
-            Is Production?
-          </th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody class="table-group-divider">
-        @for (predictorTableItem of standardPredictors; track predictorTableItem) {
-          <tr>
-            <td>
-              <a (click)="selectEditPredictor(predictorTableItem.predictor)">
-              {{predictorTableItem.predictor.name}}</a>
-            </td>
-            <td>
-              {{predictorTableItem.predictor.unit}}
-            </td>
-            <td>
-              @if (predictorTableItem.predictor.production) {
-                <span>Yes</span>
-              }
-              @if (!predictorTableItem.predictor.production) {
-                <span>No</span>
-              }
-            </td>
-            <td class="actions">
-              <div class="btn-group">
-                <button class="btn btn-sm btn-outline"
-                  (click)="selectEditPredictor(predictorTableItem.predictor)" title="Edit">
-                  <i class="fa fa-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-outline" (click)="selectDelete(predictorTableItem.predictor)"
-                  title="Delete">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+@if (_standardPredictors.length != 0) {
+<h5>Standard</h5>
+<div class="table-responsive">
+  <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
+    <thead class="sortable">
+      <tr>
+        <th class="text-center status-col">Status</th>
+        <th>Name</th>
+        <th>Units</th>
+        <th class="is-production">Is Production?</th>
+        <th class="text-nowrap">Latest Entry</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      @for (predictorTableItem of _standardPredictors; track predictorTableItem) {
+      <tr [ngClass]="{
+          'predictor-row-warning': predictorTableItem.statusCheck?.status === 'warning',
+          'predictor-row-error': predictorTableItem.statusCheck?.status === 'error'
+        }">
+        <!-- Status column -->
+        <td class="text-center align-middle status-col">
+          <span class="fa fa-fw fa-lg" [ngClass]="{
+              'fa-circle-check text-success': predictorTableItem.statusCheck?.status === 'good',
+              'fa-exclamation-triangle text-warning': predictorTableItem.statusCheck?.status === 'warning',
+              'fa-circle-xmark text-danger': predictorTableItem.statusCheck?.status === 'error'
+            }"></span>
+          @if (predictorTableItem.statusCheck?.status !== 'good') {
+          <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+            @if (predictorTableItem.statusCheck?.hasNoData) {
+            <span class="badge bg-danger issue-badge">No Data</span>
+            }
+            @if (predictorTableItem.statusCheck?.hasDuplicateEntries) {
+            <span class="badge bg-danger issue-badge">Duplicates</span>
+            }
+            @if (predictorTableItem.statusCheck?.hasMissingEntries) {
+            <span class="badge bg-danger issue-badge">Missing Entries</span>
+            }
+            @if (!predictorTableItem.statusCheck?.isDataCurrent && !predictorTableItem.statusCheck?.hasNoData) {
+            <span class="badge bg-warning text-dark issue-badge">Not Current</span>
+            }
+          </div>
+          }
+        </td>
+        <!-- Name column -->
+        <td class="align-middle">
+          <a class="predictor-name-link fw-semibold" (click)="selectEditPredictor(predictorTableItem.predictor)">
+            {{predictorTableItem.predictor.name}}
+          </a>
+          @for (action of predictorTableItem.statusCheck?.actions; track action.trackGuid) {
+          <p class="mb-0 mt-1 small action-description">
+            <span class="fa fa-fw me-1" [ngClass]="{
+                'fa-circle-xmark text-danger': action.status === 'error',
+                'fa-exclamation-triangle text-warning': action.status === 'warning'
+              }"></span>{{action.description}}
+          </p>
+          }
+        </td>
+        <td class="align-middle">{{predictorTableItem.predictor.unit}}</td>
+        <td class="align-middle">
+          @if (predictorTableItem.predictor.production) {
+          <span>Yes</span>
+          }
+          @if (!predictorTableItem.predictor.production) {
+          <span>No</span>
+          }
+        </td>
+        <!-- Latest Entry column -->
+        <td class="align-middle text-nowrap">
+          @if (predictorTableItem.statusCheck?.latestEntryDate && !predictorTableItem.statusCheck?.hasNoData) {
+          <a class="predictor-data-link" (click)="navigateToPredictorData(predictorTableItem.predictor)"
+            title="View predictor data">
+            <span class="fa fa-calendar-alt me-1 small"></span>
+            {{predictorTableItem.statusCheck.latestEntryDate | date:'MMM yyyy'}}
+          </a>
+          } @else {
+          <span class="text-muted fst-italic small">No data</span>
+          }
+        </td>
+        <td class="actions align-middle">
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline" (click)="selectEditPredictor(predictorTableItem.predictor)"
+              title="Edit predictor">
+              <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="navigateToPredictorData(predictorTableItem.predictor)"
+              title="View predictor data">
+              <i class="fa fa-table"></i>
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="selectDelete(predictorTableItem.predictor)" title="Delete">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
 }
 
 
 
-@if (degreeDayPredictors.length != 0) {
-  @if (standardPredictors.length != 0) {
-    <hr>
-    }
-    <h5><span class="fa fa-temperature-half pe-1"></span>Calculated Weather Data</h5>
-    @if (hasWeatherDataWarning) {
-      <div class="alert alert-warning text-center">
-        <span class="fa fa-exclamation-circle"></span> Indicates that one or more predictor entries associated with this
-        predictor was calculated off of weather readings with gaps of twelve hours or more. The data may not be
-        accurate. For closer inspection of that weather station click the <span class="fa fa-thermometer-half"></span>
-        button. It may be best to choose a different weather station
-        to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
-        area of this facility.
-      </div>
-    }
-    <div class="table-responsive">
-      <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
-        <thead class="sortable">
-          <tr>
-            <th>
-              Name
-            </th>
-            <th>
-              Type
-            </th>
-            <th>
-              Threshold
-            </th>
-            <th>
-              Weather Station
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody class="table-group-divider">
-          @for (predictorTableItem of degreeDayPredictors; track predictorTableItem) {
-            <tr>
-              <td>
-                <a (click)="selectEditPredictor(predictorTableItem.predictor)">
-                {{predictorTableItem.predictor.name}}</a>
-              </td>
-              <td>
-                @if (predictorTableItem.predictor.weatherDataType == 'HDD') {
-                  Heating
-                }
-                @if (predictorTableItem.predictor.weatherDataType == 'CDD') {
-                  Cooling
-                }
-              </td>
-              <td>
-                @if (predictorTableItem.predictor.weatherDataType == 'HDD') {
-                  {{predictorTableItem.predictor.heatingBaseTemperature}} &#8457;
-                }
-                @if (predictorTableItem.predictor.weatherDataType == 'CDD') {
-                  {{predictorTableItem.predictor.coolingBaseTemperature}} &#8457;
-                }
-              </td>
-              <td>
-                @if (predictorTableItem.predictor.weatherDataWarning) {
-                  <span class="fa fa-exclamation-circle">
-                  </span>
-                }
-                {{predictorTableItem.predictor.weatherStationName}}
-              </td>
-              <td class="actions">
-                <div class="btn-group">
-                  <button class="btn btn-sm btn-outline"
-                    (click)="selectEditPredictor(predictorTableItem.predictor)" title="Edit">
-                    <i class="fa fa-pencil"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline" (click)="selectDelete(predictorTableItem.predictor)"
-                    title="Delete">
-                    <i class="fa fa-trash"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline"
-                    (click)="viewWeatherData(predictorTableItem.predictor)" title="View Weather Data">
-                    <i class="fa fa-temperature-half"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
+@if (_degreeDayPredictors.length != 0) {
+@if (_standardPredictors.length != 0) {
+<hr>
+}
+<h5><span class="fa fa-temperature-half pe-1"></span>Calculated Weather Data</h5>
+@if (hasWeatherDataWarning()) {
+<div class="alert alert-warning text-center">
+  <span class="fa fa-exclamation-triangle"></span> "Weather Gap" Indicates that one or more predictor entries associated
+  with this
+  predictor was calculated off of weather readings with gaps of twelve hours or more. The data may not be
+  accurate. For closer inspection of that weather station click the <span class="fa fa-thermometer-half"></span>
+  button. It may be best to choose a different weather station
+  to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
+  area of this facility.
+</div>
+}
+<div class="table-responsive">
+  <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
+    <thead class="sortable">
+      <tr>
+        <th class="text-center status-col">Status</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Threshold</th>
+        <th>Weather Station</th>
+        <th class="text-nowrap">Latest Entry</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+      @for (predictorTableItem of _degreeDayPredictors; track predictorTableItem) {
+      <tr [ngClass]="{
+          'predictor-row-warning': predictorTableItem.statusCheck?.status === 'warning',
+          'predictor-row-error': predictorTableItem.statusCheck?.status === 'error'
+        }">
+        <!-- Status column -->
+        <td class="text-center align-middle status-col">
+          <span class="fa fa-fw fa-lg" [ngClass]="{
+              'fa-circle-check text-success': predictorTableItem.statusCheck?.status === 'good',
+              'fa-exclamation-triangle text-warning': predictorTableItem.statusCheck?.status === 'warning',
+              'fa-circle-xmark text-danger': predictorTableItem.statusCheck?.status === 'error'
+            }"></span>
+          @if (predictorTableItem.statusCheck?.status !== 'good') {
+          <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+            @if (predictorTableItem.statusCheck?.hasNoData) {
+            <span class="badge bg-danger issue-badge">No Data</span>
+            }
+            @if (predictorTableItem.statusCheck?.hasDuplicateEntries) {
+            <span class="badge bg-danger issue-badge">Duplicates</span>
+            }
+            @if (predictorTableItem.statusCheck?.hasMissingEntries) {
+            <span class="badge bg-danger issue-badge">Missing Entries</span>
+            }
+            @if (!predictorTableItem.statusCheck?.isDataCurrent && !predictorTableItem.statusCheck?.hasNoData) {
+            <span class="badge bg-warning text-dark issue-badge">Not Current</span>
+            }
+            @if (predictorTableItem.statusCheck?.hasWeatherDataWarning) {
+            <span class="badge bg-warning text-dark issue-badge">Weather Gap</span>
+            }
+          </div>
           }
-        </tbody>
-      </table>
-    </div>
-  }
+        </td>
+        <!-- Name column -->
+        <td class="align-middle">
+          <a class="predictor-name-link fw-semibold" (click)="selectEditPredictor(predictorTableItem.predictor)">
+            {{predictorTableItem.predictor.name}}
+          </a>
+          @for (action of predictorTableItem.statusCheck?.actions; track action.trackGuid) {
+          <p class="mb-0 mt-1 small action-description">
+            <span class="fa fa-fw me-1" [ngClass]="{
+                'fa-circle-xmark text-danger': action.status === 'error',
+                'fa-exclamation-triangle text-warning': action.status === 'warning'
+              }"></span>{{action.description}}
+          </p>
+          }
+        </td>
+        <td class="align-middle">
+          @if (predictorTableItem.predictor.weatherDataType == 'HDD') {
+          Heating
+          }
+          @if (predictorTableItem.predictor.weatherDataType == 'CDD') {
+          Cooling
+          }
+        </td>
+        <td class="align-middle">
+          @if (predictorTableItem.predictor.weatherDataType == 'HDD') {
+          {{predictorTableItem.predictor.heatingBaseTemperature}} &#8457;
+          }
+          @if (predictorTableItem.predictor.weatherDataType == 'CDD') {
+          {{predictorTableItem.predictor.coolingBaseTemperature}} &#8457;
+          }
+        </td>
+        <td class="align-middle">
+          @if (predictorTableItem.predictor.weatherDataWarning) {
+          <span class="fa fa-exclamation-triangle text-warning me-1"></span>
+          }
+          {{predictorTableItem.predictor.weatherStationName}}
+        </td>
+        <!-- Latest Entry column -->
+        <td class="align-middle text-nowrap">
+          @if (predictorTableItem.statusCheck?.latestEntryDate && !predictorTableItem.statusCheck?.hasNoData) {
+          <a class="predictor-data-link" (click)="navigateToPredictorData(predictorTableItem.predictor)"
+            title="View predictor data">
+            <span class="fa fa-calendar-alt me-1 small"></span>
+            {{predictorTableItem.statusCheck.latestEntryDate | date:'MMM yyyy'}}
+          </a>
+          } @else {
+          <span class="text-muted fst-italic small">No data</span>
+          }
+        </td>
+        <td class="actions align-middle">
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline" (click)="selectEditPredictor(predictorTableItem.predictor)"
+              title="Edit predictor">
+              <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="navigateToPredictorData(predictorTableItem.predictor)"
+              title="View predictor data">
+              <i class="fa fa-table"></i>
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="selectDelete(predictorTableItem.predictor)" title="Delete">
+              <i class="fa fa-trash"></i>
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="viewWeatherData(predictorTableItem.predictor)"
+              title="View Weather Data">
+              <i class="fa fa-temperature-half"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+}
 
-  @if (facilityPredictors.length == 0) {
-    <div class="text-center mt-5 no-meters">
-      <h5>No predictors found for this facility.</h5>
-      <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple predictors from
+@if (_facilityPredictors.length == 0) {
+<div class="text-center mt-5 no-meters">
+  <h5>No predictors found for this facility.</h5>
+  <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple predictors from
     excel.</p>
-    <div class="d-flex w-100 justify-content-center">
-      <div class="pe-1">
-        <button class="btn action-btn" (click)="addPredictor()"><i class="fa fa-plus"></i> Add New Predictor</button>
-      </div>
-      <div class="ps-1">
-        <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-      </div>
+  <div class="d-flex w-100 justify-content-center">
+    <div class="pe-1">
+      <button class="btn action-btn" (click)="addPredictor()"><i class="fa fa-plus"></i> Add New Predictor</button>
+    </div>
+    <div class="ps-1">
+      <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
   </div>
+</div>
 }
 
 <div [ngClass]="{'windowOverlay': displayDeletePredictor || displayCopyModal}"></div>
@@ -187,15 +278,15 @@
   </div>
   <div class="popup-body">
     @if (predictorUsedGroupIds.length == 0) {
-      <p>WARNING:
+    <p>WARNING:
       Are you sure you want to delete "{{predictorToDelete?.name}}"? This cannot be undone.</p>
     }
     @if (predictorUsedGroupIds.length != 0) {
-      <p class="alert alert-danger">
-        WARNING: This predictor is used in an analysis for this facility. Deleting this predictor will alter this
-        analysis.
-        Are you sure you want to delete "{{predictorToDelete?.name}}"? This cannot be undone.
-      </p>
+    <p class="alert alert-danger">
+      WARNING: This predictor is used in an analysis for this facility. Deleting this predictor will alter this
+      analysis.
+      Are you sure you want to delete "{{predictorToDelete?.name}}"? This cannot be undone.
+    </p>
     }
   </div>
   <div class="saveCancel popup-footer text-end">
@@ -213,8 +304,10 @@
     <form>
       <label>Facility To Create Copy</label>
       <select class="form-select" name="selectedCopyFacilityGuid" [(ngModel)]="selectedCopyFacilityGuid">
-        @for (facility of facilities; track facility) {
-          <option [ngValue]="facility.guid">{{facility.name}}</option>
+        @for (facility of facilities(); track facility) {
+        @if(facility.guid != predictorToCopy.facilityId){
+        <option [ngValue]="facility.guid">{{facility.name}}</option>
+        }
         }
         <option [ngValue]="undefined"></option>
       </select>
@@ -225,7 +318,7 @@
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelCopy()">Cancel</button>
-    <button class="btn btn-success" [disabled]="selectedCopyFacilityGuid == undefined"
-    (click)="confirmCopy()">Create Copy</button>
+    <button class="btn btn-success" [disabled]="selectedCopyFacilityGuid == undefined" (click)="confirmCopy()">Create
+      Copy</button>
   </div>
 </div>

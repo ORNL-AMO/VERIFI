@@ -10,11 +10,14 @@ export class PredictorStatusCheck {
     predictorName: string;
     hasDuplicateEntries: boolean;
     hasMissingEntries: boolean;
-    missingEntryMonths: Array<{ month: number, year: number }>;
+    hasWeatherDataWarning: boolean;
+    missingEntryMonths: Array<{ month: number, year: number, date: Date }>;
+    duplicateEntryMonths: Array<{ month: number, year: number, date: Date }>;
     latestEntryDate: Date;
     hasNoData: boolean;
     isDataCurrent: boolean;
     actions: Array<StatusCheckAction>;
+    latestFacilityEntryDate: Date | undefined;
 
     constructor(
         predictor: IdbPredictor,
@@ -23,11 +26,15 @@ export class PredictorStatusCheck {
     ) {
         this.predictorId = predictor.guid;
         this.predictorName = predictor.name;
+        if (facilityLatestEntry) {
+            this.latestFacilityEntryDate = new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1);
+        }
         this.missingEntryMonths = [];
         const predictorReadings: Array<IdbPredictorData> = predictorData.filter(data => data.predictorId === predictor.guid);
         this.hasNoData = predictorReadings.length === 0;
         this.checkEntries(predictorReadings);
         this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
+        this.setHasWeatherDataWarning(predictor, predictorReadings);
         this.setStatus();
         this.setActions(predictor, facilityLatestEntry);
     }
@@ -51,6 +58,13 @@ export class PredictorStatusCheck {
             }
         });
         this.hasDuplicateEntries = _.some(monthYearCounts, (count: number): boolean => count > 1);
+        this.duplicateEntryMonths = [];
+        for (let key in monthYearCounts) {
+            if (monthYearCounts[key] > 1) {
+                let [month, year] = key.split('-').map(num => parseInt(num));
+                this.duplicateEntryMonths.push({ month, year, date: new Date(year, month - 1, 1) });
+            }
+        }
 
         //check for missing months between first and last entry
         let firstEntry = _.minBy(predictorData, (data: IdbPredictorData) => new Date(data.year, data.month - 1));
@@ -64,7 +78,7 @@ export class PredictorStatusCheck {
             for (let month = startMonth; month <= endMonth; month++) {
                 let key: string = `${month}-${year}`;
                 if (!monthYearSet.has(key)) {
-                    this.missingEntryMonths.push({ month, year });
+                    this.missingEntryMonths.push({ month, year, date: new Date(year, month - 1, 1) });
                 }
             }
         }
@@ -82,7 +96,7 @@ export class PredictorStatusCheck {
     private setStatus() {
         if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries) {
             this.status = 'error';
-        } else if (!this.isDataCurrent) {
+        } else if (!this.isDataCurrent || this.hasWeatherDataWarning) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -123,5 +137,13 @@ export class PredictorStatusCheck {
     private monthLabel(month: number, year: number): string {
         const date = new Date(year, month - 1, 1);
         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    private setHasWeatherDataWarning(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
+        if (predictor.predictorType !== 'Weather') {
+            this.hasWeatherDataWarning = false;
+            return;
+        }
+        this.hasWeatherDataWarning = predictorData.some(data => data.weatherDataWarning);
     }
 }

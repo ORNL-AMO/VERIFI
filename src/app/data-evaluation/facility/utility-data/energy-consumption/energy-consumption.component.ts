@@ -1,47 +1,37 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Component, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+
+interface MetersListItem {
+  meter: IdbUtilityMeter;
+  meterStatusCheck: MeterStatusCheck;
+}
 
 @Component({
-    selector: 'app-energy-consumption',
-    templateUrl: './energy-consumption.component.html',
-    styleUrls: ['./energy-consumption.component.css'],
-    standalone: false
+  selector: 'app-energy-consumption',
+  templateUrl: './energy-consumption.component.html',
+  styleUrls: ['./energy-consumption.component.css'],
+  standalone: false
 })
-export class EnergyConsumptionComponent implements OnInit {
+export class EnergyConsumptionComponent {
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  utilityMeters: Array<IdbUtilityMeter>;
-  facilityMetersSub: Subscription;
+  utilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: undefined });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$)
 
-  meterDataSub: Subscription;
-  meterData: Array<IdbUtilityMeterData>;
-  facilityId: string;
-  facilitySub: Subscription;
-  constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService
-  ) { }
+  metersList: Signal<Array<MetersListItem>> = computed(() => {
+    const utilityMeters = this.utilityMeters();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!utilityMeters || !facilityStatusCheck) return [];
+    return utilityMeters.map(meter => ({
+      meter,
+      meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid)
+    }));
+  });
 
-  ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-      this.facilityId = facility?.guid;
-    });
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
-      this.utilityMeters = facilityMeters;
-    });
-    this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(fMeterData => {
-      this.meterData = fMeterData;
-    })
-  }
-
-  ngOnDestroy() {
-    this.facilityMetersSub.unsubscribe();
-    this.meterDataSub.unsubscribe();
-    this.facilitySub.unsubscribe();
-  }
 }

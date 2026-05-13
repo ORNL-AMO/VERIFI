@@ -29,10 +29,12 @@ export class FacilityStatusCheck {
     actions: Array<StatusCheckAction>;
 
     hasNoMeters: boolean;
+    hasNoMeterData: boolean;
     hasNoMeterGroups: boolean;
     hasNoPredictors: boolean;
     hasNonCurrentPredictors: boolean;
     hasNonCurrentMeters: boolean;
+    hasPredictorWeatherWarnings: boolean;
 
     facilityLatestEntry: { month: number; year: number } | undefined;
 
@@ -51,21 +53,24 @@ export class FacilityStatusCheck {
         const facilityMeters: Array<IdbUtilityMeter> = meters.filter(m => m.facilityId === facility.guid);
         const facilityPredictors: Array<IdbPredictor> = predictors.filter(p => p.facilityId === facility.guid);
         const facilityMeterGroups: Array<IdbUtilityMeterGroup> = meterGroups.filter(g => g.facilityId === facility.guid);
-        this.facility = facility;
-        this.hasNoMeters = facilityMeters.length === 0;
-        this.hasNoMeterGroups = !this.hasNoMeters && facilityMeterGroups.length === 0;
-        this.hasNoPredictors = facilityPredictors.length === 0;
-        this.facilityLatestEntry = this.computeFacilityLatestEntry(utilityMeterData);
-        
         const facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(pd => pd.facilityId === facility.guid);
         const facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(m => m.meter.facilityId === facility.guid);
         const facilityMeterData: Array<IdbUtilityMeterData> = utilityMeterData.filter(md => md.facilityId === facility.guid);
+
+        this.facility = facility;
+        this.hasNoMeters = facilityMeters.length === 0;
+        this.hasNoMeterData = facilityMeterData.length === 0;
+        this.hasNoMeterGroups = !this.hasNoMeters && facilityMeterGroups.length === 0;
+        this.hasNoPredictors = facilityPredictors.length === 0;
+        this.facilityLatestEntry = this.computeFacilityLatestEntry(facilityMeterData);
+        
         this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
         this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
         this.setHasNonCurrentMeters();
         this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
+        this.hasPredictorWeatherWarnings = this.predictorsStatusChecks.some(check => check.hasWeatherDataWarning);
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
