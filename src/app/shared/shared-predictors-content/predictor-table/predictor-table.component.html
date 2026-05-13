@@ -4,14 +4,6 @@
 
 @if (_facilityPredictors.length != 0) {
 <div class="d-flex w-100 justify-content-end mb-2">
-  <!-- @if (hasUpdateWarning) {
-  <div class="alert alert-warning small mb-0 p-1">
-    <span>
-      <i class="fa fa-exclamation-triangle"></i>
-      Latest Meter Reading: {{hasUpdateWarning| date:'MMM, yyyy'}}
-    </span>
-  </div>
-  } -->
   <div class="ps-2">
     <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
   </div>
@@ -132,7 +124,8 @@
 <h5><span class="fa fa-temperature-half pe-1"></span>Calculated Weather Data</h5>
 @if (hasWeatherDataWarning()) {
 <div class="alert alert-warning text-center">
-  <span class="fa fa-exclamation-triangle"></span> "Weather Gap" Indicates that one or more predictor entries associated with this
+  <span class="fa fa-exclamation-triangle"></span> "Weather Gap" Indicates that one or more predictor entries associated
+  with this
   predictor was calculated off of weather readings with gaps of twelve hours or more. The data may not be
   accurate. For closer inspection of that weather station click the <span class="fa fa-thermometer-half"></span>
   button. It may be best to choose a different weather station
@@ -312,7 +305,9 @@
       <label>Facility To Create Copy</label>
       <select class="form-select" name="selectedCopyFacilityGuid" [(ngModel)]="selectedCopyFacilityGuid">
         @for (facility of facilities(); track facility) {
+        @if(facility.guid != predictorToCopy.facilityId){
         <option [ngValue]="facility.guid">{{facility.name}}</option>
+        }
         }
         <option [ngValue]="undefined"></option>
       </select>

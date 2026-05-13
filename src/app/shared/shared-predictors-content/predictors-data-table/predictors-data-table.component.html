@@ -84,7 +84,7 @@
 @if(_predictorStatusCheck && _predictorStatusCheck.hasMissingEntries){
 <div class="alert alert-danger text-center p-1 fw-bold">
   <span class="fa fa-triangle-exclamation"></span> Missing predictor entries found for the following months:<br>
-  @for (monthYear of _predictorStatusCheck.missingEntryMonths; track monthYear.month) {
+  @for (monthYear of _predictorStatusCheck.missingEntryMonths; track monthYear.date) {
   <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
   }
 </div>
@@ -93,7 +93,7 @@
 @if(_predictorStatusCheck && _predictorStatusCheck.hasDuplicateEntries){
 <div class="alert alert-danger text-center p-1 fw-bold">
   <span class="fa fa-triangle-exclamation"></span> Duplicate predictor entries found for the following months:<br>
-  @for (monthYear of _predictorStatusCheck.duplicateEntryMonths; track monthYear.month) {
+  @for (monthYear of _predictorStatusCheck.duplicateEntryMonths; track monthYear.date) {
   <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
   }
 </div>

@@ -193,7 +193,6 @@ export class PredictorsDataTableComponent {
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
-  //TODO: this isn't going to work..
   checkAll() {
     const orderedItems = this.orderedPredictorData();
     const displayedItems = orderedItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage()), (this.currentPageNumber * this.itemsPerPage()));

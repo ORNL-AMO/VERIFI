@@ -4,7 +4,7 @@
       <li class="nav-item"><a class="nav-link" routerLink="energy-source" [routerLinkActive]="['active']">
           <i class="fa fa-gauge-high"></i>
           Meters
-          @if (facilityStatusCheck()?.metersStatus != 'good') {
+          @if (facilityStatusCheck() && facilityStatusCheck()?.metersStatus != 'good') {
         <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
