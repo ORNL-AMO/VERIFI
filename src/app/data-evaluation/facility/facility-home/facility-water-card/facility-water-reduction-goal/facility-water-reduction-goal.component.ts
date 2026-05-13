@@ -53,6 +53,9 @@ export class FacilityWaterReductionGoalComponent {
   percentTowardsGoal: Signal<number> = computed(() => {
     const percentSavings = this.percentSavings();
     const percentGoal = this.percentGoal();
+    if(percentGoal === 0){
+      return 0;
+    }
     let percentTowardsGoal = (percentSavings / percentGoal) * 100;
     if (percentTowardsGoal < 0 || isNaN(percentTowardsGoal)) {
       percentTowardsGoal = 0;

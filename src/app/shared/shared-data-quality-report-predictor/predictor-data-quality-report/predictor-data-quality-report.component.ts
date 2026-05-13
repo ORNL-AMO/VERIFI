@@ -19,8 +19,8 @@ export class PredictorDataQualityReportComponent {
 
   stats: PredictorStatistics;
   hasData: boolean;
-  duplicateDatesList: Array<{ monthYear: string }> = [];
-  missingMonthsList: Array<{ monthYear: string }> = [];
+  duplicateDatesList: Array<{ monthYear: string, month: number, year: number }> = [];
+  missingMonthsList: Array<{ monthYear: string, month: number, year: number }> = [];
   showAlert: boolean = false;
 
   constructor(private router: Router) { }
@@ -50,13 +50,18 @@ export class PredictorDataQualityReportComponent {
     });
     this.duplicateDatesList = Object.keys(dateCount)
       .filter(key => dateCount[key] > 1)
-      .map(key => ({ monthYear: key }));
+      .map(key => {
+        const [monthStr, yearStr] = key.split(' ');
+        const month = new Date(Date.parse(monthStr + " 1, 2000")).getMonth() + 1;
+        const year = parseInt(yearStr, 10);
+        return { monthYear: key, month, year };
+      });
   }
 
   private buildMissingList(statusCheck: PredictorStatusCheck) {
     this.missingMonthsList = statusCheck.missingEntryMonths.map(({ month, year }) => {
       const label = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
-      return { monthYear: label };
+      return { monthYear: label, month, year };
     });
   }
 

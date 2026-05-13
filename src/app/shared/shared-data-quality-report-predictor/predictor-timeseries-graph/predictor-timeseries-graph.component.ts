@@ -21,7 +21,7 @@ export class PredictorTimeseriesGraphComponent {
   @Input({ required: true })
   stats: PredictorStatistics;
   @Input({ required: true })
-  missingMonthsList: Array<{ monthYear: string }> = [];
+  missingMonthsList: Array<{ monthYear: string, month: number, year: number }> = [];
 
   @ViewChild('predictorTimeSeriesGraph', { static: false }) predictorTimeSeriesGraph: ElementRef;
   viewInitialized: boolean = false;
@@ -77,9 +77,8 @@ export class PredictorTimeseriesGraphComponent {
     let markerSymbols: Array<string> = markers.map(marker => marker.symbol);
 
     // Build vertical dashed-line shapes for each missing month
-    let missingMonthShapes = (this.missingMonthsList || []).map(({ monthYear }) => {
-      let date = new Date(monthYear);
-      let x = new Date(date.getFullYear(), date.getMonth(), 15); // mid-month
+    let missingMonthShapes = (this.missingMonthsList || []).map(({ month, year }) => {
+      let x = new Date(year, month - 1, 15); // mid-month
       return {
         type: 'line',
         xref: 'x',
@@ -97,8 +96,8 @@ export class PredictorTimeseriesGraphComponent {
     });
 
     // Invisible scatter trace for missing month legend entry
-    let missingMonthDates = (this.missingMonthsList || []).map(({ monthYear }) =>
-      new Date(new Date(monthYear).getFullYear(), new Date(monthYear).getMonth(), 15)
+    let missingMonthDates = (this.missingMonthsList || []).map(({ month, year }) =>
+      new Date(year, month - 1, 15)
     );
 
     var data: any[] = [
