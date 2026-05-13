@@ -17,7 +17,6 @@ import { WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -46,7 +45,6 @@ export class PredictorsDataTableComponent {
   private dbChangesService: DbChangesService = inject(DbChangesService);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private weatherDataService: WeatherDataService = inject(WeatherDataService);
-  private predictorDataHelperService: PredictorDataHelperService = inject(PredictorDataHelperService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;

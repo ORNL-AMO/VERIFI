@@ -10,7 +10,6 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 
 @Component({
   selector: 'app-facility-water-reduction-goal',
@@ -28,7 +27,7 @@ export class FacilityWaterReductionGoalComponent {
   latestAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
   facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
   monthlyFacilityWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityWaterAnalysisData, { initialValue: undefined });
-  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
     const monthlyFacilityWaterAnalysisData = this.monthlyFacilityWaterAnalysisData();
@@ -69,13 +68,6 @@ export class FacilityWaterReductionGoalComponent {
     } else {
       return undefined;
     }
-  });
-
-  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
-    const accountStatusCheck = this.accountStatusCheck();
-    const facility = this.facility();
-    if (!accountStatusCheck || !facility) return;
-    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === facility.guid);
   });
 
   goToAnalysisItem() {

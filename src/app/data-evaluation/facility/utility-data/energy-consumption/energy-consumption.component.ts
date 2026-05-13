@@ -1,7 +1,5 @@
-import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subscription } from 'rxjs';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';

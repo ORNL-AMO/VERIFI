@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
