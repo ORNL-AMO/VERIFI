@@ -50,10 +50,8 @@ export class PredictorTableComponent {
   facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilitydbService.selectedFacility, { initialValue: undefined });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilitydbService.accountFacilities, { initialValue: [] });
 
   predictorToDelete: IdbPredictor;
-  predictorToCopy: IdbPredictor;
 
   standardPredictors: Signal<Array<PredictorListItem>> = computed(() => {
     const predictors = this.facilityPredictors();
@@ -86,8 +84,6 @@ export class PredictorTableComponent {
   
   predictorUsedGroupIds: Array<string> = [];
   displayDeletePredictor: boolean = false;
-  selectedCopyFacilityGuid: string;
-  displayCopyModal: boolean = false;
 
   selectDelete(predictor: IdbPredictor) {
     this.predictorToDelete = predictor;
@@ -249,46 +245,6 @@ export class PredictorTableComponent {
     } else {
       this.router.navigateByUrl(`/data-evaluation/facility/${facility.guid}/utility/predictors/predictor/${predictor.guid}/entries-table`);
     }
-  }
-
-  selectCopy(predictor: IdbPredictor) {
-    this.predictorToCopy = predictor;
-    this.displayCopyModal = true;
-  }
-
-  cancelCopy() {
-    this.displayCopyModal = false;
-    this.predictorToCopy = undefined;
-  }
-
-  async confirmCopy() {
-    this.displayCopyModal = false;
-    this.loadingService.setLoadingMessage("Copying Predictor Data...")
-    this.loadingService.setLoadingStatus(true);
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictorToCopy.guid);
-    let newPredictor: IdbPredictor = JSON.parse(JSON.stringify(this.predictorToCopy));
-    delete newPredictor.id;
-    newPredictor.guid = getGUID();
-    newPredictor.facilityId = this.selectedCopyFacilityGuid;
-    newPredictor.name = newPredictor.name + " (copy)";
-    await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-    await this.analysisDbService.addAnalysisPredictor(newPredictor);
-    for (let i = 0; i < predictorData.length; i++) {
-      let newPredictorData: IdbPredictorData = JSON.parse(JSON.stringify(predictorData[i]));
-      delete newPredictorData.id;
-      newPredictorData.guid = getGUID();
-      newPredictorData.facilityId = this.selectedCopyFacilityGuid;
-      newPredictorData.predictorId = newPredictor.guid;
-      await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
-    }
-    const facility: IdbFacility = this.facilities().find(facility => { return facility.guid == this.selectedCopyFacilityGuid });
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast("Predictor Copy Created", undefined, undefined, false, "alert-success");
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsV2(account);
-    await this.dbChangesService.setPredictorDataV2(account, true)
-    await this.dbChangesService.selectFacility(facility);
-    this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/predictor-table');
   }
 }
 
