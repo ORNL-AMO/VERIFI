@@ -1,20 +1,27 @@
-@if (predictorData.length != 0) {
+@let _predictorData = predictorData();
+@let _predictor = predictor();
+@let _predictorStatusCheck = predictorStatusCheck();
+@let _orderedPredictorData = orderedPredictorData();
+@let _orderDataField = orderDataField();
+@let _itemsPerPage = itemsPerPage();
+@let _hasCheckedItems = hasCheckedItems();
+@let _filterErrors = filterErrors();
+
+@if (_predictorData.length != 0) {
 <div class="d-flex w-100 flex-wrap justify-content-end">
-  @if (latestMeterDataReading) {
-  <div class="alert alert-warning small mb-0 p-1">
-    <span>
-      <i class="fa fa-exclamation-triangle"></i>
-      Latest Meter Reading: {{latestMeterDataReading| date:'MMM, yyyy'}}
-    </span>
-  </div>
+  @if (_predictorStatusCheck && !_predictorStatusCheck.isDataCurrent) {
+  <span class="alert alert-warning small mb-0 p-1 h-fit-content">
+    <i class="fa fa-exclamation-triangle"></i>
+    Latest Meter Reading: {{_predictorStatusCheck.latestFacilityEntryDate| date:'MMM, yyyy'}}
+  </span>
   }
   <!--Bulk Delete-->
-  <div class="ps-1 pe-1 mb-2 bulk-delete" [class.show]="hasCheckedItems">
-    <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
+  <div class="ps-1 pe-1 mb-2 bulk-delete" [class.show]="_hasCheckedItems">
+    <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!_hasCheckedItems">Bulk
       Delete</button>
   </div>
   <!--Items Per Page-->
-  @if (predictorData.length != 0) {
+  @if (_predictorData.length != 0) {
   <div class="ps-1 pe-1 mb-2">
     <app-table-items-dropdown></app-table-items-dropdown>
   </div>
@@ -28,20 +35,20 @@
       Predictor
       Entry</button>
   </div>
-  @if (predictor.predictorType == 'Weather') {
+  @if (_predictor.predictorType == 'Weather') {
   <div class="ps-1 pe-1 mb-2">
     <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-redo"></i> Bulk
       Update</button>
   </div>
   }
-  @if (predictor.predictorType == 'Weather' && hasWeatherDataWarnings) {
+  @if (_predictor.predictorType == 'Weather' && _predictorStatusCheck && _predictorStatusCheck.hasWeatherDataWarning) {
   <div class="ps-1 pe-1 mb-2">
     <button class="btn action-btn" (click)="toggleFilterErrors()">
       <i class="fa fa-filter"></i>
-      @if (!filterErrors) {
+      @if (!_filterErrors) {
       Filter Errors
       }
-      @if (filterErrors) {
+      @if (_filterErrors) {
       Show All
       }
     </button>
@@ -50,16 +57,16 @@
   <div class="ps-1 pe-1 mb-2">
     @if (inDataManagement) {
     <button class="btn" (click)="goToDataQualityReport()"
-      [ngClass]="predictor | predictorDataQualityStatus: predictorData: true"><i class="fa fa-clipboard-check"></i>
+      [ngClass]="_predictor | predictorDataQualityStatus: _predictorData: true"><i class="fa fa-clipboard-check"></i>
       Data
       Quality Report</button>
     } @else {
-    <app-predictor-data-quality-report-modal [selectedPredictor]="predictor"
-      [predictorData]="predictorData"></app-predictor-data-quality-report-modal>
+    <app-predictor-data-quality-report-modal [selectedPredictor]="_predictor"
+      [predictorData]="_predictorData"></app-predictor-data-quality-report-modal>
     }
   </div>
 </div>
-@if (hasWeatherDataWarnings) {
+@if (_predictorStatusCheck && _predictorStatusCheck.hasWeatherDataWarning) {
 <div class="alert alert-warning text-center p-1">
   <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated from weather
   data
@@ -73,12 +80,31 @@
   of this facility.
 </div>
 }
-@if (hasCalculatedOverride) {
+
+@if(_predictorStatusCheck && _predictorStatusCheck.hasMissingEntries){
+<div class="alert alert-danger text-center p-1 fw-bold">
+  <span class="fa fa-triangle-exclamation"></span> Missing predictor entries found for the following months:<br>
+  @for (monthYear of _predictorStatusCheck.missingEntryMonths; track monthYear.month) {
+  <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
+  }
+</div>
+}
+
+@if(_predictorStatusCheck && _predictorStatusCheck.hasDuplicateEntries){
+<div class="alert alert-danger text-center p-1 fw-bold">
+  <span class="fa fa-triangle-exclamation"></span> Duplicate predictor entries found for the following months:<br>
+  @for (monthYear of _predictorStatusCheck.duplicateEntryMonths; track monthYear.month) {
+  <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
+  }
+</div>
+}
+
+
+@if (hasCalculatedOverride()) {
 <div class="alert alert-warning text-center p-1">
   <span class="fa fa-asterisk"></span> Indicates that the calculated predictor entry was manually overridden.
 </div>
 }
-@let filteredPredictorData = predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors;
 <table class="table utility-data table-sm table-bordered table-hover" #predictorTable
   [ngClass]="{'copying-table': copyingTable}">
   <thead class="sortable">
@@ -88,19 +114,19 @@
         <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
       </th>
       }
-      <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
+      <th (click)="setOrderDataField('date')" [ngClass]="{'active': _orderDataField == 'date'}">Date
       </th>
-      <th class="header" (click)="setOrderDataField('amount')" [ngClass]="{'active': orderDataField == 'amount'}">
-        @if (predictor.predictorType == 'Weather') {
+      <th class="header" (click)="setOrderDataField('amount')" [ngClass]="{'active': _orderDataField == 'amount'}">
+        @if (_predictor.predictorType == 'Weather') {
         <span class="fa fa-temperature-half"></span>
         }
-        {{predictor.name}}
-        @if (predictor.unit && predictor.predictorType != 'Weather') {
+        {{_predictor.name}}
+        @if (_predictor.unit && _predictor.predictorType != 'Weather') {
         <br>
-        <span class="small block">({{predictor.unit}})</span>
+        <span class="small block">({{_predictor.unit}})</span>
         }
-        @if (predictor.predictorType == 'Weather') {
-        <app-weather-data-sub-label [predictor]="predictor"></app-weather-data-sub-label>
+        @if (_predictor.predictorType == 'Weather') {
+        <app-weather-data-sub-label [predictor]="_predictor"></app-weather-data-sub-label>
         }
       </th>
       @if (!copyingTable) {
@@ -110,12 +136,12 @@
     </tr>
   </thead>
   <tbody class="table-group-divider">
-    @for (pData of predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors | slice:
-    ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage ; track pData) {
+    @for (pData of _orderedPredictorData | slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
+    _itemsPerPage ; track pData) {
     <tr>
       @if (!copyingTable) {
       <td class="input">
-        <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="pData.checked">
+        <input type="checkbox" name="predictorEntry" [checked]="isChecked(pData.guid)" (change)="toggleChecked(pData.guid)">
       </td>
       }
       <td>{{pData | displayPredictorDataDate}}</td>
@@ -144,7 +170,7 @@
           <button class="btn btn-sm btn-outline" (click)="setDeletePredictorData(pData)" title="Delete">
             <i class="fa fa-trash"></i>
           </button>
-          @if (predictor.predictorType == 'Weather') {
+          @if (_predictor.predictorType == 'Weather') {
           <button class="btn btn-sm btn-outline" (click)="viewWeatherData(pData)" title="View Weather Data">
             <i class="fa fa-temperature-half"></i>
           </button>
@@ -162,8 +188,8 @@
       <span class="fa fa-copy"></span> Copy Table
     </button>
   </div>
-  <ngb-pagination [collectionSize]="filteredPredictorData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-    [maxSize]="5" [rotate]="true" aria-label="Pagination">
+  <ngb-pagination [collectionSize]="_orderedPredictorData.length" [(page)]="currentPageNumber"
+    [pageSize]="_itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
   </ngb-pagination>
 </div>
 } @else {
@@ -172,7 +198,7 @@
   <p>Please <i class="fa fa-plus"></i> Add New Predictor Entry or <i class="fa fa-upload"></i> Import multiple
     predictor entries from
     excel.
-    @if (predictor.predictorType == 'Weather') {
+    @if (_predictor.predictorType == 'Weather') {
     <br>
     Weather predictor data can be added in bulk by clicking the <i class="fa fa-temperature-half"></i> Bulk
     Add Weather button.
@@ -183,7 +209,7 @@
       <button class="btn action-btn" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add New
         Predictor Entry</button>
     </div>
-    @if (predictor.predictorType == 'Weather') {
+    @if (_predictor.predictorType == 'Weather') {
     <div class="ps-1 pe-1">
       <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-temperature-half"></i> Bulk
         Add Weather</button>
