@@ -144,7 +144,7 @@ export class AnalysisStatusCheck {
     ): MeterDateEntry {
         const calanderizedMeter: CalanderizedMeter | undefined = calanderizedMeters.find(cm => cm.meter.guid === meterId);
         const monthlyData = calanderizedMeter?.monthlyData ?? [];
-        const lastDateEntry: Date = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue + 1, 1).getTime())));
+        const lastDateEntry: Date = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue, 1).getTime())));
         return {
             meterName: calanderizedMeter?.meter.name ?? 'Unknown Meter',
             meterId,
