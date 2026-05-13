@@ -117,12 +117,8 @@ export class MeterDataTableComponent {
     this.cancelBulkDelete();
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);
-    let meterDataItemsToDelete: Array<IdbUtilityMeterData> = new Array();
-    this.meterData.forEach(dataItem => {
-      if (dataItem.checked) {
-        meterDataItemsToDelete.push(dataItem);
-      }
-    });
+    const checkedGuids = this.checkedItemGuids();
+    let meterDataItemsToDelete: Array<IdbUtilityMeterData> = this.meterData.filter(dataItem => checkedGuids.has(dataItem.guid));
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id));
     }
@@ -162,7 +158,7 @@ export class MeterDataTableComponent {
   }
 
   setHasCheckedItems() {
-    this.hasCheckedItems = this.meterData.find(dataItem => { return dataItem.checked == true }) != undefined;
+    this.hasCheckedItems = this.checkedItemGuids().size > 0;
   }
 
   openBulkDelete() {
@@ -221,5 +217,6 @@ export class MeterDataTableComponent {
   checkedItemGuids: WritableSignal<Set<string>> = signal(new Set<string>());
   setCheckedItemGuids(valsFromChildren: Set<string>) {
     this.checkedItemGuids.set(valsFromChildren);
+    this.hasCheckedItems = valsFromChildren.size > 0;
   }
 }

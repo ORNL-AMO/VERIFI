@@ -11,22 +11,18 @@
 <!--TODO: add items per dropdown-->
 <!--TODO: table with summary of data-->
 @if (meterDataSummary.meter.source == 'Electricity') {
-  <app-electricity-data-table
-    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+  <app-electricity-data-table>
   </app-electricity-data-table>
 }
 @if (meterDataSummary.meter.source != 'Electricity' && (meterDataSummary.meter.scope != 2 && meterDataSummary.meter.scope != 5 && meterDataSummary.meter.scope != 6)) {
-  <app-general-utility-data-table
-    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+  <app-general-utility-data-table>
   </app-general-utility-data-table>
 }
 @if (meterDataSummary.meter.source != 'Electricity' && meterDataSummary.meter.scope == 2) {
-  <app-vehicle-data-table
-    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+  <app-vehicle-data-table>
   </app-vehicle-data-table>
 }
 @if (meterDataSummary.meter.source != 'Electricity' && (meterDataSummary.meter.scope == 5 || meterDataSummary.meter.scope ==6)) {
-  <app-other-emissions-data-table
-    [selectedMeter]="meterDataSummary.meter" [selectedMeterData]="meterDataSummary.meterReadings" [itemsPerPage]="12">
+  <app-other-emissions-data-table>
   </app-other-emissions-data-table>
 }

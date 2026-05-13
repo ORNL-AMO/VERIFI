@@ -86,20 +86,17 @@
         }
         @if (selectedMeter.source != 'Electricity' && (selectedMeter.scope != 2 && selectedMeter.scope != 5 &&
         selectedMeter.scope != 6)) {
-        <app-general-utility-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+        <app-general-utility-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
           (setDelete)="setDeleteMeterData($event)">
         </app-general-utility-data-table>
         }
         @if (selectedMeter.source != 'Electricity' && selectedMeter.scope == 2) {
-        <app-vehicle-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+        <app-vehicle-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
           (setDelete)="setDeleteMeterData($event)">
         </app-vehicle-data-table>
         }
         @if (selectedMeter.source != 'Electricity' && (selectedMeter.scope == 5 || selectedMeter.scope ==6)) {
-        <app-other-emissions-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+        <app-other-emissions-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
           (setDelete)="setDeleteMeterData($event)">
         </app-other-emissions-data-table>
         }
