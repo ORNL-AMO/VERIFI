@@ -10,7 +10,6 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -20,7 +19,6 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import * as _ from 'lodash';
 
@@ -54,15 +52,8 @@ export class UtilityMetersTableComponent {
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilitydbService.selectedFacility, { initialValue: undefined });
-  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
   meters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterdbService.facilityMeters, { initialValue: [] });
-
-  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
-    const accountStatusCheck = this.accountStatusCheck();
-    const selectedFacility = this.selectedFacility();
-    if (!accountStatusCheck || !selectedFacility) return;
-    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
-  });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   metersList: Signal<Array<MetersListItem>> = computed(() => {
     const utilityMeters = this.meters();

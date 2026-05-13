@@ -34,6 +34,7 @@ export class FacilityStatusCheck {
     hasNoPredictors: boolean;
     hasNonCurrentPredictors: boolean;
     hasNonCurrentMeters: boolean;
+    hasPredictorWeatherWarnings: boolean;
 
     facilityLatestEntry: { month: number; year: number } | undefined;
 
@@ -69,6 +70,7 @@ export class FacilityStatusCheck {
         this.setMetersStatus();
         this.setHasNonCurrentMeters();
         this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
+        this.hasPredictorWeatherWarnings = this.predictorsStatusChecks.some(check => check.hasWeatherDataWarning);
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);

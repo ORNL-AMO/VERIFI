@@ -31,15 +31,8 @@ export class EnergyConsumptionComponent {
 
   utilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: undefined });
   meterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: undefined });
-  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
   facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
-
-  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
-    const accountStatusCheck = this.accountStatusCheck();
-    const selectedFacility = this.facility();
-    if (!accountStatusCheck || !selectedFacility) return;
-    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
-  });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$)
 
   metersList: Signal<Array<MetersListItem>> = computed(() => {
     const utilityMeters = this.utilityMeters();

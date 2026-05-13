@@ -53,6 +53,9 @@
                             @if (predictorCheck.latestEntryDate && !predictorCheck.hasNoData) {
                             <span class="text-muted ms-2 small">({{predictorCheck.latestEntryDate | date:'MMMM yyyy'}})</span>
                             }
+                            @if(predictorCheck.hasWeatherDataWarning) {
+                            <span class="badge bg-warning text-dark ms-2">Weather Data Warning</span>
+                            }
                         </div>
                         <span class="fa fa-chevron-right text-muted small"></span>
                     </div>

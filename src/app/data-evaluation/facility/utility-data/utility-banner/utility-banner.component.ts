@@ -1,6 +1,5 @@
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -23,16 +22,10 @@ export class UtilityBannerComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen, { initialValue: false });
-  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
   facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
   navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
 
-  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
-    const accountStatusCheck = this.accountStatusCheck();
-    const selectedFacility = this.facility();
-    if (!accountStatusCheck || !selectedFacility) return;
-    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
-  });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   hasPredictorError: Signal<boolean> = computed(() => {
     const facilityStatusCheck = this.facilityStatusCheck();

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -19,6 +19,15 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getGUID, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
+import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+
+interface PredictorListItem {
+  predictor: IdbPredictor,
+  statusCheck: PredictorStatusCheck,
+}
 
 @Component({
   selector: 'app-predictor-table',
@@ -27,51 +36,79 @@ import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/h
   standalone: false
 })
 export class PredictorTableComponent {
+  private predictorDbService: PredictorDbService = inject(PredictorDbService);
+  private router: Router = inject(Router);
+  private facilitydbService: FacilitydbService = inject(FacilitydbService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private weatherDataService: WeatherDataService = inject(WeatherDataService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
+  private predictorDataHelperService: PredictorDataHelperService = inject(PredictorDataHelperService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  facilityPredictorsSub: Subscription;
-  facilityPredictors: Array<IdbPredictor>;
-  selectedFacilitySub: Subscription;
-  selectedFacility: IdbFacility;
+  facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilitydbService.selectedFacility, { initialValue: undefined });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilitydbService.accountFacilities, { initialValue: [] });
+
   predictorToDelete: IdbPredictor;
   predictorToCopy: IdbPredictor;
 
-  standardPredictors: Array<PredictorTableItem>;
-  degreeDayPredictors: Array<PredictorTableItem>;
+  standardPredictors: Signal<Array<PredictorListItem>> = computed(() => {
+    const predictors = this.facilityPredictors();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!predictors || !facilityStatusCheck) return [];
+    return predictors.filter(predictor => predictor.predictorType == 'Standard').map(predictor => {
+      return {
+        predictor: predictor,
+        statusCheck: facilityStatusCheck.predictorsStatusChecks.find(check => check.predictorId == predictor.guid)
+      }
+    });
+  });
+  degreeDayPredictors: Signal<Array<PredictorListItem>> = computed(() => {
+    const predictors = this.facilityPredictors();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!predictors || !facilityStatusCheck) return [];
+    return predictors.filter(predictor => predictor.predictorType == 'Weather').map(predictor => {
+      return {
+        predictor: predictor,
+        statusCheck: facilityStatusCheck.predictorsStatusChecks.find(check => check.predictorId == predictor.guid)
+      }
+    });
+  });
 
-  hasWeatherDataWarning: boolean;
-  hasUpdateWarning: Date;
+  hasWeatherDataWarning: Signal<boolean> = computed(() => {
+    const degreeDayPredictorsList = this.degreeDayPredictors();
+    if (!degreeDayPredictorsList) return false;
+    return degreeDayPredictorsList.some(item => item.statusCheck && item.statusCheck.hasWeatherDataWarning);
+  });
+  
   predictorUsedGroupIds: Array<string> = [];
   displayDeletePredictor: boolean = false;
-  facilities: Array<IdbFacility>;
   selectedCopyFacilityGuid: string;
   displayCopyModal: boolean = false;
-  constructor(private predictorDbService: PredictorDbService, private router: Router,
-    private facilitydbService: FacilitydbService, private loadingService: LoadingService,
-    private weatherDataService: WeatherDataService, 
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private predictorDataHelperService: PredictorDataHelperService,
+  constructor(
   ) {
 
   }
 
-  ngOnInit() {
-    this.facilities = this.facilitydbService.accountFacilities.getValue();
-    this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
-      this.selectedFacility = facility;
-    });
-    this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
-      this.setPredictors(val);
-    });
-  }
+  // ngOnInit() {
+  //   // this.facilities = this.facilitydbService.accountFacilities.getValue();
+  //   // this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
+  //   //   this.selectedFacility = facility;
+  //   // });
+  //   // this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
+  //   //   this.setPredictors(val);
+  //   // });
+  // }
 
-  ngOnDestroy() {
-    this.facilityPredictorsSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-  }
+  // ngOnDestroy() {
+  //   this.facilityPredictorsSub.unsubscribe();
+  //   this.selectedFacilitySub.unsubscribe();
+  // }
 
   selectDelete(predictor: IdbPredictor) {
     this.predictorToDelete = predictor;
@@ -114,9 +151,10 @@ export class PredictorTableComponent {
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictorToDelete.guid);
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
+    const selectedFacility = this.selectedFacility();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsV2(account, this.selectedFacility);
-    await this.dbChangesService.setPredictorDataV2(account, true, this.selectedFacility);
+    await this.dbChangesService.setPredictorsV2(account, selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
@@ -132,21 +170,21 @@ export class PredictorTableComponent {
   }
 
   async selectEditPredictor(predictor: IdbPredictor) {
+    const facility: IdbFacility = this.selectedFacility();
     if (this.router.url.includes('data-management')) {
-      let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
       predictor.sidebarOpen = true;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.setPredictorsV2(account, facility);
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
+      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
     }
   }
 
   async addPredictor() {
+    const facility: IdbFacility = this.selectedFacility();
     if (this.router.url.includes('data-management')) {
-      let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
       newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
       await this.analysisDbService.addAnalysisPredictor(newPredictor);
@@ -158,7 +196,7 @@ export class PredictorTableComponent {
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
       this.selectEditPredictor(newPredictor);
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/predictors/manage/add-predictor');
+      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/add-predictor');
     }
   }
 
@@ -169,6 +207,7 @@ export class PredictorTableComponent {
 
 
   async viewWeatherData(predictor: IdbPredictor) {
+    const degreeDayPredictors = this.degreeDayPredictors();
     //ISSUE 1822
     // let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(predictor.weatherStationId)
     let weatherStation: WeatherStation | 'error' = await this.weatherDataService.getStation(predictor.weatherStationId);
@@ -176,7 +215,7 @@ export class PredictorTableComponent {
       this.weatherDataService.selectedStation = weatherStation;
       if (predictor.weatherDataType == 'CDD') {
         this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
-        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'HDD' })?.predictor;
+        let predictorPair: IdbPredictor = degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'HDD' })?.predictor;
         if (predictorPair) {
           this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
           this.weatherDataService.weatherDataSelection = 'degreeDays';
@@ -185,7 +224,7 @@ export class PredictorTableComponent {
         }
       } else if (predictor.weatherDataType == 'HDD') {
         this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
-        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'CDD' })?.predictor;
+        let predictorPair: IdbPredictor = degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'CDD' })?.predictor;
         if (predictorPair) {
           this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
           this.weatherDataService.weatherDataSelection = 'degreeDays';
@@ -203,38 +242,49 @@ export class PredictorTableComponent {
       this.weatherDataService.selectedDate = endDate;
       this.weatherDataService.selectedMonth = endDate;
     }
-    this.weatherDataService.selectedFacility = this.selectedFacility;
-    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
+    const selectedFacility = this.selectedFacility();
+    this.weatherDataService.selectedFacility = selectedFacility;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
     if (this.router.url.includes('data-management')) {
-      this.router.navigateByUrl('/data-management/' + this.selectedFacility.accountId + '/weather-data/annual-station');
+      this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/weather-data/annual-station');
     } else {
       this.router.navigateByUrl('/data-evaluation/weather-data/annual-station');
     }
   }
 
-  checkWeatherPredictor(predictor: IdbPredictor): boolean {
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
-    let findError: IdbPredictorData = predictorData.find(data => {
-      return data.id == predictor.id && data.weatherDataWarning;
-    });
-    return findError != undefined;
-  }
+  // checkWeatherPredictor(predictor: IdbPredictor): boolean {
+  //   let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
+  //   let findError: IdbPredictorData = predictorData.find(data => {
+  //     return data.id == predictor.id && data.weatherDataWarning;
+  //   });
+  //   return findError != undefined;
+  // }
 
   goToWeatherData() {
-    this.weatherDataService.selectedFacility = this.selectedFacility;
-    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
+    const selectedFacility = this.selectedFacility();
+    this.weatherDataService.selectedFacility = selectedFacility;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
     if (this.router.url.includes('data-management')) {
-      this.router.navigateByUrl('/data-management/' + this.selectedFacility.accountId + '/weather-data');
+      this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/weather-data');
     } else {
       this.router.navigateByUrl('/data-evaluation/weather-data');
     }
   }
 
+  navigateToPredictorData(predictor: IdbPredictor) {
+    const facility = this.selectedFacility();
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl(`/data-management/${predictor.accountId}/facilities/${predictor.facilityId}/predictors/${predictor.guid}/predictor-data`);
+    } else {
+      this.router.navigateByUrl(`/data-evaluation/facility/${facility.guid}/utility/predictors/predictor/${predictor.guid}/entries-table`);
+    }
+  }
+
   selectCopy(predictor: IdbPredictor) {
     this.predictorToCopy = predictor;
-    this.facilities = this.facilitydbService.accountFacilities.getValue().filter(facility => {
-      return facility.guid != this.predictorToCopy.facilityId
-    });
+    // this.facilities = this.facilitydbService.accountFacilities.getValue().filter(facility => {
+    //   return facility.guid != this.predictorToCopy.facilityId
+    // });
     this.displayCopyModal = true;
   }
 
@@ -263,7 +313,8 @@ export class PredictorTableComponent {
       newPredictorData.predictorId = newPredictor.guid;
       await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
     }
-    let facility: IdbFacility = this.facilities.find(facility => { return facility.guid == this.selectedCopyFacilityGuid });
+    const facility: IdbFacility = this.selectedFacility();
+    // let facility: IdbFacility = this.facilities.find(facility => { return facility.guid == this.selectedCopyFacilityGuid });
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Copy Created", undefined, undefined, false, "alert-success");
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -273,29 +324,29 @@ export class PredictorTableComponent {
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/predictor-table');
   }
 
-  setPredictors(facilityPredictors: Array<IdbPredictor>) {
-    let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(this.selectedFacility);
-    this.facilityPredictors = facilityPredictors;
-    this.standardPredictors = new Array();
-    this.degreeDayPredictors = new Array();
-    let hasWeatherDataWarning: boolean = false;
-    facilityPredictors.forEach(predictor => {
-      let tableItem: PredictorTableItem = this.predictorDataHelperService.getPredictorTableItem(predictor, predictorsNeedUpdate);
-      if (predictor.predictorType == 'Standard' || predictor.predictorType == undefined) {
-        this.standardPredictors.push(tableItem);
-      } else if (predictor.predictorType == 'Weather') {
-        predictor.weatherDataWarning = this.checkWeatherPredictor(predictor);
-        if (!hasWeatherDataWarning && predictor.weatherDataWarning) {
-          hasWeatherDataWarning = true;
-        }
-        this.degreeDayPredictors.push(tableItem);
-      }
-    })
-    this.hasWeatherDataWarning = hasWeatherDataWarning;
-    if (predictorsNeedUpdate.length > 0) {
-      this.hasUpdateWarning = this.predictorDataHelperService.getLastMeterDate(this.selectedFacility);
-    }
-  }
+  // setPredictors(facilityPredictors: Array<IdbPredictor>) {
+  //   let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(this.selectedFacility);
+  //   this.facilityPredictors = facilityPredictors;
+  //   this.standardPredictors = new Array();
+  //   this.degreeDayPredictors = new Array();
+  //   let hasWeatherDataWarning: boolean = false;
+  //   facilityPredictors.forEach(predictor => {
+  //     let tableItem: PredictorTableItem = this.predictorDataHelperService.getPredictorTableItem(predictor, predictorsNeedUpdate);
+  //     if (predictor.predictorType == 'Standard' || predictor.predictorType == undefined) {
+  //       this.standardPredictors.push(tableItem);
+  //     } else if (predictor.predictorType == 'Weather') {
+  //       predictor.weatherDataWarning = this.checkWeatherPredictor(predictor);
+  //       if (!hasWeatherDataWarning && predictor.weatherDataWarning) {
+  //         hasWeatherDataWarning = true;
+  //       }
+  //       this.degreeDayPredictors.push(tableItem);
+  //     }
+  //   })
+  //   this.hasWeatherDataWarning = hasWeatherDataWarning;
+  //   if (predictorsNeedUpdate.length > 0) {
+  //     this.hasUpdateWarning = this.predictorDataHelperService.getLastMeterDate(this.selectedFacility);
+  //   }
+  // }
 
 
 }

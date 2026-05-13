@@ -10,6 +10,7 @@ export class PredictorStatusCheck {
     predictorName: string;
     hasDuplicateEntries: boolean;
     hasMissingEntries: boolean;
+    hasWeatherDataWarning: boolean;
     missingEntryMonths: Array<{ month: number, year: number }>;
     latestEntryDate: Date;
     hasNoData: boolean;
@@ -28,6 +29,7 @@ export class PredictorStatusCheck {
         this.hasNoData = predictorReadings.length === 0;
         this.checkEntries(predictorReadings);
         this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
+        this.setHasWeatherDataWarning(predictor, predictorReadings);
         this.setStatus();
         this.setActions(predictor, facilityLatestEntry);
     }
@@ -82,7 +84,7 @@ export class PredictorStatusCheck {
     private setStatus() {
         if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries) {
             this.status = 'error';
-        } else if (!this.isDataCurrent) {
+        } else if (!this.isDataCurrent || this.hasWeatherDataWarning) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -123,5 +125,13 @@ export class PredictorStatusCheck {
     private monthLabel(month: number, year: number): string {
         const date = new Date(year, month - 1, 1);
         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    private setHasWeatherDataWarning(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
+        if (predictor.predictorType !== 'Weather') {
+            this.hasWeatherDataWarning = false;
+            return;
+        }
+        this.hasWeatherDataWarning = predictorData.some(data => data.weatherDataWarning);
     }
 }

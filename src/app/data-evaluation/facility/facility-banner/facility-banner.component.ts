@@ -19,15 +19,8 @@ export class FacilityBannerComponent {
 
   @ViewChild('navTabs') navTabs: ElementRef;
 
-  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: undefined });
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
-
-  facilityStatusCheck: Signal<FacilityStatusCheck> = computed(() => {
-    const accountStatusCheck = this.accountStatusCheck();
-    const selectedFacility = this.selectedFacility();
-    if (!accountStatusCheck || !selectedFacility) return;
-    return accountStatusCheck.facilityStatusChecks.find(fc => fc.facility.guid === selectedFacility.guid);
-  });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   disableTabs: Signal<boolean> = computed(() => {
     const facilityStatusCheck = this.facilityStatusCheck();
