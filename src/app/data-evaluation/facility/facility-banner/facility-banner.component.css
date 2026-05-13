@@ -28,6 +28,3 @@
 .hide-all-text.hide-tab-text .nav.nav-tabs .nav-link:hover .nav-text {
     display: none;
 }
-.banner a.nav-link:not(.active) .fa.fa-exclamation-triangle{
-    color: yellow;
-}
