@@ -1,39 +1,42 @@
+@let _facility = facility();
+@let _lastBill = lastBill();
+
 <div class="card">
   <div class="card-body">
     <div class="row">
       <div class="col">
-        <h1 class="card-title"><span class="fa fa-industry" [ngStyle]="{color: facility.color}"></span>
-          {{facility.name}}</h1>
-        @if (facility.address) {
-        <p class="card-text mb-0">{{facility.address}}, {{facility.city}},
-          {{facility.state}}
-          {{facility.zip}}
-          {{facility.country}}
+        <h1 class="card-title"><span class="fa fa-industry" [ngStyle]="{color: _facility.color}"></span>
+          {{_facility.name}}</h1>
+        @if (_facility.address) {
+        <p class="card-text mb-0">{{_facility.address}}, {{_facility.city}},
+          {{_facility.state}}
+          {{_facility.zip}}
+          {{_facility.country}}
         </p>
         }
         <p class="mb-0">
           Contact:
-          @if (facility.contactName) {
-          <span class="pe-2">{{facility.contactName}},</span>
+          @if (_facility.contactName) {
+          <span class="pe-2">{{_facility.contactName}},</span>
           }
-          @if (facility.contactEmail) {
-          <span class="pe-2">{{facility.contactEmail}},</span>
+          @if (_facility.contactEmail) {
+          <span class="pe-2">{{_facility.contactEmail}},</span>
           }
-          @if (facility.contactPhone) {
-          <span>{{facility.contactPhone | phoneNumber}}</span>
+          @if (_facility.contactPhone) {
+          <span>{{_facility.contactPhone | phoneNumber}}</span>
           }
-          @if (!facility.contactPhone && !facility.contactEmail && !facility.contactName) {
+          @if (!_facility.contactPhone && !_facility.contactEmail && !_facility.contactName) {
           <span>&mdash;</span>
           }
         </p>
         <p class="card-text mb-0">NAICS:
-          @if ((facility | naicsDisplay)) {
-          {{facility | naicsDisplay}}
+          @if ((_facility | naicsDisplay)) {
+          {{_facility | naicsDisplay}}
           } @else {
           &mdash;
           }
         </p>
-        @for (source of sources; track source) {
+        @for (source of sources(); track source) {
         <span class="badge me-2" [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
         }
       </div>
@@ -43,39 +46,29 @@
             <button class="btn btn-outline m-0 position-relative" (click)="navigateTo('utility')">
               <span class="fa fa-book"></span><br>
               Manage Utility <br> Data
-              @if (meterReadingsNeeded) {
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                <span class="fa fa-exclamation white"></span>
-              </span>
-              }
             </button>
           </div>
           <div class="p-1">
-            <button class="btn btn-outline m-0" (click)="navigateTo('overview')" [disabled]="!lastBill">
+            <button class="btn btn-outline m-0" (click)="navigateTo('overview')" [disabled]="!_lastBill">
               <span class="fa fa-chart-column"></span><br>
               View Facility <br> Data Overview
             </button>
           </div>
           <div class="p-1">
-            <button class="btn btn-outline m-0" (click)="navigateTo('visualization')" [disabled]="!lastBill">
+            <button class="btn btn-outline m-0" (click)="navigateTo('visualization')" [disabled]="!_lastBill">
               <span class="fa fa-line-chart"></span><br>
               Visualize Facility <br> Data
             </button>
           </div>
           <div class="p-1">
             <button class="btn btn-outline m-0 position-relative" (click)="navigateTo('analysis')"
-              [disabled]="!lastBill">
+              [disabled]="!_lastBill">
               <span class="fa fa-microscope"></span><br>
               Conduct Facility <br> Analysis
-              @if (energyAnalysisNeeded || waterAnalysisNeeded || energyAnalysisHasErrors || waterAnalysisHasErrors) {
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                <span class="fa fa-exclamation white"></span>
-              </span>
-              }
             </button>
           </div>
           <div class="p-1">
-            <button class="btn btn-outline m-0" (click)="navigateTo('settings')" [disabled]="!lastBill">
+            <button class="btn btn-outline m-0" (click)="navigateTo('settings')" [disabled]="!_lastBill">
               <span class="fa fa-gear"></span><br>
               Manage Facility <br> Settings
             </button>
@@ -93,86 +86,6 @@
             </button>
           </div>
         </div>
-        @if (meterReadingsNeeded || energyAnalysisNeeded || waterAnalysisNeeded || energyAnalysisHasErrors ||
-        waterAnalysisHasErrors) {
-        <div class="d-flex justify-content-center">
-          <ul class="list-group list-group-flush">
-            <!--meters-->
-            @if (meterReadingsNeeded) {
-            <li class="list-group-item">
-              <a class="nav-link" routerLink="/data-evaluation/facility/{{facility.guid}}/utility">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Meter readings needed. @if (lastBill) {
-                <span>Latest entry {{lastBill |displayMeterDataDate}}.</span>
-                }
-              </a>
-            </li>
-            }
-            @if (energyAnalysisNeeded && lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/energy">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Energy analysis needed.
-                <!-- 
-                TODO: add check when new data is entered to determine if analysis is needed
-                @if (latestEnergyAnalysisItem) {
-                Latest energy
-                analysis conducted for
-                {{latestEnergyAnalysisItem.reportYear |
-                yearDisplay:facility.fiscalYear}}
-              } -->
-              </a>
-            </li>
-            }
-            @if (waterAnalysisNeeded && lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/water">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Water analysis needed.
-                <!-- 
-              TODO: add check when new data is entered to determine if analysis is needed
-              @if (latestWaterAnalysisItem) {
-              Latest water
-              analysis conducted for
-              {{latestWaterAnalysisItem.reportYear |
-              yearDisplay:facility.fiscalYear}}
-            } -->
-              </a>
-            </li>
-            }
-            @if (energyAnalysisHasErrors && lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/energy">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Errors in the energy analysis: {{latestEnergyAnalysisItem.name}}
-              </a>
-            </li>
-            }
-            @if (waterAnalysisHasErrors && lastBill) {
-            <li class="list-group-item">
-              <a class="nav-link"
-                routerLink="/data-evaluation/facility/{{facility.guid}}/analysis/analysis-dashboard/water">
-                <span class="badge rounded-pill bg-danger">
-                  <span class="fa fa-exclamation white"></span>
-                </span>
-                Errors in the water analysis: {{latestWaterAnalysisItem.name}}
-              </a>
-            </li>
-            }
-          </ul>
-        </div>
-        }
       </div>
     </div>
   </div>

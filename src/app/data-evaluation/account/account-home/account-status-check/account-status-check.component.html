@@ -1,0 +1,183 @@
+@let _statusCheck = accountStatusCheck();
+@let _orderedFacilityChecks = orderedFacilityChecks();
+
+@if (_statusCheck) {
+<div class="accordion" id="accountStatusCheckAccordion">
+    <div class="accordion-item card">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
+                data-bs-target="#accountStatusCollapse" aria-expanded="false" aria-controls="accountStatusCollapse"
+                [ngClass]="{
+          'bg-warning': _statusCheck.status === 'warning',
+          'bg-danger':  _statusCheck.status === 'error'
+        }">
+                <span class="fa me-2" [ngClass]="{
+          'fa-circle-check text-success':      _statusCheck.status === 'good',
+          'fa-exclamation-triangle':           _statusCheck.status === 'warning',
+          'fa-circle-xmark':                   _statusCheck.status === 'error'
+        }"></span>
+                <strong>Account Status</strong>
+                @if (_statusCheck.totalActionCount > 0) {
+                <span class="badge bg-secondary ms-2">
+                    {{_statusCheck.totalActionCount}} item{{_statusCheck.totalActionCount !== 1 ? 's' : ''}}
+                </span>
+                }
+            </button>
+        </h2>
+
+        <div id="accountStatusCollapse" class="accordion-collapse collapse">
+            <div class="accordion-body p-0">
+
+                <!--Account-level actions (e.g. setup account, upload data)-->
+                @if (_statusCheck.actions.length > 0) {
+                <ul class="list-group list-group-flush border-bottom">
+                    @for (action of _statusCheck.actions; track action.trackGuid) {
+                    <li class="list-group-item list-group-item-action" [routerLink]="action.url">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fa fa-fw" [ngClass]="{
+                'fa-circle-xmark text-danger':        action.status === 'error',
+                'fa-exclamation-triangle text-warning': action.status === 'warning'
+              }"></span>
+                            <div class="flex-grow-1">
+                                <strong class="small">{{action.label}}</strong>
+                                @if (action.description) {
+                                <p class="mb-0 text-muted" style="font-size:0.78rem">{{action.description}}</p>
+                                }
+                            </div>
+                            <span class="fa fa-chevron-right text-muted small"></span>
+                        </div>
+                    </li>
+                    }
+                </ul>
+                }
+
+                <!--Facility rows-->
+                @if (_orderedFacilityChecks.length > 0) {
+                <ul class="list-group list-group-flush">
+                    @for (fc of _orderedFacilityChecks; track fc.facility.guid) {
+                    <li class="list-group-item p-0 facility-row">
+
+                        <!--Facility header row — always visible, clickable to go to facility home-->
+                        <button
+                            class="w-100 text-start border-0 bg-transparent px-3 py-2 d-flex align-items-center gap-2"
+                            (click)="goToFacility(fc)">
+                            <!--Colored status strip-->
+                            <span class="facility-status-strip" [ngClass]="{
+                'bg-success': fc.status === 'good',
+                'bg-warning': fc.status === 'warning',
+                'bg-danger':  fc.status === 'error'
+              }"></span>
+
+                            <!--Status icon-->
+                            <span class="fa fa-fw" [ngClass]="{
+                'fa-circle-check text-success':        fc.status === 'good',
+                'fa-exclamation-triangle text-warning': fc.status === 'warning',
+                'fa-circle-xmark text-danger':         fc.status === 'error'
+              }"></span>
+
+                            <!--Facility color dot + name-->
+                            <span class="fa fa-industry me-1" [ngStyle]="{'color': fc.facility.color}"></span>
+                            <span class="fw-semibold flex-grow-1">{{fc.facility.name}}</span>
+
+                            <!--Sub-status badges (compact summary)-->
+                            <span class="d-flex gap-1 align-items-center me-1">
+                                @if (fc.metersStatus !== 'good') {
+                                <span class="badge" [ngClass]="{
+                  'bg-warning text-dark': fc.metersStatus === 'warning',
+                  'bg-danger':           fc.metersStatus === 'error'
+                }">
+                                    <span class="fa fa-gauge me-1"></span>Meters
+                                </span>
+                                }
+                                @if (fc.predictorsStatus !== 'good') {
+                                <span class="badge" [ngClass]="{
+                  'bg-warning text-dark': fc.predictorsStatus === 'warning',
+                  'bg-danger':           fc.predictorsStatus === 'error'
+                }">
+                                    <span class="fa fa-boxes-stacked me-1"></span>Predictors
+                                </span>
+                                }
+                                @if (fc.energyAnalysisStatusCheck?.status !== 'good') {
+                                <span class="badge" [ngClass]="{
+                  'bg-warning text-dark': fc.energyAnalysisStatusCheck?.status === 'warning',
+                  'bg-danger':           fc.energyAnalysisStatusCheck?.status === 'error'
+                }">
+                                    <span class="fa fa-bolt me-1"></span>Energy Analysis
+                                </span>
+                                }
+                                @if (fc.waterAnalysisStatusCheck?.status !== 'good') {
+                                <span class="badge" [ngClass]="{
+                  'bg-warning text-dark': fc.waterAnalysisStatusCheck?.status === 'warning',
+                  'bg-danger':           fc.waterAnalysisStatusCheck?.status === 'error'
+                }">
+                                    <span class="fa fa-droplet me-1"></span>Water Analysis
+                                </span>
+                                }
+                            </span>
+
+                            <!--Navigate arrow-->
+                            <span class="fa fa-arrow-right text-muted small"></span>
+                        </button>
+
+                        <!--Inline issue summary (only shown when there are issues)-->
+                        @if (fc.status !== 'good') {
+                        <div class="issues-reveal">
+                            <ul class="list-group list-group-flush border-top ms-4 me-0">
+                                @if (fc.hasNoMeters) {
+                                <li class="list-group-item list-group-item-action sub-issue py-1"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>No utility meters added
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                } @else if (fc.hasNoMeterGroups) {
+                                <li class="list-group-item list-group-item-action sub-issue py-1"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/meter-groups'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>No meter groups configured
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
+                                @if (fc.hasNoPredictors) {
+                                <li class="list-group-item list-group-item-action sub-issue py-1"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>No predictors added
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
+                                @if(fc.hasNonCurrentMeters){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>All Meter data is not
+                                    current
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
+                                @if(fc.hasNonCurrentPredictors){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>All Predictor data is not
+                                    current
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
+                            </ul>
+                        </div>
+                        }
+
+                    </li>
+                    }
+                </ul>
+                }
+
+                <!--All good message-->
+                @if (_statusCheck.status === 'good') {
+                <div class="alert alert-success m-3 mb-2">
+                    <span class="fa fa-circle-check me-2"></span>
+                    All facilities are looking good! Data is current and complete.
+                </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+}

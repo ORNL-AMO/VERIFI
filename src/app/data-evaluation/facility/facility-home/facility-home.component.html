@@ -1,35 +1,37 @@
 <div class="measur-wrapper main-content">
   <app-facility-home-summary></app-facility-home-summary>
   <hr>
-    @if (facilityMeters.length > 0) {
-      <div class="row">
-        @if (latestEnergyAnalysisItem) {
-          <div [ngClass]="{'col-6': latestWaterAnalysisItem, 'col-12': !latestWaterAnalysisItem}"
-            >
-            <app-facility-energy-card></app-facility-energy-card>
-          </div>
-        }
-        @if (latestWaterAnalysisItem) {
-          <div [ngClass]="{'col-6': latestEnergyAnalysisItem, 'col-12': !latestEnergyAnalysisItem}"
-            >
-            <app-facility-water-card></app-facility-water-card>
-          </div>
-        }
-      </div>
-    }
-    @if (facilityMeters.length == 0) {
-      <div class="row">
-        <div class="col-12">
-          <div class="card no-data-card" (click)="navigateToMeters()">
-            <div class="card-body text-center">
-              <h5>No utility meters found for this facility.</h5>
-              <p class="mb-0">Please click here to <i class="fa fa-book"></i> Manage Utility Data.</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-12">
-          <hr>
-          </div>
-        </div>
-      }
+  @if (facilityMeters().length > 0) {
+  <div class="row">
+    <div class="col-12">
+      <app-facility-status-check></app-facility-status-check>
+      <hr>
     </div>
+    @if (latestEnergyAnalysisItem()) {
+    <div [ngClass]="{'col-6': latestWaterAnalysisItem(), 'col-12': !latestWaterAnalysisItem()}">
+      <app-facility-energy-card></app-facility-energy-card>
+    </div>
+    }
+    @if (latestWaterAnalysisItem()) {
+    <div [ngClass]="{'col-6': latestEnergyAnalysisItem(), 'col-12': !latestEnergyAnalysisItem()}">
+      <app-facility-water-card></app-facility-water-card>
+    </div>
+    }
+  </div>
+  }
+  @if (facilityMeters().length == 0) {
+  <div class="row">
+    <div class="col-12">
+      <div class="card no-data-card" (click)="navigateToMeters()">
+        <div class="card-body text-center">
+          <h5>No utility meters found for this facility.</h5>
+          <p class="mb-0">Please click here to <i class="fa fa-book"></i> Manage Utility Data.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <hr>
+    </div>
+  </div>
+  }
+</div>

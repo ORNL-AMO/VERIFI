@@ -59,6 +59,7 @@ export class UtilityBannerComponent implements OnInit {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'export-facilities-to-excel') {
         this.exportToExcelTemplateV3Service.triggerExportDownload();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

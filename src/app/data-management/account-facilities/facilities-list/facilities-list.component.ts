@@ -48,6 +48,7 @@ export class FacilitiesListComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'delete-facility') {
         this.showFacilityDeletionToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

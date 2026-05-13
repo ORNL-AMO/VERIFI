@@ -2,14 +2,9 @@
     color: white;
 }
 
-/* .list-group-item-action{
-    font-weight: bold;
-} */
-
 .list-group-item-action:hover{
     cursor: pointer;
 }
-
 
 .list-group-item-action.active{
     color: white;
@@ -17,4 +12,22 @@
 
 .float-right{
     float: right;
+}
+
+.list-group-item.facility-item{
+    background-color: #efefef;
+}
+
+/* Hover-reveal description */
+.todo-item .todo-description {
+    font-size: 0.75rem;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+.todo-item:hover .todo-description {
+    max-height: 4rem;
+    opacity: 1;
 }

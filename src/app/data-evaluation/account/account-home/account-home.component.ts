@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -28,79 +27,74 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-account-home',
-    templateUrl: './account-home.component.html',
-    styleUrls: ['./account-home.component.css'],
-    standalone: false
+  selector: 'app-account-home',
+  templateUrl: './account-home.component.html',
+  styleUrls: ['./account-home.component.css'],
+  standalone: false
 })
-export class AccountHomeComponent implements OnInit {
+export class AccountHomeComponent implements OnDestroy {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private accountHomeService: AccountHomeService = inject(AccountHomeService);
+  private predictorDbService: PredictorDbService = inject(PredictorDbService);
+  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private eGridService: EGridService = inject(EGridService);
+  private customFuelDbService: CustomFuelDbService = inject(CustomFuelDbService);
+  private customGWPDbService: CustomGWPDbService = inject(CustomGWPDbService);
 
-  accountFacilities: Array<IdbFacility>;
-  selectedAccountSub: Subscription;
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
+  accountFacilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
+
+  latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
+  latestWaterAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });
+
+  monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyEnergyAnalysisData, { initialValue: undefined });
+  monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyWaterAnalysisData, { initialValue: undefined });
+
   annualEnergyAnalysisWorker: Worker;
   annualWaterAnalysisWorker: Worker;
   accountOverviewWorker: Worker;
 
-  monthlyEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyEnergyAnalysisDataSub: Subscription;
-  monthlyWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyWaterAnalysisDataSub: Subscription;
-  account: IdbAccount;
-  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
-  latestWaterAnalysisItem: IdbAccountAnalysisItem;
-  carrouselIndex: number = 0;
-  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private accountHomeService: AccountHomeService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private analysisDbService: AnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService) { }
+  constructor() {
+    effect(() => {
+      const account = this.account();
+      if (account) {
+        untracked(() => {
+          this.accountHomeService.setLatestEnergyAnalysisItem(account.selectedEnergyAnalysisId);
+          this.accountHomeService.setLatestWaterAnalysisItem(account.selectedWaterAnalysisId);
+          this.setAccountOverviewData();
+        });
+      }
+    });
 
-  ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.account = val
-      this.accountHomeService.setLatestEnergyAnalysisItem(this.account.selectedEnergyAnalysisId);
-      this.accountHomeService.setLatestWaterAnalysisItem(this.account.selectedWaterAnalysisId);
-      if (this.accountHomeService.latestEnergyAnalysisItem) {
-        this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
-        this.setAnnualEnergyAnalysisSummary();
+    effect(() => {
+      const energyItem = this.latestEnergyAnalysisItem();
+      if (energyItem) {
+        untracked(() => this.setAnnualEnergyAnalysisSummary());
       } else {
-        this.latestEnergyAnalysisItem = undefined;
         this.accountHomeService.monthlyEnergyAnalysisData.next(undefined);
         this.accountHomeService.annualEnergyAnalysisSummary.next(undefined);
       }
+    });
 
-      if (this.accountHomeService.latestWaterAnalysisItem) {
-        this.latestWaterAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
-        this.setAnnualWaterAnalysisSummary();
+    effect(() => {
+      const waterItem = this.latestWaterAnalysisItem();
+      if (waterItem) {
+        untracked(() => this.setAnnualWaterAnalysisSummary());
       } else {
-        this.latestWaterAnalysisItem = undefined;
         this.accountHomeService.monthlyWaterAnalysisData.next(undefined);
         this.accountHomeService.annualWaterAnalysisSummary.next(undefined);
       }
-      this.setAccountOverviewData();
-    });
-
-    this.monthlyEnergyAnalysisDataSub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
-      this.monthlyEnergyAnalysisData = val;
-    });
-    this.monthlyWaterAnalysisDataSub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
-      this.monthlyWaterAnalysisData = val;
     });
   }
 
   ngOnDestroy() {
-    this.selectedAccountSub.unsubscribe();
-    this.monthlyEnergyAnalysisDataSub.unsubscribe();
-    this.monthlyWaterAnalysisDataSub.unsubscribe();
-
-
     if (this.annualWaterAnalysisWorker) {
       this.annualWaterAnalysisWorker.terminate();
     }
@@ -128,7 +122,6 @@ export class AccountHomeComponent implements OnInit {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
 
-
     if (typeof Worker !== 'undefined') {
       this.annualEnergyAnalysisWorker = new Worker(new URL('../../../web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
@@ -144,8 +137,8 @@ export class AccountHomeComponent implements OnInit {
       };
       this.accountHomeService.calculatingEnergy.next(true);
       this.annualEnergyAnalysisWorker.postMessage({
-        accountAnalysisItem: this.accountHomeService.latestEnergyAnalysisItem,
-        account: this.account,
+        accountAnalysisItem: this.latestEnergyAnalysisItem(),
+        account: this.account(),
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
         allAccountAnalysisItems: accountAnalysisItems,
@@ -155,8 +148,8 @@ export class AccountHomeComponent implements OnInit {
         accountPredictors: accountPredictors
       });
     } else {
-      // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData, accountPredictors);
+      const account = this.account();
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.latestEnergyAnalysisItem(), account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData, accountPredictors);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.setEnergyBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
@@ -179,7 +172,6 @@ export class AccountHomeComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
 
@@ -198,8 +190,8 @@ export class AccountHomeComponent implements OnInit {
       };
       this.accountHomeService.calculatingWater.next(true);
       this.annualWaterAnalysisWorker.postMessage({
-        accountAnalysisItem: this.accountHomeService.latestWaterAnalysisItem,
-        account: this.account,
+        accountAnalysisItem: this.latestWaterAnalysisItem(),
+        account: this.account(),
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
         allAccountAnalysisItems: accountAnalysisItems,
@@ -209,8 +201,8 @@ export class AccountHomeComponent implements OnInit {
         accountPredictors: accountPredictors
       });
     } else {
-      // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData, accountPredictors);
+      const account = this.account();
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.latestWaterAnalysisItem(), account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData, accountPredictors);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.setWaterBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
@@ -228,15 +220,8 @@ export class AccountHomeComponent implements OnInit {
     this.accountHomeService.monthlyWaterAnalysisData.next(monthlyAnalysisSummaryData);
   }
 
-  goNext() {
-    this.carrouselIndex++;
-  }
-
-  goBack() {
-    this.carrouselIndex--;
-  }
-
   setAccountOverviewData() {
+    const account = this.account();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -249,11 +234,9 @@ export class AccountHomeComponent implements OnInit {
       this.accountOverviewWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.accountHomeService.accountOverviewData.next(data.accountOverviewData);
-          // this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
           this.accountHomeService.calculatingOverview.next(false);
         } else {
           this.accountHomeService.accountOverviewData.next(undefined);
-          // this.accountOverviewService.utilityUseAndCost.next(undefined);
           this.accountHomeService.calculatingOverview.next('error');
         }
         this.accountOverviewWorker.terminate();
@@ -266,15 +249,14 @@ export class AccountHomeComponent implements OnInit {
         dateRange: undefined,
         meterData: meterData,
         inOverview: false,
-        account: this.account,
-        energyIsSource: this.account.energyIsSource,
+        account: account,
+        energyIsSource: account.energyIsSource,
         co2Emissions: co2Emissions,
         customFuels: customFuels,
         customGWPs: customGWPs
       });
     } else {
-      // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, co2Emissions, customFuels, facilities, this.account.assessmentReportVersion, customGWPs);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, true, { energyIsSource: account.energyIsSource, neededUnits: undefined }, co2Emissions, customFuels, facilities, account.assessmentReportVersion, customGWPs);
       let dateRange: { endDate: Date, startDate: Date };
       if (calanderizedMeters && calanderizedMeters.length > 0) {
         let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
@@ -288,7 +270,7 @@ export class AccountHomeComponent implements OnInit {
           startDate: minDate
         };
       }
-      let accountOverviewData: AccountOverviewData = new AccountOverviewData(calanderizedMeters, facilities, this.account, dateRange);
+      let accountOverviewData: AccountOverviewData = new AccountOverviewData(calanderizedMeters, facilities, account, dateRange);
       this.accountHomeService.accountOverviewData.next(accountOverviewData);
       this.accountHomeService.calculatingOverview.next(false);
     }
