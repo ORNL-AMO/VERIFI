@@ -269,7 +269,7 @@
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': displayDeletePredictor || displayCopyModal}"></div>
+<div [ngClass]="{'windowOverlay': displayDeletePredictor}"></div>
 <!--delete-->
 <div class="popup" [class.open]="displayDeletePredictor">
   <div class="popup-header">
@@ -292,33 +292,5 @@
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
-  </div>
-</div>
-<!--copy-->
-<div class="popup" [class.open]="displayCopyModal">
-  <div class="popup-header">
-    Copy {{predictorToCopy?.name}} to different facility?
-    <button class="item-right" (click)="cancelCopy()">x</button>
-  </div>
-  <div class="popup-body">
-    <form>
-      <label>Facility To Create Copy</label>
-      <select class="form-select" name="selectedCopyFacilityGuid" [(ngModel)]="selectedCopyFacilityGuid">
-        @for (facility of facilities(); track facility) {
-        @if(facility.guid != predictorToCopy.facilityId){
-        <option [ngValue]="facility.guid">{{facility.name}}</option>
-        }
-        }
-        <option [ngValue]="undefined"></option>
-      </select>
-    </form>
-    <p>
-      A copy of the predictor and it's correposonding data will be created in the selected facility.
-    </p>
-  </div>
-  <div class="saveCancel popup-footer text-end">
-    <button class="btn btn-secondary" (click)="cancelCopy()">Cancel</button>
-    <button class="btn btn-success" [disabled]="selectedCopyFacilityGuid == undefined" (click)="confirmCopy()">Create
-      Copy</button>
   </div>
 </div>
