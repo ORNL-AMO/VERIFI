@@ -38,7 +38,6 @@ import { MapMetersToFacilitiesComponent } from './data-management-import/process
 import { MapPredictorsToFacilitiesComponent } from './data-management-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component';
 import { ProcessMetersComponent } from './data-management-import/shared-process-file/process-meters/process-meters.component';
 import { ProcessMeterReadingsComponent } from './data-management-import/shared-process-file/process-meter-readings/process-meter-readings.component';
-import { InspectMeterDataSummaryTableComponent } from './data-management-import/shared-process-file/process-meter-readings/inspect-meter-data-summary-table/inspect-meter-data-summary-table.component';
 import { MeterDataSummaryTableComponent } from './data-management-import/shared-process-file/process-meter-readings/meter-data-summary-table/meter-data-summary-table.component';
 import { ProcessPredictorsComponent } from './data-management-import/shared-process-file/process-predictors/process-predictors.component';
 import { ProcessPredictorReadingsComponent } from './data-management-import/shared-process-file/process-predictor-readings/process-predictor-readings.component';
@@ -125,7 +124,6 @@ import { FacilityEnergyUsesGroupSankeyComponent } from './account-facilities/fac
     DataManagementSidebarFacilitiesListPipe,
     FacilityMeterMonthlyDataComponent,
     MeterDataSummaryTableComponent,
-    InspectMeterDataSummaryTableComponent,
     FacilityPredictorsTableComponent,
     FacilityPredictorComponent,
     FacilityPredictorDataTableComponent,

@@ -15,20 +15,12 @@
             </div>
           </div>
         </h4>
-
         @if (metersIncluded) {
-          @if (!inspectMeterSummary) {
-            <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries"
-            (emitInspectSummary)="selectMeterSummary($event)"></app-meter-data-summary-table>
-          }
-          @if (inspectMeterSummary) {
-            <app-inspect-meter-data-summary-table [meterDataSummary]="inspectMeterSummary"
-            (emitClose)="selectMeterSummary(undefined)"></app-inspect-meter-data-summary-table>
-          }
+        <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries"></app-meter-data-summary-table>
         } @else {
-          <div class="alert alert-warning p-2">
-            No meters found for upload.
-          </div>
+        <div class="alert alert-warning p-2">
+          No meters found for upload.
+        </div>
         }
 
       </div>
@@ -38,4 +30,4 @@
 
 <!--TODO: disable next-->
 <app-data-management-import-footer [fileReference]="fileReference"
-[navOption]="'meter-readings'"></app-data-management-import-footer>
+  [navOption]="'meter-readings'"></app-data-management-import-footer>
