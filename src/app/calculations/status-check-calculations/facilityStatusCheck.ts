@@ -15,6 +15,7 @@ import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 
 export class FacilityStatusCheck {
 
+    analysisStatusChecks: Array<AnalysisStatusCheck>;
     energyAnalysisStatusCheck: AnalysisStatusCheck;
     waterAnalysisStatusCheck: AnalysisStatusCheck;
 
@@ -45,8 +46,7 @@ export class FacilityStatusCheck {
         utilityMeterData: Array<IdbUtilityMeterData>,
         predictors: Array<IdbPredictor>,
         predictorData: Array<IdbPredictorData>,
-        energyAnalysisItem: IdbAnalysisItem,
-        waterAnalysisItem: IdbAnalysisItem,
+        facilityAnalysisItems: Array<IdbAnalysisItem>,
         analysisSetupErrors: Array<AnalysisSetupErrors>,
         meters: Array<IdbUtilityMeter> = [],
         meterGroups: Array<IdbUtilityMeterGroup> = []
@@ -57,6 +57,7 @@ export class FacilityStatusCheck {
         const facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(pd => pd.facilityId === facility.guid);
         const facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(m => m.meter.facilityId === facility.guid);
         const facilityMeterData: Array<IdbUtilityMeterData> = utilityMeterData.filter(md => md.facilityId === facility.guid);
+        const analysisItemsForFacility: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(ai => ai.facilityId === facility.guid);
 
         this.facility = facility;
         this.hasNoMeters = facilityMeters.length === 0;
@@ -64,9 +65,7 @@ export class FacilityStatusCheck {
         this.hasNoMeterGroups = !this.hasNoMeters && facilityMeterGroups.length === 0;
         this.hasNoPredictors = facilityPredictors.length === 0;
         this.facilityLatestEntry = this.computeFacilityLatestEntry(facilityMeterData);
-        
-        this.energyAnalysisStatusCheck = new AnalysisStatusCheck(energyAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
-        this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
+
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
         this.hasInvalidMeters = this.metersStatusChecks.some(check => !check.isMeterValid);
@@ -76,6 +75,7 @@ export class FacilityStatusCheck {
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
+        this.setAnalysisStatusChecks(analysisItemsForFacility, analysisSetupErrors);
         this.setStatus();
     }
 
@@ -172,8 +172,34 @@ export class FacilityStatusCheck {
         this.hasNonCurrentPredictors = this.predictorsStatusChecks.some(check => !check.isDataCurrent);
     }
 
+    private setAnalysisStatusChecks(analysisItems: Array<IdbAnalysisItem>, analysisSetupErrors: Array<AnalysisSetupErrors>) {
+        this.analysisStatusChecks = new Array<AnalysisStatusCheck>();
+        analysisItems.forEach(item => {
+            const itemStatusCheck = new AnalysisStatusCheck(item, analysisSetupErrors, this.metersStatusChecks, this.predictorsStatusChecks);
+            this.analysisStatusChecks.push(itemStatusCheck);
+        });
+        const energyAnalysisItem = this.getLatestAnalysisItem(analysisItems, 'energy');
+        if (energyAnalysisItem) {
+            this.energyAnalysisStatusCheck = this.analysisStatusChecks.find(check => check.analysisItem.guid === energyAnalysisItem.guid);
+        }
+        const waterAnalysisItem = this.getLatestAnalysisItem(analysisItems, 'water');
+        if (waterAnalysisItem) {
+            this.waterAnalysisStatusCheck = this.analysisStatusChecks.find(check => check.analysisItem.guid === waterAnalysisItem.guid);
+        }
+    }
+
+    private getLatestAnalysisItem(analysisItems: Array<IdbAnalysisItem>, category: 'energy' | 'water'): IdbAnalysisItem | undefined {
+        const selectedId = category === 'energy' ? this.facility.selectedEnergyAnalysisId : this.facility.selectedWaterAnalysisId;
+        if (selectedId) {
+            return analysisItems.find(item => item.guid === selectedId);
+        }
+        const items = analysisItems.filter(item => item.facilityId === this.facility.guid && item.analysisCategory === category);
+        return items.length > 0 ? _.maxBy(items, 'modifiedDate') : undefined;
+    }
+
+
     private setStatus() {
-        let statuses: Array<STATUS_CHECK_OPTIONS> = [this.energyAnalysisStatusCheck.status, this.waterAnalysisStatusCheck.status, this.metersStatus, this.predictorsStatus];
+        let statuses: Array<STATUS_CHECK_OPTIONS> = [this.energyAnalysisStatusCheck?.status, this.waterAnalysisStatusCheck?.status, this.metersStatus, this.predictorsStatus];
 
         if (statuses.includes('error')) {
             this.status = 'error';

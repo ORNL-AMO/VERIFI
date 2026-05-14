@@ -1,23 +1,25 @@
-import { CalanderizedMeter } from "src/app/models/calanderization";
-import { MeterDateEntry, PredictorDateEntry } from "./statusCheckModels";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { IdbPredictor } from "src/app/models/idbModels/predictor";
-import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { AnalysisGroup, JStatRegressionModel } from "src/app/models/analysis";
 import { AnalysisSetupErrors } from "src/app/models/validation";
 import * as _ from 'lodash';
+import { MeterStatusCheck } from "./meterStatusCheck";
+import { PredictorStatusCheck } from "./predictorStatusCheck";
+import { STATUS_CHECK_OPTIONS } from "./statusCheckModels";
 
 export class AnalysisStatusCheck {
 
-    hasAnalysis: boolean;
+    analysisItem: IdbAnalysisItem;
     /** The most recent data date across all meters and predictors used in the analysis. */
     latestDataDate: Date;
     /** The most recent same day/month across all meters and predictors used in the analysis */
     latestDataAllEntries: Date;
     /** True when every meter and predictor has data up to the same month/year as latestDataDate. */
     allDatesCurrent: boolean;
-    latestPredictorData: Array<PredictorDateEntry>;
-    latestMeterData: Array<MeterDateEntry>;
+
+    includedPredictorStatusChecks: Array<PredictorStatusCheck>;
+    includedMeterStatusChecks: Array<MeterStatusCheck>;
+    // latestPredictorData: Array<PredictorDateEntry>;
+    // latestMeterData: Array<MeterDateEntry>;
 
     hasSetupErrors: boolean;
     //TODO: Dependent predictor and meter errors
@@ -27,25 +29,14 @@ export class AnalysisStatusCheck {
 
     status: 'good' | 'warning' | 'error';
     constructor(analysisItem: IdbAnalysisItem,
-        calanderizedMeters: Array<CalanderizedMeter>,
-        predictors: Array<IdbPredictor>,
-        predictorData: Array<IdbPredictorData>,
-        analysisSetupErrors: Array<AnalysisSetupErrors>) {
-        if (analysisItem) {
-            this.hasAnalysis = true;
-            this.setAnalysisDataDateCheck(calanderizedMeters, analysisItem, predictors, predictorData);
-            this.setHasSetupErrors(analysisSetupErrors, analysisItem.guid);
-            this.setStatus();
-        } else {
-            this.hasAnalysis = false;
-            this.latestDataDate = undefined;
-            this.allDatesCurrent = false;
-            this.latestPredictorData = [];
-            this.latestMeterData = [];
-            this.latestDataAllEntries = undefined;
-            this.hasSetupErrors = false;
-            this.status = 'good';
-        }
+        analysisSetupErrors: Array<AnalysisSetupErrors>,
+        meterStatusChecks: Array<MeterStatusCheck>,
+        predictorStatusChecks: Array<PredictorStatusCheck>
+    ) {
+        this.analysisItem = analysisItem;
+        this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);
+        this.setHasSetupErrors(analysisSetupErrors, analysisItem.guid);
+        this.setStatus();
     }
 
     /**
@@ -54,24 +45,24 @@ export class AnalysisStatusCheck {
     * data entry date for each.
     */
     private setAnalysisDataDateCheck(
-        calanderizedMeters: Array<CalanderizedMeter>,
         analysisItem: IdbAnalysisItem,
-        predictors: Array<IdbPredictor>,
-        predictorData: Array<IdbPredictorData>
+        meterStatusChecks: Array<MeterStatusCheck>,
+        predictorStatusChecks: Array<PredictorStatusCheck>
     ) {
-        const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(analysisItem.groups, calanderizedMeters);
-
-        this.latestPredictorData = includedPredictorIds.map(predictorId =>
-            this.getPredictorDateEntry(predictorId, predictors, predictorData)
+        const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(analysisItem.groups, meterStatusChecks);
+        this.includedPredictorStatusChecks = includedPredictorIds.map(predictorId =>
+            this.getPredictorDateEntry(predictorId, predictorStatusChecks)
         );
+        const latestPredictorDates: Array<Date> = this.includedPredictorStatusChecks.map(d => d.latestEntryDate);
 
-        this.latestMeterData = includedMeterIds.map(meterId =>
-            this.getMeterDateEntry(meterId, calanderizedMeters)
+        this.includedMeterStatusChecks = includedMeterIds.map(meterId =>
+            this.getMeterDateEntry(meterId, meterStatusChecks)
         );
+        const latestMeterData: Array<Date> = this.includedMeterStatusChecks.map(d => d.lastDateEntry);
 
         const allDates: Array<Date> = [
-            ...this.latestPredictorData.map(d => d.lastDateEntry),
-            ...this.latestMeterData.map(d => d.lastDateEntry)
+            ...latestPredictorDates,
+            ...latestMeterData
         ];
         if (allDates.length === 0) {
             this.latestDataDate = undefined;
@@ -83,10 +74,14 @@ export class AnalysisStatusCheck {
         this.latestDataDate = maxDate;
 
         // All meters and predictors are considered current when they share the same month and year as the latest data date.
-        this.allDatesCurrent = allDates.every(d =>
-            d.getFullYear() === this.latestDataDate.getFullYear() &&
-            d.getMonth() === this.latestDataDate.getMonth()
-        );
+        if (this.latestDataDate) {
+            this.allDatesCurrent = allDates.every(d =>
+                d.getFullYear() === this.latestDataDate.getFullYear() &&
+                d.getMonth() === this.latestDataDate.getMonth()
+            );
+        } else {
+            this.allDatesCurrent = false;
+        }
 
         //latest data entry date for which all meters and predictors have data entered
         this.latestDataAllEntries = _.min(allDates);
@@ -99,15 +94,18 @@ export class AnalysisStatusCheck {
      */
     private collectRegressionGroupInputIds(
         groups: Array<AnalysisGroup>,
-        calanderizedMeters: Array<CalanderizedMeter>
+        meterStatusChecks: Array<MeterStatusCheck>,
     ): { includedMeterIds: Array<string>; includedPredictorIds: Array<string> } {
         const includedMeterIds: Array<string> = [];
         const includedPredictorIds: Array<string> = [];
 
         for (const group of groups) {
-            if (group.analysisType !== 'regression') {
-                // TODO: handle other analysis types
-                continue;
+            if (group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity') {
+                group.predictorVariables.forEach(pv => {
+                    if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id)) {
+                        includedPredictorIds.push(pv.id);
+                    }
+                });
             }
 
             // Collect predictor IDs from the group's selected regression model.
@@ -121,10 +119,10 @@ export class AnalysisStatusCheck {
             }
 
             // Collect unique meter IDs for all calanderized meters belonging to this group.
-            const groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cm => cm.meter.groupId === group.idbGroupId);
+            const groupMeters: Array<MeterStatusCheck> = meterStatusChecks.filter(cm => cm.groupId === group.idbGroupId);
             for (const cm of groupMeters) {
-                if (!includedMeterIds.includes(cm.meter.guid)) {
-                    includedMeterIds.push(cm.meter.guid);
+                if (!includedMeterIds.includes(cm.meterId)) {
+                    includedMeterIds.push(cm.meterId);
                 }
             }
         }
@@ -135,42 +133,17 @@ export class AnalysisStatusCheck {
     /** Returns the latest data entry date for a single predictor. */
     private getPredictorDateEntry(
         predictorId: string,
-        predictors: Array<IdbPredictor>,
-        predictorData: Array<IdbPredictorData>
-    ): PredictorDateEntry {
-        const predictor: IdbPredictor | undefined = predictors.find(p => p.guid === predictorId);
-        const dataForPredictor: Array<IdbPredictorData> = predictorData.filter(pd => pd.predictorId === predictorId);
-        let lastDateEntry: Date;
-        if (dataForPredictor.length > 0) {
-            lastDateEntry = new Date(Math.max(...dataForPredictor.map(pd => new Date(pd.year, pd.month - 1, 1).getTime())));
-        } else {
-            lastDateEntry = undefined;
-        }
-        return {
-            predictorName: predictor?.name ?? 'Unknown Predictor',
-            predictorId,
-            lastDateEntry
-        };
+        predictorStatusChecks: Array<PredictorStatusCheck>
+    ): PredictorStatusCheck {
+        return predictorStatusChecks.find(p => p.predictorId === predictorId);
     }
 
     /** Returns the latest data entry date for a single meter. */
     private getMeterDateEntry(
         meterId: string,
-        calanderizedMeters: Array<CalanderizedMeter>
-    ): MeterDateEntry {
-        const calanderizedMeter: CalanderizedMeter | undefined = calanderizedMeters.find(cm => cm.meter.guid === meterId);
-        const monthlyData = calanderizedMeter?.monthlyData ?? [];
-        let lastDateEntry: Date | undefined;
-        if (monthlyData.length > 0) {
-            lastDateEntry = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue, 1).getTime())));
-        } else {
-            lastDateEntry = undefined;
-        }
-        return {
-            meterName: calanderizedMeter?.meter.name ?? 'Unknown Meter',
-            meterId,
-            lastDateEntry
-        };
+        meterStatusChecks: Array<MeterStatusCheck>
+    ): MeterStatusCheck {
+        return meterStatusChecks.find(cm => cm.meterId === meterId);
     }
 
     private setHasSetupErrors(analysisSetupErrors: Array<AnalysisSetupErrors>, analysisItemId: string) {
@@ -179,7 +152,9 @@ export class AnalysisStatusCheck {
     }
 
     private setStatus() {
-        if (this.hasSetupErrors || !this.hasAnalysis) {
+        const meterStatuses: Array<STATUS_CHECK_OPTIONS> = this.includedMeterStatusChecks.map(m => m.status);
+        const predictorStatuses: Array<STATUS_CHECK_OPTIONS> = this.includedPredictorStatusChecks.map(p => p.status);
+        if (this.hasSetupErrors || meterStatuses.includes('error') || predictorStatuses.includes('error')) {
             this.status = 'error';
         }
         // else if (!this.allDatesCurrent) {

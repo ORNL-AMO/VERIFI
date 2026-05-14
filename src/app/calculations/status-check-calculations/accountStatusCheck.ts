@@ -32,36 +32,19 @@ export class AccountStatusCheck {
     ) {
         this.setAccountActions(account, facilities);
         this.facilityStatusChecks = facilities.map(facility => {
-            const facilityMeters = meters.filter(m => m.facilityId === facility.guid);
-            const facilityMeterData = meterData.filter(d => d.facilityId === facility.guid);
-            const facilityMeterGroups = meterGroups.filter(g => g.facilityId === facility.guid);
-            const facilityPredictors = predictors.filter(p => p.facilityId === facility.guid);
-            const facilityPredictorData = predictorData.filter(d => d.facilityId === facility.guid);
-            const energyAnalysisItem = this.getLatestAnalysisItem(facility, facilityAnalysisItems, 'energy');
-            const waterAnalysisItem = this.getLatestAnalysisItem(facility, facilityAnalysisItems, 'water');
             return new FacilityStatusCheck(
                 facility,
                 calanderizedMeters,
-                facilityMeterData,
-                facilityPredictors,
-                facilityPredictorData,
-                energyAnalysisItem,
-                waterAnalysisItem,
+                meterData,
+                predictors,
+                predictorData,
+                facilityAnalysisItems,
                 analysisSetupErrors,
-                facilityMeters,
-                facilityMeterGroups
+                meters,
+                meterGroups
             );
         });
         this.setStatus();
-    }
-
-    private getLatestAnalysisItem(facility: IdbFacility, analysisItems: Array<IdbAnalysisItem>, category: 'energy' | 'water'): IdbAnalysisItem | undefined {
-        const selectedId = category === 'energy' ? facility.selectedEnergyAnalysisId : facility.selectedWaterAnalysisId;
-        if (selectedId) {
-            return analysisItems.find(item => item.guid === selectedId);
-        }
-        const items = analysisItems.filter(item => item.facilityId === facility.guid && item.analysisCategory === category);
-        return items.length > 0 ? _.maxBy(items, 'modifiedDate') : undefined;
     }
 
     private setAccountActions(account: IdbAccount, facilities: Array<IdbFacility>) {

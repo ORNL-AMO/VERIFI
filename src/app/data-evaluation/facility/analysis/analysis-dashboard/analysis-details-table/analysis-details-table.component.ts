@@ -229,6 +229,7 @@ export class AnalysisDetailsTableComponent {
         selectedFacility.selectedWaterAnalysisId = analysisItem.guid;
       }
       await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
+      await this.dbChangesService.updateFacilities(selectedFacility, false);
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
     }

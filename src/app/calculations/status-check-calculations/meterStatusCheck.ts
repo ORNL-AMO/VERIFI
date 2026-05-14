@@ -8,6 +8,7 @@ import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 export class MeterStatusCheck {
 
     meterId: string;
+    groupId: string;
     meterName: string;
     isMeterValid: boolean;
     lastDateEntry: Date;
@@ -28,6 +29,7 @@ export class MeterStatusCheck {
         facilityLatestEntry: { month: number; year: number } | undefined
     ) {
         this.meterId = meter.guid;
+        this.groupId = meter.groupId;
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
@@ -89,9 +91,9 @@ export class MeterStatusCheck {
     }
 
     private setStatus() {
-        if (!this.isMeterValid || this.hasNoData) {
+        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries) {
             this.status = 'error';
-        } else if (this.hasDuplicateEntries || this.hasNoCalendarizationMethod || !this.isDataCurrent || this.hasNegativeReadings) {
+        } else if (this.hasNoCalendarizationMethod || !this.isDataCurrent || this.hasNegativeReadings) {
             this.status = 'warning';
         } else {
             this.status = 'good';
