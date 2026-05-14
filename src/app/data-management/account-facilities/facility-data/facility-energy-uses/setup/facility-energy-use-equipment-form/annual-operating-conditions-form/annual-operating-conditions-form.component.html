@@ -13,6 +13,10 @@
         </div>
         <div class="col">
             <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fa fa-calculator text-primary icon-style"
+                        (click)="openCalculateHoursOfOperationModal()"></i>
+                </span>
                 <input class="form-control" type="number" formControlName="hoursOfOperation" min="0"
                     id="{{'hoursOfOperation_'+selectedYear}}">
                 <span class="input-group-text">hrs</span>
@@ -111,7 +115,7 @@
 }
 
 
-<div [ngClass]="{'windowOverlay': showRemoveOperatingConditionsModal}"></div>
+<div [ngClass]="{'windowOverlay': showRemoveOperatingConditionsModal || showCalculateHoursOfOperationModal }"></div>
 <div class="popup" [class.open]="showRemoveOperatingConditionsModal">
     <div class="popup-header">Remove Year of Operating Conditions Data
         <button class="item-right" (click)="closeRemoveOperatingConditionsModal()">x</button>
@@ -128,3 +132,10 @@
         <button class="btn btn-danger small" (click)="confirmRemoveOperatingConditionsData()">Remove</button>
     </div>
 </div>
+
+@if (showCalculateHoursOfOperationModal) {
+<app-operating-hours-modal [year]="annualOperatingConditionsDataForm.controls.year.value" [hoursPerDay]="annualOperatingConditionsDataForm.controls.hoursPerDay.value"
+    [daysPerWeek]="annualOperatingConditionsDataForm.controls.daysPerWeek.value" [weeksPerYear]="annualOperatingConditionsDataForm.controls.weeksPerYear.value"
+    (saveCalculatedHoursPerYear)="handleCalculatedValues($event)"
+    (closeModal)="closeCalculateHoursOfOperationModal()"></app-operating-hours-modal>
+}
