@@ -5,7 +5,7 @@ import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { AnalysisGroup, JStatRegressionModel } from "src/app/models/analysis";
 import { AnalysisSetupErrors } from "src/app/models/validation";
-
+import * as _ from 'lodash';
 
 export class AnalysisStatusCheck {
 
@@ -20,6 +20,10 @@ export class AnalysisStatusCheck {
     latestMeterData: Array<MeterDateEntry>;
 
     hasSetupErrors: boolean;
+    //TODO: Dependent predictor and meter errors
+    //skip warnings
+    hasPredictorSetupErrors: boolean;
+    hasMeterSetupErrors: boolean;
 
     status: 'good' | 'warning' | 'error';
     constructor(analysisItem: IdbAnalysisItem,
@@ -69,8 +73,14 @@ export class AnalysisStatusCheck {
             ...this.latestPredictorData.map(d => d.lastDateEntry),
             ...this.latestMeterData.map(d => d.lastDateEntry)
         ];
-
-        this.latestDataDate = new Date(Math.max(...allDates.map(d => d.getTime())));
+        if (allDates.length === 0) {
+            this.latestDataDate = undefined;
+            this.allDatesCurrent = false;
+            this.latestDataAllEntries = undefined;
+            return;
+        }
+        const maxDate: Date = _.max(allDates);
+        this.latestDataDate = maxDate;
 
         // All meters and predictors are considered current when they share the same month and year as the latest data date.
         this.allDatesCurrent = allDates.every(d =>
@@ -78,7 +88,8 @@ export class AnalysisStatusCheck {
             d.getMonth() === this.latestDataDate.getMonth()
         );
 
-        this.latestDataAllEntries = new Date(Math.min(...allDates.map(d => d.getTime())));
+        //latest data entry date for which all meters and predictors have data entered
+        this.latestDataAllEntries = _.min(allDates);
     }
 
     /**
@@ -129,7 +140,12 @@ export class AnalysisStatusCheck {
     ): PredictorDateEntry {
         const predictor: IdbPredictor | undefined = predictors.find(p => p.guid === predictorId);
         const dataForPredictor: Array<IdbPredictorData> = predictorData.filter(pd => pd.predictorId === predictorId);
-        const lastDateEntry: Date = new Date(Math.max(...dataForPredictor.map(pd => new Date(pd.year, pd.month - 1, 1).getTime())));
+        let lastDateEntry: Date;
+        if (dataForPredictor.length > 0) {
+            lastDateEntry = new Date(Math.max(...dataForPredictor.map(pd => new Date(pd.year, pd.month - 1, 1).getTime())));
+        } else {
+            lastDateEntry = undefined;
+        }
         return {
             predictorName: predictor?.name ?? 'Unknown Predictor',
             predictorId,
@@ -144,7 +160,12 @@ export class AnalysisStatusCheck {
     ): MeterDateEntry {
         const calanderizedMeter: CalanderizedMeter | undefined = calanderizedMeters.find(cm => cm.meter.guid === meterId);
         const monthlyData = calanderizedMeter?.monthlyData ?? [];
-        const lastDateEntry: Date = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue, 1).getTime())));
+        let lastDateEntry: Date | undefined;
+        if (monthlyData.length > 0) {
+            lastDateEntry = new Date(Math.max(...monthlyData.map(md => new Date(md.year, md.monthNumValue, 1).getTime())));
+        } else {
+            lastDateEntry = undefined;
+        }
         return {
             meterName: calanderizedMeter?.meter.name ?? 'Unknown Meter',
             meterId,

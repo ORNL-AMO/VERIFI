@@ -24,9 +24,7 @@ export class ProcessMeterReadingsComponent {
   paramsSub: Subscription;
 
   meterDataSummaries: Array<MeterDataSummary>;
-  skipAll: boolean = false;
   metersIncluded: boolean;
-  inspectMeterSummary: MeterDataSummary;
   constructor(private activatedRoute: ActivatedRoute,
     private dataManagementService: DataManagementService,
     private utilityMeterDataService: UtilityMeterDataService) { }
@@ -125,14 +123,6 @@ export class ProcessMeterReadingsComponent {
       return facility.name;
     }
     return;
-  }
-
-  setSkipAll() {
-
-  }
-
-  selectMeterSummary(meterSummary: MeterDataSummary) {
-    this.inspectMeterSummary = meterSummary;
   }
 }
 

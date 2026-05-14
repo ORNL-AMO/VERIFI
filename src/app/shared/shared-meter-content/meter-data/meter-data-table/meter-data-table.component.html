@@ -1,7 +1,14 @@
-@if(isMeterInvalid == false){
-@if (meterData.length == 0) {
+@let _selectedMeter = selectedMeter();
+@let _meterData = meterData();
+@let _meterStatusCheck = meterStatusCheck();
+@let _hasCheckedItems = hasCheckedItems();
+@let _hasEstimatedReadings = hasEstimatedReadings();
+@let _meterTableType = meterTableType();
+
+@if(_meterStatusCheck && _meterStatusCheck.isMeterValid == true){
+@if (_meterData.length == 0) {
 <div class="text-center mt-5">
-  <h5>No bills found for {{selectedMeter.name}}.</h5>
+  <h5>No bills found for {{_selectedMeter.name}}.</h5>
   <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
   </p>
   <div class="d-flex w-100 justify-content-center">
@@ -13,107 +20,111 @@
     </div>
   </div>
 </div>
-}
-@if (meterData.length != 0) {
-<div>
-  <div class="d-flex w-100 justify-content-end">
-    <div class="d-flex flex-wrap">
-      <!--Bulk Delete-->
-      <div class="ps-1 pe-1 bulk-delete mb-2" [class.show]="hasCheckedItems">
-        <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
-          Delete</button>
-      </div>
-      <!--Items Per Page-->
-      <div class="mb-2 ps-1 pe-1">
-        <app-table-items-dropdown></app-table-items-dropdown>
-      </div>
-      <app-utility-meter-data-filter [meter]="selectedMeter">
-      </app-utility-meter-data-filter>
-      @if(hasEstimatedReadings){
-      <div class="ps-1 pe-1 d-flex align-items-center mb-2">
-        <select class="form-select filter-reading" [(ngModel)]="optionSelected" (change)="filterEstimatedReadings()">
-          <option value="all">All</option>
-          <option value="estimated">Estimated Readings</option>
-        </select>
-        <app-label-with-tooltip [field]="'estimatedReading'"></app-label-with-tooltip>
-      </div>
+}@else {
+<div class="d-flex w-100 justify-content-end">
+  <div class="d-flex flex-wrap">
+    <!--Bulk Delete-->
+    <div class="ps-1 pe-1 bulk-delete mb-2" [class.show]="_hasCheckedItems">
+      <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!_hasCheckedItems">Bulk
+        Delete</button>
+    </div>
+    <!--Items Per Page-->
+    <div class="mb-2 ps-1 pe-1">
+      <app-table-items-dropdown></app-table-items-dropdown>
+    </div>
+    <app-utility-meter-data-filter [meter]="_selectedMeter">
+    </app-utility-meter-data-filter>
+    @if(_hasEstimatedReadings){
+    <div class="ps-1 pe-1 d-flex align-items-center mb-2">
+      <select class="form-select filter-reading" [(ngModel)]="optionSelected">
+        <option value="all">All</option>
+        <option value="estimated">Estimated Readings</option>
+      </select>
+      <app-label-with-tooltip [field]="'estimatedReading'"></app-label-with-tooltip>
+    </div>
+    }
+    <div class="ps-1 pe-1 mb-2">
+      @if (inDataManagement) {
+      <button class="btn" (click)="goToDataQualityReport()"
+        [ngClass]="_selectedMeter | meterDataQualityStatus: _meterData: true"><i class="fa fa-clipboard-check"></i>
+        Data
+        Quality Report</button>
+      } @else {
+      <app-meter-data-quality-report-modal [selectedMeter]="_selectedMeter"
+        [meterData]="_meterData"></app-meter-data-quality-report-modal>
       }
-      <div class="ps-1 pe-1 mb-2">
-        @if (inDataManagement) {
-        <button class="btn" (click)="goToDataQualityReport()"
-          [ngClass]="selectedMeter | meterDataQualityStatus: meterData: true"><i class="fa fa-clipboard-check"></i>
-          Data
-          Quality Report</button>
-        } @else {
-        <app-meter-data-quality-report-modal [selectedMeter]="selectedMeter"
-          [meterData]="meterData"></app-meter-data-quality-report-modal>
-        }
-      </div>
-      <!--Import/Export-->
-      <div class="ps-1 pe-1 mb-2">
-        <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
-      </div>
-      <div class="ps-1 pe-1 mb-2">
-        <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
-          Add New Bill</button>
-      </div>
+    </div>
+    <!--Import/Export-->
+    <div class="ps-1 pe-1 mb-2">
+      <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+    </div>
+    <div class="ps-1 pe-1 mb-2">
+      <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
+        Add New Bill</button>
     </div>
   </div>
-  <div class="meter">
-    @if (hasNegativeReadings) {
-    <div class="p-1 small alert alert-warning text-center">
-      Negative energy use entered for one or more readings.
-    </div>
+</div>
+<div class="meter">
+  @if (_meterStatusCheck.hasNegativeReadings) {
+  <div class="alert alert-warning text-center p-1 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span>
+    Negative energy use entered for one or more readings.
+  </div>
+  }
+  @if (_meterStatusCheck.hasDuplicateEntries) {
+  <div class="alert alert-danger text-center p-1 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span> Two or more readings have been entered for the same day.
+    Calendarization will experience errors:<br>
+    @for (date of _meterStatusCheck.duplicateEntryDates; track date) {
+    <span class="badge bg-danger ms-1">{{date | date:'MMM, yyyy'}}</span>
     }
-    @if (duplicateReadingDates.length > 0) {
-    <div class="p-1 alert alert-danger">
-      Two or more readings have been entered for the same day. Calanderization will experience errors.
-      <ul class="mb-0">
-        @for (d of duplicateReadingDates; track d) {
-        <li>
-          {{d | date}}
-        </li>
-        }
-      </ul>
-    </div>
-    }
-    <div class="row no-margin">
-      <div class="col no-margin table-responsive">
-        @if (selectedMeter.source == 'Electricity') {
-        <app-electricity-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-          (setDelete)="setDeleteMeterData($event)">
-        </app-electricity-data-table>
-        }
-        @if (selectedMeter.source != 'Electricity' && (selectedMeter.scope != 2 && selectedMeter.scope != 5 &&
-        selectedMeter.scope != 6)) {
-        <app-general-utility-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-          (setDelete)="setDeleteMeterData($event)">
-        </app-general-utility-data-table>
-        }
-        @if (selectedMeter.source != 'Electricity' && selectedMeter.scope == 2) {
-        <app-vehicle-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-          (setDelete)="setDeleteMeterData($event)">
-        </app-vehicle-data-table>
-        }
-        @if (selectedMeter.source != 'Electricity' && (selectedMeter.scope == 5 || selectedMeter.scope ==6)) {
-        <app-other-emissions-data-table [selectedMeter]="selectedMeter" [selectedMeterData]="filteredMeterData"
-          [itemsPerPage]="itemsPerPage" (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
-          (setDelete)="setDeleteMeterData($event)">
-        </app-other-emissions-data-table>
-        }
-      </div>
+  </div>
+  }
+  @if(_meterStatusCheck.isDataCurrent == false && _meterStatusCheck.lastDateEntry){
+  <div class="alert alert-warning text-center p-1 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span>
+    Facility data entered through {{_meterStatusCheck.latestFacilityEntryDate | date:'MMM, yyyy'}} but this meter only has data through
+    {{_meterStatusCheck.lastDateEntry | date:'MMM, yyyy'}}.
+  </div>
+  }
+  <div class="row no-margin">
+    <div class="col no-margin table-responsive">
+      @if (_meterTableType == 'electricity') {
+      <app-electricity-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
+        (setDelete)="setDeleteMeterData($event)">
+      </app-electricity-data-table>
+      }
+      @if (_meterTableType == 'general') {
+      <app-general-utility-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
+        (setDelete)="setDeleteMeterData($event)">
+      </app-general-utility-data-table>
+      }
+      @if (_meterTableType == 'vehicle') {
+      <app-vehicle-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
+        (setDelete)="setDeleteMeterData($event)">
+      </app-vehicle-data-table>
+      }
+      @if (_meterTableType == 'other') {
+      <app-other-emissions-data-table (setChecked)="setCheckedItemGuids($event)" (setEdit)="setEditMeterData($event)"
+        (setDelete)="setDeleteMeterData($event)">
+      </app-other-emissions-data-table>
+      }
     </div>
   </div>
 </div>
 }
-}@else {
+}@else{
+@if(!_meterStatusCheck){
+<p class="fw-light text-center pt-2">
+  Loading meter data and meter status details...
+</p>
+}@else{
 <div class="alert alert-danger">
-  The meter associated with this data has errors in its configuration. Please click here to <a class="click-link" (click)="editMeter()">edit the meter</a> to resolve these errors
+  The meter associated with this data has errors in its configuration. Please click here to <a class="click-link"
+    (click)="editMeter()">edit the meter</a> to resolve these errors
   before adding meter data.
 </div>
+}
 }
 
 

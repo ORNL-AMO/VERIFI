@@ -1,309 +1,315 @@
-@if (!isRECs) {
-  <table class="table utility-data table-sm table-bordered table-hover" #meterTable
-    [ngClass]="{'copying-table': copyingTable}">
-    <thead class="sortable">
-      <tr class="table-mh">
-        <th></th>
-        <th [attr.colspan]="numGeneralInformation">
-          General Information
-        </th>
-        @if (emissionsFilters.showSection) {
-          <th [attr.colspan]="numEmissions">
-            Emissions
-          </th>
+@let _isRECs = isRECs();
+@let _emissionsFilters = emissionsFilters();
+@let _generalInformationFilters = generalInformationFilters();
+@let _orderDataField = orderDataField();
+@let _orderByCharge = orderByCharge();
+@let _orderedMeterData = orderedMeterData();
+@let _meter = selectedMeter();
+@let _orderByChargeId = orderByChargeId();
+@let _itemsPerPage = itemsPerPage();
+
+@if (!_isRECs) {
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+  [ngClass]="{'copying-table': copyingTable}">
+  <thead class="sortable">
+    <tr class="table-mh">
+      <th></th>
+      <th [attr.colspan]="numGeneralInformation()">
+        General Information
+      </th>
+      @if (_emissionsFilters.showSection) {
+      <th [attr.colspan]="numEmissions()">
+        Emissions
+      </th>
+      }
+      @if (numDetailedCharges() > 0) {
+      <th [attr.colspan]="numDetailedCharges()">
+        Detailed Charges
+      </th>
+      }
+      <th>
+      </th>
+    </tr>
+    <tr>
+      @if (!copyingTable) {
+      <th class="input">
+        <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+      </th>
+      }
+      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': _orderDataField == 'readDate'}"
+        class="row-year">
+        Meter Read Date</th>
+      <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': _orderDataField == 'totalEnergyUse'}">
+        Total
+        Energy<br> (<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>)</th>
+      @if (_generalInformationFilters.totalCost) {
+      <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': _orderDataField == 'totalCost'}">Total
+        Cost</th>
+      }
+      <!-- totalRealDemand -->
+      @if (_generalInformationFilters.realDemand) {
+      <th (click)="setOrderDataField('totalRealDemand')" [ngClass]="{'active': _orderDataField == 'totalRealDemand'}">
+        Total
+        Real<br> Demand (kW)</th>
+      }
+      <!-- totalBilledDemand -->
+      @if (_generalInformationFilters.billedDemand) {
+      <th (click)="setOrderDataField('totalBilledDemand')"
+        [ngClass]="{'active': _orderDataField == 'totalBilledDemand'}">Total
+        Billed<br> Demand (kW)</th>
+      }
+      <!-- totalBilledDemand -->
+      @if (_generalInformationFilters.powerFactor) {
+      <th (click)="setOrderDataField('powerFactor')" [ngClass]="{'active': _orderDataField == 'powerFactor'}">
+        Power Factor</th>
+      }
+      @if (_emissionsFilters.marketEmissions) {
+      <th (click)="setOrderDataField('totalMarketEmissions')"
+        [ngClass]="{'active': _orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
+        (tonne
+        CO<sub>2</sub>e)</th>
+      }
+      @if (_emissionsFilters.locationEmissions) {
+      <th (click)="setOrderDataField('totalLocationEmissions')"
+        [ngClass]="{'active': _orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based
+        <br>Emissions (tonne
+        CO<sub>2</sub>e)
+      </th>
+      }
+      @if (_emissionsFilters.recs) {
+      <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': _orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+      }
+      @for (charge of _meter.charges; track charge.guid) {
+      @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
+      <th (click)="setOrderDataField(undefined, charge.guid, 'usage')"
+        [ngClass]="{'active': _orderByChargeId == charge.guid && _orderByCharge == 'usage'}">
+        {{charge.name}} <br>({{_meter.demandUnit}})
+      </th>
+      }
+      @if (charge.displayChargeInTable) {
+      <th (click)="setOrderDataField(undefined, charge.guid, 'amount')"
+        [ngClass]="{'active': _orderByChargeId == charge.guid && _orderByCharge == 'amount'}">
+        {{ charge.name }} <br>(&dollar;)
+      </th>
+      }
+      }
+      @if (!copyingTable) {
+      <th>Actions</th>
+      }
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    @for (meterData of _orderedMeterData | slice:
+    ((currentPageNumber-1) * _itemsPerPage): currentPageNumber * _itemsPerPage; track meterData.guid) {
+    <tr>
+      @if (!copyingTable) {
+      <td class="input">
+        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)" (change)="toggleChecked(meterData.guid)">
+      </td>
+      }
+      <td class="read-date">{{meterData | displayMeterDataDate}}</td>
+      <td>
+        @if (meterData.isEstimated) {
+        <span class="fa fa-asterisk"></span>
         }
-        @if (numDetailedCharges > 0) {
-          <th [attr.colspan]="numDetailedCharges">
-            Detailed Charges
-          </th>
+        @if (_meter.includeInEnergy) {
+        {{meterData.totalEnergyUse | customNumber}}
         }
-        <th>
-        </th>
-      </tr>
-      <tr>
-        @if (!copyingTable) {
-          <th class="input">
-            <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
-          </th>
+        @if (!_meter.includeInEnergy) {
+        {{0 | customNumber}}
         }
-        <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
-        class="row-year">Meter Read Date</th>
-        <th (click)="setOrderDataField('totalEnergyUse')"
-          [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy<br> (<span
-        [innerHTML]="energyUnit | settingsLabel"></span>)</th>
-        @if (generalInformationFilters.totalCost) {
-          <th (click)="setOrderDataField('totalCost')"
-            [ngClass]="{'active': orderDataField == 'totalCost'}">Total
-          Cost</th>
-        }
-        <!-- totalRealDemand -->
-        @if (generalInformationFilters.realDemand) {
-          <th (click)="setOrderDataField('totalRealDemand')"
-            [ngClass]="{'active': orderDataField == 'totalRealDemand'}">Total
-            Real<br> Demand (kW)</th>
+      </td>
+      @if (_generalInformationFilters.totalCost) {
+      <td>{{meterData.totalCost | customNumber:true}}</td>
+      }
+      @if (_generalInformationFilters.realDemand) {
+      <td>{{meterData.totalRealDemand | customNumber}}</td>
+      }
+      @if (_generalInformationFilters.billedDemand) {
+      <td>{{meterData.totalBilledDemand | customNumber}}</td>
+      }
+      @if (_generalInformationFilters.powerFactor) {
+      <td>{{meterData.powerFactor | customNumber}}</td>
+      }
+      @if (_emissionsFilters.marketEmissions) {
+      <td>{{meterData.totalWithMarketEmissions | customNumber}}</td>
+      }
+      @if (_emissionsFilters.locationEmissions) {
+      <td>{{meterData.totalWithLocationEmissions | customNumber}}</td>
+      }
+      @if (_emissionsFilters.recs) {
+      <td>{{meterData.RECs | customNumber}}</td>
+      }
+      @for (meterCharge of _meter.charges; track meterCharge) {
+      @if ((meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') &&
+      meterCharge.displayUsageInTable) {
+      <td>
+        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+      </td>
+      }
+      @if (meterCharge.displayChargeInTable) {
+      <td>
+        {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+      </td>
+      }
+      }
+      @if (!copyingTable) {
+      <td class="actions">
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+            <i class="fa fa-pencil"></i>
+          </button>
+          @if (isElectron) {
+          <app-view-connect-bill [meterData]="meterData" [selectedMeter]="_meter"></app-view-connect-bill>
           }
-          <!-- totalBilledDemand -->
-          @if (generalInformationFilters.billedDemand) {
-            <th (click)="setOrderDataField('totalBilledDemand')"
-              [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
-              Billed<br> Demand (kW)</th>
-            }
-            <!-- totalBilledDemand -->
-            @if (generalInformationFilters.powerFactor) {
-              <th (click)="setOrderDataField('powerFactor')"
-                [ngClass]="{'active': orderDataField == 'powerFactor'}">
-              Power Factor</th>
-            }
-            @if (emissionsFilters.marketEmissions) {
-              <th (click)="setOrderDataField('totalMarketEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
-                (tonne
-                CO<sub>2</sub>e)</th>
-              }
-              @if (emissionsFilters.locationEmissions) {
-                <th (click)="setOrderDataField('totalLocationEmissions')"
-                  [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based
-                  <br>Emissions (tonne
-                    CO<sub>2</sub>e)
-                  </th>
-                }
-                @if (emissionsFilters.recs) {
-                  <th (click)="setOrderDataField('RECs')"
-                    [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
-                  }
-                  @for (charge of selectedMeter.charges; track charge.guid) {
-                    @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
-                      <th (click)="setOrderDataField(charge.guid, 'usage')"
-                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
-                        {{charge.name}} <br>({{selectedMeter.demandUnit}})
-                      </th>
-                    }
-                    @if (charge.displayChargeInTable) {
-                      <th (click)="setOrderDataField(charge.guid, 'amount')"
-                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
-                        {{ charge.name }} <br>(&dollar;)
-                      </th>
-                    }
-                  }
-                  @if (!copyingTable) {
-                    <th>Actions</th>
-                  }
-                </tr>
-              </thead>
-              <tbody class="table-group-divider">
-                @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData.guid) {
-                  <tr
-                    >
-                    @if (!copyingTable) {
-                      <td class="input">
-                        <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
-                      </td>
-                    }
-                    <td class="read-date">{{meterData | displayMeterDataDate}}</td>
-                    <td>
-                      @if (meterData.isEstimated) {
-                        <span class="fa fa-asterisk"></span>
-                      }
-                      @if (selectedMeter.includeInEnergy) {
-                        {{meterData.totalEnergyUse | customNumber}}
-                      }
-                      @if (!selectedMeter.includeInEnergy) {
-                        {{0 | customNumber}}
-                      }
-                    </td>
-                    @if (generalInformationFilters.totalCost) {
-                      <td>{{meterData.totalCost | customNumber:true}}</td>
-                    }
-                    @if (generalInformationFilters.realDemand) {
-                      <td>{{meterData.totalRealDemand | customNumber}}</td>
-                    }
-                    @if (generalInformationFilters.billedDemand) {
-                      <td>{{meterData.totalBilledDemand | customNumber}}</td>
-                    }
-                    @if (generalInformationFilters.powerFactor) {
-                      <td>{{meterData.powerFactor | customNumber}}</td>
-                    }
-                    @if (emissionsFilters.marketEmissions) {
-                      <td>{{meterData.totalWithMarketEmissions | customNumber}}</td>
-                    }
-                    @if (emissionsFilters.locationEmissions) {
-                      <td>{{meterData.totalWithLocationEmissions | customNumber}}</td>
-                    }
-                    @if (emissionsFilters.recs) {
-                      <td>{{meterData.RECs | customNumber}}</td>
-                    }
-                    @for (meterCharge of selectedMeter.charges; track meterCharge) {
-                      @if ((meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable) {
-                        <td>
-                          {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
-                        </td>
-                      }
-                      @if (meterCharge.displayChargeInTable) {
-                        <td>
-                          {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
-                        </td>
-                      }
-                    }
-                    @if (!copyingTable) {
-                      <td class="actions">
-                        <div class="btn-group">
-                          <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
-                            <i class="fa fa-pencil"></i>
-                          </button>
-                          @if (isElectron) {
-                            <app-view-connect-bill [meterData]="meterData"
-                            [selectedMeter]="selectedMeter"></app-view-connect-bill>
-                          }
-                          <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
-                            <i class="fa fa-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    }
-                  </tr>
-                }
-              </tbody>
-            </table>
+          <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </td>
+      }
+    </tr>
+    }
+  </tbody>
+</table>
+}
+<!--RECS TABLE-->
+@if (_isRECs) {
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+  [ngClass]="{'copying-table': copyingTable}">
+  <thead class="sortable">
+    <tr class="table-mh">
+      <th></th>
+      <th [attr.colspan]="numGeneralInformation()">
+        General Information
+      </th>
+      @if (numEmissions() > 0) {
+      <th [attr.colspan]="numEmissions()">
+        Emissions
+      </th>
+      }
+      @if (numDetailedCharges() > 0) {
+      <th [attr.colspan]="numDetailedCharges()">
+        Detailed Charges
+      </th>
+      }
+      <th>
+      </th>
+    </tr>
+    <tr>
+      @if (!copyingTable) {
+      <th class="input">
+        <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+      </th>
+      }
+      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': _orderDataField == 'readDate'}"
+        class="row-year">
+        Meter Read Date</th>
+      @if (_generalInformationFilters.totalCost) {
+      <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': _orderDataField == 'totalCost'}">Total
+        Cost</th>
+      }
+      @if (_emissionsFilters.recs) {
+      <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': _orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+      }
+      @if (_emissionsFilters.excessRECs) {
+      <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': _orderDataField == 'excessRECs'}">Excess
+        RECs<br> (MWh)</th>
+      }
+      @if (_emissionsFilters.excessRECsEmissions) {
+      <th (click)="setOrderDataField('excessRECsEmissions')"
+        [ngClass]="{'active': _orderDataField == 'excessRECsEmissions'}">Excess
+        RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
+      }
+      @for (charge of _meter.charges; track charge.guid) {
+      @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
+      <th (click)="setOrderDataField(undefined, charge.guid, 'usage')"
+        [ngClass]="{'active': _orderByChargeId == charge.guid && _orderByCharge == 'usage'}">
+        {{charge.name}} <br>({{_meter.demandUnit}})
+      </th>
+      }
+      @if (charge.displayChargeInTable) {
+      <th (click)="setOrderDataField(undefined, charge.guid, 'amount')"
+        [ngClass]="{'active': _orderByChargeId == charge.guid && _orderByCharge == 'amount'}">
+        {{ charge.name }} <br>(&dollar;)
+      </th>
+      }
+      }
+      <th></th>
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    @for (meterData of _orderedMeterData| slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
+    _itemsPerPage; track meterData.guid) {
+    <tr>
+      @if (!copyingTable) {
+      <td class="input">
+        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)" (change)="toggleChecked(meterData.guid)">
+      </td>
+      }
+      <td class="read-date">{{meterData | displayMeterDataDate}}</td>
+      @if (_generalInformationFilters.totalCost) {
+      <td>{{meterData.totalCost | customNumber:true}}</td>
+      }
+      @if (_emissionsFilters.recs) {
+      <td>{{meterData.RECs | customNumber}}</td>
+      }
+      @if (_emissionsFilters.excessRECs) {
+      <td>{{meterData.excessRECs | customNumber}}</td>
+      }
+      @if (_emissionsFilters.excessRECsEmissions) {
+      <td>{{meterData.excessRECsEmissions | customNumber}}</td>
+      }
+      @for (meterCharge of _meter.charges; track meterCharge.guid) {
+      @if ((meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') &&
+      meterCharge.displayUsageInTable) {
+      <td>
+        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+      </td>
+      }
+      @if (meterCharge.displayChargeInTable) {
+      <td>
+        {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+      </td>
+      }
+      }
+      @if (!copyingTable) {
+      <td class="actions">
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+            <i class="fa fa-pencil"></i>
+          </button>
+          @if (isElectron) {
+          <app-view-connect-bill [meterData]="meterData" [selectedMeter]="_meter"></app-view-connect-bill>
           }
-
-          @if (isRECs) {
-            <table class="table utility-data table-sm table-bordered table-hover" #meterTable
-              [ngClass]="{'copying-table': copyingTable}">
-              <thead class="sortable">
-                <tr class="table-mh">
-                  <th></th>
-                  <th [attr.colspan]="numGeneralInformation">
-                    General Information
-                  </th>
-                  @if (numEmissions > 0) {
-                    <th [attr.colspan]="numEmissions">
-                      Emissions
-                    </th>
-                  }
-                  @if (numDetailedCharges > 0) {
-                    <th [attr.colspan]="numDetailedCharges">
-                      Detailed Charges
-                    </th>
-                  }
-                  <th>
-                  </th>
-                </tr>
-                <tr>
-                  @if (!copyingTable) {
-                    <th class="input">
-                      <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
-                    </th>
-                  }
-                  <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
-                  class="row-year">Meter Read Date</th>
-                  @if (generalInformationFilters.totalCost) {
-                    <th (click)="setOrderDataField('totalCost')"
-                      [ngClass]="{'active': orderDataField == 'totalCost'}">Total
-                    Cost</th>
-                  }
-                  @if (emissionsFilters.recs) {
-                    <th (click)="setOrderDataField('RECs')"
-                      [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
-                    }
-                    @if (emissionsFilters.excessRECs) {
-                      <th (click)="setOrderDataField('excessRECs')"
-                        [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
-                        RECs<br> (MWh)</th>
-                      }
-                      @if (emissionsFilters.excessRECsEmissions) {
-                        <th (click)="setOrderDataField('excessRECsEmissions')"
-                          [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
-                          RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
-                        }
-                        @for (charge of selectedMeter.charges; track charge.guid) {
-                          @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
-                            <th (click)="setOrderDataField(charge.guid, 'usage')"
-                              [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
-                              {{charge.name}} <br>({{selectedMeter.demandUnit}})
-                            </th>
-                          }
-                          @if (charge.displayChargeInTable) {
-                            <th (click)="setOrderDataField(charge.guid, 'amount')"
-                              [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
-                              {{ charge.name }} <br>(&dollar;)
-                            </th>
-                          }
-                        }
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                      @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData.guid) {
-                        <tr
-                          >
-                          @if (!copyingTable) {
-                            <td class="input">
-                              <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
-                            </td>
-                          }
-                          <td class="read-date">{{meterData | displayMeterDataDate}}</td>
-                          @if (generalInformationFilters.totalCost) {
-                            <td>{{meterData.totalCost | customNumber:true}}</td>
-                          }
-                          @if (emissionsFilters.recs) {
-                            <td>{{meterData.RECs | customNumber}}</td>
-                          }
-                          @if (emissionsFilters.excessRECs) {
-                            <td>{{meterData.excessRECs | customNumber}}</td>
-                          }
-                          @if (emissionsFilters.excessRECsEmissions) {
-                            <td>{{meterData.excessRECsEmissions | customNumber}}</td>
-                          }
-                          @for (meterCharge of selectedMeter.charges; track meterCharge.guid) {
-                            @if ((meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable) {
-                              <td>
-                                {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
-                              </td>
-                            }
-                            @if (meterCharge.displayChargeInTable) {
-                              <td>
-                                {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
-                              </td>
-                            }
-                          }
-                          @if (!copyingTable) {
-                            <td class="actions">
-                              <div class="btn-group">
-                                <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
-                                  <i class="fa fa-pencil"></i>
-                                </button>
-                                @if (isElectron) {
-                                  <app-view-connect-bill [meterData]="meterData"
-                                  [selectedMeter]="selectedMeter"></app-view-connect-bill>
-                                }
-                                <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
-                                  <i class="fa fa-trash"></i>
-                                </button>
-                              </div>
-                            </td>
-                          }
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                }
+          <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </td>
+      }
+    </tr>
+    }
+  </tbody>
+</table>
+}
 
 
-                <div class="d-flex w-100 justify-content-between">
-                  <div class="d-flex">
-                    <div>
-                      <button class="btn action-btn btn-sm" (click)="copyTable()">
-                        <span class="fa fa-copy"></span> Copy Table
-                      </button>
-                    </div>
-                    @if (showEstimated) {
-                      <div class="ps-2">
-                        <span class="fa fa-asterisk"></span> Indicates Estimated Reading
-                      </div>
-                    }
-                  </div>
+<div class="d-flex w-100 justify-content-between">
+  <div class="d-flex">
+    <div>
+      <button class="btn action-btn btn-sm" (click)="copyTable()">
+        <span class="fa fa-copy"></span> Copy Table
+      </button>
+    </div>
+    @if (showEstimated()) {
+    <div class="ps-2">
+      <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+    </div>
+    }
+  </div>
 
-                  <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-                    [maxSize]="5" [rotate]="true" aria-label="Pagination">
-                  </ngb-pagination>
-                </div>
+  <ngb-pagination [collectionSize]="_orderedMeterData.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"
+    [maxSize]="5" [rotate]="true" aria-label="Pagination">
+  </ngb-pagination>
+</div>

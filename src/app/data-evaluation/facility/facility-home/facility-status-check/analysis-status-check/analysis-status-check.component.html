@@ -52,7 +52,12 @@
                     <ul class="mb-0">
                         @for (predictorData of analysisStatusCheck.latestPredictorData; track predictorData.predictorId)
                         {
-                        <li>{{predictorData.predictorName}} ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                        <li>{{predictorData.predictorName}}
+                            @if(predictorData.lastDateEntry) {
+                            ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})
+                            } @else {
+                            (No data entered)
+                            }</li>
                         }
                     </ul>
                 </div>
@@ -60,7 +65,13 @@
                     <p class="mb-1"><strong>Meters Used:</strong></p>
                     <ul class="mb-0">
                         @for (meterData of analysisStatusCheck.latestMeterData; track meterData.meterId) {
-                        <li>{{meterData.meterName}} ({{meterData.lastDateEntry | date:'MMMM yyyy'}})</li>
+                        <li>{{meterData.meterName}}
+                            @if(meterData.lastDateEntry) {
+                            ({{meterData.lastDateEntry | date:'MMMM yyyy'}})
+                            } @else {
+                            (No data entered)
+                            }
+                        </li>
                         }
                     </ul>
                 </div>

@@ -15,6 +15,7 @@ export class MeterStatusCheck {
     duplicateEntryDates: Array<Date>;
     hasNoData: boolean;
     hasNoCalendarizationMethod: boolean;
+    hasNegativeReadings: boolean;
     isDataCurrent: boolean;
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
@@ -30,6 +31,7 @@ export class MeterStatusCheck {
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
+        this.setHasNegativeReadings(meterReadings);
         this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1) : undefined;
         if (calanderizedMeter) {
             this.isMeterValid = isMeterInvalid(calanderizedMeter.meter) == false;
@@ -56,6 +58,11 @@ export class MeterStatusCheck {
         let dayMonthYearCounts: {
             [key: string]: number;
         } = {};
+        if (meterReadings.length === 0) {
+            this.hasDuplicateEntries = false;
+            this.duplicateEntryDates = [];
+            return;
+        }
         meterReadings.forEach(reading => {
             let key = `${reading.month}-${reading.year}-${reading.day}`;
             if (dayMonthYearCounts[key]) {
@@ -84,7 +91,7 @@ export class MeterStatusCheck {
     private setStatus() {
         if (!this.isMeterValid || this.hasNoData) {
             this.status = 'error';
-        } else if (this.hasDuplicateEntries || this.hasNoCalendarizationMethod || !this.isDataCurrent) {
+        } else if (this.hasDuplicateEntries || this.hasNoCalendarizationMethod || !this.isDataCurrent || this.hasNegativeReadings) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -94,7 +101,18 @@ export class MeterStatusCheck {
     private setActions(meter: IdbUtilityMeter, facilityLatestEntry: { month: number; year: number } | undefined) {
         this.actions = [];
         const baseUrl = `/data-management/${meter.accountId}/facilities/${meter.facilityId}/meters/${meter.guid}`;
-        if (this.hasNoData) {
+
+        if (this.isMeterValid === false) {
+            this.actions.push({
+                label: 'Edit ' + meter.name,
+                url: baseUrl,
+                description: 'This meter has configuration errors that need to be resolved before data can be properly assessed.',
+                facilityId: meter.facilityId,
+                type: 'meter',
+                status: 'error',
+                trackGuid: meter.guid + '_edit'
+            });
+        } else if (this.hasNoData) {
             this.actions.push({
                 label: 'Add meter data for ' + meter.name,
                 url: baseUrl + '/meter-data',
@@ -114,6 +132,17 @@ export class MeterStatusCheck {
                     type: 'meter',
                     status: 'warning',
                     trackGuid: meter.guid + '_calendarization'
+                });
+            }
+            if(this.hasDuplicateEntries){
+                this.actions.push({
+                    label: 'Resolve duplicate entries for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: 'This meter has duplicate data entries for the following dates: ' + this.duplicateEntryDates.map(d => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })).join(', '),
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_duplicates'
                 });
             }
             if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {
@@ -136,5 +165,9 @@ export class MeterStatusCheck {
     private monthLabel(month: number, year: number): string {
         const date = new Date(year, month - 1, 1);
         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    private setHasNegativeReadings(meterReadings: Array<IdbUtilityMeterData>) {
+        this.hasNegativeReadings = meterReadings.some(reading => reading.totalEnergyUse < 0 || (reading.totalVolume !== undefined && reading.totalVolume < 0));
     }
 }

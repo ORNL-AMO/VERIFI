@@ -42,7 +42,6 @@ import { EditBillChargesComponent } from './edit-bill/edit-bill-charges/edit-bil
 import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe';
 import { MeterChargeValuePipe } from './meter-data/meter-charge-value.pipe';
 import { SharedDataQualityReportMetersModule } from '../shared-data-quality-report-meters/shared-data-quality-report-meters.module';
-import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-data-by.pipe';
 import { ManageMeterGroupingComponent } from './set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component';
 import { MeterGroupingResultsTableComponent } from './set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component';
 import { MeterGroupingResultsGraphComponent } from './set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component';
@@ -87,7 +86,6 @@ import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spi
     EditBillChargesComponent,
     MeterChargePipe,
     MeterChargeValuePipe,
-    OrderMeterDataByPipe,
     ManageMeterGroupingComponent,
     MeterGroupingResultsTableComponent,
     MeterGroupingResultsGraphComponent

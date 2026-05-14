@@ -136,6 +136,14 @@
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }
+                                @if(fc.hasInvalidMeters){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>One or more meters have
+                                    invalid configuration
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
                                 @if (fc.hasNoPredictors) {
                                 <li class="list-group-item list-group-item-action sub-issue py-1"
                                     [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
@@ -162,7 +170,8 @@
                                 @if(fc.hasPredictorWeatherWarnings){
                                 <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
                                     [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
-                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Some predictors have weather data warnings
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Some predictors have
+                                    weather data warnings
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }

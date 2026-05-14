@@ -1,24 +1,23 @@
+@let _filters = vehicleDataFilters();
+@let _meter = selectedMeter();
+@let _orderDataField = orderDataField();
+@let _orderByCharge = orderByCharge();
+@let _orderedMeterData = orderedMeterData();
+@let _itemsPerPage = itemsPerPage();
+
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable
   [ngClass]="{'copying-table': copyingTable}">
   <thead class="sortable">
     <tr class="table-mh">
       <th></th>
-      <th [attr.colspan]="numGeneralInformation">
-        General Information
-      </th>
-      @if (showEmissionsSection) {
-        <th [attr.colspan]="numEmissions">
-          Emissions
-        </th>
+      <th [attr.colspan]="numGeneralInformation()">General Information</th>
+      @if (showEmissionsSection()) {
+        <th [attr.colspan]="numEmissions()">Emissions</th>
       }
-      @if (numDetailedCharges > 0) {
-        <th [attr.colspan]="numDetailedCharges">
-          Detailed Charges
-        </th>
+      @if (numDetailedCharges() > 0) {
+        <th [attr.colspan]="numDetailedCharges()">Detailed Charges</th>
       }
-      <th>
-
-      </th>
+      <th></th>
     </tr>
     <tr>
       @if (!copyingTable) {
@@ -26,139 +25,132 @@
           <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
         </th>
       }
-      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
-      class="row-year">Meter Read Date</th>
-      <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}">
-        Total {{consumptionLabel}}<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
+      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': _orderDataField == 'readDate'}" class="row-year">
+        Meter Read Date
       </th>
-      @if (vehicleDataFilters.totalEnergy) {
-        <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': orderDataField == 'totalEnergyUse'}"
-          >Total Energy<br> (<span
-        [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+      <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': _orderDataField == 'totalVolume'}">
+        Total {{consumptionLabel()}}<br>(<span [innerHTML]="volumeUnit() | settingsLabel"></span>)
+      </th>
+      @if (_filters.totalEnergy) {
+        <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': _orderDataField == 'totalEnergyUse'}">
+          Total Energy<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>)
+        </th>
       }
-      @if (vehicleDataFilters.totalCost) {
-        <th (click)="setOrderDataField('totalCost')"
-          [ngClass]="{'active': orderDataField == 'totalCost'}">Total
-        Cost</th>
+      @if (_filters.totalCost) {
+        <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': _orderDataField == 'totalCost'}">
+          Total Cost
+        </th>
       }
-      @if (vehicleDataFilters.mobileBiogenicEmissions) {
-        <th
-          (click)="setOrderDataField('mobileBiogenicEmissions')"
-          [ngClass]="{'active': orderDataField == 'mobileBiogenicEmissions'}">Total Biogenic <br>Emissions (tonne
-          CO<sub>2</sub>e)</th>
+      @if (_filters.mobileBiogenicEmissions) {
+        <th (click)="setOrderDataField('mobileBiogenicEmissions')"
+          [ngClass]="{'active': _orderDataField == 'mobileBiogenicEmissions'}">
+          Total Biogenic<br>Emissions (tonne CO<sub>2</sub>e)
+        </th>
+      }
+      @if (_filters.mobileCarbonEmissions) {
+        <th (click)="setOrderDataField('mobileCarbonEmissions')"
+          [ngClass]="{'active': _orderDataField == 'mobileCarbonEmissions'}">
+          Total Carbon<br>Emissions (tonne CO<sub>2</sub>e)
+        </th>
+      }
+      @if (_filters.mobileOtherEmissions) {
+        <th (click)="setOrderDataField('mobileOtherEmissions')"
+          [ngClass]="{'active': _orderDataField == 'mobileOtherEmissions'}">
+          Total Other<br>Emissions (tonne CO<sub>2</sub>e)
+        </th>
+      }
+      @if (_filters.mobileTotalEmissions) {
+        <th (click)="setOrderDataField('mobileTotalEmissions')"
+          [ngClass]="{'active': _orderDataField == 'mobileTotalEmissions'}">
+          Total<br>Emissions (tonne CO<sub>2</sub>e)
+        </th>
+      }
+      @for (charge of _meter.charges; track charge.guid) {
+        @if (charge.displayChargeInTable) {
+          <th (click)="setOrderDataField(charge.guid, 'amount')"
+            [ngClass]="{'active': _orderDataField == charge.guid && _orderByCharge == 'amount'}">
+            {{charge.name}}<br>(&dollar;)
+          </th>
         }
-        @if (vehicleDataFilters.mobileCarbonEmissions) {
-          <th (click)="setOrderDataField('mobileCarbonEmissions')"
-            [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}">Total Carbon <br>Emissions (tonne
-            CO<sub>2</sub>e)</th>
+      }
+      @if (!copyingTable) {
+        <th>Actions</th>
+      }
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    @for (meterData of _orderedMeterData | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber * _itemsPerPage; track meterData.guid) {
+      <tr>
+        @if (!copyingTable) {
+          <td class="input">
+            <input type="checkbox" name="metersSelected"
+              [checked]="isChecked(meterData.guid)" (change)="toggleChecked(meterData.guid)">
+          </td>
+        }
+        <td class="read-date">{{meterData | displayMeterDataDate}}</td>
+        <td>
+          @if (meterData.isEstimated) {
+            <span class="fa fa-asterisk"></span>
           }
-          @if (vehicleDataFilters.mobileOtherEmissions) {
-            <th (click)="setOrderDataField('mobileOtherEmissions')"
-              [ngClass]="{'active': orderDataField == 'mobileOtherEmissions'}">Total Other <br>Emissions (tonne
-              CO<sub>2</sub>e)</th>
-            }
-            @if (vehicleDataFilters.mobileTotalEmissions) {
-              <th (click)="setOrderDataField('mobileTotalEmissions')"
-                [ngClass]="{'active': orderDataField == 'mobileTotalEmissions'}">Total <br>Emissions (tonne
-                CO<sub>2</sub>e)</th>
+          {{meterData.totalVolume | customNumber}}
+        </td>
+        @if (_filters.totalEnergy) {
+          <td>{{meterData.totalEnergyUse | customNumber}}</td>
+        }
+        @if (_filters.totalCost) {
+          <td>{{meterData.totalCost | customNumber:true}}</td>
+        }
+        @if (_filters.mobileBiogenicEmissions) {
+          <td>{{meterData.mobileBiogenicEmissions | customNumber}}</td>
+        }
+        @if (_filters.mobileCarbonEmissions) {
+          <td>{{meterData.mobileCarbonEmissions | customNumber}}</td>
+        }
+        @if (_filters.mobileOtherEmissions) {
+          <td>{{meterData.mobileOtherEmissions | customNumber}}</td>
+        }
+        @if (_filters.mobileTotalEmissions) {
+          <td>{{meterData.mobileTotalEmissions | customNumber}}</td>
+        }
+        @for (meterCharge of _meter.charges; track meterCharge.guid) {
+          @if (meterCharge.displayChargeInTable) {
+            <td>{{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}</td>
+          }
+        }
+        @if (!copyingTable) {
+          <td class="actions">
+            <div class="btn-group">
+              <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                <i class="fa fa-pencil"></i>
+              </button>
+              @if (isElectron) {
+                <app-view-connect-bill [meterData]="meterData" [selectedMeter]="_meter"></app-view-connect-bill>
               }
-
-              @for (charge of selectedMeter.charges; track charge) {
-                @if (charge.displayChargeInTable) {
-                  <th (click)="setOrderDataField(charge.guid, 'amount')"
-                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
-                    {{ charge.name }} <br>(&dollar;)
-                  </th>
-                }
-              }
-
-              @if (!copyingTable) {
-                <th>Actions</th>
-              }
-            </tr>
-          </thead>
-          <tbody class="table-group-divider">
-            @for (meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track meterData) {
-              <tr
-                >
-                @if (!copyingTable) {
-                  <td class="input">
-                    <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
-                  </td>
-                }
-                <td class="read-date">{{meterData | displayMeterDataDate}}</td>
-                <td>
-                  @if (meterData.isEstimated) {
-                    <span class="fa fa-asterisk"></span>
-                  }
-                  {{meterData.totalVolume | customNumber}}
-                </td>
-                @if (vehicleDataFilters.totalEnergy) {
-                  <td>
-                    {{meterData.totalEnergyUse | customNumber}}
-                  </td>
-                }
-                @if (vehicleDataFilters.totalCost) {
-                  <td>{{meterData.totalCost | customNumber:true}}</td>
-                }
-                @if (vehicleDataFilters.mobileBiogenicEmissions) {
-                  <td>{{meterData.mobileBiogenicEmissions
-                  | customNumber}}</td>
-                }
-                @if (vehicleDataFilters.mobileCarbonEmissions) {
-                  <td>
-                  {{meterData.mobileCarbonEmissions | customNumber}}</td>
-                }
-                @if (vehicleDataFilters.mobileOtherEmissions) {
-                  <td>{{meterData.mobileOtherEmissions
-                  | customNumber}}</td>
-                }
-                @if (vehicleDataFilters.mobileTotalEmissions) {
-                  <td>
-                  {{meterData.mobileTotalEmissions | customNumber}}</td>
-                }
-                @for (meterCharge of selectedMeter.charges; track meterCharge) {
-                  @if (meterCharge.displayChargeInTable) {
-                    <td>
-                      {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
-                    </td>
-                  }
-                }
-                @if (!copyingTable) {
-                  <td class="actions">
-                    <div class="btn-group">
-                      <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
-                        <i class="fa fa-pencil"></i>
-                      </button>
-                      @if (isElectron) {
-                        <app-view-connect-bill [meterData]="meterData"
-                        [selectedMeter]="selectedMeter"></app-view-connect-bill>
-                      }
-                      <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                }
-              </tr>
-            }
-          </tbody>
-        </table>
-
-        <div class="d-flex w-100 justify-content-between">
-          <div class="d-flex">
-            <div>
-              <button class="btn action-btn btn-sm" (click)="copyTable()">
-                <span class="fa fa-copy"></span> Copy Table
+              <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                <i class="fa fa-trash"></i>
               </button>
             </div>
-            @if (showEstimated) {
-              <div class="ps-2">
-                <span class="fa fa-asterisk"></span> Indicates Estimated Reading
-              </div>
-            }
-          </div>
-          <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-            [maxSize]="5" [rotate]="true" aria-label="Pagination">
-          </ngb-pagination>
-        </div>
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>
+
+<div class="d-flex w-100 justify-content-between">
+  <div class="d-flex">
+    <div>
+      <button class="btn action-btn btn-sm" (click)="copyTable()">
+        <span class="fa fa-copy"></span> Copy Table
+      </button>
+    </div>
+    @if (showEstimated()) {
+      <div class="ps-2">
+        <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+      </div>
+    }
+  </div>
+  <ngb-pagination [collectionSize]="_orderedMeterData.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"
+    [maxSize]="5" [rotate]="true" aria-label="Pagination">
+  </ngb-pagination>
+</div>
