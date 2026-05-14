@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import * as _ from 'lodash';
@@ -93,7 +93,7 @@ export class OtherEmissionsDataTableComponent {
     const orderByField = this.orderDataField();
     const orderByDirection = this.orderByDirection();
     const orderByCharge = this.orderByCharge();
-    return _.orderBy(meterData, (dataItem: IdbUtilityMeterData) => {
+    const ordered = _.orderBy(meterData, (dataItem: IdbUtilityMeterData) => {
       if (orderByField === 'readDate') {
         return getDateFromMeterData(dataItem).getTime();
       }
@@ -103,6 +103,9 @@ export class OtherEmissionsDataTableComponent {
       }
       return dataItem[orderByField];
     }, orderByDirection);
+    return this.utilityMeterDataService.optionSelected() === 'estimated'
+      ? ordered.filter(d => d.isEstimated)
+      : ordered;
   });
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
@@ -115,6 +118,14 @@ export class OtherEmissionsDataTableComponent {
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
   readonly isElectron = this.electronService.isElectron;
+
+  private readonly selectedMeterGuid = computed(() => this.selectedMeter()?.guid);
+  private readonly _resetOnMeterChange = effect(() => {
+    this.selectedMeterGuid();
+    this.checkedItemGuids.set(new Set<string>());
+    this.allChecked = false;
+    this.currentPageNumber = 1;
+  });
 
   checkAll() {
     const displayedItems = this.orderedMeterData().slice(

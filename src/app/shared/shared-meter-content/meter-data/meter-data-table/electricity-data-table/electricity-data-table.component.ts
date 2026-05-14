@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
@@ -15,7 +15,6 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { OrderMeterDataByPipe } from '../order-meter-data-by.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -76,7 +75,6 @@ export class ElectricityDataTableComponent {
     return selectedMeterData;
   });
 
-
   generalInformationFilters: Signal<GeneralInformationFilters> = computed(() => {
     let filters: ElectricityDataFilters = this.electricityDataFilters();
     return filters.generalInformationFilters;
@@ -85,8 +83,6 @@ export class ElectricityDataTableComponent {
     let filters: ElectricityDataFilters = this.electricityDataFilters();
     return filters.emissionsFilters;
   });
-
-
 
   numDetailedCharges: Signal<number> = computed(() => {
     const selectedMeter: IdbUtilityMeter = this.selectedMeter();
@@ -201,7 +197,9 @@ export class ElectricityDataTableComponent {
         }
       }
     }, orderByDirection);
-    return orderedMeterData;
+    return this.utilityMeterDataService.optionSelected() === 'estimated'
+      ? orderedMeterData.filter(d => d.isEstimated)
+      : orderedMeterData;
   });
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
@@ -215,6 +213,14 @@ export class ElectricityDataTableComponent {
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
   readonly isElectron = this.electronService.isElectron;
+
+  private readonly selectedMeterGuid = computed(() => this.selectedMeter()?.guid);
+  private readonly _resetOnMeterChange = effect(() => {
+    this.selectedMeterGuid();
+    this.checkedItemGuids.set(new Set<string>());
+    this.allChecked = false;
+    this.currentPageNumber = 1;
+  });
 
   checkAll() {
     const orderedItems = this.orderedMeterData();

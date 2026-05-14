@@ -1,5 +1,8 @@
 @let _selectedMeter = selectedMeter();
 
+@if(_selectedMeter){
 <h4>{{_selectedMeter.name}} Meter Readings <span class="badge float-end"
-        [ngStyle]="{'background-color': _selectedMeter.source | meterSourceColor}">{{_selectedMeter.source}}</span></h4>
+                [ngStyle]="{'background-color': _selectedMeter.source | meterSourceColor}">{{_selectedMeter.source}}</span>
+</h4>
 <router-outlet></router-outlet>
+}

@@ -153,7 +153,7 @@ export class FacilityStatusCheck {
             this.actions.push({
                 label: 'Add predictors for ' + facility.name,
                 url: facilityBaseUrl + '/predictors',
-                description: 'Predictors are required to analyze and forecast resource usage.',
+                description: 'Predictors are required to analyze resource usage.',
                 facilityId: facility.guid,
                 type: 'predictor',
                 status: 'error',

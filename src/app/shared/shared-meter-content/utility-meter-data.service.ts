@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -15,6 +15,8 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   providedIn: 'root'
 })
 export class UtilityMeterDataService {
+
+  optionSelected: WritableSignal<'all' | 'estimated'> = signal('all');
 
   tableElectricityFilters: BehaviorSubject<ElectricityDataFilters>;
   tableGeneralUtilityFilters: BehaviorSubject<GeneralUtilityDataFilters>;
