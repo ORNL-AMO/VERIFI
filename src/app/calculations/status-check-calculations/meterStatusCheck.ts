@@ -58,7 +58,7 @@ export class MeterStatusCheck {
         let dayMonthYearCounts: {
             [key: string]: number;
         } = {};
-        if(meterReadings.length === 0) {
+        if (meterReadings.length === 0) {
             this.hasDuplicateEntries = false;
             this.duplicateEntryDates = [];
             return;
@@ -101,7 +101,18 @@ export class MeterStatusCheck {
     private setActions(meter: IdbUtilityMeter, facilityLatestEntry: { month: number; year: number } | undefined) {
         this.actions = [];
         const baseUrl = `/data-management/${meter.accountId}/facilities/${meter.facilityId}/meters/${meter.guid}`;
-        if (this.hasNoData) {
+
+        if (this.isMeterValid === false) {
+            this.actions.push({
+                label: 'Edit ' + meter.name,
+                url: baseUrl + '/edit',
+                description: 'This meter has configuration errors that need to be resolved before data can be properly assessed.',
+                facilityId: meter.facilityId,
+                type: 'meter',
+                status: 'error',
+                trackGuid: meter.guid + '_edit'
+            });
+        } else if (this.hasNoData) {
             this.actions.push({
                 label: 'Add meter data for ' + meter.name,
                 url: baseUrl + '/meter-data',

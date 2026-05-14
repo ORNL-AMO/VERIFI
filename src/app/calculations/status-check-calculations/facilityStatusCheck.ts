@@ -35,6 +35,7 @@ export class FacilityStatusCheck {
     hasNonCurrentPredictors: boolean;
     hasNonCurrentMeters: boolean;
     hasPredictorWeatherWarnings: boolean;
+    hasInvalidMeters: boolean;
 
     facilityLatestEntry: { month: number; year: number } | undefined;
 
@@ -68,6 +69,7 @@ export class FacilityStatusCheck {
         this.waterAnalysisStatusCheck = new AnalysisStatusCheck(waterAnalysisItem, facilityCalanderizedMeters, facilityPredictors, facilityPredictorData, analysisSetupErrors);
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
+        this.hasInvalidMeters = this.metersStatusChecks.some(check => !check.isMeterValid);
         this.setHasNonCurrentMeters();
         this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
         this.hasPredictorWeatherWarnings = this.predictorsStatusChecks.some(check => check.hasWeatherDataWarning);
