@@ -57,7 +57,8 @@ export class MeterDataTableComponent {
     if (!facilityStatusCheck || !selectedMeter) {
       return null;
     }
-    return facilityStatusCheck.metersStatusChecks.find(m => m.meterId === selectedMeter.guid);
+    const meterStatusCheck = facilityStatusCheck.metersStatusChecks.find(m => m.meterId === selectedMeter.guid);
+    return meterStatusCheck;
   });
 
   meterTableType: Signal<'electricity' | 'general' | 'vehicle' | 'other'> = computed(() => {

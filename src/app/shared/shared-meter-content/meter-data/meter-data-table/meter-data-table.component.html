@@ -66,20 +66,25 @@
 </div>
 <div class="meter">
   @if (_meterStatusCheck.hasNegativeReadings) {
-  <div class="p-1 small alert alert-warning text-center">
+  <div class="alert alert-warning text-center p-1 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span>
     Negative energy use entered for one or more readings.
   </div>
   }
   @if (_meterStatusCheck.hasDuplicateEntries) {
-  <div class="p-1 alert alert-danger">
-    Two or more readings have been entered for the same day. Calanderization will experience errors.
-    <ul class="mb-0">
-      @for (d of _meterStatusCheck.duplicateEntryDates; track d) {
-      <li>
-        {{d | date}}
-      </li>
-      }
-    </ul>
+  <div class="alert alert-danger text-center p-1 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span> Two or more readings have been entered for the same day.
+    Calanderization will experience errors:<br>
+    @for (date of _meterStatusCheck.duplicateEntryDates; track date) {
+    <span class="badge bg-danger ms-1">{{date | date:'MMM, yyyy'}}</span>
+    }
+  </div>
+  }
+  @if(_meterStatusCheck.isDataCurrent == false && _meterStatusCheck.lastDateEntry){
+  <div class="alert alert-warning text-center p-1 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span>
+    Facility data entered through {{_meterStatusCheck.latestFacilityEntryDate | date:'MMM, yyyy'}} but this meter only has data through
+    {{_meterStatusCheck.lastDateEntry | date:'MMM, yyyy'}}.
   </div>
   }
   <div class="row no-margin">
@@ -108,16 +113,18 @@
   </div>
 </div>
 }
-}@else if(!_meterStatusCheck){
-  <p class="fw-light text-center pt-2">
-    Loading meter data and meter status details...
-  </p>
+}@else{
+@if(!_meterStatusCheck){
+<p class="fw-light text-center pt-2">
+  Loading meter data and meter status details...
+</p>
 }@else{
 <div class="alert alert-danger">
   The meter associated with this data has errors in its configuration. Please click here to <a class="click-link"
     (click)="editMeter()">edit the meter</a> to resolve these errors
   before adding meter data.
 </div>
+}
 }
 
 

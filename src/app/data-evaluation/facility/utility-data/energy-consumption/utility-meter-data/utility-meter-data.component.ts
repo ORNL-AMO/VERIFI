@@ -1,53 +1,47 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-utility-meter-data',
-    templateUrl: './utility-meter-data.component.html',
-    styleUrls: ['./utility-meter-data.component.css'],
-    standalone: false
+  selector: 'app-utility-meter-data',
+  templateUrl: './utility-meter-data.component.html',
+  styleUrls: ['./utility-meter-data.component.css'],
+  standalone: false
 })
-export class UtilityMeterDataComponent implements OnInit {
+export class UtilityMeterDataComponent {
 
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private router: Router = inject(Router);
 
-  selectedMeter: IdbUtilityMeter;
-  label: string;
-  routerSub: Subscription;
-  constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
-    private activatedRoute: ActivatedRoute,
-    private router: Router
-  ) { }
+  private params: Signal<Params> = toSignal(this.activatedRoute.params);
+  private facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.accountMeters);
 
-  ngOnInit() {
-    this.activatedRoute.params.subscribe(params => {
-      let meterId: string = params['id'];
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      this.selectedMeter = facilityMeters.find(meter => { return meter.guid == meterId });
+  private routerUrl: Signal<string> = toSignal(
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url)   // emit current URL immediately
+    )
+  );
+
+  selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
+  label: Signal<string> = computed(() => {
+    const url = this.routerUrl();
+    if (url.includes('new-bill')) return 'New Bill';
+    if (url.includes('edit-bill')) return 'Edit Bill';
+    return 'Bills';
+  });
+  constructor() {
+    effect(() => {
+      const params: Params = this.params();
+      const meterId: string = params['id'];
+      const facilityMeters: Array<IdbUtilityMeter> = this.facilityMeters();
+      const selectedMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.guid == meterId });
+      this.utilityMeterDbService.selectedMeter.next(selectedMeter);
     });
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setLabel(this.router.url);
-      }
-    });
-    this.setLabel(this.router.url);
-  }
-
-  ngOnDestroy(){
-    this.routerSub.unsubscribe();
-  }
-
-
-  setLabel(url: string) {
-    if (this.router.url.includes('new-bill')) {
-      this.label = 'New Bill'
-    } else if (this.router.url.includes('edit-bill')) {
-      this.label = 'Edit Bill';
-    } else {
-      this.label = 'Bills';
-    }
   }
 }
