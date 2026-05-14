@@ -105,7 +105,7 @@ export class MeterStatusCheck {
         if (this.isMeterValid === false) {
             this.actions.push({
                 label: 'Edit ' + meter.name,
-                url: baseUrl + '/edit',
+                url: baseUrl,
                 description: 'This meter has configuration errors that need to be resolved before data can be properly assessed.',
                 facilityId: meter.facilityId,
                 type: 'meter',
@@ -132,6 +132,17 @@ export class MeterStatusCheck {
                     type: 'meter',
                     status: 'warning',
                     trackGuid: meter.guid + '_calendarization'
+                });
+            }
+            if(this.hasDuplicateEntries){
+                this.actions.push({
+                    label: 'Resolve duplicate entries for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: 'This meter has duplicate data entries for the following dates: ' + this.duplicateEntryDates.map(d => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })).join(', '),
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_duplicates'
                 });
             }
             if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {

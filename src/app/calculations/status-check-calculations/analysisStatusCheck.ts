@@ -20,6 +20,10 @@ export class AnalysisStatusCheck {
     latestMeterData: Array<MeterDateEntry>;
 
     hasSetupErrors: boolean;
+    //TODO: Dependent predictor and meter errors
+    //skip warnings
+    hasPredictorSetupErrors: boolean;
+    hasMeterSetupErrors: boolean;
 
     status: 'good' | 'warning' | 'error';
     constructor(analysisItem: IdbAnalysisItem,
@@ -83,11 +87,9 @@ export class AnalysisStatusCheck {
             d.getFullYear() === this.latestDataDate.getFullYear() &&
             d.getMonth() === this.latestDataDate.getMonth()
         );
-        if (allDates.length > 0) {
-            this.latestDataAllEntries = maxDate;
-        } else {
-            this.latestDataAllEntries = undefined;
-        }
+
+        //latest data entry date for which all meters and predictors have data entered
+        this.latestDataAllEntries = _.min(allDates);
     }
 
     /**

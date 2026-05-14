@@ -131,6 +131,39 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_update'
             });
+        } else if(this.hasMissingEntries){
+            this.actions.push({
+                label: 'Add missing predictor data for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `This predictor has missing data for ${this.missingEntryMonths.length} month(s).`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'error',
+                isWeather,
+                trackGuid: predictor.guid + '_add_missing'
+            });
+        } else if(this.hasDuplicateEntries){
+            this.actions.push({
+                label: 'Resolve duplicate predictor data for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `This predictor has duplicate entries for ${this.duplicateEntryMonths.length} month(s).`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'error',
+                isWeather,
+                trackGuid: predictor.guid + '_resolve_duplicates'
+            });
+        } else if (this.hasWeatherDataWarning) {
+            this.actions.push({
+                label: 'Review weather data warnings for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `Some data entries for this weather predictor have been flagged with warnings. Review the data to ensure accuracy.`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'warning',
+                isWeather,
+                trackGuid: predictor.guid + '_weather_warnings'
+            });
         }
     }
 
