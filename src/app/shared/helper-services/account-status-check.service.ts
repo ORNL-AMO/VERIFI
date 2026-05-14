@@ -74,9 +74,6 @@ export class AccountStatusCheckService implements OnDestroy {
             if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems || !analysisSetupErrors) {
                 return;
             }
-            // if (meters.length != calanderizedMeters.length) {
-            //     return;
-            // }
             const statusCheck = new AccountStatusCheck(
                 account,
                 facilities,

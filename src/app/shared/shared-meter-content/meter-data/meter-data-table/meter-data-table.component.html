@@ -74,7 +74,7 @@
   @if (_meterStatusCheck.hasDuplicateEntries) {
   <div class="alert alert-danger text-center p-1 fw-bold">
     <span class="fa fa-triangle-exclamation"></span> Two or more readings have been entered for the same day.
-    Calanderization will experience errors:<br>
+    Calendarization will experience errors:<br>
     @for (date of _meterStatusCheck.duplicateEntryDates; track date) {
     <span class="badge bg-danger ms-1">{{date | date:'MMM, yyyy'}}</span>
     }

@@ -309,7 +309,7 @@
     }
   </div>
 
-  <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"
+  <ngb-pagination [collectionSize]="_orderedMeterData.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"
     [maxSize]="5" [rotate]="true" aria-label="Pagination">
   </ngb-pagination>
 </div>
