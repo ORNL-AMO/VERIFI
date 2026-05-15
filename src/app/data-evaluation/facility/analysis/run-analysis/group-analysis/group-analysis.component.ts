@@ -8,8 +8,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { AnalysisService } from '../../analysis.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
   selector: 'app-group-analysis',
@@ -71,22 +73,16 @@ export class GroupAnalysisComponent {
     return url.includes('banked-analysis');
   });
 
-  allGroupErrors = toSignal(this.accountStatusCheckService.accountStatusCheck.pipe(
-    map(check => check?.allGroupErrors ?? [])
-  ), { initialValue: [] });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
     const selectedGroup = this.selectedGroup();
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
-      const groupError = allGroupErrors.find(groupError => {
-        return groupError.groupId == selectedGroup.idbGroupId && groupError.analysisId == analysisItem.guid
-      });
-      if (groupError) {
-        return groupError;
-      } else {
-        return emptyGroupAnalysisErrors();
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
+      const groupStatusCheck = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid);
+      if (groupStatusCheck) {
+        return groupStatusCheck.groupAnalysisErrors;
       }
     }
     return emptyGroupAnalysisErrors();

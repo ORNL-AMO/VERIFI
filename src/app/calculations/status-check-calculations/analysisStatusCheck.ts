@@ -5,6 +5,10 @@ import * as _ from 'lodash';
 import { MeterStatusCheck } from "./meterStatusCheck";
 import { PredictorStatusCheck } from "./predictorStatusCheck";
 import { AnalysisGroupStatusCheck } from "./analysisGroupStatusCheck";
+import { getAnalysisSetupErrors } from "./validation/analysisValidation";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { CalanderizedMeter } from "src/app/models/calanderization";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export class AnalysisStatusCheck {
 
@@ -27,29 +31,34 @@ export class AnalysisStatusCheck {
     hasMeterSetupErrors: boolean;
 
     status: 'good' | 'warning' | 'error';
+
     constructor(analysisItem: IdbAnalysisItem,
-        analysisSetupErrors: Array<AnalysisSetupErrors>,
         meterStatusChecks: Array<MeterStatusCheck>,
-        predictorStatusChecks: Array<PredictorStatusCheck>
+        predictorStatusChecks: Array<PredictorStatusCheck>,
+        calanderizedMeters: Array<CalanderizedMeter>,
+        predictorData: Array<IdbPredictorData>,
+        facility: IdbFacility
     ) {
         this.analysisItem = analysisItem;
-        this.setHasSetupErrors(analysisSetupErrors, analysisItem.guid);
-        this.setGroupStatusChecks(analysisItem.groups, predictorStatusChecks, meterStatusChecks);
+        this.setAnalysisGroupErrors(analysisItem.groups, predictorStatusChecks, meterStatusChecks, calanderizedMeters, predictorData);
+        this.setAnalysisSetupErrors(calanderizedMeters, facility);
+        this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);
         this.setPredictorSetupErrors();
         this.setMeterSetupErrors();
-        this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);
         this.setStatus();
     }
 
-    private setGroupStatusChecks(
+    private setAnalysisGroupErrors(
         groups: Array<AnalysisGroup>,
         predictorStatusChecks: Array<PredictorStatusCheck>,
         meterStatusChecks: Array<MeterStatusCheck>,
+        calanderizedMeters: Array<CalanderizedMeter>,
+        predictorData: Array<IdbPredictorData>
     ) {
         this.groupStatusChecks = new Array();
         for (const group of groups) {
             if (group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis') {
-                const groupStatusCheck = new AnalysisGroupStatusCheck(group, predictorStatusChecks, meterStatusChecks, this.analysisSetupErrors?.groupErrors);
+                const groupStatusCheck = new AnalysisGroupStatusCheck(group, predictorStatusChecks, meterStatusChecks, this.analysisItem, calanderizedMeters, predictorData);
                 this.groupStatusChecks.push(groupStatusCheck);
             }
         }
@@ -162,17 +171,18 @@ export class AnalysisStatusCheck {
         return meterStatusChecks.find(cm => cm.meterId === meterId);
     }
 
-    private setHasSetupErrors(analysisSetupErrors: Array<AnalysisSetupErrors>, analysisItemId: string) {
-        this.analysisSetupErrors = analysisSetupErrors.find(e => e.analysisId === analysisItemId);
+    private setAnalysisSetupErrors(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
+        let groupErrorsForItem: Array<GroupAnalysisErrors> = this.groupStatusChecks.flatMap(g => g.groupAnalysisErrors);
+        this.analysisSetupErrors = getAnalysisSetupErrors(this.analysisItem, calanderizedMeters, facility, groupErrorsForItem);
         this.hasSetupErrors = this.analysisSetupErrors ? this.analysisSetupErrors.hasError : false;
     }
 
     private setMeterSetupErrors() {
-        this.hasMeterSetupErrors = this.groupStatusChecks.some(g => g.hasMeterSetupErrors);
+        this.hasMeterSetupErrors = this.includedMeterStatusChecks.some(g => g.status == 'error');
     }
 
     private setPredictorSetupErrors() {
-        this.hasPredictorSetupErrors = this.groupStatusChecks.some(g => g.hasPredictorSetupErrors);
+        this.hasPredictorSetupErrors = this.includedPredictorStatusChecks.some(g => g.status == 'error');
     }
 
     private setStatus() {
@@ -185,5 +195,9 @@ export class AnalysisStatusCheck {
         else {
             this.status = 'good';
         }
+    }
+
+    getGroupStatusChecksByGroupId(groupId: string): AnalysisGroupStatusCheck | undefined {
+        return this.groupStatusChecks.find(gsc => gsc.group.idbGroupId === groupId);
     }
 }

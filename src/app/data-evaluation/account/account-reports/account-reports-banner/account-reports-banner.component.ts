@@ -9,7 +9,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountReportErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { emptyAccountReportErrors } from 'src/app/shared/validation/accountReportValidation';
+import { emptyAccountReportErrors } from 'src/app/calculations/status-check-calculations/validation/accountReportValidation';
 
 @Component({
   selector: 'app-account-reports-banner',

@@ -17,11 +17,11 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisSetupErrors, FacilityReportErrors, AccountReportErrors, GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
-import { emptyAnalysisSetupErrors } from '../validation/analysisValidation';
-import { emptyGroupAnalysisErrors } from '../validation/groupAnalysisValidation';
-import { emptyFacilityReportErrors } from '../validation/facilityReportValidation';
-import { emptyAccountAnalysisSetupErrors } from '../validation/accountAnalysisValidation';
-import { emptyAccountReportErrors } from '../validation/accountReportValidation';
+import { emptyAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/analysisValidation';
+import { emptyGroupAnalysisErrors } from '../../calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { emptyFacilityReportErrors } from '../../calculations/status-check-calculations/validation/facilityReportValidation';
+import { emptyAccountAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/accountAnalysisValidation';
+import { emptyAccountReportErrors } from '../../calculations/status-check-calculations/validation/accountReportValidation';
 
 @Injectable({
     providedIn: 'root'

@@ -1,5 +1,5 @@
 import { Component, computed, inject, Signal } from '@angular/core';
-import {  firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -19,6 +19,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { map } from 'rxjs';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -43,10 +44,7 @@ export class GroupAnalysisOptionsComponent {
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems, { initialValue: [] });
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  allGroupErrors: Signal<Array<GroupAnalysisErrors>> = toSignal(
-    this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.allGroupErrors ?? [])),
-    { initialValue: [] }
-  );
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   //COMPUTED SIGNALS
   showInUseMessage: Signal<boolean> = computed(() => {
@@ -158,14 +156,14 @@ export class GroupAnalysisOptionsComponent {
   });
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const group = this.group();
     const analysisItem = this.analysisItem();
-    if (!allGroupErrors || !group) {
+    if (!facilityStatusCheck || !group) {
       return null;
     }
-    let groupErrors: GroupAnalysisErrors = allGroupErrors.find(groupError => groupError.groupId == group.idbGroupId && groupError.analysisId == analysisItem.guid);
-    if(groupErrors){
+    let groupErrors: GroupAnalysisErrors = facilityStatusCheck.getGroupStatusChecksByGroupId(group.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
+    if (groupErrors) {
       return groupErrors;
     };
     return null;

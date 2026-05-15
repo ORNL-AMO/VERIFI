@@ -2,7 +2,7 @@ import { CalanderizedMeter } from "src/app/models/calanderization";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
-import { isMeterInvalid } from "src/app/shared/validation/meterValidation";
+import { isMeterInvalid } from "src/app/calculations/status-check-calculations/validation/meterValidation";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 
 export class MeterStatusCheck {

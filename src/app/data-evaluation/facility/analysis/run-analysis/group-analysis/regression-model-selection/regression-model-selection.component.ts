@@ -17,7 +17,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
@@ -42,9 +43,7 @@ export class RegressionModelSelectionComponent {
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
-  allGroupErrors = toSignal(this.accountStatusCheckService.accountStatusCheck.pipe(
-    map(check => check?.allGroupErrors ?? [])
-  ), { initialValue: [] });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
 
   generatedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
@@ -114,12 +113,10 @@ export class RegressionModelSelectionComponent {
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
     const selectedGroup = this.selectedGroup();
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
     if (selectedGroup && analysisItem) {
-      const groupError = allGroupErrors.find(groupError => {
-        return groupError.groupId == selectedGroup.idbGroupId && groupError.analysisId == analysisItem.guid
-      });
+      const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
       if (groupError) {
         return groupError;
       } else {
