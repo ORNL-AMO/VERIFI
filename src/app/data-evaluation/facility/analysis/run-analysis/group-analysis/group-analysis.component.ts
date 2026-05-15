@@ -6,7 +6,7 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
 import { AnalysisService } from '../../analysis.service';
@@ -22,7 +22,7 @@ export class GroupAnalysisComponent {
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
   private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
@@ -71,7 +71,9 @@ export class GroupAnalysisComponent {
     return url.includes('banked-analysis');
   });
 
-  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+  allGroupErrors = toSignal(this.accountStatusCheckService.accountStatusCheck.pipe(
+    map(check => check?.allGroupErrors ?? [])
+  ), { initialValue: [] });
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
     const selectedGroup = this.selectedGroup();

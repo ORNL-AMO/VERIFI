@@ -13,7 +13,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
-import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 @Component({
   selector: 'app-analysis-footer',
   templateUrl: './analysis-footer.component.html',
@@ -46,7 +46,7 @@ export class AnalysisFooterComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dataEvaluationService: DataEvaluationService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private analysisValidationService: AccountStatusCheckService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;

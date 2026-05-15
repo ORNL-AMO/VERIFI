@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -23,7 +23,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
@@ -66,7 +66,7 @@ export class RegressionModelMenuComponent {
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private fb: NonNullableFormBuilder = inject(NonNullableFormBuilder);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private regressionModelsService: RegressionModelsService = inject(RegressionModelsService);
 
   // --- Signals ---
@@ -78,7 +78,9 @@ export class RegressionModelMenuComponent {
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters);
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
-  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+  allGroupErrors = toSignal(this.accountStatusCheckService.accountStatusCheck.pipe(
+    map(check => check?.allGroupErrors ?? [])
+  ), { initialValue: [] });
   selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
 
   // --- Computed Signals ---

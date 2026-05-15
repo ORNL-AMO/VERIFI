@@ -8,15 +8,30 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
-import { AnalysisSetupErrors } from "src/app/models/validation";
+import { AccountReportErrors, AnalysisSetupErrors, FacilityReportErrors, GroupAnalysisErrors } from "src/app/models/validation";
 import { FacilityStatusCheck } from "./facilityStatusCheck";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
+import { getGroupErrors, emptyGroupAnalysisErrors } from "src/app/shared/validation/groupAnalysisValidation";
+import { getAnalysisSetupErrors, emptyAnalysisSetupErrors } from "src/app/shared/validation/analysisValidation";
+import { getFacilityReportErrors, emptyFacilityReportErrors } from "src/app/shared/validation/facilityReportValidation";
+import { getAccountAnalysisSetupErrors, emptyAccountAnalysisSetupErrors } from "src/app/shared/validation/accountAnalysisValidation";
+import { getAccountReportErrors, emptyAccountReportErrors } from "src/app/shared/validation/accountReportValidation";
+import { IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
+import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
 
 export class AccountStatusCheck {
 
     facilityStatusChecks: Array<FacilityStatusCheck>;
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
+
+    allGroupErrors: Array<GroupAnalysisErrors>;
+    analysisSetupErrors: Array<AnalysisSetupErrors>;
+    facilityReportErrors: Array<FacilityReportErrors>;
+    accountAnalysisSetupErrors: Array<AccountAnalysisSetupErrors>;
+    accountReportErrors: Array<AccountReportErrors>;
 
     constructor(
         account: IdbAccount,
@@ -28,8 +43,15 @@ export class AccountStatusCheck {
         predictors: Array<IdbPredictor>,
         predictorData: Array<IdbPredictorData>,
         facilityAnalysisItems: Array<IdbAnalysisItem>,
-        analysisSetupErrors: Array<AnalysisSetupErrors>
+        facilityReports: Array<IdbFacilityReport>,
+        accountAnalysisItems: Array<IdbAccountAnalysisItem>,
+        accountReports: Array<IdbAccountReport>
     ) {
+        this.computeGroupErrors(facilityAnalysisItems, calanderizedMeters, predictorData);
+        this.computeAnalysisSetupErrors(facilityAnalysisItems, calanderizedMeters, facilities);
+        this.computeFacilityReportErrors(facilityReports);
+        this.computeAccountAnalysisSetupErrors(accountAnalysisItems);
+        this.computeAccountReportErrors(accountReports);
         this.setAccountActions(account, facilities);
         this.facilityStatusChecks = facilities.map(facility => {
             return new FacilityStatusCheck(
@@ -39,12 +61,89 @@ export class AccountStatusCheck {
                 predictors,
                 predictorData,
                 facilityAnalysisItems,
-                analysisSetupErrors,
+                this.analysisSetupErrors,
                 meters,
                 meterGroups
             );
         });
         this.setStatus();
+    }
+
+    getGroupErrorsByGroupId(groupId: string, analysisId: string): GroupAnalysisErrors {
+        const groupErrors = this.allGroupErrors.find(e => e.groupId === groupId && e.analysisId === analysisId);
+        return groupErrors ?? emptyGroupAnalysisErrors();
+    }
+
+    getErrorsByAnalysisId(analysisId: string): AnalysisSetupErrors {
+        const errors = this.analysisSetupErrors.find(e => e.analysisId === analysisId);
+        return errors ?? emptyAnalysisSetupErrors();
+    }
+
+    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
+        const errors = this.facilityReportErrors.find(e => e.reportId === reportId);
+        return errors ?? emptyFacilityReportErrors();
+    }
+
+    getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
+        const errors = this.accountAnalysisSetupErrors.find(e => e.analysisId === analysisId);
+        return errors ?? emptyAccountAnalysisSetupErrors();
+    }
+
+    getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
+        const errors = this.accountReportErrors.find(e => e.reportId === reportId);
+        return errors ?? emptyAccountReportErrors();
+    }
+
+    private computeGroupErrors(
+        analysisItems: Array<IdbAnalysisItem>,
+        calanderizedMeters: Array<CalanderizedMeter>,
+        predictorData: Array<IdbPredictorData>
+    ) {
+        this.allGroupErrors = [];
+        for (const analysisItem of analysisItems) {
+            for (const group of analysisItem.groups) {
+                const groupErrors = getGroupErrors(group, analysisItem, calanderizedMeters, predictorData);
+                this.allGroupErrors.push(groupErrors);
+            }
+        }
+    }
+
+    private computeAnalysisSetupErrors(
+        analysisItems: Array<IdbAnalysisItem>,
+        calanderizedMeters: Array<CalanderizedMeter>,
+        facilities: Array<IdbFacility>
+    ) {
+        this.analysisSetupErrors = [];
+        for (const analysisItem of analysisItems) {
+            const facility = facilities.find(f => f.guid === analysisItem.facilityId);
+            const groupErrorsForItem = this.allGroupErrors.filter(e => e.analysisId === analysisItem.guid);
+            const errors = getAnalysisSetupErrors(analysisItem, calanderizedMeters, facility, groupErrorsForItem);
+            this.analysisSetupErrors.push(errors);
+        }
+    }
+
+    private computeFacilityReportErrors(facilityReports: Array<IdbFacilityReport>) {
+        this.facilityReportErrors = [];
+        for (const report of facilityReports) {
+            const errors = getFacilityReportErrors(report, this.analysisSetupErrors);
+            this.facilityReportErrors.push(errors);
+        }
+    }
+
+    private computeAccountAnalysisSetupErrors(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+        this.accountAnalysisSetupErrors = [];
+        for (const item of accountAnalysisItems) {
+            const errors = getAccountAnalysisSetupErrors(item, this.analysisSetupErrors);
+            this.accountAnalysisSetupErrors.push(errors);
+        }
+    }
+
+    private computeAccountReportErrors(accountReports: Array<IdbAccountReport>) {
+        this.accountReportErrors = [];
+        for (const report of accountReports) {
+            const errors = getAccountReportErrors(report, this.accountAnalysisSetupErrors);
+            this.accountReportErrors.push(errors);
+        }
     }
 
     private setAccountActions(account: IdbAccount, facilities: Array<IdbFacility>) {

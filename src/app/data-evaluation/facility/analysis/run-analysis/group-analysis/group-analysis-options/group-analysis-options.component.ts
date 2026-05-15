@@ -16,8 +16,9 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -34,7 +35,7 @@ export class GroupAnalysisOptionsComponent {
   private router: Router = inject(Router);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup, { initialValue: null });
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem, { initialValue: null });
@@ -42,7 +43,10 @@ export class GroupAnalysisOptionsComponent {
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems, { initialValue: [] });
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  allGroupErrors: Signal<Array<GroupAnalysisErrors>> = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+  allGroupErrors: Signal<Array<GroupAnalysisErrors>> = toSignal(
+    this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.allGroupErrors ?? [])),
+    { initialValue: [] }
+  );
 
   //COMPUTED SIGNALS
   showInUseMessage: Signal<boolean> = computed(() => {

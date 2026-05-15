@@ -1,5 +1,5 @@
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -16,7 +16,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
 
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
@@ -35,14 +35,16 @@ export class RegressionModelSelectionComponent {
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
-  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+  allGroupErrors = toSignal(this.accountStatusCheckService.accountStatusCheck.pipe(
+    map(check => check?.allGroupErrors ?? [])
+  ), { initialValue: [] });
 
 
   generatedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
