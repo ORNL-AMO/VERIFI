@@ -57,7 +57,8 @@ export class PredictorTableComponent {
     const predictors = this.facilityPredictors();
     const facilityStatusCheck = this.facilityStatusCheck();
     if (!predictors || !facilityStatusCheck) return [];
-    return predictors.filter(predictor => predictor.predictorType == 'Standard').map(predictor => {
+    console.log('predictors', predictors);
+    return predictors.filter(predictor => (predictor.predictorType == 'Standard' || !predictor.predictorType)).map(predictor => {
       return {
         predictor: predictor,
         statusCheck: facilityStatusCheck.predictorsStatusChecks.find(check => check.predictorId == predictor.guid)
