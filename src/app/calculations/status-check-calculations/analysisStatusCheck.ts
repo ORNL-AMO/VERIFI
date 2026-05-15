@@ -1,10 +1,10 @@
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { AnalysisGroup, JStatRegressionModel } from "src/app/models/analysis";
-import { AnalysisSetupErrors } from "src/app/models/validation";
+import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
 import * as _ from 'lodash';
 import { MeterStatusCheck } from "./meterStatusCheck";
 import { PredictorStatusCheck } from "./predictorStatusCheck";
-import { STATUS_CHECK_OPTIONS } from "./statusCheckModels";
+import { AnalysisGroupStatusCheck } from "./analysisGroupStatusCheck";
 
 export class AnalysisStatusCheck {
 
@@ -16,14 +16,13 @@ export class AnalysisStatusCheck {
     /** True when every meter and predictor has data up to the same month/year as latestDataDate. */
     allDatesCurrent: boolean;
 
-    includedPredictorStatusChecks: Array<PredictorStatusCheck>;
+    analysisSetupErrors: AnalysisSetupErrors;
+    groupStatusChecks: Array<AnalysisGroupStatusCheck>;
+
     includedMeterStatusChecks: Array<MeterStatusCheck>;
-    // latestPredictorData: Array<PredictorDateEntry>;
-    // latestMeterData: Array<MeterDateEntry>;
+    includedPredictorStatusChecks: Array<PredictorStatusCheck>;
 
     hasSetupErrors: boolean;
-    //TODO: Dependent predictor and meter errors
-    //skip warnings
     hasPredictorSetupErrors: boolean;
     hasMeterSetupErrors: boolean;
 
@@ -34,9 +33,26 @@ export class AnalysisStatusCheck {
         predictorStatusChecks: Array<PredictorStatusCheck>
     ) {
         this.analysisItem = analysisItem;
-        this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);
         this.setHasSetupErrors(analysisSetupErrors, analysisItem.guid);
+        this.setGroupStatusChecks(analysisItem.groups, predictorStatusChecks, meterStatusChecks);
+        this.setPredictorSetupErrors();
+        this.setMeterSetupErrors();
+        this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);
         this.setStatus();
+    }
+
+    private setGroupStatusChecks(
+        groups: Array<AnalysisGroup>,
+        predictorStatusChecks: Array<PredictorStatusCheck>,
+        meterStatusChecks: Array<MeterStatusCheck>,
+    ) {
+        this.groupStatusChecks = new Array();
+        for (const group of groups) {
+            if (group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis') {
+                const groupStatusCheck = new AnalysisGroupStatusCheck(group, predictorStatusChecks, meterStatusChecks, this.analysisSetupErrors?.groupErrors);
+                this.groupStatusChecks.push(groupStatusCheck);
+            }
+        }
     }
 
     /**
@@ -147,14 +163,20 @@ export class AnalysisStatusCheck {
     }
 
     private setHasSetupErrors(analysisSetupErrors: Array<AnalysisSetupErrors>, analysisItemId: string) {
-        const setupErrorsForAnalysis = analysisSetupErrors.find(e => e.analysisId === analysisItemId);
-        this.hasSetupErrors = setupErrorsForAnalysis ? setupErrorsForAnalysis.hasError : false;
+        this.analysisSetupErrors = analysisSetupErrors.find(e => e.analysisId === analysisItemId);
+        this.hasSetupErrors = this.analysisSetupErrors ? this.analysisSetupErrors.hasError : false;
+    }
+
+    private setMeterSetupErrors() {
+        this.hasMeterSetupErrors = this.groupStatusChecks.some(g => g.hasMeterSetupErrors);
+    }
+
+    private setPredictorSetupErrors() {
+        this.hasPredictorSetupErrors = this.groupStatusChecks.some(g => g.hasPredictorSetupErrors);
     }
 
     private setStatus() {
-        const meterStatuses: Array<STATUS_CHECK_OPTIONS> = this.includedMeterStatusChecks.map(m => m.status);
-        const predictorStatuses: Array<STATUS_CHECK_OPTIONS> = this.includedPredictorStatusChecks.map(p => p.status);
-        if (this.hasSetupErrors || meterStatuses.includes('error') || predictorStatuses.includes('error')) {
+        if (this.hasSetupErrors || this.hasMeterSetupErrors || this.hasPredictorSetupErrors) {
             this.status = 'error';
         }
         // else if (!this.allDatesCurrent) {

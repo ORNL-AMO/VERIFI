@@ -52,6 +52,7 @@
             @if(!showDeleteColumn) {
             <th></th>
             }
+            <th class="status-col text-center">Status</th>
             <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField == 'name'}">
               Analysis Item
             </th>
@@ -76,7 +77,11 @@
           @for (item of _orderedAnalysisItems | slice: ((currentPageNumber-1) * itemsPerPage()): currentPageNumber *
           itemsPerPage(); track item.analysisItem.guid) {
           @let setupErrors = item.analysisItem.guid | invalidAnalysis;
-          <tr>
+          @let sc = item.analysisStatusCheck;
+          <tr [ngClass]="{
+            'analysis-row-error': sc?.status === 'error',
+            'analysis-row-warning': sc?.status === 'warning'
+          }">
             @if(showDeleteColumn) {
             <td class="input text-center">
               <input type="checkbox" name="analysisSelected" [checked]="checkedGuids().has(item.analysisItem.guid)"
@@ -86,22 +91,42 @@
             @if(!showDeleteColumn) {
             <td class="text-center">
               @if (item.analysisItem.analysisCategory == 'energy') {
-              <span class="energy fa"
-                [ngClass]="{'fa-circle-check': item.analysisItem.guid == _selectedFacility.selectedEnergyAnalysisId, 'fa-circle':item.analysisItem.guid != _selectedFacility.selectedEnergyAnalysisId}"
+              <span class="fa fa-star selection-star"
+                [ngClass]="{'text-warning': item.analysisItem.guid == _selectedFacility.selectedEnergyAnalysisId, 'text-muted': item.analysisItem.guid != _selectedFacility.selectedEnergyAnalysisId}"
+                [title]="item.analysisItem.guid == _selectedFacility.selectedEnergyAnalysisId ? 'Active energy analysis' : 'Set as active energy analysis'"
                 (click)="setUseItem(item.analysisItem)"></span>
               }
               @if (item.analysisItem.analysisCategory == 'water') {
-              <span class="water fa"
-                [ngClass]="{'fa-circle-check': item.analysisItem.guid == _selectedFacility.selectedWaterAnalysisId, 'fa-circle':item.analysisItem.guid != _selectedFacility.selectedWaterAnalysisId}"
+              <span class="fa fa-star selection-star"
+                [ngClass]="{'text-info': item.analysisItem.guid == _selectedFacility.selectedWaterAnalysisId, 'text-muted': item.analysisItem.guid != _selectedFacility.selectedWaterAnalysisId}"
+                [title]="item.analysisItem.guid == _selectedFacility.selectedWaterAnalysisId ? 'Active water analysis' : 'Set as active water analysis'"
                 (click)="setUseItem(item.analysisItem)"></span>
               }
             </td>
             }
+            <!-- Status column -->
+            <td class="text-center align-middle status-col">
+              <span class="fa fa-fw fa-lg" [ngClass]="{
+                'fa-circle-check text-success': sc?.status === 'good',
+                'fa-exclamation-triangle text-warning': sc?.status === 'warning',
+                'fa-circle-xmark text-danger': sc?.status === 'error'
+              }"></span>
+              @if (sc?.status !== 'good') {
+              <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+                @if (sc?.hasSetupErrors) {
+                <span class="badge bg-danger issue-badge">Setup Errors</span>
+                }
+                @if(sc?.hasMeterSetupErrors) {
+                <span class="badge bg-danger issue-badge">Meter Errors</span>
+                }
+                @if(sc?.hasPredictorSetupErrors) {
+                <span class="badge bg-danger issue-badge">Predictor Errors</span>
+                }
+              </div>
+              }
+            </td>
             <td>
               <a (click)="selectAnalysisItem(item.analysisItem)">
-                @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
-                <span class="me-2 fa fa-exclamation-circle error-icon"></span>
-                }
                 {{item.analysisItem.name}}
               </a>
             </td>
@@ -178,10 +203,10 @@
       </div>
       <div class="d-flex justify-content-between">
         <div class="icon-text">
-          <span class="energy fa fa-circle-check"></span> Denotes selected energy analysis.<br>
-          <span class="water fa fa-circle-check"></span> Denotes selected water analysis.
+          <span class="fa fa-star text-warning"></span> Denotes active energy analysis.<br>
+          <span class="fa fa-star text-info"></span> Denotes active water analysis.
           <p class="fw-light pt-2 italic mb-0">
-            The selected analysis is used to track progress towards your goals and for reporting.
+            The active analysis is used to track progress towards your goals and for reporting.
           </p>
         </div>
         @if (_orderedAnalysisItems.length > 0) {

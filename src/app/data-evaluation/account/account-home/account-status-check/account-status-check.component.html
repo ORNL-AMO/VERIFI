@@ -97,7 +97,7 @@
                                     <span class="fa fa-boxes-stacked me-1"></span>Predictors
                                 </span>
                                 }
-                                @if (fc.energyAnalysisStatusCheck?.status !== 'good') {
+                                @if (fc.energyAnalysisStatusCheck && fc.energyAnalysisStatusCheck?.status !== 'good') {
                                 <span class="badge" [ngClass]="{
                   'bg-warning text-dark': fc.energyAnalysisStatusCheck?.status === 'warning',
                   'bg-danger':           fc.energyAnalysisStatusCheck?.status === 'error'
@@ -105,7 +105,7 @@
                                     <span class="fa fa-bolt me-1"></span>Energy Analysis
                                 </span>
                                 }
-                                @if (fc.waterAnalysisStatusCheck?.status !== 'good') {
+                                @if (fc.waterAnalysisStatusCheck && fc.waterAnalysisStatusCheck?.status !== 'good') {
                                 <span class="badge" [ngClass]="{
                   'bg-warning text-dark': fc.waterAnalysisStatusCheck?.status === 'warning',
                   'bg-danger':           fc.waterAnalysisStatusCheck?.status === 'error'
