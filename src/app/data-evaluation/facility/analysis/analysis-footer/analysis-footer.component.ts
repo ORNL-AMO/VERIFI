@@ -46,7 +46,7 @@ export class AnalysisFooterComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dataEvaluationService: DataEvaluationService,
-    private analysisValidationService: AccountStatusCheckService) { }
+    private accountStatusCheckService: AccountStatusCheckService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
@@ -70,7 +70,7 @@ export class AnalysisFooterComponent implements OnInit {
       this.sidebarWidth = sidebarWidth;
     });
 
-    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
+    this.analysisValidationSub = this.accountStatusCheckService.accountStatusCheck.subscribe(val => {
       this.setDisableContinue();
     });
   }
@@ -170,7 +170,7 @@ export class AnalysisFooterComponent implements OnInit {
   setDisableContinue() {
     let setupErrors: AnalysisSetupErrors;
     if (this.analysisItem) {
-      setupErrors = this.analysisValidationService.getErrorsByAnalysisId(this.analysisItem.guid);
+      setupErrors = this.accountStatusCheckService.getErrorsByAnalysisId(this.analysisItem.guid);
     }
     if (this.router.url.includes('analysis-setup')) {
       if (setupErrors && setupErrors.setupHasError) {
