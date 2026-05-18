@@ -96,7 +96,7 @@ export class AccountStatusCheckService implements OnDestroy {
                 this.isCollectionForAccount(meters, account.guid, meter => meter.accountId) &&
                 this.isCollectionForAccount(meterData, account.guid, data => data.accountId) &&
                 this.isCollectionForAccount(meterGroups, account.guid, group => group.accountId) &&
-                this.isCollectionForAccount(calanderizedMeters, account.guid, calanderizedMeter => calanderizedMeter.meter.accountId) &&
+                this.isCollectionForAccount(calanderizedMeters, account.guid, calendarizedMeter => calendarizedMeter.meter.accountId) &&
                 this.isCollectionForAccount(predictors, account.guid, predictor => predictor.accountId) &&
                 this.isCollectionForAccount(predictorData, account.guid, data => data.accountId) &&
                 this.isCollectionForAccount(analysisItems, account.guid, item => item.accountId) &&
