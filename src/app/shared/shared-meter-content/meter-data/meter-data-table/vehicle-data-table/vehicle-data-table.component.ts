@@ -101,6 +101,7 @@ export class VehicleDataTableComponent {
     let count = 3;
     if (!f.totalEnergy) count--;
     if (f.totalCost) count++;
+    if (f.fuelEfficiency && this.selectedMeter()?.scope === 2 &&  this.selectedMeter()?.vehicleCategory == 2) count++;
     return count;
   });
 

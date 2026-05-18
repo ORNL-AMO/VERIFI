@@ -1,8 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, computed, Input, OnInit, Signal } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
-import { checkShowEmissionsOutputRate, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
+import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
@@ -29,6 +29,10 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   vehicleDataFilters: VehicleDataFilters;
   isRECs: boolean;
   account: IdbAccount;
+  showHeatCapacity: boolean;
+  showFuelEfficiency: boolean;
+  private lastMeterId: string;
+
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -39,28 +43,35 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   ngOnChanges() {
-    if (this.meter.source == 'Electricity') {
-      this.isRECs = (this.meter.agreementType == 4 || this.meter.agreementType == 6);
-      let electricityDataFilters: ElectricityDataFilters;
-      electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
-      this.emissionsFilters = electricityDataFilters.emissionsFilters;
-      this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
-    } else if (this.meter.scope != 2) {
-      this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
+    if (!this.meter) {
+      return;
     }
+    if (this.meter.guid != this.lastMeterId) {
+      if (this.meter.source == 'Electricity') {
+        this.isRECs = (this.meter.agreementType == 4 || this.meter.agreementType == 6);
+        let electricityDataFilters: ElectricityDataFilters;
+        electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
+        this.emissionsFilters = electricityDataFilters.emissionsFilters;
+        this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
+      } else if (this.meter.scope != 2) {
+        this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
+      }
 
-    if (this.meter.source != 'Electricity') {
-      this.isRECs = false;
-    }
+      if (this.meter.source != 'Electricity') {
+        this.isRECs = false;
+      }
 
-    if (this.meter.scope == 2) {
-      this.vehicleDataFilters = this.utilityMeterDataService.tableVehicleDataFilters.getValue();
-      this.showEmissions = true;
-      this.displayVolumeInput = true;
-
-    } else {
-      this.showEmissions = checkShowEmissionsOutputRate(this.meter);
-      this.displayVolumeInput = (getIsEnergyUnit(this.meter.startingUnit) == false);
+      if (this.meter.scope == 2) {
+        this.vehicleDataFilters = this.utilityMeterDataService.tableVehicleDataFilters.getValue();
+        this.showEmissions = true;
+        this.displayVolumeInput = true;
+        this.showFuelEfficiency = (this.meter.vehicleCategory == 2);
+      } else {
+        this.showEmissions = checkShowEmissionsOutputRate(this.meter);
+        this.displayVolumeInput = (getIsEnergyUnit(this.meter.startingUnit) == false);
+        this.showHeatCapacity = checkShowHeatCapacity(this.meter.source, this.meter.startingUnit, this.meter.scope);
+      }
+      this.lastMeterId = this.meter.guid;
     }
   }
 
@@ -111,6 +122,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         stationaryCarbonEmissions: this.account.displayEmissions ? true : false,
         stationaryOtherEmissions: this.account.displayEmissions ? true : false,
         totalEmissions: this.account.displayEmissions ? true : false,
+        heatCapacity: checkShowHeatCapacity(this.meter.source, this.meter.startingUnit, this.meter.scope)
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {
@@ -120,6 +132,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         mobileCarbonEmissions: this.account.displayEmissions ? true : false,
         mobileOtherEmissions: this.account.displayEmissions ? true : false,
         mobileTotalEmissions: this.account.displayEmissions ? true : false,
+        fuelEfficiency: (this.meter.vehicleCategory == 2) ? true : false
       }
     }
 
@@ -157,6 +170,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         stationaryCarbonEmissions: false,
         stationaryOtherEmissions: false,
         totalEmissions: false,
+        heatCapacity: false
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {
@@ -166,6 +180,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         mobileCarbonEmissions: false,
         mobileOtherEmissions: false,
         mobileTotalEmissions: false,
+        fuelEfficiency: false
       }
     }
     this.meter.charges.forEach(charge => {
