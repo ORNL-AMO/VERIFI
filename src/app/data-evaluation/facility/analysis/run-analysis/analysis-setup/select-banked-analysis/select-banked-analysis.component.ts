@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, output } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
@@ -10,33 +10,28 @@ import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/model
     standalone: false
 })
 export class SelectBankedAnalysisComponent {
-  @Input({ required: true })
-  facilityAnalysisItems: Array<IdbAnalysisItem>;
-  @Input({ required: true })
-  analysisItem: IdbAnalysisItem;
-  @Input({ required: true })
-  facility: IdbFacility;
-  @Input()
-  disabled: boolean;
-  @Output('emitSave')
-  emitSave: EventEmitter<boolean> = new EventEmitter();
+  @Input({ required: true }) facilityAnalysisItems: Array<IdbAnalysisItem>;
+  @Input({ required: true }) analysisItem: IdbAnalysisItem;
+  @Input({ required: true }) facility: IdbFacility;
+  @Input() disabled: boolean;
 
-  showDetail: boolean = false;
+  readonly bankedItemSelected = output<string>();
 
+  showDetail = false;
   quickReportItem: IdbAnalysisItem;
   quickReportSettings: AnalysisReportSettings = getAnalysisReportSettings();
-  displayQuickReport: boolean = false;
-  save() {
-    this.emitSave.emit(true);
+  displayQuickReport = false;
+
+  selectItem(guid: string): void {
+    this.bankedItemSelected.emit(guid);
   }
 
-  viewQuickReport(analysisItem: IdbAnalysisItem){
+  viewQuickReport(analysisItem: IdbAnalysisItem): void {
     this.quickReportItem = analysisItem;
     this.displayQuickReport = true;
   }
 
-  hideQuickReport(){
+  hideQuickReport(): void {
     this.displayQuickReport = false;
   }
-  
 }

@@ -122,6 +122,9 @@
                 @if(sc?.hasPredictorSetupErrors) {
                 <span class="badge bg-danger issue-badge">Predictor Errors</span>
                 }
+                @if(sc?.analysisSetupErrors?.groupsHaveErrors) {
+                <span class="badge bg-danger issue-badge">Group Errors</span>
+                }
               </div>
               }
             </td>

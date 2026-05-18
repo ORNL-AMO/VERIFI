@@ -187,7 +187,7 @@ export class AnalysisStatusCheck {
     private setAnalysisSetupErrors(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
         let groupErrorsForItem: Array<GroupAnalysisErrors> = this.groupStatusChecks.flatMap(g => g.groupAnalysisErrors);
         this.analysisSetupErrors = getAnalysisSetupErrors(this.analysisItem, calanderizedMeters, facility, groupErrorsForItem);
-        this.hasSetupErrors = this.analysisSetupErrors ? this.analysisSetupErrors.hasError : false;
+        this.hasSetupErrors = this.analysisSetupErrors ? this.analysisSetupErrors.setupHasError : false;
     }
 
     private setMeterSetupErrors() {
@@ -199,7 +199,7 @@ export class AnalysisStatusCheck {
     }
 
     private setStatus() {
-        if (this.hasSetupErrors || this.hasMeterSetupErrors || this.hasPredictorSetupErrors) {
+        if (this.hasSetupErrors || this.hasMeterSetupErrors || this.hasPredictorSetupErrors || this.analysisSetupErrors.groupsHaveErrors) {
             this.status = 'error';
         }
         // else if (!this.allDatesCurrent) {
