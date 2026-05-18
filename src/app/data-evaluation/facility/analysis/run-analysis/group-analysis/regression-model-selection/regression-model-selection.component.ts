@@ -1,5 +1,5 @@
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -115,7 +115,7 @@ export class RegressionModelSelectionComponent {
     const selectedGroup = this.selectedGroup();
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
       const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
       if (groupError) {
         return groupError;

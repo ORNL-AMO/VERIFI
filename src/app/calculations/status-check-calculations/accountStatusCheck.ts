@@ -83,7 +83,8 @@ export class AccountStatusCheck {
     }
 
     getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        return this.getFacilityReportErrorsByReportId(reportId);
+        const facilityReportStatusChecks: Array<FacilityReportErrors> = this.facilityStatusChecks.flatMap(fc => fc.facilityReportErrors);
+        return facilityReportStatusChecks.find(fr => fr.reportId === reportId);
     }
 
     getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {

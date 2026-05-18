@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -149,7 +149,7 @@ export class RegressionModelMenuComponent {
     const selectedGroup = this.group();
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
       const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
       if (groupError) {
         return groupError;

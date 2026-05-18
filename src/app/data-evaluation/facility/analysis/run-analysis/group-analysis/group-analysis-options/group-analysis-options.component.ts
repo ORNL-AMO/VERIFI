@@ -18,7 +18,6 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { map } from 'rxjs';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({

@@ -10,7 +10,6 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { AnalysisService } from '../../analysis.service';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
@@ -30,11 +29,6 @@ export class GroupAnalysisComponent {
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   params: Signal<Params> = toSignal(this.activatedRoute.params);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
-
-  // groupId: Signal<string> = computed(() => {
-  //   const params = this.params();
-  //   return params['id'];
-  // });
 
   showModelSelection: Signal<boolean> = computed(() => {
     const selectedGroup = this.selectedGroup();

@@ -63,6 +63,7 @@ export class FacilityStatusCheck {
         const facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(m => m.meter.facilityId === facility.guid);
         const facilityMeterData: Array<IdbUtilityMeterData> = utilityMeterData.filter(md => md.facilityId === facility.guid);
         const analysisItemsForFacility: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(ai => ai.facilityId === facility.guid);
+        const facilityReportsForFacility: Array<IdbFacilityReport> = facilityReports.filter(fr => fr.facilityId === facility.guid);
 
         this.facility = facility;
         this.hasNoMeters = facilityMeters.length === 0;
@@ -80,7 +81,7 @@ export class FacilityStatusCheck {
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setAnalysisStatusChecks(analysisItemsForFacility, facilityCalanderizedMeters, facilityPredictorData);
-        this.setFacilityReportErrors(facilityReports);
+        this.setFacilityReportErrors(facilityReportsForFacility);
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
         this.setStatus();
     }
