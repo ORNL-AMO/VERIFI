@@ -1,7 +1,7 @@
-import { Component, computed, effect, inject, OnInit, Signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter, map, startWith, Subscription } from 'rxjs';
+import { filter, map, startWith } from 'rxjs';
 import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';

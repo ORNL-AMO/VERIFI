@@ -206,17 +206,25 @@ export class AnalysisSetupComponent {
       takeUntilDestroyed()
     ).subscribe(hasBanking => {
       if (!hasBanking) {
-        this.form.controls.bankedAnalysisItemId.setValue(null, { emitEvent: false });
+        this.form.controls.bankedAnalysisItemId.setValue(null);
       }
     });
 
     // Auto-save on any valid form value change.
     this.form.valueChanges.pipe(
-      debounceTime(300),
+      debounceTime(100),
       takeUntilDestroyed()
     ).subscribe(() => {
       if (this.form.valid) {
         this.saveItem();
+      }
+    });
+
+    //turn off banking if there are no other analysis items to bank with
+    effect(() => {
+      const facilityAnalysisItems = this.facilityAnalysisItems();
+      if (this.form.controls.hasBanking.value == true && facilityAnalysisItems.length == 0) {
+        this.form.controls.hasBanking.setValue(false);
       }
     });
   }
