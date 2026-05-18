@@ -116,7 +116,7 @@ export class SelectItemTableComponent {
     this.sharedDataService.modalOpen.next(false);
     const facility = this.selectedFacility();
     const selectedAnalysisItem = this.selectedAnalysisItem();
-    this.analysisService.accountAnalysisItem = selectedAnalysisItem;
+    this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
     this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis');
   }
@@ -150,7 +150,7 @@ export class SelectItemTableComponent {
     await this.save(newIdbItem.guid);
     this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
     this.loadingService.setLoadingStatus(false);
-    this.analysisService.accountAnalysisItem = selectedAnalysisItem;
+    this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
     this.router.navigateByUrl("/data-evaluation/facility/" + facility.guid + "/analysis/run-analysis/analysis-setup");
   }
 }

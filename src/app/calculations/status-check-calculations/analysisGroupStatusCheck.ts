@@ -20,12 +20,18 @@ export class AnalysisGroupStatusCheck {
     constructor(group: AnalysisGroup, predictorStatusChecks: Array<PredictorStatusCheck>, meterStatusChecks: Array<MeterStatusCheck>, analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>) {
         this.group = group;
         this.setAnalysisGroupErrors(analysisItem, calanderizedMeters, predictorData);
-        this.setHasPredictorErrors(group, predictorStatusChecks);
-        this.setHasMeterErrors(group, meterStatusChecks);
+        if (group.analysisType == 'skip' || group.analysisType == 'skipAnalysis') {
+            this.hasModelErrors = false;
+            this.hasPredictorSetupErrors = false;
+            this.hasMeterSetupErrors = false;
+        } else {
+            this.setHasPredictorErrors(group, predictorStatusChecks);
+            this.setHasMeterErrors(group, meterStatusChecks);
+        }
         this.setStatus();
     }
 
-    private setAnalysisGroupErrors(analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>){
+    private setAnalysisGroupErrors(analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>) {
         this.groupAnalysisErrors = getGroupErrors(this.group, analysisItem, calanderizedMeters, predictorData);
     }
 

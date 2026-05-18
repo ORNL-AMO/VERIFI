@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -7,40 +7,43 @@ import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-account-analysis-list',
-    templateUrl: './account-analysis-list.component.html',
-    styleUrls: ['./account-analysis-list.component.css'],
-    standalone: false
+  selector: 'app-account-analysis-list',
+  templateUrl: './account-analysis-list.component.html',
+  styleUrls: ['./account-analysis-list.component.css'],
+  standalone: false
 })
-export class AccountAnalysisListComponent implements OnInit {
+export class AccountAnalysisListComponent {
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private router: Router = inject(Router);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
 
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
+  private allAccountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
+
+  selecteAccountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  selectedAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => {
+    const allItems = this.allAccountAnalysisItems();
+    const selectedAnalysisItem = this.selectedAnalysisItem();
+    if (!allItems || !selectedAnalysisItem) {
+      return [];
+    }
+    return allItems.filter(item => item.facilityAnalysisItems.find(facilityItem => facilityItem.analysisItemId === selectedAnalysisItem.guid));
+  });
+
   currentPageNumber: number = 1;
-  itemsPerPage: number;
-  itemsPerPageSub: Subscription;
+  itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
-  canReturnToAccount: boolean;
-  constructor(private analysisDbService: AnalysisDbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router, private analysisService: AnalysisService,
-    private sharedDataService: SharedDataService) { }
-
-  ngOnInit(): void {
-    this.canReturnToAccount = this.analysisService.accountAnalysisItem != undefined;
-    let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(selectedAnalysisItem.guid);
-
-    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
-      this.itemsPerPage = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.itemsPerPageSub.unsubscribe();
-  }
-
+  
+  canReturnToAccount: Signal<boolean> = computed(() => {
+    const analysisItem = this.selecteAccountAnalysisItem();
+    return analysisItem !== undefined;
+  })
+  
   setOrderDataField(str: string) {
     this.orderDataField = str;
   }
@@ -51,7 +54,8 @@ export class AccountAnalysisListComponent implements OnInit {
   }
 
   goBackToAccount() {
-    this.selectAnalysisItem(this.analysisService.accountAnalysisItem);
+    const accountAnalysisItem: IdbAccountAnalysisItem = this.selecteAccountAnalysisItem();
+    this.selectAnalysisItem(accountAnalysisItem);
   }
 
   goToAccountAnalysisDashboard() {

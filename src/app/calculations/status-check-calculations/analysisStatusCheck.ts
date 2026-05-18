@@ -57,10 +57,8 @@ export class AnalysisStatusCheck {
     ) {
         this.groupStatusChecks = new Array();
         for (const group of groups) {
-            if (group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis') {
-                const groupStatusCheck = new AnalysisGroupStatusCheck(group, predictorStatusChecks, meterStatusChecks, this.analysisItem, calanderizedMeters, predictorData);
-                this.groupStatusChecks.push(groupStatusCheck);
-            }
+            const groupStatusCheck = new AnalysisGroupStatusCheck(group, predictorStatusChecks, meterStatusChecks, this.analysisItem, calanderizedMeters, predictorData);
+            this.groupStatusChecks.push(groupStatusCheck);
         }
     }
 
@@ -126,7 +124,7 @@ export class AnalysisStatusCheck {
         const includedPredictorIds: Array<string> = [];
 
         for (const group of groups) {
-            if(group.analysisType == 'skip' || group.analysisType == 'skipAnalysis'){
+            if (group.analysisType == 'skip' || group.analysisType == 'skipAnalysis') {
                 continue;
             }
             if (group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity') {

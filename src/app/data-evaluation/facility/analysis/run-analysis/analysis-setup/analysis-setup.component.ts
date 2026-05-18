@@ -117,7 +117,7 @@ export class AnalysisSetupComponent implements OnInit {
 
   setComponentBools() {
     let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
-    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
+    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage.getValue() == false) {
       this.showInUseMessage = true;
     }
     let hasModelsGenerated: boolean = false;
@@ -134,7 +134,7 @@ export class AnalysisSetupComponent implements OnInit {
 
   hideInUseMessage() {
     this.showInUseMessage = false;
-    this.analysisService.hideInUseMessage = true;
+    this.analysisService.hideInUseMessage.next(true);
   }
 
   showEnableForm() {

@@ -44,7 +44,7 @@ export class RegressionModelSelectionComponent {
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-
+  hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
 
   generatedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
     const group = this.selectedGroup();
@@ -95,7 +95,7 @@ export class RegressionModelSelectionComponent {
 
   showInUseMessage: Signal<boolean> = computed(() => {
     const analysisItem = this.analysisItem();
-    if (analysisItem && this.analysisService.hideInUseMessage == false) {
+    if (analysisItem && this.hideInUseMessage() == false) {
       const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
       if (accountAnalysisItems.length != 0) {
         return true;
@@ -217,8 +217,8 @@ export class RegressionModelSelectionComponent {
     this.cancelInspectModel();
   }
 
-  hideInUseMessage() {
-    this.analysisService.hideInUseMessage = true;
+  toggleHideInUseMessage() {
+    this.analysisService.hideInUseMessage.next(true);
   }
 
   toggleDropdown() {

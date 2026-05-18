@@ -44,11 +44,12 @@ export class GroupAnalysisOptionsComponent {
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-
+  hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
   //COMPUTED SIGNALS
   showInUseMessage: Signal<boolean> = computed(() => {
     const allAccountAnalysisItems = this.accountAnalysisItems();
     const analysisItem = this.analysisItem();
+    const hideInUseMessage = this.hideInUseMessage();
     if (!allAccountAnalysisItems || !analysisItem) {
       return false;
     }
@@ -58,7 +59,7 @@ export class GroupAnalysisOptionsComponent {
         return facilityItem.analysisItemId;
       });
     });
-    return facilityItemIds.includes(facilityAnalysisItemId) && !this.analysisService.hideInUseMessage;
+    return facilityItemIds.includes(facilityAnalysisItemId) && !hideInUseMessage;
   });
 
 
@@ -215,8 +216,8 @@ export class GroupAnalysisOptionsComponent {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/utility/meter-groups');
   }
 
-  hideInUseMessage() {
-    this.analysisService.hideInUseMessage = true;
+  toggleHideInUseMessage() {
+    this.analysisService.hideInUseMessage.next(true);
   }
 
   //ENABLE ANALYSIS FORM
