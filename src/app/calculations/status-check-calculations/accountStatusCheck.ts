@@ -109,7 +109,7 @@ export class AccountStatusCheck {
                     .filter((analysisItemId): analysisItemId is string => analysisItemId !== undefined && analysisItemId !== null)
             );
             const analysisSetupErrors: Array<AnalysisSetupErrors> = allAnalysisSetupErrors
-                .filter(errors => itemAnalysisIds.has(errors.analysisItemId));
+                .filter(errors => itemAnalysisIds.has(errors.analysisId));
             const errors = getAccountAnalysisSetupErrors(item, analysisSetupErrors);
             this.accountAnalysisSetupErrors.push(errors);
         }
