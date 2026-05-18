@@ -3,6 +3,10 @@ import { MeterStatusCheck } from "./meterStatusCheck";
 import { PredictorStatusCheck } from "./predictorStatusCheck";
 import { GroupAnalysisErrors } from "src/app/models/validation";
 import { STATUS_CHECK_OPTIONS } from "./statusCheckModels";
+import { getGroupErrors } from "./validation/groupAnalysisValidation";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { CalanderizedMeter } from "src/app/models/calanderization";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 
 export class AnalysisGroupStatusCheck {
@@ -13,12 +17,16 @@ export class AnalysisGroupStatusCheck {
     hasPredictorSetupErrors: boolean;
     hasMeterSetupErrors: boolean;
     status: STATUS_CHECK_OPTIONS;
-    constructor(group: AnalysisGroup, predictorStatusChecks: Array<PredictorStatusCheck>, meterStatusChecks: Array<MeterStatusCheck>, groupAnalysisErrors: Array<GroupAnalysisErrors>) {
+    constructor(group: AnalysisGroup, predictorStatusChecks: Array<PredictorStatusCheck>, meterStatusChecks: Array<MeterStatusCheck>, analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>) {
         this.group = group;
-        this.groupAnalysisErrors = groupAnalysisErrors?.find(e => e.groupId === group.idbGroupId);
+        this.setAnalysisGroupErrors(analysisItem, calanderizedMeters, predictorData);
         this.setHasPredictorErrors(group, predictorStatusChecks);
         this.setHasMeterErrors(group, meterStatusChecks);
         this.setStatus();
+    }
+
+    private setAnalysisGroupErrors(analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>){
+        this.groupAnalysisErrors = getGroupErrors(this.group, analysisItem, calanderizedMeters, predictorData);
     }
 
     private setHasPredictorErrors(group: AnalysisGroup, predictorStatusChecks: Array<PredictorStatusCheck>) {

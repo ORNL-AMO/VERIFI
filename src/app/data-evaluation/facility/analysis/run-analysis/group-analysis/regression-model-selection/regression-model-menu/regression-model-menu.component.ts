@@ -23,10 +23,11 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
-import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 type PredictorVariableForm = FormGroup<{
   productionInAnalysis: FormControl<boolean>;
@@ -66,7 +67,7 @@ export class RegressionModelMenuComponent {
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private fb: NonNullableFormBuilder = inject(NonNullableFormBuilder);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private regressionModelsService: RegressionModelsService = inject(RegressionModelsService);
 
   // --- Signals ---
@@ -78,7 +79,7 @@ export class RegressionModelMenuComponent {
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters);
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
-  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
 
   // --- Computed Signals ---
@@ -146,12 +147,10 @@ export class RegressionModelMenuComponent {
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
     const selectedGroup = this.group();
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
-      const groupError = allGroupErrors.find(groupError => {
-        return groupError.groupId == selectedGroup.idbGroupId && groupError.analysisId == analysisItem.guid
-      });
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
+      const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
       if (groupError) {
         return groupError;
       } else {

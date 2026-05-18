@@ -13,7 +13,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
-import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 @Component({
   selector: 'app-analysis-footer',
   templateUrl: './analysis-footer.component.html',
@@ -46,7 +46,7 @@ export class AnalysisFooterComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dataEvaluationService: DataEvaluationService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private accountStatusCheckService: AccountStatusCheckService) { }
 
   ngOnInit(): void {
     this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
@@ -70,7 +70,7 @@ export class AnalysisFooterComponent implements OnInit {
       this.sidebarWidth = sidebarWidth;
     });
 
-    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
+    this.analysisValidationSub = this.accountStatusCheckService.accountStatusCheck.subscribe(val => {
       this.setDisableContinue();
     });
   }
@@ -170,7 +170,7 @@ export class AnalysisFooterComponent implements OnInit {
   setDisableContinue() {
     let setupErrors: AnalysisSetupErrors;
     if (this.analysisItem) {
-      setupErrors = this.analysisValidationService.getErrorsByAnalysisId(this.analysisItem.guid);
+      setupErrors = this.accountStatusCheckService.getErrorsByAnalysisId(this.analysisItem.guid);
     }
     if (this.router.url.includes('analysis-setup')) {
       if (setupErrors && setupErrors.setupHasError) {

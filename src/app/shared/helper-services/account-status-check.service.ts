@@ -12,7 +12,16 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizationService } from './calanderization.service';
-import { AnalysisValidationService } from '../validation/services/analysis-validation.service';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AnalysisSetupErrors, FacilityReportErrors, AccountReportErrors, GroupAnalysisErrors } from 'src/app/models/validation';
+import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
+import { emptyAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/analysisValidation';
+import { emptyGroupAnalysisErrors } from '../../calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { emptyFacilityReportErrors } from '../../calculations/status-check-calculations/validation/facilityReportValidation';
+import { emptyAccountAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/accountAnalysisValidation';
+import { emptyAccountReportErrors } from '../../calculations/status-check-calculations/validation/accountReportValidation';
 
 @Injectable({
     providedIn: 'root'
@@ -35,7 +44,9 @@ export class AccountStatusCheckService implements OnDestroy {
         private predictorDbService: PredictorDbService,
         private predictorDataDbService: PredictorDataDbService,
         private analysisDbService: AnalysisDbService,
-        private analysisValidationService: AnalysisValidationService
+        private facilityReportsDbService: FacilityReportsDbService,
+        private accountAnalysisDbService: AccountAnalysisDbService,
+        private accountReportDbService: AccountReportDbService
     ) {
         this.selectedFacilityStatusCheck$ = combineLatest([
             this.accountStatusCheck,
@@ -56,7 +67,9 @@ export class AccountStatusCheckService implements OnDestroy {
             this.predictorDbService.accountPredictors,
             this.predictorDataDbService.accountPredictorData,
             this.analysisDbService.accountAnalysisItems,
-            this.analysisValidationService.analysisSetupErrors
+            this.facilityReportsDbService.accountFacilityReports,
+            this.accountAnalysisDbService.accountAnalysisItems,
+            this.accountReportDbService.accountReports
         ]).pipe(
             debounceTime(300)
         ).subscribe(([
@@ -69,9 +82,11 @@ export class AccountStatusCheckService implements OnDestroy {
             predictors,
             predictorData,
             analysisItems,
-            analysisSetupErrors
+            facilityReports,
+            accountAnalysisItems,
+            accountReports
         ]) => {
-            if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems || !analysisSetupErrors) {
+            if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems) {
                 return;
             }
             const statusCheck = new AccountStatusCheck(
@@ -84,7 +99,9 @@ export class AccountStatusCheckService implements OnDestroy {
                 predictors,
                 predictorData,
                 analysisItems,
-                analysisSetupErrors
+                facilityReports ?? [],
+                accountAnalysisItems ?? [],
+                accountReports ?? []
             );
             this.accountStatusCheck.next(statusCheck);
         });
@@ -92,6 +109,26 @@ export class AccountStatusCheckService implements OnDestroy {
 
     ngOnDestroy() {
         this.sub.unsubscribe();
+    }
+
+    getGroupErrorsByGroupId(groupId: string, analysisId: string): GroupAnalysisErrors {
+        return this.accountStatusCheck.getValue()?.getGroupErrorsByGroupId(groupId, analysisId) ?? emptyGroupAnalysisErrors();
+    }
+
+    getErrorsByAnalysisId(analysisId: string): AnalysisSetupErrors {
+        return this.accountStatusCheck.getValue()?.getErrorsByAnalysisId(analysisId) ?? emptyAnalysisSetupErrors();
+    }
+
+    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
+        return this.accountStatusCheck.getValue()?.getFacilityReportErrorsByReportId(reportId) ?? emptyFacilityReportErrors();
+    }
+
+    getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
+        return this.accountStatusCheck.getValue()?.getAccountAnalysisErrorsByAnalysisId(analysisId) ?? emptyAccountAnalysisSetupErrors();
+    }
+
+    getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
+        return this.accountStatusCheck.getValue()?.getAccountReportErrorsByReportId(reportId) ?? emptyAccountReportErrors();
     }
 
 }
