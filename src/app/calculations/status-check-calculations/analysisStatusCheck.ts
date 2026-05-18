@@ -129,7 +129,7 @@ export class AnalysisStatusCheck {
             }
             if (group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity') {
                 group.predictorVariables.forEach(pv => {
-                    if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id)) {
+                    if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id) && pv.id) {
                         includedPredictorIds.push(pv.id);
                     }
                 });
@@ -141,7 +141,7 @@ export class AnalysisStatusCheck {
                     const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
                     if (selectedModel) {
                         for (const pv of selectedModel.predictorVariables) {
-                            if (!includedPredictorIds.includes(pv.id)) {
+                            if (!includedPredictorIds.includes(pv.id) && pv.id) {
                                 includedPredictorIds.push(pv.id);
                             }
                         }
@@ -149,7 +149,7 @@ export class AnalysisStatusCheck {
                 } else {
                     //user defined model
                     group.predictorVariables.forEach(pv => {
-                        if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id)) {
+                        if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id) && pv.id) {
                             includedPredictorIds.push(pv.id);
                         }
                     });
