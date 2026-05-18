@@ -88,7 +88,8 @@ export class AnalysisStatusCheck {
         const allDates: Array<Date> = [
             ...latestPredictorDates,
             ...latestMeterData
-        ];
+        ].filter(d => d !== undefined) as Array<Date>;
+
         if (allDates.length === 0) {
             this.latestDataDate = undefined;
             this.allDatesCurrent = false;
@@ -125,6 +126,9 @@ export class AnalysisStatusCheck {
         const includedPredictorIds: Array<string> = [];
 
         for (const group of groups) {
+            if(group.analysisType == 'skip' || group.analysisType == 'skipAnalysis'){
+                continue;
+            }
             if (group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity') {
                 group.predictorVariables.forEach(pv => {
                     if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id)) {
@@ -134,11 +138,13 @@ export class AnalysisStatusCheck {
             }
 
             // Collect predictor IDs from the group's selected regression model.
-            const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
-            if (selectedModel) {
-                for (const pv of selectedModel.predictorVariables) {
-                    if (!includedPredictorIds.includes(pv.id)) {
-                        includedPredictorIds.push(pv.id);
+            if (group.analysisType == 'regression') {
+                const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
+                if (selectedModel) {
+                    for (const pv of selectedModel.predictorVariables) {
+                        if (!includedPredictorIds.includes(pv.id)) {
+                            includedPredictorIds.push(pv.id);
+                        }
                     }
                 }
             }

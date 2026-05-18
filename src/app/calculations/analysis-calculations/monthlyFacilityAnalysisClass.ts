@@ -51,21 +51,23 @@ export class MonthlyFacilityAnalysisClass {
             let includedCalanderizedMeters: Array<CalanderizedMeter> = new Array();
             let includedDates: Array<Date> = new Array();
             analysisItem.groups.forEach(group => {
-                let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == group.idbGroupId });
-                includedCalanderizedMeters = includedCalanderizedMeters.concat(groupMeters);
-                let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(groupMeters);
-                includedDates.push(new Date(lastBill.date));
+                if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
+                    let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == group.idbGroupId });
+                    includedCalanderizedMeters = includedCalanderizedMeters.concat(groupMeters);
+                    let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(groupMeters);
+                    includedDates.push(new Date(lastBill.date));
 
-                group.predictorVariables.forEach(variable => {
-                    if (group.analysisType != 'absoluteEnergyConsumption' && variable.productionInAnalysis) {
-                        let predictorData: Array<IdbPredictorData> = this.facilityPredictorEntries.filter(entry => { return entry.predictorId == variable.id });
-                        let latestReading: IdbPredictorData = getLatestPredictorData(predictorData);
-                        if (latestReading) {
-                            let pDate: Date = getDateFromPredictorData(latestReading);
-                            includedDates.push(pDate);
+                    group.predictorVariables.forEach(variable => {
+                        if (group.analysisType != 'absoluteEnergyConsumption' && variable.productionInAnalysis) {
+                            let predictorData: Array<IdbPredictorData> = this.facilityPredictorEntries.filter(entry => { return entry.predictorId == variable.id });
+                            let latestReading: IdbPredictorData = getLatestPredictorData(predictorData);
+                            if (latestReading) {
+                                let pDate: Date = getDateFromPredictorData(latestReading);
+                                includedDates.push(pDate);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
             // Get the earliest last bill date from all group meters and predictors
             // we want the latest date that has data for all group meters and predictors

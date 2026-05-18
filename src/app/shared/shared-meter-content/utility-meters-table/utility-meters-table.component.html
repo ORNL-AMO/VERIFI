@@ -51,7 +51,9 @@
           <th (click)="setOrderDataField('startingUnit')" [ngClass]="{'active': _orderDataField == 'startingUnit'}">
             Units <span class="fa ms-1" [ngClass]="getSortIcon('startingUnit')"></span>
           </th>
-          <th class="text-nowrap">Latest Reading</th>
+          <th class="text-nowrap" (click)="setOrderDataField('latestReading')"
+            [ngClass]="{'active': _orderDataField == 'latestReading'}">Latest Reading <span class="fa ms-1"
+              [ngClass]="getSortIcon('latestReading')"></span></th>
           @if (!copyingTable) {
           <th>Actions</th>
           }
@@ -149,8 +151,7 @@
           <!-- Latest Reading column -->
           <td class="align-middle text-nowrap">
             @if (meterListItem.meterStatusCheck.lastDateEntry && !meterListItem.meterStatusCheck.hasNoData) {
-            <a class="meter-data-link" (click)="navigateToMeterData(meterListItem.meter)"
-              title="View meter data">
+            <a class="meter-data-link" (click)="navigateToMeterData(meterListItem.meter)" title="View meter data">
               <span class="fa fa-calendar-alt me-1 small"></span>
               {{meterListItem.meterStatusCheck.lastDateEntry | date:'MMM yyyy'}}
             </a>
