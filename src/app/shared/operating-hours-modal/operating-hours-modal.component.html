@@ -1,0 +1,42 @@
+<div class="popup" [class.open]="showCalculateHoursOfOperationModal">
+    <div class="popup-header">Hours of Operation
+        <button class="item-right" (click)="closeCalculateHoursOfOperationModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="hoursPerDay">Hours / Day</label>
+            <div class="col-7">
+                <input class="form-control" type="number" id="hoursPerDay" min="0" max="24" [(ngModel)]="hoursPerDay">
+                @if (hoursPerDay > 24) {
+                <div class="text-danger">Hours per day cannot exceed 24</div>
+                }
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="daysPerWeek">Days / Week</label>
+            <div class="col-7">
+                <input class="form-control" type="number" id="daysPerWeek" min="0" max="7" [(ngModel)]="daysPerWeek">
+                @if (daysPerWeek > 7) {
+                <div class="text-danger">Days per week cannot exceed 7</div>
+                }
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="weeksPerYear">Weeks / Year</label>
+            <div class="col-7">
+                <input class="form-control" type="number" id="weeksPerYear" min="0" max="52" [(ngModel)]="weeksPerYear">
+                @if (weeksPerYear > 52) {
+                <div class="text-danger">Weeks per year cannot exceed 52</div>
+                }
+            </div>
+        </div>
+        <div class="alert alert-info d-flex align-items-center justify-content-center mt-3">
+            <span class="fs-6">Hours of Operation: <strong class="fs-6">{{calculatedHoursPerYear}}</strong>
+                hrs/yr</span>
+        </div>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary small me-2" (click)="closeCalculateHoursOfOperationModal()">Cancel</button>
+        <button class="btn btn-success small" [disabled]="isDisabled" (click)="save()">Save</button>
+    </div>
+</div>

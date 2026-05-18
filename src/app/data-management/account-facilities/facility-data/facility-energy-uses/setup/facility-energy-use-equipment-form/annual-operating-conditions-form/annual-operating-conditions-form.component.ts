@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
 
 @Component({
@@ -19,6 +18,8 @@ export class AnnualOperatingConditionsFormComponent {
   inSetup: boolean = false;
 
   showRemoveOperatingConditionsModal: boolean = false;
+  showCalculateHoursOfOperationModal: boolean = false;
+
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit() {
@@ -35,5 +36,20 @@ export class AnnualOperatingConditionsFormComponent {
   confirmRemoveOperatingConditionsData() {
     this.closeRemoveOperatingConditionsModal();
     this.emitRemoveOperatingConditionsData.emit();
+  }
+
+  openCalculateHoursOfOperationModal() {
+    this.showCalculateHoursOfOperationModal = true;
+  }
+
+  closeCalculateHoursOfOperationModal() {
+    this.showCalculateHoursOfOperationModal = false;
+  }
+
+  handleCalculatedValues({ calculatedHoursPerYear, hoursPerDay, daysPerWeek, weeksPerYear }: { calculatedHoursPerYear: number, hoursPerDay: number, daysPerWeek: number, weeksPerYear: number }) {
+    this.annualOperatingConditionsDataForm.controls.hoursOfOperation.setValue(calculatedHoursPerYear);
+    this.annualOperatingConditionsDataForm.controls.hoursPerDay.setValue(hoursPerDay);
+    this.annualOperatingConditionsDataForm.controls.daysPerWeek.setValue(daysPerWeek);
+    this.annualOperatingConditionsDataForm.controls.weeksPerYear.setValue(weeksPerYear);
   }
 }

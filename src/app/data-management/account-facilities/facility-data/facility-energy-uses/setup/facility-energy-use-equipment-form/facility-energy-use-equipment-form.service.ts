@@ -135,7 +135,10 @@ export class FacilityEnergyUseEquipmentFormService {
       dutyFactor: [operatingConditionsData.dutyFactor, [Validators.required, Validators.min(0), Validators.max(100)]],
       efficiency: [operatingConditionsData.efficiency, [Validators.required, Validators.min(0), Validators.max(100)]],
       hoursOfOperation: [operatingConditionsData.hoursOfOperation, [Validators.required, Validators.min(0)]],
-      loadFactor: [operatingConditionsData.loadFactor, [Validators.required, Validators.min(0), Validators.max(100)]]
+      loadFactor: [operatingConditionsData.loadFactor, [Validators.required, Validators.min(0), Validators.max(100)]],
+      hoursPerDay: [operatingConditionsData.hoursPerDay],
+      daysPerWeek: [operatingConditionsData.daysPerWeek],
+      weeksPerYear: [operatingConditionsData.weeksPerYear]
     });
     operatingConditionsForm.controls['year'].disable();
     return operatingConditionsForm;
@@ -150,7 +153,10 @@ export class FacilityEnergyUseEquipmentFormService {
         dutyFactor: operatingConditionsForm.controls.dutyFactor.value,
         efficiency: operatingConditionsForm.controls.efficiency.value,
         hoursOfOperation: operatingConditionsForm.controls.hoursOfOperation.value,
-        loadFactor: operatingConditionsForm.controls.loadFactor.value
+        loadFactor: operatingConditionsForm.controls.loadFactor.value,
+        hoursPerDay: operatingConditionsForm.controls.hoursPerDay.value,
+        daysPerWeek: operatingConditionsForm.controls.daysPerWeek.value,
+        weeksPerYear: operatingConditionsForm.controls.weeksPerYear.value
       });
     }
     return equipment;

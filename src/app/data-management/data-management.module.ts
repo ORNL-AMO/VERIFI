@@ -103,6 +103,7 @@ import { MapMeterGroupsToEquipmentComponent } from './data-management-import/pro
 import { ConfirmEnergyUsesUploadComponent } from './data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component';
 import { FacilityEnergyUsesSankeyComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-sankey/facility-energy-uses-sankey.component';
 import { FacilityEnergyUsesGroupSankeyComponent } from './account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-sankey/facility-energy-uses-group-sankey.component';
+import { OperatingHoursModalModule } from '../shared/operating-hours-modal/operating-hours.module';
 
 
 @NgModule({
@@ -214,7 +215,8 @@ import { FacilityEnergyUsesGroupSankeyComponent } from './account-facilities/fac
     CustomDatabaseModule,
     DataManagementSidePanelModule,
     SharedDataQualityReportMetersModule,
-    SharedDataQualityReportPredictorsModule
+    SharedDataQualityReportPredictorsModule,
+    OperatingHoursModalModule
 ]
 })
 export class DataManagementModule { }
