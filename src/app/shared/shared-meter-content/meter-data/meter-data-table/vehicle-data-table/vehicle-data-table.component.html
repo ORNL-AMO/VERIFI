@@ -38,8 +38,8 @@
       </th>
       }
       @if (_meter && _meter.scope == 2 && _meter.vehicleCategory == 2 && _filters.fuelEfficiency) {
-      <th (click)="setOrderDataField('displayFuelEfficiency')"
-        [ngClass]="{'active': _orderDataField == 'displayFuelEfficiency'}">
+      <th (click)="setOrderDataField('vehicleFuelEfficiency')"
+        [ngClass]="{'active': _orderDataField == 'vehicleFuelEfficiency'}">
         Fuel Efficiency<br>(<span [innerHTML]="_meter.vehicleDistanceUnit | settingsLabel"></span>/<span
           [innerHTML]="_meter.vehicleCollectionUnit | settingsLabel"></span>)
       </th>
