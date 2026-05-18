@@ -19,8 +19,8 @@ export class AnalysisService {
   calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  accountAnalysisItem: IdbAccountAnalysisItem;
-  hideInUseMessage: boolean = false;
+  accountAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
+  hideInUseMessage: BehaviorSubject<boolean>;
   groupSummaries: BehaviorSubject<Array<{
     group: AnalysisGroup,
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
@@ -33,6 +33,8 @@ export class AnalysisService {
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
+    this.accountAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
+    this.hideInUseMessage = new BehaviorSubject<boolean>(false);
 
     let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");
     if (!analysisTableColumns) {

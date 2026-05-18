@@ -23,6 +23,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import * as _ from 'lodash';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 
 interface AnalysisDetailsTableRow {
   analysisItem: IdbAnalysisItem,
@@ -31,6 +34,7 @@ interface AnalysisDetailsTableRow {
     guid: string,
     type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport'
   }>
+  analysisStatusCheck: AnalysisStatusCheck
 }
 
 @Component({
@@ -53,6 +57,7 @@ export class AnalysisDetailsTableComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private calendarizationService: CalanderizationService = inject(CalanderizationService);
   private loadingService: LoadingService = inject(LoadingService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
 
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
@@ -60,6 +65,7 @@ export class AnalysisDetailsTableComponent {
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
   facilityReports: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityReportsDbService.facilityReports);
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   selectedAnalysisCategory: WritableSignal<'energy' | 'water' | 'all'> = signal('all');
 
@@ -88,11 +94,13 @@ export class AnalysisDetailsTableComponent {
     const facilityAnalysisItems = this.facilityAnalysisItems();
     const accountAnalysisItems = this.accountAnalysisItems();
     const facilityReports = this.facilityReports();
-    if (selectedAnalysisCategory && facilityAnalysisItems && accountAnalysisItems && facilityReports) {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (selectedAnalysisCategory && facilityAnalysisItems && accountAnalysisItems && facilityReports && facilityStatusCheck) {
       let analysisItemsList: Array<AnalysisDetailsTableRow> = [];
       let filteredAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => selectedAnalysisCategory == 'all' || item.analysisCategory == selectedAnalysisCategory);
-
       filteredAnalysisItems.forEach(analysisItem => {
+        const analysisStatusCheck: AnalysisStatusCheck = facilityStatusCheck.analysisStatusChecks.find(check => check.analysisItem.guid == analysisItem.guid);
+
         let linkedItems: Array<{
           guid: string,
           type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport'
@@ -123,7 +131,8 @@ export class AnalysisDetailsTableComponent {
         analysisItemsList.push({
           analysisItem: analysisItem,
           isDeleteChecked: false,
-          linkedItems: linkedItems
+          linkedItems: linkedItems,
+          analysisStatusCheck: analysisStatusCheck
         });
 
       });
@@ -229,6 +238,7 @@ export class AnalysisDetailsTableComponent {
         selectedFacility.selectedWaterAnalysisId = analysisItem.guid;
       }
       await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
+      await this.dbChangesService.updateFacilities(selectedFacility, false);
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
     }

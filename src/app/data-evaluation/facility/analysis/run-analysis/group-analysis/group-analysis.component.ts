@@ -6,10 +6,11 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { AnalysisService } from '../../analysis.service';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
   selector: 'app-group-analysis',
@@ -22,17 +23,12 @@ export class GroupAnalysisComponent {
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
   private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   params: Signal<Params> = toSignal(this.activatedRoute.params);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
-
-  // groupId: Signal<string> = computed(() => {
-  //   const params = this.params();
-  //   return params['id'];
-  // });
 
   showModelSelection: Signal<boolean> = computed(() => {
     const selectedGroup = this.selectedGroup();
@@ -71,20 +67,16 @@ export class GroupAnalysisComponent {
     return url.includes('banked-analysis');
   });
 
-  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
     const selectedGroup = this.selectedGroup();
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
-      const groupError = allGroupErrors.find(groupError => {
-        return groupError.groupId == selectedGroup.idbGroupId && groupError.analysisId == analysisItem.guid
-      });
-      if (groupError) {
-        return groupError;
-      } else {
-        return emptyGroupAnalysisErrors();
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
+      const groupStatusCheck = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid);
+      if (groupStatusCheck) {
+        return groupStatusCheck.groupAnalysisErrors;
       }
     }
     return emptyGroupAnalysisErrors();

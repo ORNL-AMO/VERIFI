@@ -16,8 +16,9 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
-import { emptyGroupAnalysisErrors } from 'src/app/shared/validation/groupAnalysisValidation';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
@@ -35,15 +36,15 @@ export class RegressionModelSelectionComponent {
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
-  allGroupErrors = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
-
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+  hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
 
   generatedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
     const group = this.selectedGroup();
@@ -94,7 +95,7 @@ export class RegressionModelSelectionComponent {
 
   showInUseMessage: Signal<boolean> = computed(() => {
     const analysisItem = this.analysisItem();
-    if (analysisItem && this.analysisService.hideInUseMessage == false) {
+    if (analysisItem && this.hideInUseMessage() == false) {
       const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
       if (accountAnalysisItems.length != 0) {
         return true;
@@ -112,12 +113,10 @@ export class RegressionModelSelectionComponent {
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
     const selectedGroup = this.selectedGroup();
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (selectedGroup && analysisItem) {
-      const groupError = allGroupErrors.find(groupError => {
-        return groupError.groupId == selectedGroup.idbGroupId && groupError.analysisId == analysisItem.guid
-      });
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
+      const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
       if (groupError) {
         return groupError;
       } else {
@@ -218,8 +217,8 @@ export class RegressionModelSelectionComponent {
     this.cancelInspectModel();
   }
 
-  hideInUseMessage() {
-    this.analysisService.hideInUseMessage = true;
+  toggleHideInUseMessage() {
+    this.analysisService.hideInUseMessage.next(true);
   }
 
   toggleDropdown() {

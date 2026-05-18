@@ -8,8 +8,8 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountReportErrors } from 'src/app/models/validation';
-import { AccountReportValidationService } from 'src/app/shared/validation/services/account-report-validation.service';
-import { emptyAccountReportErrors } from 'src/app/shared/validation/accountReportValidation';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { emptyAccountReportErrors } from 'src/app/calculations/status-check-calculations/validation/accountReportValidation';
 
 @Component({
   selector: 'app-account-reports-banner',
@@ -22,12 +22,15 @@ export class AccountReportsBannerComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
-  private accountReportValidationService: AccountReportValidationService = inject(AccountReportValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   readonly selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport, { initialValue: null });
   readonly reportList: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports, { initialValue: [] });
   readonly accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
-  readonly accountReportErrors: Signal<Array<AccountReportErrors>> = toSignal(this.accountReportValidationService.accountReportErrors, { initialValue: [] });
+  readonly accountReportErrors: Signal<Array<AccountReportErrors>> = toSignal(
+    this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.accountReportErrors ?? [])),
+    { initialValue: [] }
+  );
 
   readonly analysisVisited: Signal<boolean> = computed(() => {
     const selectedReport = this.selectedReport();

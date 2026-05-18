@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { AccountReportErrors } from 'src/app/models/validation';
-import { AccountReportValidationService } from '../../validation/services/account-report-validation.service';
+import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 
 @Pipe({
   name: 'invalidAccountReport',
@@ -9,11 +9,10 @@ import { AccountReportValidationService } from '../../validation/services/accoun
 })
 export class InvalidAccountReportPipe implements PipeTransform {
 
-  constructor(private accountReportValidationService: AccountReportValidationService
-  ) { }
+  constructor(private accountStatusCheckService: AccountStatusCheckService) { }
 
   transform(accountReportID: string): AccountReportErrors {
-    return this.accountReportValidationService.getErrorsByReportId(accountReportID);
+    return this.accountStatusCheckService.getAccountReportErrorsByReportId(accountReportID);
   }
 
 }

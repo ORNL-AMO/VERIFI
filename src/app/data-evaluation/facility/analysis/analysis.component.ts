@@ -42,8 +42,8 @@ export class AnalysisComponent implements OnDestroy {
 
   ngOnDestroy() {
     //Reset when leaving analysis section
-    this.analysisService.accountAnalysisItem = undefined;
-    this.analysisService.hideInUseMessage = false;
+    this.analysisService.accountAnalysisItem.next(undefined);
+    this.analysisService.hideInUseMessage.next(false);
     this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
     this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
     this.analysisDbService.clearGeneratedModels();

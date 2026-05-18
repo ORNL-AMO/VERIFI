@@ -1,5 +1,5 @@
 import { Component, computed, inject, Signal } from '@angular/core';
-import {  firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -16,8 +16,9 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AnalysisGroupValidationService } from 'src/app/shared/validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -34,7 +35,7 @@ export class GroupAnalysisOptionsComponent {
   private router: Router = inject(Router);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
-  private analysisGroupValidationService: AnalysisGroupValidationService = inject(AnalysisGroupValidationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup, { initialValue: null });
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem, { initialValue: null });
@@ -42,12 +43,13 @@ export class GroupAnalysisOptionsComponent {
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems, { initialValue: [] });
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  allGroupErrors: Signal<Array<GroupAnalysisErrors>> = toSignal(this.analysisGroupValidationService.allGroupErrors, { initialValue: [] });
-
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+  hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
   //COMPUTED SIGNALS
   showInUseMessage: Signal<boolean> = computed(() => {
     const allAccountAnalysisItems = this.accountAnalysisItems();
     const analysisItem = this.analysisItem();
+    const hideInUseMessage = this.hideInUseMessage();
     if (!allAccountAnalysisItems || !analysisItem) {
       return false;
     }
@@ -57,7 +59,7 @@ export class GroupAnalysisOptionsComponent {
         return facilityItem.analysisItemId;
       });
     });
-    return facilityItemIds.includes(facilityAnalysisItemId) && !this.analysisService.hideInUseMessage;
+    return facilityItemIds.includes(facilityAnalysisItemId) && !hideInUseMessage;
   });
 
 
@@ -154,14 +156,14 @@ export class GroupAnalysisOptionsComponent {
   });
 
   groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
-    const allGroupErrors = this.allGroupErrors();
+    const facilityStatusCheck = this.facilityStatusCheck();
     const group = this.group();
     const analysisItem = this.analysisItem();
-    if (!allGroupErrors || !group) {
+    if (!facilityStatusCheck || !group) {
       return null;
     }
-    let groupErrors: GroupAnalysisErrors = allGroupErrors.find(groupError => groupError.groupId == group.idbGroupId && groupError.analysisId == analysisItem.guid);
-    if(groupErrors){
+    let groupErrors: GroupAnalysisErrors = facilityStatusCheck.getGroupStatusChecksByGroupId(group.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
+    if (groupErrors) {
       return groupErrors;
     };
     return null;
@@ -214,8 +216,8 @@ export class GroupAnalysisOptionsComponent {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/utility/meter-groups');
   }
 
-  hideInUseMessage() {
-    this.analysisService.hideInUseMessage = true;
+  toggleHideInUseMessage() {
+    this.analysisService.hideInUseMessage.next(true);
   }
 
   //ENABLE ANALYSIS FORM

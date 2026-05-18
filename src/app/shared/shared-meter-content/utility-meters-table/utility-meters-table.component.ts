@@ -28,7 +28,7 @@ interface MetersListItem {
   meterDataUrl: string
 }
 
-type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit';
+type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit' | 'latestReading';
 
 @Component({
   selector: 'app-utility-meters-table',
@@ -71,6 +71,11 @@ export class UtilityMetersTableComponent {
     const metersList = this.metersList();
     const orderBy = this.orderDataField();
     const orderDirection = this.orderByDirection();
+    if (orderBy === 'latestReading') {
+      return _.orderBy(metersList, [(item: MetersListItem) => {
+        return item.meterStatusCheck.lastDateEntry;
+      }], [orderDirection]);
+    }
     return _.orderBy(metersList, [item => item.meter[orderBy]], [orderDirection]);
   });
 

@@ -1,81 +1,160 @@
-@if (analysisStatusCheck?.hasAnalysis) {
+@if (analysisStatusCheck) {
+@let item = analysisStatusCheck.analysisItem;
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
             [attr.data-bs-target]="type === 'energy' ? '#energyAnalysisCollapse' : '#waterAnalysisCollapse'"
             aria-expanded="false" [ngClass]="{
-                    'bg-warning': analysisStatusCheck.status === 'warning',
-                    'bg-danger': analysisStatusCheck.status === 'error'
-                }">
+                'bg-warning': analysisStatusCheck.status === 'warning',
+                'bg-danger': analysisStatusCheck.status === 'error'
+            }">
             @if (type === 'energy') {
-            <span class="fa fa-bolt me-2"></span>
-            Energy Analysis
+            <span class="fa fa-bolt me-2"></span>Energy Analysis
             } @else {
-            <span class="fa fa-droplet me-2"></span>
-            Water Analysis
+            <span class="fa fa-droplet me-2"></span>Water Analysis
             }
             <span class="fa ms-2" [ngClass]="{
-                        'fa-circle-check text-success': analysisStatusCheck.status === 'good',
-                        'fa-exclamation-triangle': analysisStatusCheck.status === 'warning',
-                        'fa-circle-xmark': analysisStatusCheck.status === 'error'
-                    }"></span>
+                'fa-circle-check text-success': analysisStatusCheck.status === 'good',
+                'fa-exclamation-triangle': analysisStatusCheck.status === 'warning',
+                'fa-circle-xmark': analysisStatusCheck.status === 'error'
+            }"></span>
         </button>
     </h2>
     <div [id]="type === 'energy' ? 'energyAnalysisCollapse' : 'waterAnalysisCollapse'"
         class="accordion-collapse collapse">
-        <div class="accordion-body">
-            <div class="row">
-                @if(analysisStatusCheck.hasSetupErrors){
-                <div class="col-12">
-                    <div class="alert alert-danger mb-2">
-                        <span class="fa fa-exclamation-circle me-1"></span>
-                        There are setup errors for the selected analysis. Please visit the analysis to fix the errors
-                    </div>
+        <div class="accordion-body p-2">
+
+            <!-- Setup errors alert -->
+            @if (analysisStatusCheck.hasSetupErrors) {
+            <div class="alert alert-danger py-1 px-2 mb-2 small">
+                <span class="fa fa-exclamation-circle me-1"></span>
+                Setup errors found.
+                <button type="button" class="btn btn-link btn-sm p-0 ms-1 align-baseline text-danger fw-semibold"
+                    (click)="goToAnalysis()">Go to analysis setup</button>
+            </div>
+            }
+
+            <!-- Analysis name (link) + metadata badges -->
+            <div class="d-flex align-items-start justify-content-between mb-2 gap-2">
+                <button type="button" class="btn btn-link p-0 text-start fw-semibold text-decoration-none lh-sm"
+                    (click)="goToAnalysis()">
+                    {{item.name}}
+                </button>
+                <div class="d-flex gap-1 flex-wrap justify-content-end flex-shrink-0">
+                    <span class="badge bg-secondary">Baseline: {{item.baselineYear}}</span>
+                    <span class="badge bg-secondary">{{item.energyIsSource ? 'Source' : 'Site'}} Energy</span>
+                    @if (item.hasBanking) {
+                    <span class="badge bg-dark">
+                        <span class="fa fa-piggy-bank me-1"></span>Banking
+                    </span>
+                    }
                 </div>
-                }
-                <div class="col-12">
-                    <p class="mb-1">
-                        <strong>Latest Date With Complete Data:</strong>
-                        {{analysisStatusCheck.latestDataAllEntries | date:'MMMM yyyy'}}
-                    </p>
-                    <p class="mb-1">
-                        <strong>Latest Date Any Data Entered:</strong>
-                        {{analysisStatusCheck.latestDataDate | date:'MMMM yyyy'}}
-                    </p>
-                    <p class="mb-2">
-                        <strong>All Data Current:</strong>
-                        {{analysisStatusCheck.allDatesCurrent ? 'Yes' : 'No'}}
-                    </p>
-                </div>
-                <div class="col-6">
-                    <p class="mb-1"><strong>Predictors Used:</strong></p>
-                    <ul class="mb-0">
-                        @for (predictorData of analysisStatusCheck.latestPredictorData; track predictorData.predictorId)
-                        {
-                        <li>{{predictorData.predictorName}}
-                            @if(predictorData.lastDateEntry) {
-                            ({{predictorData.lastDateEntry | date:'MMMM yyyy'}})
-                            } @else {
-                            (No data entered)
-                            }</li>
-                        }
-                    </ul>
-                </div>
-                <div class="col-6">
-                    <p class="mb-1"><strong>Meters Used:</strong></p>
-                    <ul class="mb-0">
-                        @for (meterData of analysisStatusCheck.latestMeterData; track meterData.meterId) {
-                        <li>{{meterData.meterName}}
-                            @if(meterData.lastDateEntry) {
-                            ({{meterData.lastDateEntry | date:'MMMM yyyy'}})
-                            } @else {
-                            (No data entered)
+            </div>
+
+            <!-- Groups -->
+            @if (groupItems.length) {
+            <div class="mb-2">
+                <p class="mb-1 small text-uppercase text-muted fw-semibold">Groups</p>
+                <div class="row g-2">
+                    @for (groupItem of groupItems; track groupItem.group.idbGroupId) {
+                    <div class="col-12 col-sm-6">
+                        <div class="small ps-2 border-start border-2 h-100" [ngClass]="{
+                        'border-primary': groupItem.group.analysisType === 'regression',
+                        'border-secondary': groupItem.group.analysisType !== 'regression'
+                    }">
+                            <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
+                                <strong>{{groupItem.group.idbGroupId | groupName}}</strong>
+                                <span class="badge bg-secondary">{{groupItem.group.analysisType |
+                                    analysisTypeLabel}}</span>
+                                @for (pv of groupItem.predictorVariables; track pv.id) {
+                                <span class="badge bg-info text-dark">{{pv.name}}</span>
+                                }
+                            </div>
+                            @if (groupItem.group.analysisType === 'regression') {
+                            <div class="text-muted lh-sm">
+                                <div>Model Year: {{groupItem.group.regressionModelYear}}</div>
+                                <div class="text-truncate" title="y = {{groupItem.regressionEquation}}">
+                                    @if (type === 'energy') {
+                                    Modeled Energy
+                                    } @else {
+                                    Modeled Consumption
+                                    }
+                                    = {{groupItem.regressionEquation}}
+                                </div>
+                                @if (groupItem.group.isGeneratedModel) {
+                                <div>Adj. R²: {{groupItem.adjust_R2 | number:'0.3-3'}}</div>
+                                } @else {
+                                <div class="fst-italic">User-defined model</div>
+                                }
+                            </div>
                             }
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- Data currency -->
+            <div class="mb-2">
+                <p class="mb-1 small text-uppercase text-muted fw-semibold">Data Currency</p>
+                <div class="text-muted ps-2 small lh-sm border-start border-2">
+                    <div class="mb-1">All Data Current:
+                        @if (analysisStatusCheck.allDatesCurrent) {
+                        <span class="text-success fw-semibold">
+                            <span class="fa fa-circle-check me-1"></span>Yes
+                        </span>
+                        } @else {
+                        <span class="text-danger fw-semibold">
+                            <span class="fa fa-circle-xmark me-1"></span>No
+                        </span>
+                        }
+                    </div>
+                    <div>Latest Complete: {{analysisStatusCheck.latestDataAllEntries | date:'MMM yyyy'}}</div>
+                    <div>Latest Any Data: {{analysisStatusCheck.latestDataDate | date:'MMM yyyy'}}</div>
+                </div>
+            </div>
+
+            <!-- Dependent data: meters + predictors (status icon + name only) -->
+            <div class="row gx-3">
+                @if (analysisStatusCheck.includedMeterStatusChecks?.length) {
+                <div [class]="analysisStatusCheck.includedPredictorStatusChecks?.length ? 'col-6' : 'col-12'">
+                    <p class="mb-1 small text-uppercase text-muted fw-semibold">Meters</p>
+                    <ul class="list-unstyled mb-0 small">
+                        @for (m of analysisStatusCheck.includedMeterStatusChecks; track m.meterId) {
+                        <li class="d-flex align-items-center gap-1 mb-1">
+                            <span class="fa fa-fw flex-shrink-0" [ngClass]="{
+                                'fa-circle-check text-success': m.status === 'good',
+                                'fa-exclamation-triangle text-warning': m.status === 'warning',
+                                'fa-circle-xmark text-danger': m.status === 'error'
+                            }"></span>
+                            <span class="text-truncate" title="{{m.meterName}}">{{m.meterName}} ({{m.lastDateEntry |
+                                date:'MMM yyyy'}})</span>
                         </li>
                         }
                     </ul>
                 </div>
+                }
+                @if (analysisStatusCheck.includedPredictorStatusChecks?.length) {
+                <div [class]="analysisStatusCheck.includedMeterStatusChecks?.length ? 'col-6' : 'col-12'">
+                    <p class="mb-1 small text-uppercase text-muted fw-semibold">Predictors</p>
+                    <ul class="list-unstyled mb-0 small">
+                        @for (p of analysisStatusCheck.includedPredictorStatusChecks; track p.predictorId) {
+                        <li class="d-flex align-items-center gap-1 mb-1">
+                            <span class="fa fa-fw flex-shrink-0" [ngClass]="{
+                                'fa-circle-check text-success': p.status === 'good',
+                                'fa-exclamation-triangle text-warning': p.status === 'warning',
+                                'fa-circle-xmark text-danger': p.status === 'error'
+                            }"></span>
+                            <span class="text-truncate" title="{{p.predictorName}}">{{p.predictorName}}
+                                ({{p.latestEntryDate | date:'MMM yyyy'}})</span>
+                        </li>
+                        }
+                    </ul>
+                </div>
+                }
             </div>
+
         </div>
     </div>
 </div>

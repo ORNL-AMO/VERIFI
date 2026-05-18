@@ -35,7 +35,9 @@ export class FacilityBannerComponent {
   hasAnalysisWarning: Signal<boolean> = computed(() => {
     const facilityStatusCheck = this.facilityStatusCheck();
     if (!facilityStatusCheck) return false;
-    return facilityStatusCheck.energyAnalysisStatusCheck.status != 'good' || facilityStatusCheck.waterAnalysisStatusCheck.status != 'good';
+    const energyAnalysisStatusCheck = facilityStatusCheck.energyAnalysisStatusCheck;
+    const waterAnalysisStatusCheck = facilityStatusCheck.waterAnalysisStatusCheck;
+    return (energyAnalysisStatusCheck && energyAnalysisStatusCheck.status != 'good') || (waterAnalysisStatusCheck && waterAnalysisStatusCheck.status != 'good');
   });
 
   hideTabText: boolean = false;

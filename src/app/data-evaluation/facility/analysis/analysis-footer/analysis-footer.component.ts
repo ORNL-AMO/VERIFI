@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { filter, map, startWith, Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
@@ -13,106 +13,147 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
-import { AnalysisValidationService } from 'src/app/shared/validation/services/analysis-validation.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 @Component({
   selector: 'app-analysis-footer',
   templateUrl: './analysis-footer.component.html',
   styleUrls: ['./analysis-footer.component.css'],
   standalone: false
 })
-export class AnalysisFooterComponent implements OnInit {
+export class AnalysisFooterComponent {
+  private router: Router = inject(Router);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  analysisItem: IdbAnalysisItem;
-  analysisItemSub: Subscription;
-  selectedGroup: AnalysisGroup;
-  selectedGroupSub: Subscription;
+  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
+  helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
+  sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
+  accountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.analysisService.accountAnalysisItem);
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
-  routerSub: Subscription;
-  showContinue: boolean;
-  showGoBackToAccount: boolean;
-  disableContinue: boolean = false;
-  helpWidth: number;
-  helpWidthSub: Subscription;
+  url = toSignal(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url)
+    ),
+    { initialValue: this.router.url }
+  );
 
-  sidebarWidth: number;
-  sidebarWidthSub: Subscription;
+  analysisStatusCheck: Signal<AnalysisStatusCheck> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    const analysisItem = this.analysisItem();
+    if (!facilityStatusCheck || !analysisItem) {
+      return undefined;
+    }
+    const analysisStatusCheck: AnalysisStatusCheck = facilityStatusCheck.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisItem.guid);
+    return analysisStatusCheck
+  });
 
-  analysisValidationSub: Subscription;
+  setupErrors: Signal<AnalysisSetupErrors> = computed(() => {
+    const analysisStatusCheck = this.analysisStatusCheck();
+    return analysisStatusCheck ? analysisStatusCheck.analysisSetupErrors : undefined;
+  });
 
-  constructor(
-    private router: Router,
-    private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private dataEvaluationService: DataEvaluationService,
-    private analysisValidationService: AnalysisValidationService) { }
+  showContinue: Signal<boolean> = computed(() => {
+    const currentUrl = this.url();
+    return currentUrl.includes('account-analysis') == false;
+  });
 
-  ngOnInit(): void {
-    this.showGoBackToAccount = this.analysisService.accountAnalysisItem != undefined;
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setShowContinue();
+  disableContinue: Signal<boolean> = computed(() => {
+    const setupErrors: AnalysisSetupErrors = this.setupErrors();
+    const analysisItem: IdbAnalysisItem = this.analysisItem();
+    const selectedGroup: AnalysisGroup = this.selectedGroup();
+    const url: string = this.url();
+    if (!analysisItem || !selectedGroup || !setupErrors) {
+      return true;
+    }
+
+    if (url.includes('analysis-setup')) {
+      if (setupErrors.setupHasError) {
+        return true;
+      } else {
+        return false;
       }
-    });
-    this.setShowContinue();
-    this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
-      this.analysisItem = val;
-    });
+    } else if (url.includes('group-analysis')) {
+      if (selectedGroup.analysisType == 'skip' || selectedGroup.analysisType == 'skipAnalysis') {
+        return false;
+      }
+      const groupErrors: GroupAnalysisErrors = setupErrors.groupErrors.find(groupError => { return groupError.groupId == selectedGroup.idbGroupId });
+      if (groupErrors) {
+        if (url.includes('options')) {
+          if (groupErrors.hasErrors) {
+            if (groupErrors.invalidAverageBaseload || groupErrors.invalidMonthlyBaseload
+              || groupErrors.missingGroupMeters || groupErrors.noProductionVariables || groupErrors.missingProductionVariables) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        } else if (url.includes('model-selection')) {
+          if (groupErrors.hasErrors) {
+            if (groupErrors.hasRegressionErrors) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
+      return true;
+    }
+  });
 
-    this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
-      this.selectedGroup = val;
-    });
-    this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
-      this.helpWidth = helpWidth;
-    });
-    this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
-      this.sidebarWidth = sidebarWidth;
-    });
-
-    this.analysisValidationSub = this.analysisValidationService.analysisSetupErrors.subscribe(val => {
-      this.setDisableContinue();
-    });
-  }
-
-  ngOnDestroy() {
-    this.analysisItemSub.unsubscribe();
-    this.selectedGroupSub.unsubscribe();
-    this.routerSub.unsubscribe();
-    this.helpWidthSub.unsubscribe();
-    this.sidebarWidthSub.unsubscribe();
-    this.analysisValidationSub.unsubscribe();
-  }
+  showGoBackToAccount: Signal<boolean> = computed(() => {
+    const accountAnalysisItem = this.accountAnalysisItem();
+    return accountAnalysisItem !== undefined;
+  });
 
   goBack() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
+    const facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const selectedGroup: AnalysisGroup = this.selectedGroup();
+    const analysisItem: IdbAnalysisItem = this.analysisItem();
+    const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
     if (this.router.url.includes('account-analysis')) {
       this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/monthly-analysis');
     } else if (this.router.url.includes('facility-analysis')) {
       if (this.router.url.includes('monthly-analysis')) {
         this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/annual-analysis');
       } else {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[this.analysisItem.groups.length - 1].idbGroupId + '/monthly-analysis');
+        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[analysisItem.groups.length - 1].idbGroupId + '/monthly-analysis');
       }
     } else if (this.router.url.includes('group-analysis')) {
       if (this.router.url.includes('monthly-analysis')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/annual-analysis');
+        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
       } else if (this.router.url.includes('annual-analysis')) {
-        if (this.selectedGroup.analysisType == 'regression') {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/model-selection');
+        if (selectedGroup.analysisType == 'regression') {
+          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/model-selection');
         } else {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/options');
+          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/options');
         }
       } else if (this.router.url.includes('model-selection')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/options');
+        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/options');
       } else if (this.router.url.includes('options')) {
-        let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
+        let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
         if (groupIndex > 0) {
-          if (this.analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
-            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
+          if (analysisItem.groups[groupIndex - 1].analysisType == 'skip') {
+            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex - 1].idbGroupId + '/options');
           } else {
-            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
+            this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex - 1].idbGroupId + '/monthly-analysis');
           }
         } else {
           this.router.navigateByUrl(facilityUrlStr + 'analysis-setup');
@@ -124,25 +165,27 @@ export class AnalysisFooterComponent implements OnInit {
   }
 
   continue() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
+    const facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const selectedGroup: AnalysisGroup = this.selectedGroup();
+    const analysisItem: IdbAnalysisItem = this.analysisItem();
+    const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
     if (this.router.url.includes('analysis-setup')) {
-      this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
+      this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[0].idbGroupId + '/options');
     } else if (this.router.url.includes('group-analysis')) {
-      if (this.router.url.includes('options') && this.selectedGroup.analysisType != 'skip') {
-        if (this.selectedGroup.analysisType == 'regression') {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/model-selection');
+      if (this.router.url.includes('options') && selectedGroup.analysisType != 'skip') {
+        if (selectedGroup.analysisType == 'regression') {
+          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/model-selection');
         } else {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/annual-analysis');
+          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
         }
       } else if (this.router.url.includes('model-selection')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/annual-analysis');
+        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/annual-analysis');
       } else if (this.router.url.includes('annual-analysis')) {
-        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.selectedGroup.idbGroupId + '/monthly-analysis');
+        this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + selectedGroup.idbGroupId + '/monthly-analysis');
       } else {
-        let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
-        if (groupIndex < this.analysisItem.groups.length - 1) {
-          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + this.analysisItem.groups[groupIndex + 1].idbGroupId + '/options');
+        let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == selectedGroup.idbGroupId });
+        if (groupIndex < analysisItem.groups.length - 1) {
+          this.router.navigateByUrl(facilityUrlStr + 'group-analysis/' + analysisItem.groups[groupIndex + 1].idbGroupId + '/options');
         } else {
           this.router.navigateByUrl(facilityUrlStr + 'facility-analysis/annual-analysis');
         }
@@ -156,60 +199,16 @@ export class AnalysisFooterComponent implements OnInit {
     }
   }
 
-  setShowContinue() {
-    this.showContinue = (this.router.url.includes('account-analysis') == false);
-  }
-
   goBackToAccount() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.analysisService.accountAnalysisItem.guid })
+    const accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    const accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItem();
+    const selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == accountAnalysisItem.guid })
     this.accountAnalysisDbService.selectedAnalysisItem.next(selectedAnalysisItem);
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
-  }
-
-  setDisableContinue() {
-    let setupErrors: AnalysisSetupErrors;
-    if (this.analysisItem) {
-      setupErrors = this.analysisValidationService.getErrorsByAnalysisId(this.analysisItem.guid);
-    }
-    if (this.router.url.includes('analysis-setup')) {
-      if (setupErrors && setupErrors.setupHasError) {
-        this.disableContinue = true;
-      } else {
-        this.disableContinue = false;
-      }
-    } else if (this.router.url.includes('group-analysis') && this.selectedGroup && setupErrors) {
-      let groupErrors: GroupAnalysisErrors = setupErrors.groupErrors.find(groupError => { return groupError.groupId == this.selectedGroup.idbGroupId });
-      if (this.router.url.includes('options')) {
-        if (groupErrors.hasErrors) {
-          if (groupErrors.invalidAverageBaseload || groupErrors.invalidMonthlyBaseload
-            || (groupErrors.missingGroupMeters && this.selectedGroup.analysisType !== 'skip') || groupErrors.noProductionVariables || groupErrors.missingProductionVariables) {
-            this.disableContinue = true;
-          } else {
-            this.disableContinue = false;
-          }
-        } else {
-          this.disableContinue = false;
-        }
-      } else if (this.router.url.includes('model-selection') && setupErrors) {
-        if (groupErrors.hasErrors) {
-          if (groupErrors.hasRegressionErrors) {
-            this.disableContinue = true;
-          } else {
-            this.disableContinue = false;
-          }
-        } else {
-          this.disableContinue = false;
-        }
-      } else {
-        this.disableContinue = false;
-      }
-    }
   }
 
   returnToDashboard() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
   }
-
 }
