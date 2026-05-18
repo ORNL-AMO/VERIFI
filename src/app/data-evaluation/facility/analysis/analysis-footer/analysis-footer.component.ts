@@ -73,17 +73,20 @@ export class AnalysisFooterComponent {
     const analysisItem: IdbAnalysisItem = this.analysisItem();
     const selectedGroup: AnalysisGroup = this.selectedGroup();
     const url: string = this.url();
-    if (!analysisItem || !selectedGroup || !setupErrors) {
+    if (!analysisItem || !setupErrors) {
       return true;
     }
-
     if (url.includes('analysis-setup')) {
       if (setupErrors.setupHasError) {
         return true;
       } else {
         return false;
       }
-    } else if (url.includes('group-analysis')) {
+    }
+    if (url.includes('group-analysis')) {
+      if (!selectedGroup) {
+        return true;
+      }
       if (selectedGroup.analysisType == 'skip' || selectedGroup.analysisType == 'skipAnalysis') {
         return false;
       }
