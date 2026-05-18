@@ -71,10 +71,14 @@ export class MonthlyFacilityAnalysisClass {
             });
             // Get the earliest last bill date from all group meters and predictors
             // we want the latest date that has data for all group meters and predictors
-            let lastBill: Date = _.min(includedDates);
-            this.endDate = new Date(lastBill);
-            this.endDate.setMonth(this.endDate.getMonth() + 1);
-            this.endDate.setDate(1);
+            if (includedDates.length > 0) {
+                let lastBill: Date = _.min(includedDates);
+                this.endDate = new Date(lastBill);
+                this.endDate.setMonth(this.endDate.getMonth() + 1);
+                this.endDate.setDate(1);
+            } else {
+                this.endDate = monthlyStartAndEndDate.endDate;
+            }
         } else {
             this.endDate = monthlyStartAndEndDate.endDate;
         }

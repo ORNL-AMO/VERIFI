@@ -46,12 +46,23 @@ export class AnalysisGroupStatusCheck {
         }
 
         // Collect predictor IDs from the group's selected regression model.
-        const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
-        if (selectedModel) {
-            for (const pv of selectedModel.predictorVariables) {
-                if (!groupPredictorIds.includes(pv.id)) {
-                    groupPredictorIds.push(pv.id);
+        if (group.analysisType == 'regression') {
+            if (group.isGeneratedModel) {
+                const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
+                if (selectedModel) {
+                    for (const pv of selectedModel.predictorVariables) {
+                        if (!groupPredictorIds.includes(pv.id)) {
+                            groupPredictorIds.push(pv.id);
+                        }
+                    }
                 }
+            } else {
+                //user defined model
+                group.predictorVariables.forEach(pv => {
+                    if (pv.productionInAnalysis && !groupPredictorIds.includes(pv.id)) {
+                        groupPredictorIds.push(pv.id);
+                    }
+                });
             }
         }
         const groupPredictorStatusChecks: Array<PredictorStatusCheck> = predictorStatusChecks.filter(p => groupPredictorIds.includes(p.predictorId));

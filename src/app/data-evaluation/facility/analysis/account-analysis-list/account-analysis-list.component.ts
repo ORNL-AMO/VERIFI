@@ -20,10 +20,11 @@ export class AccountAnalysisListComponent {
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
+  private analysisService: AnalysisService = inject(AnalysisService);
 
   private allAccountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
 
-  selecteAccountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  selectedAccountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.analysisService.accountAnalysisItem);
   selectedAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => {
     const allItems = this.allAccountAnalysisItems();
@@ -40,7 +41,7 @@ export class AccountAnalysisListComponent {
   orderByDirection: string = 'desc';
   
   canReturnToAccount: Signal<boolean> = computed(() => {
-    const analysisItem = this.selecteAccountAnalysisItem();
+    const analysisItem = this.selectedAccountAnalysisItem();
     return analysisItem !== undefined;
   })
   
@@ -54,7 +55,7 @@ export class AccountAnalysisListComponent {
   }
 
   goBackToAccount() {
-    const accountAnalysisItem: IdbAccountAnalysisItem = this.selecteAccountAnalysisItem();
+    const accountAnalysisItem: IdbAccountAnalysisItem = this.selectedAccountAnalysisItem();
     this.selectAnalysisItem(accountAnalysisItem);
   }
 
