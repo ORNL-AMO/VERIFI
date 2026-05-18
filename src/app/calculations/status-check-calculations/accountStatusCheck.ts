@@ -58,8 +58,8 @@ export class AccountStatusCheck {
                 facilityReports
             );
         });
-        this.computeAccountAnalysisSetupErrors(accountAnalysisItems);
-        this.computeAccountReportErrors(accountReports);
+        this.computeAccountAnalysisSetupErrors(account, accountAnalysisItems);
+        this.computeAccountReportErrors(account, accountReports);
         this.setAccountActions(account, facilities);
         this.setStatus();
     }
@@ -97,19 +97,26 @@ export class AccountStatusCheck {
         return errors ?? emptyAccountReportErrors();
     }
 
-    private computeAccountAnalysisSetupErrors(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+    private computeAccountAnalysisSetupErrors(account: IdbAccount, accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
         this.accountAnalysisSetupErrors = [];
         const analysisStatusChecks: Array<AnalysisStatusCheck> = this.facilityStatusChecks.flatMap(fc => fc.analysisStatusChecks)
-        const analysisSetupErrors: Array<AnalysisSetupErrors> = analysisStatusChecks.map(asc => asc.analysisSetupErrors);
-        for (const item of accountAnalysisItems) {
+        for (const item of accountAnalysisItems.filter(accountAnalysisItem => accountAnalysisItem.accountId === account.guid)) {
+            const itemAnalysisIds: Set<string> = new Set(
+                item.facilityAnalysisItems
+                    .map(facilityAnalysisItem => facilityAnalysisItem.analysisItemId)
+                    .filter(analysisItemId => analysisItemId)
+            );
+            const analysisSetupErrors: Array<AnalysisSetupErrors> = analysisStatusChecks
+                .map(asc => asc.analysisSetupErrors)
+                .filter(errors => itemAnalysisIds.has(errors.analysisItemId));
             const errors = getAccountAnalysisSetupErrors(item, analysisSetupErrors);
             this.accountAnalysisSetupErrors.push(errors);
         }
     }
 
-    private computeAccountReportErrors(accountReports: Array<IdbAccountReport>) {
+    private computeAccountReportErrors(account: IdbAccount, accountReports: Array<IdbAccountReport>) {
         this.accountReportErrors = [];
-        for (const report of accountReports) {
+        for (const report of accountReports.filter(accountReport => accountReport.accountId === account.guid)) {
             const errors = getAccountReportErrors(report, this.accountAnalysisSetupErrors);
             this.accountReportErrors.push(errors);
         }

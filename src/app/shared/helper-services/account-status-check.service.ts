@@ -89,6 +89,24 @@ export class AccountStatusCheckService implements OnDestroy {
             if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems) {
                 return;
             }
+            const facilityReportsForAccount = (facilityReports ?? []).filter(report => report.accountId === account.guid);
+            const accountAnalysisItemsForAccount = (accountAnalysisItems ?? []).filter(item => item.accountId === account.guid);
+            const accountReportsForAccount = (accountReports ?? []).filter(report => report.accountId === account.guid);
+            const isConsistentSnapshot = this.isCollectionForAccount(facilities, account.guid, facility => facility.accountId) &&
+                this.isCollectionForAccount(meters, account.guid, meter => meter.accountId) &&
+                this.isCollectionForAccount(meterData, account.guid, data => data.accountId) &&
+                this.isCollectionForAccount(meterGroups, account.guid, group => group.accountId) &&
+                this.isCollectionForAccount(calanderizedMeters, account.guid, calanderizedMeter => calanderizedMeter.meter.accountId) &&
+                this.isCollectionForAccount(predictors, account.guid, predictor => predictor.accountId) &&
+                this.isCollectionForAccount(predictorData, account.guid, data => data.accountId) &&
+                this.isCollectionForAccount(analysisItems, account.guid, item => item.accountId) &&
+                this.isCollectionForAccount(facilityReports ?? [], account.guid, report => report.accountId) &&
+                this.isCollectionForAccount(accountAnalysisItems ?? [], account.guid, item => item.accountId) &&
+                this.isCollectionForAccount(accountReports ?? [], account.guid, report => report.accountId);
+            if (!isConsistentSnapshot) {
+                this.accountStatusCheck.next(undefined);
+                return;
+            }
             const statusCheck = new AccountStatusCheck(
                 account,
                 facilities,
@@ -99,9 +117,9 @@ export class AccountStatusCheckService implements OnDestroy {
                 predictors,
                 predictorData,
                 analysisItems,
-                facilityReports ?? [],
-                accountAnalysisItems ?? [],
-                accountReports ?? []
+                facilityReportsForAccount,
+                accountAnalysisItemsForAccount,
+                accountReportsForAccount
             );
             this.accountStatusCheck.next(statusCheck);
         });
@@ -129,6 +147,10 @@ export class AccountStatusCheckService implements OnDestroy {
 
     getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
         return this.accountStatusCheck.getValue()?.getAccountReportErrorsByReportId(reportId) ?? emptyAccountReportErrors();
+    }
+
+    private isCollectionForAccount<T>(items: Array<T>, accountId: string, getAccountId: (item: T) => string): boolean {
+        return items.every(item => getAccountId(item) === accountId);
     }
 
 }
