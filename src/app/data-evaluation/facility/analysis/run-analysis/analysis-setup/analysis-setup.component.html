@@ -1,25 +1,27 @@
+@let _analysisItem = analysisItem();
+@let _facilityAnalysisItems = facilityAnalysisItems();
+
 <div class="content-padding">
   <h4>Analysis Setup</h4>
-  @if (showInUseMessage) {
+  @if (showInUseMessage()) {
   <div class="row">
     <div class="col-12 alert alert-info text-center">
-      <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+      <button type="button" class="btn-close" aria-label="Close" (click)="toggleHideInUseMessage()"></button>
       This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
       to the corresponding analysis items. Making changes to this analysis may effect the results of the account
       analysis.
     </div>
   </div>
   }
-  <form>
+  <form [formGroup]="form">
     <div class="row">
       <div class="col-6">
         <div class="row form-group">
           <label class="col-5 col-form-label" for="analysisName">Name</label>
           <div class="col-7">
-            <input class="form-control" type="text" id="analysisName" name="analysisName"
-              [(ngModel)]="analysisItem.name" (input)="saveItem()" required>
+            <input class="form-control" type="text" id="analysisName" formControlName="name" required>
           </div>
-          @if (!analysisItem.name) {
+          @if (form.controls.name.invalid && (form.controls.name.dirty || form.controls.name.touched)) {
           <div class="col-12">
             <div class="alert alert-danger">
               Name Required
@@ -27,20 +29,18 @@
           </div>
           }
         </div>
-        @if (analysisItem.analysisCategory == 'energy') {
+        @if (_analysisItem?.analysisCategory == 'energy') {
         <div class="form-group row">
           <label class="col-5 col-form-label">Analysis Boundary </label>
           <div class="col-7">
             <div class="form-check">
-              <input type="radio" class="form-check-input" name="energyIsSource" [value]="true" id="sourceEnergy"
-                [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()"
-                [disabled]="disableForm || showInUseMessage">
+              <input type="radio" class="form-check-input" formControlName="energyIsSource" [value]="true"
+                id="sourceEnergy">
               <label class="form-check-label" for="sourceEnergy">Source Energy</label>
             </div>
             <div class="form-check">
-              <input type="radio" class="form-check-input" name="energyIsSource" [value]="false" id="siteEnergy"
-                [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()"
-                [disabled]="disableForm || showInUseMessage">
+              <input type="radio" class="form-check-input" formControlName="energyIsSource" [value]="false"
+                id="siteEnergy">
               <label class="form-check-label" for="siteEnergy">Site Energy</label>
             </div>
           </div>
@@ -48,8 +48,7 @@
         <div class="form-group row">
           <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
           <div class="col-7">
-            <select class="form-select" name="energyUnit" id="energyUnit" [(ngModel)]="analysisItem.energyUnit"
-              (change)="saveItem()" [disabled]="disableForm">
+            <select class="form-select" id="energyUnit" formControlName="energyUnit">
               @for (energyUnitOption of energyUnitOptions; track energyUnitOption) {
               <option [ngValue]="energyUnitOption.value">
                 <span [innerHTML]="energyUnitOption.display"></span>
@@ -59,12 +58,11 @@
           </div>
         </div>
         }
-        @if (analysisItem.analysisCategory == 'water') {
+        @if (_analysisItem?.analysisCategory == 'water') {
         <div class="form-group row">
           <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
           <div class="col-7">
-            <select class="form-select" name="waterUnit" id="waterUnit" [(ngModel)]="analysisItem.waterUnit"
-              (change)="saveItem()" [disabled]="disableForm">
+            <select class="form-select" id="waterUnit" formControlName="waterUnit">
               @for (waterUnitOption of waterUnitOptions; track waterUnitOption) {
               <option [ngValue]="waterUnitOption.value">
                 <span [innerHTML]="waterUnitOption.display"></span>
@@ -74,13 +72,12 @@
           </div>
         </div>
         }
-        @if (facilityAnalysisItems.length > 0) {
+        @if (_facilityAnalysisItems?.length > 0) {
         <div class="form-group row">
           <label class="col-5 col-form-label" for="hasBanking">Has Banking</label>
           <div class="col-6">
             <label class="switch" for="hasBanking">
-              <input class="checkbox" type="checkbox" id="hasBanking" name="hasBanking"
-                [(ngModel)]="analysisItem.hasBanking" (change)="changeHasBanking()" [disabled]="disableForm">
+              <input class="checkbox" type="checkbox" id="hasBanking" formControlName="hasBanking">
               <span class="slider round"></span>
             </label>
           </div>
@@ -93,34 +90,32 @@
             Baseline Year
           </label>
           <div class="col-7">
-            <select required class="form-select" id="baselineYear" name="baselineYear"
-              [(ngModel)]="analysisItem.baselineYear" (change)="changeBaselineYear()"
-              [disabled]="disableForm || showInUseMessage">
-              @for (year of yearOptions; track year) {
+            <select required class="form-select" id="baselineYear" formControlName="baselineYear">
+              @for (year of yearOptions(); track year) {
               <option [ngValue]="year">
-                {{year| yearDisplay: facility.fiscalYear}}</option>
+                {{year | yearDisplay: facility()?.fiscalYear}}</option>
               }
             </select>
           </div>
         </div>
-        @if (baselineYearWarning) {
+        @if (baselineYearWarning()) {
         <div class="alert alert-warning text-center p-1">
-          {{baselineYearWarning}}
+          {{baselineYearWarning()}}
         </div>
         }
-        @let setupErrors = analysisItem.guid | invalidAnalysis;
-        @if (setupErrors.baselineYearAfterMeterDataEnd) {
+        @let setupErrors = _analysisItem?.guid | invalidAnalysis;
+        @if (setupErrors?.baselineYearAfterMeterDataEnd) {
         <div class="alert alert-danger text-center p-1">
-          Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
+          Your baseline year ({{form.controls.baselineYear.value}}) is after the meter data for this facility ends.
         </div>
         }
-        @if (setupErrors.baselineYearBeforeMeterDataStart) {
+        @if (setupErrors?.baselineYearBeforeMeterDataStart) {
         <div class="alert alert-danger text-center p-1">
-          Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
+          Your baseline year ({{form.controls.baselineYear.value}}) is before the meter data for this facility
           starts.
         </div>
         }
-        @if (account.fiscalYear == 'nonCalendarYear') {
+        @if (account()?.fiscalYear == 'nonCalendarYear') {
         <p class="mb-0 mt-2 italic">
           The account fiscal year option is set to <b>non-calendar year</b>. For more information, go to the "Financial
           Reporting" section
@@ -147,9 +142,10 @@
       </div>
     </div>
   </form>
-  @if (analysisItem.hasBanking) {
-  <app-select-banked-analysis [facilityAnalysisItems]="facilityAnalysisItems" [analysisItem]="analysisItem"
-    [facility]="facility" (emitSave)="saveItem()" [disabled]="disableForm"></app-select-banked-analysis>
+  @if (form.controls.hasBanking.value) {
+  <app-select-banked-analysis [facilityAnalysisItems]="_facilityAnalysisItems" [analysisItem]="_analysisItem"
+    [facility]="facility()" (bankedItemSelected)="setBankedAnalysisItemId($event)"
+    [disabled]="hasModelsGenerated()"></app-select-banked-analysis>
   }
 
 
@@ -158,7 +154,7 @@
       <hr>
     </div>
   </div>
-  @if (hasModelsGenerated) {
+  @if (hasModelsGenerated()) {
   <div class="row">
     <div class="col-12 alert alert-warning">
       One or more groups have regression models generated. These settings were used to create the models and are
@@ -183,14 +179,12 @@
   <div class="popup-body">
     Are you sure you want to clear the existing regression models in this analysis? This cannot be undone!
     <hr>
-    <!-- <div class="row"> -->
-    @if (showInUseMessage) {
+    @if (showInUseMessage()) {
     <div class="col-12 alert alert-info text-center">
       This analysis is used in one or more account analysis. Altering the models in this analysis may effect
       the results of the corresponding account analysis.
     </div>
     }
-    <!-- </div> -->
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>

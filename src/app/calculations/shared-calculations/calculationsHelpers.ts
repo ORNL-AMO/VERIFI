@@ -11,6 +11,7 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable } from "src/app/models/an
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { getDateFromPredictorData } from "src/app/shared/dateHelperFunctions";
+import { getIsEnergyMeter } from "src/app/shared/sharedHelperFunctions";
 
 export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } {
     let baselineDate: Date;
@@ -212,4 +213,24 @@ export function getLatestDataDate(calanderizedMeters: Array<CalanderizedMeter>):
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     let dates: Array<Date> = monthlyData.map(mData => { return new Date(mData.year, mData.monthNumValue, 1) });
     return _.max(dates);
+}
+
+export function getYearsWithFullDataAnalysis(calanderizedMeters: Array<CalanderizedMeter>, analysisItem: IdbAnalysisItem, facility: IdbFacility): Array<number> {
+    const filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(calanderizedMeter => {
+        return calanderizedMeter.meter.facilityId == analysisItem.facilityId && isCategoryMeter(calanderizedMeter.meter, analysisItem.analysisCategory);
+    });
+    return getYearsWithFullData(filteredMeters, facility);
+}
+
+export function isCategoryMeter(meter: IdbUtilityMeter, meterCategory: 'water' | 'energy' | 'all'): boolean {
+    if (meterCategory == 'water') {
+        if (meter.source == 'Water Intake') {
+            return true;
+        }
+        return false;
+    } else if (meterCategory == 'energy') {
+        return getIsEnergyMeter(meter.source);
+    } else if (meterCategory == 'all') {
+        return true;
+    }
 }
