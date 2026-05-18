@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
+import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -93,6 +93,12 @@ export class GeneralUtilityDataTableComponent {
       : getIsEnergyMeter(meter.source);
   });
 
+  showHeatCapacity: Signal<boolean> = computed(() => {
+    const meter = this.selectedMeter();
+    if (!meter) return false;
+    return checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
+  });
+
   showEstimated: Signal<boolean> = computed(() => {
     return this.selectedMeterData().some(d => d.isEstimated === true);
   });
@@ -115,6 +121,7 @@ export class GeneralUtilityDataTableComponent {
     if (filters.totalVolume && this.showVolumeColumn()) count++;
     if (!this.showEnergyColumn()) count--;
     if (filters.totalCost) count++;
+    if (filters.heatCapacity && this.showHeatCapacity()) count++;
     return count;
   });
 

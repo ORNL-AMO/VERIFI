@@ -107,6 +107,7 @@ export class UtilityMeterDataService {
       stationaryCarbonEmissions: account && account.displayEmissions ? true : false,
       stationaryOtherEmissions: account && account.displayEmissions ? true : false,
       totalEmissions: account && account.displayEmissions ? true : false,
+      heatCapacity: true
     }
   }
 
@@ -118,7 +119,8 @@ export class UtilityMeterDataService {
       mobileBiogenicEmissions: account && account.displayEmissions ? true : false,
       mobileCarbonEmissions: account && account.displayEmissions ? true : false,
       mobileOtherEmissions: account && account.displayEmissions ? true : false,
-      mobileTotalEmissions: account && account.displayEmissions ? true : false
+      mobileTotalEmissions: account && account.displayEmissions ? true : false,
+      fuelEfficiency: true
     }
   }
 

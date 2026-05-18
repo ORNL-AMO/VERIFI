@@ -28,6 +28,7 @@ export interface GeneralUtilityDataFilters{
   stationaryCarbonEmissions: boolean,
   stationaryOtherEmissions: boolean,
   totalEmissions: boolean,
+  heatCapacity: boolean
 }
 
 
@@ -38,4 +39,5 @@ export interface VehicleDataFilters{
   mobileCarbonEmissions: boolean,
   mobileOtherEmissions: boolean,
   mobileTotalEmissions: boolean,
+  fuelEfficiency: boolean
 }

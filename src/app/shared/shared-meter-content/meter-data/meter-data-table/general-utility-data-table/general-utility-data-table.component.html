@@ -7,6 +7,7 @@
 @let _showVolumeColumn = showVolumeColumn();
 @let _showEnergyColumn = showEnergyColumn();
 @let _showEmissions = showEmissions();
+@let _showHeatCapacity = showHeatCapacity();
 
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable
   [ngClass]="{'copying-table': copyingTable}">
@@ -39,6 +40,12 @@
       @if (_showEnergyColumn) {
         <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': _orderDataField == 'totalEnergyUse'}">
           Total Energy<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>)
+        </th>
+      }
+      @if (_showHeatCapacity && _filters.heatCapacity) {
+        <th (click)="setOrderDataField('heatCapacity')" [ngClass]="{'active': _orderDataField == 'heatCapacity'}">
+          Heat Capacity<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>/<span
+            [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
         </th>
       }
       @if (_filters.totalCost) {
@@ -124,6 +131,11 @@
               <span class="fa fa-asterisk"></span>
             }
             {{meterData.totalEnergyUse | customNumber}}
+          </td>
+        }
+        @if (_showHeatCapacity && _filters.heatCapacity) {
+          <td>
+            {{meterData.heatCapacity | customNumber}}
           </td>
         }
         @if (_filters.totalCost) {
