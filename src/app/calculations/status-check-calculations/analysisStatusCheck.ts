@@ -173,14 +173,7 @@ export class AnalysisStatusCheck {
         predictorId: string,
         predictorStatusChecks: Array<PredictorStatusCheck>
     ): PredictorStatusCheck {
-        const statusCheck = predictorStatusChecks.find(p => p.predictorId === predictorId);
-        if(!statusCheck){
-            console.log('missing status check');
-            console.log(predictorStatusChecks)
-            console.log(predictorId);
-            console.log('===')
-        }
-        return statusCheck;
+        return predictorStatusChecks.find(p => p.predictorId === predictorId);
     }
 
     /** Returns the latest data entry date for a single meter. */
