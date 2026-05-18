@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OperatingHoursModalComponent } from './operating-hours-modal.component';
+import { FormsModule } from '@angular/forms';
 
 describe('OperatingHoursModalComponent', () => {
   let component: OperatingHoursModalComponent;
@@ -8,7 +9,8 @@ describe('OperatingHoursModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [OperatingHoursModalComponent]
+      declarations: [OperatingHoursModalComponent],
+      imports: [FormsModule]
     })
     .compileComponents();
 

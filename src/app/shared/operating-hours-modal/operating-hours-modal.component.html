@@ -24,12 +24,9 @@
         <div class="row mb-2">
             <label class="col-5 col-form-label" for="weeksPerYear">Weeks / Year</label>
             <div class="col-7">
-                <input class="form-control" type="number" id="weeksPerYear" min="0" [max]="isLeapYear ? 52.28 : 52.14" [(ngModel)]="weeksPerYear">
-                @if (!isLeapYear && weeksPerYear > 52.14) {
-                <div class="text-danger">Weeks per year cannot exceed 52.14</div>
-                }
-                @if (isLeapYear && weeksPerYear > 52.28) {
-                <div class="text-danger">Weeks per year cannot exceed 52.28</div>
+                <input class="form-control" type="number" id="weeksPerYear" min="0" max="52" [(ngModel)]="weeksPerYear">
+                @if (weeksPerYear > 52) {
+                <div class="text-danger">Weeks per year cannot exceed 52</div>
                 }
             </div>
         </div>

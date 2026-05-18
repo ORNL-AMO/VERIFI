@@ -14,8 +14,10 @@
         <div class="col">
             <div class="input-group">
                 <span class="input-group-text">
-                    <i class="fa fa-calculator text-primary icon-style"
-                        (click)="openCalculateHoursOfOperationModal()"></i>
+                    <button type="button" class="btn p-0 border-0 bg-transparent"
+                        aria-label="Calculate hours of operation" (click)="openCalculateHoursOfOperationModal()">
+                        <i class="fa fa-calculator text-primary icon-style"></i>
+                    </button>
                 </span>
                 <input class="form-control" type="number" formControlName="hoursOfOperation" min="0"
                     id="{{'hoursOfOperation_'+selectedYear}}">
@@ -134,8 +136,10 @@
 </div>
 
 @if (showCalculateHoursOfOperationModal) {
-<app-operating-hours-modal [year]="annualOperatingConditionsDataForm.controls.year.value" [hoursPerDay]="annualOperatingConditionsDataForm.controls.hoursPerDay.value"
-    [daysPerWeek]="annualOperatingConditionsDataForm.controls.daysPerWeek.value" [weeksPerYear]="annualOperatingConditionsDataForm.controls.weeksPerYear.value"
+<app-operating-hours-modal [year]="annualOperatingConditionsDataForm.controls.year.value"
+    [hoursPerDay]="annualOperatingConditionsDataForm.controls.hoursPerDay.value"
+    [daysPerWeek]="annualOperatingConditionsDataForm.controls.daysPerWeek.value"
+    [weeksPerYear]="annualOperatingConditionsDataForm.controls.weeksPerYear.value"
     (saveCalculatedHoursPerYear)="handleCalculatedValues($event)"
     (closeModal)="closeCalculateHoursOfOperationModal()"></app-operating-hours-modal>
 }

@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { OperatingHoursModalComponent } from './operating-hours-modal.component';
 import { FormsModule } from '@angular/forms';
 

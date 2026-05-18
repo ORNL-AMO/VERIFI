@@ -32,12 +32,8 @@ export class OperatingHoursModalComponent {
       this.daysPerWeek = 7;
     }
     if (this.weeksPerYear == null) {
-      this.weeksPerYear = this.isLeapYear ? 52.28 : 52.14;
+      this.weeksPerYear = 52;
     }
-  }
-
-  get isLeapYear(): boolean {
-    return (this.year % 4 === 0 && this.year % 100 !== 0) || (this.year % 400 === 0);
   }
 
   get calculatedHoursPerYear(): number {
@@ -52,7 +48,7 @@ export class OperatingHoursModalComponent {
       return true;
     }
 
-    if (this.hoursPerDay < 0 || this.hoursPerDay > 24 || this.daysPerWeek < 0 || this.daysPerWeek > 7 || this.weeksPerYear < 0 || (!this.isLeapYear && this.weeksPerYear > 52.14) || (this.isLeapYear && this.weeksPerYear > 52.28)) {
+    if (this.hoursPerDay < 0 || this.hoursPerDay > 24 || this.daysPerWeek < 0 || this.daysPerWeek > 7 || this.weeksPerYear < 0 || this.weeksPerYear > 52) {
       return true;
     }
     return false;
