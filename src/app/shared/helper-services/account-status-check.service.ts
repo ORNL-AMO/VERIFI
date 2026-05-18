@@ -78,7 +78,7 @@ export class AccountStatusCheckService implements OnDestroy {
             meters,
             meterData,
             meterGroups,
-            calanderizedMeters,
+            calendarizedMeters,
             predictors,
             predictorData,
             analysisItems,
@@ -86,7 +86,7 @@ export class AccountStatusCheckService implements OnDestroy {
             accountAnalysisItems,
             accountReports
         ]) => {
-            if (!account || !facilities || !meters || !meterData || !meterGroups || !calanderizedMeters || !predictors || !predictorData || !analysisItems) {
+            if (!account || !facilities || !meters || !meterData || !meterGroups || !calendarizedMeters || !predictors || !predictorData || !analysisItems) {
                 return;
             }
             const facilityReportsForAccount = (facilityReports ?? []).filter(report => report.accountId === account.guid);
@@ -96,7 +96,7 @@ export class AccountStatusCheckService implements OnDestroy {
                 this.isCollectionForAccount(meters, account.guid, meter => meter.accountId) &&
                 this.isCollectionForAccount(meterData, account.guid, data => data.accountId) &&
                 this.isCollectionForAccount(meterGroups, account.guid, group => group.accountId) &&
-                this.isCollectionForAccount(calanderizedMeters, account.guid, calendarizedMeter => calendarizedMeter.meter.accountId) &&
+                this.isCollectionForAccount(calendarizedMeters, account.guid, calendarizedMeter => calendarizedMeter.meter.accountId) &&
                 this.isCollectionForAccount(predictors, account.guid, predictor => predictor.accountId) &&
                 this.isCollectionForAccount(predictorData, account.guid, data => data.accountId) &&
                 this.isCollectionForAccount(analysisItems, account.guid, item => item.accountId) &&
@@ -113,7 +113,7 @@ export class AccountStatusCheckService implements OnDestroy {
                 meters,
                 meterData,
                 meterGroups,
-                calanderizedMeters,
+                calendarizedMeters,
                 predictors,
                 predictorData,
                 analysisItems,

@@ -100,7 +100,8 @@ export class AccountStatusCheck {
     private computeAccountAnalysisSetupErrors(account: IdbAccount, accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
         this.accountAnalysisSetupErrors = [];
         const analysisStatusChecks: Array<AnalysisStatusCheck> = this.facilityStatusChecks.flatMap(fc => fc.analysisStatusChecks)
-        for (const item of accountAnalysisItems.filter(accountAnalysisItem => accountAnalysisItem.accountId === account.guid)) {
+        const accountAnalysisItemsForAccount: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(accountAnalysisItem => accountAnalysisItem.accountId === account.guid);
+        for (const item of accountAnalysisItemsForAccount) {
             const itemAnalysisIds: Set<string> = new Set(
                 item.facilityAnalysisItems
                     .map(facilityAnalysisItem => facilityAnalysisItem.analysisItemId)
