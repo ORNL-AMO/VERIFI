@@ -31,7 +31,8 @@ export class AnalysisStatusCheck {
     hasMeterSetupErrors: boolean;
 
     status: 'good' | 'warning' | 'error';
-
+    groupsHaveWarnings: boolean;
+    groupsHaveErrors: boolean;
     constructor(analysisItem: IdbAnalysisItem,
         meterStatusChecks: Array<MeterStatusCheck>,
         predictorStatusChecks: Array<PredictorStatusCheck>,
@@ -199,12 +200,15 @@ export class AnalysisStatusCheck {
     }
 
     private setStatus() {
-        if (this.hasSetupErrors || this.hasMeterSetupErrors || this.hasPredictorSetupErrors || this.analysisSetupErrors.groupsHaveErrors) {
+        this.groupsHaveWarnings = this.groupStatusChecks.some(g => g.status === 'warning');
+        this.groupsHaveErrors = this.groupStatusChecks.some(g => g.status === 'error');
+
+        if (this.hasSetupErrors || this.analysisSetupErrors.groupsHaveErrors || this.groupsHaveErrors) {
             this.status = 'error';
         }
-        // else if (!this.allDatesCurrent) {
-        //     this.status = 'warning';
-        // } 
+        else if (this.groupsHaveWarnings) {
+            this.status = 'warning';
+        }
         else {
             this.status = 'good';
         }

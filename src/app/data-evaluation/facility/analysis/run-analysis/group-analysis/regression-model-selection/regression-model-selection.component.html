@@ -9,14 +9,12 @@
 @let _selectedFacility = selectedFacility();
 
 @if (showInUseMessage()) {
-<div class="row">
-  <div class="col-12 alert alert-info text-center">
+  <div class="p-2 alert alert-info text-center">
     <button type="button" class="btn-close" aria-label="Close" (click)="toggleHideInUseMessage()"></button>
     This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
     to the corresponding analysis items. Making changes to this analysis may effect the results of the account
     analysis.
   </div>
-</div>
 }
 
 @if (!selectedInspectModel) {

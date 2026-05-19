@@ -18,7 +18,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getYearsWithFullDataAnalysis } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -53,13 +52,23 @@ export class AnalysisSetupComponent {
   readonly facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
 
-  analysisStatusCheck: Signal<AnalysisStatusCheck> = computed(() => {
+  readonly analysisStatusCheck = computed(() => {
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (!facilityStatusCheck || !analysisItem) {
-      return undefined;
-    }
+    if (!facilityStatusCheck || !analysisItem) { return undefined; }
     return facilityStatusCheck.getAnalysisStatusById(analysisItem.guid);
+  });
+
+  /** True when any analysis group has setup configuration errors. */
+  readonly hasGroupSetupErrors = computed(() => {
+    const analysisStatusCheck = this.analysisStatusCheck();
+    return analysisStatusCheck?.groupStatusChecks.some(g => g.groupAnalysisErrors?.hasErrors) ?? false;
+  });
+
+  /** True when any analysis group has regression model errors. */
+  readonly hasGroupModelWarnings = computed(() => {
+    const analysisStatusCheck = this.analysisStatusCheck();
+    return analysisStatusCheck?.groupStatusChecks.some(g => g.groupAnalysisErrors?.hasRegressionErrors) ?? false;
   });
 
   yearOptions: Signal<Array<number>> = computed(() => {
@@ -248,14 +257,6 @@ export class AnalysisSetupComponent {
     const selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(updatedItem);
-  }
-
-  continue(): void {
-    const item = this.analysisItem();
-    const facility = this.facility();
-    this.router.navigateByUrl(
-      `/data-evaluation/facility/${facility.guid}/analysis/run-analysis/group-analysis/${item.groups[0].idbGroupId}/options`
-    );
   }
 
   toggleHideInUseMessage(): void {

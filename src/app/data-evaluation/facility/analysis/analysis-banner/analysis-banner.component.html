@@ -20,13 +20,13 @@
           [routerLinkActive]="['active']">
           <i class="fa fa-file-edit"></i>
           {{groupListItem.group.idbGroupId | groupName}}
-          @if (groupListItem.groupStatusCheck.status == 'error') {
+          @if (groupListItem.groupStatusCheck.status !== 'good') {
           <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>
       </li>
       }
-      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.hasSetupErrors}">
+      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.status === 'error'}">
         <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
           <i class="fa fa-magnifying-glass-chart"></i>Facility
           Summary</a>

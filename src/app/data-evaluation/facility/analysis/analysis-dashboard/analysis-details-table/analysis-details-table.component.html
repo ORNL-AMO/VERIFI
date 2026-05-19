@@ -119,11 +119,18 @@
                 @if(sc?.hasMeterSetupErrors) {
                 <span class="badge bg-danger issue-badge">Meter Errors</span>
                 }
+
                 @if(sc?.hasPredictorSetupErrors) {
+                @if(sc?.status === 'error') {
                 <span class="badge bg-danger issue-badge">Predictor Errors</span>
+                } @else if (sc?.status === 'warning') {
+                <span class="badge bg-warning text-dark issue-badge">Predictor Warnings</span>
                 }
-                @if(sc?.analysisSetupErrors?.groupsHaveErrors) {
+                }
+                @if(sc?.analysisSetupErrors?.groupsHaveErrors || sc?.groupsHaveErrors) {
                 <span class="badge bg-danger issue-badge">Group Errors</span>
+                } @else if (sc?.groupsHaveWarnings) {
+                <span class="badge bg-warning text-dark issue-badge">Group Warnings</span>
                 }
               </div>
               }

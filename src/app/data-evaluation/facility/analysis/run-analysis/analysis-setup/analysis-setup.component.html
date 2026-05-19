@@ -1,8 +1,40 @@
 @let _analysisItem = analysisItem();
 @let _facilityAnalysisItems = facilityAnalysisItems();
+@let _analysisStatusCheck = analysisStatusCheck();
 
 <div class="content-padding">
-  <h4>Analysis Setup</h4>
+  <h4 class="mb-2">
+    <div class="d-flex align-items-center flex-wrap justify-content-between">
+      <div class="h4 mb-0 mt-auto">
+        Analysis Setup
+      </div>
+      <div class="d-flex gap-2">
+        @if (_analysisStatusCheck) {
+        @if (_analysisStatusCheck.status === 'good') {
+        <span class="badge rounded-pill bg-success">
+          <span class="fa fa-circle-check me-1"></span>Analysis Valid
+        </span>
+        } @else {
+        @if (_analysisStatusCheck.hasSetupErrors) {
+        <span class="badge rounded-pill bg-danger">Setup Errors</span>
+        }
+        @if (hasGroupSetupErrors()) {
+        <span class="badge rounded-pill bg-danger">Group Setup Errors</span>
+        }@else if (hasGroupModelWarnings()) {
+        <span class="badge rounded-pill bg-warning text-dark">Group Model Warnings</span>
+        }
+        @if (_analysisStatusCheck.hasMeterSetupErrors || _analysisStatusCheck.hasPredictorSetupErrors) {
+        @if(_analysisStatusCheck.status == 'warning') {
+        <span class="badge rounded-pill bg-warning text-dark">Predictor/Meter Warnings</span>
+        } @else if (_analysisStatusCheck.status == 'error') {
+        <span class="badge rounded-pill bg-danger">Predictor/Meter Errors</span>
+        }
+        }
+        }
+        }
+      </div>
+    </div>
+  </h4>
   @if (showInUseMessage()) {
   <div class="row">
     <div class="col-12 alert alert-info text-center">
@@ -148,7 +180,6 @@
     [disabled]="hasModelsGenerated()"></app-select-banked-analysis>
   }
 
-
   <div class="row">
     <div class="col">
       <hr>
@@ -167,6 +198,7 @@
       </ul>
     </div>
   </div>
+  <!---->
   }
 </div>
 

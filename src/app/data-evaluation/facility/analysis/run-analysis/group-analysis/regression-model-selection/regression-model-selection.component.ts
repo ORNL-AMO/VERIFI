@@ -150,6 +150,25 @@ export class RegressionModelSelectionComponent {
       if (selectedGroup && selectedGroup.models && generatedModelsPerGroup && !generatedModelsPerGroup[selectedGroup.idbGroupId]) {
         this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, selectedGroup.models);
       }
+    });
+
+    effect(() => {
+      //need to toggle on showInvalid and showFailedValidationModel if selected model is invalid or failed validation so that it shows in the list and user can select it to see details
+      const generatedModels = this.generatedModels();
+      const selectedGroup = this.selectedGroup();
+      if (generatedModels && selectedGroup) {
+        const selectedModel = generatedModels.find(model => model.modelId === selectedGroup.selectedModelId);
+        if (selectedModel) {
+          if (!selectedModel.isValid && !this.showInvalid()) {
+            this.showInvalid.set(true);
+          }
+          if (selectedModel.SEPValidation && !selectedModel.SEPValidation.every(SEPValidation => SEPValidation.isValid) && !this.showFailedValidationModel()) {
+            this.showFailedValidationModel.set(true);
+          }
+        }
+      }
+      // const selectedModel = this.generatedModels().find(model => model.modelId === this.selectedGroup()?.selectedModelId);
+      // const groupErrors = this.groupErrors();
     })
   }
 

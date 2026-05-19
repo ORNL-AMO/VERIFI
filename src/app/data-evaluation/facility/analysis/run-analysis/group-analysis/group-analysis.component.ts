@@ -7,10 +7,9 @@ import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { AnalysisService } from '../../analysis.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
 
 @Component({
   selector: 'app-group-analysis',
@@ -69,17 +68,17 @@ export class GroupAnalysisComponent {
 
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
-  groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
+  groupStatusCheck: Signal<AnalysisGroupStatusCheck> = computed(() => {
     const selectedGroup = this.selectedGroup();
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
     if (selectedGroup && analysisItem && facilityStatusCheck) {
       const groupStatusCheck = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid);
       if (groupStatusCheck) {
-        return groupStatusCheck.groupAnalysisErrors;
+        return groupStatusCheck;
       }
     }
-    return emptyGroupAnalysisErrors();
+    return null;
   });
 
   constructor() {
