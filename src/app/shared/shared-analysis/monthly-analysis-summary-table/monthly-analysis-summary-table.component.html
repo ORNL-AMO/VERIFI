@@ -159,10 +159,10 @@
         @if (data.isIntermediateBanked) {
         <span class="fa fa-paint-roller"></span>
         }
-        @if (group?.userDefinedModel && data.fiscalYear == modelYear) {
+        @if (group?.isGeneratedModel && data.fiscalYear == modelYear) {
         <span class="fa fa-star"></span>
         }
-        @if (!group?.userDefinedModel && isModelYearMonth(data.date)) {
+        @if (!group?.isGeneratedModel && isModelYearMonth(data.date)) {
         <span class="fa fa-star"></span>
         }
         {{data.date | date: 'MMMM, y'}}

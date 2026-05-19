@@ -1,18 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-select-facility-analysis-items',
@@ -20,131 +17,64 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   styleUrls: ['./select-facility-analysis-items.component.css'],
   standalone: false
 })
-export class SelectFacilityAnalysisItemsComponent implements OnInit {
+export class SelectFacilityAnalysisItemsComponent {
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private router: Router = inject(Router);
+  private accountAnalysisService: AccountAnalysisService = inject(AccountAnalysisService);
+  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
 
-  facilitiesList: Array<{
-    facility: IdbFacility,
-    cssClass: string,
-    isInvalid: boolean
-  }>;
-  selectedAnalysisItem: IdbAccountAnalysisItem;
-  selectedAnalysisItemSub: Subscription;
-  facilityAnalysisItems: Array<IdbAnalysisItem>;
-  selectedFacilitySub: Subscription;
-  selectedFacility: IdbFacility;
-  showInUseMessage: boolean;
-  constructor(private facilityDbService: FacilitydbService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private accountAnalysisService: AccountAnalysisService,
-    private accountReportDbService: AccountReportDbService) { }
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities);
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
 
-  ngOnInit(): void {
-    this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
-      this.selectedAnalysisItem = item;
-      this.setShowInUseMessage();
-      this.setFacilitiesList();
-    })
-
-    if (!this.selectedAnalysisItem) {
-      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
-    }
-    this.selectedFacilitySub = this.accountAnalysisService.selectedFacility.subscribe(val => {
-      if (val) {
-        this.selectedFacility = val;
-        let checkExists = this.selectedAnalysisItem.facilityAnalysisItems.find(facility => { return this.selectedFacility.guid == facility.facilityId });
-        if (!checkExists) {
-          this.initSelectedFacility();
-        } else {
-          this.setFacilityAnlaysisItems();
+  showInUseMessage: Signal<boolean> = computed(() => {
+    const selectedItem = this.selectedAnalysisItem();
+    const reports = this.accountReports();
+    if (selectedItem && reports) {
+      const hasCorrespondingReport = reports.some(report => {
+        if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        } else if (report.reportType == 'analysis' && report.analysisReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        } else if (report.reportType == 'accountSavings' && report.accountSavingsReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
+        } else if (report.reportType == 'performance' && report.performanceReportSetup.analysisItemId == selectedItem.guid) {
+          return true;
         }
-      } else {
-        this.initSelectedFacility();
+        return false;
+      });
+      return hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false;
+    }
+    return false;
+  });
+
+  constructor() {
+    effect(() => {
+      if (!this.selectedAnalysisItem()) {
+        this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
+      }
+    });
+
+    effect(() => {
+      const selectedFacility = this.selectedFacility();
+      const facilities = this.facilities();
+      if (!selectedFacility && facilities && facilities.length > 0) {
+        this.facilityDbService.selectedFacility.next(facilities[0]);
       }
     });
   }
 
-  ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
-    this.selectedAnalysisItemSub.unsubscribe();
-  }
-
-  initSelectedFacility() {
-    if (this.facilitiesList && this.facilitiesList.length != 0) {
-      this.accountAnalysisService.selectedFacility.next(this.facilitiesList[0].facility);
-    }
-  }
-
-  selectFacility(facility: IdbFacility) {
-    this.accountAnalysisService.selectedFacility.next(facility);
-  }
-
-  setFacilityAnlaysisItems() {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
-      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
-          && item.facilityId == this.selectedFacility.guid
-          && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
-          && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
-      });
-    } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
-      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
-          && item.facilityId == this.selectedFacility.guid
-          && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
-      });
-    }
-  }
-
-  getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } {
-    let facilityItem: { facilityId: string, analysisItemId: string } = this.selectedAnalysisItem.facilityAnalysisItems.find(item => { return item.facilityId == facility.guid });
-    let cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square' = 'fa fa-square';
-    let isInvalid: boolean = false;
-    if (facilityItem && facilityItem.analysisItemId) {
-      if (facilityItem.analysisItemId != 'skip') {
-        cssClass = 'fa fa-square-check';
-        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-        let item: IdbAnalysisItem = analysisItems.find(item => { return item.guid == facilityItem.analysisItemId });
-        if (item) {
-          if (item.setupErrors.hasError || item.setupErrors.groupsHaveErrors) {
-            isInvalid = true;
-          } else {
-            isInvalid = false;
-          }
-        }
-      } else {
-        cssClass = 'fa fa-square-minus';
-        isInvalid = false;
-      }
-    } else {
-      isInvalid = true;
-    }
-    return { cssClass: cssClass, isInvalid: isInvalid }
-  }
-
-  setFacilitiesList() {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.facilitiesList = facilities.map(facility => {
-      let data: { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } = this.getClassAndValid(facility);
-      return {
-        facility: facility,
-        cssClass: data.cssClass,
-        isInvalid: data.isInvalid
-      }
-    });
-  }
-
-  setShowInUseMessage() {
-    let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.selectedAnalysisItem.guid);
-    if (hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false) {
-      this.showInUseMessage = true;
-    }
+  selectFacility(facilityId: string) {
+    const facilities = this.facilities();
+    let selectedFacility: IdbFacility = facilities.find(facility => facility.guid === facilityId);
+    this.facilityDbService.selectedFacility.next(selectedFacility);
   }
 
   hideInUseMessage() {
-    this.showInUseMessage = false;
     this.accountAnalysisService.hideInUseMessage = true;
   }
 }

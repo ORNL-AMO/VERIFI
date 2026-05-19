@@ -8,6 +8,8 @@ import { FileReference, getEmptyFileReference } from 'src/app/data-management/da
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-process-predictors',
@@ -34,7 +36,8 @@ export class ProcessPredictorsComponent {
   constructor(private activatedRoute: ActivatedRoute,
     private dataManagementService: DataManagementService,
     private editPredictorFormService: EditPredictorFormService,
-    private predictorDbService: PredictorDbService) { }
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -116,9 +119,26 @@ export class ProcessPredictorsComponent {
 
   selectExistingPredictor(predictor: IdbPredictor) {
     let importWizardName: string = this.editPredictor.importWizardName;
+    let previousId: string = this.editPredictor.guid;
     this.editPredictor = predictor;
     this.editPredictor.importWizardName = importWizardName;
     this.editPredictorForm = this.editPredictorFormService.getFormFromPredictor(predictor);
+
+    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.editPredictor.guid);
+    this.fileReference.predictorData.forEach(pData => {
+      if (pData.predictorId == previousId) {
+        pData.predictorId = predictor.guid;
+        //update with existing predictor data
+        let existingData: IdbPredictorData = facilityPredictorData.find(fpData => {
+          return fpData.year == pData.year && fpData.month == pData.month && fpData.predictorId == predictor.guid;
+        });
+        if (existingData) {
+          pData.id = existingData.id;
+        } else {
+          delete pData.id;
+        }
+      }
+    });
     this.showExisting = false;
   }
 }

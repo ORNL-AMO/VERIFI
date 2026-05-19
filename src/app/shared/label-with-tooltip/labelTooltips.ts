@@ -64,11 +64,17 @@ export const LabelTooltips = {
     },
     "checkMeterDifferences": {
         "tooltip": "Click the icon to check the differences between the existing meter readings and the imported meter readings."
-    }, 
+    },
     "estimatedReading": {
         "tooltip": "Filter meter data to show estimated readings."
     },
     "checkPredictorDifferences": {
         "tooltip": "Click the icon to check the differences between the existing predictor entries and the imported predictor entries."
+    },
+    "financialReportingFiscalYear": {
+        "tooltip": "Select whether your fiscal year is a calendar year (January - December) or a non-calendar year (for example, July - June). This setting will determine how your data is organized and displayed within VERIFI."
+    },
+    "fiscalYearCalendarEnd": {
+        "tooltip": "For example, if your fiscal year starts in July 2023 and ends in June 2024, it will be denoted as FY - 2024."
     }
 }

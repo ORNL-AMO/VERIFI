@@ -1,0 +1,43 @@
+<span class="badge me-1 badge-text" [ngStyle]="{'background-color': energySource | meterSourceColor}">{{energySource}}
+    Data</span>
+@for(energyUseForm of energyUseForms | orderEquipmentEnergyUseForms; track energyUseForm.controls.year.value) {
+<form [formGroup]="energyUseForm">
+    <div class="row">
+        <label class="col-5 col-form-label">
+            {{energyUseForm.controls.year.value}}
+        </label>
+        @let unitsDifferent = (energyUseForm.controls.energyUseUnit.value !== facilityEnergyUnit);
+        <div [ngClass]="{'col-4': unitsDifferent, 'col-7': !unitsDifferent || inSetup}">
+            <div class="input-group">
+                <button class="btn action-btn input-group-text" (click)="toggleOverride(energyUseForm)">
+                    @if(energyUseForm.controls.overrideEnergyUse.value){
+                    <span class="fa fa-calculator"></span>
+                    }@else {
+                    <span class="fa fa-pencil"></span>
+                    }
+                </button>
+                <input class="form-control" type="number" formControlName="energyUse" id="energyUse" min="0">
+                <select class="input-group-text" id="units_{{energyUseForm.controls.energyUseUnit.value}}"
+                    name="energyUseUnit" formControlName="energyUseUnit">
+                    @for(option of energyUnits; track option) {
+                    <option [ngValue]="option">
+                        <span [innerHTML]="option | settingsLabel"></span>
+                    </option>
+                    }
+                </select>
+            </div>
+        </div>
+        @if(unitsDifferent){
+        <div class="col-3" [ngClass]="{'col-7 ms-auto': inSetup}">
+            <div class="input-group">
+                @let convertedEnergyUse = energyUseForm.controls.energyUse.value | convertEnergyUseResult:
+                energyUseForm.controls.energyUseUnit.value : facilityEnergyUnit : energySource;
+                <input class="form-control" type="number" [value]="convertedEnergyUse" [disabled]="true">
+                <span class="input-group-text" [innerHTML]="facilityEnergyUnit | settingsLabel">
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+</form>
+}

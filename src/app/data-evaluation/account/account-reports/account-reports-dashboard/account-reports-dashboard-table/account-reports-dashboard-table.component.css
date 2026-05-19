@@ -11,6 +11,12 @@
     background-color: #154c79;
     color: white;
     text-align: center;
+    vertical-align: middle;
+}
+
+.table th.input input[type='checkbox'] {
+    margin: 0 auto;
+    display: block;
 }
 
 thead th.can-click:hover {
@@ -90,4 +96,9 @@ thead th.can-click:hover {
 
 tbody td, .action-btn .fa{
     vertical-align: middle;
+}
+
+td.input input[type='checkbox'] {
+    margin: 0 auto;
+    display: block;
 }

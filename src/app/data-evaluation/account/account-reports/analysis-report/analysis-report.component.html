@@ -1,34 +1,37 @@
 @if (selectedReport) {
-  @if (analysisReportSetup.includeProblemsInformation) {
-    <div class="report" [ngClass]="{'print': print}">
-      @if (facilityDetails) {
-        <app-analysis-problems-information [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-problems-information>
-      }
-    </div>
+@if (selectedReport.analysisReportSetup.includeProblemsInformation) {
+<div class="report" [ngClass]="{'print': print}">
+  @if (facilityAnalysisItems) {
+  <app-analysis-problems-information [executiveSummaryItems]="executiveSummaryItems"
+    [accountReport]="selectedReport"></app-analysis-problems-information>
   }
-  @if (analysisReportSetup.includeExecutiveSummary) {
-    <div class="report" [ngClass]="{'print': print}">
-      @if (facilityDetails) {
-        <app-analysis-facility-report [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
-      }
-    </div>
+</div>
+}
+@if (selectedReport.analysisReportSetup.includeExecutiveSummary) {
+<div class="report" [ngClass]="{'print': print}">
+  @if (facilityAnalysisItems) {
+  <app-analysis-facility-report [accountReport]="selectedReport"
+    [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
   }
-  @if (analysisReportSetup.includeDataValidationTables) {
-    <div class="report" [ngClass]="{'print': print}">
-      <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-data-validation-tables>
-    </div>
-  }
+</div>
+}
+@if (selectedReport.analysisReportSetup.includeDataValidationTables) {
+<div class="report" [ngClass]="{'print': print}">
+  <app-analysis-data-validation-tables [executiveSummaryItems]="executiveSummaryItems" [accountReport]="selectedReport"
+    [isDataCheck]="false"></app-analysis-data-validation-tables>
+</div>
+}
 }
 
 
-@if (!facilityDetails) {
-  <div class="w-100 justify-content-center">
-    <div class="pt-5">
-      <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
-    </div>
+@if (!facilityAnalysisItems) {
+<div class="w-100 justify-content-center">
+  <div class="pt-5">
+    <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
   </div>
+</div>
 }
 
-@if (facilityDetails.length > 0) {
-  <app-print-report-button></app-print-report-button>
+@if (facilityAnalysisItems.length > 0) {
+<app-print-report-button></app-print-report-button>
 }

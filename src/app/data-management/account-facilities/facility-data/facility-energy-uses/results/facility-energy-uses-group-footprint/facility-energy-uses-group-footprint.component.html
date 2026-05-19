@@ -1,0 +1,30 @@
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div class="h4 mt-auto mb-0">
+                            {{energyUseGroup()?.name}} Footprint ({{selectedYear()}})
+                        </div>
+                        <div class="d-flex">
+                            <button class="btn action-btn" (click)="goToFacilityFootprint()">
+                                <span class="fa fa-paw"></span>
+                                View Facility Footprint
+                            </button>
+                        </div>
+                    </div>
+                </h4>
+                @if(!energyFootprintAnnualEquipmentGroupSummary) {
+                <p>Calculating footprint...</p>
+                } @else {
+                <app-facility-energy-uses-group-sankey
+                    [energyFootprintAnnualEquipmentGroupSummary]="energyFootprintAnnualEquipmentGroupSummary"></app-facility-energy-uses-group-sankey>
+                <hr>
+                <app-facility-energy-uses-group-footprint-table
+                    [energyFootprintAnnualEquipmentGroupSummary]="energyFootprintAnnualEquipmentGroupSummary"></app-facility-energy-uses-group-footprint-table>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -87,54 +87,30 @@
           </div>
           }
 
-          <div class="form-group row">
-            <label class="col-5 col-form-label">
-              Reporting Year
-            </label>
-            <div class="col-7">
-              <div class="form-check">
-                <input type="radio" class="form-check-input" [(ngModel)]="account.fiscalYear" value="calendarYear"
-                  name="calendarYear" id="calendarYear" disabled>
-                <label class="form-check-label" for="calendarYear">Calendar Year</label>
-
-              </div>
-              <div class="form-check">
-                <input type="radio" class="form-check-input" for="nonCalendarYear" [(ngModel)]="account.fiscalYear"
-                  value="nonCalendarYear" name="nonCalendarYear" id="nonCalendarYear" disabled>
-                <label class="form-check-label">Fiscal Year</label>
-              </div>
-            </div>
-          </div>
           @if (account.fiscalYear == 'nonCalendarYear') {
-          <div class="form-group row">
-            <label class="col-5 col-form-label">Start Month</label>
-            <div class="col-7">
-              <select class="form-select" id="startMonth" name="startMonth" [(ngModel)]="account.fiscalYearMonth"
-                disabled>
-                @for (month of months; track month) {
-                <option [ngValue]="month.monthNumValue">{{month.name}}
-                </option>
-                }
-              </select>
-            </div>
-          </div>
+          <p class="mb-0 mt-2 italic">
+            The account fiscal year option is set to <b>non-calendar year</b>. For more information, go to the
+            "Financial Reporting" section
+            of the account settings in the "<a class="click-link" (click)="goToSettings()"><span
+                class="fa fa-gear"></span> Settings</a>" tab.
+          </p>
+          }@else {
+          <p class="mb-0 mt-2 italic">
+            The account fiscal year option is set to <b>calendar year</b>. For more information, go to the "Financial
+            Reporting" section
+            of the account settings in the "<a class="click-link" (click)="goToSettings()"><span
+                class="fa fa-gear"></span>
+              Settings</a>" tab.
+          </p>
           }
-          @if (account.fiscalYear == 'nonCalendarYear') {
-          <div class="form-group row">
-            <div class="col-12">
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" name="fiscalYearCalendarEnd" id="fiscalYearCalendarEnd"
-                  [(ngModel)]="account.fiscalYearCalendarEnd" disabled>
-                <label class="form-check-label" for="fiscalYearCalanderEnd">FY is denoted by the
-                  calendar
-                  year in which it ends.</label>
-              </div>
-            </div>
-          </div>
-          }
-          <div class="alert alert-info text-center p-2">
-            Fields set in "<span class="fa fa-gear"></span> Settings" tab.
-          </div>
+          <hr>
+          <p class="mb-0 italic">
+            <span class="fa fa-exclamation-triangle"></span> <b>Report Year Removed:</b>
+            Analyses no longer require setting a "report year" - all years with complete energy and predictor data will
+            generate results. When generating reports, simply select the analysis you want and specify a report year to
+            display results for that year. If you have no changes to your models or modeling techniques, this
+            means you no longer have to update your analysis settings each year.
+          </p>
           @if (!disableForm && analysisItem.baselineYear) {
           <div class="d-flex w-100 justify-content-end">
             <div class="d-flex">

@@ -60,7 +60,7 @@ export class BetterClimateSetupComponent {
     selectedReport.betterClimateReportSetup.initiativeNotes = this.initiativeNotes;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
+    this.accountReportDbService.selectedReport.next({ ...selectedReport });
   }
 
   async addNote() {

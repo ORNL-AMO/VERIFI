@@ -42,6 +42,7 @@ export class FacilitySettingsComponent implements OnInit {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'delete-facility') {
         this.showFacilityDeletionToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }
@@ -58,6 +59,7 @@ export class FacilitySettingsComponent implements OnInit {
 
   async facilityDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
   }
 

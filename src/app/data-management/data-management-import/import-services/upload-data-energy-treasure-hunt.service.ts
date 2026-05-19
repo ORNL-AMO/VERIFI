@@ -44,10 +44,15 @@ export class UploadDataEnergyTreasureHuntService {
         predictors: _.concat(hostPlantResults.predictors, exchangePlantResults.predictors),
         predictorData: _.concat(hostPlantResults.predictorData, exchangePlantResults.predictorData),
         meterData: _.concat(hostPlantResults.meterData, exchangePlantResults.meterData),
-        newGroups: []
+        newGroups: [],
+        energyUseEquipment: [],
+        energyUseGroups: []
       }
     } else {
-      return { importFacilities: [hostPlant], importMeters: hostPlantResults.importMeters, predictors: hostPlantResults.predictors, predictorData: hostPlantResults.predictorData, meterData: hostPlantResults.meterData, newGroups: [] }
+      return {
+        importFacilities: [hostPlant], importMeters: hostPlantResults.importMeters, predictors: hostPlantResults.predictors,
+        predictorData: hostPlantResults.predictorData, meterData: hostPlantResults.meterData, newGroups: [], energyUseEquipment: [], energyUseGroups: []
+      }
     }
 
   }
@@ -112,7 +117,10 @@ export class UploadDataEnergyTreasureHuntService {
       })
     }
     let pData: { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } = this.getProductionData(worksheet, facility, account);
-    return { importFacilities: [facility], importMeters: meters, predictors: pData.predictors, predictorData: pData.predictorData, meterData: meterData, newGroups: [] }
+    return {
+      importFacilities: [facility], importMeters: meters, predictors: pData.predictors,
+      predictorData: pData.predictorData, meterData: meterData, newGroups: [], energyUseEquipment: [], energyUseGroups: []
+    }
   }
 
 

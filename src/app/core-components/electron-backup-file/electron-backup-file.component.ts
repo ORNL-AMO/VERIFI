@@ -13,10 +13,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
 
 @Component({
-    selector: 'app-electron-backup-file',
-    templateUrl: './electron-backup-file.component.html',
-    styleUrls: ['./electron-backup-file.component.css'],
-    standalone: false
+  selector: 'app-electron-backup-file',
+  templateUrl: './electron-backup-file.component.html',
+  styleUrls: ['./electron-backup-file.component.css'],
+  standalone: false
 })
 export class ElectronBackupFileComponent {
 
@@ -138,6 +138,7 @@ export class ElectronBackupFileComponent {
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;
         let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
+        this.backupDataService.accountBackupMessages();
         let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1);
         newAccount.dataBackupFilePath = backupPath;
         newAccount.sharedFileAuthor = sharedFileAuthor;

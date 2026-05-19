@@ -1,71 +1,59 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject, OnDestroy, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisService } from './analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
-    selector: 'app-analysis',
-    templateUrl: './analysis.component.html',
-    styleUrls: ['./analysis.component.css'],
-    standalone: false
+  selector: 'app-analysis',
+  templateUrl: './analysis.component.html',
+  styleUrls: ['./analysis.component.css'],
+  standalone: false
 })
-export class AnalysisComponent implements OnInit {
+export class AnalysisComponent implements OnDestroy {
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
+  private router: Router = inject(Router);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private analysisDbService = inject(AnalysisDbService);
 
-  utilityMeterDataSub: Subscription;
-  utilityMeterData: Array<IdbUtilityMeterData>;
-  utilityMeterGroups: Array<IdbUtilityMeterGroup>;
-  utilityMeterGroupsSub: Subscription;
-  facilityAnalysisItemsSub: Subscription;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private router: Router,
-    private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+  utilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
+  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.facilityMeterGroups);
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  annualKey: string;
+  monthlyKey: string;
 
-  ngOnInit(): void {
-    this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
-      this.utilityMeterData = val;
-    });
-
-    this.utilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(val => {
-      this.utilityMeterGroups = val;
-    });
-
-    this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(val => {
-      this.updateAccountValidation(val);
+  constructor() {
+    effect(() => {
+      const selectedFacility = this.facility();
+      if (selectedFacility) {
+        this.annualKey = 'annual-' + selectedFacility.id;
+        this.monthlyKey = 'monthly-' + selectedFacility.id;
+      }
     })
   }
 
   ngOnDestroy() {
-    this.utilityMeterDataSub.unsubscribe();
-    this.utilityMeterGroupsSub.unsubscribe();
-    this.analysisService.accountAnalysisItem = undefined;
-    this.facilityAnalysisItemsSub.unsubscribe();
-    this.analysisService.hideInUseMessage = false;
+    //Reset when leaving analysis section
+    this.analysisService.accountAnalysisItem.next(undefined);
+    this.analysisService.hideInUseMessage.next(false);
+    this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
+    this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
+    this.analysisDbService.clearGeneratedModels();
   }
 
   goToMeterGroups() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/meter-groups')
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/utility/meter-groups')
   }
 
   goToUtilityData() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility')
-  }
-
-  async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {
-    await this.accountAnalysisDbService.updateAccountValidation(allAnalysisItems);
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/utility')
   }
 }

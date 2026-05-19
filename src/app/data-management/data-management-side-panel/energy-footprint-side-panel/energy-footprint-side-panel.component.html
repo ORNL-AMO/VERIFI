@@ -1,0 +1,181 @@
+@let _facilities = facilities();
+
+<!--dropdown for facility-->
+@if(_facilities.length > 1) {
+<select class="form-select form-select-sm mb-2" [(ngModel)]="selectedFacilityId">
+    @for(facility of _facilities; track facility.guid) {
+    <option [ngValue]="facility.guid">{{facility.name}}</option>
+    }
+</select>
+}
+
+<!--display data by group toggle-->
+<div class="d-flex align-items-center pt-1 pb-2">
+    <label class="switch ms-auto" for="includeInEnergySidepanel">
+        <input class="checkbox" type="checkbox" id="includeInEnergySidepanel" [(ngModel)]="displayDataByGroup">
+        <span class="slider round"></span>
+    </label>
+    <span class="ps-2 fw-bold small">By Meter Group</span>
+</div>
+
+<div class="balance-header text-center mb-3">
+    <div class="balance-title">
+        <span class="fa fa-scale-balanced me-1"></span>{{selectedFacilityId() | facilityName: _facilities}}
+    </div>
+    <div class="balance-subtitle">Energy Balance &mdash; {{selectedYear()}}</div>
+</div>
+
+@let _energyFootprintAnnualFacilityBalance = energyFootprintAnnualFacilityBalance();
+@if(!_energyFootprintAnnualFacilityBalance) {
+<div class="text-center py-4">
+    <span class="fa fa-spinner fa-spin fa-2x text-muted"></span>
+    <p class="mt-2 text-muted small">Calculating footprint...</p>
+</div>
+} @else {
+
+<!-- Overall Score Card -->
+@let overallPct = overallAccountedPercent();
+@let overallOver = overallIsOverAccounted();
+<div class="score-card mb-3"
+    [class.score-card--over]="overallOver"
+    [class.score-card--good]="!overallOver && overallPct >= 70"
+    [class.score-card--fair]="!overallOver && overallPct >= 50 && overallPct < 70"
+    [class.score-card--low]="!overallOver && overallPct < 50">
+    <div class="d-flex justify-content-between align-items-baseline mb-1">
+        <span class="score-card__label">Overall Accounted Energy Use</span>
+        <span class="score-card__value" [class.text-over]="overallOver">{{overallPct | number:'1.0-1'}}%</span>
+    </div>
+    <div class="progress score-card__bar" role="progressbar" [attr.aria-valuenow]="overallPct" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" [style.width.%]="overallPct" [class]="getProgressClass(overallPct, overallOver)"></div>
+    </div>
+    <div class="d-flex justify-content-between mt-1 mb-2">
+        <span class="score-scale-label">0%</span>
+        <span class="score-target-label">Target 70-80%</span>
+        <span class="score-scale-label">100%</span>
+    </div>
+    <div class="text-center">
+        <span class="status-badge"
+            [class.status-badge--over]="overallOver"
+            [class.status-badge--good]="!overallOver && overallPct >= 70"
+            [class.status-badge--fair]="!overallOver && overallPct >= 50 && overallPct < 70"
+            [class.status-badge--low]="!overallOver && overallPct < 50">
+            <span class="fa me-1"
+                [class.fa-triangle-exclamation]="overallOver"
+                [class.fa-check-circle]="!overallOver && overallPct >= 70"
+                [class.fa-exclamation-circle]="!overallOver && overallPct < 70"></span>
+            {{getStatusLabel(overallPct, overallOver)}}
+        </span>
+    </div>
+    @if(overallOver) {
+    <div class="over-warning mt-2">
+        <span class="fa fa-triangle-exclamation me-1"></span>
+        One or more energy sources have equipment use exceeding billed consumption. Check for duplicate or misconfigured equipment.
+    </div>
+    }
+</div>
+
+@if(!displayDataByGroup()) {
+<!-- By Source view -->
+@for(sourceConsumption of _energyFootprintAnnualFacilityBalance.sourcesConsumption; track sourceConsumption.source) {
+@let pct = getAccountedPercent(sourceConsumption.actualEnergyUse, sourceConsumption.totalEquipmentEnergyUse);
+@let over = isOverAccounted(sourceConsumption.actualEnergyUse, sourceConsumption.totalEquipmentEnergyUse);
+<div class="source-card mb-2" [class.source-card--over]="over">
+    <div class="source-card__header d-flex justify-content-between align-items-center">
+        <span class="source-card__name">{{sourceConsumption.source}}</span>
+        <span class="source-pct"
+            [class.text-over]="over"
+            [class.text-success]="!over && pct >= 70"
+            [class.text-warning]="!over && pct >= 50 && pct < 70"
+            [class.text-danger]="!over && pct < 50">
+            @if(over) { {{getRawPercent(sourceConsumption.actualEnergyUse, sourceConsumption.totalEquipmentEnergyUse)}}% } @else { {{pct | number:'1.0-1'}}% }
+        </span>
+    </div>
+    <div class="progress source-card__bar my-1" role="progressbar" [attr.aria-valuenow]="pct" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" [style.width.%]="pct" [class]="getProgressClass(pct, over)"></div>
+    </div>
+    @if(over) {
+    <div class="source-over-warning">
+        <span class="fa fa-triangle-exclamation me-1"></span>
+        Equipment use ({{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}) exceeds billed ({{sourceConsumption.actualEnergyUse | number:'1.0-0'}}). Check for duplicate or misconfigured equipment.
+    </div>
+    }
+    <div class="source-card__stats d-flex justify-content-between">
+        <div class="stat-item">
+            <div class="stat-label">Billed</div>
+            <div class="stat-value">{{sourceConsumption.actualEnergyUse | number:'1.0-0'}}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Equipment</div>
+            <div class="stat-value" [class.text-over]="over">{{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}</div>
+        </div>
+        <div class="stat-item text-end">
+            <div class="stat-label">Unaccounted</div>
+            <div class="stat-value" [class.text-danger]="sourceConsumption.unaccountedEnergyUse > 0">{{sourceConsumption.unaccountedEnergyUse | number:'1.0-0'}}</div>
+        </div>
+    </div>
+</div>
+}
+} @else {
+<!-- By Meter Group view -->
+@for(meterGroupBalance of _energyFootprintAnnualFacilityBalance.meterGroupsAnnualBalances; track meterGroupBalance.meterGroup.guid) {
+<div class="meter-group-section mb-3">
+    <div class="meter-group-header">
+        <span class="fa fa-layer-group me-1"></span>{{meterGroupBalance.meterGroup.name}}
+    </div>
+    @for(sourceConsumption of meterGroupBalance.sourcesConsumption; track sourceConsumption.source) {
+    @let pct = getAccountedPercent(sourceConsumption.actualEnergyUse, sourceConsumption.totalEquipmentEnergyUse);
+    @let over = isOverAccounted(sourceConsumption.actualEnergyUse, sourceConsumption.totalEquipmentEnergyUse);
+    <div class="source-card source-card--nested mb-2" [class.source-card--over]="over">
+        <div class="source-card__header d-flex justify-content-between align-items-center">
+            <span class="source-card__name small">{{sourceConsumption.source}}</span>
+            <span class="source-pct small"
+                [class.text-over]="over"
+                [class.text-success]="!over && pct >= 70"
+                [class.text-warning]="!over && pct >= 50 && pct < 70"
+                [class.text-danger]="!over && pct < 50">
+                @if(over) { {{getRawPercent(sourceConsumption.actualEnergyUse, sourceConsumption.totalEquipmentEnergyUse)}}% } @else { {{pct | number:'1.0-1'}}% }
+            </span>
+        </div>
+        <div class="progress source-card__bar my-1" role="progressbar" [attr.aria-valuenow]="pct" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" [style.width.%]="pct" [class]="getProgressClass(pct, over)"></div>
+        </div>
+        @if(over) {
+        <div class="source-over-warning">
+            <span class="fa fa-triangle-exclamation me-1"></span>
+            Equipment use ({{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}) exceeds billed ({{sourceConsumption.actualEnergyUse | number:'1.0-0'}}). Check for duplicate or misconfigured equipment.
+        </div>
+        }
+        <div class="source-card__stats d-flex justify-content-between">
+            <div class="stat-item">
+                <div class="stat-label">Billed</div>
+                <div class="stat-value small">{{sourceConsumption.actualEnergyUse | number:'1.0-0'}}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Equipment</div>
+                <div class="stat-value small" [class.text-over]="over">{{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}</div>
+            </div>
+            <div class="stat-item text-end">
+                <div class="stat-label">Unaccounted</div>
+                <div class="stat-value small" [class.text-danger]="sourceConsumption.unaccountedEnergyUse > 0">{{sourceConsumption.unaccountedEnergyUse | number:'1.0-0'}}</div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+}
+}
+
+<p class="text-end small text-muted mt-2 mb-1">
+    Energy in <span [innerHTML]="_energyFootprintAnnualFacilityBalance.facility.energyUnit"></span>
+</p>
+<hr class="my-2">
+}
+
+<button class="btn btn-sm action-btn w-100 mb-2" (click)="goToFacilityFootprint()">
+    <span class="fa fa-paw"></span>
+    View {{selectedFacilityId() | facilityName: _facilities}} Energy Footprint
+</button>
+<p class="small text-muted mt-1 mb-0">
+    <span class="fa fa-info-circle me-1"></span>
+    Unaccounted energy is the difference between utility bills and equipment use totals. A target of 70–80% accounted is considered good.
+</p>

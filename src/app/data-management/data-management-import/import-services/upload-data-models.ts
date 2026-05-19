@@ -5,6 +5,8 @@ import { IdbUtilityMeterData } from "../../../models/idbModels/utilityMeterData"
 import { IdbUtilityMeterGroup } from "../../../models/idbModels/utilityMeterGroup"
 import { IdbPredictor } from "../../../models/idbModels/predictor"
 import { IdbPredictorData } from "../../../models/idbModels/predictorData"
+import { IdbFacilityEnergyUseGroup } from "src/app/models/idbModels/facilityEnergyUseGroups"
+import { IdbFacilityEnergyUseEquipment } from "src/app/models/idbModels/facilityEnergyUseEquipment"
 
 export interface FileReference {
   name: string,
@@ -30,7 +32,10 @@ export interface FileReference {
   skipExistingReadingsMeterIds: Array<string>
   skipExistingPredictorFacilityIds: Array<string>,
   newMeterGroups: Array<IdbUtilityMeterGroup>,
-  selectedFacilityId: string
+  selectedFacilityId: string,
+  isFootprintToolTemplate?: boolean,
+  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>,
+  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>
 }
 
 export function getEmptyFileReference(): FileReference {
@@ -56,7 +61,9 @@ export function getEmptyFileReference(): FileReference {
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
     newMeterGroups: [],
-    selectedFacilityId: undefined
+    selectedFacilityId: undefined,
+    facilityEnergyUseGroups: [],
+    facilityEnergyUseEquipment: []
   };
 }
 
@@ -90,7 +97,9 @@ export interface ParsedTemplate {
   predictors: Array<IdbPredictor>,
   predictorData: Array<IdbPredictorData>,
   meterData: Array<IdbUtilityMeterData>,
-  newGroups: Array<IdbUtilityMeterGroup>
+  newGroups: Array<IdbUtilityMeterGroup>,
+  energyUseGroups: Array<IdbFacilityEnergyUseGroup>,
+  energyUseEquipment: Array<IdbFacilityEnergyUseEquipment>
 }
 
-export type TemplateVersion = "V1" | "V2" | "V3" | "ETH" | "Non-template";
+export type TemplateVersion = "V1" | "V2" | "V3" | "ETH" | "Non-template" | "Footprint-tool";

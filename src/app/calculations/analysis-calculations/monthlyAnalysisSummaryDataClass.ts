@@ -205,9 +205,11 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
     isPredictorDataMissing(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
-        this.missingValueWarning = predictorVariables.some(variable =>
-            !this.monthPredictorData.some(data => data.predictorId == variable.id)
-        );
+        this.missingValueWarning = predictorVariables.some(variable => {
+            if (variable.productionInAnalysis) {
+                !this.monthPredictorData.some(data => data.predictorId == variable.id)
+            }
+        });
     }
 
     calculateEnergyIntensityModeledEnergy(baselineEnergyIntensity: number): number {

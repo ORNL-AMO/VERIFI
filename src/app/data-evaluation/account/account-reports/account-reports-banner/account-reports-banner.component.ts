@@ -1,12 +1,15 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription } from 'rxjs';
-import { AccountReportsService } from '../account-reports.service';
+import { filter, map, startWith } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { AccountReportErrors } from 'src/app/models/validation';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { emptyAccountReportErrors } from 'src/app/calculations/status-check-calculations/validation/accountReportValidation';
 
 @Component({
   selector: 'app-account-reports-banner',
@@ -15,164 +18,77 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
   standalone: false
 })
 export class AccountReportsBannerComponent {
+  private router: Router = inject(Router);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
+  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  routerSub: Subscription;
-  inDashboard: boolean;
-  modalOpenSub: Subscription;
-  modalOpen: boolean;
-  setupValid: boolean;
-  selectedReportSub: Subscription;
-  selectedReport: IdbAccountReport;
-  errorMessage: string = '';
-  errorSub: Subscription;
-  showDropdown: boolean = false;
-  reportList: Array<IdbAccountReport>;
-  reportListSub: Subscription;
-  compareBaselineYearToReportYearError: boolean;
-  compareBaselineYearToReportYearErrorSub: Subscription;
-  analysisVisited: boolean = false;
-  selectedAnalysisItemSub: Subscription;
+  readonly selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport, { initialValue: null });
+  readonly reportList: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports, { initialValue: [] });
+  readonly accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
+  readonly accountReportErrors: Signal<Array<AccountReportErrors>> = toSignal(
+    this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.accountReportErrors ?? [])),
+    { initialValue: [] }
+  );
 
-  constructor(private router: Router,
-    private sharedDataService: SharedDataService,
-    private accountReportsService: AccountReportsService,
-    private accountReportDbService: AccountReportDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,) { }
-  ngOnInit() {
-    this.routerSub = this.router.events.subscribe(event => {
-      this.setInDashboard();
-      this.showDropdown = false;
+  readonly analysisVisited: Signal<boolean> = computed(() => {
+    const selectedReport = this.selectedReport();
+    const accountAnalysisItems = this.accountAnalysisItems();
+    if (selectedReport) {
+      let analysisItemId: string | undefined;
+      if (selectedReport.reportType == 'betterPlants') {
+        analysisItemId = selectedReport.betterPlantsReportSetup?.analysisItemId;
+      }
+      else if (selectedReport.reportType == 'performance') {
+        analysisItemId = selectedReport.performanceReportSetup?.analysisItemId;
+      }
+      else if (selectedReport.reportType == 'accountSavings') {
+        analysisItemId = selectedReport.accountSavingsReportSetup?.analysisItemId;
+      }
+
+      if (analysisItemId) {
+        const analysisItem = accountAnalysisItems.find(item => item.guid == analysisItemId);
+        if (analysisItem) {
+          return analysisItem.isAnalysisVisited;
+        }
+      }
+    }
+    return false;
+  });
+
+  readonly modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen, { initialValue: false });
+  private url = toSignal(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url)
+    ), { initialValue: this.router.url }
+  );
+  readonly inDashboard: Signal<boolean> = computed(() => {
+    const url = this.url();
+    return url.includes('dashboard');
+  });
+
+  readonly showDropdown: WritableSignal<boolean> = signal(false);
+
+  readonly reportErrors: Signal<AccountReportErrors> = computed(() => {
+    const selectedReport = this.selectedReport();
+    const reportErrors = this.accountReportErrors();
+    if (selectedReport && reportErrors) {
+      const selectedReportErrors = reportErrors.find(errors => errors.reportId == selectedReport.guid);
+      if (selectedReportErrors) {
+        return selectedReportErrors;
+      }
+    }
+    return emptyAccountReportErrors();
+  });
+
+  constructor() {
+    effect(() => {
+      this.url();
+      this.showDropdown.set(false);
     });
-    this.setInDashboard();
-    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
-      this.modalOpen = val;
-    });
-
-    this.errorSub = this.accountReportsService.errorMessage.subscribe(errorMessage => {
-      this.errorMessage = errorMessage;
-      if (this.selectedReport) {
-        this.setValidation(this.selectedReport);
-      }
-    });
-
-    this.compareBaselineYearToReportYearErrorSub = this.accountReportsService.compareBaselineYearToReportYearError.subscribe(showError => {
-      this.compareBaselineYearToReportYearError = showError;
-      if (this.selectedReport) {
-        this.setValidation(this.selectedReport);
-      }
-    });
-
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
-      this.selectedReport = val;
-      if (val) {
-        this.setValidation(val);
-        this.checkIfAnalysisVisited();
-      }
-    });
-
-    this.reportListSub = this.accountReportDbService.accountReports.subscribe(reports => {
-      this.reportList = reports;
-    });
-
-    this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.checkIfAnalysisVisited();
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    this.modalOpenSub.unsubscribe();
-    this.routerSub.unsubscribe();
-    this.selectedReportSub.unsubscribe();
-    this.errorSub.unsubscribe();
-    this.reportListSub.unsubscribe();
-    this.selectedAnalysisItemSub.unsubscribe();
-    this.compareBaselineYearToReportYearErrorSub.unsubscribe();
-  }
-
-  checkIfAnalysisVisited() {
-    let analysisItem: IdbAccountAnalysisItem;
-    if (this.selectedReport) {
-      if (this.selectedReport.reportType == 'betterPlants') {
-        analysisItem = this.accountAnalysisDbService.getByGuid(this.selectedReport.betterPlantsReportSetup?.analysisItemId);
-      }
-      else if (this.selectedReport.reportType == 'performance') {
-        analysisItem = this.accountAnalysisDbService.getByGuid(this.selectedReport.performanceReportSetup?.analysisItemId);
-      }
-      else if (this.selectedReport.reportType == 'accountSavings') {
-        analysisItem = this.accountAnalysisDbService.getByGuid(this.selectedReport.accountSavingsReportSetup?.analysisItemId);
-      }
-    }
-  
-    if (analysisItem) {
-      this.analysisVisited = analysisItem.isAnalysisVisited;
-    }
-    else {
-      this.analysisVisited = false;
-    }
-  }
-
-  setInDashboard() {
-    this.inDashboard = this.router.url.includes('dashboard');
-
-  }
-
-  setValidation(report: IdbAccountReport) {
-    let setupValid: boolean = this.accountReportsService.getSetupFormFromReport(report).valid;
-    let betterPlantsValid: boolean = true;
-    let dataOverviewValid: boolean = true;
-    let performanceValid: boolean = true;
-    let betterClimateValid: boolean = true;
-    let analysisValid: boolean = true;
-    let accountSavingsValid: boolean = true;
-    let emissionFactorsValid: boolean = true;
-    if (report.reportType == 'dataOverview') {
-      if (this.errorMessage.length > 0) {
-        dataOverviewValid = false;
-      }
-      else {
-        dataOverviewValid = this.accountReportsService.getDataOverviewFormFromReport(report.dataOverviewReportSetup).valid;
-      }
-      this.setupValid = (setupValid && dataOverviewValid);
-    }
-    else if (report.reportType == 'performance') {
-      if (this.compareBaselineYearToReportYearError) {
-        performanceValid = false;
-      }
-      else {
-        performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
-      }
-      this.setupValid = (setupValid && performanceValid);
-    }
-    else if (report.reportType == 'betterClimate') {
-      if (this.compareBaselineYearToReportYearError) {
-        betterClimateValid = false;
-      }
-      else {
-        betterClimateValid = this.accountReportsService.getBetterCimateFormFromReport(report.betterClimateReportSetup).valid;
-      }
-      this.setupValid = (setupValid && betterClimateValid);
-    }
-    else if (report.reportType == 'accountEmissionFactors') {
-      if (this.errorMessage.length > 0) {
-        emissionFactorsValid = false;
-      }
-      else {
-        emissionFactorsValid = true;
-      }
-      this.setupValid = (setupValid && emissionFactorsValid);
-    }
-    else {
-      if (report.reportType == 'betterPlants') {
-        betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
-      } else if (report.reportType == 'analysis') {
-        analysisValid = this.accountReportsService.getAnalysisFormFromReport(report.analysisReportSetup).valid;
-      } else if (report.reportType == 'accountSavings') {
-        accountSavingsValid = this.accountReportsService.getAccountSavingsFormFromReport(report.accountSavingsReportSetup).valid;
-      }
-      this.setupValid = (setupValid && betterPlantsValid && analysisValid && accountSavingsValid);
-    }
   }
 
   goToDashboard() {
@@ -180,13 +96,13 @@ export class AccountReportsBannerComponent {
   }
 
   toggleShow() {
-    this.showDropdown = !this.showDropdown;
+    this.showDropdown.update(v => !v);
   }
 
   selectItem(item: IdbAccountReport) {
     this.accountReportDbService.selectedReport.next(item);
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
-    this.showDropdown = false;
+    this.showDropdown.set(false);
   }
 
 }

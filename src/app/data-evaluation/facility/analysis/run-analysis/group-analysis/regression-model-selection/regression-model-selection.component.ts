@@ -1,24 +1,26 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { NavigationStart, Router } from '@angular/router';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import * as _ from 'lodash';
+import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+
+type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
 @Component({
   selector: 'app-regression-model-selection',
@@ -26,128 +28,179 @@ import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/c
   styleUrls: ['./regression-model-selection.component.css'],
   standalone: false
 })
-export class RegressionModelSelectionComponent implements OnInit {
+export class RegressionModelSelectionComponent {
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private calanderizationService: CalanderizationService = inject(CalanderizationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedGroup: AnalysisGroup;
-  orderDataField: string = 'adjust_R2';
-  orderByDirection: 'asc' | 'desc' = 'desc';
-  selectedGroupSub: Subscription;
-  selectedFacility: IdbFacility;
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
+  calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+  hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
+
+  generatedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
+    const group = this.selectedGroup();
+    const generatedModelsPerGroup = this.generatedModelsPerGroup();
+    if (group && generatedModelsPerGroup && generatedModelsPerGroup[group.idbGroupId]) {
+      return generatedModelsPerGroup[group.idbGroupId];
+    }
+    return [];
+  });
+
+  orderDataField: WritableSignal<OrderDataBy> = signal('adjust_R2');
+  orderByDirection: WritableSignal<'asc' | 'desc'> = signal('desc');
+
+  orderedModels: Signal<Array<JStatRegressionModel>> = computed(() => {
+    const models = this.generatedModels();
+    const showInvalid = this.showInvalid();
+    const showFailedValidationModel = this.showFailedValidationModel();
+    const yearOptionSelections = this.yearOptionSelections();
+    const orderDataBy = this.orderDataField();
+    let orderByDirection = this.orderByDirection();
+
+    let filteredModels: Array<JStatRegressionModel> = models.map(model => ({ ...model }));
+    //filter invalid models
+    if (!showInvalid) {
+      filteredModels = filteredModels.filter(model => { return model.isValid });
+    }
+    //filter models that failed validation
+    if (!showFailedValidationModel) {
+      filteredModels = filteredModels.filter(model => {
+        if (model.SEPValidation) {
+          return model.SEPValidation.every(SEPValidation => SEPValidation.isValid)
+        }
+        return false;
+      });
+    }
+    //filter by year
+    if (yearOptionSelections.length > 0) {
+      let includedYears: Array<number> = yearOptionSelections.filter(option => option.isChecked).map(option => option.year);
+      filteredModels = filteredModels.filter(model => includedYears.includes(model.modelYear));
+    }
+    //order models
+    if (!orderByDirection) {
+      orderByDirection = 'desc';
+    }
+    filteredModels = _.orderBy(filteredModels, orderDataBy, orderByDirection);
+    return filteredModels;
+  });
+
+  showInUseMessage: Signal<boolean> = computed(() => {
+    const analysisItem = this.analysisItem();
+    if (analysisItem && this.hideInUseMessage() == false) {
+      const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+      if (accountAnalysisItems.length != 0) {
+        return true;
+      }
+    }
+    return false;
+  });
+
   selectedInspectModel: JStatRegressionModel;
-  showInUseMessage: boolean;
-  showUserDefinedModelInspection: boolean = false;
-  generatedModels: Array<JStatRegressionModel>;
-  generatedModelsPerGroupSub: Subscription;
-  routerSub: Subscription;
   dropdownOpen: boolean = false;
 
-  modelFilterOptions: {
-    yearOptionSelections: Array<{ year: number, isChecked: boolean }>
-    showInvalid: boolean;
-    showFailedValidationModel: boolean;
-  } = {
-      yearOptionSelections: [],
-      showInvalid: false,
-      showFailedValidationModel: true
+  showInvalid: WritableSignal<boolean> = signal(false);
+  showFailedValidationModel: WritableSignal<boolean> = signal(false);
+  yearOptionSelections: WritableSignal<Array<{ year: number, isChecked: boolean }>> = signal([]);
+
+  groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
+    const selectedGroup = this.selectedGroup();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    const analysisItem = this.analysisItem();
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
+      const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
+      if (groupError) {
+        return groupError;
+      } else {
+        return emptyGroupAnalysisErrors();
+      }
     }
+    return emptyGroupAnalysisErrors();
+  });
 
   @ViewChild('dropdown') dropdownRef: ElementRef;
 
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private analysisValidationService: AnalysisValidationService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router) { }
-
-  ngOnInit(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      if (!this.selectedGroup || group.idbGroupId != this.selectedGroup.idbGroupId) {
-        this.selectedGroup = group;
-        //group change
-        this.setYears();
-      } else {
-        this.selectedGroup = group;
-      }
-      this.generatedModels = this.analysisDbService.getGeneratedModelsForGroup(this.selectedGroup.idbGroupId);
-      if (!this.generatedModels?.length && this.selectedGroup?.models?.length) {
-        this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.selectedGroup.models);
-        this.generatedModels = this.selectedGroup.models;
-      }
-      this.checkHasValidModels();
-      this.checkFailedValidationModels();
-    });
-
-    this.generatedModelsPerGroupSub = this.analysisDbService.generatedModelsPerGroup.subscribe(generatedModelsPerGroup => {
-      if (this.selectedGroup && this.selectedGroup.idbGroupId) {
-        this.generatedModels = generatedModelsPerGroup[this.selectedGroup.idbGroupId] || [];
-      }
-      else {
-        this.generatedModels = [];
-      }
-      this.checkHasValidModels();
-      this.checkFailedValidationModels();
-    });
-
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        if (!event.url.includes('/analysis/run-analysis/group-analysis')) {
-          this.analysisDbService.clearGeneratedModels();
+  selectedGroupId: string;
+  constructor() {
+    effect(() => {
+      const selectedGroup = this.selectedGroup();
+      const calanderizedMeters = this.calanderizedMeters();
+      const facility = this.selectedFacility();
+      if (selectedGroup && calanderizedMeters && calanderizedMeters.length > 0 && facility) {
+        if (selectedGroup.idbGroupId != this.selectedGroupId) {
+          this.selectedGroupId = selectedGroup.idbGroupId;
+          const groupMeters = calanderizedMeters.filter(cMeter => cMeter.meter.groupId == selectedGroup.idbGroupId);
+          const yearsWithFullData = getYearsWithFullData(groupMeters, facility);
+          this.yearOptionSelections.set(yearsWithFullData.map(year => ({ year, isChecked: true })));
         }
       }
     });
-    this.setShowInUseMessage();
-  }
 
-  ngOnDestroy() {
-    this.selectedGroupSub.unsubscribe();
-    this.generatedModelsPerGroupSub.unsubscribe();
-    this.routerSub.unsubscribe();
-  }
-
-  selectModel() {
-    let selectedModel: JStatRegressionModel = this.generatedModels.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
-    this.selectedGroup.regressionConstant = selectedModel.coef[0];
-    this.selectedGroup.regressionModelYear = selectedModel.modelYear;
-    this.selectedGroup.predictorVariables.forEach(variable => {
-      let coefIndex: number = selectedModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-      if (coefIndex != -1) {
-        variable.regressionCoefficient = selectedModel.coef[coefIndex + 1];
-      } else {
-        variable.regressionCoefficient = 0;
+    effect(() => {
+      const selectedGroup = this.selectedGroup();
+      const generatedModelsPerGroup = this.generatedModelsPerGroup();
+      if (selectedGroup && selectedGroup.models && generatedModelsPerGroup && !generatedModelsPerGroup[selectedGroup.idbGroupId]) {
+        this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, selectedGroup.models);
       }
-    });
-    this.selectedGroup.models = [selectedModel];
-    this.saveItem();
-    this.analysisDbService.setGeneratedModelsForGroup(this.selectedGroup.idbGroupId, this.generatedModels);
+    })
   }
 
-  async saveItem() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    analysisItem.isAnalysisVisited = false;
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.selectedGroup.idbGroupId });
-    this.selectedGroup.groupErrors = this.analysisValidationService.getGroupErrors(this.selectedGroup, analysisItem);
-    analysisItem.groups[groupIndex] = this.selectedGroup;
-    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+  async selectModel(modelId?: string) {
+    const currentGroup: AnalysisGroup = this.selectedGroup();
+    const selectedModelId = modelId ?? currentGroup.selectedModelId;
+    const generatedModels: Array<JStatRegressionModel> = this.generatedModels();
+    const selectedModel: JStatRegressionModel = generatedModels.find(model => model.modelId === selectedModelId);
+    const updatedGroup: AnalysisGroup = {
+      ...currentGroup,
+      selectedModelId,
+      regressionConstant: selectedModel.coef[0],
+      regressionModelYear: selectedModel.modelYear,
+      models: [selectedModel],
+      predictorVariables: currentGroup.predictorVariables.map(variable => {
+        const coefIndex = selectedModel.predictorVariables.findIndex(pVariable => pVariable.id === variable.id);
+        return {
+          ...variable,
+          regressionCoefficient: coefIndex !== -1 ? selectedModel.coef[coefIndex + 1] : 0,
+        };
+      }),
+    };
+    await this.saveItem(updatedGroup);
+    this.analysisDbService.setGeneratedModelsForGroup(updatedGroup.idbGroupId, generatedModels);
+  }
+
+  async saveItem(selectedGroup?: AnalysisGroup) {
+    const _group: AnalysisGroup = selectedGroup ?? this.selectedGroup();
+    const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
+    const selectedFacility: IdbFacility = this.selectedFacility();
+    const groupIndex: number = _analysisItemCurrent.groups.findIndex(group => group.idbGroupId === _group.idbGroupId);
+    const updatedGroups = [..._analysisItemCurrent.groups];
+    updatedGroups[groupIndex] = _group;
+    const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
+    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
-    this.analysisService.selectedGroup.next(this.selectedGroup)
+    this.analysisService.selectedGroup.next(_group);
   }
 
-  setOrderDataField(str: string) {
-    if (str == this.orderDataField) {
-      if (this.orderByDirection == 'desc') {
-        this.orderByDirection = 'asc';
+  setOrderDataField(str: OrderDataBy) {
+    const currentOrderDataField = this.orderDataField();
+    if (str == currentOrderDataField) {
+      if (this.orderByDirection() == 'desc') {
+        this.orderByDirection.set('asc');
       } else {
-        this.orderByDirection = 'desc';
+        this.orderByDirection.set('desc');
       }
     } else {
-      this.orderDataField = str;
+      this.orderDataField.set(str);
     }
   }
 
@@ -160,46 +213,12 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   async selectFromInspection() {
-    this.selectedGroup.selectedModelId = this.selectedInspectModel.modelId;
-    await this.selectModel();
+    await this.selectModel(this.selectedInspectModel.modelId);
     this.cancelInspectModel();
   }
 
-  setShowInUseMessage() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
-    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
-      this.showInUseMessage = true;
-    }
-  }
-
-  hideInUseMessage() {
-    this.showInUseMessage = false;
-    this.analysisService.hideInUseMessage = true;
-  }
-
-  setShowUserDefinedModelInspection(showUserDefinedModelInspection: boolean) {
-    this.showUserDefinedModelInspection = showUserDefinedModelInspection;
-  }
-
-  checkHasValidModels() {
-    let noValidModels: boolean = this.generatedModels?.find(model => { return model.isValid == true }) == undefined;
-    if (!this.modelFilterOptions.showInvalid && noValidModels) {
-      this.modelFilterOptions.showInvalid = true;
-    }
-  }
-
-  checkFailedValidationModels() {
-    let noDataValidationModels: boolean = this.generatedModels?.find(model => {
-      if (model.SEPValidation) {
-        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
-      } else {
-        return undefined;
-      }
-    }) == undefined;
-    if (!this.modelFilterOptions.showFailedValidationModel && noDataValidationModels) {
-      this.modelFilterOptions.showFailedValidationModel = true;
-    }
+  toggleHideInUseMessage() {
+    this.analysisService.hideInUseMessage.next(true);
   }
 
   toggleDropdown() {
@@ -207,10 +226,9 @@ export class RegressionModelSelectionComponent implements OnInit {
   }
 
   toggleOption(option: number) {
-    const selection = this.modelFilterOptions.yearOptionSelections.find(selection => selection.year == option);
-    if (selection) {
-      selection.isChecked = !selection.isChecked;
-    }
+    this.yearOptionSelections.update(selections =>
+      selections.map(s => s.year === option ? { ...s, isChecked: !s.isChecked } : s)
+    );
   }
 
   @HostListener('document:click', ['$event'])
@@ -218,19 +236,6 @@ export class RegressionModelSelectionComponent implements OnInit {
     if (this.dropdownRef && this.dropdownRef.nativeElement && !this.dropdownRef.nativeElement.contains(event.target)) {
       this.dropdownOpen = false;
     }
-  }
-
-  setYears() {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.groupId == this.selectedGroup.idbGroupId });
-    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(groupMeters, facilityMeterData, this.selectedFacility, true, undefined, [], [], [this.selectedFacility], 'AR6', []);
-    let fullYearsWithData: Array<number> = getYearsWithFullData(calanderizedMeterData, this.selectedFacility);
-    let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    fullYearsWithData = fullYearsWithData.filter(year => {
-      return year >= selectedAnalysisItem.baselineYear;
-    })
-    this.modelFilterOptions.yearOptionSelections = fullYearsWithData.map(year => { return { year: year, isChecked: true } });
   }
 }
 

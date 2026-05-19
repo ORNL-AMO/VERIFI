@@ -2,19 +2,23 @@
   <div class="banner p-0">
     <ul class="nav nav-tabs">
       <li class="nav-item"><a class="nav-link" routerLink="manage" [routerLinkActive]="['active']">
-        <i class="fa fa-gauge-high"></i>
-      Predictors</a></li>
-      @for (predictorItem of predictors; track predictorItem) {
-        <li class="nav-item">
-          <a class="nav-link" routerLink="predictor/{{predictorItem.predictor.guid}}"
-            [routerLinkActive]="['active']">
-            <i class="fa fa-file-invoice"></i>
-            {{predictorItem.predictor.name}}
-            @if (predictorItem.needsUpdate) {
-              <i class="fa fa-exclamation-triangle"></i>
-            }
-          </a>
-        </li>
+          <i class="fa fa-gauge-high"></i>
+          Predictors
+          @if(facilityStatusCheck() && facilityStatusCheck()?.predictorsStatus != 'good') {
+          <i class="fa fa-exclamation-triangle text-warning"></i>
+          }
+        </a>
+      </li>
+      @for (predictorItem of predictorList(); track predictorItem.predictor.guid) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="predictor/{{predictorItem.predictor.guid}}" [routerLinkActive]="['active']">
+          <i class="fa fa-file-invoice"></i>
+          {{predictorItem.predictor.name}}
+          @if (predictorItem.predictorStatusCheck.status != 'good') {
+          <i class="fa fa-exclamation-triangle text-warning"></i>
+          }
+        </a>
+      </li>
       }
     </ul>
   </div>

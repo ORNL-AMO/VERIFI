@@ -80,9 +80,11 @@ export class MonthlyFacilityAnalysisDataClass {
     }
 
     setMissingPredictorWarning(predictors: Array<IdbPredictor>) {
-        this.missingValueWarning = predictors.some(variable =>
-            !this.monthPredictorData.some(data => data.predictorId == variable.guid)
-        );
+        this.missingValueWarning = predictors.some(variable => {
+            if (variable.productionInAnalysis) {
+                return !this.monthPredictorData.some(data => data.predictorId == variable.guid)
+            }
+        });
     }
 
     setFiscalYear(facility: IdbFacility) {

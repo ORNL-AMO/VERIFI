@@ -1,0 +1,41 @@
+<table class="table table-bordered utility-data">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th class="w-50">Source</th>
+            <th>Equipment Use<br>
+                <span
+                    [innerHTML]="'(' + energyFootprintAnnualEquipmentGroupSummary.facility.energyUnit + '/yr)'"></span>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for(sourceConsumption of energyFootprintAnnualEquipmentGroupSummary.sourcesConsumption; track
+        sourceConsumption.source) {
+        <tr>
+            <td colspan="2" class="fw-bold bg-secondary text-white">{{sourceConsumption.source}}
+            </td>
+        </tr>
+        @for(equipmentEnergyUse of sourceConsumption.equipmentEnergyUses; track equipmentEnergyUse.equipment.guid)
+        {
+        <tr>
+            <td>
+                <span class="ps-4">
+                    <a class="click-link" (click)="goToEquipment(equipmentEnergyUse.equipment)">
+                        @let icons = (equipmentEnergyUse.equipment | equipmentSourceIcons);
+                        @for(icon of icons; track icon) {
+                        <span class="fa-solid {{icon}} me-1"></span>
+                        }
+                        {{equipmentEnergyUse.equipment.name}}
+                    </a>
+                </span>
+            </td>
+            <td>{{equipmentEnergyUse.energyUse | number:'1.0-0'}}</td>
+        </tr>
+        }
+        <tr>
+            <th>Total {{sourceConsumption.source}}</th>
+            <th>{{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}</th>
+        </tr>
+        }
+    </tbody>
+</table>

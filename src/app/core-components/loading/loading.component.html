@@ -5,19 +5,21 @@
 
 <div id="loading-info" [class.open]="loadingMessages?.length > 0">
   @if (title) {
-    <div class="fw-bold title-style mb-3">{{ title }}</div>
+  <div class="fw-bold title-style mb-3">{{ title }}</div>
   }
   <div class="p-4 bg-white rounded message-container">
     @for (message of loadingMessages; track i; let i = $index) {
-      <div class="d-flex align-items-center mb-3">
-        @if (i < currentLoadingIndex || loadingComplete) {
-          <i class="fa fa-check-circle text-success me-2 icon-style"></i>
+    <div class="d-flex align-items-center mb-3">
+      @if (i < currentLoadingIndex || loadingComplete) { <i class="fa fa-check-circle text-success me-2 icon-style"></i>
         }
         @if (i === currentLoadingIndex && !loadingComplete) {
-          <i class="fa fa-spinner fa-spin text-primary me-2 icon-style"></i>
+        <i class="fa fa-spinner fa-spin text-primary me-2 icon-style"></i>
+        }
+        @if (i > currentLoadingIndex && !loadingComplete) {
+        <i class="fa fa-circle-minus text-secondary me-2 icon-style"></i>
         }
         <span class="fw-bold message-text">{{ message }}</span>
-      </div>
+    </div>
     }
   </div>
 

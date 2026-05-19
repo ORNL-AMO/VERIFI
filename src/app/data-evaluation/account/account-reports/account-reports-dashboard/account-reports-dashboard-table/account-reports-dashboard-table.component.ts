@@ -10,6 +10,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportsService } from '../../account-reports.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-account-reports-dashboard-table',
@@ -20,49 +21,47 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 })
 export class AccountReportsDashboardTableComponent {
 
-  reports: Array<IdbAccountReport> = [];
   selectedAccount: IdbAccount;
   reportTypes: Array<ReportType> = ['betterPlants', 'dataOverview', 'performance', 'betterClimate', 'analysis', 'accountEmissionFactors', 'accountSavings'];
-  reportText: string;
   selectedReportType = '';
   displayDeleteModal: boolean;
   deletedReport: IdbAccountReport;
-  reportList: Array<{ isValid: boolean, report: IdbAccountReport }> = [];
-  orderDataField: string = 'report.reportName';
+
+  reportSub: Subscription;
+  reports: Array<IdbAccountReport> = [];
+
+  orderDataField: string = 'name';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
   currentPageNumber: number = 1;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
 
+  allChecked: boolean = false;
+  showBulkDelete: boolean = false;
+
   constructor(private accountDbService: AccountdbService,
     private accountReportDbService: AccountReportDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
-    private accountReportsService: AccountReportsService,
     private sharedDataService: SharedDataService,
     private toastNotificationService: ToastNotificationsService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-    this.getReports();
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
+    });
+    this.reportSub = this.accountReportDbService.accountReports.subscribe(reports => {
+      this.reports = reports;
     });
   }
 
   ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
-  }
-
-  async getReports() {
-    this.reportList = [];
-    this.reports = await this.accountReportDbService.getAllAccountReports(this.selectedAccount.guid);
-    this.reports.forEach(report => {
-      const isValid = this.accountReportsService.isReportValid(report);
-      this.reportList.push({ isValid, report });
-    });
+    this.reportSub.unsubscribe();
   }
 
   selectReport(report: IdbAccountReport) {
@@ -97,7 +96,6 @@ export class AccountReportsDashboardTableComponent {
     await this.dbChangesService.setAccountReports(this.selectedAccount);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "alert-success");
-    this.getReports();
   }
 
   setOrderDataField(str: string) {
@@ -112,7 +110,60 @@ export class AccountReportsDashboardTableComponent {
     }
   }
 
-  get yearSortField(): string {
-    return 'report.reportYearOrEndYear';
+  openBulkDeleteModal() {
+    this.showBulkDelete = true;
+  }
+
+  get anyChecked(): boolean {
+    return this.reports.some(report => report.checked);
+  }
+
+  toggleChecked() {
+    const filteredReports = this.getFilteredReports();
+    this.allChecked = filteredReports.length > 0 && filteredReports.every(report => report.checked);
+  }
+
+  getFilteredReports(): Array<IdbAccountReport> {
+    if (!this.selectedReportType || this.selectedReportType == '') {
+      return this.reports;
+    }
+    return this.reports.filter(report => report.reportType == this.selectedReportType);
+  }
+
+  checkAll() {
+    const filteredReports = this.getFilteredReports();
+    filteredReports.forEach(report => {
+      report.checked = this.allChecked;
+    });
+  }
+
+  cancelBulkDelete() {
+    this.showBulkDelete = false;
+  }
+
+  async bulkDelete() {
+    this.cancelBulkDelete();
+    const filteredReports = this.getFilteredReports();
+    this.loadingService.setLoadingMessage("Deleting Reports...");
+    this.loadingService.setLoadingStatus(true);
+    let reportsToDelete: Array<IdbAccountReport> = new Array();
+    filteredReports.forEach(report => {
+      if (report.checked) {
+        reportsToDelete.push(report);
+      }
+    });
+    for (let index = 0; index < reportsToDelete.length; index++) {
+      await firstValueFrom(this.accountReportDbService.deleteWithObservable(reportsToDelete[index].id));
+    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountReports(selectedAccount);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast("Report Items Deleted!", undefined, undefined, false, "alert-success");
+    this.selectedReportType = '';
+    this.allChecked = false;
+  }
+
+  get selectedItemsForBulkDelete() {
+    return this.getFilteredReports().filter(report => report.checked);
   }
 }

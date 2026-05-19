@@ -1,0 +1,25 @@
+/* Facility row status color strip */
+.facility-status-strip {
+    width: 4px;
+    border-radius: 2px;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+/* Compact sub-issue rows */
+.sub-issue {
+    font-size: 0.8rem;
+}
+
+/* Hover-reveal issue list */
+.facility-row .issues-reveal {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+}
+
+.facility-row:hover .issues-reveal {
+    max-height: 20rem;
+    opacity: 1;
+}

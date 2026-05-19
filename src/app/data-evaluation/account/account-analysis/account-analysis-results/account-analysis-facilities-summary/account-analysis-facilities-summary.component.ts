@@ -34,7 +34,6 @@ export class AccountAnalysisFacilitiesSummaryComponent {
     })
     this.monthlyFacilityAnalysisClassesSub = this.accountAnalysisService.facilitySummaries.subscribe(val => {
       this.facilitySummaries = val;
-      console.log(this.facilitySummaries);
     });
   }
 

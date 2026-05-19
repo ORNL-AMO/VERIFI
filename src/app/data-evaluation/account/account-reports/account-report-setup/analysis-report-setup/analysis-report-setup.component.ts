@@ -9,11 +9,6 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { Router } from '@angular/router';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import * as _ from 'lodash';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-analysis-report-setup',
@@ -24,33 +19,25 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class AnalysisReportSetupComponent {
   analysisReportForm: FormGroup;
   account: IdbAccount;
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   selectedAnalysisItem: IdbAccountAnalysisItem;
-  itemToEdit: IdbAccountAnalysisItem;
-  facilityAnalysisItems: Array<IdbAnalysisItem> = [];
-  facilityDetails: Array<IdbAnalysisItem> = [];
-  baselineYears: Array<number> = [];
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
+  analysisItemIdSub: Subscription;
+
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private calanderizationService: CalanderizationService) {
+    private accountAnalysisDbService: AccountAnalysisDbService) {
   }
-
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.analysisReportForm = this.accountReportsService.getAnalysisFormFromReport(val.analysisReportSetup);
-        this.setAnalysisOptions();
+        this.setSelectedAnalysisItem();
+        this.subscribeAnalysisItemChanges();
       } else {
         this.isFormChange = false;
       }
@@ -59,6 +46,17 @@ export class AnalysisReportSetupComponent {
 
   ngOnDestroy() {
     this.selectedReportSub.unsubscribe();
+    this.analysisItemIdSub.unsubscribe();
+  }
+
+  subscribeAnalysisItemChanges() {
+    if (this.analysisItemIdSub) {
+      this.analysisItemIdSub.unsubscribe();
+    }
+    
+    this.analysisItemIdSub = this.analysisReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+      await this.save();
+    })
   }
 
   async save() {
@@ -72,57 +70,13 @@ export class AnalysisReportSetupComponent {
     }
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
-  }
-
-  setAnalysisOptions() {
-    this.setYearOptions();
-    this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
-    if (!this.selectedAnalysisItem) {
-      this.analysisReportForm.controls.analysisItemId.patchValue(undefined);
-      this.analysisReportForm.controls.analysisItemId.updateValueAndValidity();
-      this.save();
-    }
+    this.accountReportDbService.selectedReport.next({ ...selectedReport });
   }
 
   setSelectedAnalysisItem() {
-    this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.analysisReportForm.controls.analysisItemId.value });
+    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.analysisReportForm.controls.analysisItemId.value);
   }
 
-  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
-    this.itemToEdit = analysisItem;
-  }
-
-  confirmEditItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
-  }
-
-  cancelEditItem() {
-    this.itemToEdit = undefined;
-  }
-
-  setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
-    this.baselineYears = yearOptions;
-  }
-
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.accountAnalysisItems];
-    if(this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if(this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
-  }
-
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
-  }
 }
 
 

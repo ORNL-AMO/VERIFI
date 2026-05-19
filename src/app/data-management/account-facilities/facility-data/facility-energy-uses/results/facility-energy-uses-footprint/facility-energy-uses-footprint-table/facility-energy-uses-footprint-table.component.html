@@ -1,0 +1,108 @@
+@if(!energyFootprintAnnualFacilityBalance) {
+<p>Calculating footprint...</p>
+} @else {
+@if(!displayDataByGroup) {
+<table class="table table-bordered utility-data">
+    <thead>
+        <tr class="table-mh">
+            <th>Source</th>
+            <th>
+                Consumption<br>
+                (<span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit | settingsLabel"></span>)
+            </th>
+            <th>Equipment Use<br>
+                (<span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit | settingsLabel"></span>)
+            </th>
+            <th>Unaccounted<br>
+                (<span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit | settingsLabel"></span>)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for(sourceConsumption of energyFootprintAnnualFacilityBalance.sourcesConsumption; track
+        sourceConsumption.source) {
+        <tr>
+            <th class="bg-secondary text-white">{{sourceConsumption.source}}</th>
+            <th class="bg-secondary text-white">{{sourceConsumption.actualEnergyUse | number:'1.0-0'}}</th>
+            <th class="bg-secondary text-white">{{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}</th>
+            <th class="bg-secondary text-white">{{sourceConsumption.unaccountedEnergyUse | number:'1.0-0'}}</th>
+        </tr>
+        @for(groupConsumption of sourceConsumption.equipmentGroupEnergyUses; track groupConsumption.energyUseGroup.guid)
+        {
+        <tr>
+            <td>
+                <span class="ps-4">
+                    <a class="click-link" (click)="goToGroupFootprint(groupConsumption.energyUseGroup)">
+                        {{groupConsumption.energyUseGroup.name}}
+                    </a>
+                </span>
+            </td>
+            <td>&mdash;</td>
+            <td>{{groupConsumption.energyUse | number:'1.0-0'}}</td>
+            <td>&mdash;</td>
+        </tr>
+        }
+        }
+    </tbody>
+</table>
+<hr>
+} @else {
+<table class="table table-bordered utility-data">
+    <thead>
+        <tr class="table-mh">
+            <th>Source</th>
+            <th>
+                Consumption<br>
+                (<span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit | settingsLabel"></span>)
+            </th>
+            <th>Equipment Use<br>
+                (<span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit | settingsLabel"></span>)
+            </th>
+            <th>Unaccounted<br>
+                (<span [innerHTML]="energyFootprintAnnualFacilityBalance.facility.energyUnit | settingsLabel"></span>)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for(meterGroupBalance of energyFootprintAnnualFacilityBalance.meterGroupsAnnualBalances; track
+        meterGroupBalance.meterGroup.guid) {
+        <tr>
+            <td colspan="4" class="fw-bold bg-secondary text-white">Meter Group: {{meterGroupBalance.meterGroup.name}}
+            </td>
+        </tr>
+        @for(sourceConsumption of meterGroupBalance.sourcesConsumption; track
+        sourceConsumption.source) {
+        @for(groupConsumption of sourceConsumption.equipmentGroupEnergyUses; track groupConsumption.energyUseGroup.guid)
+        {
+        <tr>
+            <td>
+                <span class="ps-4">
+                    <a class="click-link" (click)="goToGroupFootprint(groupConsumption.energyUseGroup)">
+                        {{groupConsumption.energyUseGroup.name}}
+                    </a>
+                </span>
+            </td>
+            <td>&mdash;</td>
+            <td>{{groupConsumption.energyUse | number:'1.0-0'}}</td>
+            <td>&mdash;</td>
+        </tr>
+        }
+        <tr>
+            <th>Total {{sourceConsumption.source}}</th>
+            <th>{{sourceConsumption.actualEnergyUse | number:'1.0-0'}}</th>
+            <th>{{sourceConsumption.totalEquipmentEnergyUse | number:'1.0-0'}}</th>
+            <th>{{sourceConsumption.unaccountedEnergyUse | number:'1.0-0'}}</th>
+        </tr>
+        }
+        }
+    </tbody>
+</table>
+<hr>
+}
+}
+<p class="fw-light">
+    <span class="fa fa-asterisk"></span>
+    Unaccounted energy use is the difference between the actual energy use from utility bills and the total energy use
+    calculated from equipment. A large unaccounted energy use may indicate missing equipment data or inaccurate energy
+    use estimates for equipment.
+</p>

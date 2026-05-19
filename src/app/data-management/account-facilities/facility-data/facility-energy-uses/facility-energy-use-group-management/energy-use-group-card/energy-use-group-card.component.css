@@ -1,0 +1,109 @@
+/* Group Card */
+.group-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, transform 0.15s;
+    overflow: hidden;
+}
+.group-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+}
+
+.group-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0.85rem;
+    background: #2c386b;
+    color: #fff;
+    cursor: pointer;
+    border-bottom: 1px solid #dee2e6;
+    gap: 0.5rem;
+}
+.group-card__header:hover {
+    background: #3a4c8e;
+}
+.group-card__name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+.equipment-count-badge {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: white;
+    border-radius: 12px;
+    padding: 5px 8px;
+    white-space: nowrap;
+}
+
+.group-card__body {
+    flex: 1;
+    padding: 0.65rem 0.85rem;
+    min-height: 60px;
+    max-height: 200px;
+    overflow-x: auto;
+}
+
+/* Equipment chips */
+.equipment-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.equipment-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 12px;
+    border: 1px solid #c8d4e8;
+    background: #f0f4fb;
+    color: #2c386b;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    /* max-width: 180px; */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.equipment-chip:hover {
+    background: #2980b9;
+    color: #fff;
+    border-color: #2980b9;
+}
+
+.no-equipment-label {
+    font-size: 0.78rem;
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.group-card__footer {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+.group-card__footer .btn {
+    font-size: 0.75rem;
+}
+.group-card__footer .btn:last-child {
+    margin-left: auto;
+}
+
+.fa-trash {
+    color: inherit;
+}

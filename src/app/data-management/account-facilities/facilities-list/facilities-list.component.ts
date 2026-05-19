@@ -48,6 +48,7 @@ export class FacilitiesListComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'delete-facility') {
         this.showFacilityDeletionToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }
@@ -109,6 +110,7 @@ export class FacilitiesListComponent {
     let facilityToDelete: IdbFacility = this.facilityToDelete;
     this.cancelFacilityDelete();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(facilityToDelete, selectedAccount);
   }
 

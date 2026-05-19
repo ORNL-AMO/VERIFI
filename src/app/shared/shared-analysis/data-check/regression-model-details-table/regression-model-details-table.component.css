@@ -1,0 +1,7 @@
+td.nowrap{
+    white-space: nowrap;
+}
+
+td{
+    vertical-align: middle;
+}

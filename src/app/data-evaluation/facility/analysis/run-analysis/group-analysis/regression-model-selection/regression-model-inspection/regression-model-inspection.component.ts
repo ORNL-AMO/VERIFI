@@ -152,9 +152,7 @@ export class RegressionModelInspectionComponent implements OnInit {
 
 
   drawChart() {
-    console.log('draw')
     if (this.monthlyAnalysisGraph) {
-      console.log('....')
       let name: string = this.getGraphName();
 
       let yAxisTitle: string = this.analysisItem.energyUnit;

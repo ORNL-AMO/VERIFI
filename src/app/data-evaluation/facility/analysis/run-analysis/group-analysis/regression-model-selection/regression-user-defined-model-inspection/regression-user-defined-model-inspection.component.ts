@@ -1,13 +1,12 @@
-import { Component, ElementRef, Input, SimpleChange, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, Signal, ViewChild, effect, signal, WritableSignal, untracked, afterRenderEffect } from '@angular/core';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../../analysis.service';
-import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { getFiscalYear, getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
@@ -19,9 +18,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-regression-user-defined-model-inspection',
@@ -31,191 +31,175 @@ import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/
   styleUrl: './regression-user-defined-model-inspection.component.css'
 })
 export class RegressionUserDefinedModelInspectionComponent {
+  private analysisService: AnalysisService = inject(AnalysisService);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
+  private plotlyService: PlotlyService = inject(PlotlyService);
+  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private regressionsModelsService: RegressionModelsService = inject(RegressionModelsService);
+  private calanderizationService: CalanderizationService = inject(CalanderizationService);
 
-  selectedGroup: AnalysisGroup;
-  selectedGroupSub: Subscription;
-  analysisItem: IdbAnalysisItem;
-  worker: Worker;
-  calculating: boolean | 'error';
-  inspectedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
-  selectedFacility: IdbFacility;
-  accountAnalysisItems: Array<IdbAnalysisItem>;
-  accountPredictorEntries: Array<IdbPredictorData>;
-  userModel: JStatRegressionModel;
-  facilityMeters: Array<IdbUtilityMeter>;
-  facilityMeterData: Array<IdbUtilityMeterData>;
-  account: IdbAccount;
+
+  selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
+  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  accountAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
+  accountPredictorEntries: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.accountPredictorData);
+  facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters);
+  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+
+  private worker: Worker;
+  calculating: WritableSignal<boolean | 'error'> = signal(false);
+  inspectedMonthlyAnalysisSummaryData: WritableSignal<Array<MonthlyAnalysisSummaryData> | undefined> = signal(undefined);
+
+  userModel: Signal<JStatRegressionModel> = computed(() => {
+    const analysisItem = this.analysisItem();
+    const selectedGroup = this.selectedGroup();
+    const selectedFacility = this.selectedFacility();
+    const calanderizedMeters = this.calanderizedMeters();
+
+    if(!analysisItem || !selectedGroup || !selectedFacility || calanderizedMeters.length == 0) {
+      return null;
+    }
+    let analysisItemCopy: IdbAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
+    analysisItemCopy.baselineYear = selectedGroup.regressionStartYear;
+    let reportYear: number = getLatestYearWithData(calanderizedMeters, [selectedFacility]);
+    return this.regressionsModelsService.getUserDefinedModel(selectedGroup, selectedFacility, analysisItemCopy, reportYear);
+  });
 
   @ViewChild('monthlyAnalysisGraph', { static: false }) monthlyAnalysisGraph: ElementRef;
 
+  constructor() {
+    effect(() => {
+      const analysisItem = this.analysisItem();
+      const selectedGroup = this.selectedGroup();
+      const selectedFacility = this.selectedFacility();
+      const facilityMeters = this.facilityMeters();
+      const facilityMeterData = this.facilityMeterData();
+      const accountPredictorEntries = this.accountPredictorEntries();
+      const accountAnalysisItems = this.accountAnalysisItems();
+      const account = this.account();
 
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private plotlyService: PlotlyService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountDbService: AccountdbService,
-    private regressionsModelsService: RegressionModelsService,
-    private loadingService: LoadingService
-  ) { }
+      if (!analysisItem || !selectedGroup || !selectedFacility || !facilityMeters || !facilityMeterData || !account) {
+        return;
+      }
 
-  ngOnInit(): void {
-    this.loadingService.setLoadingMessage("Generating User Defined Model...");
-    this.loadingService.setLoadingStatus(true);
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
-    this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
-
-    this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
-      this.selectedGroup = group;
-      this.generateUserDefinedModel();
+      untracked(() => this.calculateInspectedModel(
+        analysisItem, selectedGroup, selectedFacility,
+        facilityMeters, facilityMeterData,
+        accountPredictorEntries, accountAnalysisItems, account
+      ));
     });
 
-    this.calculateInspectedModel();
+    afterRenderEffect(() => this.drawChart());
   }
 
   ngOnDestroy(): void {
-    this.selectedGroupSub.unsubscribe();
+    this.worker?.terminate();
   }
 
-  ngAfterViewInit() {
-    this.drawChart();
-  }
+  calculateInspectedModel(
+    analysisItem: IdbAnalysisItem,
+    selectedGroup: AnalysisGroup,
+    selectedFacility: IdbFacility,
+    facilityMeters: Array<IdbUtilityMeter>,
+    facilityMeterData: Array<IdbUtilityMeterData>,
+    accountPredictorEntries: Array<IdbPredictorData>,
+    accountAnalysisItems: Array<IdbAnalysisItem>,
+    account: IdbAccount
+  ): void {
+    this.worker?.terminate();
 
-  generateUserDefinedModel() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    //report year is determined by the latest full year of data
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
-    let reportYear: number = getLatestYearWithData(calanderizedMeters, [this.selectedFacility]);
+    const analysisItemCopy: IdbAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
+    analysisItemCopy.baselineYear = selectedGroup.regressionStartYear;
+    const groupCopy: AnalysisGroup = JSON.parse(JSON.stringify(selectedGroup));
 
-    let baselineYear: number = analysisItem.baselineYear;
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedFacility.guid);
-    const selectedPredictors = this.selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
+    this.calculating.set(true);
 
-    this.userModel = {
-      coef: [
-        this.selectedGroup.regressionConstant,
-        ...selectedPredictors.map(v => v.regressionCoefficient)
-      ],
-      R2: undefined,
-      SSE: undefined,
-      SSR: undefined,
-      SST: undefined,
-      adjust_R2: undefined,
-      df_model: undefined,
-      df_resid: undefined,
-      ybar: undefined,
-      t: {
-        se: undefined,
-        sigmaHat: undefined,
-        p: undefined
-      },
-      f: {
-        pvalue: undefined,
-        F_statistic: undefined
-      },
-      modelYear: this.selectedGroup.regressionModelYear,
-      predictorVariables: selectedPredictors,
-      modelId: undefined,
-      isValid: false,
-      modelPValue: undefined,
-      modelNotes: [this.selectedGroup.regressionModelNotes],
-      errorModeling: false,
-      SEPValidation: undefined,
-      SEPValidationPass: undefined,
-      dataValidationNotes: [''],
-      modelValidationNotes: ['']
-    };
-
-    const validatedModel = this.regressionsModelsService.setModelVaildAndNotes(this.userModel, facilityPredictorData, reportYear, this.selectedFacility, baselineYear, this.selectedGroup);
-    this.userModel = validatedModel;
-  }
-
-  calculateInspectedModel() {
-    this.loadingService.setLoadingStatus(true);
-    let groupCopy: AnalysisGroup = JSON.parse(JSON.stringify(this.selectedGroup));
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
-          this.inspectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummary.monthlyAnalysisSummaryData;
-          this.calculating = false;
-          this.loadingService.setLoadingStatus(false);
-          this.drawChart();
+          this.inspectedMonthlyAnalysisSummaryData.set(data.monthlyAnalysisSummary.monthlyAnalysisSummaryData);
+          this.calculating.set(false);
         } else {
-          this.inspectedMonthlyAnalysisSummaryData = undefined;
-          this.calculating = 'error';
+          this.inspectedMonthlyAnalysisSummaryData.set(undefined);
+          this.calculating.set('error');
         }
         this.worker.terminate();
       };
-      this.calculating = true;
       this.worker.postMessage({
         selectedGroup: groupCopy,
-        analysisItem: this.analysisItem,
-        facility: this.selectedFacility,
-        meters: this.facilityMeters,
-        meterData: this.facilityMeterData,
-        accountPredictorEntries: this.accountPredictorEntries,
-        accountAnalysisItems: this.accountAnalysisItems,
-        assessmentReportVersion: this.account.assessmentReportVersion
+        analysisItem: analysisItemCopy,
+        facility: selectedFacility,
+        meters: facilityMeters,
+        meterData: facilityMeterData,
+        accountPredictorEntries,
+        accountAnalysisItems,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
-      // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
-      this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
-      this.calculating = false;
-      this.loadingService.setLoadingStatus(false);
-      this.drawChart();
+      // Web Workers are not supported in this environment.
+      const calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(
+        facilityMeters, facilityMeterData, selectedFacility, false,
+        { energyIsSource: analysisItemCopy.energyIsSource, neededUnits: getNeededUnits(analysisItemCopy) },
+        [], [], [selectedFacility], account.assessmentReportVersion, []
+      );
+      const monthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(
+        groupCopy, analysisItemCopy, selectedFacility, calanderizedMeters,
+        accountPredictorEntries, false, accountAnalysisItems
+      );
+      this.inspectedMonthlyAnalysisSummaryData.set(monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData);
+      this.calculating.set(false);
     }
   }
 
   drawChart() {
     if (this.monthlyAnalysisGraph) {
-      let name: string = this.getGraphName();
+      const analysisItem = this.analysisItem();
+      const selectedGroup = this.selectedGroup();
+      const summaryData = this.inspectedMonthlyAnalysisSummaryData();
 
-      let yAxisTitle: string = this.analysisItem.energyUnit;
-      let traceColor: string = '#7D3C98'
-      if (this.analysisItem.analysisCategory == 'water') {
-        yAxisTitle = this.analysisItem.waterUnit;
-        traceColor = '#3498DB';
+      if (!analysisItem || !selectedGroup) {
+        return;
+      }
+
+      let yAxisTitle: string = analysisItem.energyUnit;
+      if (analysisItem.analysisCategory == 'water') {
+        yAxisTitle = analysisItem.waterUnit;
       }
 
       var data = [];
-      if (this.inspectedMonthlyAnalysisSummaryData) {
+      if (summaryData) {
         var trace1 = {
           type: "scatter",
           mode: "lines+markers",
-          name: name,
-          x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
+          name: this.getGraphName(),
+          x: summaryData.map(results => { return results.date }),
+          y: summaryData.map(results => { return results.modeledEnergy }),
           line: { color: '#BB8FCE', width: 4 },
           marker: {
             size: 8
           }
         }
 
-        const startMonth = this.selectedGroup.regressionModelStartMonth;;
-        const startYear = this.selectedGroup.regressionStartYear;
-        const endMonth = this.selectedGroup.regressionModelEndMonth;
-        const endYear = this.selectedGroup.regressionEndYear;
+        const startMonth = selectedGroup.regressionModelStartMonth;
+        const startYear = selectedGroup.regressionStartYear;
+        const endMonth = selectedGroup.regressionModelEndMonth;
+        const endYear = selectedGroup.regressionEndYear;
 
-        let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = [];
-        if (this.inspectedMonthlyAnalysisSummaryData) {
-          potentialModelYearData = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
-            const date = data.date;
-            return (
-              (date.getFullYear() > startYear || (date.getFullYear() == startYear && date.getMonth() >= startMonth)) &&
-              (date.getFullYear() < endYear || (date.getFullYear() == endYear && date.getMonth() <= endMonth))
-            );
-          });
-        }
+        const potentialModelYearData = summaryData.filter(data => {
+          const date = data.date;
+          return (
+            (date.getFullYear() > startYear || (date.getFullYear() == startYear && date.getMonth() >= startMonth)) &&
+            (date.getFullYear() < endYear || (date.getFullYear() == endYear && date.getMonth() <= endMonth))
+          );
+        });
 
         var trace2 = {
           type: "scatter",
@@ -230,13 +214,12 @@ export class RegressionUserDefinedModelInspectionComponent {
           }
         }
 
-
         var trace3 = {
           type: "scatter",
           mode: "markers",
           name: this.getTrace3Name(),
-          x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
-          y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.energyUse }),
+          x: summaryData.map(results => { return results.date }),
+          y: summaryData.map(results => { return results.energyUse }),
           line: { color: '#515A5A', width: 4 },
           marker: {
             size: 10,
@@ -283,26 +266,26 @@ export class RegressionUserDefinedModelInspectionComponent {
   }
 
   getGraphName(): string {
-    if (this.analysisItem.analysisCategory == 'energy') {
+    if (this.analysisItem()?.analysisCategory == 'energy') {
       return 'Modeled Energy';
-    } else if (this.analysisItem.analysisCategory == 'water') {
+    } else if (this.analysisItem()?.analysisCategory == 'water') {
       return 'Modeled Water';
     }
     return '';
   }
 
   getTrace3Name(): string {
-    if (this.analysisItem.analysisCategory == 'energy') {
+    if (this.analysisItem()?.analysisCategory == 'energy') {
       return 'Actual Energy';
-    } else if (this.analysisItem.analysisCategory == 'water') {
+    } else if (this.analysisItem()?.analysisCategory == 'water') {
       return 'Actual Consumption';
     }
   }
 
   getGraphTitle(): string {
-    if (this.analysisItem.analysisCategory == 'energy') {
+    if (this.analysisItem()?.analysisCategory == 'energy') {
       return 'Comparison of Actual and Modeled Energy Use';
-    } else if (this.analysisItem.analysisCategory == 'water') {
+    } else if (this.analysisItem()?.analysisCategory == 'water') {
       return 'Comparison of Actual and Modeled Water Consumption';
     }
   }

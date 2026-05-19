@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MeterDataSummary } from '../process-meter-readings.component';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -17,8 +17,6 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 export class MeterDataSummaryTableComponent {
   @Input({ required: true })
   meterDataSummaries: Array<MeterDataSummary>;
-  @Output('emitInspectSummary')
-  emitInspectSummary: EventEmitter<MeterDataSummary> = new EventEmitter<MeterDataSummary>();
 
   skipAll: boolean = false;
   facilities: Array<IdbFacility>;
@@ -220,10 +218,6 @@ export class MeterDataSummaryTableComponent {
         return meterReadingComparisonObj;
       }
     }
-  }
-
-  selectMeterSummary(meterSummary: MeterDataSummary) {
-    this.emitInspectSummary.emit(meterSummary);
   }
 }
 

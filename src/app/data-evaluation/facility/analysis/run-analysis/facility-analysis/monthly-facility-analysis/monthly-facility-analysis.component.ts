@@ -16,7 +16,6 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 })
 export class MonthlyFacilityAnalysisComponent implements OnInit {
 
-  dataDisplay: 'table' | 'graph';
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
@@ -31,14 +30,23 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
   }>;
+  analysisDisplay: 'table' | 'graph';
+  key: string;
+  facilitySub: Subscription;
+
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
     private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
-    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+      this.key = 'monthly-' + this.facility?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+    });
+
     this.calculatingSub = this.analysisService.calculating.subscribe(val => {
       this.calculating = val;
     });
@@ -61,10 +69,11 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
     this.monthlyFacilityAnalysisDataSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
     this.groupSummariesSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.dataDisplay = display;
-    this.analysisService.dataDisplay.next(this.dataDisplay);
+    this.analysisDisplay = display;
+    this.analysisService.getDisplaySubject(this.key, 'graph').next(display);
   }
 }

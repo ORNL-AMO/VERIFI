@@ -17,7 +17,6 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 })
 export class MonthlyAccountAnalysisComponent implements OnInit {
 
-  dataDisplay: 'table' | 'graph';
   monthlyAccountAnalysisData: Array<MonthlyAnalysisSummaryData>;
   accountAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
@@ -27,14 +26,22 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
 
   calculatingSub: Subscription;
   monthlyAccountAnalysisDataSub: Subscription;
+  analysisDisplay: 'table' | 'graph';
+  key: string;
+  accountSub: Subscription;
+
   constructor(private analysisService: AnalysisService,
     private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
     private accountAnalysisService: AccountAnalysisService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
-    this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
+
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.account = val;
+      this.key = 'monthly-' + this.account?.id;
+      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
+    });
 
     this.calculatingSub = this.accountAnalysisService.calculating.subscribe(val => {
       this.calculating = val;
@@ -53,10 +60,11 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     this.calculatingSub.unsubscribe();
     this.monthlyAccountAnalysisDataSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.accountSub.unsubscribe();
   }
   
   setDataDisplay(display: 'table' | 'graph') {
-    this.dataDisplay = display;
-    this.analysisService.dataDisplay.next(this.dataDisplay);
+    this.analysisDisplay = display;
+    this.analysisService.getDisplaySubject(this.key, 'graph').next(this.analysisDisplay);
   }
 }

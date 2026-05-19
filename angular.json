@@ -7,10 +7,20 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "standalone": false
+          "standalone": false,
+          "type": "component"
         },
         "@schematics/angular:pipe": {
-          "standalone": false
+          "standalone": false,
+          "typeSeparator": "."
+        },
+        "@schematics/angular:service": {
+          "type": "service"
+        },
+        "@schematics/angular:module": {
+          "standalone": false,
+          "type": "module",
+          "typeSeparator": "."
         }
       },
       "root": "",

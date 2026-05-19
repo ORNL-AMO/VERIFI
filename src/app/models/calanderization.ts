@@ -16,6 +16,7 @@ export interface CalanderizedMeter {
     showProcessEmissions: boolean,
     showMobileEmissions: boolean,
     energyUnit: string,
+    energyIsSource: boolean
 }
 
 export interface MonthlyData extends EmissionsResults {

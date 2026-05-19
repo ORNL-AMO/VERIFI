@@ -27,14 +27,28 @@ import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
 import { FacilityReportNamePipe } from './facility-report-name.pipe';
 import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 import { CharactersRemainingPipe } from './characters-remaining.pipe';
-import { InvalidMeterPipe } from './invalid-meter.pipe';
+import { InvalidMeterPipe } from './validation-pipes/invalid-meter.pipe';
 import { FacilityItemPipe } from './facility-item.pipe';
 import { ReportDatePipe } from './report-date.pipe';
 import { ChargeTypeLabelPipe } from './charge-type-label.pipe';
+import { FacilityEnergyGroupsListPipe } from './facility-energy-groups-list.pipe';
+import { FacilityEnergyEquipmentListPipe } from './facility-energy-equipment-list.pipe';
+import { MeterGroupSourcesListPipe } from './meter-group-sources-list.pipe';
 import { GwpValueDisplayPipe } from './gwp-value-display-pipe';
 import { MeterGroupSourcePipe } from './meter-group-source-pipe';
+import { FacilityEnergyEquipmentNamePipe } from './facility-energy-equipment-name.pipe';
 import { DisplayPredictorDataDatePipe } from './display-predictor-data-date.pipe';
 import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
+import { InvalidMetersPipe } from './validation-pipes/invalid-meters.pipe';
+import { InvalidMeterDataPipe } from './validation-pipes/invalid-meter-data.pipe';
+import { InvalidGroupAnalysisPipe } from './validation-pipes/invalid-group-analysis.pipe';
+import { InvalidAccountAnalysisPipe } from './validation-pipes/invalid-account-analysis.pipe';
+import { InvalidAnalysisPipe } from './validation-pipes/invalid-analysis.pipe';
+import { AnalysisItemPipe } from './analysis-item.pipe';
+import { InvalidAccountReportPipe } from './validation-pipes/invalid-account-report.pipe';
+import { InvalidFacilityReportPipe } from './validation-pipes/invalid-facility-report.pipe';
+import { AccountReportNamePipe } from './account-report-name-pipe';
+import { EquipmentSourceIconsPipe } from './equipment-source-icons.pipe';
 
 @NgModule({
   declarations: [
@@ -69,10 +83,24 @@ import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
     FacilityItemPipe,
     ReportDatePipe,
     ChargeTypeLabelPipe,
+    FacilityEnergyGroupsListPipe,
+    FacilityEnergyEquipmentListPipe,
+    MeterGroupSourcesListPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
+    FacilityEnergyEquipmentNamePipe,
     DisplayPredictorDataDatePipe,
-    DisplayMeterDataDatePipe
+    DisplayMeterDataDatePipe,
+    InvalidMetersPipe,
+    InvalidMeterDataPipe,
+    InvalidGroupAnalysisPipe,
+    InvalidAccountAnalysisPipe,
+    InvalidAnalysisPipe,
+    AnalysisItemPipe,
+    InvalidAccountReportPipe,
+    InvalidFacilityReportPipe,
+    AccountReportNamePipe,
+    EquipmentSourceIconsPipe
   ],
   imports: [
     CommonModule
@@ -109,10 +137,24 @@ import { DisplayMeterDataDatePipe } from './display-meter-data-date.pipe';
     FacilityItemPipe,
     ReportDatePipe,
     ChargeTypeLabelPipe,
+    FacilityEnergyGroupsListPipe,
+    FacilityEnergyEquipmentListPipe,
+    MeterGroupSourcesListPipe,
     GwpValueDisplayPipe,
     MeterGroupSourcePipe,
+    FacilityEnergyEquipmentNamePipe,
     DisplayPredictorDataDatePipe,
-    DisplayMeterDataDatePipe
+    DisplayMeterDataDatePipe,
+    InvalidMetersPipe,
+    InvalidMeterDataPipe,
+    InvalidGroupAnalysisPipe,
+    InvalidAccountAnalysisPipe,
+    InvalidAnalysisPipe,
+    AnalysisItemPipe,
+    InvalidAccountReportPipe,
+    InvalidFacilityReportPipe,
+    AccountReportNamePipe,
+    EquipmentSourceIconsPipe
   ]
 })
 export class HelperPipesModule { }

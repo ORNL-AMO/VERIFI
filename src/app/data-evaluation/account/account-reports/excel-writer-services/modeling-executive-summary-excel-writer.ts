@@ -3,7 +3,7 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunction';
+import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,9 +11,6 @@ import { FacilityGroupAnalysisItem } from 'src/app/shared/facilityGroupItemFunct
 export class ModelingExecutiveSummaryExcelWriter {
 
   workbook: ExcelJS.Workbook;
-  regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
-  classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
-  absoluteGroupItems: Array<FacilityGroupAnalysisItem> = [];
   maxPredictorCount: number;
 
   constructor(
@@ -24,27 +21,27 @@ export class ModelingExecutiveSummaryExcelWriter {
   exportToExcel(selectedReport: IdbAccountReport, executiveSummaryItems: Array<FacilityGroupAnalysisItem>) {
     this.workbook = new ExcelJS.Workbook();
 
-    this.regressionGroupItems = executiveSummaryItems.filter(item => {
+    let regressionGroupItems: Array<FacilityGroupAnalysisItem> = executiveSummaryItems.filter(item => {
       return item.group.analysisType == 'regression';
     });
 
-    this.classicIntensityGroupItems = executiveSummaryItems.filter(item => {
+    let classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = executiveSummaryItems.filter(item => {
       return item.group.analysisType == 'energyIntensity';
     });
 
-    this.absoluteGroupItems = executiveSummaryItems.filter(item => {
+    let absoluteGroupItems: Array<FacilityGroupAnalysisItem> = executiveSummaryItems.filter(item => {
       return item.group.analysisType == 'absoluteEnergyConsumption';
     });
 
-    this.maxPredictorCount = this.regressionGroupItems.reduce((max, item) => {
+    this.maxPredictorCount = regressionGroupItems.reduce((max, item) => {
       const predictorCount = item.selectedModel?.predictorVariables.length || 0;
       return predictorCount > max ? predictorCount : max;
     }, 0);
 
-    if ((this.regressionGroupItems && this.regressionGroupItems.length > 0) ||
-      (this.classicIntensityGroupItems && this.classicIntensityGroupItems.length > 0) ||
-      (this.absoluteGroupItems && this.absoluteGroupItems.length > 0)) {
-      this.addExecutiveSummarySheet(this.workbook);
+    if ((regressionGroupItems && regressionGroupItems.length > 0) ||
+      (classicIntensityGroupItems && classicIntensityGroupItems.length > 0) ||
+      (absoluteGroupItems && absoluteGroupItems.length > 0)) {
+      this.addExecutiveSummarySheet(this.workbook, regressionGroupItems, classicIntensityGroupItems, absoluteGroupItems);
 
       this.workbook.xlsx.writeBuffer().then(excelData => {
         let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -60,7 +57,11 @@ export class ModelingExecutiveSummaryExcelWriter {
     }
   }
 
-  addExecutiveSummarySheet(workbook: ExcelJS.Workbook) {
+  addExecutiveSummarySheet(workbook: ExcelJS.Workbook,
+    regressionGroupItems: Array<FacilityGroupAnalysisItem>,
+    classicIntensityGroupItems: Array<FacilityGroupAnalysisItem>,
+    absoluteGroupItems: Array<FacilityGroupAnalysisItem>
+  ) {
     let sheet: ExcelJS.Worksheet = workbook.addWorksheet('Executive Summary');
 
     let headerRow = ['Facility', 'Group', 'Baseline Year', 'Model Year', 'R2', 'Adjusted R2', 'Model P-Value', 'Model Equation', 'Model Notes', 'Model Validation Failures', 'Data Validation Failures', 'Constant'];
@@ -97,8 +98,8 @@ export class ModelingExecutiveSummaryExcelWriter {
       };
     });
 
-    if (this.regressionGroupItems?.length > 0) {
-      this.regressionGroupItems.forEach(item => {
+    if (regressionGroupItems?.length > 0) {
+      regressionGroupItems.forEach(item => {
         let row = [
           this.facilityDbService.getFacilityNameById(item.facilityId),
           this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
@@ -123,8 +124,8 @@ export class ModelingExecutiveSummaryExcelWriter {
       });
     }
 
-    if (this.classicIntensityGroupItems?.length > 0) {
-      this.classicIntensityGroupItems.forEach(item => {
+    if (classicIntensityGroupItems?.length > 0) {
+      classicIntensityGroupItems.forEach(item => {
         let row = [
           this.facilityDbService.getFacilityNameById(item.facilityId),
           this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
@@ -146,8 +147,8 @@ export class ModelingExecutiveSummaryExcelWriter {
       });
     }
 
-    if (this.absoluteGroupItems?.length > 0) {
-      this.absoluteGroupItems.forEach(item => {
+    if (absoluteGroupItems?.length > 0) {
+      absoluteGroupItems.forEach(item => {
         let row = [
           this.facilityDbService.getFacilityNameById(item.facilityId),
           this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),

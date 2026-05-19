@@ -9,7 +9,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { FacilityReportsService } from '../../facility-reports.service';
 
 @Component({
     selector: 'app-facility-overview-report-setup',
@@ -26,16 +25,13 @@ export class FacilityOverviewReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  errorMessage: string;
-  errorMessageSub: Subscription;
   account: IdbAccount;
   accountSub: Subscription;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
-    private calanderizationService: CalanderizationService,
-    private facilityReportsService: FacilityReportsService
+    private calanderizationService: CalanderizationService
   ) {
 
   }
@@ -53,15 +49,10 @@ export class FacilityOverviewReportSetupComponent {
       }
     });
     this.setYearOptions();
-
-    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
-      this.errorMessage = message;
-    });
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
-    this.errorMessageSub.unsubscribe();
     this.accountSub.unsubscribe();
   }
 

@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { RouterGuardService } from './router-guard-service';
-import { Subscription } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -10,25 +10,10 @@ import { Subscription } from 'rxjs';
   styleUrl: './shared-router-guard-modal.component.css',
 })
 export class SharedRouterGuardModalComponent {
+  private routerGuardService: RouterGuardService = inject(RouterGuardService);
 
-  showModalSub: Subscription
-  showModal: boolean = false;
-
-  constructor(
-    private routerGuardService: RouterGuardService
-  ) { }
-
-  ngOnInit() {
-    this.showModalSub = this.routerGuardService.getShowModal().subscribe(show => {
-      this.showModal = show;
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.showModalSub) {
-      this.showModalSub.unsubscribe();
-    }
-  }
+  showModal: Signal<boolean> = toSignal(this.routerGuardService.showModal, { initialValue: false });
+  showSave: Signal<boolean> = toSignal(this.routerGuardService.showSave, { initialValue: true });
 
   onSave() {
     this.routerGuardService.setShowModal(false);
@@ -42,5 +27,6 @@ export class SharedRouterGuardModalComponent {
 
   onClose() {
     this.routerGuardService.setShowModal(false);
+    this.routerGuardService.setModalAction('cancel');
   }
 }

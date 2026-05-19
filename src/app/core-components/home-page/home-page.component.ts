@@ -39,6 +39,7 @@ export class HomePageComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'load-example-data') {
         this.navigateToAccount();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }
@@ -61,6 +62,7 @@ export class HomePageComponent {
         try {
           let test = JSON.parse(JSON.stringify(reader.result));
           let tmpBackupFile: BackupFile = JSON.parse(test);
+          this.backupDataService.accountBackupMessages();
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);
           await this.dbChangesService.selectAccount(newAccount, false);

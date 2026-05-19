@@ -139,49 +139,51 @@ export function getEmissions(meter: IdbUtilityMeter,
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel
         });
-        //not On Road Vehicle or On Road Calcuatated by consumption
-        if (meter.vehicleCategory != 2 || meter.vehicleCollectionType == 1) {
-            //TOTAL VOLUME IS IN gal
-            if (vehicleCollectionUnit != 'gal') {
-                //convert to gal
-                totalVolume = new ConvertValue(totalVolume, vehicleCollectionUnit, 'gal').convertedValue;
-            }
-            if (meterFuel.isBiofuel) {
-                mobileBiogenicEmissions = totalVolume * meterFuel.CO2;
-                mobileCarbonEmissions = 0;
+        if (meterFuel) {
+            //not On Road Vehicle or On Road Calcuatated by consumption
+            if (meter.vehicleCategory != 2 || meter.vehicleCollectionType == 1) {
+                //TOTAL VOLUME IS IN gal
+                if (vehicleCollectionUnit != 'gal') {
+                    //convert to gal
+                    totalVolume = new ConvertValue(totalVolume, vehicleCollectionUnit, 'gal').convertedValue;
+                }
+                if (meterFuel.isBiofuel) {
+                    mobileBiogenicEmissions = totalVolume * meterFuel.CO2;
+                    mobileCarbonEmissions = 0;
+                } else {
+                    mobileCarbonEmissions = (totalVolume * meterFuel.CO2) / 1000;
+                    mobileBiogenicEmissions = 0;
+                }
+                if (meter.vehicleCategory == 2) {
+                    let miles = (totalVolume * hhvOrFuelEfficiency);
+                    let totalCH4 = miles * CH4_Multiplier * meterFuel.CH4;
+                    let totalN2O = miles * N2O_Multiplier * meterFuel.N2O;
+                    mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+                } else {
+                    let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
+                    let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
+                    mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+                }
+                mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
             } else {
-                mobileCarbonEmissions = (totalVolume * meterFuel.CO2) / 1000;
-                mobileBiogenicEmissions = 0;
-            }
-            if (meter.vehicleCategory == 2) {
-                let miles = (totalVolume * hhvOrFuelEfficiency);
-                let totalCH4 = miles * CH4_Multiplier * meterFuel.CH4;
-                let totalN2O = miles * N2O_Multiplier * meterFuel.N2O;
-                mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
-            } else {
+                //TOTAL VOLUME IS IN MILES
+                if (vehicleDistanceUnit != 'mi') {
+                    //convert to miles
+                    totalVolume = new ConvertValue(totalVolume, vehicleDistanceUnit, 'mi').convertedValue;
+                }
+                //On Road calculated by mile
+                if (meterFuel.isBiofuel) {
+                    mobileBiogenicEmissions = (totalVolume * (1 / hhvOrFuelEfficiency) * meterFuel.CO2) / 1000;
+                    mobileCarbonEmissions = 0;
+                } else {
+                    mobileCarbonEmissions = (totalVolume * (1 / hhvOrFuelEfficiency) * meterFuel.CO2) / 1000;
+                    mobileBiogenicEmissions = 0;
+                }
                 let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
                 let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
-                mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+                mobileOtherEmissions = (totalCH4 + totalN2O);
+                mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
             }
-            mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
-        } else {
-            //TOTAL VOLUME IS IN MILES
-            if (vehicleDistanceUnit != 'mi') {
-                //convert to miles
-                totalVolume = new ConvertValue(totalVolume, vehicleDistanceUnit, 'mi').convertedValue;
-            }
-            //On Road calculated by mile
-            if (meterFuel.isBiofuel) {
-                mobileBiogenicEmissions = (totalVolume * (1 / hhvOrFuelEfficiency) * meterFuel.CO2) / 1000;
-                mobileCarbonEmissions = 0;
-            } else {
-                mobileCarbonEmissions = (totalVolume * (1 / hhvOrFuelEfficiency) * meterFuel.CO2) / 1000;
-                mobileBiogenicEmissions = 0;
-            }
-            let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
-            let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
-            mobileOtherEmissions = (totalCH4 + totalN2O);
-            mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
         }
     } else if (meter.source == 'Other') {
         let gwps: Array<GlobalWarmingPotential> = customGWPs.map(customGWP => {

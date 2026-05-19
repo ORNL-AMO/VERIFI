@@ -19,10 +19,14 @@ export class SidebarItemActivePipe implements PipeTransform {
       return url.includes('predictors') && url.includes(contextGuid);
     } else if (context === 'predictor') {
       return url.includes('predictors') && url.includes(contextGuid);
+    } else if (context === 'energy-uses-folder') {
+      return url.includes('energy-uses') && url.includes(contextGuid);
+    } else if (context === 'energy-use') {
+      return url.includes('energy-uses') && url.includes(contextGuid);
     }
     return null;
   }
 
 }
 
-type SidebarItemContext = 'facilities-folder' | 'facility' | 'meters-folder' | 'meter' | 'predictors-folder' | 'predictor';
+type SidebarItemContext = 'facilities-folder' | 'facility' | 'meters-folder' | 'meter' | 'predictors-folder' | 'predictor' | 'energy-uses-folder' | 'energy-use';

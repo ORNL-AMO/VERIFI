@@ -32,6 +32,12 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated, PredictorDataDeprecated } from 'src/app/models/idbModels/deprecatedPredictors';
 import JSZip from 'jszip';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -48,7 +54,10 @@ export class BackupDataService {
     private customGWPDbService: CustomGWPDbService,
     private predictorDataDbService: PredictorDataDbService,
     private predictorDbService: PredictorDbService,
-    private predictorsDbServiceDeprecated: PredictordbServiceDeprecated) { }
+    private predictorsDbServiceDeprecated: PredictordbServiceDeprecated,
+    private facilityReportsDbService: FacilityReportsDbService,
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) { }
 
 
   backupAccount(downloadAsZip?: boolean) {
@@ -73,6 +82,9 @@ export class BackupDataService {
       customEmissionsItems: this.customEmissionsDbService.accountEmissionsItems.getValue(),
       customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
+      facilityReports: this.facilityReportsDbService.accountFacilityReports.getValue(),
+      facilityEnergyUseGroups: this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue(),
+      facilityEnergyUseEquipment: this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue(),
       facility: undefined,
       backupFileType: "Account",
       origin: "VERIFI",
@@ -105,6 +117,15 @@ export class BackupDataService {
     let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let facilityPredictors: Array<IdbPredictor> = predictors.filter(meter => { return meter.facilityId == facility.guid });
 
+    let accountFacilityReports: Array<IdbFacilityReport> = this.facilityReportsDbService.accountFacilityReports.getValue();
+    let facilityReports: Array<IdbFacilityReport> = accountFacilityReports.filter(report => { return report.facilityId == facility.guid });
+
+    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue();
+    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = accountEnergyUseGroups.filter(group => { return group.facilityId == facility.guid });
+
+    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue();
+    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(equipment => { return equipment.facilityId == facility.guid });
+
     let backupFile: BackupFile = {
       account: undefined,
       facilities: undefined,
@@ -121,10 +142,13 @@ export class BackupDataService {
       customEmissionsItems: this.customEmissionsDbService.accountEmissionsItems.getValue(),
       customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
+      facilityReports: facilityReports,
+      facilityEnergyUseGroups: facilityEnergyUseGroups,
+      facilityEnergyUseEquipment: facilityEnergyUseEquipment,
       backupFileType: "Facility",
       origin: "VERIFI",
       timeStamp: new Date(),
-      dataBackupId: Math.random().toString(36).substr(2, 9)
+      dataBackupId: Math.random().toString(36).substr(2, 9),
     }
     let backupName: string = backupFile.facility.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
@@ -177,6 +201,18 @@ export class BackupDataService {
     return GUID;
   }
 
+  accountBackupMessages() {
+    this.loadingService.addLoadingMessage('Adding Facilities');
+    this.loadingService.addLoadingMessage('Adding Meter Groups');
+    this.loadingService.addLoadingMessage('Adding Meters');
+    this.loadingService.addLoadingMessage('Adding Meter Data');
+    this.loadingService.addLoadingMessage('Adding Predictors');
+    this.loadingService.addLoadingMessage('Adding Facility Analysis Items');
+    this.loadingService.addLoadingMessage('Adding Account Analysis Items');
+    this.loadingService.addLoadingMessage('Adding Custom Fuels');
+    this.loadingService.addLoadingMessage('Adding Account Reports');
+  }
+
   async importAccountBackupFile(backupFile: BackupFile, currIdx: number): Promise<IdbAccount> {
     this.analyticsService.sendEvent('import_backup_file');
     let accountGUIDs: { oldId: string, newId: string } = {
@@ -187,7 +223,6 @@ export class BackupDataService {
     backupFile.account.guid = accountGUIDs.newId;
     let newAccount: IdbAccount = await firstValueFrom(this.accountDbService.addWithObservable(backupFile.account));
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Facilities');
     let facilityGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilities.length; i++) {
       let facility: IdbFacility = backupFile.facilities[i];
@@ -199,11 +234,10 @@ export class BackupDataService {
       facility.guid = newGUID;
       delete facility.id;
       facility.accountId = accountGUIDs.newId;
-      await firstValueFrom(this.facilityDbService.addWithObservable(facility));
+      backupFile.facilities[i] = await firstValueFrom(this.facilityDbService.addWithObservable(facility));
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Meter Groups');
     let meterGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.groups.length; i++) {
       let group: IdbUtilityMeterGroup = backupFile.groups[i];
@@ -220,7 +254,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Meters');
     let meterGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.meters.length; i++) {
       let meter: IdbUtilityMeter = backupFile.meters[i];
@@ -238,7 +271,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Meter Data');
     let meterDataGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = backupFile.meterData[i];
@@ -264,10 +296,9 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Predictors');
 
     //migrate old
-    let predictorGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+    let predictorGUIDs: Array<{ oldId: string, newId: string, predictorName: string, facilityId: string }> = new Array();
     if (backupFile.predictorData.length > 0) {
       // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
@@ -294,7 +325,7 @@ export class BackupDataService {
             newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
             newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
             await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-            predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
+            predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid, predictorName: newPredictor.name, facilityId: facilityGuid.newId });
             for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
               let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
               let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
@@ -320,14 +351,17 @@ export class BackupDataService {
       for (let i = 0; i < backupFile.predictors.length; i++) {
         let predictor: IdbPredictor = backupFile.predictors[i];
         let newGUID: string = this.getGUID();
+        let facilityId: string = this.getNewId(predictor.facilityId, facilityGUIDs);
         predictorGUIDs.push({
           newId: newGUID,
-          oldId: predictor.guid
+          oldId: predictor.guid,
+          predictorName: predictor.name,
+          facilityId: facilityId
         });
         delete predictor.id;
         predictor.guid = newGUID;
         predictor.accountId = accountGUIDs.newId;
-        predictor.facilityId = this.getNewId(predictor.facilityId, facilityGUIDs);
+        predictor.facilityId = facilityId;
         await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
       }
     }
@@ -358,7 +392,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Facility Analysis Items');
     let facilityAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     let bankedItems: Array<IdbAnalysisItem> = new Array();
     for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
@@ -376,6 +409,17 @@ export class BackupDataService {
         group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
         if (group.models) {
           group.models = group.models.map(model => {
+            model.predictorVariables.forEach(variable => {
+              variable.id = this.getNewId(variable.id, predictorGUIDs);
+              if (variable.id == undefined) {
+                let facilityPredictorNewIds: { oldId: string, newId: string, predictorName: string, facilityId: string } = predictorGUIDs.find(predictor => {
+                  return predictor.predictorName === variable.name && predictor.facilityId === facilityAnalysisItem.facilityId;
+                });
+                if (facilityPredictorNewIds) {
+                  variable.id = facilityPredictorNewIds.newId;
+                }
+              }
+            })
             return this.getTrimmedModel(model);
           })
         }
@@ -398,7 +442,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Account Analysis Items');
     let accountAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.accountAnalysisItems.length; i++) {
       let accountAnalysisItem: IdbAccountAnalysisItem = backupFile.accountAnalysisItems[i];
@@ -429,7 +472,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom Fuels');
     for (let i = 0; i < backupFile.customFuels?.length; i++) {
       let customFuel: IdbCustomFuel = backupFile.customFuels[i];
       customFuel.accountId = accountGUIDs.newId;
@@ -447,7 +489,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Account Reports');
     for (let i = 0; i < backupFile.accountReports?.length; i++) {
       let accountReport: IdbAccountReport = backupFile.accountReports[i];
       accountReport.guid = this.getGUID();
@@ -483,10 +524,97 @@ export class BackupDataService {
       }
       await firstValueFrom(this.accountReportsDbService.addWithObservable(accountReport));
     }
+
+    //facility reports
+    this.loadingService.setLoadingMessage('Adding Facility Reports...');
+    for (let i = 0; i < backupFile.facilityReports?.length; i++) {
+      let facilityReport: IdbFacilityReport = backupFile.facilityReports[i];
+      facilityReport.guid = this.getGUID();
+      delete facilityReport.id;
+      facilityReport.accountId = accountGUIDs.newId;
+      facilityReport.facilityId = this.getNewId(facilityReport.facilityId, facilityGUIDs);
+      facilityReport.analysisItemId = this.getNewId(facilityReport.analysisItemId, facilityAnalysisGUIDs);
+      await firstValueFrom(this.facilityReportsDbService.addWithObservable(facilityReport));
+    }
+
+    //facility energy use groups
+    this.loadingService.setLoadingMessage('Adding Facility Energy Use Groups...');
+    let facilityEnergyUseGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+    for (let i = 0; i < backupFile.facilityEnergyUseGroups?.length; i++) {
+      let facilityEnergyUseGroup: IdbFacilityEnergyUseGroup = backupFile.facilityEnergyUseGroups[i];
+      let newId: string = this.getGUID();
+      facilityEnergyUseGroupGUIDs.push({
+        oldId: facilityEnergyUseGroup.guid,
+        newId: newId
+      });
+      delete facilityEnergyUseGroup.id;
+      facilityEnergyUseGroup.guid = newId;
+      facilityEnergyUseGroup.accountId = accountGUIDs.newId;
+      facilityEnergyUseGroup.facilityId = this.getNewId(facilityEnergyUseGroup.facilityId, facilityGUIDs);
+      await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(facilityEnergyUseGroup));
+    }
+
+    //facility energy use equipment
+    this.loadingService.setLoadingMessage('Adding Facility Energy Use Equipment...');
+    for (let i = 0; i < backupFile.facilityEnergyUseEquipment?.length; i++) {
+      let facilityEnergyUseEquipment: IdbFacilityEnergyUseEquipment = backupFile.facilityEnergyUseEquipment[i];
+      facilityEnergyUseEquipment.guid = this.getGUID();
+      delete facilityEnergyUseEquipment.id;
+      facilityEnergyUseEquipment.accountId = accountGUIDs.newId;
+      facilityEnergyUseEquipment.facilityId = this.getNewId(facilityEnergyUseEquipment.facilityId, facilityGUIDs);
+      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
+      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
+        return this.getNewId(groupId, meterGroupGUIDs);
+      });
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
+    }
+
+
+    //update account selected analysis items
+    let needsAccountUpdate: boolean = false;
+    if (newAccount.selectedEnergyAnalysisId) {
+      newAccount.selectedEnergyAnalysisId = this.getNewId(newAccount.selectedEnergyAnalysisId, accountAnalysisGUIDs);
+      needsAccountUpdate = true;
+    }
+    if (newAccount.selectedWaterAnalysisId) {
+      newAccount.selectedWaterAnalysisId = this.getNewId(newAccount.selectedWaterAnalysisId, accountAnalysisGUIDs);
+      needsAccountUpdate = true;
+    }
+    if (needsAccountUpdate) {
+      await firstValueFrom(this.accountDbService.updateWithObservable(newAccount));
+    }
+    //update facility analysis items
+    for (let i = 0; i < backupFile.facilities.length; i++) {
+      let facility: IdbFacility = backupFile.facilities[i];
+      let needsFacilityUpdate: boolean = false;
+      if (facility.selectedEnergyAnalysisId) {
+        facility.selectedEnergyAnalysisId = this.getNewId(facility.selectedEnergyAnalysisId, facilityAnalysisGUIDs);
+        needsFacilityUpdate = true;
+      }
+      if (facility.selectedWaterAnalysisId) {
+        facility.selectedWaterAnalysisId = this.getNewId(facility.selectedWaterAnalysisId, facilityAnalysisGUIDs);
+        needsFacilityUpdate = true;
+      }
+      if (needsFacilityUpdate) {
+        await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
+      }
+    }
+
     return newAccount;
   }
 
-  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<{facility: IdbFacility, index?: number}> {
+  facilityBackupMessages() {
+    this.loadingService.addLoadingMessage('Adding Meter Groups');
+    this.loadingService.addLoadingMessage('Adding Meters');
+    this.loadingService.addLoadingMessage('Adding Meter Data');
+    this.loadingService.addLoadingMessage('Adding Predictors');
+    this.loadingService.addLoadingMessage('Adding Facility Analysis Items');
+    this.loadingService.addLoadingMessage('Adding Custom Fuels');
+    this.loadingService.addLoadingMessage('Updating Account Analysis Items');
+    this.loadingService.addLoadingMessage('Updating Account Reports');
+  }
+
+  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<{ facility: IdbFacility, index?: number }> {
     this.analyticsService.sendEvent('import_backup_file');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
@@ -495,7 +623,6 @@ export class BackupDataService {
     let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(backupFile.facility));
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Meter Groups');
     let meterGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.groups.length; i++) {
       let group: IdbUtilityMeterGroup = backupFile.groups[i];
@@ -512,7 +639,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Meters');
     let meterGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.meters.length; i++) {
       let meter: IdbUtilityMeter = backupFile.meters[i];
@@ -530,7 +656,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Meter Data');
     let meterDataGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = backupFile.meterData[i];
@@ -555,7 +680,6 @@ export class BackupDataService {
 
     //TODO: migrate to new predictors..
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Predictors');
     // let predictorDataGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     // for (let i = 0; i < backupFile.predictorData.length; i++) {
     //   let predictorEntryDeprecated: IdbPredictorEntryDeprecated = backupFile.predictorData[i];
@@ -572,7 +696,7 @@ export class BackupDataService {
     //   await firstValueFrom(this.predictorsDbServiceDeprecated.addWithObservable(predictorEntryDeprecated));
     // }
 
-    let predictorGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+    let predictorGUIDs: Array<{ oldId: string, newId: string, predictorName: string, facilityId: string }> = new Array();
     if (backupFile.predictorData.length > 0) {
       // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
@@ -598,7 +722,7 @@ export class BackupDataService {
           newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
           newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
           await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-          predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
+          predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid, predictorName: newPredictor.name, facilityId: newFacilityGUID });
           for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
             let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
             let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
@@ -617,14 +741,15 @@ export class BackupDataService {
       }
     }
 
-
     if (backupFile.predictors) {
       for (let i = 0; i < backupFile.predictors.length; i++) {
         let predictor: IdbPredictor = backupFile.predictors[i];
         let newGUID: string = this.getGUID();
         predictorGUIDs.push({
           newId: newGUID,
-          oldId: predictor.guid
+          oldId: predictor.guid,
+          predictorName: predictor.name,
+          facilityId: newFacilityGUID
         });
         delete predictor.id;
         predictor.guid = newGUID;
@@ -644,7 +769,7 @@ export class BackupDataService {
           oldId: predictorData.guid
         });
         delete predictorData.id;
-        if(predictorData['date']){
+        if (predictorData['date']) {
           predictorData.year = new Date(predictorData['date']).getFullYear();
           predictorData.month = new Date(predictorData['date']).getMonth() + 1;
           predictorData.migratedDates = true;
@@ -653,13 +778,12 @@ export class BackupDataService {
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUID;
         predictorData.facilityId = newFacilityGUID;
-        predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorV2GUIDs);
+        predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Facility Analysis Items');
     let facilityAnalysisGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilityAnalysisItems.length; i++) {
       let facilityAnalysisItem: IdbAnalysisItem = backupFile.facilityAnalysisItems[i];
@@ -677,6 +801,19 @@ export class BackupDataService {
         group.predictorVariables.forEach(variable => {
           variable.id = this.getNewId(variable.id, predictorGUIDs);
         });
+        group.models.forEach(model => {
+          model.predictorVariables.forEach(variable => {
+            variable.id = this.getNewId(variable.id, predictorGUIDs);
+            if (variable.id == undefined) {
+              let facilityPredictorNewIds: { oldId: string, newId: string, predictorName: string, facilityId: string } = predictorGUIDs.find(predictor => {
+                return predictor.predictorName === variable.name && predictor.facilityId === newFacilityGUID;
+              });
+              if (facilityPredictorNewIds) {
+                variable.id = facilityPredictorNewIds.newId;
+              }
+            }
+          })
+        });
       });
       await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));
     }
@@ -691,7 +828,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Adding Custom Fuels');
     for (let i = 0; i < backupFile.customFuels.length; i++) {
       let customFuel: IdbCustomFuel = backupFile.customFuels[i];
       customFuel.accountId = accountGUID;
@@ -709,7 +845,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Updating Account Analysis Items');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
       accountAnalysisItems[i].facilityAnalysisItems.push({
@@ -720,7 +855,6 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    this.loadingService.addLoadingMessage('Updating Account Reports');
     let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
     for (let reportIndex = 0; reportIndex < accountReports.length; reportIndex++) {
       accountReports[reportIndex].dataOverviewReportSetup.includedFacilities.push({
@@ -736,7 +870,85 @@ export class BackupDataService {
       await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }
 
-    return {facility: newFacility, index: currIdx};
+    //facility reports
+    this.loadingService.setCurrentLoadingIndex(++currIdx);
+    this.loadingService.setLoadingMessage('Adding Facility Reports...');
+    for (let i = 0; i < backupFile.facilityReports?.length; i++) {
+      let facilityReport: IdbFacilityReport = backupFile.facilityReports[i];
+      facilityReport.guid = this.getGUID();
+      delete facilityReport.id;
+      facilityReport.accountId = accountGUID;
+      facilityReport.facilityId = newFacilityGUID;
+      facilityReport.analysisItemId = this.getNewId(facilityReport.analysisItemId, facilityAnalysisGUIDs);
+      await firstValueFrom(this.facilityReportsDbService.addWithObservable(facilityReport));
+    }
+
+    //facility energy use groups
+    this.loadingService.setCurrentLoadingIndex(++currIdx);
+    this.loadingService.setLoadingMessage('Adding Facility Energy Use Groups...');
+    let facilityEnergyUseGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
+    for (let i = 0; i < backupFile.facilityEnergyUseGroups?.length; i++) {
+      let facilityEnergyUseGroup: IdbFacilityEnergyUseGroup = backupFile.facilityEnergyUseGroups[i];
+      let newGUID: string = this.getGUID();
+      facilityEnergyUseGroupGUIDs.push({
+        newId: newGUID,
+        oldId: facilityEnergyUseGroup.guid
+      });
+      delete facilityEnergyUseGroup.id;
+      facilityEnergyUseGroup.guid = newGUID;
+      facilityEnergyUseGroup.accountId = accountGUID;
+      facilityEnergyUseGroup.facilityId = newFacilityGUID;
+      await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(facilityEnergyUseGroup));
+    }
+
+    //facility energy use equipment
+    this.loadingService.setCurrentLoadingIndex(++currIdx);
+    this.loadingService.setLoadingMessage('Adding Facility Energy Use Equipment...');
+    for (let i = 0; i < backupFile.facilityEnergyUseEquipment?.length; i++) {
+      let facilityEnergyUseEquipment: IdbFacilityEnergyUseEquipment = backupFile.facilityEnergyUseEquipment[i];
+      facilityEnergyUseEquipment.guid = this.getGUID();
+      delete facilityEnergyUseEquipment.id;
+      facilityEnergyUseEquipment.accountId = accountGUID;
+      facilityEnergyUseEquipment.facilityId = newFacilityGUID;
+      facilityEnergyUseEquipment.energyUseGroupId = this.getNewId(facilityEnergyUseEquipment.energyUseGroupId, facilityEnergyUseGroupGUIDs);
+      facilityEnergyUseEquipment.utilityMeterGroupIds = facilityEnergyUseEquipment.utilityMeterGroupIds.map(groupId => {
+        return this.getNewId(groupId, meterGroupGUIDs);
+      });
+      await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(facilityEnergyUseEquipment));
+    }
+
+    let needsFacilityUpdate: boolean = false;
+    if (newFacility.selectedEnergyAnalysisId) {
+      newFacility.selectedEnergyAnalysisId = this.getNewId(newFacility.selectedEnergyAnalysisId, facilityAnalysisGUIDs);
+      needsFacilityUpdate = true;
+    }
+    if (newFacility.selectedWaterAnalysisId) {
+      newFacility.selectedWaterAnalysisId = this.getNewId(newFacility.selectedWaterAnalysisId, facilityAnalysisGUIDs);
+      needsFacilityUpdate = true;
+    }
+    if (needsFacilityUpdate) {
+      await firstValueFrom(this.facilityDbService.updateWithObservable(newFacility));
+    }
+    return { facility: newFacility, index: currIdx };
+  }
+
+  getImportDate(date: Date): Date {
+    //date imported with timestap cause problems.
+    if (typeof date.getMonth === 'function') {
+      return date;
+    } else {
+      let readDateString: string = String(date);
+      //remove time stamp
+      let newString: string = readDateString.split('T')[0];
+      //Format: YYYY-MM-DD
+      let yearMonthDate: Array<string> = newString.split('-');
+      //Month 0 indexed (-1)
+      if (yearMonthDate.length == 3) {
+        return new Date(Number(yearMonthDate[0]), Number(yearMonthDate[1]) - 1, Number(yearMonthDate[2]));
+      } else {
+        return date;
+      }
+    }
   }
 
   getTrimmedModel(model: JStatRegressionModel): JStatRegressionModel {
@@ -817,6 +1029,9 @@ export interface BackupFile {
   backupFileType: "Account" | "Facility",
   timeStamp: Date,
   dataBackupId: string,
+  facilityReports: Array<IdbFacilityReport>,
+  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>
+  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>
 }
 
 

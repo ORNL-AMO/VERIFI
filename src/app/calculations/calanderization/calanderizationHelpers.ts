@@ -8,6 +8,8 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { getDateFromMeterData, getEarliestMeterData, getLatestMeterData, getLatestMeterDataDate } from "src/app/shared/dateHelperFunctions";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
+import { ConvertValue } from "../conversions/convertValue";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     let earliestReading: IdbUtilityMeterData = getEarliestMeterData(meterReadings);
@@ -146,4 +148,28 @@ export function getMonthsArray(meterData: Array<IdbUtilityMeterData>): Array<{ m
         };
     });
     return uniqYearMonths;
+}
+
+export function convertMeterDataToSite(calanderizedMeterData: Array<CalanderizedMeter>, neededUnits: string): Array<CalanderizedMeter> {
+    let convertedData: Array<CalanderizedMeter> = new Array();
+    calanderizedMeterData.forEach(cMeter => {
+        let cMeterCopy: CalanderizedMeter = _.cloneDeep(cMeter);
+        if (cMeterCopy.energyIsSource) {
+            cMeterCopy.monthlyData.forEach(monthData => {
+                monthData.energyUse = monthData.energyUse / cMeterCopy.meter.siteToSource;
+                return monthData;
+            });
+            cMeterCopy.energyIsSource = false;
+        }
+
+        if (cMeterCopy.energyUnit != neededUnits) {
+            cMeterCopy.monthlyData.forEach(monthData => {
+                monthData.energyUse = new ConvertValue(monthData.energyUse, cMeterCopy.energyUnit, neededUnits).convertedValue;
+                return monthData;
+            });
+            cMeterCopy.energyUnit = neededUnits;
+        }
+        convertedData.push(cMeterCopy);
+    });
+    return convertedData;
 }

@@ -35,6 +35,11 @@ import { UtilityMeterDataService } from '../../../shared/shared-meter-content/ut
 import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
+import { UploadDataFootprintToolService } from './upload-data-footprint-tool.service';
+import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
+import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
+import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
+import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions';
 
 @Injectable({
@@ -63,7 +68,10 @@ export class UploadDataService {
     private utilityMeterDataService: UtilityMeterDataService,
     private dbChangesService: DbChangesService,
     private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
-    private uploadDataV3Service: UploadDataV3Service) {
+    private uploadDataV3Service: UploadDataV3Service,
+    private uploadDataFootprintToolService: UploadDataFootprintToolService,
+    private facilityEnergyUseGroupDbService: FacilityEnergyUseGroupsDbService,
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -95,7 +103,9 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: [],
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: [],
+        facilityEnergyUseGroups: []
       };
     }
     else if (isTemplate == 'ETH') {
@@ -129,7 +139,40 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: templateData.newGroups,
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: templateData.energyUseEquipment,
+        facilityEnergyUseGroups: templateData.energyUseGroups
+      };
+    } else if (isTemplate == 'Footprint-tool') {
+      console.log('parsing footprint tool template');
+      // let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
+      return {
+        name: file.name,
+        file: file,
+        dataSubmitted: false,
+        id: Math.random().toString(36).substr(2, 9),
+        workbook: workBook,
+        isTemplate: false,
+        isTreasureHuntTemplate: false,
+        isFootprintToolTemplate: true,
+        selectedWorksheetName: undefined,
+        selectedWorksheetData: [],
+        columnGroups: [],
+        meterFacilityGroups: [],
+        predictorFacilityGroups: [],
+        headerMap: [],
+        importFacilities: templateData.importFacilities,
+        meters: templateData.importMeters,
+        meterData: templateData.meterData,
+        predictors: templateData.predictors,
+        predictorData: templateData.predictorData,
+        skipExistingReadingsMeterIds: [],
+        skipExistingPredictorFacilityIds: [],
+        newMeterGroups: templateData.newGroups,
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: templateData.energyUseEquipment,
+        facilityEnergyUseGroups: templateData.energyUseGroups
       };
     }
     else {
@@ -162,7 +205,9 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: templateData.newGroups,
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        facilityEnergyUseEquipment: [],
+        facilityEnergyUseGroups: []
       };
     }
   }
@@ -186,6 +231,8 @@ export class UploadDataService {
       return "ETH";
     } else if (sheetNames.includes("V3")) {
       return "V3";
+    } else if (sheetNames.includes("Energy Consumption") && sheetNames.includes("Energy Uses") && sheetNames.includes("Relevant Variables")) {
+      return "Footprint-tool";
     } else {
       return "Non-template";
     }
@@ -200,6 +247,8 @@ export class UploadDataService {
       return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook);
     } else if (templateVersion == "V3") {
       return this.uploadDataV3Service.parseTemplate(workbook);
+    } else if (templateVersion == "Footprint-tool") {
+      return this.uploadDataFootprintToolService.parseTemplate(workbook);
     }
   }
 
@@ -515,6 +564,16 @@ export class UploadDataService {
     return;
   }
 
+  setUploadDataSubmitMessages() {
+    this.loadingService.addLoadingMessage('Uploading Facilities');
+    this.loadingService.addLoadingMessage('Uploading Meters');
+    this.loadingService.addLoadingMessage('Creating Meter Groups');
+    this.loadingService.addLoadingMessage('Uploading Meter Data');
+    this.loadingService.addLoadingMessage('Uploading Predictors');
+    this.loadingService.addLoadingMessage('Uploading Predictor Data');    
+    this.loadingService.addLoadingMessage('Finishing Up');
+  }
+
 
   async submit(fileReference: FileReference): Promise<FileReference> {
     this.importFileReference = fileReference;
@@ -522,8 +581,8 @@ export class UploadDataService {
 
     this.loadingService.setContext('submit-file-data');
     this.loadingService.setTitle('Submitting File Data');
+    this.setUploadDataSubmitMessages();
     this.loadingService.setCurrentLoadingIndex(0);
-    this.loadingService.addLoadingMessage('Uploading Facilities');
 
     for (let i = 0; i < fileReference.importFacilities.length; i++) {
       let facility: IdbFacility = fileReference.importFacilities[i];
@@ -535,7 +594,6 @@ export class UploadDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(1);
-    this.loadingService.addLoadingMessage('Uploading Meters');
     for (let i = 0; i < fileReference.meters.length; i++) {
       let meter: IdbUtilityMeter = fileReference.meters[i];
       if (!meter.skipImport) {
@@ -548,14 +606,12 @@ export class UploadDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(2);
-    this.loadingService.addLoadingMessage('Creating Meter Groups');
     for (let i = 0; i < fileReference.newMeterGroups.length; i++) {
       let meterGroup: IdbUtilityMeterGroup = fileReference.newMeterGroups[i];
       await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(meterGroup));
     }
 
     this.loadingService.setCurrentLoadingIndex(3);
-    this.loadingService.addLoadingMessage('Uploading Meter Data');
     for (let i = 0; i < fileReference.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = fileReference.meterData[i];
       let meter: IdbUtilityMeter = fileReference.meters.find(meter => { return meter.guid == meterData.meterId })
@@ -590,7 +646,6 @@ export class UploadDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(4);
-    this.loadingService.addLoadingMessage('Uploading Predictors');
     for (let i = 0; i < fileReference.predictors.length; i++) {
       let predictor: IdbPredictor = fileReference.predictors[i];
       if (predictor.id) {
@@ -608,7 +663,6 @@ export class UploadDataService {
       }
     }
     this.loadingService.setCurrentLoadingIndex(5);
-    this.loadingService.addLoadingMessage('Uploading Predictor Data');
     for (let i = 0; i < fileReference.predictorData.length; i++) {
       let predictorData: IdbPredictorData = fileReference.predictorData[i];
       if (predictorData.id) {
@@ -625,9 +679,31 @@ export class UploadDataService {
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
       }
     }
+
+    this.loadingService.setCurrentLoadingIndex(6);
+    this.loadingService.addLoadingMessage('Uploading Energy Use Groups');
+    for (let i = 0; i < fileReference.facilityEnergyUseGroups.length; i++) {
+      let energyUseGroup: IdbFacilityEnergyUseGroup = fileReference.facilityEnergyUseGroups[i];
+      if (energyUseGroup.id) {
+        await firstValueFrom(this.facilityEnergyUseGroupDbService.updateWithObservable(energyUseGroup));
+      } else {
+        await firstValueFrom(this.facilityEnergyUseGroupDbService.addWithObservable(energyUseGroup));
+      }
+    }
+
+    this.loadingService.setCurrentLoadingIndex(7);
+    this.loadingService.addLoadingMessage('Uploading Energy Use Equipment');
+    for (let i = 0; i < fileReference.facilityEnergyUseEquipment.length; i++) {
+      let energyUseEquipment: IdbFacilityEnergyUseEquipment = fileReference.facilityEnergyUseEquipment[i];
+      if (energyUseEquipment.id) {
+        await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(energyUseEquipment));
+      } else {
+        await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(energyUseEquipment));
+      }
+    }
+
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setCurrentLoadingIndex(6);
-    this.loadingService.addLoadingMessage('Finishing Up');
     await this.dbChangesService.selectAccount(selectedAccount, false);
     fileReference.dataSubmitted = true;
     this.importFileReference = fileReference;

@@ -87,7 +87,8 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showOtherScope2Emissions: showOtherScope2Emissions,
             showFugitiveEmissions: showFugitiveEmissions,
             showMobileEmissions: showMobileEmissions,
-            showProcessEmissions: showProcessEmissions
+            showProcessEmissions: showProcessEmissions,
+            energyIsSource: energyIsSource
         });
     });
     return calanderizedMeterData;
@@ -132,7 +133,7 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
     //remove first and last month for iteration since they will be used as previous and next month for calanderization
     uniqYearMonths.shift();
     uniqYearMonths.pop();
-    
+
     if (meterData.length > 3) {
         for (let uniqMonth of uniqYearMonths) {
 

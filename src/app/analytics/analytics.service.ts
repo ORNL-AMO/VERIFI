@@ -104,7 +104,7 @@ export class AnalyticsService {
         ]
       }
     }
-    
+
     let url: string = environment.measurUtilitiesApi + 'gamp';
     if (environment.production) {
       this.httpClient.post<any>(url, postBody, this.httpOptions)
@@ -185,7 +185,17 @@ export interface EventParameters {
   engagement_time_msec?: string,
 }
 
-export type AnalyticsEventString = 'page_view' | 'verifi_app_open' | 'import_backup_file' | 'create_account_analysis' | 'create_facility_analysis' | 'create_account' | 'create_report' | 'use_data_visualization' | 'weather_data_predictors';
+export type AnalyticsEventString = 'page_view' |
+  'verifi_app_open' |
+  'import_backup_file' |
+  'create_account_analysis' |
+  'create_facility_analysis' |
+  'create_account' |
+  'create_report' |
+  'use_data_visualization' |
+  'weather_data_predictors' |
+  'email-list-subscribe';
+
 export type VerifiPlatformString = 'verifi-desktop' | 'verifi-web';
 
 export interface AppAnalyticsData {

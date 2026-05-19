@@ -38,6 +38,7 @@ export class ManageMeterGroupingComponent {
 
   ungroupedMeters: Array<IdbUtilityMeter>;
   groupToDelete: IdbUtilityMeterGroup;
+  ungroupedMeterGroup: IdbUtilityMeterGroup;
   constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
@@ -61,6 +62,8 @@ export class ManageMeterGroupingComponent {
     });
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
       this.facility = facility;
+      this.ungroupedMeterGroup = getNewIdbUtilityMeterGroup('Other', "Ungrouped Meters", facility.guid, facility.accountId);
+      this.ungroupedMeterGroup.guid = undefined;
     });
     this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(facilityMeterGroups => {
       this.otherGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Other' });
@@ -84,6 +87,8 @@ export class ManageMeterGroupingComponent {
     let newGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(newGroupType, "New Group", this.facility.guid, this.facility.accountId);
     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.analysisDbService.addGroup(newGroup.guid, newGroup.groupType);
+    await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     await this.dbChangesService.setMeterGroups(account, this.facility);
     this.toastNoticationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     this.editGroup(newGroup);

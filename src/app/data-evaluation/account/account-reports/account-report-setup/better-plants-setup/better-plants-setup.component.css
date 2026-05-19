@@ -6,3 +6,7 @@
 td{
     vertical-align: middle;
 }
+
+.fa.fa-exclamation-circle{
+    color: red;
+}

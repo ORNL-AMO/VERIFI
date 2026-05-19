@@ -1,14 +1,25 @@
-<h4>{{predictor.name}} Entry
-</h4>
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>{{predictor.name}} Entry
+                </h4>
 
-<div class="d-flex w-100 justify-content-end">
-    <div>
-        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
-        <button class="btn btn-primary me-2" (click)="saveAndQuit()" [disabled]="calculatingDegreeDays">Save +
-            Quit</button>
-        <button class="btn btn-primary" (click)="saveAndAddAnother()" [disabled]="calculatingDegreeDays">Save +
-            Add Another</button>
+                <div class="d-flex w-100 justify-content-end">
+                    <div>
+                        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+                        <button class="btn btn-primary me-2" (click)="saveAndQuit()"
+                            [disabled]="calculatingDegreeDays">Save +
+                            Quit</button>
+                        <button class="btn btn-primary" (click)="saveAndAddAnother()"
+                            [disabled]="calculatingDegreeDays">Save +
+                            Add Another</button>
+                    </div>
+                </div>
+                <app-edit-predictor-data-entry-form (isSaved)="onSavedChanges($event)" [predictor]="predictor"
+                    [predictorData]="predictorData"
+                    [calculatingDegreeDays]="calculatingDegreeDays"></app-edit-predictor-data-entry-form>
+            </div>
+        </div>
     </div>
 </div>
-<app-edit-predictor-data-entry-form (isSaved)="onSavedChanges($event)" [predictor]="predictor" [predictorData]="predictorData"
-    [calculatingDegreeDays]="calculatingDegreeDays"></app-edit-predictor-data-entry-form>

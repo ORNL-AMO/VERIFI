@@ -1,0 +1,53 @@
+@let _facility = facility();
+@let _facilityEnergyUseGroups = facilityEnergyUseGroups();
+
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    {{_facility.name}} Energy Use Groups
+                </h4>
+                @if(_facilityEnergyUseGroups.length > 0){
+                <!-- Toolbar -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <div class="group-count-badge">
+                        <span class="fa fa-layer-group me-1"></span>
+                        {{_facilityEnergyUseGroups.length}} Groups
+                    </div>
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <button class="btn action-btn" (click)="addGroup()">
+                            <i class="fa fa-plus"></i> Add Group
+                        </button>
+                        <button class="btn action-btn" (click)="goToBulkSetup()">
+                            <i class="fa fa-edit"></i> Bulk Setup
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Group Cards -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+                    @for(group of _facilityEnergyUseGroups; track group.guid) {
+                    <div class="col">
+                        <app-energy-use-group-card [group]="group">
+                        </app-energy-use-group-card>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <div class="text-center mt-5">
+                    <h5>No energy use groups found for this facility.</h5>
+                    <div class="d-flex w-100 justify-content-center">
+                        <div class="pe-1">
+                            <button class="btn action-btn" (click)="goToBulkSetup()"><i class="fa fa-plus"></i> Setup
+                                Energy Use
+                                Groups</button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

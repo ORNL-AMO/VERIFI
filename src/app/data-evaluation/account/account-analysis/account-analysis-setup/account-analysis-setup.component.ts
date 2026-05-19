@@ -7,7 +7,6 @@ import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shar
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
@@ -16,7 +15,6 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisType } from 'src/app/models/analysis';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -54,12 +52,10 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private router: Router,
     private dbChangesService: DbChangesService,
     private analysisDbService: AnalysisDbService,
-    private analysisValidationService: AnalysisValidationService,
     private calendarizationService: CalanderizationService,
     private accountReportDbService: AccountReportDbService,
     private accountAnalysisService: AccountAnalysisService,
     private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private utiltiyMeterGroupDbService: UtilityMeterGroupdbService,
@@ -91,8 +87,6 @@ export class AccountAnalysisSetupComponent implements OnInit {
   async saveItem() {
     this.isFormChange = true;
     this.analysisItem.isAnalysisVisited = false;
-    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.analysisItem, analysisItems);
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
@@ -199,10 +193,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
       }
       newIdbItem.groups.forEach(group => {
         group.analysisType = this.analysisType;
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
       });
-      // newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
-      newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
       newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
       for (let f = 0; f < this.analysisItem.facilityAnalysisItems.length; f++) {
         if (this.analysisItem.facilityAnalysisItems[f].facilityId == facility.guid) {
@@ -215,5 +206,9 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
+  }
+
+  goToSettings(){
+    this.router.navigateByUrl('/data-evaluation/account/settings');
   }
 }

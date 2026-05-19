@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -23,7 +23,10 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   selector: 'app-edit-bill',
   templateUrl: './edit-bill.component.html',
   styleUrls: ['./edit-bill.component.css'],
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class EditBillComponent implements OnInit {
 
@@ -40,6 +43,16 @@ export class EditBillComponent implements OnInit {
   inDataManagement: boolean;
   paramsSub: Subscription;
   isElectron: boolean;
+
+  handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.meterDataForm.invalid && !this.invalidDate) {
+        this.saveAndQuit();
+      }
+    }
+  }
+
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -170,6 +183,7 @@ export class EditBillComponent implements OnInit {
 
   canDeactivate(): Observable<boolean> {
     if (this.meterDataForm && this.meterDataForm.dirty) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

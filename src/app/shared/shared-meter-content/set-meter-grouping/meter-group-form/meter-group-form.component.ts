@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -23,9 +23,11 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
 @Component({
   selector: 'app-meter-group-form',
   standalone: false,
-
   templateUrl: './meter-group-form.component.html',
-  styleUrl: './meter-group-form.component.css'
+  styleUrl: './meter-group-form.component.css',
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class MeterGroupFormComponent {
 
@@ -38,6 +40,20 @@ export class MeterGroupFormComponent {
   hasWaterMeters: boolean;
 
   showDeleteModal: boolean = false;
+  inDataManagement: boolean = false;
+
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if ((!this.groupForm.invalid && !this.groupForm.pristine) || this.selectionsChanged) {
+        await this.saveChanges();
+        if (!this.inDataManagement) {
+          this.cancel();
+        }
+      }
+    }
+  }
+
   constructor(private facilityDbService: FacilitydbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -55,6 +71,7 @@ export class MeterGroupFormComponent {
   }
 
   ngOnInit() {
+    this.setInDataManagement();
     this.setHasMetersBools();
     this.activatedRoute.params.subscribe(params => {
       let meterGroupId: string = params['id'];
@@ -77,6 +94,10 @@ export class MeterGroupFormComponent {
     });
   }
 
+  setInDataManagement() {
+    this.inDataManagement = this.router.url.includes('data-management');
+  }
+
   cancel() {
     this.router.navigate(['../..'], { relativeTo: this.activatedRoute });
   }
@@ -88,7 +109,15 @@ export class MeterGroupFormComponent {
   }
 
   async saveChanges() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+
     this.meterGroup.name = this.groupForm.controls['name'].value;
+    if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
+      //need to update analysis items if groupType changes
+      await this.analysisDbService.changeGroupType(this.meterGroup.guid, this.groupForm.controls['groupType'].value, this.meterGroup.groupType);
+      await this.dbChangesService.setAnalysisItems(account, true, facility)
+    }
     this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
     this.meterGroup.description = this.groupForm.controls['description'].value;
     await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.meterGroup));
@@ -106,10 +135,10 @@ export class MeterGroupFormComponent {
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeterGroups(account, facility);
     await this.dbChangesService.setMeters(account, facility);
+    await this.dbChangesService.setMeterData(account, true, facility);
+    this.toastNoticationService.showToast("Meter Group Changes Saved!", undefined, undefined, false, "alert-success");
     this.selectionsChanged = false;
     this.groupForm.markAsPristine();
   }
@@ -168,6 +197,7 @@ export class MeterGroupFormComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.groupForm.dirty || this.selectionsChanged) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

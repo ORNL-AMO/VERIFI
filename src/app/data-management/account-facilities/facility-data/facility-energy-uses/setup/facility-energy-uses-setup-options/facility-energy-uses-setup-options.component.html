@@ -1,0 +1,74 @@
+<!--only show if no child route exists-->
+@if(!hasChildRoute){
+<div class="data-management-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex justify-content-between">
+                        <div class="h4 mb-0 mt-auto">
+                            {{facility.name}} Energy Use Groups Setup
+
+                        </div>
+                        <div class="ps-1">
+                            <button class="btn nav-btn" (click)="leaveGroupSetup()">
+                                <span class="fa fa-times"></span>
+                                Leave Group Setup
+                            </button>
+                        </div>
+                    </div>
+                </h4>
+
+                <div>
+                    <h5 class="text-center mb-0">Existing energy use groups found.<br> Would you like to set up new
+                        groups or edit
+                        existing groups?</h5>
+
+                    <div class="d-flex flex-column col-sm-12 col-md-8 col-lg-6 mx-auto">
+                        <div class="d-flex option-card" (click)="setupNewGroups()">
+                            <div>
+                                <i class="fa fa-plus"></i>
+                            </div>
+                            <div>
+                                <h6>Setup New Groups</h6>
+                                <p class="fw-light">
+                                    This option will allow you to set up new energy use groups. You will be able to
+                                    select which energy uses are included in each group and assign a name to each
+                                    group.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex option-card" (click)="editExistingGroups()">
+                            <div>
+                                <i class="fa fa-pencil"></i>
+                            </div>
+                            <div>
+                                <h6>Bulk Edit Existing Groups</h6>
+                                <p class="fw-light">
+                                    This option will allow you to edit existing energy use groups. You will be able to
+                                    change which energy uses are included in each group and rename groups.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex option-card" (click)="addYearOfData()">
+                            <div>
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <div>
+                                <h6>Add/Modify Year of Data</h6>
+                                <p class="fw-light">
+                                    This option will allow you to add or modify a year of data for your existing energy use groups.
+                                    You will be able to select which year of data to add or modify and which energy use groups to
+                                    apply the changes to.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}@else{
+<router-outlet></router-outlet>
+}

@@ -22,16 +22,17 @@ export class AnnualFacilityAnalysisReportComponent {
   facility: IdbFacility;
   @Input({ required: true })
   analysisReportSettings: AnalysisReportSettings;
+  @Input()
+  groupSummaries: Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+  }>;
+
   facilityReport: IdbFacilityReport;
   print: boolean;
   printSub: Subscription;
   facilityReportSub: Subscription;
-  @Input()
-  groupSummaries: Array<{
-          group: AnalysisGroup,
-          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-          annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
-      }>;
   constructor(private dataEvaluationService: DataEvaluationService,
     private facilityReportsDbService: FacilityReportsDbService
   ) { }

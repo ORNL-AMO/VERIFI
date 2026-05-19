@@ -1,20 +1,15 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlotlyService } from 'angular-plotly.js';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as _ from 'lodash';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { Subscription } from 'rxjs';
+import { MeterGroupingDataService } from '../meter-grouping-data.service';
 
 @Component({
   selector: 'app-meter-grouping-results-graph',
@@ -25,29 +20,30 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 export class MeterGroupingResultsGraphComponent {
   meterGroup: IdbUtilityMeterGroup;
 
-  calanderizedMeterData: Array<CalanderizedMeter>;
+  calanderizedMeters: Array<CalanderizedMeter>;
+  calanderizedMetersSub: Subscription;
   groupMonthlyData: Array<MonthlyData>;
   energyUnit: string;
 
   showConsumption: boolean = true;
   showEnergyUse: boolean = true;
   showCost: boolean = true;
-  metersInGroup: Array<IdbUtilityMeter>;
 
   displayGraphCost: "bar" | "scatter" | null = 'bar';
   displayGraphEnergy: "bar" | "scatter" | null = 'bar';
 
   @ViewChild('groupMeterDataChart', { static: false }) groupMeterDataChart: ElementRef;
   selectedFacility: IdbFacility;
+
+  calculatingMeterGroups: boolean | 'error' = false;
+  calculatingMeterGroupsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private router: Router,
     private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService,
     private plotlyService: PlotlyService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private meterGroupingDataService: MeterGroupingDataService
   ) { }
 
   ngOnInit() {
@@ -56,10 +52,21 @@ export class MeterGroupingResultsGraphComponent {
       this.meterGroup = this.utilityMeterGroupDbService.getGroupById(meterGroupId);
       if (!this.meterGroup) {
         this.cancel();
-      } else {
-        this.setCalanderizedMeterData();
       }
     });
+    this.calculatingMeterGroupsSub = this.meterGroupingDataService.calanderizingMeterData.subscribe(calculating => {
+      this.calculatingMeterGroups = calculating;
+    });
+    this.calanderizedMetersSub = this.meterGroupingDataService.calanderizedMeters.subscribe(calanderizedMeters => {
+      if (calanderizedMeters.length > 0) {
+        this.setCalanderizedMeterData(calanderizedMeters);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.calanderizedMetersSub.unsubscribe();
+    this.calculatingMeterGroupsSub.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -78,15 +85,14 @@ export class MeterGroupingResultsGraphComponent {
     this.router.navigate(['../../edit-group/' + this.meterGroup.guid], { relativeTo: this.activatedRoute });
   }
 
-  setCalanderizedMeterData() {
-    this.metersInGroup = this.utilityMeterDbService.getGroupMetersByGroupId(this.meterGroup.guid);
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+  setCalanderizedMeterData(calanderizedMeters: Array<CalanderizedMeter>) {
+    this.calanderizedMeters = calanderizedMeters.filter(cMeter => {
+      return cMeter.meter.groupId == this.meterGroup.guid;
+    });
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
 
     this.energyUnit = this.selectedFacility.energyUnit;
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.calanderizedMeterData = getCalanderizedMeterData(this.metersInGroup, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedFacility.energyIsSource, neededUnits: undefined }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
-    this.groupMonthlyData = this.calanderizedMeterData.flatMap(meter => { return meter.monthlyData });
+    this.groupMonthlyData = this.calanderizedMeters.flatMap(meter => { return meter.monthlyData });
     //combine monthly data for meters in group with same month and year
     this.groupMonthlyData = this.groupMonthlyData.reduce((acc, monthlyData) => {
       let existingData = acc.find(data => { return data.month == monthlyData.month && data.year == monthlyData.year });
@@ -112,6 +118,7 @@ export class MeterGroupingResultsGraphComponent {
       this.showConsumption = false;
     }
     this.showCost = this.groupMonthlyData.some(data => { return data.energyCost > 0 });
+    this.drawChart();
   }
 
 
@@ -135,7 +142,7 @@ export class MeterGroupingResultsGraphComponent {
 
 
   drawChart() {
-    if (this.groupMeterDataChart) {
+    if (this.groupMeterDataChart && this.calanderizedMeters && this.calanderizedMeters.length > 0) {
       let traceData = new Array();
       let yAxisTitle: string;
       let yAxis2Title: string;
@@ -279,7 +286,6 @@ export class MeterGroupingResultsGraphComponent {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
-      this.setCalanderizedMeterData();
       this.drawChart();
     }
   }

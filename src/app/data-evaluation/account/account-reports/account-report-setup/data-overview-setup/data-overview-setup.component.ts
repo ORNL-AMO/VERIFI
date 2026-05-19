@@ -53,7 +53,7 @@ export class DataOverviewSetupComponent {
     selectedReport.dataOverviewReportSetup = this.reportSetup;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(selectedReport);
+    this.accountReportDbService.selectedReport.next({ ...selectedReport });
   }
 
   setShowWater() {

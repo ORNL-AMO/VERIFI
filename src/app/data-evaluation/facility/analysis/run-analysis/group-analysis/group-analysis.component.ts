@@ -1,116 +1,100 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Component, computed, effect, inject, Signal } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AnalysisService } from '../../analysis.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { AnalysisService } from '../../analysis.service';
+import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 
 @Component({
-    selector: 'app-group-analysis',
-    templateUrl: './group-analysis.component.html',
-    styleUrls: ['./group-analysis.component.css'],
-    standalone: false
+  selector: 'app-group-analysis',
+  templateUrl: './group-analysis.component.html',
+  styleUrls: ['./group-analysis.component.css'],
+  standalone: false
 })
-export class GroupAnalysisComponent implements OnInit {
+export class GroupAnalysisComponent {
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private router: Router = inject(Router);
+  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private analysisService: AnalysisService = inject(AnalysisService);
 
-  analysisItem: IdbAnalysisItem;
-  selectedGroup: AnalysisGroup;
-  selectedGroupSub: Subscription;
-  groupId: string;
-  label: string
-  analysisItemSub: Subscription;
-  showModelSelection: boolean;
-  showBanked: boolean;
-  routerSub: Subscription;
-  setupErrors: boolean;
-  regressionErrors: boolean;
-  hasErrors: boolean;
-  hasInvalidRegressionModel: boolean;
-  hideLabel: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
-    private analysisService: AnalysisService, private router: Router,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  params: Signal<Params> = toSignal(this.activatedRoute.params);
+  selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
 
-  ngOnInit(): void {
-    this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
-      this.analysisItem = val;
+  showModelSelection: Signal<boolean> = computed(() => {
+    const selectedGroup = this.selectedGroup();
+    return selectedGroup ? selectedGroup.analysisType == 'regression' : false;
+  });
+  showBanked: Signal<boolean> = computed(() => {
+    const selectedGroup = this.selectedGroup();
+    const analysisItem = this.analysisItem();
+    if (selectedGroup && analysisItem) {
+      return selectedGroup.applyBanking && analysisItem.hasBanking;
+    }
+    return false;
+  });
+
+  private url = toSignal(
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map(e => (e as NavigationEnd).urlAfterRedirects)
+    ),
+    { initialValue: this.router.url }
+  );
+
+  label = computed(() => {
+    const url = this.url();
+    const group = this.selectedGroup();
+    if (!group) return '';
+    const groupName = this.utilityMeterGroupDbService.getGroupName(group.idbGroupId);
+    if (url.includes('annual-analysis')) return groupName + ' Annual Analysis';
+    if (url.includes('monthly-analysis')) return groupName + ' Monthly Analysis';
+    if (url.includes('model-selection')) return groupName + ' Regression Model';
+    return groupName + ' Setup';
+  });
+
+  hideLabel: Signal<boolean> = computed(() => {
+    const url = this.url();
+    return url.includes('banked-analysis');
+  });
+
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+
+  groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
+    const selectedGroup = this.selectedGroup();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    const analysisItem = this.analysisItem();
+    if (selectedGroup && analysisItem && facilityStatusCheck) {
+      const groupStatusCheck = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid);
+      if (groupStatusCheck) {
+        return groupStatusCheck.groupAnalysisErrors;
+      }
+    }
+    return emptyGroupAnalysisErrors();
+  });
+
+  constructor() {
+    effect(() => {
+      const params = this.params();
+      const analysisItem = this.analysisItem();
+      if (params['id']) {
+        const groupId = params['id'];
+        const group = analysisItem?.groups.find(group => group.idbGroupId == groupId);
+        if (group) {
+          this.analysisService.selectedGroup.next(group);
+        } else {
+          this.router.navigateByUrl('/data-evaluation/analysis/analysis-dashboard')
+        }
+      }
     })
-    this.activatedRoute.params.subscribe(params => {
-      this.groupId = params['id'];
-      this.setSelectedGroup();
-    });
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setLabel(this.router.url);
-      }
-    });
-
-    this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
-      this.selectedGroup = val;
-      if (this.selectedGroup) {
-        this.showModelSelection = this.selectedGroup.analysisType == 'regression';
-        this.showBanked = this.selectedGroup.applyBanking && this.analysisItem.hasBanking;
-        this.setErrorBools();
-      }
-    });
-    this.setLabel(this.router.url);
-  }
-
-  ngOnDestroy() {
-    this.analysisItemSub.unsubscribe();
-    this.routerSub.unsubscribe();
-    this.selectedGroupSub.unsubscribe();
-  }
-
-  setSelectedGroup() {
-    if (this.groupId != undefined) {
-      let selectedGroup: AnalysisGroup = this.analysisItem.groups.find(group => { return group.idbGroupId == this.groupId });
-      this.analysisService.selectedGroup.next(selectedGroup);
-    }
-  }
-
-  setLabel(url: string) {
-    if (this.selectedGroup) {
-      let groupName: string = this.utilityMeterGroupDbService.getGroupName(this.selectedGroup.idbGroupId);
-      if (url.includes('annual-analysis')) {
-        this.label = groupName + ' Annual Analysis';
-      } else if (url.includes('monthly-analysis')) {
-        this.label = groupName + ' Monthly Analysis';
-      } else if (url.includes('model-selection')) {
-        this.label = groupName + ' Regression Model';
-      } else {
-        this.label = groupName + ' Setup'
-      }
-
-      if (url.includes('banked-analysis')) {
-        this.hideLabel = true;
-      } else {
-        this.hideLabel = false;
-      }
-    }
-  }
-
-  setErrorBools() {
-    this.hasErrors = this.selectedGroup.groupErrors.hasErrors;
-    this.hasInvalidRegressionModel = this.selectedGroup.groupErrors.hasInvalidRegressionModel;
-    if (this.selectedGroup.groupErrors.hasErrors) {
-      this.regressionErrors = (this.selectedGroup.groupErrors.missingRegressionConstant ||
-        this.selectedGroup.groupErrors.missingRegressionModelYear ||
-        this.selectedGroup.groupErrors.missingRegressionModelStartMonth ||
-        this.selectedGroup.groupErrors.missingRegressionStartYear ||
-        this.selectedGroup.groupErrors.missingRegressionModelEndMonth ||
-        this.selectedGroup.groupErrors.missingRegressionEndYear ||
-        this.selectedGroup.groupErrors.invalidModelDateSelection ||
-        this.selectedGroup.groupErrors.missingRegressionModelSelection ||
-        this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
-      this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||
-        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters
-        || this.selectedGroup.groupErrors.invalidBankingYears || this.selectedGroup.groupErrors.missingBankingAppliedYear || this.selectedGroup.groupErrors.missingBankingBaselineYear)
-    } else {
-      this.regressionErrors = false;
-      this.setupErrors = false;
-    }
   }
 }

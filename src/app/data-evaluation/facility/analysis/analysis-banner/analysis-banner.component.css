@@ -2,16 +2,6 @@
     color: black !important;
 }
 
-.fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
-    color: red;
-}
-
-
-.fa.fa-exclamation-circle.warning, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle.warning{
-    color: orange;
-}
-
-
 .analysis.banner{
     background-color: white;
      /* border-bottom: solid #34495E; */

@@ -46,7 +46,9 @@ export class ManageAccountsComponent {
 
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'export-facilities-to-excel') {
+        this.exportToExcelTemplateV3Service.triggerExportDownload();
         this.showFacilityExportToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }
@@ -104,8 +106,8 @@ export class ManageAccountsComponent {
     this.account = account;
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facilities');
+    this.exportToExcelTemplateV3Service.setExportFacilityDataMessages();
     this.loadingService.setCurrentLoadingIndex(0);
-    this.loadingService.addLoadingMessage('Exporting to .xlsx template');
     try {
       await this.dbChangesService.selectAccount(account, true);
       this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData);

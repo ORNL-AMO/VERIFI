@@ -10,7 +10,6 @@ import { ProcessTemplateFileComponent } from "../data-management/data-management
 import { ProcessTemplateFacilitiesComponent } from "../data-management/data-management-import/process-template-file/process-template-facilities/process-template-facilities.component";
 import { FacilityMetersTableComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
-import { MeterDataComponent } from "../shared/shared-meter-content/meter-data/meter-data.component";
 import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { FacilitiesListComponent } from "../data-management/account-facilities/facilities-list/facilities-list.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
@@ -43,7 +42,6 @@ import { CustomFuelDataFormComponent } from "../shared/custom-database/custom-fu
 import { CustomGwpFormComponent } from "../shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 import { CustomGwpDashboardComponent } from "../shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
 import { AccountCustomDataComponent } from "../data-management/account-custom-data/account-custom-data.component";
-import { SetMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/set-meter-grouping.component";
 import { PrivacyNoticeComponent } from "../static-content/privacy-notice/privacy-notice.component";
 import { AboutComponent } from "../static-content/about/about.component";
 import { AcknowledgmentsComponent } from "../static-content/acknowledgments/acknowledgments.component";
@@ -52,10 +50,29 @@ import { HelpComponent } from "../static-content/help/help.component";
 import { FacilityMeterDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component";
 import { FacilityPredictorDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component";
 import { MeterChargesVisualizationComponent } from "../data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-visualization.component";
+import { FacilityEnergyUseGroupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group.component";
+import { FacilityEnergyUseGroupManagementComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group-management/facility-energy-use-group-management.component";
+import { FacilityEnergyUseEquipmentComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-equipment/facility-energy-use-equipment.component";
+import { FacilityEnergyUsesComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-uses.component";
+import { FacilityEnergyUsesGroupSetupComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-group-setup/facility-energy-uses-group-setup.component";
+import { FacilityEnergyUsesSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-summary/facility-energy-uses-summary.component";
+import { FacilityEnergyUsesGroupSummaryComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-summary/facility-energy-uses-group-summary.component";
+import { FootprintUploadSelectFacilityComponent } from "../data-management/data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component";
+import { FacilityEnergyUsesGroupFootprintComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint.component";
+import { FacilityEnergyUsesFootprintComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint.component";
 import { ManageMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
 import { MeterGroupFormComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
 import { MeterGroupingResultsTableComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
 import { MeterGroupingResultsGraphComponent } from "../shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
+import { FacilityEnergyUsesSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/facility-energy-uses-setup-options.component";
+import { NewEquipmentGroupSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component";
+import { EditExistingGroupsSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component";
+import { AddYearSetupOptionsComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/add-year-setup-options/add-year-setup-options.component";
+import { FacilityMeterGroupsComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-groups/facility-meter-groups.component";
+import { FacilityMeterDataComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
+import { FacilityEnergyUsesModifyAnnualDataComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component";
+import { MapMeterGroupsToEquipmentComponent } from "../data-management/data-management-import/process-footprint-tool-file/map-meter-groups-to-equipment/map-meter-groups-to-equipment.component";
+import { ConfirmEnergyUsesUploadComponent } from "../data-management/data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -104,6 +121,16 @@ export const DataManagementRoutes: Route = {
                         { path: 'predictor-data', component: ProcessPredictorReadingsComponent },
                         { path: 'review-and-submit', component: SubmitImportDataComponent }
                     ]
+                },
+                {
+                    path: 'process-footprint-tool-file/:id',
+                    component: ProcessTemplateFileComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'select-facility' },
+                        { path: 'select-facility', component: FootprintUploadSelectFacilityComponent },
+                        { path: 'map-meter-groups-to-equipment', component: MapMeterGroupsToEquipmentComponent },
+                        { path: 'review-and-submit', component: ConfirmEnergyUsesUploadComponent }
+                    ]
                 }
             ]
         },
@@ -138,7 +165,7 @@ export const DataManagementRoutes: Route = {
                                 },
                                 {
                                     path: 'meter-data',
-                                    component: MeterDataComponent,
+                                    component: FacilityMeterDataComponent,
                                     children: [
                                         { path: '', component: MeterDataTableComponent },
                                         {
@@ -161,7 +188,7 @@ export const DataManagementRoutes: Route = {
                         },
                         {
                             path: 'meter-grouping',
-                            component: SetMeterGroupingComponent,
+                            component: FacilityMeterGroupsComponent,
                             children: [
                                 {
                                     path: '',
@@ -225,7 +252,76 @@ export const DataManagementRoutes: Route = {
                                 },
                                 { path: 'data-quality-report', component: FacilityPredictorDataQualityReportComponent }
                             ]
-                        }
+                        },
+                        {
+                            path: 'energy-uses',
+                            component: FacilityEnergyUsesComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    component: FacilityEnergyUseGroupManagementComponent
+                                },
+                                {
+                                    path: 'setup-options',
+                                    component: FacilityEnergyUsesSetupOptionsComponent,
+                                    children: [
+                                        {
+                                            path: 'new-groups',
+                                            component: NewEquipmentGroupSetupOptionsComponent
+                                        },
+                                        {
+                                            path: 'edit-groups',
+                                            component: EditExistingGroupsSetupOptionsComponent
+                                        },
+                                        {
+                                            path: 'add-year',
+                                            component: AddYearSetupOptionsComponent
+                                        }
+                                    ]
+                                },
+                                {
+                                    path: 'edit-existing',
+                                    component: FacilityEnergyUsesGroupSetupComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'new-setup',
+                                    component: FacilityEnergyUsesGroupSetupComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'modify-annual-data/:year',
+                                    component: FacilityEnergyUsesModifyAnnualDataComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'summary',
+                                    component: FacilityEnergyUsesSummaryComponent
+                                },
+                                {
+                                    path: 'footprint',
+                                    component: FacilityEnergyUsesFootprintComponent
+                                },
+                                {
+                                    path: ':id',
+                                    component: FacilityEnergyUseGroupComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: ':id/equipment/:equipmentId',
+                                    component: FacilityEnergyUseEquipmentComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: ':id/summary',
+                                    component: FacilityEnergyUsesGroupSummaryComponent
+                                },
+                                {
+                                    path: ':id/footprint',
+                                    component: FacilityEnergyUsesGroupFootprintComponent
+                                }
+                            ]
+                        },
                     ]
                 }
             ]

@@ -5,6 +5,7 @@ export interface ApplicationInstanceData extends IdbEntry {
     isSurveyDone: boolean,
     doSurveyReminder: boolean,
     appOpenCount: number,
+    subscriberId?: number,
 }
 
 export function getNewApplicationInstanceData(): ApplicationInstanceData {

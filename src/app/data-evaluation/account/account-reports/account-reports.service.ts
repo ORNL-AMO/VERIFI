@@ -11,51 +11,8 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 export class AccountReportsService {
 
   generateExcel: BehaviorSubject<boolean>;
-
-  errorMessage: BehaviorSubject<string>;
-  compareBaselineYearToReportYearError: BehaviorSubject<boolean>;
-
-  constructor(private accountReportDbService: AccountReportDbService,
-    private formBuilder: FormBuilder
-  ) {
+  constructor(private formBuilder: FormBuilder) {
     this.generateExcel = new BehaviorSubject<boolean>(false);
-    this.errorMessage = new BehaviorSubject<string>(undefined);
-    this.compareBaselineYearToReportYearError = new BehaviorSubject<boolean>(false);
-
-    this.accountReportDbService.selectedReport.subscribe(report => {
-      if (report) {
-        this.validateReport(report);
-        this.compareBaselineYearToReportYear(report);
-      }
-    });
-  }
-
-  validateReport(report: IdbAccountReport) {
-    let errorMessage: string = '';
-    //write validation for report
-    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0 && report.endYear > 0) {
-      let startDate: Date = new Date(report.startYear, report.startMonth, 1);
-      let endDate: Date = new Date(report.endYear, report.endMonth, 1);
-      // compare start and end date
-      if (startDate.getTime() >= endDate.getTime()) {
-        errorMessage = 'Start date cannot be later than the end date.';
-      }
-      else {
-        errorMessage = '';
-      }
-    }
-    this.errorMessage.next(errorMessage)
-  }
-
-  compareBaselineYearToReportYear(report: IdbAccountReport) {
-    if (report.reportType == 'performance' || report.reportType == 'betterClimate') {
-      if (report.baselineYear != undefined && report.reportYear != undefined && report.reportYear < report.baselineYear) {
-        this.compareBaselineYearToReportYearError.next(true);
-      }
-      else {
-        this.compareBaselineYearToReportYearError.next(false);
-      }
-    }
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
@@ -74,7 +31,6 @@ export class AccountReportsService {
     if (report.reportType == 'betterClimate' || report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
-        reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, yearValidators],
         baselineYear: [report.baselineYear, yearValidators],
         startMonth: [report.startMonth, startDateValidators],
@@ -87,7 +43,6 @@ export class AccountReportsService {
     else if (report.reportType == 'betterPlants' || report.reportType == 'analysis' || report.reportType == 'performance') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
-        reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, yearValidators],
         baselineYear: [report.baselineYear, ''],
         startMonth: [report.startMonth, startDateValidators],
@@ -100,7 +55,6 @@ export class AccountReportsService {
     else if (report.reportType == 'accountEmissionFactors') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
-        reportType: [report.reportType, Validators.required],
         reportYear: [report.reportYear, ''],
         baselineYear: [report.baselineYear, ''],
         startMonth: [report.startMonth, ''],
@@ -114,7 +68,6 @@ export class AccountReportsService {
 
   updateReportFromSetupForm(report: IdbAccountReport, form: FormGroup): IdbAccountReport {
     report.name = form.controls.reportName.value;
-    report.reportType = form.controls.reportType.value;
     report.reportYear = form.controls.reportYear.value;
     report.baselineYear = form.controls.baselineYear.value;
     report.startMonth = form.controls.startMonth.value;
@@ -321,83 +274,6 @@ export class AccountReportsService {
   }
 
   getAccountSavingsFormFromReport(accountSavingsReportSetup: AccountSavingsReportSetup): FormGroup {
-    if (!accountSavingsReportSetup) {
-      accountSavingsReportSetup = {
-        analysisItemId: undefined,
-        includeAnnualResults: true,
-        includeAnnualResultsTable: true,
-        includeAnnualResultsGraph: true,
-        includeAccountMonthlyTable: true,
-        includeAccountMonthlyResults: true,
-        includeFacilityResults: true,
-        includeFacilityResultsTable: true,
-        includeFacilityResultsGraph: true,
-        includeFacilityMonthlyResultsGraph: true,
-        includePerformanceResults: true,
-        includePerformanceResultsTable: true,
-        includePerformanceResultsGraph: true,
-        includePerformanceActual: true,
-        includePerformanceAdjusted: true,
-        includePerformanceContribution: true,
-        includePerformanceSavings: true,
-        numberOfTopPerformers: 5,
-        analysisTableColumns: {
-          incrementalImprovement: false,
-          SEnPI: false,
-          savings: false,
-          percentSavingsComparedToBaseline: false,
-          yearToDateSavings: false,
-          yearToDatePercentSavings: false,
-          rollingSavings: false,
-          rolling12MonthImprovement: false,
-          productionVariables: false,
-          energy: true,
-          actualEnergy: true,
-          modeledEnergy: true,
-          adjusted: true,
-          baselineAdjustmentForNormalization: true,
-          baselineAdjustmentForOther: true,
-          baselineAdjustment: true,
-          totalSavingsPercentImprovement: true,
-          annualSavingsPercentImprovement: true,
-          cummulativeSavings: true,
-          newSavings: true,
-          predictors: [],
-          predictorGroupId: undefined,
-          bankedSavings: false,
-          savingsUnbanked: false
-        }
-      };
-    }
-
-    if (!accountSavingsReportSetup.analysisTableColumns) {
-      accountSavingsReportSetup.analysisTableColumns = {
-        incrementalImprovement: false,
-        SEnPI: false,
-        savings: false,
-        percentSavingsComparedToBaseline: false,
-        yearToDateSavings: false,
-        yearToDatePercentSavings: false,
-        rollingSavings: false,
-        rolling12MonthImprovement: false,
-        productionVariables: false,
-        energy: true,
-        actualEnergy: true,
-        modeledEnergy: true,
-        adjusted: true,
-        baselineAdjustmentForNormalization: true,
-        baselineAdjustmentForOther: true,
-        baselineAdjustment: true,
-        totalSavingsPercentImprovement: true,
-        annualSavingsPercentImprovement: true,
-        cummulativeSavings: true,
-        newSavings: true,
-        predictors: [],
-        predictorGroupId: undefined,
-        bankedSavings: false,
-        savingsUnbanked: false
-      };
-    }
     let form: FormGroup = this.formBuilder.group({
       analysisItemId: [accountSavingsReportSetup.analysisItemId, Validators.required],
       includeAnnualResults: [accountSavingsReportSetup.includeAnnualResults],
@@ -516,33 +392,5 @@ export class AccountReportsService {
     accountSavingsReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
     accountSavingsReportSetup.analysisTableColumns = form.controls.analysisTableColumns.value;
     return accountSavingsReportSetup;
-  }
-
-  isReportValid(report: IdbAccountReport): boolean {
-    let setupForm: FormGroup = this.getSetupFormFromReport(report);
-    if (setupForm.invalid) {
-      return false;
-    }
-    if (report.reportType == 'betterPlants') {
-      let bpForm: FormGroup = this.getBetterPlantsFormFromReport(report.betterPlantsReportSetup);
-      return bpForm.valid;
-    } else if (report.reportType == 'dataOverview') {
-      let dataForm: FormGroup = this.getDataOverviewFormFromReport(report.dataOverviewReportSetup);
-      return dataForm.valid;
-    } else if (report.reportType == 'performance') {
-      let performanceForm: FormGroup = this.getPerformanceFormFromReport(report.performanceReportSetup);
-      return performanceForm.valid;
-    } else if (report.reportType == 'betterClimate') {
-      let betterClimateForm: FormGroup = this.getBetterCimateFormFromReport(report.betterClimateReportSetup);
-      return betterClimateForm.valid;
-    } else if (report.reportType == 'analysis') {
-      let analysisForm: FormGroup = this.getAnalysisFormFromReport(report.analysisReportSetup);
-      return analysisForm.valid;
-    } else if (report.reportType == 'accountSavings') {
-      let accountSavingsForm: FormGroup = this.getAccountSavingsFormFromReport(report.accountSavingsReportSetup);
-      return accountSavingsForm.valid;
-    } else if (report.reportType == 'accountEmissionFactors') {
-      return true;
-    }
   }
 }

@@ -17,7 +17,7 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
   styleUrl: './analysis-detail-item-card.component.css'
 })
 export class AnalysisDetailItemCardComponent {
-  @Input()
+  @Input({required: true})
   analysisItem: IdbAnalysisItem;
 
   @Output() itemDeleted = new EventEmitter<boolean>();
@@ -44,8 +44,7 @@ export class AnalysisDetailItemCardComponent {
     private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, 
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService
-
+    private facilityReportsDbService: FacilityReportsDbService,
   ) { }
 
   ngOnChanges(): void {

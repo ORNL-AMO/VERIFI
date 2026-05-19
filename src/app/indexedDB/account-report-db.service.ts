@@ -146,4 +146,18 @@ export class AccountReportDbService {
     }
   }
 
+  getReportName(reportId: string): string {
+    let report: IdbAccountReport = this.getByGuid(reportId);
+    if (report) {
+      return report.name;
+    }
+    return '';
+  }
+
+  getByGuid(guid: string): IdbAccountReport {
+    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    return accountReports.find(report => {
+      return report.guid == guid;
+    });
+  }
 }

@@ -1,11 +1,12 @@
+@let _selectedFacility = selectedFacility();
+@let _disableTabs = disableTabs();
+
 <div class="facility banner d-flex justify-content-between w-100 pb-0 hide-print">
   <div class="d-flex w-100">
-    @if (selectedFacility) {
     <div class="banner-title ellipsis">
       <span class="fa fa-industry"></span>
-      {{selectedFacility.name}}
+      {{_selectedFacility?.name}}
     </div>
-    }
     <div class="flex-fill" #navTabs [ngClass]="{'hide-tab-text': hideTabText, 'hide-all-text': hideAllText}">
       <ul class="nav nav-tabs">
         <li class="nav-item" title="Facility Home">
@@ -20,10 +21,14 @@
             <span class="nav-text">
               Utility
               Data
+              @if(hasUtilityDataWarning()){
+              <i class="fa fa-exclamation-triangle text-warning"></i>
+              }
             </span>
           </a>
         </li>
-        <li class="nav-item" title="Facility Data Overview" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+        <li class="nav-item" title="Facility Data Overview"
+          [ngClass]="{'disabled': _disableTabs}">
           <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']"><i class="fa fa-chart-column"></i>
             <span class="nav-text">
               Overview
@@ -31,7 +36,7 @@
           </a>
         </li>
         <li class="nav-item" title="Facility Data Visualization"
-          [ngClass]="{'disabled': facilityMeterData.length == 0}">
+          [ngClass]="{'disabled': _disableTabs}">
           <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']"><i
               class="fa fa-chart-line"></i>
             <span class="nav-text">
@@ -39,14 +44,17 @@
             </span>
           </a>
         </li>
-        <li class="nav-item" title="Facility Analysis" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+        <li class="nav-item" title="Facility Analysis" [ngClass]="{'disabled': _disableTabs}">
           <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i class="fa fa-microscope"></i>
             <span class="nav-text">
               Analysis
+              @if(hasAnalysisWarning()){
+              <i class="fa fa-exclamation-triangle text-warning"></i>
+              }
             </span>
           </a>
         </li>
-        <li class="nav-item" title="Facility Reports" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+        <li class="nav-item" title="Facility Reports" [ngClass]="{'disabled': _disableTabs}">
           <a class="nav-link" routerLink="reports" [routerLinkActive]="['active']"><i class="fa fa-folder"></i>
             <span class="nav-text">
               Reports

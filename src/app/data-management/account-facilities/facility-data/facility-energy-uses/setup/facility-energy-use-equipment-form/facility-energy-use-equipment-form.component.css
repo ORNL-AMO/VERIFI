@@ -1,0 +1,28 @@
+.clickable{
+    cursor: pointer;
+}
+
+.fa.fa-circle-check{
+    color: green;
+    font-size: 1.2em;
+}
+
+.fa.fa-circle{
+    font-size: 1.2rem;
+}
+
+.popup-header .fa-link, .popup-header .fa-plus{
+    color: white;
+}
+
+span.badge.larger{
+    font-size: larger;
+}
+
+.float-right{
+    float: right;
+}
+
+a.click-link .fa{
+    color: inherit;
+}

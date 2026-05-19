@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-between mb-2">
   <div class="p-0">
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-analysis-summary-table-filter [tableContext]="'annualAccount'"
       [analysisItem]="accountAnalysisItem"></app-analysis-summary-table-filter>
     }
@@ -8,12 +8,12 @@
 
 
   <div class="btn-group">
-    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+    <button class="btn toggle-btn" [ngClass]="{'active': analysisDisplay == 'table'}" (click)="setDataDisplay('table')">
       <span class="fa fa-chevron-right"></span>
       Table
       <span class="fa fa-chevron-left"></span>
     </button>
-    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+    <button class="btn toggle-btn" [ngClass]="{'active': analysisDisplay == 'graph'}" (click)="setDataDisplay('graph')">
       <span class="fa fa-chevron-right"></span>
       Graph
       <span class="fa fa-chevron-left"></span>
@@ -23,12 +23,12 @@
 
 @if (calculating == false) {
   <div class="w-100 x-scroll">
-    @if (dataDisplay == 'table') {
+    @if (analysisDisplay == 'table') {
       <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummary" [isAccount]="true"
         [analysisItem]="accountAnalysisItem" [accountOrFacility]="account" [printBlock]="'all'">
       </app-annual-analysis-summary-table>
     }
-    @if (dataDisplay == 'graph') {
+    @if (analysisDisplay == 'graph') {
       <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="accountAnalysisItem">
       </app-annual-analysis-summary-graph>

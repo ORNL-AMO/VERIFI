@@ -24,13 +24,12 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
-import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
-import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
 import { DataManagementModule } from './data-management/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
 import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-modal/shared-router-guard-modal.component';
+import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-list-subscribe.module";
 
 @NgModule({
     declarations: [
@@ -46,29 +45,28 @@ import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-mo
         ManageAccountsComponent,
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
-        SurveyModalComponent,
-        SurveyToastComponent,
         HomePageComponent,
         SharedRouterGuardModalComponent
     ],
     bootstrap: [AppComponent],
     imports: [
-        BrowserModule,
-        AppRoutingModule,
-        FormsModule,
-        CommonModule,
-        PlotlyModule.forRoot(PlotlyJS),
-        IndexedDBModule,
-        StaticContentModule,
-        BrowserAnimationsModule,
-        HelperPipesModule,
-        NgbTypeaheadModule,
-        WeatherDataModule,
-        UserSurveyModule,
-        DataManagementModule,
-        DataEvaluationModule,
-        NgbPaginationModule
-    ],
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    CommonModule,
+    PlotlyModule.forRoot(PlotlyJS),
+    IndexedDBModule,
+    StaticContentModule,
+    BrowserAnimationsModule,
+    HelperPipesModule,
+    NgbTypeaheadModule,
+    WeatherDataModule,
+    UserSurveyModule,
+    DataManagementModule,
+    DataEvaluationModule,
+    NgbPaginationModule,
+    EmailListSubscribeModule
+],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })
 

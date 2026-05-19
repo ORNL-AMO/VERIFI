@@ -2,18 +2,23 @@
   <div class="banner p-0">
     <ul class="nav nav-tabs">
       <li class="nav-item"><a class="nav-link" routerLink="energy-source" [routerLinkActive]="['active']">
-        <i class="fa fa-gauge-high"></i>
-      Meters</a></li>
-      @for (meter of utilityMeters; track meter) {
-        <li class="nav-item">
-          <a class="nav-link" routerLink="utility-meter/{{meter.guid}}" [routerLinkActive]="['active']">
-            <i class="fa fa-file-invoice"></i>
-            {{meter.name}}
-            @if (meter.guid | invalidMeter: meterData) {
-              <i class="fa fa-exclamation-circle"></i>
-            }
-          </a>
-        </li>
+          <i class="fa fa-gauge-high"></i>
+          Meters
+          @if (facilityStatusCheck() && facilityStatusCheck()?.metersStatus != 'good') {
+        <i class="fa fa-exclamation-triangle text-warning"></i>
+          }
+        </a>
+      </li>
+      @for (meterListItem of metersList(); track meterListItem.meter.guid) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="utility-meter/{{meterListItem.meter.guid}}" [routerLinkActive]="['active']">
+          <i class="fa fa-file-invoice"></i>
+          {{meterListItem.meter.name}}
+          @if (meterListItem.meterStatusCheck?.status != 'good') {
+        <i class="fa fa-exclamation-triangle text-warning"></i>
+          }
+        </a>
+      </li>
       }
     </ul>
   </div>

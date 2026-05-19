@@ -164,7 +164,7 @@ export class MonthlyGroupAnalysisClass {
 
   setModelYear() {
     if (this.selectedGroup.analysisType == 'regression') {
-      if (this.selectedGroup.userDefinedModel && this.selectedGroup.regressionStartYear && this.selectedGroup.regressionEndYear) {
+      if (this.selectedGroup.isGeneratedModel && this.selectedGroup.regressionStartYear && this.selectedGroup.regressionEndYear) {
         this.customModelYear = {
           startMonth: this.selectedGroup.regressionModelStartMonth,
           startYear: this.selectedGroup.regressionStartYear,

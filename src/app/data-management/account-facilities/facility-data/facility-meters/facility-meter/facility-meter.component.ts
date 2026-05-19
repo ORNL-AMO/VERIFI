@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
@@ -21,7 +21,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   selector: 'app-facility-meter',
   templateUrl: './facility-meter.component.html',
   styleUrl: './facility-meter.component.css',
-  standalone: false
+  standalone: false,
+  host: {
+    '(window:keydown)': 'handleKeyDown($event)'
+  }
 })
 export class FacilityMeterComponent {
 
@@ -32,6 +35,17 @@ export class FacilityMeterComponent {
   utilityMeter: IdbUtilityMeter;
   meterForm: FormGroup;
   showDeleteMeter: boolean = false;
+  meterDataExists: boolean = false;
+
+  async handleKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!this.meterForm.invalid && !this.meterForm.pristine) {
+        await this.saveChanges();
+      }
+    }
+  }
+
   constructor(private activatedRoute: ActivatedRoute,
     private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
@@ -60,6 +74,29 @@ export class FacilityMeterComponent {
       if (this.utilityMeter) {
         this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.utilityMeter);
+        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.utilityMeter.guid);
+        if (meterData.length != 0 && this.meterForm.valid) {
+          this.meterDataExists = true;
+          this.meterForm.controls.source.disable();
+          this.meterForm.controls.startingUnit.disable();
+          this.meterForm.controls.phase.disable();
+          this.meterForm.controls.fuel.disable();
+          this.meterForm.controls.heatCapacity.disable();
+          this.meterForm.controls.energyUnit.disable();
+
+          this.meterForm.controls.scope.disable();
+
+          this.meterForm.controls.waterIntakeType.disable();
+          this.meterForm.controls.waterDischargeType.disable();
+
+          this.meterForm.controls.vehicleCategory.disable();
+          this.meterForm.controls.vehicleType.disable();
+          this.meterForm.controls.vehicleCollectionType.disable();
+          this.meterForm.controls.vehicleCollectionUnit.disable();
+          this.meterForm.controls.vehicleFuel.disable();
+          this.meterForm.controls.vehicleFuelEfficiency.disable();
+          this.meterForm.controls.vehicleDistanceUnit.disable();
+        }
       } else {
         this.goToMeterList();
       }
@@ -145,6 +182,7 @@ export class FacilityMeterComponent {
 
   canDeactivate(): Observable<boolean> {
     if (this.meterForm && this.meterForm.dirty) {
+      this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {

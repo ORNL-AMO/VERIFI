@@ -31,6 +31,7 @@ import { FacilityModelingReportSetupComponent } from './facility-report-setup/fa
 import { FacilityModelingReportResultsComponent } from './report-results/facility-modeling-report-results/facility-modeling-report-results.component';
 import { AccountReportsModule } from '../../account/account-reports/account-reports.module';
 import { FacilityReportsDataCheckComponent } from './facility-reports-data-check/facility-reports-data-check.component';
+import { FacilityReportAnalysisSelectionComponent } from './facility-report-setup/facility-report-analysis-selection/facility-report-analysis-selection.component';
 import { FacilityCostSavingsReportSetupComponent } from './facility-report-setup/facility-cost-savings-report-setup/facility-cost-savings-report-setup.component';
 import { BlendedEnergyRateModalComponent } from './facility-report-setup/facility-cost-savings-report-setup/blended-energy-rate-modal/blended-energy-rate-modal.component';
 import { FacilityCostSavingsReportResultsComponent } from './report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component';
@@ -60,6 +61,7 @@ import { FacilityCostSavingsReportResultsComponent } from './report-results/faci
     FacilityModelingReportSetupComponent,
     FacilityModelingReportResultsComponent,
     FacilityReportsDataCheckComponent,
+    FacilityReportAnalysisSelectionComponent,
     FacilityCostSavingsReportSetupComponent,
     BlendedEnergyRateModalComponent,
     FacilityCostSavingsReportResultsComponent
