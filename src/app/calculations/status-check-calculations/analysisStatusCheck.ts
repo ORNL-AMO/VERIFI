@@ -199,12 +199,14 @@ export class AnalysisStatusCheck {
     }
 
     private setStatus() {
+        const groupsHaveWarnings = this.groupStatusChecks.some(g => g.status === 'warning');
+
         if (this.hasSetupErrors || this.hasMeterSetupErrors || this.hasPredictorSetupErrors || this.analysisSetupErrors.groupsHaveErrors) {
             this.status = 'error';
         }
-        // else if (!this.allDatesCurrent) {
-        //     this.status = 'warning';
-        // } 
+        else if (groupsHaveWarnings) {
+            this.status = 'warning';
+        } 
         else {
             this.status = 'good';
         }

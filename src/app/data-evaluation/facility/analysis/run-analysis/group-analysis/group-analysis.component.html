@@ -1,17 +1,19 @@
 @let _selectedGroup = selectedGroup();
-@let _groupErrors = groupErrors();
+@let _groupStatusCheck = groupStatusCheck();
 
-@if (_selectedGroup) {
+@if (_selectedGroup && _groupStatusCheck) {
 <!--TABS-->
 <div class="banner p-0">
   <ul class="nav nav-tabs">
-    <li class="nav-item" [ngClass]="{'error': _groupErrors.hasSetupErrors}"><a class="nav-link" routerLink="options"
-        [routerLinkActive]="['active']">
-        @if (_groupErrors.hasSetupErrors) {
-        <span class="fa fa-exclamation-circle"></span>
-        }
+    <li class="nav-item" [ngClass]="{'error': _groupStatusCheck.status == 'error'}"><a class="nav-link"
+        routerLink="options" [routerLinkActive]="['active']">
         <i class="fa fa-gears"></i>
-        Analysis Options</a></li>
+        Analysis Options
+        @if (_groupStatusCheck.status == 'error') {
+        <i class="fa fa-exclamation-triangle text-warning"></i>
+        }
+      </a>
+    </li>
     @if (showBanked() && _selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
     <li class="nav-item">
       <a class="nav-link" routerLink="banked-analysis" [routerLinkActive]="['active']">
@@ -23,24 +25,24 @@
     {
     <li class="nav-item">
       <a class="nav-link" routerLink="model-selection" [routerLinkActive]="['active']">
-        @if (_groupErrors.hasRegressionErrors) {
-        <span class="fa fa-exclamation-circle"></span>
-        }
-        @if (_groupErrors.hasInvalidRegressionModel) {
-        <span class="fa fa-exclamation-circle warning"></span>
-        }
         <i class=" fa fa-arrow-up-right-dots"></i>
-        Regression Model</a>
+        Regression Model
+        @if (_groupStatusCheck.groupAnalysisErrors.hasRegressionErrors ||
+        _groupStatusCheck.groupAnalysisErrors.hasInvalidRegressionModel ||
+        _groupStatusCheck.hasMeterSetupErrors || _groupStatusCheck.hasPredictorSetupErrors) {
+        <i class="fa fa-exclamation-triangle text-warning"></i>
+        }
+      </a>
     </li>
     }
     @if (_selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
-    <li class="nav-item" [ngClass]="{'disabled': _groupErrors.hasErrors}"><a class="nav-link"
+    <li class="nav-item" [ngClass]="{'disabled': _groupStatusCheck.status == 'error'}"><a class="nav-link"
         routerLink="annual-analysis" [routerLinkActive]="['active']">
         <i class="fa fa-magnifying-glass-chart"></i>Annual
         Analysis</a></li>
     }
     @if (_selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
-    <li class="nav-item" [ngClass]="{'disabled': _groupErrors.hasErrors}"><a class="nav-link"
+    <li class="nav-item" [ngClass]="{'disabled': _groupStatusCheck.groupAnalysisErrors.hasErrors}"><a class="nav-link"
         routerLink="monthly-analysis" [routerLinkActive]="['active']">
         <i class="fa fa-magnifying-glass-chart"></i>Monthly
         Analysis</a></li>
@@ -49,7 +51,39 @@
 </div>
 <div class="content-padding">
   @if (!hideLabel()) {
-  <h4>{{label()}}</h4>
+  <h4 class="mb-2">
+    <div class="d-flex align-items-center flex-wrap justify-content-between">
+      <div class="h4 mb-0 mt-auto">
+        {{label()}}
+      </div>
+      <div class="d-flex gap-2">
+        @if (_groupStatusCheck) {
+        @if (_groupStatusCheck.status === 'good') {
+        <span class="badge rounded-pill bg-success">
+          <span class="fa fa-circle-check me-1"></span>Analysis Valid
+        </span>
+        } @else {
+        @if (_groupStatusCheck.groupAnalysisErrors.hasSetupErrors) {
+        <span class="badge rounded-pill bg-danger">Setup Errors</span>
+        }
+        @if (_groupStatusCheck.hasModelErrors) {
+        <span class="badge rounded-pill bg-danger">Group Model Errors</span>
+        }
+        @if(_groupStatusCheck.groupAnalysisErrors.hasRegressionErrors ||
+        _groupStatusCheck.groupAnalysisErrors.hasInvalidRegressionModel ||
+        _groupStatusCheck.groupAnalysisErrors.hasInvalidUserDefinedModel) {
+        <span class="badge rounded-pill bg-warning text-dark">Invalid Regression Model</span>
+        }
+        @if (_groupStatusCheck.hasMeterSetupErrors || _groupStatusCheck.hasPredictorSetupErrors) {
+        <span class="badge rounded-pill bg-danger">Predictor/Meter Errors</span>
+        }
+        }
+        }
+      </div>
+    </div>
+  </h4>
+
+
   }
   <router-outlet></router-outlet>
 </div>

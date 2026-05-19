@@ -77,6 +77,8 @@ export class AnalysisGroupStatusCheck {
     private setStatus() {
         if (this.hasPredictorSetupErrors || this.hasMeterSetupErrors || this.groupAnalysisErrors?.hasErrors) {
             this.status = 'error';
+        }else if(this.groupAnalysisErrors?.hasInvalidRegressionModel || this.groupAnalysisErrors?.hasInvalidUserDefinedModel) {
+            this.status = 'warning';
         }
         else {
             this.status = 'good';

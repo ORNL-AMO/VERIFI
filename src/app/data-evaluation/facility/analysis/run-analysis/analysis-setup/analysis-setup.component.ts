@@ -53,13 +53,23 @@ export class AnalysisSetupComponent {
   readonly facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
 
-  analysisStatusCheck: Signal<AnalysisStatusCheck> = computed(() => {
+  readonly analysisStatusCheck = computed(() => {
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
-    if (!facilityStatusCheck || !analysisItem) {
-      return undefined;
-    }
+    if (!facilityStatusCheck || !analysisItem) { return undefined; }
     return facilityStatusCheck.getAnalysisStatusById(analysisItem.guid);
+  });
+
+  /** True when any analysis group has setup configuration errors. */
+  readonly hasGroupSetupErrors = computed(() => {
+    const analysisStatusCheck = this.analysisStatusCheck();
+    return analysisStatusCheck?.groupStatusChecks.some(g => g.groupAnalysisErrors?.hasErrors) ?? false;
+  });
+
+  /** True when any analysis group has regression model errors. */
+  readonly hasGroupModelWarnings = computed(() => {
+    const analysisStatusCheck = this.analysisStatusCheck();
+    return analysisStatusCheck?.groupStatusChecks.some(g => g.groupAnalysisErrors?.hasRegressionErrors) ?? false;
   });
 
   yearOptions: Signal<Array<number>> = computed(() => {
@@ -248,6 +258,13 @@ export class AnalysisSetupComponent {
     const selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(updatedItem);
+  }
+
+  goToGroup(idbGroupId: string): void {
+    const facility = this.facility();
+    this.router.navigateByUrl(
+      `/data-evaluation/facility/${facility.guid}/analysis/run-analysis/group-analysis/${idbGroupId}/options`
+    );
   }
 
   continue(): void {

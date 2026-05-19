@@ -20,7 +20,7 @@
           [routerLinkActive]="['active']">
           <i class="fa fa-file-edit"></i>
           {{groupListItem.group.idbGroupId | groupName}}
-          @if (groupListItem.groupStatusCheck.status == 'error') {
+          @if (groupListItem.groupStatusCheck.status !== 'good') {
           <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>

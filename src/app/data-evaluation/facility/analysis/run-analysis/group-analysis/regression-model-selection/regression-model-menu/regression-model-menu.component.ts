@@ -167,6 +167,9 @@ export class RegressionModelMenuComponent {
     const generatedModels = this.generatedModels();
     if (generatedModels.length == 0) {
       return true;
+    } else if(generatedModels.length == 1){
+      //one model means just the selected model
+      return false;
     }
     return generatedModels.some(model => model.isValid === true) == false;
   });
