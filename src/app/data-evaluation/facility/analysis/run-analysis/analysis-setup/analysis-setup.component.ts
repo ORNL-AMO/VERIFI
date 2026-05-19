@@ -18,7 +18,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getYearsWithFullDataAnalysis } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -258,21 +257,6 @@ export class AnalysisSetupComponent {
     const selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(updatedItem);
-  }
-
-  goToGroup(idbGroupId: string): void {
-    const facility = this.facility();
-    this.router.navigateByUrl(
-      `/data-evaluation/facility/${facility.guid}/analysis/run-analysis/group-analysis/${idbGroupId}/options`
-    );
-  }
-
-  continue(): void {
-    const item = this.analysisItem();
-    const facility = this.facility();
-    this.router.navigateByUrl(
-      `/data-evaluation/facility/${facility.guid}/analysis/run-analysis/group-analysis/${item.groups[0].idbGroupId}/options`
-    );
   }
 
   toggleHideInUseMessage(): void {
