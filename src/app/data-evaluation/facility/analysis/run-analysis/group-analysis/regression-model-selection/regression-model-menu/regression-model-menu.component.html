@@ -1,20 +1,69 @@
-@let _groupErrors = groupErrors();
+@let _groupStatusCheck = groupStatusCheck();
 @let _group = group();
 @let _generatedModels = generatedModels();
 @let _yearOptions = yearOptions();
 @let _generatingModels = generatingModels();
+@if(_group && _groupStatusCheck) {
+@if (_groupStatusCheck.hasMeterSetupErrors) {
+<div class="alert alert-danger p-2 small">
+  <p class="mb-1 fw-semibold">Meter issues may impact the regression model.
+  </p>
+  <ul class="mb-0 ps-3">
+    @for (m of _groupStatusCheck.meterStatusChecks; track m.meterId) {
+    @if (m.status === 'error') {
+    <li class="d-flex align-items-center gap-1">
+      <span class="fa fa-fw flex-shrink-0 fa-exclamation-triangle text-danger"></span>
+      <strong>{{m.meterName}}</strong>
+      @if (m.hasNoData) {<span class="ms-1">— no data</span>}
+      @else if (m.hasDuplicateEntries) {<span class="ms-1">— duplicate readings</span>}
+      @else if (!m.isDataCurrent) {<span class="ms-1">— data not current</span>}
+      @else if (m.hasNegativeReadings) {<span class="ms-1">— negative readings</span>}
+      @else if (!m.isMeterValid) {<span class="ms-1">— invalid meter setup</span>}
+    </li>
+    }
+    }
+  </ul>
+</div>
+}
+@if (_groupStatusCheck.hasPredictorSetupErrors) {
+<div class="alert alert-danger p-2 small">
+  <p class="mb-1 fw-semibold">Predictor issues may impact the regression
+    model.</p>
+  <ul class="mb-0 ps-3">
+    @for (p of _groupStatusCheck.predictorStatusChecks; track p.predictorId) {
+    @if (p.status === 'error') {
+    <li class="d-flex align-items-center gap-1">
+      <span class="fa fa-fw flex-shrink-0 fa-exclamation-triangle text-danger"></span>
+      <strong>{{p.predictorName}}</strong>
+      @if (p.hasNoData) {<span class="ms-1">— no data</span>}
+      @else if (p.hasDuplicateEntries) {<span class="ms-1">— duplicate readings</span>}
+      @else if (p.hasMissingEntries) {<span class="ms-1">— missing data</span>}
+      @else if (!p.isDataCurrent) {<span class="ms-1">— data not current</span>}
+    </li>
+    }
+    }
+  </ul>
+  @if(_groupStatusCheck.modelYearHasMissingPredictorData){
+    <p class="fw-semibold mt-2 mb-0">
+      Missing data is in the selected model year. This is not allowed. Please choose a different model year or update predictor data.
+    </p>
+  }
+</div>
+}
+
+
 <div class="row" [formGroup]="form">
   <div class="col-md-4 col-sm-12">
     <label class="bold">Select Modeling Method</label>
-    <select required class="form-select" id="userDefinedModel"
-      formControlName="isGeneratedModel" (change)="onModelTypeChange()">
+    <select required class="form-select" id="userDefinedModel" formControlName="isGeneratedModel"
+      (change)="onModelTypeChange()">
       <option [ngValue]="true">Calculate Models</option>
       <option [ngValue]="false">User Defined Model</option>
     </select>
     @if (_group.isGeneratedModel == true) {
     <label class="bold">Max Variable Combinations</label>
-    <select required class="form-select" id="maxModelVariables"
-      formControlName="maxModelVariables" (change)="onModelTypeChange()">
+    <select required class="form-select" id="maxModelVariables" formControlName="maxModelVariables"
+      (change)="onModelTypeChange()">
       @for (option of numVariableOptions(); track option) {
       <option [ngValue]="option">{{option}}</option>
       }
@@ -89,32 +138,30 @@
       }
       @if (!_group.isGeneratedModel) {
       <div class="p-2">
-        <div class="alert alert-info">
+        <p class="fw-light italic">
           Manually select production variables and define model coefficients and constants. The below table and graph
           are provided for model evaluation.
-        </div>
-        @if (!_groupErrors.isDateRangeValid) {
+        </p>
+        @if (!_groupStatusCheck.groupAnalysisErrors.isDateRangeValid) {
         <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
           End date must be after the start date. Please check the input values.
         </div>
         }
-        @if (!_groupErrors.isTwelveMonthSelected && _groupErrors.isDateRangeValid) {
+        @if (!_groupStatusCheck.groupAnalysisErrors.isTwelveMonthSelected &&
+        _groupStatusCheck.groupAnalysisErrors.isDateRangeValid) {
         <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
           Model generation requires at least 12 months of data. Please check the input values.
         </div>
         }
-        @if (!_groupErrors.allMeterReadingsPresent){
+        @if (!_groupStatusCheck.groupAnalysisErrors.allMeterReadingsPresent){
         <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
           Meter data is missing within the provided date range. Please check the data.
         </div>
         }
-        @if(!_groupErrors.allPredictorReadingsPresent) {
-        <div class="mt-4 alert alert-danger d-flex justify-content-center align-items-center">
-          Predictor data is missing within the provided date range. Please check the predictor data.
-        </div>
-        }
       </div>
       }
+
+
     </div>
 
   </div>
@@ -141,8 +188,7 @@
       <div class="col-4" [formGroupName]="i">
         <label class="switch" for="{{'predictor_'+predictor.id}}">
           <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
-            name="{{'predictor_'+predictor.id}}" formControlName="productionInAnalysis"
-            (change)="onPredictorChange(i)">
+            name="{{'predictor_'+predictor.id}}" formControlName="productionInAnalysis" (change)="onPredictorChange(i)">
           <span class="slider round"></span>
         </label>
       </div>
@@ -178,8 +224,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionModelYear"
-          formControlName="regressionModelYear" (change)="saveFormValue()">
+        <select required class="form-select" id="regressionModelYear" formControlName="regressionModelYear"
+          (change)="saveFormValue()">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -195,8 +241,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionModelStartMonth"
-          formControlName="regressionModelStartMonth" (change)="saveFormValue()">
+        <select required class="form-select" id="regressionModelStartMonth" formControlName="regressionModelStartMonth"
+          (change)="saveFormValue()">
           @for (month of months; track month) {
           <option [ngValue]="month.monthNumValue">{{month.name}}
           </option>
@@ -211,8 +257,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionStartYear"
-          formControlName="regressionStartYear" (change)="saveFormValue()">
+        <select required class="form-select" id="regressionStartYear" formControlName="regressionStartYear"
+          (change)="saveFormValue()">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -226,8 +272,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionModelEndMonth"
-          formControlName="regressionModelEndMonth" (change)="saveFormValue()">
+        <select required class="form-select" id="regressionModelEndMonth" formControlName="regressionModelEndMonth"
+          (change)="saveFormValue()">
           @for (month of months; track month) {
           <option [ngValue]="month.monthNumValue">{{month.name}}
           </option>
@@ -242,8 +288,8 @@
         </label>
       </div>
       <div class="col-6">
-        <select required class="form-select" id="regressionEndYear"
-          formControlName="regressionEndYear" (change)="saveFormValue()">
+        <select required class="form-select" id="regressionEndYear" formControlName="regressionEndYear"
+          (change)="saveFormValue()">
           @for (year of _yearOptions; track year) {
           <option [ngValue]="year">{{year}}</option>
           }
@@ -274,10 +320,12 @@
   </div>
   }
 </div>
+}
 
 
 
-<div [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmModelTypeChange || showConfirmPredictorChangeModel || showModelComparison}">
+<div
+  [ngClass]="{'windowOverlay': showUpdateModelsModal || showConfirmModelTypeChange || showConfirmPredictorChangeModel || showModelComparison}">
 </div>
 <div class="popup" [class.open]="showConfirmModelTypeChange">
   <div class="popup-header">Are you sure you want to change the modeling method?
@@ -288,7 +336,8 @@
   </div>
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelModelTypeChange()">Cancel</button>
-    <button class="btn btn-success" (click)="changeModelType(); showConfirmModelTypeChange = false">Change Method</button>
+    <button class="btn btn-success" (click)="changeModelType(); showConfirmModelTypeChange = false">Change
+      Method</button>
   </div>
 </div>
 

@@ -131,7 +131,7 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_update'
             });
-        } else if(this.hasMissingEntries){
+        } else if (this.hasMissingEntries) {
             this.actions.push({
                 label: 'Add missing predictor data for ' + predictor.name,
                 url: baseUrl + '/predictor-data',
@@ -142,7 +142,7 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_add_missing'
             });
-        } else if(this.hasDuplicateEntries){
+        } else if (this.hasDuplicateEntries) {
             this.actions.push({
                 label: 'Resolve duplicate predictor data for ' + predictor.name,
                 url: baseUrl + '/predictor-data',
@@ -178,5 +178,9 @@ export class PredictorStatusCheck {
             return;
         }
         this.hasWeatherDataWarning = predictorData.some(data => data.weatherDataWarning);
+    }
+
+    hasMissingDataForModelYear(modelYear: number): boolean {
+        return this.missingEntryMonths.some(m => m.year === modelYear);
     }
 }

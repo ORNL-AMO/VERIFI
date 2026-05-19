@@ -28,6 +28,7 @@ import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calc
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
 
 type PredictorVariableForm = FormGroup<{
   productionInAnalysis: FormControl<boolean>;
@@ -145,19 +146,14 @@ export class RegressionModelMenuComponent {
     return [];
   });
 
-  groupErrors: Signal<GroupAnalysisErrors> = computed(() => {
+  groupStatusCheck: Signal<AnalysisGroupStatusCheck> = computed(() => {
     const selectedGroup = this.group();
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
     if (selectedGroup && analysisItem && facilityStatusCheck) {
-      const groupError = facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid)?.groupAnalysisErrors;
-      if (groupError) {
-        return groupError;
-      } else {
-        return emptyGroupAnalysisErrors();
-      }
+      return facilityStatusCheck.getGroupStatusChecksByGroupId(selectedGroup.idbGroupId, analysisItem.guid);
     }
-    return emptyGroupAnalysisErrors();
+    return null;
   });
 
   // --- UI State ---
@@ -167,7 +163,7 @@ export class RegressionModelMenuComponent {
     const generatedModels = this.generatedModels();
     if (generatedModels.length == 0) {
       return true;
-    } else if(generatedModels.length == 1){
+    } else if (generatedModels.length == 1) {
       //one model means just the selected model
       return false;
     }

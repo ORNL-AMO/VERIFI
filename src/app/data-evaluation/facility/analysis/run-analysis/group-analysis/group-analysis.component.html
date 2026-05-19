@@ -42,7 +42,7 @@
         Analysis</a></li>
     }
     @if (_selectedGroup.analysisType != 'skip' && _selectedGroup.analysisType != 'skipAnalysis') {
-    <li class="nav-item" [ngClass]="{'disabled': _groupStatusCheck.groupAnalysisErrors.hasErrors}"><a class="nav-link"
+    <li class="nav-item" [ngClass]="{'disabled': _groupStatusCheck.status == 'error'}"><a class="nav-link"
         routerLink="monthly-analysis" [routerLinkActive]="['active']">
         <i class="fa fa-magnifying-glass-chart"></i>Monthly
         Analysis</a></li>
@@ -75,15 +75,17 @@
         <span class="badge rounded-pill bg-warning text-dark">Invalid Regression Model</span>
         }
         @if (_groupStatusCheck.hasMeterSetupErrors || _groupStatusCheck.hasPredictorSetupErrors) {
+        @if(_groupStatusCheck.status == 'warning') {
+        <span class="badge rounded-pill bg-warning text-dark">Predictor/Meter Warnings</span>
+        } @else if (_groupStatusCheck.status == 'error') {
         <span class="badge rounded-pill bg-danger">Predictor/Meter Errors</span>
+        }
         }
         }
         }
       </div>
     </div>
   </h4>
-
-
   }
   <router-outlet></router-outlet>
 </div>

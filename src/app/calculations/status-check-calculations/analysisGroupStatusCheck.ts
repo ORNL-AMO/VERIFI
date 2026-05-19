@@ -14,9 +14,12 @@ export class AnalysisGroupStatusCheck {
     group: AnalysisGroup;
     groupAnalysisErrors: GroupAnalysisErrors;
     hasModelErrors: boolean;
+    predictorStatusChecks: Array<PredictorStatusCheck>;
+    meterStatusChecks: Array<MeterStatusCheck>;
     hasPredictorSetupErrors: boolean;
     hasMeterSetupErrors: boolean;
     status: STATUS_CHECK_OPTIONS;
+    modelYearHasMissingPredictorData: boolean;
     constructor(group: AnalysisGroup, predictorStatusChecks: Array<PredictorStatusCheck>, meterStatusChecks: Array<MeterStatusCheck>, analysisItem: IdbAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>) {
         this.group = group;
         this.setAnalysisGroupErrors(analysisItem, calanderizedMeters, predictorData);
@@ -46,10 +49,12 @@ export class AnalysisGroupStatusCheck {
         }
 
         // Collect predictor IDs from the group's selected regression model.
+        let modelYear: number;
         if (group.analysisType == 'regression') {
             if (group.isGeneratedModel) {
                 const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
                 if (selectedModel) {
+                    modelYear = selectedModel.modelYear;
                     for (const pv of selectedModel.predictorVariables) {
                         if (!groupPredictorIds.includes(pv.id)) {
                             groupPredictorIds.push(pv.id);
@@ -65,19 +70,24 @@ export class AnalysisGroupStatusCheck {
                 });
             }
         }
-        const groupPredictorStatusChecks: Array<PredictorStatusCheck> = predictorStatusChecks.filter(p => groupPredictorIds.includes(p.predictorId));
-        this.hasPredictorSetupErrors = groupPredictorStatusChecks.some(p => p.status === 'error');
+        this.predictorStatusChecks = predictorStatusChecks.filter(p => groupPredictorIds.includes(p.predictorId));
+        this.hasPredictorSetupErrors = this.predictorStatusChecks.some(p => p.status === 'error');
+        if (this.groupAnalysisErrors.allPredictorReadingsPresent == false) {
+            this.modelYearHasMissingPredictorData = true;
+        } else {
+            this.modelYearHasMissingPredictorData = modelYear ? this.predictorStatusChecks.some(p => p.hasMissingDataForModelYear(modelYear)) : false;
+        }
     }
 
     private setHasMeterErrors(group: AnalysisGroup, meterStatusChecks: Array<MeterStatusCheck>) {
-        const groupMeterStatusChecks = meterStatusChecks.filter(m => m.groupId === group.idbGroupId);
-        this.hasMeterSetupErrors = groupMeterStatusChecks.some(m => m.status === 'error');
+        this.meterStatusChecks = meterStatusChecks.filter(m => m.groupId === group.idbGroupId);
+        this.hasMeterSetupErrors = this.meterStatusChecks.some(m => m.status === 'error');
     }
 
     private setStatus() {
-        if (this.hasPredictorSetupErrors || this.hasMeterSetupErrors || this.groupAnalysisErrors?.hasErrors) {
+        if (this.groupAnalysisErrors?.hasErrors || this.modelYearHasMissingPredictorData) {
             this.status = 'error';
-        }else if(this.groupAnalysisErrors?.hasInvalidRegressionModel || this.groupAnalysisErrors?.hasInvalidUserDefinedModel) {
+        } else if (this.hasPredictorSetupErrors || this.hasMeterSetupErrors || this.groupAnalysisErrors?.hasInvalidRegressionModel || this.groupAnalysisErrors?.hasInvalidUserDefinedModel) {
             this.status = 'warning';
         }
         else {

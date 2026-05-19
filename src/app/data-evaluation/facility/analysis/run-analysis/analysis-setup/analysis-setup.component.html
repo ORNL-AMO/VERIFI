@@ -24,7 +24,11 @@
         <span class="badge rounded-pill bg-warning text-dark">Group Model Warnings</span>
         }
         @if (_analysisStatusCheck.hasMeterSetupErrors || _analysisStatusCheck.hasPredictorSetupErrors) {
+        @if(_analysisStatusCheck.status == 'warning') {
+        <span class="badge rounded-pill bg-warning text-dark">Predictor/Meter Warnings</span>
+        } @else if (_analysisStatusCheck.status == 'error') {
         <span class="badge rounded-pill bg-danger">Predictor/Meter Errors</span>
+        }
         }
         }
         }
