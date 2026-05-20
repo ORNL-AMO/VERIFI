@@ -32,27 +32,32 @@ thead th.can-click:hover {
     color: red;
 }
 
-.fa-circle-check,
-.fa-circle {
+.selection-star {
     font-size: 18px;
-}
-
-.fa-circle-check {
-    color: green;
-}
-
-
-.fa-circle {
-    color: lightgray;
-}
-
-.fa-circle:hover {
-    color: gray;
     cursor: pointer;
+    transition: opacity 0.15s ease;
 }
 
-.fa-circle-check:hover {
-    cursor: pointer;
+.selection-star:hover {
+    opacity: 0.7;
+}
+
+.status-col {
+    width: 80px;
+    min-width: 80px;
+}
+
+.analysis-row-warning td {
+    background-color: rgba(255, 193, 7, 0.08) !important;
+}
+
+.analysis-row-error td {
+    background-color: rgba(220, 53, 69, 0.08) !important;
+}
+
+.issue-badge {
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .icon-style {
@@ -65,14 +70,6 @@ thead th.can-click:hover {
 
 .select-width{
     width: 200px;
-}
-
-.water.fa-circle-check{
-    color: #3055cf;
-}
-
-.energy.fa-circle-check{
-    color: #339d16;
 }
 
 button:hover .fa-trash {
