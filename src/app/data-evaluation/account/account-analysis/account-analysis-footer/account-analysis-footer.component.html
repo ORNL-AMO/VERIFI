@@ -1,14 +1,15 @@
-@if (!inDashboard) {
-  <div class="fixed-bottom footer-nav pb-3" [ngStyle]="{'right.px': helpWidth, 'left.px': sidebarWidth}">
+@let _canContinue = canContinue();
+@if (!inDashboard()) {
+  <div class="fixed-bottom footer-nav pb-3" [ngStyle]="{'right.px': helpWidth(), 'left.px': sidebarWidth()}">
     <div class="d-flex flex-fill justify-content-between pe-3 ps-3">
       <div>
         <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pe-1"></span>Back</button>
       </div>
       <div>
-        @if (showContinue) {
-          <button class="btn" (click)="continue()">Continue<span class="fa fa-chevron-right ps-1"></span></button>
+        @if (showContinue()) {
+          <button class="btn" (click)="continue()" [disabled]="!_canContinue">Continue<span class="fa fa-chevron-right ps-1"></span></button>
         }
-        @if (!showContinue) {
+        @if (!showContinue()) {
           <button class="btn" (click)="returnToDashboard()">
             <i class="fa fa-list"></i> All Account Analysis
           </button>

@@ -1,26 +1,29 @@
-@if (!inDashboard) {
-<div class="analysis banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
+@let _analysisStatusCheck = analysisStatusCheck();
+@let _accountAnalysisItem = accountAnalysisItem();
+
+@if (!inDashboard() && _accountAnalysisItem && _analysisStatusCheck) {
+<div class="analysis banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen()}">
   <div>
-    @let setupErrors = accountAnalysisItem.guid | invalidAccountAnalysis;
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
-          @if (setupErrors.hasSetupErrors) {
-          <span class="fa fa-exclamation-circle"></span>
-          }
           <i class="fa fa-gears"></i>
-          Analysis Setup</a>
-      </li>
-      <li class="nav-item" [ngClass]="{'disabled': setupErrors.hasSetupErrors}">
-        <a class="nav-link" routerLink="select-items" [routerLinkActive]="['active']">
-          @if (setupErrors.facilitiesSelectionsInvalid) {
-          <span class="fa fa-exclamation-circle"></span>
+          Analysis Setup
+          @if (_analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors) {
+          <span class="fa fa-exclamation-triangle text-warning"></span>
           }
-          <i class="fa fa-list-check"></i>
-          Select Facility Items</a>
+        </a>
       </li>
-      <li class="nav-item"
-        [ngClass]="{'disabled': setupErrors.hasError}">
+      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors}">
+        <a class="nav-link" routerLink="select-items" [routerLinkActive]="['active']">
+          <i class="fa fa-list-check"></i>
+          Select Facility Items
+          @if (_analysisStatusCheck.accountAnalysisSetupErrors.facilitiesSelectionsInvalid || !_analysisStatusCheck.allDatesCurrent) {
+          <span class="fa fa-exclamation-triangle text-warning"></span>
+          }
+        </a>
+      </li>
+      <li class="nav-item" [ngClass]="{'disabled': _analysisStatusCheck.accountAnalysisSetupErrors.hasError}">
         <a class="nav-link" routerLink="results" [routerLinkActive]="['active']">
           <i class="fa fa-magnifying-glass-chart"></i>
           Analysis Results</a>
@@ -32,19 +35,19 @@
       <ul class="nav nav-tabs">
         <li class="nav-item dropdown">
           <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
-            @if (accountAnalysisItem.analysisCategory == 'water') {
+            @if (_accountAnalysisItem.analysisCategory == 'water') {
             <i class="fa fa-droplet"></i>
             }
-            @if (accountAnalysisItem.analysisCategory == 'energy') {
+            @if (_accountAnalysisItem.analysisCategory == 'energy') {
             <i class="fa fa-plug"></i>
             }
-            {{accountAnalysisItem.name}}
+            {{_accountAnalysisItem.name}}
           </a>
           <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
             <div class="menu-scroll-section">
-              @for (analysisItemOption of accountAnalysisItems; track analysisItemOption) {
-              @if (accountAnalysisItem.guid != analysisItemOption.guid && analysisItemOption.analysisCategory ==
-              accountAnalysisItem.analysisCategory) {
+              @for (analysisItemOption of accountAnalysisItems(); track analysisItemOption) {
+              @if (_accountAnalysisItem.guid != analysisItemOption.guid && analysisItemOption.analysisCategory ==
+              _accountAnalysisItem.analysisCategory) {
               <li>
                 <a class="dropdown-item" (click)="selectItem(analysisItemOption)">
                   @if (analysisItemOption.analysisCategory == 'water') {

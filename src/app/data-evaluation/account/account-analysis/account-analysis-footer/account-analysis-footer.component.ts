@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { filter, map, startWith, Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
@@ -7,6 +7,11 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 
 @Component({
   selector: 'app-account-analysis-footer',
@@ -14,59 +19,60 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   styleUrls: ['./account-analysis-footer.component.css'],
   standalone: false
 })
-export class AccountAnalysisFooterComponent implements OnInit {
+export class AccountAnalysisFooterComponent {
 
+  private router: Router = inject(Router);
+  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  routerSub: Subscription;
-  inDashboard: boolean;
-  showContinue: boolean;
-  analysisItem: IdbAccountAnalysisItem;
-  analysisItemSub: Subscription
+  helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
+  sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
+  analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
-  helpWidth: number;
-  helpWidthSub: Subscription;
+  url: Signal<string> = toSignal(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url)
+    ),
+    { initialValue: this.router.url }
+  );
 
-  sidebarWidth: number;
-  sidebarWidthSub: Subscription;
+  inDashboard: Signal<boolean> = computed(() => {
+    const url = this.url();
+    return url.includes('dashboard');
+  });
 
-  constructor(
-    private router: Router,
-    private facilityDbService: FacilitydbService,
-    private accountAnalysisService: AccountAnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private dataEvaluationService: DataEvaluationService) { }
+  showContinue: Signal<boolean> = computed(() => {
+    const url = this.url();
+    return url.includes('/results/monthly-analysis') == false;
+  });
 
-  ngOnInit(): void {
-    this.analysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(val => {
-      this.analysisItem = val;
-    });
+  analysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
+    const analysisItem = this.analysisItem();
+    const accountStatusCheck = this.accountStatusCheck();
+    if(analysisItem && accountStatusCheck) {
+      return accountStatusCheck.getAccountAnalysisStatusCheckById(analysisItem.guid);
+    }
+    return undefined;
+  });
 
-    this.routerSub = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setInDashboard(event.url);
-        this.setShowContinue(event.url);
+  canContinue: Signal<boolean> = computed(() => {
+    const url = this.url();
+    const analysisItem = this.analysisItem();
+    const analysisStatusCheck = this.analysisStatusCheck();
+    if(url && analysisItem && analysisStatusCheck) {
+      if(url.includes('setup')) {
+        return !analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors;
+      } else if (url.includes('select-items')) {
+        return !analysisStatusCheck.accountAnalysisSetupErrors.facilitiesSelectionsInvalid;
       }
-    });
-    this.setInDashboard(this.router.url);
-    this.setShowContinue(this.router.url);
-    this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
-      this.helpWidth = helpWidth;
-    });
-    this.sidebarWidthSub = this.dataEvaluationService.sidebarWidthBs.subscribe(sidebarWidth => {
-      this.sidebarWidth = sidebarWidth;
-    });
-  }
-  ngOnDestroy() {
-    this.routerSub.unsubscribe();
-    this.analysisItemSub.unsubscribe();
-    this.helpWidthSub.unsubscribe();
-    this.sidebarWidthSub.unsubscribe();
-  }
-
-  setInDashboard(url: string) {
-    this.inDashboard = url.includes('dashboard') || (url == '/account/analysis');
-  }
-
+    }
+    return true;
+  });
 
   goBack() {
     if (this.router.url.includes('setup')) {
@@ -105,14 +111,6 @@ export class AccountAnalysisFooterComponent implements OnInit {
       }
     } else if (this.router.url.includes('results')) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/results/monthly-analysis');
-    }
-  }
-
-  setShowContinue(url: string) {
-    if (url.includes('/results/monthly-analysis')) {
-      this.showContinue = false;
-    } else {
-      this.showContinue = true;
     }
   }
 
