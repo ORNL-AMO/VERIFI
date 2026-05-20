@@ -41,8 +41,7 @@ export class FacilityStatusCheck {
     hasPredictorWeatherWarnings: boolean;
     hasInvalidMeters: boolean;
 
-    facilityLatestEntry: { month: number; year: number } | undefined;
-
+    facilityLatestEntry: { month: number; year: number, date: Date } | undefined;
     facilityReportErrors: Array<FacilityReportErrors>;
 
     constructor(
@@ -93,10 +92,10 @@ export class FacilityStatusCheck {
         return actions;
     }
 
-    private computeFacilityLatestEntry(utilityMeterData: Array<IdbUtilityMeterData>): { month: number; year: number } | undefined {
+    private computeFacilityLatestEntry(utilityMeterData: Array<IdbUtilityMeterData>): { month: number; year: number, date: Date } | undefined {
         if (!utilityMeterData || utilityMeterData.length === 0) return undefined;
         const latest = _.maxBy(utilityMeterData, d => d.year * 12 + d.month);
-        return latest ? { month: latest.month, year: latest.year } : undefined;
+        return latest ? { month: latest.month, year: latest.year, date: new Date(latest.year, latest.month - 1) } : undefined;
     }
 
     private setMetersStatusChecks(meters: Array<IdbUtilityMeter>, calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>) {
