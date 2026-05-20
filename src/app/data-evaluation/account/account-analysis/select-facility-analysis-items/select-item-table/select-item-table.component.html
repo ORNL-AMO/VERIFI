@@ -1,5 +1,5 @@
 @let _facility = selectedFacility();
-@let _facilityAnalysisItems = facilityAnalysisItems();
+@let _facilityAnalysisListItems = facilityAnalysisListItems();
 @let _selectedFacilityItem = selectedFacilityItem();
 @let _selectedAnalysisItem = selectedAnalysisItem();
 @let _selectedFacilityItemId = selectedFacilityItemId();
@@ -49,22 +49,23 @@
       </tr>
     </thead>
     <tbody class="table-group-divider">
-      @for (analysisItem of _facilityAnalysisItems; track analysisItem.guid) {
+      @for (facilityAnalysisListItem of _facilityAnalysisListItems; track facilityAnalysisListItem.analysisItem.guid) {
       <tr>
         <td class="radio-td">
-          <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="analysisItem.guid"
-            name="{{analysisItem.id+'_selectedFacilityItemId'}}" id="{{analysisItem.id+'_selectedFacilityItemId'}}"
-            (change)="save(analysisItem.guid)">
+          <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="facilityAnalysisListItem.analysisItem.guid"
+            name="{{facilityAnalysisListItem.analysisItem.id+'_selectedFacilityItemId'}}" id="{{facilityAnalysisListItem.analysisItem.id+'_selectedFacilityItemId'}}"
+            (change)="save(facilityAnalysisListItem.analysisItem.guid)">
         </td>
         <td class="w-25">
-          @let setupErrors = analysisItem.guid | invalidAnalysis;
-          @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
-          <span class="fa fa-exclamation-circle"></span>
+          {{facilityAnalysisListItem.analysisItem.name}}
+          @if (facilityAnalysisListItem.statusCheck?.status == 'error') {
+          <span class="fa fa-exclamation-triangle text-warning"></span>
+          }@else if(facilityAnalysisListItem.statusCheck?.status == 'warning') {
+          <span class="fa fa-exclamation-circle text-warning"></span>
           }
-          {{analysisItem.name}}
         </td>
         <td class="w-50">
-          @for (group of analysisItem.groups; track group) {
+          @for (group of facilityAnalysisListItem.analysisItem.groups; track group) {
           <span>
             {{group.idbGroupId | groupName}}:
             @if (group.analysisType == 'absoluteEnergyConsumption') {
@@ -90,13 +91,13 @@
           </span>
           }
         </td>
-        <td>{{analysisItem.modifiedDate | date:'short'}}</td>
+        <td>{{facilityAnalysisListItem.analysisItem.modifiedDate | date:'short'}}</td>
         <td class="actions">
-          <a class="click-link" (click)="editItem(analysisItem)">View Analysis</a>
+          <a class="click-link" (click)="editItem(facilityAnalysisListItem.analysisItem)">View Analysis</a>
         </td>
       </tr>
       }
-      @if (_facilityAnalysisItems.length == 0) {
+      @if (_facilityAnalysisListItems.length == 0) {
       <tr>
         <td colspan="7" class="text-center">
           No @if (_selectedAnalysisItem.energyIsSource) {

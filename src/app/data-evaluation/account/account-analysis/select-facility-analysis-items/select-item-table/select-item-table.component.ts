@@ -18,6 +18,14 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+
+interface FacilityAnalysisListItem {
+  analysisItem: IdbAnalysisItem;
+  statusCheck: AnalysisStatusCheck;
+}
 
 @Component({
   selector: 'app-select-item-table',
@@ -37,34 +45,45 @@ export class SelectItemTableComponent {
   private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private predictorDbService: PredictorDbService = inject(PredictorDbService);
   private facilityDbservice: FacilitydbService = inject(FacilitydbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbservice.selectedFacility);
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
-  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => {
+  facilityAnalysisListItems: Signal<Array<FacilityAnalysisListItem>> = computed(() => {
     const allItems = this.allFacilityAnalysisItems();
     const selectedItem = this.selectedAnalysisItem();
     const selectedFacility = this.selectedFacility();
-    let filteredItems: Array<IdbAnalysisItem> = [];
-    if (allItems && selectedItem && selectedFacility) {
+    const accountStatusCheck = this.accountStatusCheck();
+    let filteredItems: Array<FacilityAnalysisListItem> = [];
+    if (allItems && selectedItem && selectedFacility && accountStatusCheck) {
+      const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(selectedFacility.guid);
+      let filteredAnalysisItems: Array<IdbAnalysisItem> = [];
       if (selectedItem.analysisCategory == 'energy') {
-        filteredItems = allItems.filter(item => {
+        filteredAnalysisItems = allItems.filter(item => {
           return (item.analysisCategory == selectedItem.analysisCategory
             && item.facilityId == selectedFacility.guid
             && item.energyIsSource == selectedItem.energyIsSource
             && (item.baselineYear == selectedItem.baselineYear || selectedFacility.isNewFacility));
         });
       } else if (selectedItem.analysisCategory == 'water') {
-        filteredItems = allItems.filter(item => {
+        filteredAnalysisItems = allItems.filter(item => {
           return (item.analysisCategory == selectedItem.analysisCategory
             && item.facilityId == selectedFacility.guid
             && (item.baselineYear == selectedItem.baselineYear || selectedFacility.isNewFacility));
         });
       }
       //order by modified date
-      filteredItems = filteredItems.sort((a, b) => {
+      filteredAnalysisItems = filteredAnalysisItems.sort((a, b) => {
         return new Date(b.modifiedDate).getTime() - new Date(a.modifiedDate).getTime();
+      });
+      filteredItems = filteredAnalysisItems.map(item => {
+        return {
+          analysisItem: item,
+          statusCheck: facilityStatusCheck ? facilityStatusCheck.getAnalysisStatusById(item.guid) : null
+        }
       });
     }
     return filteredItems;
