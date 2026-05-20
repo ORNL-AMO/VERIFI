@@ -90,8 +90,12 @@ export class AccountStatusCheck {
         return facilityReportStatusChecks.find(fr => fr.reportId === reportId);
     }
 
+    getAccountAnalysisStatusCheckById(analysisId: string): AccountAnalysisStatusCheck | undefined {
+        return this.accountAnalysisStatusChecks.find(aasc => aasc.analysisItemId === analysisId);
+    }
+
     getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
-        const errors = this.accountAnalysisStatusChecks.find(e => e.analysisItemId === analysisId)?.accountAnalysisSetupErrors;
+        const errors = this.getAccountAnalysisStatusCheckById(analysisId)?.accountAnalysisSetupErrors;
         return errors ?? emptyAccountAnalysisSetupErrors();
     }
 
