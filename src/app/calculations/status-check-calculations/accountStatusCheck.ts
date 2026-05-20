@@ -104,6 +104,10 @@ export class AccountStatusCheck {
         return errors ?? emptyAccountReportErrors();
     }
 
+    getFacilityStatusCheckByFacilityId(facilityId: string): FacilityStatusCheck | undefined {
+        return this.facilityStatusChecks.find(fc => fc.facility.guid === facilityId);
+    }
+
     private computeAccountAnalysisSetupErrors(account: IdbAccount, accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
         this.accountAnalysisStatusChecks = [];
         const accountAnalysisItemsForAccount: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(accountAnalysisItem => accountAnalysisItem.accountId === account.guid);

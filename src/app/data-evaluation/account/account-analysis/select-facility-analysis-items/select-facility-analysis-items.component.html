@@ -1,26 +1,26 @@
-@let _selectedAnalysisItem = selectedAnalysisItem();
+<!-- @let _selectedAnalysisItem = selectedAnalysisItem(); -->
+@let _facilityList = facilityList();
 
-@if(_selectedAnalysisItem){
+@if(_facilityList){
 <div class="wrapper">
   <div class="d-flex w-100 h-100">
     <div class="p-2 nav flex-column">
-      @for (facilityItem of _selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
-      <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
-          [ngClass]="{'active': facilityItem.facilityId == selectedFacility().guid}">
+      @for (facilityItem of _facilityList; track facilityItem.facility.guid) {
+      <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facility.guid)"
+          [ngClass]="{'active': facilityItem.facility.guid == selectedFacility().guid}">
           <i class="pe-2 fa" [ngClass]="{
               'fa-square-minus': !facilityItem.analysisItemId || facilityItem.analysisItemId === 'skip',
               'fa-square-check': facilityItem.analysisItemId && facilityItem.analysisItemId !== 'skip'
             }"></i>
-          @if(facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
-          @let analysisItem = facilityItem.analysisItemId | analysisItem;
-          @let analysisSetupErrors = analysisItem.guid | invalidAnalysis;
-          @if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
-          <span class="fa fa-exclamation-circle"></span>
+          {{facilityItem.facility.name}}
+          @if(facilityItem.analysisItemId != 'skip') {
+          @if(!facilityItem.analysisItemId || facilityItem.analysisStatusCheck?.status == 'error'){
+          <span class="fa fa-exclamation-triangle text-danger"></span>
+          }@else if (facilityItem.analysisStatusCheck?.status == 'warning') {
+          <span class="fa fa-exclamation-triangle text-warning"></span>
           }
-          }@else if(!facilityItem.analysisItemId){
-          <span class="fa fa-exclamation-circle"></span>
           }
-          {{facilityItem.facilityId | facilityName}}</a>
+        </a>
       </div>
       }
     </div>
@@ -28,7 +28,7 @@
       @if (showInUseMessage()) {
       <div class="p-2">
         <div class="alert alert-info text-center mb-0">
-          <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+          <button type="button" class="btn-close" aria-label="Close" (click)="toggleHideInUseMessage()"></button>
           This analysis is used in one or more reports. Changes to this analysis may effect the results of the
           corresponding reports.
         </div>
