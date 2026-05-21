@@ -43,7 +43,6 @@ export class FacilityStatusCheck {
 
     facilityLatestEntry: { month: number; year: number, date: Date } | undefined;
     facilityReportErrors: Array<FacilityReportErrors>;
-
     constructor(
         facility: IdbFacility,
         calanderizedMeters: Array<CalanderizedMeter>,
@@ -227,8 +226,12 @@ export class FacilityStatusCheck {
         return errors ?? emptyFacilityReportErrors();
     }
 
-    getAnalysisStatusById(analysisId: string): AnalysisStatusCheck | undefined {
-        return this.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisId);
+    getAnalysisStatusById(analysisId: string, accountLatestDataDate?: Date): AnalysisStatusCheck | undefined {
+        const analysisStatusCheck: AnalysisStatusCheck = this.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisId);
+        if (analysisStatusCheck && accountLatestDataDate) {
+            analysisStatusCheck.setIsDateCurrentWithAccountAnalysis(accountLatestDataDate);
+        }
+        return analysisStatusCheck;
     }
 
     getGroupStatusChecksByGroupId(groupId: string, analysisId: string): AnalysisGroupStatusCheck | undefined {

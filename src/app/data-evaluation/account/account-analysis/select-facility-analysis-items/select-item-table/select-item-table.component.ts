@@ -21,6 +21,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 
 interface FacilityAnalysisListItem {
   analysisItem: IdbAnalysisItem;
@@ -52,13 +53,23 @@ export class SelectItemTableComponent {
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbservice.selectedFacility);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
+  accountAnalysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
+    const selectedItem = this.selectedAnalysisItem();
+    const accountStatusCheck = this.accountStatusCheck();
+    if (selectedItem && accountStatusCheck) {
+      return accountStatusCheck.getAccountAnalysisStatusCheckById(selectedItem.guid);
+    }
+    return null;
+  });
+
   facilityAnalysisListItems: Signal<Array<FacilityAnalysisListItem>> = computed(() => {
     const allItems = this.allFacilityAnalysisItems();
     const selectedItem = this.selectedAnalysisItem();
     const selectedFacility = this.selectedFacility();
     const accountStatusCheck = this.accountStatusCheck();
+    const accountAnalysisStatusCheck = this.accountAnalysisStatusCheck();
     let filteredItems: Array<FacilityAnalysisListItem> = [];
-    if (allItems && selectedItem && selectedFacility && accountStatusCheck) {
+    if (allItems && selectedItem && selectedFacility && accountStatusCheck && accountAnalysisStatusCheck) {
       const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(selectedFacility.guid);
       let filteredAnalysisItems: Array<IdbAnalysisItem> = [];
       if (selectedItem.analysisCategory == 'energy') {
@@ -82,7 +93,7 @@ export class SelectItemTableComponent {
       filteredItems = filteredAnalysisItems.map(item => {
         return {
           analysisItem: item,
-          statusCheck: facilityStatusCheck ? facilityStatusCheck.getAnalysisStatusById(item.guid) : null
+          statusCheck: facilityStatusCheck ? facilityStatusCheck.getAnalysisStatusById(item.guid, accountAnalysisStatusCheck?.latestDataDate) : null
         }
       });
     }

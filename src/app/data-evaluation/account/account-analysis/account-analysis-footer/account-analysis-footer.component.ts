@@ -31,6 +31,8 @@ export class AccountAnalysisFooterComponent {
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
   analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
+  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities);
 
   url: Signal<string> = toSignal(
     this.router.events.pipe(
@@ -54,7 +56,7 @@ export class AccountAnalysisFooterComponent {
   analysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
     const analysisItem = this.analysisItem();
     const accountStatusCheck = this.accountStatusCheck();
-    if(analysisItem && accountStatusCheck) {
+    if (analysisItem && accountStatusCheck) {
       return accountStatusCheck.getAccountAnalysisStatusCheckById(analysisItem.guid);
     }
     return undefined;
@@ -64,11 +66,13 @@ export class AccountAnalysisFooterComponent {
     const url = this.url();
     const analysisItem = this.analysisItem();
     const analysisStatusCheck = this.analysisStatusCheck();
-    if(url && analysisItem && analysisStatusCheck) {
-      if(url.includes('setup')) {
+    const selectedFacility = this.selectedFacility();
+    if (url && analysisItem && analysisStatusCheck && selectedFacility) {
+      if (url.includes('setup')) {
         return !analysisStatusCheck.accountAnalysisSetupErrors.hasSetupErrors;
       } else if (url.includes('select-items')) {
-        return !analysisStatusCheck.accountAnalysisSetupErrors.facilitiesSelectionsInvalid;
+        const hasSelection = analysisItem.facilityAnalysisItems.find(item => item.facilityId == selectedFacility.guid);
+        return hasSelection.analysisItemId != undefined;
       }
     }
     return true;
@@ -78,9 +82,9 @@ export class AccountAnalysisFooterComponent {
     if (this.router.url.includes('setup')) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
     } else if (this.router.url.includes('account/analysis/select-items')) {
-      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
+      const facilities: Array<IdbFacility> = this.facilities();
+      const selectedFacility: IdbFacility = this.selectedFacility();
+      const facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
       if (facilityIndex == 0) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
       } else {
@@ -90,7 +94,7 @@ export class AccountAnalysisFooterComponent {
       if (this.router.url.includes('monthly-analysis')) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
       } else {
-        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        const facilities: Array<IdbFacility> = this.facilities();
         this.facilityDbService.selectedFacility.next(facilities[facilities.length - 1]);
         this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
       }
@@ -101,9 +105,9 @@ export class AccountAnalysisFooterComponent {
     if (this.router.url.includes('setup')) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
     } else if (this.router.url.includes('select-items')) {
-      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
+      const facilities: Array<IdbFacility> = this.facilities();
+      const selectedFacility: IdbFacility = this.selectedFacility();
+      const facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
       if (facilityIndex == facilities.length - 1) {
         this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
       } else {

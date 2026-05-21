@@ -32,7 +32,7 @@ export class AnnualAccountAnalysisSummaryClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>) {
-        this.setReportYear(accountAnalysisItem, meters, meterData, account, accountAnalysisItem, accountFacilities);
+        this.setReportYear(accountAnalysisItem, meters, meterData, account, accountFacilities);
         this.setMonthlyAnalysisSummaryData(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
         this.setBaselineYear(accountAnalysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, accountPredictors);
@@ -51,11 +51,11 @@ export class AnnualAccountAnalysisSummaryClass {
         this.baselineYear = analysisItem.baselineYear;
     }
 
-    setReportYear(analysisItem: IdbAccountAnalysisItem, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, account: IdbAccount, accountAnalysisItem: IdbAccountAnalysisItem, accountFacilities: Array<IdbFacility>) {
+    setReportYear(analysisItem: IdbAccountAnalysisItem, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, account: IdbAccount, accountFacilities: Array<IdbFacility>) {
         if (analysisItem.calculatedReportYear) {
             this.reportYear = analysisItem.calculatedReportYear;
         } else {
-            let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: accountAnalysisItem.energyIsSource, neededUnits: getNeededUnits(accountAnalysisItem) }, [], [], accountFacilities, account.assessmentReportVersion, []);
+            let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, account.assessmentReportVersion, []);
             let includedFacilities: Array<IdbFacility> = new Array();
             analysisItem.facilityAnalysisItems.forEach(facilityItem => {
                 if (facilityItem.analysisItemId) {
@@ -63,6 +63,8 @@ export class AnnualAccountAnalysisSummaryClass {
                     includedFacilities.push(facility);
                 }
             });
+            //TODO need to update this to only look at meters that are included in the analysis item 
+            // need full year
             this.reportYear = getLatestYearWithData(calanderizedMeters, includedFacilities);
             analysisItem.calculatedReportYear = this.reportYear;
         }

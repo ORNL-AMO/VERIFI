@@ -1,66 +1,119 @@
-.content-padding{
-    padding: 20px 30px;
-    height: calc(100vh - 290px);
-    overflow-y: auto;
+.wrapper {
+    padding: 0;
+    height: calc(100vh - 250px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.wrapper{
-    /* margin-bottom: 100px; */
-    padding: 0px;
-    height: calc(100vh - 290px);
+/* ── Sidebar ─────────────────────────────────────── */
+.sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid #154c79;
+    background-color: #f8f9fa;
+    height: 100%;
 }
 
-.nav-tabs{
-    background-color: #f1f1f1;
-}
-
-
-.nav-tabs a:not([href]).nav-link.active{
-    color: #ff6000 !important;
-    background-color: white;
-}
-
-.nav-tabs .nav-link:not(.active){
-    background-color: #145A32;
+.sidebar-header {
+    padding: 10px 12px 8px;
+    background-color: #154c79;
     color: white;
-    border: solid 1px white;
+    flex-shrink: 0;
 }
 
-
-
-.nav-link{
-    font-weight: 600;
-    font-size: 16px;
+.sidebar-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    color: white;
+}
+.progress{
+    height: 3px;
 }
 
-a:not([href]).active, .nav .nav-link.active i.fa{
-    color: #ff6000 !important;
+.sidebar-count {
+    color: white;
+    font-size: 0.78rem;
 }
 
-.fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
-    color: red;
-}
-
-
-.nav{
-    border-right: solid #145A32;
-    width: 210px;
-    max-height: 100%;
+.facility-nav {
+    flex: 1;
     overflow-y: auto;
-    flex-wrap: nowrap;
+    padding: 4px 0;
 }
 
-.nav-item{
-    border-bottom: groove 1px;
+/* ── Facility items ──────────────────────────────── */
+.facility-item {
+    display: flex;
+    align-items: center;
     width: 100%;
-    height: fit-content;
-}
-
-.nav-link.active{
-    background-color: #efefef;
-}
-
-.nav-link:hover{
+    padding: 8px 10px 8px 12px;
+    border: none;
+    border-left: 3px solid #e9ecef;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: none;
+    text-align: left;
     cursor: pointer;
-    background-color: #efefef;
+    font-size: 0.875rem;
+    color: #333;
+    transition: background-color 0.12s;
 }
+
+.facility-item:hover {
+    background-color: rgba(21, 76, 121, 0.06);
+}
+
+/* Active state: blue tint background, bold text */
+.facility-item.active {
+    background-color: rgba(21, 76, 121, 0.1);
+    font-weight: 600;
+}
+
+/* Status border colors — declared after .active so they always win */
+.facility-item.item-error  { border-left-color: #dc3545; }
+.facility-item.item-warning { border-left-color: #ffc107; }
+.facility-item.item-good   { border-left-color: #198754; }
+.facility-item.item-skip   { border-left-color: #6c757d; color: #6c757d; }
+
+/* Active + status background tints */
+.facility-item.active.item-error   { background-color: rgba(220, 53,  69, 0.07); }
+.facility-item.active.item-warning { background-color: rgba(255, 193,  7, 0.1);  }
+.facility-item.active.item-good    { background-color: rgba(25,  135, 84, 0.07); }
+
+.facility-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    margin-right: 7px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.facility-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-icon-sm {
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+/* ── Main content area ───────────────────────────── */
+.content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 24px 72px 20px; /* bottom pad clears fixed footer */
+    min-width: 0;
+}
+

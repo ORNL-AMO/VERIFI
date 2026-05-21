@@ -13,6 +13,7 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 
 interface FacilityListItem {
   facility: IdbFacility;
@@ -43,24 +44,39 @@ export class SelectFacilityAnalysisItemsComponent {
   hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
+  accountAnalysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
+    const selectedItem = this.selectedAnalysisItem();
+    const accountStatusCheck = this.accountStatusCheck();
+    if (selectedItem && accountStatusCheck) {
+      return accountStatusCheck.getAccountAnalysisStatusCheckById(selectedItem.guid);
+    }
+    return null;
+  });
+
   facilityList: Signal<Array<FacilityListItem>> = computed(() => {
     const facilities = this.facilities();
     const facilityAnalysisItems = this.facilityAnalysisItems();
     const analysisItem = this.selectedAnalysisItem();
     const accountStatusCheck = this.accountStatusCheck();
+    const accountAnalysisStatusCheck = this.accountAnalysisStatusCheck();
     if (!facilities || !facilityAnalysisItems || !analysisItem || !accountStatusCheck) {
       return [];
     }
+    console.log(accountAnalysisStatusCheck.latestDataAllEntries);
     return analysisItem.facilityAnalysisItems.map(facilityItem => {
       const facility = facilities.find(fac => fac.guid === facilityItem.facilityId);
       const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(facilityItem.facilityId);
-      const analysisStatusCheck = facilityStatusCheck?.getAnalysisStatusById(facilityItem.analysisItemId);
+      const analysisStatusCheck = facilityStatusCheck?.getAnalysisStatusById(facilityItem.analysisItemId, accountAnalysisStatusCheck?.latestDataDate);
       return {
         facility: facility,
         analysisItemId: facilityItem.analysisItemId,
         analysisStatusCheck: analysisStatusCheck
       }
     });
+  });
+
+  configuredCount: Signal<number> = computed(() => {
+    return this.facilityList().filter(item => item.analysisItemId != null && item.analysisItemId !== undefined).length;
   });
 
   showInUseMessage: Signal<boolean> = computed(() => {

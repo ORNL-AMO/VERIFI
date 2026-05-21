@@ -10,22 +10,21 @@
       <i class="fa fa-industry pe-2" [ngStyle]="{color: _facility?.color}"></i>{{_facility?.name}}
       Analysis Items
     </div>
-
     <div>
       <button class="btn btn-outline m-0" (click)="createNewItem()">+Add Facility Analysis</button>
     </div>
   </div>
 </h4>
-@if(_selectedFacilityItem){
-@let setupErrors = _selectedFacilityItem.guid | invalidAnalysis;
-@if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
-<div class="alert alert-danger w-100 text-center">
-  The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
-</div>
-<hr>
-}
-}
 
+@if (_selectedFacilityItem) {
+  @let setupErrors = _selectedFacilityItem.guid | invalidAnalysis;
+  @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
+  <div class="alert alert-danger w-100 text-center">
+    The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
+  </div>
+  <hr>
+  }
+}
 
 @if (_selectedFacilityItemId == null) {
 <div class="alert alert-danger w-100 text-center">
@@ -34,97 +33,151 @@
 <hr>
 }
 
-
 <div class="table-responsive">
-  <table class="table table-bordered table-sm table-hover">
+  <table class="table table-bordered table-hover">
     <thead>
       <tr>
-        <th></th>
+        <th class="radio-td"></th>
+        <th class="status-col">Status</th>
         <th>Analysis Item</th>
-        <th>
-          Group Analysis
-        </th>
-        <th>Last Modified</th>
-        <th></th>
+        <th>Group Analysis</th>
+        <th class="data-through-col">Data Through</th>
+        <th class="modified-col">Last Modified</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody class="table-group-divider">
       @for (facilityAnalysisListItem of _facilityAnalysisListItems; track facilityAnalysisListItem.analysisItem.guid) {
-      <tr>
-        <td class="radio-td">
-          <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="facilityAnalysisListItem.analysisItem.guid"
-            name="{{facilityAnalysisListItem.analysisItem.id+'_selectedFacilityItemId'}}" id="{{facilityAnalysisListItem.analysisItem.id+'_selectedFacilityItemId'}}"
+      @let sc = facilityAnalysisListItem.statusCheck;
+      <tr [ngClass]="{
+        'analysis-row-error': sc?.status === 'error',
+        'analysis-row-warning': sc?.status === 'warning'
+      }">
+        <!-- Select -->
+        <td class="radio-td text-center">
+          <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()"
+            [value]="facilityAnalysisListItem.analysisItem.guid"
+            name="{{facilityAnalysisListItem.analysisItem.id + '_selectedFacilityItemId'}}"
+            id="{{facilityAnalysisListItem.analysisItem.id + '_selectedFacilityItemId'}}"
             (change)="save(facilityAnalysisListItem.analysisItem.guid)">
         </td>
-        <td class="w-25">
-          {{facilityAnalysisListItem.analysisItem.name}}
-          @if (facilityAnalysisListItem.statusCheck?.status == 'error') {
-          <span class="fa fa-exclamation-triangle text-warning"></span>
-          }@else if(facilityAnalysisListItem.statusCheck?.status == 'warning') {
-          <span class="fa fa-exclamation-circle text-warning"></span>
+        <!-- Status -->
+        <td class="text-center align-middle status-col">
+          @if (sc && sc.status !== 'good') {
+          <span class="fa fa-fw fa-lg" [ngClass]="{
+            'fa-exclamation-triangle text-warning': sc.status === 'warning',
+            'fa-circle-xmark text-danger': sc.status === 'error'
+          }"></span>
+          <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+            @if (sc.hasSetupErrors) {
+            <span class="badge bg-danger issue-badge">Setup Errors</span>
+            }
+            @if (sc.hasMeterSetupErrors) {
+            <span class="badge bg-danger issue-badge">Meter Errors</span>
+            }
+            @if (sc.hasPredictorSetupErrors) {
+              @if (sc.status === 'error') {
+              <span class="badge bg-danger issue-badge">Predictor Errors</span>
+              } @else if (sc.status === 'warning') {
+              <span class="badge bg-warning text-dark issue-badge">Predictor Warnings</span>
+              }
+            }
+            @if (sc.groupsHaveErrors) {
+            <span class="badge bg-danger issue-badge">Analysis Errors</span>
+            } @else if (sc.groupsHaveWarnings) {
+            <span class="badge bg-warning text-dark issue-badge">Analysis Warnings</span>
+            }
+            @if(sc.isDateCurrentWithAccountAnalysis === false){
+              <span class="badge bg-warning text-dark issue-badge">Data Lagging</span>
+            }
+          </div>
+          }@else {
+            <span class="text-success">No Issues</span>
           }
         </td>
-        <td class="w-50">
+        <!-- Analysis Item Name -->
+        <td class="fw-semibold">
+          {{facilityAnalysisListItem.analysisItem.name}}
+        </td>
+        <!-- Group Analysis -->
+        <td>
           @for (group of facilityAnalysisListItem.analysisItem.groups; track group) {
-          <span>
-            {{group.idbGroupId | groupName}}:
+          <div class="small">
+            <span class="text-muted">{{group.idbGroupId | groupName}}:</span>
             @if (group.analysisType == 'absoluteEnergyConsumption') {
-            <span>Absolute Energy
-              Consumption</span>
+            <span> Absolute</span>
             }
             @if (group.analysisType == 'energyIntensity') {
-            <span>Energy Intensity</span>
+            <span> Intensity</span>
             }
             @if (group.analysisType == 'modifiedEnergyIntensity') {
-            <span>Modified Energy Intensity</span>
+            <span> Mod. Intensity</span>
             }
             @if (group.analysisType == 'regression') {
-            <span>Regression</span>
+            <span> Regression</span>
             }
             @if (group.analysisType == 'skip') {
-            <span>Exclude from Analysis</span>
+            <span class="text-muted"> Exclude</span>
             }
             @if (group.analysisType == 'skipAnalysis') {
-            <span>Skip Analysis</span>
+            <span class="text-muted"> Skip All</span>
             }
-            <br>
-          </span>
+          </div>
           }
         </td>
-        <td>{{facilityAnalysisListItem.analysisItem.modifiedDate | date:'short'}}</td>
-        <td class="actions">
+        <!-- Data Through -->
+        <td class="text-center data-through-col">
+          @if (sc?.latestDataAllEntries) {
+          <span class="fw-semibold" [ngClass]="{
+            'text-success': sc.allDatesCurrent,
+            'text-warning': !sc.allDatesCurrent
+          }">{{sc.latestDataAllEntries | date:'MMM y'}}</span>
+          } @else {
+          <span class="text-muted">&mdash;</span>
+          }
+        </td>
+        <!-- Last Modified -->
+        <td class="text-center modified-col">
+          {{facilityAnalysisListItem.analysisItem.modifiedDate | date:'shortDate'}}
+        </td>
+        <!-- Actions -->
+        <td class="text-center">
           <a class="click-link" (click)="editItem(facilityAnalysisListItem.analysisItem)">View Analysis</a>
         </td>
       </tr>
       }
       @if (_facilityAnalysisListItems.length == 0) {
       <tr>
-        <td colspan="7" class="text-center">
-          No @if (_selectedAnalysisItem.energyIsSource) {
+        <td colspan="7" class="text-center fst-italic text-muted py-3">
+          No
+          @if (_selectedAnalysisItem?.energyIsSource) {
           <b>source energy</b>
-          }
-          @if (!_selectedAnalysisItem.energyIsSource) {
+          } @else {
           <b>site energy</b>
-          } analysis items found for this
-          facility that match
-          the <b>selected baseline year.</b><br>
-          Click the "+Add Facility Analysis" button to conduct a facility level analysis that will be added to
-          the account analysis in progress.
+          }
+          analysis items found for this facility that match the <b>selected baseline year.</b><br>
+          Click "+Add Facility Analysis" to conduct a facility level analysis to include in this account analysis.
         </td>
       </tr>
       }
-      <tr>
-        <td>
+      <tr class="table-light">
+        <td class="radio-td text-center">
           <input type="radio" class="rowToggle" [ngModel]="selectedFacilityItemId()" [value]="'skip'"
-            name="{{_facility.name+'undefined'}}" id="{{_facility.name+'undefined'}}" (change)="save('skip')">
+            name="{{_facility?.name + 'skip'}}" id="{{_facility?.name + 'skip'}}" (change)="save('skip')">
         </td>
-        <td colspan="6">
-          Skip Facility
+        <td colspan="6" class="text-muted fst-italic">
+          <i class="fa fa-forward-step me-1"></i> Skip this facility
         </td>
       </tr>
     </tbody>
   </table>
 </div>
+<p class="text-muted mb-0 mt-1">
+  <i class="fa fa-circle-info me-1"></i>
+  <b>Data Through</b> shows the most recent month/year through which all meters and predictors in the analysis have data.
+  <span class="text-success fw-semibold">Green</span> = all sources current;
+  <span class="text-warning fw-semibold">Yellow</span> = some sources lag behind.
+</p>
 
 
 <div [ngClass]="{'windowOverlay': itemToEdit || showCreateItem}"></div>
@@ -143,8 +196,6 @@
     <button class="btn btn-outline" (click)="confirmEditItem()">Go To Facility Analysis</button>
   </div>
 </div>
-
-
 
 <div class="popup" [class.open]="showCreateItem">
   <div class="popup-header">Create New Facility Analysis
