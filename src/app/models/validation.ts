@@ -70,5 +70,6 @@ export interface FacilityReportErrors {
     missingEndDate: boolean,
     invalidDateRange: boolean,
     baselineAfterReportYear: boolean,
-    analysisHasErrors: boolean
+    analysisHasErrors: boolean,
+    isDataComplete: boolean
 }

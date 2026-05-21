@@ -13,9 +13,9 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         missingEndDate: false,
         invalidDateRange: false,
         baselineAfterReportYear: false,
-        analysisHasErrors: false
+        analysisHasErrors: false,
+        isDataComplete: true
     };
-
     errors.missingName = !facilityReport.name || facilityReport.name.toString().trim() === '';
 
     let linkedAnalysisItemId: string;
@@ -74,6 +74,11 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         analysisNeeded = true;
         linkedAnalysisItemId = facilityReport.analysisItemId;
         errors.missingReportYear = facilityReport.modelingReportSettings.reportYear === undefined || facilityReport.modelingReportSettings.reportYear === null || isNaN(facilityReport.modelingReportSettings.reportYear);
+    } else if (facilityReport.facilityReportType == 'costSavings') {
+        analysisNeeded = true;
+        linkedAnalysisItemId = facilityReport.analysisItemId;
+        errors.missingReportYear = facilityReport.costSavingsReportSettings.reportYear === undefined || facilityReport.costSavingsReportSettings.reportYear === null || isNaN(facilityReport.costSavingsReportSettings.reportYear);
+        errors.isDataComplete = facilityReport.costSavingsReportSettings.isDataComplete;
     }
     if (analysisNeeded) {
         if (!linkedAnalysisItemId) {
@@ -88,7 +93,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         }
     }
 
-    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors;
+    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors || !errors.isDataComplete;
     return errors;
 }
 
@@ -103,6 +108,7 @@ export function emptyFacilityReportErrors(): FacilityReportErrors {
         missingEndDate: false,
         invalidDateRange: false,
         baselineAfterReportYear: false,
-        analysisHasErrors: false
+        analysisHasErrors: false,
+        isDataComplete: true
     }
 }

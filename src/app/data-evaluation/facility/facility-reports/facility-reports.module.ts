@@ -35,6 +35,7 @@ import { FacilityReportAnalysisSelectionComponent } from './facility-report-setu
 import { FacilityCostSavingsReportSetupComponent } from './facility-report-setup/facility-cost-savings-report-setup/facility-cost-savings-report-setup.component';
 import { BlendedEnergyRateModalComponent } from './facility-report-setup/facility-cost-savings-report-setup/blended-energy-rate-modal/blended-energy-rate-modal.component';
 import { FacilityCostSavingsReportResultsComponent } from './report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component';
+import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savings-report-results/annual-savings-graph/annual-savings-graph.component';
 
 
 
@@ -64,7 +65,8 @@ import { FacilityCostSavingsReportResultsComponent } from './report-results/faci
     FacilityReportAnalysisSelectionComponent,
     FacilityCostSavingsReportSetupComponent,
     BlendedEnergyRateModalComponent,
-    FacilityCostSavingsReportResultsComponent
+    FacilityCostSavingsReportResultsComponent,
+    AnnualSavingsGraphComponent
     
   ],
   imports: [

@@ -11,7 +11,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { convertConsumptionRate } from 'src/app/shared/sharedHelperFunctions';
+import { convertConsumptionRate, getMeterCollectionUnit } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-blended-energy-rate-modal',
@@ -77,12 +77,7 @@ export class BlendedEnergyRateModalComponent {
   }
 
   getCollectionUnit(meter: IdbUtilityMeter): string {
-    if (meter.source == 'Other Fuels' && meter.scope == 2) {
-      return meter.vehicleCollectionUnit;
-    }
-    else {
-      return meter.startingUnit;
-    }
+    return getMeterCollectionUnit(meter);
   }
 
   calculateGroupEnergyForYear() {

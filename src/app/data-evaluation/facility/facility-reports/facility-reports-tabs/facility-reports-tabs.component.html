@@ -55,7 +55,7 @@
       </li>
       }
       @if (selectedReport.facilityReportType == 'costSavings') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || !setupValid}">
+      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || reportErrors.hasErrors}">
         <a class="nav-link" routerLink="cost-savings-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Cost Savings Report</a>

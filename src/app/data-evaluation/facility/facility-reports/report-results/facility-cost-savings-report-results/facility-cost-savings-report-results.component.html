@@ -1,4 +1,4 @@
-@if(reportSettings.costSavingsTable && convertedCostDataTable && savingsDataTable && cumulativeSavingsDataTable) {
+@if(reportSettings.costSavingsTable && convertedCostDataTable && costSavingsTable && cumulativeCostSavingsTable) {
 <div class="report">
     <div class="text-center">
         <h3>
@@ -12,15 +12,15 @@
         </h6>
     </div>
 
-    @if(savingsDataTable) {
+    @if(costSavingsTable) {
     <div>
         <h4 class="mb-0">
             Annual Cost Savings
         </h4>
 
         <div class="table-responsive">
-            <table class="table table-bordered mt-3">
-                <thead class="text-center">
+            <table class="table table-bordered report-table mt-3">
+                <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
                         @for (group of selectedAnalysisItem.groups; track group) {
@@ -33,9 +33,11 @@
                     <tr>
                         <td>{{year}}</td>
                         @for (group of selectedAnalysisItem.groups; track group) {
-                        @if (calculateCostSavings(year, group.idbGroupId) !== undefined && calculateCostSavings(year, group.idbGroupId) !== null && calculateCostSavings(year, group.idbGroupId)!== 0) {
+                        @if (costSavingsTable[year] && costSavingsTable[year][group.idbGroupId] !== undefined &&
+                        costSavingsTable[year][group.idbGroupId] !== null && costSavingsTable[year][group.idbGroupId]
+                        !== 0) {
                         <td class="text-center">
-                            $ {{ calculateCostSavings(year, group.idbGroupId) | number:'1.2-2'}}
+                            $ {{ costSavingsTable[year][group.idbGroupId] | number:'1.2-2'}}
                         </td>
                         }
                         @else {
@@ -50,17 +52,22 @@
             </table>
         </div>
     </div>
+
+    @if(years && selectedAnalysisItem && costSavingsTable) {
+    <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
+        [savingsData]="costSavingsTable"></app-annual-savings-graph>
+    }
     }
 
-    @if(cumulativeSavingsDataTable) {
-    <div class="mt-5">
+    @if(cumulativeCostSavingsTable) {
+    <div class="report-section">
         <h4 class="mb-0">
             Cumulative Annual Cost Savings
         </h4>
 
         <div class="table-responsive">
-            <table class="table table-bordered mt-3">
-                <thead class="text-center">
+            <table class="table table-bordered report-table mt-3">
+                <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
                         @for (group of selectedAnalysisItem.groups; track group) {
@@ -73,9 +80,13 @@
                     <tr>
                         <td>{{year}}</td>
                         @for (group of selectedAnalysisItem.groups; track group) {
-                        @if (calculateCumulativeCostSavings(year, group.idbGroupId) !== undefined && calculateCumulativeCostSavings(year, group.idbGroupId) !== null && calculateCumulativeCostSavings(year, group.idbGroupId)!== 0) {
+                        @if (cumulativeCostSavingsTable[year] && cumulativeCostSavingsTable[year][group.idbGroupId] !==
+                        undefined &&
+                        cumulativeCostSavingsTable[year][group.idbGroupId] !== null &&
+                        cumulativeCostSavingsTable[year][group.idbGroupId]
+                        !== 0) {
                         <td class="text-center">
-                            $ {{ calculateCumulativeCostSavings(year, group.idbGroupId) | number:'1.2-2'}}
+                            $ {{ cumulativeCostSavingsTable[year][group.idbGroupId] | number:'1.2-2'}}
                         </td>
                         }
                         @else {
@@ -90,26 +101,33 @@
             </table>
         </div>
     </div>
+
+    @if(years && selectedAnalysisItem && cumulativeCostSavingsTable) {
+    <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
+        [savingsData]="cumulativeCostSavingsTable"></app-annual-savings-graph>
+    }
     }
 
-    <div class="mt-5">
+    <div class="report-section">
         <h4 class="mb-0">
             Summary of User Costs
         </h4>
 
         <div class="table-responsive">
-            <table class="table table-bordered mt-3">
-                <thead class="text-center">
+            <table class="table table-bordered report-table mt-3">
+                <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
                         @for (group of selectedAnalysisItem.groups; track group) {
                         <th>{{ group.idbGroupId | groupName }}</th>
                         }
                     </tr>
+                </thead>
+                <thead class="sub-header">
                     <tr>
                         <th></th>
                         @for (group of selectedAnalysisItem.groups; track group) {
-                        <th>$/{{ convertedGroupUnits[group.idbGroupId] }}</th>
+                        <th class="fst-italic">$/{{ convertedGroupUnits[group.idbGroupId] }}</th>
                         }
                     </tr>
                 </thead>
@@ -131,24 +149,26 @@
         </div>
     </div>
 
-    <div class="mt-5">
+    <div class="report-section">
         <h4 class="mb-0">
             Summary of Calculated Costs
         </h4>
 
         <div class="table-responsive">
-            <table class="table table-bordered mt-3">
-                <thead class="text-center">
+            <table class="table table-bordered report-table mt-3">
+                <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
                         @for (group of selectedAnalysisItem.groups; track group) {
                         <th>{{ group.idbGroupId | groupName }}</th>
                         }
                     </tr>
+                </thead>
+                <thead class="sub-header">
                     <tr>
                         <th></th>
                         @for (group of selectedAnalysisItem.groups; track group) {
-                        <th>$/{{selectedAnalysisItem.energyUnit}}</th>
+                        <th class="fst-italic">$/{{selectedAnalysisItem.energyUnit}}</th>
                         }
                     </tr>
                 </thead>
@@ -157,7 +177,8 @@
                     <tr>
                         <td>{{year}}</td>
                         @for (group of selectedAnalysisItem.groups; track group) {
-                        @if(convertedCostDataTable[year] && convertedCostDataTable[year][group.idbGroupId] !== undefined) {
+                        @if(convertedCostDataTable[year] && convertedCostDataTable[year][group.idbGroupId] !==
+                        undefined) {
                         <td class="text-center">
                             {{convertedCostDataTable[year][group.idbGroupId] | number:'1.2-2'}}
                         </td>

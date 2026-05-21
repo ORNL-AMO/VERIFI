@@ -305,3 +305,17 @@ export function getEnergyUseSourceIcons(equipment: IdbFacilityEnergyUseEquipment
     }
     return icons;
 }
+
+export function getYearsArray(startYear: number, endYear: number): number[] {
+  const years: number[] = [];
+  for (let year = startYear; year <= endYear; year++) {
+    years.push(year);
+  }
+  return years;
+}
+
+export function getMeterCollectionUnit(meter: IdbUtilityMeter): string {
+  return (meter.source === 'Other Fuels' && meter.scope === 2)
+    ? meter.vehicleCollectionUnit
+    : meter.startingUnit;
+}
