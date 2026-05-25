@@ -74,6 +74,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         analysisNeeded = true;
         linkedAnalysisItemId = facilityReport.analysisItemId;
         errors.missingReportYear = facilityReport.modelingReportSettings.reportYear === undefined || facilityReport.modelingReportSettings.reportYear === null || isNaN(facilityReport.modelingReportSettings.reportYear);
+    } else if (facilityReport.facilityReportType == 'dataQuality') {
     }
     if (analysisNeeded) {
         if (!linkedAnalysisItemId) {

@@ -34,7 +34,7 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling' | 'dataQuality';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {

@@ -1,0 +1,39 @@
+<hr>
+
+@if (facilityMeters?.length > 0 || facilityPredictors?.length > 0)
+{
+<div class="fst-italic fw-bold fs-5 mt-5">
+    * Please select the meters and predictors you want to include in the report.
+</div>
+
+<div class="alert alert-warning mt-3">
+    @if (facilityMeters?.length > 0)
+    {
+    <div class="section-header">
+        Meters
+    </div>
+    <div class="tag-list">
+        @for (meter of facilityMeters; track meter.guid) {
+        <span class="tag" [class.selected]="selectedMeters.includes(meter)" (click)="toggleMeter(meter)">
+            {{ meter.name }}
+        </span>
+        }
+    </div>
+    }
+
+    @if (facilityPredictors?.length > 0)
+    {
+    <div class="section-header mt-5">
+        Predictors
+    </div>
+    <div class="tag-list">
+        @for (predictor of facilityPredictors; track predictor.guid) {
+        <span class="tag" [class.selected]="selectedPredictors.includes(predictor)"
+            (click)="togglePredictor(predictor)">
+            {{ predictor.name }}
+        </span>
+        }
+    </div>
+    }
+</div>
+}

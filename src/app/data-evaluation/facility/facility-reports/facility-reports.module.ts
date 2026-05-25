@@ -32,6 +32,7 @@ import { FacilityModelingReportResultsComponent } from './report-results/facilit
 import { AccountReportsModule } from '../../account/account-reports/account-reports.module';
 import { FacilityReportsDataCheckComponent } from './facility-reports-data-check/facility-reports-data-check.component';
 import { FacilityReportAnalysisSelectionComponent } from './facility-report-setup/facility-report-analysis-selection/facility-report-analysis-selection.component';
+import { FacilityDataQualityReportSetupComponent } from './facility-report-setup/facility-data-quality-report-setup/facility-data-quality-report-setup.component';
 
 
 
@@ -58,7 +59,8 @@ import { FacilityReportAnalysisSelectionComponent } from './facility-report-setu
     FacilityModelingReportSetupComponent,
     FacilityModelingReportResultsComponent,
     FacilityReportsDataCheckComponent,
-    FacilityReportAnalysisSelectionComponent
+    FacilityReportAnalysisSelectionComponent,
+    FacilityDataQualityReportSetupComponent
     
   ],
   imports: [

@@ -53,6 +53,13 @@
           Modeling Report</a>
       </li>
       }
+      @if (selectedReport.facilityReportType == 'dataQuality') {
+      <li class="nav-item" [ngClass]="{'disabled': reportErrors.hasErrors}">
+        <a class="nav-link" routerLink="data-quality-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Data Quality Report</a>
+      </li>
+      }
     </ul>
   </div>
   <div>
