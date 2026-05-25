@@ -2,8 +2,8 @@
   <div class="row form-group">
     <label class="col-6 col-form-label semibold" for="reportYear">Report Year</label>
     <div class="col-6 mb-3">
-      <select name="reportYear" [(ngModel)]="reportSettings.reportYear" class="form-select" (change)="reportYearChanged()"
-        [required]="true">
+      <select name="reportYear" [(ngModel)]="reportSettings.reportYear" class="form-select"
+        (change)="reportYearChanged()" [required]="true">
         @for (year of reportYears; track year) {
         <option class="pe-2" [ngValue]="year">{{year}}
         </option>
@@ -13,6 +13,12 @@
   </div>
 </form>
 <hr>
+
+<div class="d-flex flex-wrap">
+  <div class="mb-3 fw-bold fst-italic fs-6">
+    * Cost Savings Report is only available for site and water analyses.
+  </div>
+</div>
 
 <app-facility-report-analysis-selection [facilityReport]="facilityReport" [baselineYears]="baselineYears"
   [selectedAnalysisItem]="selectedAnalysisItem" (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"
@@ -41,13 +47,13 @@
     <thead class="text-center">
       <tr>
         <th>Year</th>
-        @for (group of selectedAnalysisItem.groups; track group) {
+        @for (group of filteredGroups; track group) {
         <th>{{ group.idbGroupId | groupName }}</th>
         }
       </tr>
       <tr>
         <th></th>
-        @for (group of selectedAnalysisItem.groups; track group) {
+        @for (group of filteredGroups; track group) {
         <th>$/{{ groupUnits[group.idbGroupId] }}</th>
         }
       </tr>
@@ -56,7 +62,7 @@
       @for (year of yearsList; track year) {
       <tr>
         <td> {{year}} </td>
-        @for (group of selectedAnalysisItem.groups; track group) {
+        @for (group of filteredGroups; track group) {
         <td>
           <div class="input-group input-group-sm">
             <input type="number" placeholder="Enter cost" class="form-control form-control-sm"
@@ -78,6 +84,7 @@
 }
 
 @if (showModal) {
-<app-blended-energy-rate-modal [showModal]="showModal" [group]="selectedGroup" [year]="selectedYear" [selectedAnalysisItem]="selectedAnalysisItem"
-  (close)="closeCalculator()" (calculatedBlendedRate)="updateBlendedRate($event)"></app-blended-energy-rate-modal>
+<app-blended-energy-rate-modal [showModal]="showModal" [group]="selectedGroup" [year]="selectedYear"
+  [selectedAnalysisItem]="selectedAnalysisItem" (close)="closeCalculator()"
+  (calculatedBlendedRate)="updateBlendedRate($event)"></app-blended-energy-rate-modal>
 }

@@ -5,9 +5,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -121,6 +119,7 @@ export class FacilityCostSavingsReportSetupComponent {
       if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.reportYear) {
         this.selectedYearError = false;
         this.setTableYears();
+        this.setGroupUnits();
       } else {
         this.selectedYearError = true;
       }
@@ -255,5 +254,9 @@ export class FacilityCostSavingsReportSetupComponent {
       }
     }
     return true;
+  }
+
+  get filteredGroups() {
+    return this.selectedAnalysisItem.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis');
   }
 }

@@ -39,8 +39,11 @@ export class AnnualSavingsGraphComponent {
   }
 
   drawChart() {
-    if (this.selectedAnalysisItem?.groups && this.years) {
-      const data = this.selectedAnalysisItem.groups.map(group => {
+    let filteredGroups = this.selectedAnalysisItem?.groups?.filter(group => {
+      return group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis';
+    });
+    if (filteredGroups && this.years) {
+      const data = filteredGroups.map(group => {
         const xVals = this.years;
         const yVals = this.years.map(year => {
           if (this.savingsData[year] && this.savingsData[year][group.idbGroupId] !== undefined && !isNaN(this.savingsData[year][group.idbGroupId])) {
@@ -63,7 +66,7 @@ export class AnnualSavingsGraphComponent {
           orientation: "h"
         },
         xaxis: {
-          title: { text: 'Year', font: { size: 16 }, hoverformat: "%b, %y" },
+          title: { font: { size: 16 }, hoverformat: "%b, %y" },
           type: 'category'
         },
         yaxis: { title: { text: 'Savings ($)', font: { size: 16 }, standoff: 18 }, automargin: true },

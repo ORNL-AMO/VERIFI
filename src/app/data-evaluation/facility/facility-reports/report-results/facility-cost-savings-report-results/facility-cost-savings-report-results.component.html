@@ -23,7 +23,7 @@
                 <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         <th>{{ group.idbGroupId | groupName }}</th>
                         }
                     </tr>
@@ -32,7 +32,7 @@
                     @for(year of years; track year) {
                     <tr>
                         <td>{{year}}</td>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         @if (costSavingsTable[year] && costSavingsTable[year][group.idbGroupId] !== undefined &&
                         costSavingsTable[year][group.idbGroupId] !== null && costSavingsTable[year][group.idbGroupId]
                         !== 0) {
@@ -70,7 +70,7 @@
                 <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         <th>{{ group.idbGroupId | groupName }}</th>
                         }
                     </tr>
@@ -79,7 +79,7 @@
                     @for(year of years; track year) {
                     <tr>
                         <td>{{year}}</td>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         @if (cumulativeCostSavingsTable[year] && cumulativeCostSavingsTable[year][group.idbGroupId] !==
                         undefined &&
                         cumulativeCostSavingsTable[year][group.idbGroupId] !== null &&
@@ -118,7 +118,7 @@
                 <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         <th>{{ group.idbGroupId | groupName }}</th>
                         }
                     </tr>
@@ -126,7 +126,7 @@
                 <thead class="sub-header">
                     <tr>
                         <th></th>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         <th class="fst-italic">$/{{ convertedGroupUnits[group.idbGroupId] }}</th>
                         }
                     </tr>
@@ -135,7 +135,7 @@
                     @for(year of years; track year) {
                     <tr>
                         <td>{{year}}</td>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         @if(costDataTable[year] && costDataTable[year][group.idbGroupId] !== undefined) {
                         <td class="text-center">
                             {{costDataTable[year][group.idbGroupId] | number:'1.2-2'}}
@@ -159,7 +159,7 @@
                 <thead class="text-center primary-header">
                     <tr>
                         <th>Year</th>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         <th>{{ group.idbGroupId | groupName }}</th>
                         }
                     </tr>
@@ -167,7 +167,7 @@
                 <thead class="sub-header">
                     <tr>
                         <th></th>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         <th class="fst-italic">$/{{selectedAnalysisItem.energyUnit}}</th>
                         }
                     </tr>
@@ -176,7 +176,7 @@
                     @for(year of years; track year) {
                     <tr>
                         <td>{{year}}</td>
-                        @for (group of selectedAnalysisItem.groups; track group) {
+                        @for (group of filteredGroups; track group) {
                         @if(convertedCostDataTable[year] && convertedCostDataTable[year][group.idbGroupId] !==
                         undefined) {
                         <td class="text-center">

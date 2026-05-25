@@ -73,8 +73,8 @@ export class FacilityCostSavingsReportResultsComponent {
       this.convertedCostDataTable = JSON.parse(JSON.stringify(this.reportSettings.costSavingsTable));
       this.convertToRequiredUnit();
       this.setYears();
+      this.getGroupSummaries();
     });
-    this.getGroupSummaries();
   }
 
   ngOnDestroy() {
@@ -202,6 +202,10 @@ export class FacilityCostSavingsReportResultsComponent {
       });
     });
     return outputTable;
+  }
+
+  get filteredGroups() {
+    return this.selectedAnalysisItem.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis');
   }
 }
 
