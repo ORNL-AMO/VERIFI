@@ -13,16 +13,19 @@ export class AccountAnalysisStatusCheck {
     analysisItemId: string;
     accountAnalysisSetupErrors: AccountAnalysisSetupErrors;
     status: STATUS_CHECK_OPTIONS;
-    
+
     /** The most recent data date across all meters and predictors used in the analysis. */
     latestDataDate: Date;
     /** The most recent same day/month across all meters and predictors used in the analysis */
     latestDataAllEntries: Date;
+    /** latest complete year of data */
+    latestCompleteYear: number;
+
     /** True when every meter and predictor has data up to the same month/year as latestDataDate. */
     allDatesCurrent: boolean;
+    facilityAnalysisHasWarnings: boolean;
 
-
-    constructor(analysisItem: IdbAccountAnalysisItem, facilityStatusChecks: Array<FacilityStatusCheck>) {
+    constructor(analysisItem: IdbAccountAnalysisItem, facilityStatusChecks: Array<FacilityStatusCheck>, account: IdbAccount) {
         this.analysisItemId = analysisItem.guid;
         const facilityAnalysisItemIds: Set<string> = new Set(
             analysisItem.facilityAnalysisItems
@@ -32,8 +35,8 @@ export class AccountAnalysisStatusCheck {
         const facilityAnalysisStatusChecks: Array<AnalysisStatusCheck> = facilityStatusChecks.flatMap(fc => fc.analysisStatusChecks)
         const includedFacilityAnalysisStatusChecks: Array<AnalysisStatusCheck> = facilityAnalysisStatusChecks.filter(fc => facilityAnalysisItemIds.has(fc.analysisItem.guid));
         this.setAnalysisSetupErrors(includedFacilityAnalysisStatusChecks, analysisItem);
-        this.setDates(includedFacilityAnalysisStatusChecks);
-        this.setStatus();
+        this.setDates(includedFacilityAnalysisStatusChecks, account);
+        this.setStatus(includedFacilityAnalysisStatusChecks);
     }
 
     private setAnalysisSetupErrors(facilityAnalysisStatusChecks: Array<AnalysisStatusCheck>, analysisItem: IdbAccountAnalysisItem) {
@@ -42,21 +45,50 @@ export class AccountAnalysisStatusCheck {
         this.accountAnalysisSetupErrors = errors;
     }
 
-    private setDates(facilityAnalysisStatusChecks: Array<AnalysisStatusCheck>) {
+    private setDates(facilityAnalysisStatusChecks: Array<AnalysisStatusCheck>, account: IdbAccount) {
         const latestDataDates: Array<Date> = facilityAnalysisStatusChecks.map(fc => fc.latestDataDate).filter((date): date is Date => date !== undefined);
         this.latestDataDate = latestDataDates.length > 0 ? new Date(Math.max(...latestDataDates.map(date => date.getTime()))) : undefined;
 
         const latestDataAllEntriesDates: Array<Date> = facilityAnalysisStatusChecks.map(fc => fc.latestDataAllEntries).filter((date): date is Date => date !== undefined);
         this.latestDataAllEntries = latestDataAllEntriesDates.length > 0 ? new Date(Math.min(...latestDataAllEntriesDates.map(date => date.getTime()))) : undefined;
 
-        //year/month equal
-        this.allDatesCurrent = this.latestDataDate !== undefined && this.latestDataAllEntries !== undefined && this.latestDataDate.getFullYear() === this.latestDataAllEntries.getFullYear() && this.latestDataDate.getMonth() === this.latestDataAllEntries.getMonth();
+        if (this.latestDataAllEntries) {
+            if (account.fiscalYear === 'calendarYear') {
+                if(this.latestDataAllEntries.getMonth() === 11) {
+                    this.latestCompleteYear = this.latestDataAllEntries.getFullYear();
+                } else {
+                    this.latestCompleteYear = this.latestDataAllEntries.getFullYear() - 1;
+                }
+            } else if(account.fiscalYearCalendarEnd) {
+                //fiscal year ends in the fiscalYearMonth
+                if(account.fiscalYearMonth){
+                    if(this.latestDataAllEntries.getMonth() === (account.fiscalYearMonth - 1 + 12) % 12) {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear();
+                    } else {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear() - 1;
+                    }
+                }
+            } else if(!account.fiscalYearCalendarEnd){
+                //fiscal year starts in the fiscalYearMonth
+                if(account.fiscalYearMonth){
+                    if(this.latestDataAllEntries.getMonth() === (account.fiscalYearMonth - 2 + 12) % 12) {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear();
+                    } else {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear() - 1;
+                    }
+                }
+            }
+            //year/month equal
+            this.allDatesCurrent = this.latestDataDate !== undefined && this.latestDataDate.getFullYear() === this.latestDataAllEntries.getFullYear() && this.latestDataDate.getMonth() === this.latestDataAllEntries.getMonth();
+        }
     }
 
-    private setStatus() {
+    private setStatus(includedFacilityAnalysisStatusChecks: Array<AnalysisStatusCheck>) {
+        this.facilityAnalysisHasWarnings = includedFacilityAnalysisStatusChecks.some(fc => fc.status === 'warning');
+
         if (this.accountAnalysisSetupErrors.hasError) {
             this.status = 'error';
-        } else if (!this.allDatesCurrent) {
+        } else if (this.facilityAnalysisHasWarnings) {
             this.status = 'warning';
         } else {
             this.status = 'good';

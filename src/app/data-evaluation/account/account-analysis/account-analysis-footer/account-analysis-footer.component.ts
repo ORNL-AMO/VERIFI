@@ -12,6 +12,8 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-account-analysis-footer',
@@ -26,6 +28,7 @@ export class AccountAnalysisFooterComponent {
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
 
   helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
@@ -33,6 +36,7 @@ export class AccountAnalysisFooterComponent {
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
   facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities);
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
 
   url: Signal<string> = toSignal(
     this.router.events.pipe(

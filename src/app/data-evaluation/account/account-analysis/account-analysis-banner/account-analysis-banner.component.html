@@ -18,7 +18,9 @@
         <a class="nav-link" routerLink="select-items" [routerLinkActive]="['active']">
           <i class="fa fa-list-check"></i>
           Select Facility Items
-          @if (_analysisStatusCheck.accountAnalysisSetupErrors.facilitiesSelectionsInvalid || !_analysisStatusCheck.allDatesCurrent) {
+          <!--'warning' = warnings in facilities-->
+          @if (_analysisStatusCheck.accountAnalysisSetupErrors.facilitiesSelectionsInvalid ||
+          _analysisStatusCheck.facilityAnalysisHasWarnings) {
           <span class="fa fa-exclamation-triangle text-warning"></span>
           }
         </a>

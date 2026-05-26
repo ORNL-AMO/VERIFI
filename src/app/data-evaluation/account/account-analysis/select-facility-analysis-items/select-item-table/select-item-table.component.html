@@ -17,13 +17,13 @@
 </h4>
 
 @if (_selectedFacilityItem) {
-  @let setupErrors = _selectedFacilityItem.guid | invalidAnalysis;
-  @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
-  <div class="alert alert-danger w-100 text-center">
-    The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
-  </div>
-  <hr>
-  }
+@let setupErrors = _selectedFacilityItem.guid | invalidAnalysis;
+@if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
+<div class="alert alert-danger w-100 text-center">
+  The selected facility analysis contains errors. Click "View Analysis" to view and fix the errors.
+</div>
+<hr>
+}
 }
 
 @if (_selectedFacilityItemId == null) {
@@ -76,11 +76,11 @@
             <span class="badge bg-danger issue-badge">Meter Errors</span>
             }
             @if (sc.hasPredictorSetupErrors) {
-              @if (sc.status === 'error') {
-              <span class="badge bg-danger issue-badge">Predictor Errors</span>
-              } @else if (sc.status === 'warning') {
-              <span class="badge bg-warning text-dark issue-badge">Predictor Warnings</span>
-              }
+            @if (sc.status === 'error') {
+            <span class="badge bg-danger issue-badge">Predictor Errors</span>
+            } @else if (sc.status === 'warning') {
+            <span class="badge bg-warning text-dark issue-badge">Predictor Warnings</span>
+            }
             }
             @if (sc.groupsHaveErrors) {
             <span class="badge bg-danger issue-badge">Analysis Errors</span>
@@ -88,11 +88,11 @@
             <span class="badge bg-warning text-dark issue-badge">Analysis Warnings</span>
             }
             @if(sc.isDateCurrentWithAccountAnalysis === false){
-              <span class="badge bg-warning text-dark issue-badge">Data Lagging</span>
+            <span class="badge bg-warning text-dark issue-badge">Data Lagging</span>
             }
           </div>
           }@else {
-            <span class="text-success">No Issues</span>
+          <span class="text-success">No Issues</span>
           }
         </td>
         <!-- Analysis Item Name -->
@@ -128,10 +128,7 @@
         <!-- Data Through -->
         <td class="text-center data-through-col">
           @if (sc?.latestDataAllEntries) {
-          <span class="fw-semibold" [ngClass]="{
-            'text-success': sc.allDatesCurrent,
-            'text-warning': !sc.allDatesCurrent
-          }">{{sc.latestDataAllEntries | date:'MMM y'}}</span>
+          <span class="fw-semibold">{{sc.latestDataAllEntries | date:'MMM y'}}</span>
           } @else {
           <span class="text-muted">&mdash;</span>
           }
@@ -174,9 +171,8 @@
 </div>
 <p class="text-muted mb-0 mt-1">
   <i class="fa fa-circle-info me-1"></i>
-  <b>Data Through</b> shows the most recent month/year through which all meters and predictors in the analysis have data.
-  <span class="text-success fw-semibold">Green</span> = all sources current;
-  <span class="text-warning fw-semibold">Yellow</span> = some sources lag behind.
+  <b>Data Through</b> shows the most recent month/year through which all meters and predictors in the analysis have
+  data.
 </p>
 
 

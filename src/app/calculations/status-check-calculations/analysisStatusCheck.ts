@@ -218,17 +218,4 @@ export class AnalysisStatusCheck {
     getGroupStatusChecksByGroupId(groupId: string): AnalysisGroupStatusCheck | undefined {
         return this.groupStatusChecks.find(gsc => gsc.group.idbGroupId === groupId);
     }
-
-    setIsDateCurrentWithAccountAnalysis(accountLatestDataDate: Date) {
-        if (!this.latestDataAllEntries) {
-            this.isDateCurrentWithAccountAnalysis = false;
-        } else {
-            //check month/year of latest facility entry against month/year of latest data date for account analysis
-            this.isDateCurrentWithAccountAnalysis = this.latestDataAllEntries.getFullYear() === accountLatestDataDate.getFullYear() &&
-                this.latestDataAllEntries.getMonth() === accountLatestDataDate.getMonth();
-        }
-        if(!this.isDateCurrentWithAccountAnalysis && this.status == 'good'){
-            this.status = 'warning';
-        }
-    }
 }

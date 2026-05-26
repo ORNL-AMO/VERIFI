@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { CalanderizedMeter } from "src/app/models/calanderization";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
@@ -68,7 +68,7 @@ export class FacilityStatusCheck {
         this.hasNoMeterData = facilityMeterData.length === 0;
         this.hasNoMeterGroups = !this.hasNoMeters && facilityMeterGroups.length === 0;
         this.hasNoPredictors = facilityPredictors.length === 0;
-        this.facilityLatestEntry = this.computeFacilityLatestEntry(facilityMeterData);
+        this.facilityLatestEntry = this.computeFacilityLatestEntry(facilityCalanderizedMeters);
 
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
@@ -91,10 +91,11 @@ export class FacilityStatusCheck {
         return actions;
     }
 
-    private computeFacilityLatestEntry(utilityMeterData: Array<IdbUtilityMeterData>): { month: number; year: number, date: Date } | undefined {
-        if (!utilityMeterData || utilityMeterData.length === 0) return undefined;
-        const latest = _.maxBy(utilityMeterData, d => d.year * 12 + d.month);
-        return latest ? { month: latest.month, year: latest.year, date: new Date(latest.year, latest.month - 1) } : undefined;
+    private computeFacilityLatestEntry(calanderizedMeters: Array<CalanderizedMeter>): { month: number; year: number, date: Date } | undefined {
+        if (!calanderizedMeters || calanderizedMeters.length === 0) return undefined;
+        const allMonthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cm => cm.monthlyData);
+        const latest = _.maxBy(allMonthlyData, d => d.year * 12 + d.monthNumValue);
+        return latest ? { month: latest.monthNumValue, year: latest.year, date: new Date(latest.year, latest.monthNumValue) } : undefined;
     }
 
     private setMetersStatusChecks(meters: Array<IdbUtilityMeter>, calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>) {
@@ -226,11 +227,8 @@ export class FacilityStatusCheck {
         return errors ?? emptyFacilityReportErrors();
     }
 
-    getAnalysisStatusById(analysisId: string, accountLatestDataDate?: Date): AnalysisStatusCheck | undefined {
+    getAnalysisStatusById(analysisId: string): AnalysisStatusCheck | undefined {
         const analysisStatusCheck: AnalysisStatusCheck = this.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisId);
-        if (analysisStatusCheck && accountLatestDataDate) {
-            analysisStatusCheck.setIsDateCurrentWithAccountAnalysis(accountLatestDataDate);
-        }
         return analysisStatusCheck;
     }
 

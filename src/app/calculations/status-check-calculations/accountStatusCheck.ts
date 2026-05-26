@@ -112,7 +112,7 @@ export class AccountStatusCheck {
         this.accountAnalysisStatusChecks = [];
         const accountAnalysisItemsForAccount: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(accountAnalysisItem => accountAnalysisItem.accountId === account.guid);
         for (const item of accountAnalysisItemsForAccount) {
-            const accountAnalysisStatusCheck = new AccountAnalysisStatusCheck(item, this.facilityStatusChecks);
+            const accountAnalysisStatusCheck = new AccountAnalysisStatusCheck(item, this.facilityStatusChecks, account);
             this.accountAnalysisStatusChecks.push(accountAnalysisStatusCheck);
         }
         const energyAnalysisItem = this.getLatestAnalysisItem(account, accountAnalysisItemsForAccount, 'energy');

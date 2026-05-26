@@ -118,8 +118,8 @@
               @if (sc?.accountAnalysisSetupErrors?.facilitiesSelectionsInvalid) {
               <span class="badge bg-danger issue-badge">Selection Errors</span>
               }
-              @if (!sc?.allDatesCurrent && sc?.status === 'warning') {
-              <span class="badge bg-warning text-dark issue-badge">Data Outdated</span>
+              @if (sc?.facilityAnalysisHasWarnings) {
+              <span class="badge bg-warning text-dark issue-badge">Facility Warnings</span>
               }
             </div>
             }

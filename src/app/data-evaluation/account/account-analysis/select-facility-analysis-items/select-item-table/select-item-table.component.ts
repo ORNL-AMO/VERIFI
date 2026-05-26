@@ -93,7 +93,7 @@ export class SelectItemTableComponent {
       filteredItems = filteredAnalysisItems.map(item => {
         return {
           analysisItem: item,
-          statusCheck: facilityStatusCheck ? facilityStatusCheck.getAnalysisStatusById(item.guid, accountAnalysisStatusCheck?.latestDataDate) : null
+          statusCheck: facilityStatusCheck ? facilityStatusCheck.getAnalysisStatusById(item.guid) : null
         }
       });
     }
