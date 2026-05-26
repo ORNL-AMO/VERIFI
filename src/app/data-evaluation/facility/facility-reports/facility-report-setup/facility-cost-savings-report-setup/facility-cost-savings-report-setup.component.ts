@@ -182,7 +182,12 @@ export class FacilityCostSavingsReportSetupComponent {
           unit = groupMeters[0].startingUnit;
         }
         else {
-          unit = this.selectedAnalysisItem?.energyUnit;
+          if(this.selectedAnalysisItem?.analysisCategory == 'energy') {
+            unit = this.selectedAnalysisItem.energyUnit;
+          }
+          else if(this.selectedAnalysisItem?.analysisCategory == 'water') {
+            unit = this.selectedAnalysisItem.waterUnit;
+          }
         }
       }
       else if (mobileMeters.length == groupMeters.length) {
@@ -246,7 +251,7 @@ export class FacilityCostSavingsReportSetupComponent {
 
   isDataComplete(): boolean {
     for (let year of this.yearsList) {
-      for (const group of this.selectedAnalysisItem.groups) {
+      for (const group of this.filteredGroups) {
         const cost = this.costTableData[year][group.idbGroupId];
         if (cost === null || cost === undefined || isNaN(cost)) {
           return false;

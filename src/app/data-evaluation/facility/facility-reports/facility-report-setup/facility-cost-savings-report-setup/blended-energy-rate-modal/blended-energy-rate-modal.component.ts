@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -84,7 +85,7 @@ export class BlendedEnergyRateModalComponent {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.calanderizedMeterData = getCalanderizedMeterData(this.groupMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedFacility.energyIsSource, neededUnits: undefined }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
+    this.calanderizedMeterData = getCalanderizedMeterData(this.groupMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
     this.groupMonthlyData = this.calanderizedMeterData.flatMap(meter => { return meter.monthlyData });
     this.groupMonthlyData = this.groupMonthlyData.reduce((acc, monthlyData) => {
       let existingData = acc.find(data => { return data.month == monthlyData.month && data.year == monthlyData.year });
@@ -121,7 +122,11 @@ export class BlendedEnergyRateModalComponent {
         meterConsumptionForYear = meterMonthlyDataForYear.reduce((total, data) => total + data.energyConsumption, 0);
       }
 
-      this.consumptionPercentagePerMeter[meter.guid] = meterConsumptionForYear / this.totalGroupConsumption;
+      if (this.totalGroupConsumption > 0) {
+        this.consumptionPercentagePerMeter[meter.guid] = meterConsumptionForYear / this.totalGroupConsumption;
+      } else {
+        this.consumptionPercentagePerMeter[meter.guid] = 0;
+      }
     });
   }
 
@@ -149,5 +154,10 @@ export class BlendedEnergyRateModalComponent {
     });
     blendedRate = Math.round(blendedRate * 100) / 100;
     this.calculatedBlendedRate.emit(blendedRate);
+  }
+
+  getRoundedValue(meter: IdbUtilityMeter): number {
+    const convertedRate = this.convertedConsumptionRatePerMeter[meter.guid] || 0;
+    return Math.round(convertedRate * 100) / 100;
   }
 }

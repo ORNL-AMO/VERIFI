@@ -141,6 +141,11 @@
                             {{costDataTable[year][group.idbGroupId] | number:'1.2-2'}}
                         </td>
                         }
+                        @else {
+                        <td class="text-center">
+                            &mdash;
+                        </td>
+                        }
                         }
                     </tr>
                     }
@@ -168,7 +173,7 @@
                     <tr>
                         <th></th>
                         @for (group of filteredGroups; track group) {
-                        <th class="fst-italic">$/{{selectedAnalysisItem.energyUnit}}</th>
+                        <th class="fst-italic">$/{{finalUnit}}</th>
                         }
                     </tr>
                 </thead>
@@ -181,6 +186,11 @@
                         undefined) {
                         <td class="text-center">
                             {{convertedCostDataTable[year][group.idbGroupId] | number:'1.2-2'}}
+                        </td>
+                        }
+                        @else {
+                        <td class="text-center">
+                            &mdash;
                         </td>
                         }
                         }

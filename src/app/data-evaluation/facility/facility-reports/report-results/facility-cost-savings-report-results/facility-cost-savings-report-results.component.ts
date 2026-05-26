@@ -50,6 +50,7 @@ export class FacilityCostSavingsReportResultsComponent {
   convertedCostDataTable: YearGroupData = {};
   costSavingsTable: YearGroupData = {};
   cumulativeCostSavingsTable: YearGroupData = {};
+  finalUnit: string;
 
   constructor(
     private facilityReportsDbService: FacilityReportsDbService,
@@ -88,23 +89,33 @@ export class FacilityCostSavingsReportResultsComponent {
     for (const group of this.selectedAnalysisItem.groups) {
       let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == group.idbGroupId);
       if (groupMeters.length > 1) {
-        this.convertedGroupUnits[group.idbGroupId] = this.selectedAnalysisItem.energyUnit;
+        if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+          this.convertedGroupUnits[group.idbGroupId] = this.selectedAnalysisItem.energyUnit;
+        }
+        else if (this.selectedAnalysisItem.analysisCategory == 'water') {
+          this.convertedGroupUnits[group.idbGroupId] = this.selectedAnalysisItem.waterUnit;
+        }
       }
     }
   }
 
   convertToRequiredUnit() {
-    const finalUnit = this.selectedAnalysisItem.energyUnit;
+    if(this.selectedAnalysisItem.analysisCategory == 'energy') {
+      this.finalUnit = this.selectedAnalysisItem.energyUnit;
+    }
+    else if(this.selectedAnalysisItem.analysisCategory == 'water') {
+      this.finalUnit = this.selectedAnalysisItem.waterUnit;
+    }
     for (const year in this?.convertedCostDataTable) {
       for (const groupId in this?.convertedCostDataTable[year]) {
         const cost = this.convertedCostDataTable[year][groupId];
         const originalUnit = this.convertedGroupUnits[groupId];
-        if (originalUnit == finalUnit || cost == null || originalUnit == null)
+        if (originalUnit == this.finalUnit || cost == null || originalUnit == null)
           continue;
 
         const groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == groupId);
         if (groupMeters.length > 0) {
-          this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, finalUnit, this.selectedAnalysisItem.analysisCategory);
+          this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, this.finalUnit, this.selectedAnalysisItem.analysisCategory);
         }
       }
     }
@@ -157,7 +168,7 @@ export class FacilityCostSavingsReportResultsComponent {
   }
 
   setGroupSavings() {
-    if(!this.groupSummaries) {
+    if (!this.groupSummaries) {
       return;
     }
     const savingsDataTable: YearGroupData = {};
