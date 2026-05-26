@@ -6,7 +6,7 @@
       <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pe-1"></span>Back</button>
     </div>
     <div>
-      <div class="badge bg-primary">
+      <div class="badge bg-dark">
         @if(account()?.fiscalYear == 'calendarYear') {
         Latest Complete Year: {{analysisStatusCheck()?.latestCompleteYear}}
         }@else{
