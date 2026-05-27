@@ -81,9 +81,16 @@ export class PredictorTableComponent {
     if (!degreeDayPredictorsList) return false;
     return degreeDayPredictorsList.some(item => item.statusCheck && item.statusCheck.hasWeatherDataWarning);
   });
+
+  hasIgnoredWeatherDataWarning: Signal<boolean> = computed(() => {
+    const degreeDayPredictorsList = this.degreeDayPredictors();
+    if (!degreeDayPredictorsList) return false;
+    return degreeDayPredictorsList.some(item => item.predictor.ignoreWeatherDataWarning);
+  });
   
   predictorUsedGroupIds: Array<string> = [];
   displayDeletePredictor: boolean = false;
+  showIgnoreAllWarningsModal: boolean = false;
 
   selectDelete(predictor: IdbPredictor) {
     this.predictorToDelete = predictor;
@@ -236,6 +243,41 @@ export class PredictorTableComponent {
     } else {
       this.router.navigateByUrl('/data-evaluation/weather-data');
     }
+  }
+
+  openIgnoreAllWarningsModal() {
+    this.showIgnoreAllWarningsModal = true;
+  }
+
+  cancelIgnoreAllWarningsModal() {
+    this.showIgnoreAllWarningsModal = false;
+  }
+
+  async confirmIgnoreAllWarningsModal() {
+    this.showIgnoreAllWarningsModal = false;
+    await this.setAllIgnoreWeatherDataWarning(true);
+  }
+
+  async setAllIgnoreWeatherDataWarning(ignoreWarning: boolean) {
+    const predictorsToUpdate = this.degreeDayPredictors()
+      .map(item => item.predictor)
+      .filter(predictor => Boolean(predictor.ignoreWeatherDataWarning) !== ignoreWarning);
+    if (predictorsToUpdate.length === 0) {
+      return;
+    }
+    for (const predictor of predictorsToUpdate) {
+      predictor.ignoreWeatherDataWarning = ignoreWarning;
+      await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
+    }
+    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setPredictorsV2(account, this.selectedFacility());
+    this.toastNotificationService.showToast(
+      ignoreWarning ? 'Weather gap warnings dismissed' : 'Weather gap warnings re-enabled',
+      undefined,
+      1200,
+      false,
+      'alert-success'
+    );
   }
 
   navigateToPredictorData(predictor: IdbPredictor) {

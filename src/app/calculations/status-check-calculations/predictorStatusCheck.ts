@@ -173,7 +173,7 @@ export class PredictorStatusCheck {
     }
 
     private setHasWeatherDataWarning(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
-        if (predictor.predictorType !== 'Weather') {
+        if (predictor.predictorType !== 'Weather' || predictor.ignoreWeatherDataWarning) {
             this.hasWeatherDataWarning = false;
             return;
         }

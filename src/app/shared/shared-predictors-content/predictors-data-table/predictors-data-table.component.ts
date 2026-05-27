@@ -127,6 +127,7 @@ export class PredictorsDataTableComponent {
   currentPageNumber: number = 1;
   allChecked: boolean = false;
   showBulkDelete: boolean = false;
+  showIgnoreWarningModal: boolean = false;
 
   ngOnInit() {
     this.inDataManagement = this.router.url.includes('data-management');
@@ -318,5 +319,26 @@ export class PredictorsDataTableComponent {
     const predictor = this.predictor();
     const facility = this.facility();
     this.router.navigateByUrl('/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors/' + predictor.guid + '/data-quality-report');
+  }
+
+  async setIgnoreWeatherDataWarning() {
+    const predictor = this.predictor();
+    predictor.ignoreWeatherDataWarning = !predictor.ignoreWeatherDataWarning;
+    await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
+    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setPredictorsV2(account, this.facility());
+  }
+
+  openIgnoreWarningModal() {
+    this.showIgnoreWarningModal = true;
+  }
+
+  cancelIgnoreWarningModal() {
+    this.showIgnoreWarningModal = false;
+  }
+
+  async confirmIgnoreWarningModal() {
+    this.showIgnoreWarningModal = false;
+    await this.setIgnoreWeatherDataWarning();
   }
 }
