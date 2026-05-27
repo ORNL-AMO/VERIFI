@@ -1,0 +1,90 @@
+<form>
+  <div class="row form-group">
+    <label class="col-6 col-form-label semibold" for="reportYear">Report Year</label>
+    <div class="col-6 mb-3">
+      <select name="reportYear" [(ngModel)]="reportSettings.reportYear" class="form-select"
+        (change)="reportYearChanged()" [required]="true">
+        @for (year of reportYears; track year) {
+        <option class="pe-2" [ngValue]="year">{{year}}
+        </option>
+        }
+      </select>
+    </div>
+  </div>
+</form>
+<hr>
+
+<div class="d-flex flex-wrap">
+  <div class="mb-3 fw-bold fst-italic fs-6">
+    * Cost Savings Report is only available for site energy and water analyses.
+  </div>
+</div>
+
+<app-facility-report-analysis-selection [facilityReport]="facilityReport" [baselineYears]="baselineYears"
+  [selectedAnalysisItem]="selectedAnalysisItem" (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"
+  (filteredItemsChange)="onFilteredItemsChange($event)"></app-facility-report-analysis-selection>
+
+@if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
+<div class="alert alert-warning text-center">
+  No analysis items matching selected filters. Please adjust filters to view analysis items.
+</div>
+}
+
+@if(selectedYearError) {
+<div class="alert alert-danger text-center">
+  Report Year must be greater than or equal to Baseline Year of the selected analysis item.
+</div>
+}
+
+@if (selectedAnalysisItem && !selectedYearError && filteredAnalysisItems?.length !== 0) {
+<hr class="mt-4">
+<div class="setup-info mt-4">
+  Enter the cost of energy for each group and year below. For groups with multiple meters, click the calculator icon to
+  assist with your calculation
+</div>
+<div class="table-responsive mt-3">
+  <table class="table table-bordered table-hover">
+    <thead class="text-center">
+      <tr>
+        <th>Year</th>
+        @for (group of filteredGroups; track group) {
+        <th>{{ group.idbGroupId | groupName }}</th>
+        }
+      </tr>
+      <tr>
+        <th></th>
+        @for (group of filteredGroups; track group) {
+        <th>$/{{ groupUnits[group.idbGroupId] }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (year of yearsList; track year) {
+      <tr>
+        <td> {{year}} </td>
+        @for (group of filteredGroups; track group) {
+        <td>
+          <div class="input-group input-group-sm">
+            <input type="number" placeholder="Enter cost" class="form-control form-control-sm"
+              [(ngModel)]="costTableData[year][group.idbGroupId]" (ngModelChange)="updateReportSettings()">
+
+            @if (hasMultipleMeters(group)) {
+            <span class="input-group-text">
+              <i class="fa fa-calculator text-primary calculator-pointer" (click)="openCalculator(group, year)"></i>
+            </span>
+            }
+          </div>
+        </td>
+        }
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>
+}
+
+@if (showModal) {
+<app-blended-energy-rate-modal [showModal]="showModal" [group]="selectedGroup" [year]="selectedYear"
+  [selectedAnalysisItem]="selectedAnalysisItem" (close)="closeCalculator()"
+  (calculatedBlendedRate)="updateBlendedRate($event)"></app-blended-energy-rate-modal>
+}
