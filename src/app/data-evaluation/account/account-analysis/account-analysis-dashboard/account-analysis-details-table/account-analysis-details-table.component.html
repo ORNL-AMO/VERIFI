@@ -52,6 +52,7 @@
           @if (!showDeleteColumn) {
           <th></th>
           }
+          <th class="status-col text-center">Status</th>
           <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField == 'name'}">
             Analysis Item
           </th>
@@ -75,7 +76,11 @@
       <tbody>
         @for (item of _orderedAnalysisListItems | slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
         _itemsPerPage; track item.analysisItem.guid) {
-        <tr>
+        @let sc = item.accountAnalysisStatusCheck;
+        <tr [ngClass]="{
+            'analysis-row-error': sc?.status === 'error',
+            'analysis-row-warning': sc?.status === 'warning'
+          }">
           @if(showDeleteColumn) {
           <td class="input text-center">
             <input type="checkbox" name="analysisSelected" [checked]="checkedGuids().has(item.analysisItem.guid)"
@@ -85,23 +90,42 @@
           @if(!showDeleteColumn) {
           <td class="text-center">
             @if (item.analysisItem.analysisCategory == 'energy') {
-            <span class="energy fa"
-              [ngClass]="{'fa-circle-check': item.analysisItem.guid == _selectedAccount.selectedEnergyAnalysisId, 'fa-circle':item.analysisItem.guid != _selectedAccount.selectedEnergyAnalysisId}"
+            <span class="fa fa-star selection-star"
+              [ngClass]="{'text-warning': item.analysisItem.guid == _selectedAccount.selectedEnergyAnalysisId, 'text-muted': item.analysisItem.guid != _selectedAccount.selectedEnergyAnalysisId}"
+              [title]="item.analysisItem.guid == _selectedAccount.selectedEnergyAnalysisId ? 'Active energy analysis' : 'Set as active energy analysis'"
               (click)="setUseItem(item.analysisItem)"></span>
             }
             @if (item.analysisItem.analysisCategory == 'water') {
-            <span class="water fa"
-              [ngClass]="{'fa-circle-check': item.analysisItem.guid == _selectedAccount.selectedWaterAnalysisId, 'fa-circle':item.analysisItem.guid != _selectedAccount.selectedWaterAnalysisId}"
+            <span class="fa fa-star selection-star"
+              [ngClass]="{'text-info': item.analysisItem.guid == _selectedAccount.selectedWaterAnalysisId, 'text-muted': item.analysisItem.guid != _selectedAccount.selectedWaterAnalysisId}"
+              [title]="item.analysisItem.guid == _selectedAccount.selectedWaterAnalysisId ? 'Active water analysis' : 'Set as active water analysis'"
               (click)="setUseItem(item.analysisItem)"></span>
             }
           </td>
           }
-          <td>
-            @let setupErrors = item.analysisItem.guid | invalidAccountAnalysis;
-            <a (click)="selectAnalysisItem(item.analysisItem, setupErrors)">
-              @if (setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid) {
-              <span class="me-2 fa fa-exclamation-circle error-icon"></span>
+          <!-- Status column -->
+          <td class="text-center align-middle status-col">
+            <span class="fa fa-fw fa-lg" [ngClass]="{
+              'fa-circle-check text-success': sc?.status === 'good',
+              'fa-exclamation-triangle text-warning': sc?.status === 'warning',
+              'fa-circle-xmark text-danger': sc?.status === 'error'
+            }"></span>
+            @if (sc?.status === 'warning' || sc?.status === 'error') {
+            <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+              @if (sc?.accountAnalysisSetupErrors?.hasSetupErrors) {
+              <span class="badge bg-danger issue-badge">Setup Errors</span>
               }
+              @if (sc?.accountAnalysisSetupErrors?.facilitiesSelectionsInvalid) {
+              <span class="badge bg-danger issue-badge">Selection Errors</span>
+              }
+              @if (sc?.facilityAnalysisHasWarnings) {
+              <span class="badge bg-warning text-dark issue-badge">Facility Warnings</span>
+              }
+            </div>
+            }
+          </td>
+          <td>
+            <a (click)="selectAnalysisItem(item.analysisItem, sc)">
               {{item.analysisItem.name}}
             </a>
           </td>
@@ -144,10 +168,10 @@
   </div>
   <div class="d-flex justify-content-between align-items-center">
     <div class="icon-text">
-      <span class="energy fa fa-circle-check"></span> Denotes selected energy analysis.<br>
-      <span class="water fa fa-circle-check"></span> Denotes selected water analysis.
+      <span class="fa fa-star text-warning"></span> Denotes active energy analysis.<br>
+      <span class="fa fa-star text-info"></span> Denotes active water analysis.
       <p class="fw-light pt-2 italic mb-0">
-        The selected analysis is used to track progress towards your goals and for reporting.
+        The active analysis is used to track progress towards your goals and for reporting.
       </p>
     </div>
     <div>

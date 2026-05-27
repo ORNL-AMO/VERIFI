@@ -15,7 +15,7 @@ export class AccountAnalysisService {
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   facilitySummaries: BehaviorSubject<Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>>;
 
-  hideInUseMessage: boolean = false;
+  hideInUseMessage: BehaviorSubject<boolean>;
 
   calanderizedMeters: BehaviorSubject<Array<CalanderizedMeter>>;
   constructor() {
@@ -23,6 +23,7 @@ export class AccountAnalysisService {
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
     this.facilitySummaries = new BehaviorSubject([]);
+    this.hideInUseMessage = new BehaviorSubject<boolean>(false);
     this.calanderizedMeters = new BehaviorSubject([]);
   }
 }

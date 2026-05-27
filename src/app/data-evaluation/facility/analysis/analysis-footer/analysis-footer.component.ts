@@ -1,5 +1,5 @@
-import { Component, computed, inject, OnInit, Signal } from '@angular/core';
-import { filter, map, startWith, Subscription } from 'rxjs';
+import { Component, computed, inject, Signal } from '@angular/core';
+import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
@@ -10,8 +10,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -38,6 +36,7 @@ export class AnalysisFooterComponent {
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
   accountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.analysisService.accountAnalysisItem);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
 
   url = toSignal(
     this.router.events.pipe(
@@ -127,7 +126,7 @@ export class AnalysisFooterComponent {
   });
 
   goBack() {
-    const facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const facility: IdbFacility = this.facility();
     const selectedGroup: AnalysisGroup = this.selectedGroup();
     const analysisItem: IdbAnalysisItem = this.analysisItem();
     const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';
@@ -168,7 +167,7 @@ export class AnalysisFooterComponent {
   }
 
   continue() {
-    const facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const facility: IdbFacility = this.facility();
     const selectedGroup: AnalysisGroup = this.selectedGroup();
     const analysisItem: IdbAnalysisItem = this.analysisItem();
     const facilityUrlStr: string = '/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/';

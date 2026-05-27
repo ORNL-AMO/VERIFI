@@ -1,4 +1,4 @@
-import { CalanderizedMeter } from "src/app/models/calanderization";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
@@ -34,10 +34,10 @@ export class MeterStatusCheck {
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
         this.setHasNegativeReadings(meterReadings);
-        this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1) : undefined;
+        this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1) : undefined;
         if (calanderizedMeter) {
             this.isMeterValid = isMeterInvalid(calanderizedMeter.meter) == false;
-            this.setLastDateEntry(meterReadings);
+            this.setLastDateEntry(calanderizedMeter.monthlyData);
             this.setHasDuplicateEntries(meterReadings);
         } else {
             this.isMeterValid = true;
@@ -49,10 +49,10 @@ export class MeterStatusCheck {
         this.setActions(meter, facilityLatestEntry);
     }
 
-    private setLastDateEntry(meterReadings: Array<IdbUtilityMeterData>) {
-        if (meterReadings && meterReadings.length > 0) {
-            let lastEntry: IdbUtilityMeterData = _.maxBy(meterReadings, (data: IdbUtilityMeterData) => new Date(data.year, data.month - 1, data.day));
-            this.lastDateEntry = new Date(lastEntry.year, lastEntry.month - 1, lastEntry.day);
+    private setLastDateEntry(calanderizedMeterData: Array<MonthlyData>) {
+        if (calanderizedMeterData && calanderizedMeterData.length > 0) {
+            let lastEntry: MonthlyData = _.maxBy(calanderizedMeterData, (data: MonthlyData) => new Date(data.year, data.monthNumValue, 1));
+            this.lastDateEntry = new Date(lastEntry.year, lastEntry.monthNumValue, 1);
         }
     }
 

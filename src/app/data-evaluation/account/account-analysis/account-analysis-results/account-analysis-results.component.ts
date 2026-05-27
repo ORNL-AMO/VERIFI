@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -9,7 +10,6 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { AccountAnalysisService } from '../account-analysis.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -18,83 +18,87 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { runWorker } from 'src/app/web-workers/run-worker';
 
 @Component({
-    selector: 'app-account-analysis-results',
-    templateUrl: './account-analysis-results.component.html',
-    styleUrls: ['./account-analysis-results.component.css'],
-    standalone: false
+  selector: 'app-account-analysis-results',
+  templateUrl: './account-analysis-results.component.html',
+  styleUrls: ['./account-analysis-results.component.css'],
+  standalone: false
 })
 export class AccountAnalysisResultsComponent implements OnInit {
-
-  accountAnalysisItem: IdbAccountAnalysisItem;
-  account: IdbAccount;
-  worker: Worker;
-  constructor(private accountAnalysisService: AccountAnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private analysisDbService: AnalysisDbService,
-    private sharedDataService: SharedDataService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  private readonly accountAnalysisService = inject(AccountAnalysisService);
+  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
+  private readonly accountDbService = inject(AccountdbService);
+  private readonly facilityDbService = inject(FacilitydbService);
+  private readonly predictorDbService = inject(PredictorDbService);
+  private readonly predictorDataDbService = inject(PredictorDataDbService);
+  private readonly analysisDbService = inject(AnalysisDbService);
+  private readonly sharedDataService = inject(SharedDataService);
+  private readonly utilityMeterDbService = inject(UtilityMeterdbService);
+  private readonly utilityMeterDataDbService = inject(UtilityMeterDatadbService);
+  private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
-    this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    const accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    const account = this.accountDbService.selectedAccount.getValue();
+    const accountFacilities: IdbFacility[] = this.facilityDbService.accountFacilities.getValue();
+    const accountPredictorEntries: IdbPredictorData[] = this.predictorDataDbService.accountPredictorData.getValue();
+    const accountPredictors: IdbPredictor[] = this.predictorDbService.accountPredictors.getValue();
+    const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
+    const meters: IdbUtilityMeter[] = this.utilityMeterDbService.accountMeters.getValue();
+    const meterData: IdbUtilityMeterData[] = this.utilityMeterDataDbService.accountMeterData.getValue();
 
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    const payload = {
+      accountAnalysisItem,
+      account,
+      accountFacilities,
+      accountPredictorEntries,
+      allAccountAnalysisItems: accountAnalysisItems,
+      calculateAllMonthlyData: false,
+      meters,
+      meterData,
+      accountPredictors
+    };
+
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../web-workers/annual-account-analysis.worker', import.meta.url));
-      this.worker.onmessage = ({ data }) => {
-        this.worker.terminate();
-        if (!data.error) {
-          this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-          this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-          this.accountAnalysisService.facilitySummaries.next(data.facilitySummaries);
-          this.accountAnalysisService.calculating.next(false);
-        } else {
+      const worker = new Worker(new URL('../../../../web-workers/annual-account-analysis.worker', import.meta.url));
+      this.accountAnalysisService.calculating.next(true);
+      runWorker<any>(worker, payload).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
+        next: (data) => {
+          if (!data.error) {
+            this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+            this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+            this.accountAnalysisService.facilitySummaries.next(data.facilitySummaries);
+            this.accountAnalysisService.calculating.next(false);
+          } else {
+            this.accountAnalysisService.annualAnalysisSummary.next(undefined);
+            this.accountAnalysisService.monthlyAccountAnalysisData.next(undefined);
+            this.accountAnalysisService.facilitySummaries.next(undefined);
+            this.accountAnalysisService.calculating.next('error');
+          }
+        },
+        error: () => {
           this.accountAnalysisService.annualAnalysisSummary.next(undefined);
           this.accountAnalysisService.monthlyAccountAnalysisData.next(undefined);
           this.accountAnalysisService.facilitySummaries.next(undefined);
           this.accountAnalysisService.calculating.next('error');
         }
-      };
-      this.accountAnalysisService.calculating.next(true);
-      this.worker.postMessage({
-        accountAnalysisItem: this.accountAnalysisItem,
-        account: this.account,
-        accountFacilities: accountFacilities,
-        accountPredictorEntries: accountPredictorEntries,
-        allAccountAnalysisItems: accountAnalysisItems,
-        calculateAllMonthlyData: false,
-        meters: meters,
-        meterData: meterData,
-        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, false, meters, meterData, accountPredictors);
-      let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
-      let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+      const annualAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(
+        accountAnalysisItem, account, accountFacilities, accountPredictorEntries,
+        accountAnalysisItems, false, meters, meterData, accountPredictors
+      );
+      const annualAnalysisSummaries: AnnualAnalysisSummary[] = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      const monthlyAnalysisSummaryData: MonthlyAnalysisSummaryData[] = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountAnalysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
       this.accountAnalysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
       this.accountAnalysisService.facilitySummaries.next(annualAnalysisSummaryClass.facilitySummaries);
       this.accountAnalysisService.calculating.next(false);
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.worker) {
-      this.worker.terminate();
     }
   }
 

@@ -222,6 +222,13 @@ export function getYearsWithFullDataAnalysis(calanderizedMeters: Array<Calanderi
     return getYearsWithFullData(filteredMeters, facility);
 }
 
+export function getYearsWithFullDataAccountAnalysis(calanderizedMeters: Array<CalanderizedMeter>, analysisItem: IdbAccountAnalysisItem, account: IdbAccount): Array<number> {
+    const filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(calanderizedMeter => {
+        return isCategoryMeter(calanderizedMeter.meter, analysisItem.analysisCategory);
+    });
+    return getYearsWithFullDataAccount(filteredMeters, account);
+}
+
 export function isCategoryMeter(meter: IdbUtilityMeter, meterCategory: 'water' | 'energy' | 'all'): boolean {
     if (meterCategory == 'water') {
         if (meter.source == 'Water Intake') {

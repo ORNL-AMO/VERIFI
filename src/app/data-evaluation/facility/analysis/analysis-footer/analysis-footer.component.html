@@ -4,6 +4,15 @@
       <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pe-1"></span>Back </button>
     </div>
     <div>
+      <div class="badge bg-dark">
+        @if(facility()?.fiscalYear == 'calendarYear') {
+        Latest Complete Year: {{analysisStatusCheck()?.latestCompleteYear}}
+        }@else{
+        Latest Complete FY: {{analysisStatusCheck()?.latestCompleteYear}}
+        }
+      </div>
+    </div>
+    <div>
       @if (showGoBackToAccount()) {
       <button class="btn btn-secondary me-1" (click)="goBackToAccount()">Return to Account Analysis</button>
       }
