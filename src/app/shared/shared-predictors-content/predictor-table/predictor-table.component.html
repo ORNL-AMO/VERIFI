@@ -1,6 +1,7 @@
 @let _facilityPredictors = facilityPredictors();
 @let _standardPredictors = standardPredictors();
 @let _degreeDayPredictors = degreeDayPredictors();
+@let _hasIgnoredWeatherDataWarning = hasIgnoredWeatherDataWarning();
 
 @if (_facilityPredictors.length != 0) {
 <div class="d-flex w-100 justify-content-end mb-2">
@@ -131,6 +132,20 @@
   button. It may be best to choose a different weather station
   to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
   area of this facility.
+  <div class="mt-2">
+    <button class="btn btn-sm btn-outline-warning" (click)="openIgnoreAllWarningsModal()">
+      <i class="fa fa-eye-slash"></i> Dismiss All Weather Gap Warnings
+    </button>
+  </div>
+</div>
+}
+@if (_hasIgnoredWeatherDataWarning) {
+<div class="alert alert-secondary d-flex align-items-center justify-content-center gap-2 p-2">
+  <i class="fa fa-eye-slash"></i>
+  <span>Weather data gap warnings are dismissed for one or more predictors.</span>
+  <button class="btn btn-sm btn-outline-secondary" (click)="setAllIgnoreWeatherDataWarning(false)">
+    <i class="fa fa-eye"></i> Re-enable All Warnings
+  </button>
 </div>
 }
 <div class="table-responsive">
@@ -269,7 +284,7 @@
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': displayDeletePredictor}"></div>
+<div [ngClass]="{'windowOverlay': displayDeletePredictor || showIgnoreAllWarningsModal}"></div>
 <!--delete-->
 <div class="popup" [class.open]="displayDeletePredictor">
   <div class="popup-header">
@@ -293,4 +308,30 @@
     <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
   </div>
+</div>
+
+<div class="popup" [class.open]="showIgnoreAllWarningsModal">
+  @if (showIgnoreAllWarningsModal) {
+  <div class="popup-header">
+    Dismiss All Weather Gap Warnings?
+    <button class="item-right" (click)="cancelIgnoreAllWarningsModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>
+      Are you sure you want to dismiss weather data gap warnings for all weather predictors in this facility?
+    </p>
+    <p>
+      These warnings indicate some calculated entries may be based on weather data with gaps of 12 or more hours and
+      <strong>may not be accurate</strong>.
+    </p>
+    <p class="mb-0 text-muted small">
+      <i class="fa fa-info-circle"></i> You can re-enable these warnings at any time from this table.
+    </p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelIgnoreAllWarningsModal()">Cancel</button>
+    <button class="btn btn-warning" (click)="confirmIgnoreAllWarningsModal()"><i class="fa fa-eye-slash"></i>
+      Dismiss All Warnings</button>
+  </div>
+  }
 </div>
