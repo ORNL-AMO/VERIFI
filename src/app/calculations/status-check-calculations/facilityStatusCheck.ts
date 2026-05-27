@@ -95,7 +95,7 @@ export class FacilityStatusCheck {
         if (!calanderizedMeters || calanderizedMeters.length === 0) return undefined;
         const allMonthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cm => cm.monthlyData);
         const latest = _.maxBy(allMonthlyData, d => d.year * 12 + d.monthNumValue);
-        return latest ? { month: latest.monthNumValue, year: latest.year, date: new Date(latest.year, latest.monthNumValue) } : undefined;
+        return latest ? { month: latest.monthNumValue + 1, year: latest.year, date: new Date(latest.year, latest.monthNumValue) } : undefined;
     }
 
     private setMetersStatusChecks(meters: Array<IdbUtilityMeter>, calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>) {

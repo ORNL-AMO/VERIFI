@@ -13,7 +13,7 @@ import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
-import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
+import { getNeededUnits, getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import * as _ from 'lodash';
 
 export class AnnualAccountAnalysisSummaryClass {
@@ -67,16 +67,13 @@ export class AnnualAccountAnalysisSummaryClass {
             analysisItem.facilityAnalysisItems.forEach(facilityItem => {
                 if (facilityItem.analysisItemId) {
                     const facilityAnalysis: IdbAnalysisItem = facilityAnalysisItems.find(item => item.guid === facilityItem.analysisItemId);
-                    // let facility: IdbFacility = accountFacilities.find(fac => fac.guid == facilityItem.facilityId);
-                    includedFacilityAnalysis.push(facilityAnalysis);
+                    if (facilityAnalysis) {
+                        includedFacilityAnalysis.push(facilityAnalysis);
+                    }
                 }
             });
-            //TODO need to update this to only look at meters that are included in the analysis item 
-            // need full year
-            // this.reportYear = getLatestYearWithData(calanderizedMeters, includedFacilityAnalysis);
-
             const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(meters, includedFacilityAnalysis);
-            let latestYears: Array<Date> = [];
+            let latestYears: Array<number> = [];
             for (const meterId of includedMeterIds) {
                 const cMeter: CalanderizedMeter = calanderizedMeters.find(cMeter => cMeter.meter.guid === meterId);
                 const facility: IdbFacility = accountFacilities.find(fac => {
@@ -90,14 +87,23 @@ export class AnnualAccountAnalysisSummaryClass {
             }
             for (const predictorId of includedPredictorIds) {
                 const predictorDataForPredictor = predictorData.filter(predictorEntry => predictorEntry.predictorId === predictorId);
-                //years with 12 months of data
-                const years: Array<number> = predictorDataForPredictor.map(entry => { return entry.year });
-                //get counts of years to find full years of data
-                const yearCounts = _.countBy(years);
-                const fullYears = Object.keys(yearCounts).filter(year => yearCounts[year] >= 12).map(year => parseInt(year));
-                const latestYearWithData = _.max(fullYears);
-                if (latestYearWithData) {
-                    latestYears.push(latestYearWithData);
+                if (predictorDataForPredictor.length != 0) {
+                    const facility: IdbFacility = accountFacilities.find(fac => {
+                        return fac.guid == predictorDataForPredictor[0].facilityId
+                    });
+                    //years with 12 months of data
+                    const years: Array<number> = predictorDataForPredictor.map(entry => {
+                        const date: Date = new Date(entry.year, entry.month - 1, 1);
+                        const fiscalYear: number = getFiscalYear(date, facility)
+                        return fiscalYear;
+                    });
+                    //get counts of years to find full years of data
+                    const yearCounts = _.countBy(years);
+                    const fullYears = Object.keys(yearCounts).filter(year => yearCounts[year] >= 12).map(year => parseInt(year));
+                    const latestYearWithData = _.max(fullYears);
+                    if (latestYearWithData) {
+                        latestYears.push(latestYearWithData);
+                    }
                 }
             }
             //minimum date of all meters and predictors included in the analysis groups will determine the 
@@ -105,19 +111,6 @@ export class AnnualAccountAnalysisSummaryClass {
             const minYear: number = _.min(latestYears);
             this.reportYear = minYear;
             analysisItem.calculatedReportYear = this.reportYear;
-
-
-            // let includedFacility: Array<IdbFacility> = new Array();
-            // analysisItem.facilityAnalysisItems.forEach(facilityItem => {
-            //     if (facilityItem.analysisItemId) {
-            //         let facility: IdbFacility = accountFacilities.find(fac => fac.guid == facilityItem.facilityId);
-            //         includedFacility.push(facility);
-            //     }
-            // });
-            // //TODO need to update this to only look at meters that are included in the analysis item 
-            // // need full year
-            // this.reportYear = getLatestYearWithData(calanderizedMeters, includedFacility);
-            // analysisItem.calculatedReportYear = this.reportYear;
         }
     }
 

@@ -83,7 +83,8 @@
   @if(_meterStatusCheck.isDataCurrent == false && _meterStatusCheck.lastDateEntry){
   <div class="alert alert-warning text-center p-1 fw-bold">
     <span class="fa fa-triangle-exclamation"></span>
-    Facility data entered through {{_meterStatusCheck.latestFacilityEntryDate | date:'MMM, yyyy'}} but this meter only has data through
+    Facility data calendarized through {{_meterStatusCheck.latestFacilityEntryDate | date:'MMM, yyyy'}} but this meter
+    only has monthly data through
     {{_meterStatusCheck.lastDateEntry | date:'MMM, yyyy'}}.
   </div>
   }
