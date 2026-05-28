@@ -3,7 +3,7 @@ import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { isMeterInvalid } from "src/app/calculations/status-check-calculations/validation/meterValidation";
-import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, computeDataOutdated } from "./statusCheckModels";
 
 export class MeterStatusCheck {
 
@@ -101,12 +101,8 @@ export class MeterStatusCheck {
      * Data is considered outdated if the last entry date is older than the threshold months from today.
      */
     private computeIsDataOutdated(thresholdMonths: DataStalenessMonths): boolean {
-        if (this.hasNoData || !this.lastDateEntry) return false;
-        
-        const now = new Date();
-        const thresholdDate = new Date(now.getFullYear(), now.getMonth() - thresholdMonths, 1);
-        
-        return this.lastDateEntry < thresholdDate;
+        if (this.hasNoData) return false;
+        return computeDataOutdated(this.lastDateEntry, thresholdMonths);
     }
 
     private setStatus() {

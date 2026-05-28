@@ -1,6 +1,6 @@
 
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
-import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, computeDataOutdated } from "./statusCheckModels";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import * as _ from 'lodash';
 
@@ -104,12 +104,8 @@ export class PredictorStatusCheck {
      * Data is considered outdated if the last entry date is older than the threshold months from today.
      */
     private computeIsDataOutdated(thresholdMonths: DataStalenessMonths): boolean {
-        if (this.hasNoData || !this.latestEntryDate) return false;
-        
-        const now = new Date();
-        const thresholdDate = new Date(now.getFullYear(), now.getMonth() - thresholdMonths, 1);
-        
-        return this.latestEntryDate < thresholdDate;
+        if (this.hasNoData) return false;
+        return computeDataOutdated(this.latestEntryDate, thresholdMonths);
     }
 
     private setStatus() {
