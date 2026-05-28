@@ -1,0 +1,12 @@
+.bg-outdated {
+    background-color: #6f42c1 !important;
+    color: white;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.pe-none {
+    pointer-events: none;
+}

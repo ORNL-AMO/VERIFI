@@ -1,6 +1,6 @@
 
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
-import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths } from "./statusCheckModels";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import * as _ from 'lodash';
 
@@ -16,13 +16,17 @@ export class PredictorStatusCheck {
     latestEntryDate: Date;
     hasNoData: boolean;
     isDataCurrent: boolean;
+    isDataOutdated: boolean;
+    outdatedMonths: number;
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date | undefined;
 
     constructor(
         predictor: IdbPredictor,
         predictorData: Array<IdbPredictorData>,
-        facilityLatestEntry: { month: number; year: number } | undefined
+        facilityLatestEntry: { month: number; year: number } | undefined,
+        stalenessEnabled: boolean = false,
+        stalenessThresholdMonths: DataStalenessMonths = 3
     ) {
         this.predictorId = predictor.guid;
         this.predictorName = predictor.name;
@@ -34,6 +38,8 @@ export class PredictorStatusCheck {
         this.hasNoData = predictorReadings.length === 0;
         this.checkEntries(predictorReadings);
         this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
+        this.isDataOutdated = stalenessEnabled ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
+        this.outdatedMonths = stalenessThresholdMonths;
         this.setHasWeatherDataWarning(predictor, predictorReadings);
         this.setStatus();
         this.setActions(predictor, facilityLatestEntry);
@@ -93,9 +99,25 @@ export class PredictorStatusCheck {
             (entryYear === facilityLatestEntry.year && entryMonth >= facilityLatestEntry.month);
     }
 
+    /**
+     * Compute if the data is outdated based on the time-based staleness threshold.
+     * Data is considered outdated if the last entry date is older than the threshold months from today.
+     */
+    private computeIsDataOutdated(thresholdMonths: DataStalenessMonths): boolean {
+        if (this.hasNoData || !this.latestEntryDate) return false;
+        
+        const now = new Date();
+        const thresholdDate = new Date(now.getFullYear(), now.getMonth() - thresholdMonths, 1);
+        
+        return this.latestEntryDate < thresholdDate;
+    }
+
     private setStatus() {
         if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries) {
             this.status = 'error';
+        } else if (this.isDataOutdated) {
+            // Outdated status takes precedence over warning when data is time-stale
+            this.status = 'outdated';
         } else if (!this.isDataCurrent || this.hasWeatherDataWarning) {
             this.status = 'warning';
         } else {
@@ -117,6 +139,18 @@ export class PredictorStatusCheck {
                 status: 'error',
                 isWeather,
                 trackGuid: predictor.guid + '_add'
+            });
+        } else if (this.isDataOutdated && this.latestEntryDate) {
+            const dataLabel = this.monthLabel(this.latestEntryDate.getMonth() + 1, this.latestEntryDate.getFullYear());
+            this.actions.push({
+                label: 'Update outdated predictor data for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `This predictor has not received data in over ${this.outdatedMonths} months. Last entry: ${dataLabel}.`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'outdated',
+                isWeather,
+                trackGuid: predictor.guid + '_outdated'
             });
         } else if (!this.isDataCurrent && facilityLatestEntry && this.latestEntryDate) {
             const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);

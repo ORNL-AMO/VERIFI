@@ -3,7 +3,7 @@ import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { isMeterInvalid } from "src/app/calculations/status-check-calculations/validation/meterValidation";
-import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths } from "./statusCheckModels";
 
 export class MeterStatusCheck {
 
@@ -18,6 +18,8 @@ export class MeterStatusCheck {
     hasNoCalendarizationMethod: boolean;
     hasNegativeReadings: boolean;
     isDataCurrent: boolean;
+    isDataOutdated: boolean;
+    outdatedMonths: number;
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date;
@@ -26,7 +28,9 @@ export class MeterStatusCheck {
         meter: IdbUtilityMeter,
         meterReadings: Array<IdbUtilityMeterData>,
         calanderizedMeter: CalanderizedMeter | undefined,
-        facilityLatestEntry: { month: number; year: number } | undefined
+        facilityLatestEntry: { month: number; year: number } | undefined,
+        stalenessEnabled: boolean = false,
+        stalenessThresholdMonths: DataStalenessMonths = 3
     ) {
         this.meterId = meter.guid;
         this.groupId = meter.groupId;
@@ -45,6 +49,8 @@ export class MeterStatusCheck {
             this.duplicateEntryDates = [];
         }
         this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
+        this.isDataOutdated = stalenessEnabled ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
+        this.outdatedMonths = stalenessThresholdMonths;
         this.setStatus();
         this.setActions(meter, facilityLatestEntry);
     }
@@ -90,9 +96,25 @@ export class MeterStatusCheck {
             (entryYear === facilityLatestEntry.year && entryMonth >= facilityLatestEntry.month);
     }
 
+    /**
+     * Compute if the data is outdated based on the time-based staleness threshold.
+     * Data is considered outdated if the last entry date is older than the threshold months from today.
+     */
+    private computeIsDataOutdated(thresholdMonths: DataStalenessMonths): boolean {
+        if (this.hasNoData || !this.lastDateEntry) return false;
+        
+        const now = new Date();
+        const thresholdDate = new Date(now.getFullYear(), now.getMonth() - thresholdMonths, 1);
+        
+        return this.lastDateEntry < thresholdDate;
+    }
+
     private setStatus() {
         if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries) {
             this.status = 'error';
+        } else if (this.isDataOutdated) {
+            // Outdated status takes precedence over warning when data is time-stale
+            this.status = 'outdated';
         } else if (this.hasNoCalendarizationMethod || !this.isDataCurrent || this.hasNegativeReadings) {
             this.status = 'warning';
         } else {
@@ -147,7 +169,18 @@ export class MeterStatusCheck {
                     trackGuid: meter.guid + '_duplicates'
                 });
             }
-            if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {
+            if (this.isDataOutdated && this.lastDateEntry) {
+                const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
+                this.actions.push({
+                    label: 'Update outdated meter data for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: `This meter has not received data in over ${this.outdatedMonths} months. Last entry: ${dataLabel}.`,
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'outdated',
+                    trackGuid: meter.guid + '_outdated'
+                });
+            } else if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {
                 const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
 
                 const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());

@@ -1,0 +1,81 @@
+<form [formGroup]="form">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">
+                <span class="fa fa-clock me-2"></span>
+                Data Staleness Alerts
+            </h6>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">
+                Configure alerts for meters and predictors that haven't received data updates within a specified time period.
+                Outdated data will be highlighted with a purple status indicator.
+            </p>
+
+            @if (!inAccount) {
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="useAccountSettings"
+                        formControlName="useAccountSettings" (change)="onUseAccountSettingsChange()">
+                    <label class="form-check-label" for="useAccountSettings">
+                        Use account-level settings
+                    </label>
+                </div>
+                @if (isUsingAccountSettings) {
+                <div class="alert alert-info mt-2 small py-2">
+                    <span class="fa fa-info-circle me-1"></span>
+                    This facility inherits staleness settings from the account.
+                    @if (selectedAccount?.dataStalenessSettings) {
+                    <br>
+                    Current account setting: 
+                    @if (effectiveEnabled) {
+                    <strong>{{effectiveThresholdMonths}} months</strong>
+                    } @else {
+                    <strong>Disabled</strong>
+                    }
+                    }
+                </div>
+                }
+            </div>
+            }
+
+            <div [class.opacity-50]="isUsingAccountSettings" [class.pe-none]="isUsingAccountSettings">
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="stalenessEnabled"
+                        formControlName="enabled" (change)="saveChanges()">
+                    <label class="form-check-label" for="stalenessEnabled">
+                        Enable time-based staleness alerts
+                    </label>
+                </div>
+
+                @if (form.controls['enabled'].value) {
+                <div class="row">
+                    <div class="col-lg-12 mb-3">
+                        <label for="thresholdMonths" class="form-label">
+                            Alert when data is older than
+                        </label>
+                        <select class="form-select" id="thresholdMonths" formControlName="thresholdMonths"
+                            (change)="saveChanges()">
+                            @for (option of stalenessOptions; track option.value) {
+                            <option [ngValue]="option.value">{{option.label}}</option>
+                            }
+                        </select>
+                        <small class="text-muted">
+                            Meters and predictors without data entries within this period will be flagged as outdated.
+                        </small>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="mt-3 pt-2 border-top">
+                <div class="d-flex align-items-center gap-2 small">
+                    <span class="badge bg-outdated">
+                        <span class="fa fa-clock me-1"></span>Outdated
+                    </span>
+                    <span class="text-muted">- Indicates data that hasn't been updated within the threshold period</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
