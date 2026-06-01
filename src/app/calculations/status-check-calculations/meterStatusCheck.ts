@@ -231,8 +231,8 @@ export class MeterStatusCheck {
         meter: IdbUtilityMeter,
         facilityLatestEntry: { month: number; year: number } | undefined
     ): { month: number; year: number } | undefined {
-        if (meter.noLongerInUse && meter.noLongerInUseMonth && meter.noLongerInUseYear) {
-            return { month: meter.noLongerInUseMonth, year: meter.noLongerInUseYear };
+        if (meter.noLongerInUse && meter.noLongerInUseMonth != null && meter.noLongerInUseYear) {
+            return { month: meter.noLongerInUseMonth + 1, year: meter.noLongerInUseYear };
         }
         return facilityLatestEntry;
     }

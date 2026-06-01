@@ -246,8 +246,8 @@ export class PredictorStatusCheck {
         predictor: IdbPredictor,
         facilityLatestEntry: { month: number; year: number } | undefined
     ): { month: number; year: number } | undefined {
-        if (predictor.noLongerInUse && predictor.noLongerInUseMonth && predictor.noLongerInUseYear) {
-            return { month: predictor.noLongerInUseMonth, year: predictor.noLongerInUseYear };
+        if (predictor.noLongerInUse && predictor.noLongerInUseMonth != null && predictor.noLongerInUseYear) {
+            return { month: predictor.noLongerInUseMonth + 1, year: predictor.noLongerInUseYear };
         }
         return facilityLatestEntry;
     }
