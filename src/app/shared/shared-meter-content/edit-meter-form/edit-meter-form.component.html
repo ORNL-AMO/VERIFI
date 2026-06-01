@@ -338,5 +338,61 @@
         (emitSetIncludeEnergy)="setIncludeEnergy()"></app-additional-electricity-options-form>
     </div>
     }
+    <hr>
+    <div class="col-12">
+      <p class="bold">Status Settings</p>
+      <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="meterNoLongerInUse"
+              formControlName="noLongerInUse">
+            <label class="form-check-label semibold" for="meterNoLongerInUse">No Longer In Use</label>
+          </div>
+          @if (meterForm.controls.noLongerInUse.value) {
+          <div class="row">
+            <div class="col">
+              <label class="semibold" for="meterNoLongerInUseMonth">Stop Month</label>
+              <div class="mb-3">
+                <select id="meterNoLongerInUseMonth" class="form-select" formControlName="noLongerInUseMonth">
+                  <option [ngValue]="1">January</option>
+                  <option [ngValue]="2">February</option>
+                  <option [ngValue]="3">March</option>
+                  <option [ngValue]="4">April</option>
+                  <option [ngValue]="5">May</option>
+                  <option [ngValue]="6">June</option>
+                  <option [ngValue]="7">July</option>
+                  <option [ngValue]="8">August</option>
+                  <option [ngValue]="9">September</option>
+                  <option [ngValue]="10">October</option>
+                  <option [ngValue]="11">November</option>
+                  <option [ngValue]="12">December</option>
+                </select>
+              </div>
+            </div>
+            <div class="col">
+              <label class="semibold" for="meterNoLongerInUseYear">Stop Year</label>
+              <div class="mb-3">
+                <input id="meterNoLongerInUseYear" class="form-control" type="number"
+                  formControlName="noLongerInUseYear" onfocus="this.select();">
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="meterCanBeNegative"
+              formControlName="canBeNegative">
+            <label class="form-check-label semibold" for="meterCanBeNegative">Can Be Negative</label>
+          </div>
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="meterIgnoreDateStatusChecks"
+              formControlName="ignoreDateStatusChecks">
+            <label class="form-check-label semibold" for="meterIgnoreDateStatusChecks">Ignore Date Related Status
+              Checks</label>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </form>

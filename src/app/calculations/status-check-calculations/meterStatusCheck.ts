@@ -37,7 +37,7 @@ export class MeterStatusCheck {
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
-        this.setHasNegativeReadings(meterReadings);
+        this.setHasNegativeReadings(meter, meterReadings);
         this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1) : undefined;
         if (calanderizedMeter) {
             this.isMeterValid = isMeterInvalid(calanderizedMeter.meter) == false;
@@ -48,11 +48,13 @@ export class MeterStatusCheck {
             this.hasDuplicateEntries = false;
             this.duplicateEntryDates = [];
         }
-        this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
-        this.isDataOutdated = stalenessEnabled ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
+        // Apply noLongerInUse: filter readings and entries after stop date
+        const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(meter, facilityLatestEntry);
+        this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry);
+        this.isDataOutdated = (stalenessEnabled && !meter.ignoreDateStatusChecks && !meter.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
-        this.setStatus();
-        this.setActions(meter, facilityLatestEntry);
+        this.setStatus(meter);
+        this.setActions(meter, noLongerInUseFacilityEntry);
     }
 
     private setLastDateEntry(calanderizedMeterData: Array<MonthlyData>) {
@@ -105,13 +107,13 @@ export class MeterStatusCheck {
         return computeDataOutdated(this.lastDateEntry, thresholdMonths);
     }
 
-    private setStatus() {
+    private setStatus(meter: IdbUtilityMeter) {
         if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries) {
             this.status = 'error';
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
             this.status = 'outdated';
-        } else if (this.hasNoCalendarizationMethod || !this.isDataCurrent || this.hasNegativeReadings) {
+        } else if (this.hasNoCalendarizationMethod || (!meter.ignoreDateStatusChecks && !meter.noLongerInUse && !this.isDataCurrent) || this.hasNegativeReadings) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -198,7 +200,25 @@ export class MeterStatusCheck {
         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
 
-    private setHasNegativeReadings(meterReadings: Array<IdbUtilityMeterData>) {
+    private setHasNegativeReadings(meter: IdbUtilityMeter, meterReadings: Array<IdbUtilityMeterData>) {
+        if (meter.canBeNegative) {
+            this.hasNegativeReadings = false;
+            return;
+        }
         this.hasNegativeReadings = meterReadings.some(reading => reading.totalEnergyUse < 0 || (reading.totalVolume !== undefined && reading.totalVolume < 0));
+    }
+
+    /**
+     * When noLongerInUse is set, use the stop date as the effective latest entry
+     * for currency checks (so data up to the stop date is considered current).
+     */
+    private getNoLongerInUseFacilityEntry(
+        meter: IdbUtilityMeter,
+        facilityLatestEntry: { month: number; year: number } | undefined
+    ): { month: number; year: number } | undefined {
+        if (meter.noLongerInUse && meter.noLongerInUseMonth && meter.noLongerInUseYear) {
+            return { month: meter.noLongerInUseMonth, year: meter.noLongerInUseYear };
+        }
+        return facilityLatestEntry;
     }
 }

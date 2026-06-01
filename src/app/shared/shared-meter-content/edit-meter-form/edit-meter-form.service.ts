@@ -67,7 +67,13 @@ export class EditMeterFormService {
       globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, globalWarmingPotentialValidation],
       // globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation],
       demandUnit: [meter.demandUnit],
-      chargesArray: chargesArray
+      chargesArray: chargesArray,
+      //status settings
+      noLongerInUse: [meter.noLongerInUse || false],
+      noLongerInUseMonth: [meter.noLongerInUseMonth],
+      noLongerInUseYear: [meter.noLongerInUseYear],
+      canBeNegative: [meter.canBeNegative || false],
+      ignoreDateStatusChecks: [meter.ignoreDateStatusChecks || false]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -109,6 +115,12 @@ export class EditMeterFormService {
     meter.globalWarmingPotentialOption = form.controls.globalWarmingPotentialOption.value;
     // meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
     meter.demandUnit = form.controls.demandUnit.value;
+    //status settings
+    meter.noLongerInUse = form.controls.noLongerInUse.value;
+    meter.noLongerInUseMonth = form.controls.noLongerInUseMonth.value;
+    meter.noLongerInUseYear = form.controls.noLongerInUseYear.value;
+    meter.canBeNegative = form.controls.canBeNegative.value;
+    meter.ignoreDateStatusChecks = form.controls.ignoreDateStatusChecks.value;
     //set multipliers
     meter = this.setMultipliers(meter);
 
