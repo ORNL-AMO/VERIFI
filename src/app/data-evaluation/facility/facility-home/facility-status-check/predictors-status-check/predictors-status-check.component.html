@@ -4,14 +4,16 @@
             data-bs-target="#predictorsStatusCollapse" aria-expanded="false" aria-controls="predictorsStatusCollapse"
             [ngClass]="{
                     'bg-warning': predictorsStatus === 'warning',
-                    'bg-danger': predictorsStatus === 'error'
+                    'bg-danger': predictorsStatus === 'error',
+                    'bg-outdated': predictorsStatus === 'outdated'
                 }">
             <span class="fa fa-boxes-stacked me-2"></span>
             Predictors
             <span class="fa ms-2" [ngClass]="{
                         'fa-circle-check text-success': predictorsStatus === 'good',
                         'fa-exclamation-triangle': predictorsStatus === 'warning',
-                        'fa-circle-xmark': predictorsStatus === 'error'
+                        'fa-circle-xmark': predictorsStatus === 'error',
+                        'fa-clock': predictorsStatus === 'outdated'
                     }"></span>
         </button>
     </h2>
@@ -34,7 +36,8 @@
                         <span class="fa fa-fw" [ngClass]="{
                             'fa-circle-check text-success': predictorCheck.status === 'good',
                             'fa-exclamation-triangle text-warning': predictorCheck.status === 'warning',
-                            'fa-circle-xmark text-danger': predictorCheck.status === 'error'
+                            'fa-circle-xmark text-danger': predictorCheck.status === 'error',
+                            'fa-clock text-outdated': predictorCheck.status === 'outdated'
                         }"></span>
                         <div class="flex-grow-1">
                             <strong>{{predictorCheck.predictorName}}</strong>
@@ -50,7 +53,9 @@
                             @if (predictorCheck.hasMissingEntries) {
                             <span class="badge bg-danger ms-2">Missing Entries</span>
                             }
-                            @if (!predictorCheck.isDataCurrent && !predictorCheck.hasNoData) {
+                            @if (predictorCheck.isDataOutdated && !predictorCheck.hasNoData) {
+                            <span class="badge bg-outdated ms-2">Outdated</span>
+                            } @else if (!predictorCheck.isDataCurrent && !predictorCheck.hasNoData) {
                             <span class="badge bg-warning text-dark ms-2">Data Not Current</span>
                             }
                             @if(predictorCheck.hasWeatherDataWarning) {

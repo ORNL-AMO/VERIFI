@@ -32,3 +32,20 @@
 button strong {
     color: inherit;
 }
+
+/* Purple/outdated status styling */
+.bg-outdated {
+    background-color: #6f42c1 !important;
+    color: white;
+}
+
+.text-outdated {
+    color: #6f42c1 !important;
+}
+
+.status-check-header.bg-outdated,
+.status-check-header.bg-outdated:not(.collapsed),
+.status-check-header.bg-outdated strong {
+    background-color: #6f42c1 !important;
+    color: white;
+}

@@ -58,7 +58,8 @@ export class AccountStatusCheck {
                 facilityAnalysisItems,
                 meters,
                 meterGroups,
-                facilityReports
+                facilityReports,
+                account
             );
         });
         this.computeAccountAnalysisSetupErrors(account, accountAnalysisItems);
@@ -182,6 +183,8 @@ export class AccountStatusCheck {
         const allStatuses: Array<STATUS_CHECK_OPTIONS> = this.facilityStatusChecks.map(fc => fc.status);
         if (allStatuses.includes('error')) {
             this.status = 'error';
+        } else if (allStatuses.includes('outdated')) {
+            this.status = 'outdated';
         } else if (allStatuses.includes('warning')) {
             this.status = 'warning';
         } else {

@@ -15,6 +15,13 @@
     Latest Meter Reading: {{_predictorStatusCheck.latestFacilityEntryDate| date:'MMM, yyyy'}}
   </span>
   }
+  @if(_predictorStatusCheck && _predictorStatusCheck.isDataOutdated) {
+  <div class="my-auto">
+    <span class="badge bg-outdated">
+      <span class="fa fa-clock me-1"></span>Outdated
+    </span>
+  </div>
+  }
   <!--Bulk Delete-->
   <div class="ps-1 pe-1 mb-2 bulk-delete" [class.show]="_hasCheckedItems">
     <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!_hasCheckedItems">Bulk
@@ -154,7 +161,8 @@
     <tr>
       @if (!copyingTable) {
       <td class="input">
-        <input type="checkbox" name="predictorEntry" [checked]="isChecked(pData.guid)" (change)="toggleChecked(pData.guid)">
+        <input type="checkbox" name="predictorEntry" [checked]="isChecked(pData.guid)"
+          (change)="toggleChecked(pData.guid)">
       </td>
       }
       <td>{{pData | displayPredictorDataDate}}</td>

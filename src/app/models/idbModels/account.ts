@@ -1,5 +1,6 @@
 import { AccountAndFacility } from "./accountAndFacility"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
+import { DEFAULT_DATA_STALENESS_MONTHS } from "../../calculations/status-check-calculations/statusCheckModels";
 
 
 
@@ -74,7 +75,11 @@ export function getNewIdbAccount(): IdbAccount {
         isSharedBackupFile: false,
         color: undefined,
         assessmentReportVersion: 'AR6',
-        displayEmissions: false
+        displayEmissions: false,
+        dataStalenessSettings: {
+            enabled: true,
+            thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS
+        }
     }
 }
 

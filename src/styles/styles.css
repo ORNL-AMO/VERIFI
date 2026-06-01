@@ -134,3 +134,33 @@ body {
   /* scrollbar-color: rgb(0 0 0 / 15%) transparent; */
   scrollbar-width: thin;
 }
+
+:root {
+  --outdated-color: #6f42c1;
+  --outdated-alert-bg: #e9dcf9;
+  --outdated-alert-border: #6f42c1;
+  --outdated-alert-text: #4a2c82;
+}
+
+.bg-outdated{
+  background-color: var(--outdated-color) !important;
+  color: white;
+}
+
+.bg-outdated .fa{
+  color: white !important;
+}
+
+.text-outdated{
+  color: var(--outdated-color) !important;
+}
+
+.accordion-button.bg-outdated, .accordion-button.bg-outdated:after{
+  color: white !important;
+}
+
+.alert-outdated {
+  background-color: var(--outdated-alert-bg);
+  border-color: var(--outdated-alert-border);
+  color: var(--outdated-alert-text);
+}

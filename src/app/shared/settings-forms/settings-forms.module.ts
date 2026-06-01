@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
 import { EGridEmissionsTableComponent } from './default-units-form/e-grid-emissions-table/e-grid-emissions-table.component';
+import { DataStalenessSettingsFormComponent } from './data-staleness-settings-form/data-staleness-settings-form.component';
 
 
 
@@ -17,7 +18,8 @@ import { EGridEmissionsTableComponent } from './default-units-form/e-grid-emissi
     GeneralInformationFormComponent,
     FinancialReportingFormComponent,
     DefaultUnitsFormComponent,
-    EGridEmissionsTableComponent
+    EGridEmissionsTableComponent,
+    DataStalenessSettingsFormComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +32,8 @@ import { EGridEmissionsTableComponent } from './default-units-form/e-grid-emissi
     SustainabilityQuestionsFormComponent,
     GeneralInformationFormComponent,
     FinancialReportingFormComponent,
-    DefaultUnitsFormComponent
+    DefaultUnitsFormComponent,
+    DataStalenessSettingsFormComponent
   ]
 })
 export class SettingsFormsModule { }
