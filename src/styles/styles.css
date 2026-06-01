@@ -135,8 +135,15 @@ body {
   scrollbar-width: thin;
 }
 
+:root {
+  --outdated-color: #6f42c1;
+  --outdated-alert-bg: #e9dcf9;
+  --outdated-alert-border: #6f42c1;
+  --outdated-alert-text: #4a2c82;
+}
+
 .bg-outdated{
-  background-color: #6f42c1 !important;
+  background-color: var(--outdated-color) !important;
   color: white;
 }
 
@@ -145,9 +152,15 @@ body {
 }
 
 .text-outdated{
-  color: #6f42c1 !important;
+  color: var(--outdated-color) !important;
 }
 
 .accordion-button.bg-outdated, .accordion-button.bg-outdated:after{
   color: white !important;
+}
+
+.alert-outdated {
+  background-color: var(--outdated-alert-bg);
+  border-color: var(--outdated-alert-border);
+  color: var(--outdated-alert-text);
 }
