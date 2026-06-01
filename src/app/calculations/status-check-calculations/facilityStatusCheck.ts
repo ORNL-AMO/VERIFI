@@ -120,7 +120,7 @@ export class FacilityStatusCheck {
             this.stalenessThresholdMonths = accountSettings.thresholdMonths;
         } else {
             // Default values
-            this.stalenessEnabled = false;
+            this.stalenessEnabled = true;
             this.stalenessThresholdMonths = DEFAULT_DATA_STALENESS_MONTHS;
         }
     }

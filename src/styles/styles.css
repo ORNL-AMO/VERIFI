@@ -134,3 +134,20 @@ body {
   /* scrollbar-color: rgb(0 0 0 / 15%) transparent; */
   scrollbar-width: thin;
 }
+
+.bg-outdated{
+  background-color: #6f42c1 !important;
+  color: white;
+}
+
+.bg-outdated .fa{
+  color: white !important;
+}
+
+.text-outdated{
+  color: #6f42c1 !important;
+}
+
+.accordion-button.bg-outdated, .accordion-button.bg-outdated:after{
+  color: white !important;
+}

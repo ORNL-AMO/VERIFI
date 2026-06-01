@@ -11,6 +11,7 @@ import {
     DataStalenessMonths,
     DEFAULT_DATA_STALENESS_MONTHS
 } from 'src/app/calculations/status-check-calculations/statusCheckModels';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
     selector: 'app-data-staleness-settings-form',
@@ -34,7 +35,8 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
     constructor(
         private accountDbService: AccountdbService,
         private facilityDbService: FacilitydbService,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private dbChangesService: DbChangesService
     ) { }
 
     ngOnInit(): void {
@@ -104,11 +106,7 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
         } else {
             this.selectedFacility.dataStalenessSettings = settings;
             await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-            let accountFacilities: Array<IdbFacility> = await firstValueFrom(
-                this.facilityDbService.getAllByIndexRange('accountId', this.selectedFacility.accountId)
-            );
-            this.facilityDbService.accountFacilities.next(accountFacilities);
-            this.facilityDbService.selectedFacility.next(this.selectedFacility);
+            this.dbChangesService.updateFacilities(this.selectedFacility);
         }
     }
 
