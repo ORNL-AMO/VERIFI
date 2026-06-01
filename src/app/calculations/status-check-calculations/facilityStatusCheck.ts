@@ -86,11 +86,11 @@ export class FacilityStatusCheck {
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
         this.hasInvalidMeters = this.metersStatusChecks.some(check => !check.isMeterValid);
-        this.hasOutdatedMeters = this.metersStatusChecks.some(check => check.isDataOutdated);
+        this.hasOutdatedMeters = this.metersStatusChecks.some(check => check.status === 'outdated');
         this.setHasNonCurrentMeters();
         this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
         this.hasPredictorWeatherWarnings = this.predictorsStatusChecks.some(check => check.hasWeatherDataWarning);
-        this.hasOutdatedPredictors = this.predictorsStatusChecks.some(check => check.isDataOutdated);
+        this.hasOutdatedPredictors = this.predictorsStatusChecks.some(check => check.status === 'outdated');
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setAnalysisStatusChecks(analysisItemsForFacility, facilityCalanderizedMeters, facilityPredictorData);
