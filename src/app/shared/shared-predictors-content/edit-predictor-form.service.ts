@@ -26,7 +26,13 @@ export class EditPredictorFormService {
       'heatingBaseTemperature': [predictor.heatingBaseTemperature],
       'coolingBaseTemperature': [predictor.coolingBaseTemperature],
       'weatherStationId': [predictor.weatherStationId],
-      'createPredictorData': [true]
+      'createPredictorData': [true],
+      //status settings
+      'noLongerInUse': [predictor.noLongerInUse || false],
+      'noLongerInUseMonth': [predictor.noLongerInUseMonth],
+      'noLongerInUseYear': [predictor.noLongerInUseYear],
+      'canBeNegative': [predictor.canBeNegative || false],
+      'ignoreDateStatusChecks': [predictor.ignoreDateStatusChecks || false]
     });
     // this.setShowReferencePredictors()
     // this.setUnitOptions();
@@ -90,11 +96,12 @@ export class EditPredictorFormService {
       weatherDataChange = true;
       predictor.weatherStationId = predictorForm.controls.weatherStationId.value;
     }
-    // if (this.predictor.predictorType == 'Weather') {
-    //   this.predictor.weatherStationName = this.stations.find(station => {
-    //     return station.ID == this.predictor.weatherStationId;
-    //   })?.name;
-    // }
+    //status settings
+    predictor.noLongerInUse = predictorForm.controls.noLongerInUse.value;
+    predictor.noLongerInUseMonth = predictorForm.controls.noLongerInUseMonth.value;
+    predictor.noLongerInUseYear = predictorForm.controls.noLongerInUseYear.value;
+    predictor.canBeNegative = predictorForm.controls.canBeNegative.value;
+    predictor.ignoreDateStatusChecks = predictorForm.controls.ignoreDateStatusChecks.value;
     return weatherDataChange;
   }
 }

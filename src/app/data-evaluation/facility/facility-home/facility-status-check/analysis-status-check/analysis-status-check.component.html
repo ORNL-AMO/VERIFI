@@ -126,7 +126,8 @@
                             <span class="fa fa-fw flex-shrink-0" [ngClass]="{
                                 'fa-circle-check text-success': m.status === 'good',
                                 'fa-exclamation-triangle text-warning': m.status === 'warning',
-                                'fa-circle-xmark text-danger': m.status === 'error'
+                                'fa-circle-xmark text-danger': m.status === 'error',
+                                'fa-clock text-outdated': m.status === 'outdated'
                             }"></span>
                             <span class="text-truncate" title="{{m.meterName}}">{{m.meterName}} ({{m.lastDateEntry |
                                 date:'MMM yyyy'}})</span>
@@ -144,7 +145,8 @@
                             <span class="fa fa-fw flex-shrink-0" [ngClass]="{
                                 'fa-circle-check text-success': p.status === 'good',
                                 'fa-exclamation-triangle text-warning': p.status === 'warning',
-                                'fa-circle-xmark text-danger': p.status === 'error'
+                                'fa-circle-xmark text-danger': p.status === 'error',
+                                'fa-clock text-outdated': p.status === 'outdated'
                             }"></span>
                             <span class="text-truncate" title="{{p.predictorName}}">{{p.predictorName}}
                                 ({{p.latestEntryDate | date:'MMM yyyy'}})</span>

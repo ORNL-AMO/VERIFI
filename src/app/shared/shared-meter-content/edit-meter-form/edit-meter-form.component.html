@@ -338,5 +338,42 @@
         (emitSetIncludeEnergy)="setIncludeEnergy()"></app-additional-electricity-options-form>
     </div>
     }
+    <div class="col-12">
+      <hr>
+    </div>
+    <div class="col-12">
+      <p class="bold">Status Settings</p>
+      <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="meterNoLongerInUse" formControlName="noLongerInUse">
+            <label class="form-check-label semibold" for="meterNoLongerInUse">No Longer In Use</label>
+          </div>
+          @if (meterForm.controls.noLongerInUse.value) {
+          <div class="row">
+            <div class="col">
+              <label class="semibold" for="meterNoLongerInUseDate">Stop Month/Year</label>
+              <div class="mb-3">
+                <input id="meterNoLongerInUseDate" class="form-control" type="month"
+                  [value]="noLongerInUseDateValue" (change)="setNoLongerInUseDate($event)">
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="meterCanBeNegative" formControlName="canBeNegative">
+            <label class="form-check-label semibold" for="meterCanBeNegative">Can Be Negative</label>
+          </div>
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="meterIgnoreDateStatusChecks"
+              formControlName="ignoreDateStatusChecks">
+            <label class="form-check-label semibold" for="meterIgnoreDateStatusChecks">Ignore Date Related Status
+              Checks</label>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </form>

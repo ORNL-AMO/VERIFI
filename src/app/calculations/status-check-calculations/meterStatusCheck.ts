@@ -37,7 +37,7 @@ export class MeterStatusCheck {
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
-        this.setHasNegativeReadings(meterReadings);
+        this.setHasNegativeReadings(meter, meterReadings);
         this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1) : undefined;
         if (calanderizedMeter) {
             this.isMeterValid = isMeterInvalid(calanderizedMeter.meter) == false;
@@ -48,11 +48,13 @@ export class MeterStatusCheck {
             this.hasDuplicateEntries = false;
             this.duplicateEntryDates = [];
         }
-        this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
-        this.isDataOutdated = stalenessEnabled ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
+        // Apply noLongerInUse: filter readings and entries after stop date
+        const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(meter, facilityLatestEntry);
+        this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry, meter);
+        this.isDataOutdated = (stalenessEnabled && !meter.ignoreDateStatusChecks && !meter.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
-        this.setStatus();
-        this.setActions(meter, facilityLatestEntry);
+        this.setStatus(meter);
+        this.setActions(meter, noLongerInUseFacilityEntry);
     }
 
     private setLastDateEntry(calanderizedMeterData: Array<MonthlyData>) {
@@ -88,7 +90,11 @@ export class MeterStatusCheck {
             });
     }
 
-    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined): boolean {
+    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined, meter: IdbUtilityMeter): boolean {
+        if(meter.ignoreDateStatusChecks){
+            return true;
+        }
+
         if (this.hasNoData || !facilityLatestEntry || !this.lastDateEntry) return false;
         const entryYear = this.lastDateEntry.getFullYear();
         const entryMonth = this.lastDateEntry.getMonth() + 1;
@@ -105,13 +111,13 @@ export class MeterStatusCheck {
         return computeDataOutdated(this.lastDateEntry, thresholdMonths);
     }
 
-    private setStatus() {
-        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries) {
+    private setStatus(meter: IdbUtilityMeter) {
+        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries || this.hasNegativeReadings) {
             this.status = 'error';
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
             this.status = 'outdated';
-        } else if (this.hasNoCalendarizationMethod || !this.isDataCurrent || this.hasNegativeReadings) {
+        } else if (this.hasNoCalendarizationMethod || (!meter.ignoreDateStatusChecks && !meter.noLongerInUse && !this.isDataCurrent)) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -165,6 +171,17 @@ export class MeterStatusCheck {
                     trackGuid: meter.guid + '_duplicates'
                 });
             }
+            if(this.hasNegativeReadings){
+                this.actions.push({
+                    label: 'Review negative readings for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: 'This meter has negative energy use or volume readings, which may indicate data entry errors unless negative values are expected for this meter.',
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_negative_readings'
+                });
+            }
             if (this.isDataOutdated && this.lastDateEntry) {
                 const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
                 this.actions.push({
@@ -198,7 +215,25 @@ export class MeterStatusCheck {
         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
 
-    private setHasNegativeReadings(meterReadings: Array<IdbUtilityMeterData>) {
+    private setHasNegativeReadings(meter: IdbUtilityMeter, meterReadings: Array<IdbUtilityMeterData>) {
+        if (meter.canBeNegative) {
+            this.hasNegativeReadings = false;
+            return;
+        }
         this.hasNegativeReadings = meterReadings.some(reading => reading.totalEnergyUse < 0 || (reading.totalVolume !== undefined && reading.totalVolume < 0));
+    }
+
+    /**
+     * When noLongerInUse is set, use the stop date as the effective latest entry
+     * for currency checks (so data up to the stop date is considered current).
+     */
+    private getNoLongerInUseFacilityEntry(
+        meter: IdbUtilityMeter,
+        facilityLatestEntry: { month: number; year: number } | undefined
+    ): { month: number; year: number } | undefined {
+        if (meter.noLongerInUse && meter.noLongerInUseMonth != null && meter.noLongerInUseYear) {
+            return { month: meter.noLongerInUseMonth + 1, year: meter.noLongerInUseYear };
+        }
+        return facilityLatestEntry;
     }
 }

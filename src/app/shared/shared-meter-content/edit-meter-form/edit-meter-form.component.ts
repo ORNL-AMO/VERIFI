@@ -18,6 +18,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AssessmentReportVersion, IdbAccount } from 'src/app/models/idbModels/account';
+import { Month, Months } from '../../form-data/months';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -62,6 +63,7 @@ export class EditMeterFormComponent implements OnInit {
   waterDischargeTypes: Array<WaterDischargeType> = WaterDischargeTypes;
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
+  months: Array<Month> = Months;
 
   assessmentReportOption: AssessmentReportVersion = 'AR6';
   constructor(
@@ -486,5 +488,25 @@ export class EditMeterFormComponent implements OnInit {
     GlobalWarmingPotentials.forEach(gwpOption => {
       this.globalWarmingPotentials.push(gwpOption);
     });
+  }
+
+  get noLongerInUseDateValue(): string {
+    const month = this.meterForm.controls.noLongerInUseMonth.value;
+    const year = this.meterForm.controls.noLongerInUseYear.value;
+    if (month != null && year) {
+      const mm = String(month + 1).padStart(2, '0');
+      return `${year}-${mm}`;
+    }
+    return '';
+  }
+
+  setNoLongerInUseDate(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    if (value) {
+      const [yearStr, monthStr] = value.split('-');
+      this.meterForm.controls.noLongerInUseMonth.patchValue(parseInt(monthStr, 10) - 1);
+      this.meterForm.controls.noLongerInUseYear.patchValue(parseInt(yearStr, 10));
+      this.meterForm.markAsDirty();
+    }
   }
 }

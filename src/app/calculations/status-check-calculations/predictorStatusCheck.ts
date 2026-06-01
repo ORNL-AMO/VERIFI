@@ -20,6 +20,8 @@ export class PredictorStatusCheck {
     outdatedMonths: number;
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date | undefined;
+    hasNegativeData: boolean = false;
+
 
     constructor(
         predictor: IdbPredictor,
@@ -37,12 +39,15 @@ export class PredictorStatusCheck {
         const predictorReadings: Array<IdbPredictorData> = predictorData.filter(data => data.predictorId === predictor.guid);
         this.hasNoData = predictorReadings.length === 0;
         this.checkEntries(predictorReadings);
-        this.isDataCurrent = this.computeIsDataCurrent(facilityLatestEntry);
-        this.isDataOutdated = stalenessEnabled ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
+        // Apply noLongerInUse: use stop date as effective facility entry for currency checks
+        const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(predictor, facilityLatestEntry);
+        this.setHasNegativeData(predictor, predictorReadings);
+        this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry);
+        this.isDataOutdated = (stalenessEnabled && !predictor.ignoreDateStatusChecks && !predictor.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
         this.setHasWeatherDataWarning(predictor, predictorReadings);
-        this.setStatus();
-        this.setActions(predictor, facilityLatestEntry);
+        this.setStatus(predictor);
+        this.setActions(predictor, noLongerInUseFacilityEntry);
     }
 
     private checkEntries(predictorData: Array<IdbPredictorData>) {
@@ -108,13 +113,13 @@ export class PredictorStatusCheck {
         return computeDataOutdated(this.latestEntryDate, thresholdMonths);
     }
 
-    private setStatus() {
-        if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries) {
+    private setStatus(predictor: IdbPredictor) {
+        if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries || this.hasNegativeData) {
             this.status = 'error';
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
             this.status = 'outdated';
-        } else if (!this.isDataCurrent || this.hasWeatherDataWarning) {
+        } else if ((!predictor.ignoreDateStatusChecks && !predictor.noLongerInUse && !this.isDataCurrent) || this.hasWeatherDataWarning) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -194,6 +199,17 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_weather_warnings'
             });
+        } else if(this.hasNegativeData) {
+            this.actions.push({
+                label: 'Review negative data entries for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `Some data entries for this predictor have negative values. Review the data to ensure accuracy.`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'error',
+                isWeather,
+                trackGuid: predictor.guid + '_negative_data'
+            });
         }
     }
 
@@ -210,7 +226,29 @@ export class PredictorStatusCheck {
         this.hasWeatherDataWarning = predictorData.some(data => data.weatherDataWarning);
     }
 
+    private setHasNegativeData(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
+        if (predictor.canBeNegative) {
+            this.hasNegativeData = false;
+            return;
+        }
+        this.hasNegativeData = predictorData.some(data => data.amount < 0);
+    }
+
     hasMissingDataForModelYear(modelYear: number): boolean {
         return this.missingEntryMonths.some(m => m.year === modelYear);
+    }
+
+    /**
+     * When noLongerInUse is set, use the stop date as the effective latest entry
+     * for currency checks (so data up to the stop date is considered current).
+     */
+    private getNoLongerInUseFacilityEntry(
+        predictor: IdbPredictor,
+        facilityLatestEntry: { month: number; year: number } | undefined
+    ): { month: number; year: number } | undefined {
+        if (predictor.noLongerInUse && predictor.noLongerInUseMonth != null && predictor.noLongerInUseYear) {
+            return { month: predictor.noLongerInUseMonth + 1, year: predictor.noLongerInUseYear };
+        }
+        return facilityLatestEntry;
     }
 }

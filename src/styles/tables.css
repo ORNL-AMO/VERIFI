@@ -54,3 +54,12 @@ Tables
     font-size: 12px;
     white-space: nowrap;
   }
+
+
+
+.data-row-error td {
+  background-color: rgba(220, 53, 69, 0.08) !important;
+}
+.data-row-warning td {
+  background-color: rgba(255, 193, 7, 0.08) !important;
+}

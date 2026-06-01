@@ -89,7 +89,9 @@
   <tbody class="table-group-divider">
     @for (meterData of _orderedMeterData | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber *
     _itemsPerPage; track meterData.guid) {
-    <tr>
+    <tr [ngClass]="{
+      'data-row-error': (meterData.totalVolume < 0 && !_meter.canBeNegative)
+      }">
       @if (!copyingTable) {
       <td class="input">
         <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)"
@@ -101,7 +103,9 @@
         @if (meterData.isEstimated) {
         <span class="fa fa-asterisk"></span>
         }
-        {{meterData.totalVolume | customNumber}}
+        @if(meterData.totalVolume < 0 && !_meter.canBeNegative){ <span class="fa fa-exclamation-triangle"></span>
+          }
+          {{meterData.totalVolume | customNumber}}
       </td>
       @if (_filters.totalEnergy) {
       <td>{{meterData.totalEnergyUse | customNumber}}</td>

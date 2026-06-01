@@ -73,9 +73,10 @@
 </div>
 <div class="meter">
   @if (_meterStatusCheck.hasNegativeReadings) {
-  <div class="alert alert-warning text-center p-1 fw-bold">
+  <div class="alert alert-danger text-center p-1 fw-bold">
     <span class="fa fa-triangle-exclamation"></span>
-    Negative energy use entered for one or more readings.
+    Negative energy use entered for one or more readings. To allow negative readings, edit the meter setup by clicking
+    <a class="click-link" (click)="editMeter()">here</a> and enabling the "Allow Negative Readings" option.
   </div>
   }
   @if (_meterStatusCheck.hasDuplicateEntries) {

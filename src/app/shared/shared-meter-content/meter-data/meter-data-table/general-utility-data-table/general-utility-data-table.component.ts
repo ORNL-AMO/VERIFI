@@ -82,7 +82,10 @@ export class GeneralUtilityDataTableComponent {
   });
 
   showVolumeColumn: Signal<boolean> = computed(() => {
-    return this.selectedMeterData().some(d => d.totalVolume !== undefined && d.totalVolume !== 0);
+    const selectedMeterData = this.selectedMeterData();
+    return selectedMeterData.some(d => {
+      return d.totalVolume != null && d.totalVolume != undefined && d.totalVolume !== 0;
+    });
   });
 
   showEnergyColumn: Signal<boolean> = computed(() => {
