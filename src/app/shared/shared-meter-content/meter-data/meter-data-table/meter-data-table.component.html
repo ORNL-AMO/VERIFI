@@ -23,6 +23,13 @@
 }@else {
 <div class="d-flex w-100 justify-content-end">
   <div class="d-flex flex-wrap">
+    @if(_meterStatusCheck.isDataOutdated == true){
+    <div class="my-auto">
+      <span class="badge bg-outdated">
+        <span class="fa fa-clock me-1"></span>Outdated
+      </span>
+    </div>
+    }
     <!--Bulk Delete-->
     <div class="ps-1 pe-1 bulk-delete mb-2" [class.show]="_hasCheckedItems">
       <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!_hasCheckedItems">Bulk
