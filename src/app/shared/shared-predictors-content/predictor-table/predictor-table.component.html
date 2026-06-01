@@ -60,6 +60,9 @@
             @if(predictorTableItem.statusCheck.status == 'outdated') {
             <span class="badge bg-outdated issue-badge">Outdated</span>
             }
+            @if(predictorTableItem.statusCheck?.hasNegativeData) {
+            <span class="badge bg-danger issue-badge">Negative Data</span>
+            }
           </div>
           }
         </td>

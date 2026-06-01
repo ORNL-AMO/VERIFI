@@ -306,11 +306,10 @@ export class PredictorsDataTableComponent {
 
   showUpdateEntries() {
     const predictor = this.predictor();
-    const facility = this.facility();
     if (this.inDataManagement) {
-      this.router.navigateByUrl('data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors/' + predictor.guid + '/predictor-data/update-calculated-entries');
+      this.router.navigateByUrl('data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid + '/predictor-data/update-calculated-entries');
     } else {
-      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/predictor/' + predictor.guid + '/update-calculated-entries');
+      this.router.navigateByUrl('/data-evaluation/facility/' + predictor.facilityId + '/utility/predictors/predictor/' + predictor.guid + '/update-calculated-entries');
     }
   }
 
@@ -320,8 +319,7 @@ export class PredictorsDataTableComponent {
 
   goToDataQualityReport() {
     const predictor = this.predictor();
-    const facility = this.facility();
-    this.router.navigateByUrl('/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors/' + predictor.guid + '/data-quality-report');
+    this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid + '/data-quality-report');
   }
 
   async setIgnoreWeatherDataWarning() {
@@ -343,5 +341,14 @@ export class PredictorsDataTableComponent {
   async confirmIgnoreWarningModal() {
     this.showIgnoreWarningModal = false;
     await this.setIgnoreWeatherDataWarning();
+  }
+
+  editPredictor() {
+    const predictor = this.predictor();
+    if (this.inDataManagement) {
+      this.router.navigateByUrl('data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + predictor.facilityId + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
+    }
   }
 }

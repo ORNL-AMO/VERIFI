@@ -50,7 +50,7 @@ export class MeterStatusCheck {
         }
         // Apply noLongerInUse: filter readings and entries after stop date
         const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(meter, facilityLatestEntry);
-        this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry);
+        this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry, meter);
         this.isDataOutdated = (stalenessEnabled && !meter.ignoreDateStatusChecks && !meter.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
         this.setStatus(meter);
@@ -90,7 +90,11 @@ export class MeterStatusCheck {
             });
     }
 
-    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined): boolean {
+    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined, meter: IdbUtilityMeter): boolean {
+        if(meter.ignoreDateStatusChecks){
+            return true;
+        }
+
         if (this.hasNoData || !facilityLatestEntry || !this.lastDateEntry) return false;
         const entryYear = this.lastDateEntry.getFullYear();
         const entryMonth = this.lastDateEntry.getMonth() + 1;

@@ -121,8 +121,8 @@
 
 @if(_predictorStatusCheck && _predictorStatusCheck.hasNegativeData){
 <div class="alert alert-danger text-center p-1 fw-bold">
-  <span class="fa fa-triangle-exclamation"></span> Negative predictor entries found. If this predictor can have negative
-  values, please update the predictor settings to allow for negative values.
+  <span class="fa fa-triangle-exclamation"></span> Negative predictor entries found. To allow negative entries, edit the predictor setup by clicking
+    <a class="click-link" (click)="editPredictor()">here</a> and enabling the "Allow Negative Data" option.
 </div>
 }
 

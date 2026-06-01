@@ -90,11 +90,13 @@
               @if (meterListItem.meterStatusCheck.hasNoCalendarizationMethod) {
               <span class="badge bg-warning text-dark issue-badge">No Calend. Method</span>
               }
-              @if (!meterListItem.meterStatusCheck.isDataCurrent && !meterListItem.meterStatusCheck.hasNoData) {
-              <span class="badge bg-warning text-dark issue-badge">Not Current</span>
-              }
               @if(meterListItem.meterStatusCheck.status === 'outdated'){
               <span class="badge bg-outdated issue-badge">Outdated</span>
+              } @else if (!meterListItem.meterStatusCheck.isDataCurrent && !meterListItem.meterStatusCheck.hasNoData) {
+              <span class="badge bg-warning text-dark issue-badge">Not Current</span>
+              }
+              @if (meterListItem.meterStatusCheck.hasNegativeReadings) {
+              <span class="badge bg-danger issue-badge">Negative Readings</span>
               }
             </div>
             }
