@@ -101,10 +101,13 @@
   <tbody class="table-group-divider">
     @for (meterData of _orderedMeterData | slice:
     ((currentPageNumber-1) * _itemsPerPage): currentPageNumber * _itemsPerPage; track meterData.guid) {
-    <tr>
+    <tr [ngClass]="{
+      'data-row-error': (meterData.totalEnergyUse < 0 && !_meter.canBeNegative)
+    }">
       @if (!copyingTable) {
       <td class="input">
-        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)" (change)="toggleChecked(meterData.guid)">
+        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)"
+          (change)="toggleChecked(meterData.guid)">
       </td>
       }
       <td class="read-date">{{meterData | displayMeterDataDate}}</td>
@@ -113,11 +116,13 @@
         <span class="fa fa-asterisk"></span>
         }
         @if (_meter.includeInEnergy) {
-        {{meterData.totalEnergyUse | customNumber}}
-        }
-        @if (!_meter.includeInEnergy) {
-        {{0 | customNumber}}
-        }
+        @if(meterData.totalEnergyUse < 0 && !_meter.canBeNegative){ <span class="fa fa-exclamation-triangle"></span>
+          }
+          {{meterData.totalEnergyUse | customNumber}}
+          }
+          @if (!_meter.includeInEnergy) {
+          {{0 | customNumber}}
+          }
       </td>
       @if (_generalInformationFilters.totalCost) {
       <td>{{meterData.totalCost | customNumber:true}}</td>
@@ -244,7 +249,8 @@
     <tr>
       @if (!copyingTable) {
       <td class="input">
-        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)" (change)="toggleChecked(meterData.guid)">
+        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)"
+          (change)="toggleChecked(meterData.guid)">
       </td>
       }
       <td class="read-date">{{meterData | displayMeterDataDate}}</td>

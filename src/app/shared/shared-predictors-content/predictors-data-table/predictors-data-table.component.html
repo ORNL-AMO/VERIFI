@@ -48,7 +48,7 @@
       Update</button>
   </div>
   }
-  @if (_predictor.predictorType == 'Weather' && _predictorStatusCheck && _predictorStatusCheck.hasWeatherDataWarning) {
+  @if (_predictorStatusCheck && (_predictorStatusCheck.hasWeatherDataWarning || _predictorStatusCheck.hasNegativeData)) {
   <div class="ps-1 pe-1 mb-2">
     <button class="btn action-btn" (click)="toggleFilterErrors()">
       <i class="fa fa-filter"></i>
@@ -119,6 +119,13 @@
 </div>
 }
 
+@if(_predictorStatusCheck && _predictorStatusCheck.hasNegativeData){
+<div class="alert alert-danger text-center p-1 fw-bold">
+  <span class="fa fa-triangle-exclamation"></span> Negative predictor entries found. If this predictor can have negative
+  values, please update the predictor settings to allow for negative values.
+</div>
+}
+
 
 @if (hasCalculatedOverride()) {
 <div class="alert alert-warning text-center p-1">
@@ -158,7 +165,10 @@
   <tbody class="table-group-divider">
     @for (pData of _orderedPredictorData | slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
     _itemsPerPage ; track pData) {
-    <tr>
+    <tr [ngClass]="{
+      'data-row-error': (pData.amount < 0 && !_predictor.canBeNegative),
+      'data-row-warning': (pData.weatherDataWarning && !_predictor.ignoreWeatherDataWarning)
+      }">
       @if (!copyingTable) {
       <td class="input">
         <input type="checkbox" name="predictorEntry" [checked]="isChecked(pData.guid)"
@@ -176,7 +186,10 @@
           data-bs-html="true"></span>
         }
         @if (pData.amount != undefined) {
-        {{pData.amount | customNumber}}
+          @if(pData.amount < 0 && !_predictor.canBeNegative) {
+            <span class="fa fa-exclamation-triangle"></span>  
+          }
+          {{pData.amount | customNumber}}
         }
         @if (pData.amount == undefined) {
         &mdash;

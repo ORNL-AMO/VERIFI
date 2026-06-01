@@ -16,175 +16,183 @@
       <th></th>
       <th [attr.colspan]="numGeneralInformation()">General Information</th>
       @if (showEmissionsSection() && _showEmissions) {
-        <th [attr.colspan]="numEmissions()">Emissions</th>
+      <th [attr.colspan]="numEmissions()">Emissions</th>
       }
       @if (numDetailedCharges() > 0) {
-        <th [attr.colspan]="numDetailedCharges()">Detailed Charges</th>
+      <th [attr.colspan]="numDetailedCharges()">Detailed Charges</th>
       }
       <th></th>
     </tr>
     <tr>
       @if (!copyingTable) {
-        <th class="input">
-          <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
-        </th>
+      <th class="input">
+        <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+      </th>
       }
-      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': _orderDataField == 'readDate'}" class="row-year">
+      <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': _orderDataField == 'readDate'}"
+        class="row-year">
         Meter Read Date
       </th>
       @if (_filters.totalVolume && _showVolumeColumn) {
-        <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': _orderDataField == 'totalVolume'}">
-          Total Consumption<br>(<span [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
-        </th>
+      <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': _orderDataField == 'totalVolume'}">
+        Total Consumption<br>(<span [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
+      </th>
       }
       @if (_showEnergyColumn) {
-        <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': _orderDataField == 'totalEnergyUse'}">
-          Total Energy<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>)
-        </th>
+      <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': _orderDataField == 'totalEnergyUse'}">
+        Total Energy<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>)
+      </th>
       }
       @if (_showHeatCapacity && _filters.heatCapacity) {
-        <th (click)="setOrderDataField('heatCapacity')" [ngClass]="{'active': _orderDataField == 'heatCapacity'}">
-          Heat Capacity<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>/<span
-            [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
-        </th>
+      <th (click)="setOrderDataField('heatCapacity')" [ngClass]="{'active': _orderDataField == 'heatCapacity'}">
+        Heat Capacity<br>(<span [innerHTML]="_meter.energyUnit | settingsLabel"></span>/<span
+          [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
+      </th>
       }
       @if (_filters.totalCost) {
-        <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': _orderDataField == 'totalCost'}">
-          Total Cost
-        </th>
+      <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': _orderDataField == 'totalCost'}">
+        Total Cost
+      </th>
       }
       @if (_showEmissions) {
-        @if (_meter.source == 'Natural Gas' || _meter.source == 'Other Fuels') {
-          @if (_filters.stationaryBiogenicEmmissions) {
-            <th (click)="setOrderDataField('stationaryBiogenicEmmissions')"
-              [ngClass]="{'active': _orderDataField == 'stationaryBiogenicEmmissions'}">
-              Total Biogenic<br>Emissions (tonne CO<sub>2</sub>e)
-            </th>
-          }
-          @if (_filters.stationaryCarbonEmissions) {
-            <th (click)="setOrderDataField('stationaryCarbonEmissions')"
-              [ngClass]="{'active': _orderDataField == 'stationaryCarbonEmissions'}">
-              Total Carbon<br>Emissions (tonne CO<sub>2</sub>e)
-            </th>
-          }
-          @if (_filters.stationaryOtherEmissions) {
-            <th (click)="setOrderDataField('stationaryOtherEmissions')"
-              [ngClass]="{'active': _orderDataField == 'stationaryOtherEmissions'}">
-              Total Other<br>Emissions (tonne CO<sub>2</sub>e)
-            </th>
-          }
-          @if (_filters.totalEmissions) {
-            <th (click)="setOrderDataField('stationaryEmissions')"
-              [ngClass]="{'active': _orderDataField == 'stationaryEmissions'}">
-              Total<br>Emissions (tonne CO<sub>2</sub>e)
-            </th>
-          }
-        } @else {
-          @if (_filters.totalEmissions) {
-            <th (click)="setOrderDataField('otherScope2Emissions')"
-              [ngClass]="{'active': _orderDataField == 'otherScope2Emissions'}">
-              Total<br>Emissions (tonne CO<sub>2</sub>e)
-            </th>
-          }
-        }
+      @if (_meter.source == 'Natural Gas' || _meter.source == 'Other Fuels') {
+      @if (_filters.stationaryBiogenicEmmissions) {
+      <th (click)="setOrderDataField('stationaryBiogenicEmmissions')"
+        [ngClass]="{'active': _orderDataField == 'stationaryBiogenicEmmissions'}">
+        Total Biogenic<br>Emissions (tonne CO<sub>2</sub>e)
+      </th>
+      }
+      @if (_filters.stationaryCarbonEmissions) {
+      <th (click)="setOrderDataField('stationaryCarbonEmissions')"
+        [ngClass]="{'active': _orderDataField == 'stationaryCarbonEmissions'}">
+        Total Carbon<br>Emissions (tonne CO<sub>2</sub>e)
+      </th>
+      }
+      @if (_filters.stationaryOtherEmissions) {
+      <th (click)="setOrderDataField('stationaryOtherEmissions')"
+        [ngClass]="{'active': _orderDataField == 'stationaryOtherEmissions'}">
+        Total Other<br>Emissions (tonne CO<sub>2</sub>e)
+      </th>
+      }
+      @if (_filters.totalEmissions) {
+      <th (click)="setOrderDataField('stationaryEmissions')"
+        [ngClass]="{'active': _orderDataField == 'stationaryEmissions'}">
+        Total<br>Emissions (tonne CO<sub>2</sub>e)
+      </th>
+      }
+      } @else {
+      @if (_filters.totalEmissions) {
+      <th (click)="setOrderDataField('otherScope2Emissions')"
+        [ngClass]="{'active': _orderDataField == 'otherScope2Emissions'}">
+        Total<br>Emissions (tonne CO<sub>2</sub>e)
+      </th>
+      }
+      }
       }
       @for (charge of _meter.charges; track charge.guid) {
-        @if (charge.chargeType == 'sewer' && charge.displayUsageInTable) {
-          <th (click)="setOrderDataField(charge.guid, 'usage')"
-            [ngClass]="{'active': _orderDataField == charge.guid && _orderByCharge == 'usage'}">
-            {{charge.name}}<br>(<span [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
-          </th>
-        }
-        @if (charge.displayChargeInTable) {
-          <th (click)="setOrderDataField(charge.guid, 'amount')"
-            [ngClass]="{'active': _orderDataField == charge.guid && _orderByCharge == 'amount'}">
-            {{charge.name}}<br>(&dollar;)
-          </th>
-        }
+      @if (charge.chargeType == 'sewer' && charge.displayUsageInTable) {
+      <th (click)="setOrderDataField(charge.guid, 'usage')"
+        [ngClass]="{'active': _orderDataField == charge.guid && _orderByCharge == 'usage'}">
+        {{charge.name}}<br>(<span [innerHTML]="_meter.startingUnit | settingsLabel"></span>)
+      </th>
+      }
+      @if (charge.displayChargeInTable) {
+      <th (click)="setOrderDataField(charge.guid, 'amount')"
+        [ngClass]="{'active': _orderDataField == charge.guid && _orderByCharge == 'amount'}">
+        {{charge.name}}<br>(&dollar;)
+      </th>
+      }
       }
       @if (!copyingTable) {
-        <th>Actions</th>
+      <th>Actions</th>
       }
     </tr>
   </thead>
   <tbody class="table-group-divider">
-    @for (meterData of _orderedMeterData | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber * _itemsPerPage; track meterData.guid) {
-      <tr>
-        @if (!copyingTable) {
-          <td class="input">
-            <input type="checkbox" name="metersSelected"
-              [checked]="isChecked(meterData.guid)" (change)="toggleChecked(meterData.guid)">
-          </td>
+    @for (meterData of _orderedMeterData | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber *
+    _itemsPerPage; track meterData.guid) {
+    <tr [ngClass]="{
+      'data-row-error': (meterData.totalVolume < 0 || meterData.totalEnergyUse < 0) && !_meter.canBeNegative
+      }">
+      @if (!copyingTable) {
+      <td class="input">
+        <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)"
+          (change)="toggleChecked(meterData.guid)">
+      </td>
+      }
+      <td class="read-date">{{meterData | displayMeterDataDate}}</td>
+      @if (_filters.totalVolume && _showVolumeColumn) {
+      <td>
+        @if (meterData.isEstimated) {
+        <span class="fa fa-asterisk"></span>
         }
-        <td class="read-date">{{meterData | displayMeterDataDate}}</td>
-        @if (_filters.totalVolume && _showVolumeColumn) {
-          <td>
-            @if (meterData.isEstimated) {
-              <span class="fa fa-asterisk"></span>
-            }
-            {{meterData.totalVolume | customNumber}}
-          </td>
-        }
-        @if (_showEnergyColumn) {
-          <td>
-            @if (meterData.isEstimated && !_showVolumeColumn) {
-              <span class="fa fa-asterisk"></span>
-            }
-            {{meterData.totalEnergyUse | customNumber}}
-          </td>
-        }
-        @if (_showHeatCapacity && _filters.heatCapacity) {
-          <td>
-            {{meterData.heatCapacity | customNumber}}
-          </td>
-        }
-        @if (_filters.totalCost) {
-          <td>{{meterData.totalCost | customNumber:true}}</td>
-        }
-        @if (_showEmissions) {
-          @if (_meter.source == 'Natural Gas' || _meter.source == 'Other Fuels') {
-            @if (_filters.stationaryBiogenicEmmissions) {
-              <td>{{meterData.stationaryBiogenicEmmissions | customNumber}}</td>
-            }
-            @if (_filters.stationaryCarbonEmissions) {
-              <td>{{meterData.stationaryCarbonEmissions | customNumber}}</td>
-            }
-            @if (_filters.stationaryOtherEmissions) {
-              <td>{{meterData.stationaryOtherEmissions | customNumber}}</td>
-            }
-            @if (_filters.totalEmissions) {
-              <td>{{meterData.stationaryEmissions | customNumber}}</td>
-            }
-          } @else {
-            @if (_filters.totalEmissions) {
-              <td>{{meterData.otherScope2Emissions | customNumber}}</td>
-            }
+        @if(meterData.totalVolume < 0 && !_meter.canBeNegative){ <span class="fa fa-exclamation-triangle"></span>
           }
+          {{meterData.totalVolume | customNumber}}
+      </td>
+      }
+      @if (_showEnergyColumn) {
+      <td>
+        @if (meterData.isEstimated && !_showVolumeColumn) {
+        <span class="fa fa-asterisk"></span>
         }
-        @for (meterCharge of _meter.charges; track meterCharge.guid) {
-          @if (meterCharge.chargeType == 'sewer' && meterCharge.displayUsageInTable) {
-            <td>{{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}</td>
+        @if(meterData.totalEnergyUse < 0 && !_meter.canBeNegative){ <span class="fa fa-exclamation-triangle"></span>
           }
-          @if (meterCharge.displayChargeInTable) {
-            <td>{{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}</td>
+          {{meterData.totalEnergyUse | customNumber}}
+      </td>
+      }
+      @if (_showHeatCapacity && _filters.heatCapacity) {
+      <td>
+        {{meterData.heatCapacity | customNumber}}
+      </td>
+      }
+      @if (_filters.totalCost) {
+      <td>{{meterData.totalCost | customNumber:true}}</td>
+      }
+      @if (_showEmissions) {
+      @if (_meter.source == 'Natural Gas' || _meter.source == 'Other Fuels') {
+      @if (_filters.stationaryBiogenicEmmissions) {
+      <td>{{meterData.stationaryBiogenicEmmissions | customNumber}}</td>
+      }
+      @if (_filters.stationaryCarbonEmissions) {
+      <td>{{meterData.stationaryCarbonEmissions | customNumber}}</td>
+      }
+      @if (_filters.stationaryOtherEmissions) {
+      <td>{{meterData.stationaryOtherEmissions | customNumber}}</td>
+      }
+      @if (_filters.totalEmissions) {
+      <td>{{meterData.stationaryEmissions | customNumber}}</td>
+      }
+      } @else {
+      @if (_filters.totalEmissions) {
+      <td>{{meterData.otherScope2Emissions | customNumber}}</td>
+      }
+      }
+      }
+      @for (meterCharge of _meter.charges; track meterCharge.guid) {
+      @if (meterCharge.chargeType == 'sewer' && meterCharge.displayUsageInTable) {
+      <td>{{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}</td>
+      }
+      @if (meterCharge.displayChargeInTable) {
+      <td>{{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}</td>
+      }
+      }
+      @if (!copyingTable) {
+      <td class="actions">
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+            <i class="fa fa-pencil"></i>
+          </button>
+          @if (isElectron) {
+          <app-view-connect-bill [meterData]="meterData" [selectedMeter]="_meter"></app-view-connect-bill>
           }
-        }
-        @if (!copyingTable) {
-          <td class="actions">
-            <div class="btn-group">
-              <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
-                <i class="fa fa-pencil"></i>
-              </button>
-              @if (isElectron) {
-                <app-view-connect-bill [meterData]="meterData" [selectedMeter]="_meter"></app-view-connect-bill>
-              }
-              <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
-                <i class="fa fa-trash"></i>
-              </button>
-            </div>
-          </td>
-        }
-      </tr>
+          <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </td>
+      }
+    </tr>
     }
   </tbody>
 </table>
@@ -197,9 +205,9 @@
       </button>
     </div>
     @if (showEstimated()) {
-      <div class="ps-2">
-        <span class="fa fa-asterisk"></span> Indicates Estimated Reading
-      </div>
+    <div class="ps-2">
+      <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+    </div>
     }
   </div>
   <ngb-pagination [collectionSize]="_orderedMeterData.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"

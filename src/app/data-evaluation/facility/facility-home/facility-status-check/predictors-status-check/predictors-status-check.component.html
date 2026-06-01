@@ -50,6 +50,9 @@
                             @if (predictorCheck.hasDuplicateEntries) {
                             <span class="badge bg-danger ms-2">Duplicate Entries</span>
                             }
+                            @if (predictorCheck.hasNegativeData) {
+                            <span class="badge bg-danger ms-2">Negative Data</span>
+                            }
                             @if (predictorCheck.hasMissingEntries) {
                             <span class="badge bg-danger ms-2">Missing Entries</span>
                             }

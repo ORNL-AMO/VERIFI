@@ -20,6 +20,8 @@ export class PredictorStatusCheck {
     outdatedMonths: number;
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date | undefined;
+    hasNegativeData: boolean = false;
+
 
     constructor(
         predictor: IdbPredictor,
@@ -39,6 +41,7 @@ export class PredictorStatusCheck {
         this.checkEntries(predictorReadings);
         // Apply noLongerInUse: use stop date as effective facility entry for currency checks
         const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(predictor, facilityLatestEntry);
+        this.setHasNegativeData(predictor, predictorReadings);
         this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry);
         this.isDataOutdated = (stalenessEnabled && !predictor.ignoreDateStatusChecks && !predictor.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
@@ -111,7 +114,7 @@ export class PredictorStatusCheck {
     }
 
     private setStatus(predictor: IdbPredictor) {
-        if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries) {
+        if (this.hasNoData || this.hasDuplicateEntries || this.hasMissingEntries || this.hasNegativeData) {
             this.status = 'error';
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
@@ -196,6 +199,17 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_weather_warnings'
             });
+        } else if(this.hasNegativeData) {
+            this.actions.push({
+                label: 'Review negative data entries for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `Some data entries for this predictor have negative values. Review the data to ensure accuracy.`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'error',
+                isWeather,
+                trackGuid: predictor.guid + '_negative_data'
+            });
         }
     }
 
@@ -210,6 +224,14 @@ export class PredictorStatusCheck {
             return;
         }
         this.hasWeatherDataWarning = predictorData.some(data => data.weatherDataWarning);
+    }
+
+    private setHasNegativeData(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
+        if (predictor.canBeNegative) {
+            this.hasNegativeData = false;
+            return;
+        }
+        this.hasNegativeData = predictorData.some(data => data.amount < 0);
     }
 
     hasMissingDataForModelYear(modelYear: number): boolean {

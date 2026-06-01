@@ -85,8 +85,11 @@ export class PredictorsDataTableComponent {
     const predictorData = this.predictorData();
     const orderDataField = this.orderDataField();
     const orderByDirection = this.orderByDirection();
+    const predictor = this.predictor();
     const filterErrors = this.filterErrors();
-    const filteredData = filterErrors ? predictorData.filter(data => data.weatherDataWarning) : predictorData;
+    const filteredData = filterErrors ? predictorData.filter(data => {
+      return data.weatherDataWarning || (predictor && !predictor.canBeNegative && data.amount < 0);
+    }) : predictorData;
     if (orderDataField == 'amount') {
       return _.orderBy(filteredData, [data => data.amount], [orderByDirection]);
     } else if (orderDataField == 'date') {

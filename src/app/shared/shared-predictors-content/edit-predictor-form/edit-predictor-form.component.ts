@@ -9,6 +9,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import * as _ from 'lodash';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
+import { Month, Months } from '../../form-data/months';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -32,6 +33,7 @@ export class EditPredictorFormComponent {
 
 
   displaySationModal: boolean = false;
+  months: Array<Month> = Months;
   constructor(
     private router: Router, private facilityDbService: FacilitydbService,
     private weatherDataService: WeatherDataService,
@@ -101,5 +103,25 @@ export class EditPredictorFormComponent {
     this.predictor.weatherStationName = station.name;
     this.predictorForm.controls['weatherStationId'].patchValue(station.ID);
     this.cancelStationSelect();
+  }
+
+  get noLongerInUseDateValue(): string {
+    const month = this.predictorForm.controls.noLongerInUseMonth.value;
+    const year = this.predictorForm.controls.noLongerInUseYear.value;
+    if (month != null && year) {
+      const mm = String(month + 1).padStart(2, '0');
+      return `${year}-${mm}`;
+    }
+    return '';
+  }
+
+  setNoLongerInUseDate(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    if (value) {
+      const [yearStr, monthStr] = value.split('-');
+      this.predictorForm.controls.noLongerInUseMonth.patchValue(parseInt(monthStr, 10) - 1);
+      this.predictorForm.controls.noLongerInUseYear.patchValue(parseInt(yearStr, 10));
+      this.predictorForm.markAsDirty();
+    }
   }
 }

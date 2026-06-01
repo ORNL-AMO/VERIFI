@@ -69,7 +69,7 @@
                             <span class="badge bg-warning text-dark ms-2">Data Not Current</span>
                             }
                             @if(meterCheck.hasNegativeReadings){
-                            <span class="badge bg-warning text-dark ms-2">Negative Readings</span>
+                            <span class="badge bg-danger ms-2">Negative Readings</span>
                             }
                             @if (meterCheck.lastDateEntry && !meterCheck.hasNoData) {
                             <span class="text-muted ms-2 small">({{meterCheck.lastDateEntry | date:'MMMM yyyy'}})</span>

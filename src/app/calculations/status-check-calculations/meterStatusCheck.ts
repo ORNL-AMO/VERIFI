@@ -108,12 +108,12 @@ export class MeterStatusCheck {
     }
 
     private setStatus(meter: IdbUtilityMeter) {
-        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries) {
+        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries || this.hasNegativeReadings) {
             this.status = 'error';
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
             this.status = 'outdated';
-        } else if (this.hasNoCalendarizationMethod || (!meter.ignoreDateStatusChecks && !meter.noLongerInUse && !this.isDataCurrent) || this.hasNegativeReadings) {
+        } else if (this.hasNoCalendarizationMethod || (!meter.ignoreDateStatusChecks && !meter.noLongerInUse && !this.isDataCurrent)) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -165,6 +165,17 @@ export class MeterStatusCheck {
                     type: 'meter',
                     status: 'error',
                     trackGuid: meter.guid + '_duplicates'
+                });
+            }
+            if(this.hasNegativeReadings){
+                this.actions.push({
+                    label: 'Review negative readings for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: 'This meter has negative energy use or volume readings, which may indicate data entry errors unless negative values are expected for this meter.',
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_negative_readings'
                 });
             }
             if (this.isDataOutdated && this.lastDateEntry) {
