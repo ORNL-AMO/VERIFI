@@ -13,7 +13,8 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         missingEndDate: false,
         invalidDateRange: false,
         baselineAfterReportYear: false,
-        analysisHasErrors: false
+        analysisHasErrors: false,
+        missingSelection: false
     };
 
     errors.missingName = !facilityReport.name || facilityReport.name.toString().trim() === '';
@@ -75,6 +76,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         linkedAnalysisItemId = facilityReport.analysisItemId;
         errors.missingReportYear = facilityReport.modelingReportSettings.reportYear === undefined || facilityReport.modelingReportSettings.reportYear === null || isNaN(facilityReport.modelingReportSettings.reportYear);
     } else if (facilityReport.facilityReportType == 'dataQuality') {
+        errors.missingSelection = facilityReport.dataQualityReportSettings.missingSelection;
     }
     if (analysisNeeded) {
         if (!linkedAnalysisItemId) {
@@ -89,7 +91,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         }
     }
 
-    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors;
+    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors || errors.missingSelection;
     return errors;
 }
 
@@ -104,6 +106,7 @@ export function emptyFacilityReportErrors(): FacilityReportErrors {
         missingEndDate: false,
         invalidDateRange: false,
         baselineAfterReportYear: false,
-        analysisHasErrors: false
+        analysisHasErrors: false,
+        missingSelection: false
     }
 }

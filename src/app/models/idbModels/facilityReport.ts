@@ -13,7 +13,8 @@ export interface IdbFacilityReport extends IdbEntry {
     dataOverviewReportSettings: DataOverviewFacilityReportSettings,
     savingsReportSettings: SavingsFacilityReportSettings,
     emissionFactorsReportSettings: EmissionFactorsReportSettings,
-    modelingReportSettings: ModelingReportSettings
+    modelingReportSettings: ModelingReportSettings,
+    dataQualityReportSettings: DataQualityReportSettings
 }
 
 export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
@@ -30,7 +31,8 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         dataOverviewReportSettings: getDataOverviewReportSettings(groups),
         savingsReportSettings: getSavingsReportSettings(),
         emissionFactorsReportSettings: getEmissionFactorsReportSettings(),
-        modelingReportSettings: getModelingReportSettings()
+        modelingReportSettings: getModelingReportSettings(),
+        dataQualityReportSettings: getDataQualityReportSettings()
     }
 }
 
@@ -267,4 +269,42 @@ export interface ModelingReportSettings {
     includeIssuesSummary: boolean,
     includeExecutiveSummary: boolean,
     includeDataValidationTables: boolean
+}
+
+export function getDataQualityReportSettings(): DataQualityReportSettings {
+    return {
+        missingSelection: false,
+        selectedAnalysisItemId: undefined,
+        selectedMeterIds: undefined,
+        selectedPredictorIds: undefined,
+        selectedMode: 'analysis',
+        includeMeter: true,
+        includeMeterStatisticsTable: true,
+        includeMeterConsumptionTimeseriesGraph: true,
+        includeMeterCostTimeseriesGraph: true,
+        includeMeterConsumptionHistogram: true,
+        includeMeterCostHistogram: true,
+        includePredictors: true,
+        includePredictorStatisticsTable: true,
+        includePredictorTimeseriesGraph: true,
+        includePredictorHistogram: true
+    }
+}
+
+export interface DataQualityReportSettings {
+    missingSelection: boolean,
+    selectedAnalysisItemId?: string,
+    selectedMeterIds?: Array<string>,
+    selectedPredictorIds?: Array<string>,
+    selectedMode: 'analysis' | 'manual',
+    includeMeter: boolean,
+    includeMeterStatisticsTable: boolean,
+    includeMeterConsumptionTimeseriesGraph: boolean,
+    includeMeterCostTimeseriesGraph: boolean,
+    includeMeterConsumptionHistogram: boolean,
+    includeMeterCostHistogram: boolean,
+    includePredictors: boolean,
+    includePredictorStatisticsTable: boolean,
+    includePredictorTimeseriesGraph: boolean,
+    includePredictorHistogram: boolean
 }

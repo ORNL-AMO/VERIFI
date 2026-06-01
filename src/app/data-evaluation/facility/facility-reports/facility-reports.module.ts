@@ -33,6 +33,9 @@ import { AccountReportsModule } from '../../account/account-reports/account-repo
 import { FacilityReportsDataCheckComponent } from './facility-reports-data-check/facility-reports-data-check.component';
 import { FacilityReportAnalysisSelectionComponent } from './facility-report-setup/facility-report-analysis-selection/facility-report-analysis-selection.component';
 import { FacilityDataQualityReportSetupComponent } from './facility-report-setup/facility-data-quality-report-setup/facility-data-quality-report-setup.component';
+import { FacilityDataQualityReportResultsComponent } from './report-results/facility-data-quality-report-results/facility-data-quality-report-results.component';
+import { SharedDataQualityReportMetersModule } from 'src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
+import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 
 
 
@@ -60,7 +63,8 @@ import { FacilityDataQualityReportSetupComponent } from './facility-report-setup
     FacilityModelingReportResultsComponent,
     FacilityReportsDataCheckComponent,
     FacilityReportAnalysisSelectionComponent,
-    FacilityDataQualityReportSetupComponent
+    FacilityDataQualityReportSetupComponent,
+    FacilityDataQualityReportResultsComponent
     
   ],
   imports: [
@@ -74,7 +78,9 @@ import { FacilityDataQualityReportSetupComponent } from './facility-report-setup
     TableItemsDropdownModule,
     NgbPagination,
     SharedAnalysisModule,
-    AccountReportsModule
+    AccountReportsModule,
+    SharedDataQualityReportMetersModule,
+    SharedDataQualityReportPredictorsModule
 ], 
 providers: [
     FacilityReportTypePipe,

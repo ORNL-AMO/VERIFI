@@ -5,6 +5,7 @@
   padding-left: 8px;
   margin-bottom: 16px;
 }
+
 .tag {
   display: inline-block;
   padding: 6px 14px;
@@ -13,6 +14,7 @@
   cursor: pointer;
   transition: background 0.2s;
 }
+
 .tag.selected {
   background: #89568f;
   color: #fff;
@@ -20,13 +22,17 @@
 }
 
 .section-header {
-  font-size: 1.3em;
-  color: #1976d2;
-  margin-top: 16px;
-  margin-bottom: 10px;
+  font-size: 1.2em;
+  color: #2c386b;
   letter-spacing: 0.5px;
   font-weight: bold;
   display: flex;
   align-items: center;
-  padding-left: 8px;
+  margin: 8px;
+}
+
+.sub-heading-style {
+  font-size: 1.1em;
+  font-style: italic;
+  font-weight: bold;
 }
