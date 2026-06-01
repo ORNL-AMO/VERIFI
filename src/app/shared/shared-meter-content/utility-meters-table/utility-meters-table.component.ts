@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -14,13 +14,15 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import * as _ from 'lodash';
+
+type MeterTableContext = 'data-evaluation' | 'data-management';
 
 interface MetersListItem {
   meter: IdbUtilityMeter,
@@ -50,6 +52,8 @@ export class UtilityMetersTableComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
+  context = input<MeterTableContext>('data-evaluation');
+
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilitydbService.selectedFacility, { initialValue: undefined });
   meters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterdbService.facilityMeters, { initialValue: [] });
@@ -59,11 +63,15 @@ export class UtilityMetersTableComponent {
     const utilityMeters = this.meters();
     const facilityStatusCheck = this.facilityStatusCheck();
     const facility = this.selectedFacility();
+    const ctx = this.context();
     if (!utilityMeters || !facilityStatusCheck || !facility) return [];
+    const account = this.accountDbService.selectedAccount.getValue();
     return utilityMeters.map(meter => ({
       meter,
       meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid),
-      meterDataUrl: `/data-evaluation/facility/${facility.guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`
+      meterDataUrl: ctx === 'data-management'
+        ? `data-management/${account.guid}/facilities/${facility.guid}/meters/${meter.guid}/meter-data`
+        : `/data-evaluation/facility/${facility.guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`
     }));
   });
 
@@ -92,8 +100,17 @@ export class UtilityMetersTableComponent {
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
-  addMeter() {
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/new-meter');
+  async addMeter() {
+    if (this.context() === 'data-management') {
+      const facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+      let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
+      newMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(newMeter));
+      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      await this.dbChangesService.setMeters(account, facility);
+      await this.selectEditMeter(newMeter);
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/new-meter');
+    }
   }
 
   copyTable() {
@@ -155,12 +172,27 @@ export class UtilityMetersTableComponent {
     }
   }
 
-  selectEditMeter(meter: IdbUtilityMeter) {
-    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
+  async selectEditMeter(meter: IdbUtilityMeter) {
+    if (this.context() === 'data-management') {
+      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      const facility: IdbFacility = this.selectedFacility();
+      meter.sidebarOpen = true;
+      await firstValueFrom(this.utilityMeterdbService.updateWithObservable(meter));
+      await this.dbChangesService.setMeters(account, facility);
+      this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/meters/' + meter.guid);
+    } else {
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
+    }
   }
 
   navigateToMeterData(meter: IdbUtilityMeter) {
-    this.router.navigateByUrl(`/data-evaluation/facility/${this.selectedFacility().guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`);
+    const facility = this.selectedFacility();
+    if (this.context() === 'data-management') {
+      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      this.router.navigateByUrl(`data-management/${account.guid}/facilities/${facility.guid}/meters/${meter.guid}/meter-data`);
+    } else {
+      this.router.navigateByUrl(`/data-evaluation/facility/${facility.guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`);
+    }
   }
 
   getSortIcon(field: OrderMeterListField): string {
