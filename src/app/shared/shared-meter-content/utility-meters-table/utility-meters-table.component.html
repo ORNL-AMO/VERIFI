@@ -52,7 +52,7 @@
             Units <span class="fa ms-1" [ngClass]="getSortIcon('startingUnit')"></span>
           </th>
           <th class="text-nowrap" (click)="setOrderDataField('latestReading')"
-            [ngClass]="{'active': _orderDataField == 'latestReading'}">Latest Reading <span class="fa ms-1"
+            [ngClass]="{'active': _orderDataField == 'latestReading'}">Latest Month<span class="fa ms-1"
               [ngClass]="getSortIcon('latestReading')"></span></th>
           @if (!copyingTable) {
           <th>Actions</th>
@@ -63,18 +63,20 @@
         @for (meterListItem of _orderedMeterList | slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
         _itemsPerPage; track meterListItem.meter.guid) {
         <tr [ngClass]="{
-            'meter-row-warning': meterListItem.meterStatusCheck.status === 'warning',
-            'meter-row-error': meterListItem.meterStatusCheck.status === 'error'
+            'meter-row-warning': meterListItem.meterStatusCheck?.status === 'warning',
+            'meter-row-error': meterListItem.meterStatusCheck?.status === 'error'
           }">
 
           <!-- Status column -->
           <td class="text-center align-middle status-col">
+            @if(meterListItem.meterStatusCheck){
             <span class="fa fa-fw fa-lg" [ngClass]="{
                 'fa-circle-check text-success': meterListItem.meterStatusCheck.status === 'good',
                 'fa-exclamation-triangle text-warning': meterListItem.meterStatusCheck.status === 'warning',
-                'fa-circle-xmark text-danger': meterListItem.meterStatusCheck.status === 'error'
+                'fa-circle-xmark text-danger': meterListItem.meterStatusCheck.status === 'error',
+                'fa-clock text-outdated': meterListItem.meterStatusCheck.status === 'outdated'
               }"></span>
-            @if (meterListItem.meterStatusCheck.status !== 'good') {
+            @if ( meterListItem.meterStatusCheck.status !== 'good') {
             <div class="d-flex flex-column gap-1 mt-1 align-items-center">
               @if (meterListItem.meterStatusCheck.hasNoData) {
               <span class="badge bg-danger issue-badge">No Data</span>
@@ -91,7 +93,11 @@
               @if (!meterListItem.meterStatusCheck.isDataCurrent && !meterListItem.meterStatusCheck.hasNoData) {
               <span class="badge bg-warning text-dark issue-badge">Not Current</span>
               }
+              @if(meterListItem.meterStatusCheck.status === 'outdated'){
+              <span class="badge bg-outdated issue-badge">Outdated</span>
+              }
             </div>
+            }
             }
           </td>
 
@@ -100,11 +106,12 @@
             <a class="meter-name-link fw-semibold" (click)="selectEditMeter(meterListItem.meter)">
               {{meterListItem.meter.name}}
             </a>
-            @for (action of meterListItem.meterStatusCheck.actions; track action.trackGuid) {
+            @for (action of meterListItem.meterStatusCheck?.actions; track action.trackGuid) {
             <p class="mb-0 mt-1 small action-description">
               <span class="fa fa-fw me-1" [ngClass]="{
                   'fa-circle-xmark text-danger': action.status === 'error',
-                  'fa-exclamation-triangle text-warning': action.status === 'warning'
+                  'fa-exclamation-triangle text-warning': action.status === 'warning',
+                  'fa-clock text-outdated': action.status === 'outdated'
                 }"></span>{{action.description}}
             </p>
             }
@@ -150,7 +157,8 @@
 
           <!-- Latest Reading column -->
           <td class="align-middle text-nowrap">
-            @if (meterListItem.meterStatusCheck.lastDateEntry && !meterListItem.meterStatusCheck.hasNoData) {
+            @if (meterListItem.meterStatusCheck && meterListItem.meterStatusCheck.lastDateEntry
+            && !meterListItem.meterStatusCheck.hasNoData) {
             <a class="meter-data-link" (click)="navigateToMeterData(meterListItem.meter)" title="View meter data">
               <span class="fa fa-calendar-alt me-1 small"></span>
               {{meterListItem.meterStatusCheck.lastDateEntry | date:'MMM yyyy'}}
