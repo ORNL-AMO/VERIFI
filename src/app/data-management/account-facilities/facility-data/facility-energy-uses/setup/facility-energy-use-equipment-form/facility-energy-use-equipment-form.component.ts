@@ -55,7 +55,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
     }
     const facilityYears: Array<number> = getAllYearsWithData(calanderizedMeters, facility);
     const currentYears: Array<number> = this.annualOperatingConditionsDataForms().map(form => { return form.controls['year'].value });
-    return _.xor(facilityYears, currentYears).sort((a, b) => a - b);
+    return _.difference(facilityYears, currentYears).sort((a, b) => a - b);
   });
   equipmentDetailsForm = signal<FormGroup | null>(null);
   utilityDataForms = signal<Array<UtilityDataForm>>([]);

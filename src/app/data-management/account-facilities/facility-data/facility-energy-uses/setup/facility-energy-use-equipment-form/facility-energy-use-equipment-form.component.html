@@ -66,7 +66,7 @@
             [hasElectricityUtility]="_hasElectricityUtility">
         </app-annual-operating-conditions-form>
         }
-        @if(_annualOperatingConditionsDataForms.length < _yearOptions.length) { <div class="w-100 text-end">
+        @if(_yearOptions.length > 0) { <div class="w-100 text-end">
             <a class="click-link" (click)="openAddOperatingConditionsModal()"><span class="fa fa-plus"></span> Add
                 Year
             </a>
@@ -99,7 +99,7 @@ track $index) {
 }
 <div class="d-flex justify-content-end">
     <div>
-        @if(_annualOperatingConditionsDataForms.length < _yearOptions.length) { <a class="click-link"
+        @if(_yearOptions.length > 0) { <a class="click-link"
             (click)="openAddOperatingConditionsModal()"><span class="fa fa-plus"></span> Add Year</a>
             }
     </div>
