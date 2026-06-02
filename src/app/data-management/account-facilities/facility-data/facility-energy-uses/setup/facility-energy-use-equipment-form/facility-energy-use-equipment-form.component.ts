@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, computed, effect, EventEmitter, inject, Injector, input, Output, Signal, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -7,10 +7,13 @@ import { Subscription } from 'rxjs';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { getEnergyUseUnit } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-use-equipment-form',
@@ -19,54 +22,74 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
   styleUrl: './facility-energy-use-equipment-form.component.css'
 })
 export class FacilityEnergyUseEquipmentFormComponent {
-  @Input()
-  energyUseEquipment: IdbFacilityEnergyUseEquipment;
+  energyUseEquipment = input.required<IdbFacilityEnergyUseEquipment>();
   @Output('emitChanged')
   emitChanged: EventEmitter<IdbFacilityEnergyUseEquipment> = new EventEmitter<IdbFacilityEnergyUseEquipment>();
-  @Input()
-  inSetup: boolean = false;
+  inSetup = input(false);
 
 
   private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService = inject(FacilityEnergyUseEquipmentFormService);
   private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private calanderizationService: CalanderizationService = inject(CalanderizationService);
+  private injector: Injector = inject(Injector);
+
+  private energyUseEquipmentSignal = signal<IdbFacilityEnergyUseEquipment | null>(null);
+  calanderizedMeterData: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: new Array<CalanderizedMeter>() });
+  private facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+
+  hasElectricityUtility: Signal<boolean> = computed(() => {
+    const utilityDataFroms = this.utilityDataForms();
+    if (!utilityDataFroms || utilityDataFroms.length == 0) {
+      return false;
+    }
+    const hasElec = utilityDataFroms.some(ud => ud.energySource == "Electricity");
+    return hasElec;
+  });
 
 
-
-  yearOptions: Array<number> = []
-  equipmentDetailsForm: FormGroup;
-  utilityDataForms: Array<UtilityDataForm>;
-  annualOperatingConditionsDataForms: Array<FormGroup>;
+  yearOptions: Signal<Array<number>> = computed(() => {
+    const facility: IdbFacility = this.facility();
+    const calanderizedMeters = this.calanderizedMeterData();
+    if (!facility || !calanderizedMeters) {
+      return [];
+    }
+    const facilityYears: Array<number> = getAllYearsWithData(calanderizedMeters, facility);
+    const currentYears: Array<number> = this.annualOperatingConditionsDataForms().map(form => { return form.controls['year'].value });
+    return _.xor(facilityYears, currentYears).sort((a, b) => a - b);
+  });
+  equipmentDetailsForm = signal<FormGroup | null>(null);
+  utilityDataForms = signal<Array<UtilityDataForm>>([]);
+  annualOperatingConditionsDataForms = signal<Array<FormGroup>>([]);
   private formSubscriptions = new Subscription();
   showUtilityTypeModal: boolean = false;
   showAddOperatingConditionsModal: boolean = false;
   constructor(
-  ) { }
-
-  ngOnInit() {
-    this.initFormData();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['energyUseEquipment'] && !changes['energyUseEquipment'].firstChange) {
+  ) {
+    effect(() => {
+      const incomingEnergyUseEquipment = this.energyUseEquipment();
+      this.energyUseEquipmentSignal.set(incomingEnergyUseEquipment);
       this.initFormData();
-    }
+    }, { injector: this.injector });
   }
-
+  
   ngOnDestroy() {
     this.formSubscriptions.unsubscribe();
   }
 
   initFormData() {
-    this.equipmentDetailsForm = this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(this.energyUseEquipment);
-    this.utilityDataForms = this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(this.energyUseEquipment);
-    this.annualOperatingConditionsDataForms = this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(this.energyUseEquipment);
-    this.setYearOptions();
+    const energyUseEquipment = this.energyUseEquipmentSignal();
+    if (!energyUseEquipment) {
+      return;
+    }
+    this.equipmentDetailsForm.set(this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(energyUseEquipment));
+    this.utilityDataForms.set(this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(energyUseEquipment));
+    this.annualOperatingConditionsDataForms.set(this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(energyUseEquipment));
     this.subscribeToFormChanges();
   }
 
   addOperatingConditionsYear(year: number) {
+    const utilityDataForms = this.utilityDataForms();
     let newOperatingConditionsData: EnergyEquipmentOperatingConditionsData = {
       year: year,
       hoursOfOperation: 8760,
@@ -75,37 +98,27 @@ export class FacilityEnergyUseEquipmentFormComponent {
       efficiency: 100
     };
     let newForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getOperatingConditionsYearForm(newOperatingConditionsData);
-    this.annualOperatingConditionsDataForms.push(newForm);
-    this.utilityDataForms.forEach(udf => {
+    this.annualOperatingConditionsDataForms.update(forms => [...forms, newForm]);
+    utilityDataForms.forEach(udf => {
       let energyUseUnit: string = this.facilityDbService.selectedFacility.getValue()?.energyUnit;
       let energyUseForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getEnergyUseForm({ year: year, energyUse: 0, overrideEnergyUse: false, energyUseUnit: energyUseUnit });
       udf.energyUseForms.push(energyUseForm);
     });
+    this.utilityDataForms.set([...utilityDataForms]);
     this.subscribeToFormChanges();
     this.saveChanges();
     this.closeAddOperatingConditionsModal();
-    this.setYearOptions();
-  }
-
-  setYearOptions() {
-    this.yearOptions = new Array();
-    let currentYears: Array<number> = this.annualOperatingConditionsDataForms.map(form => { return form.controls['year'].value });
-    let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.energyUseEquipment.facilityId);
-    for (let year = facilityMeterDataYears.startYear; year <= facilityMeterDataYears.endYear; year++) {
-      if (!currentYears.includes(year)) {
-        this.yearOptions.push(year);
-      }
-    }
   }
 
   removeOperatingConditionsData(dataForm: FormGroup) {
+    const utilityDataForms = this.utilityDataForms();
     let yearToRemove: number = dataForm.controls['year'].value;
-    this.annualOperatingConditionsDataForms = this.annualOperatingConditionsDataForms.filter(form => { return form.controls['year'].value != yearToRemove });
-    this.utilityDataForms.forEach(udf => {
+    this.annualOperatingConditionsDataForms.update(forms => forms.filter(form => { return form.controls['year'].value != yearToRemove }));
+    utilityDataForms.forEach(udf => {
       udf.energyUseForms = udf.energyUseForms.filter(euf => { return euf.controls['year'].value != yearToRemove });
     });
+    this.utilityDataForms.set([...utilityDataForms]);
     this.subscribeToFormChanges();
-    this.setYearOptions();
     this.saveChanges();
   }
 
@@ -125,23 +138,28 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   setUtilityTypes() {
+    const equipmentDetailsForm = this.equipmentDetailsForm();
+    if (!equipmentDetailsForm) {
+      return;
+    }
+    const utilityDataForms = this.utilityDataForms();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return this.equipmentDetailsForm.controls['utilityMeterGroupIds'].value.includes(meter.groupId); });
+    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return equipmentDetailsForm.controls['utilityMeterGroupIds'].value.includes(meter.groupId); });
     let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
     sources = _.uniq(sources);
     sources.forEach(source => {
-      if (!this.utilityDataForms.find(udf => { return udf.energySource == source })) {
+      if (!utilityDataForms.find(udf => { return udf.energySource == source })) {
         this.addSourceToUtilitydata(source)
       }
     });
     //remove any that are not in the meter group
-    this.utilityDataForms = this.utilityDataForms.filter(udf => { return sources.includes(udf.energySource) });
+    this.utilityDataForms.set(this.utilityDataForms().filter(udf => { return sources.includes(udf.energySource) }));
     this.subscribeToFormChanges();
     this.saveChanges();
   }
 
   addSourceToUtilitydata(source: MeterSource) {
-    let years: Array<number> = this.annualOperatingConditionsDataForms.map(form => { return form.controls['year'].value });
+    let years: Array<number> = this.annualOperatingConditionsDataForms().map(form => { return form.controls['year'].value });
     let utilityData: EquipmentUtilityData = {
       energySource: source,
       size: 0,
@@ -161,28 +179,32 @@ export class FacilityEnergyUseEquipmentFormComponent {
       utilityDataForm: FormGroup,
       energyUseForms: Array<FormGroup>
     } = this.facilityEnergyUseEquipmentFormService.getUtilityDataForm(utilityData);
-    this.utilityDataForms.push(newForm);
+    this.utilityDataForms.update(forms => [...forms, newForm]);
   }
 
   removeUtilityType(energySource: MeterSource) {
-    this.utilityDataForms = this.utilityDataForms.filter(udf => { return udf.energySource != energySource });
+    this.utilityDataForms.update(forms => forms.filter(udf => { return udf.energySource != energySource }));
     this.subscribeToFormChanges();
     this.saveChanges();
   }
 
   subscribeToFormChanges() {
+    const equipmentDetailsForm = this.equipmentDetailsForm();
+    if (!equipmentDetailsForm) {
+      return;
+    }
     this.formSubscriptions.unsubscribe();
     this.formSubscriptions = new Subscription();
     this.formSubscriptions.add(
-      this.equipmentDetailsForm.controls['utilityMeterGroupIds'].valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
+      equipmentDetailsForm.controls['utilityMeterGroupIds'].valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
         console.log('meter group change');
         this.setUtilityTypes();
       }));
     this.formSubscriptions.add(
-      this.equipmentDetailsForm.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
+      equipmentDetailsForm.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
         this.saveChanges();
       }));
-    this.utilityDataForms.forEach(udf => {
+    this.utilityDataForms().forEach(udf => {
       this.formSubscriptions.add(
         udf.utilityDataForm.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
           this.saveChanges();
@@ -194,7 +216,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
           }));
       });
     });
-    this.annualOperatingConditionsDataForms.forEach(aocf => {
+    this.annualOperatingConditionsDataForms().forEach(aocf => {
       this.formSubscriptions.add(
         aocf.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
           this.saveChanges();
@@ -203,14 +225,23 @@ export class FacilityEnergyUseEquipmentFormComponent {
   }
 
   saveChanges() {
-    this.facilityEnergyUseEquipmentFormService.calculateEnergyUse(this.utilityDataForms, this.annualOperatingConditionsDataForms);
-    this.energyUseEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForms(
-      this.energyUseEquipment,
-      this.equipmentDetailsForm,
-      this.utilityDataForms,
-      this.annualOperatingConditionsDataForms
+    const currentEnergyUseEquipment = this.energyUseEquipmentSignal();
+    const equipmentDetailsForm = this.equipmentDetailsForm();
+    if (!currentEnergyUseEquipment) {
+      return;
+    }
+    if (!equipmentDetailsForm) {
+      return;
+    }
+    this.facilityEnergyUseEquipmentFormService.calculateEnergyUse(this.utilityDataForms(), this.annualOperatingConditionsDataForms());
+    const updatedEnergyUseEquipment = this.facilityEnergyUseEquipmentFormService.updateEnergyUseEquipmentFromForms(
+      currentEnergyUseEquipment,
+      equipmentDetailsForm,
+      this.utilityDataForms(),
+      this.annualOperatingConditionsDataForms()
     );
-    this.emitChanged.emit(this.energyUseEquipment);
+    this.energyUseEquipmentSignal.set(updatedEnergyUseEquipment);
+    this.emitChanged.emit(updatedEnergyUseEquipment);
   }
 
   openAddOperatingConditionsModal() {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -11,16 +11,12 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
   styleUrl: './equipment-utility-data-form.component.css',
 })
 export class EquipmentUtilityDataFormComponent {
-  @Input({ required: true })
-  energySource: MeterSource;
-  @Input({ required: true })
-  utilityDataForm: FormGroup;
-  @Input({ required: true })
-  equipmentDetailsForm: FormGroup;
+  energySource = input.required<MeterSource>();
+  utilityDataForm = input.required<FormGroup>();
+  equipmentDetailsForm = input.required<FormGroup>();
   @Output('emitRemoveUtilityType')
   emitRemoveUtilityType: EventEmitter<void> = new EventEmitter<void>();
-  @Input()
-  inSetup: boolean = false;
+  inSetup = input(false);
 
   facilityUnits: string;
   facilitySub: Subscription;
