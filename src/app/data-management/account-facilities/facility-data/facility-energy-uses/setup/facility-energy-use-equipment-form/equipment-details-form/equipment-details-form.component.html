@@ -1,4 +1,5 @@
-<form [formGroup]="equipmentDetailsForm()">
+@let _equipmentDetailsForm = equipmentDetailsForm();
+<form [formGroup]="_equipmentDetailsForm">
     <div class="row">
         <div class="col-12">
             <p class="bold mb-0">Equipment / System Information</p>
@@ -7,7 +8,7 @@
                 <div class="col-7">
                     <input id="equipmentName" class="form-control" type="text" formControlName="name"
                         onfocus="this.select();" minlength="0" maxlength="100">
-                    @let nameControl = equipmentDetailsForm().get('name');
+                    @let nameControl = _equipmentDetailsForm.get('name');
                     @if(nameControl.touched && nameControl.hasError('required')){
                     <div class="alert alert-danger mt-1">Name is
                         required</div>
@@ -37,8 +38,8 @@
             <div class="row">
                 <label class="col-5 col-form-label">Connect Utility Meter Group</label>
                 <div class="col-7">
-                    @if(equipmentDetailsForm().controls.utilityMeterGroupIds.value?.length > 0) {
-                    @for (id of equipmentDetailsForm().controls.utilityMeterGroupIds.value; track id) {
+                    @if(_equipmentDetailsForm.controls.utilityMeterGroupIds.value?.length > 0) {
+                    @for (id of _equipmentDetailsForm.controls.utilityMeterGroupIds.value; track id) {
                     <button class="btn action-btn me-2" (click)="openLinkMeterTable()" type="button">
                         <span class="fa fa-link"></span>
                         {{ id | groupName}}

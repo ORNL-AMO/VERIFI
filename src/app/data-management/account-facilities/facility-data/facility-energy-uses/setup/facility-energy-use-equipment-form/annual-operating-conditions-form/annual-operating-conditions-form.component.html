@@ -1,6 +1,7 @@
+@let _annualOperatingConditionsDataForm = annualOperatingConditionsDataForm();
 @if(!inSetup()){
-<form [formGroup]="annualOperatingConditionsDataForm()">
-    @let selectedYear = annualOperatingConditionsDataForm().controls.year.value;
+<form [formGroup]="_annualOperatingConditionsDataForm">
+    @let selectedYear = _annualOperatingConditionsDataForm.controls.year.value;
     <div class="row">
         <div class="col">
             <div class="input-group">
@@ -51,8 +52,8 @@
 </form>
 }@else {
 <!--form in setup-->
-<form [formGroup]="annualOperatingConditionsDataForm()">
-    @let selectedYear = annualOperatingConditionsDataForm().controls.year.value;
+<form [formGroup]="_annualOperatingConditionsDataForm">
+    @let selectedYear = _annualOperatingConditionsDataForm.controls.year.value;
     <div class="row">
         <label class="col-5 col-form-label">
             Year
@@ -129,7 +130,7 @@
     <div class="popup-body">
         <p>
             Are you sure you want to remove the operating conditions data for
-            {{annualOperatingConditionsDataForm().controls.year.value}}? This will also remove the energy use data
+            {{_annualOperatingConditionsDataForm.controls.year.value}}? This will also remove the energy use data
             associated with this year.
         </p>
     </div>
@@ -140,10 +141,10 @@
 </div>
 
 @if (showCalculateHoursOfOperationModal) {
-<app-operating-hours-modal [year]="annualOperatingConditionsDataForm().controls.year.value"
-    [hoursPerDay]="annualOperatingConditionsDataForm().controls.hoursPerDay.value"
-    [daysPerWeek]="annualOperatingConditionsDataForm().controls.daysPerWeek.value"
-    [weeksPerYear]="annualOperatingConditionsDataForm().controls.weeksPerYear.value"
+<app-operating-hours-modal [year]="_annualOperatingConditionsDataForm.controls.year.value"
+    [hoursPerDay]="_annualOperatingConditionsDataForm.controls.hoursPerDay.value"
+    [daysPerWeek]="_annualOperatingConditionsDataForm.controls.daysPerWeek.value"
+    [weeksPerYear]="_annualOperatingConditionsDataForm.controls.weeksPerYear.value"
     (saveCalculatedHoursPerYear)="handleCalculatedValues($event)"
     (closeModal)="closeCalculateHoursOfOperationModal()"></app-operating-hours-modal>
 }

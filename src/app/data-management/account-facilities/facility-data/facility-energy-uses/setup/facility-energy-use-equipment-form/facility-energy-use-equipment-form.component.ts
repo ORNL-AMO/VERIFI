@@ -3,11 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { Subscription } from 'rxjs';
+import { auditTime, distinctUntilChanged, merge } from 'rxjs';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
-import { distinctUntilChanged } from 'rxjs/operators';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -61,7 +60,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
   equipmentDetailsForm = signal<FormGroup | null>(null);
   utilityDataForms = signal<Array<UtilityDataForm>>([]);
   annualOperatingConditionsDataForms = signal<Array<FormGroup>>([]);
-  private formSubscriptions = new Subscription();
   showUtilityTypeModal: boolean = false;
   showAddOperatingConditionsModal: boolean = false;
   constructor(
@@ -71,10 +69,40 @@ export class FacilityEnergyUseEquipmentFormComponent {
       this.energyUseEquipmentSignal.set(incomingEnergyUseEquipment);
       this.initFormData();
     }, { injector: this.injector });
-  }
-  
-  ngOnDestroy() {
-    this.formSubscriptions.unsubscribe();
+
+    effect((onCleanup) => {
+      const equipmentDetailsForm = this.equipmentDetailsForm();
+      const utilityDataForms = this.utilityDataForms();
+      const annualOperatingConditionsDataForms = this.annualOperatingConditionsDataForms();
+      if (!equipmentDetailsForm) {
+        return;
+      }
+
+      const meterGroupChangesSub = equipmentDetailsForm.controls['utilityMeterGroupIds'].valueChanges.pipe(
+        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr))
+      ).subscribe(() => {
+        this.setUtilityTypes();
+      });
+
+      const allFormGroups: Array<FormGroup> = [
+        equipmentDetailsForm,
+        ...utilityDataForms.map(udf => udf.utilityDataForm),
+        ...utilityDataForms.flatMap(udf => udf.energyUseForms),
+        ...annualOperatingConditionsDataForms
+      ];
+
+      const saveChangesSub = merge(...allFormGroups.map(formGroup => formGroup.valueChanges)).pipe(
+        // Coalesce synchronous form updates into one save call.
+        auditTime(0)
+      ).subscribe(() => {
+        this.saveChanges();
+      });
+
+      onCleanup(() => {
+        meterGroupChangesSub.unsubscribe();
+        saveChangesSub.unsubscribe();
+      });
+    }, { injector: this.injector });
   }
 
   initFormData() {
@@ -85,7 +113,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
     this.equipmentDetailsForm.set(this.facilityEnergyUseEquipmentFormService.getEquipmentDetailsFromFromEnergyUseEquipment(energyUseEquipment));
     this.utilityDataForms.set(this.facilityEnergyUseEquipmentFormService.getUtilityDataFormsFromEnergyUseEquipment(energyUseEquipment));
     this.annualOperatingConditionsDataForms.set(this.facilityEnergyUseEquipmentFormService.getAnnualOperatingConditionsFormsFromEnergyUseEquipment(energyUseEquipment));
-    this.subscribeToFormChanges();
   }
 
   addOperatingConditionsYear(year: number) {
@@ -105,7 +132,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
       udf.energyUseForms.push(energyUseForm);
     });
     this.utilityDataForms.set([...utilityDataForms]);
-    this.subscribeToFormChanges();
     this.saveChanges();
     this.closeAddOperatingConditionsModal();
   }
@@ -118,7 +144,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
       udf.energyUseForms = udf.energyUseForms.filter(euf => { return euf.controls['year'].value != yearToRemove });
     });
     this.utilityDataForms.set([...utilityDataForms]);
-    this.subscribeToFormChanges();
     this.saveChanges();
   }
 
@@ -132,7 +157,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
   addUtilityType(source: MeterSource) {
     this.addSourceToUtilitydata(source);
-    this.subscribeToFormChanges();
     this.saveChanges();
     this.closeAddUtilityModal();
   }
@@ -154,7 +178,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
     });
     //remove any that are not in the meter group
     this.utilityDataForms.set(this.utilityDataForms().filter(udf => { return sources.includes(udf.energySource) }));
-    this.subscribeToFormChanges();
     this.saveChanges();
   }
 
@@ -184,44 +207,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
   removeUtilityType(energySource: MeterSource) {
     this.utilityDataForms.update(forms => forms.filter(udf => { return udf.energySource != energySource }));
-    this.subscribeToFormChanges();
     this.saveChanges();
-  }
-
-  subscribeToFormChanges() {
-    const equipmentDetailsForm = this.equipmentDetailsForm();
-    if (!equipmentDetailsForm) {
-      return;
-    }
-    this.formSubscriptions.unsubscribe();
-    this.formSubscriptions = new Subscription();
-    this.formSubscriptions.add(
-      equipmentDetailsForm.controls['utilityMeterGroupIds'].valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
-        console.log('meter group change');
-        this.setUtilityTypes();
-      }));
-    this.formSubscriptions.add(
-      equipmentDetailsForm.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
-        this.saveChanges();
-      }));
-    this.utilityDataForms().forEach(udf => {
-      this.formSubscriptions.add(
-        udf.utilityDataForm.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
-          this.saveChanges();
-        }));
-      udf.energyUseForms.forEach(euf => {
-        this.formSubscriptions.add(
-          euf.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
-            this.saveChanges();
-          }));
-      });
-    });
-    this.annualOperatingConditionsDataForms().forEach(aocf => {
-      this.formSubscriptions.add(
-        aocf.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
-          this.saveChanges();
-        }));
-    });
   }
 
   saveChanges() {

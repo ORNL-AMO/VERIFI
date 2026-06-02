@@ -3,6 +3,7 @@
 @let _utilityDataForms = utilityDataForms();
 @let _annualOperatingConditionsDataForms = annualOperatingConditionsDataForms();
 @let _yearOptions = yearOptions();
+@let _inSetup = inSetup();
 
 @if (_equipmentDetailsForm) {
 <app-equipment-details-form [equipmentDetailsForm]="_equipmentDetailsForm" [utilityDataForms]="_utilityDataForms"
@@ -18,7 +19,7 @@
 <app-equipment-utility-data-form [energySource]="utilityDataFormGroup.energySource"
     [utilityDataForm]="utilityDataFormGroup.utilityDataForm" [equipmentDetailsForm]="_equipmentDetailsForm"
     (emitRemoveUtilityType)="removeUtilityType(utilityDataFormGroup.energySource)"
-    [inSetup]="inSetup()"></app-equipment-utility-data-form>
+    [inSetup]="_inSetup"></app-equipment-utility-data-form>
 }
 }@else {
 <p class="fw-light italic">
@@ -33,7 +34,7 @@
 </div>
 
 <!--Operating conditions data-->
-@if(!inSetup()) {
+@if(!_inSetup) {
 <hr>
 <div class="row">
     <div class="col-12">
@@ -117,7 +118,7 @@ track $index) {
 @for(utilityDataFormGroup of _utilityDataForms; track utilityDataFormGroup.energySource) {
 <app-energy-use-data-form [energySource]="utilityDataFormGroup.energySource"
     [utilityDataForm]="utilityDataFormGroup.utilityDataForm" [energyUseForms]="utilityDataFormGroup.energyUseForms"
-    [inSetup]="inSetup()"></app-energy-use-data-form>
+    [inSetup]="_inSetup"></app-energy-use-data-form>
 }
 }
 
