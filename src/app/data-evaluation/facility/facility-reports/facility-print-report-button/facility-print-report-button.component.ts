@@ -1,20 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
-    selector: 'app-facility-print-report-button',
-    templateUrl: './facility-print-report-button.component.html',
-    styleUrl: './facility-print-report-button.component.css',
-    standalone: false
+  selector: 'app-facility-print-report-button',
+  templateUrl: './facility-print-report-button.component.html',
+  styleUrl: './facility-print-report-button.component.css',
+  standalone: false
 })
 export class FacilityPrintReportButtonComponent {
+
+  @Input()
+  isDataQuality: boolean = false;
 
   print: boolean;
   printSub: Subscription;
   helpWidth: number;
   helpWidthSub: Subscription;
-  constructor(private dataEvaluationService: DataEvaluationService) {
+
+  @Output()
+  exportPdf: EventEmitter<void> = new EventEmitter<void>();
+  constructor(private dataEvaluationService: DataEvaluationService  ) {
 
   }
 
@@ -41,12 +47,18 @@ export class FacilityPrintReportButtonComponent {
   }
 
   printReport() {
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
+    if (!this.isDataQuality) {
       setTimeout(() => {
-        window.print();
-        this.dataEvaluationService.print.next(false)
-      }, 1000)
-    }, 100)
+        window.dispatchEvent(new Event("resize"));
+        setTimeout(() => {
+          window.print();
+          this.dataEvaluationService.print.next(false)
+        }, 1000)
+      }, 100)
+    }
+    else {
+      this.exportPdf.emit();
+      this.dataEvaluationService.print.next(false);
+    }
   }
 }

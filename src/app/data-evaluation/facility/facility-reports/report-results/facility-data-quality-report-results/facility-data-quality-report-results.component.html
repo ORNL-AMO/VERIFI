@@ -37,7 +37,7 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Total Consumption
         </h4>
-        <app-meter-energy-timeseries-graph [meterData]="meterData.data" [selectedMeter]="meterData.meter"
+        <app-meter-energy-timeseries-graph #meterConsumption [meterData]="meterData.data" [selectedMeter]="meterData.meter"
             [energyStats]="meterData.energyStats"></app-meter-energy-timeseries-graph>
     </div>
     }
@@ -46,7 +46,7 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Total Cost
         </h4>
-        <app-meter-cost-timeseries-graph [meterData]="meterData.data"
+        <app-meter-cost-timeseries-graph #meterCost [meterData]="meterData.data"
             [costStats]="meterData.costStats"></app-meter-cost-timeseries-graph>
     </div>
     }
@@ -56,7 +56,7 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Distribution of Total Consumption
         </h4>
-        <app-meter-energy-histogram [meterData]="meterData.data"
+        <app-meter-energy-histogram #meterEnergyHistogram [meterData]="meterData.data"
             [selectedMeter]="meterData.meter"></app-meter-energy-histogram>
     </div>
     }
@@ -66,7 +66,7 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Distribution of Total Cost
         </h4>
-        <app-meter-cost-histogram [meterData]="meterData.data"></app-meter-cost-histogram>
+        <app-meter-cost-histogram #meterCostHistogram [meterData]="meterData.data"></app-meter-cost-histogram>
     </div>
     }
     }
@@ -85,7 +85,7 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Total Consumption
         </h4>
-        <app-meter-energy-timeseries-graph [meterData]="meterData.data" [selectedMeter]="meterData.meter"
+        <app-meter-energy-timeseries-graph #meterConsumption [meterData]="meterData.data" [selectedMeter]="meterData.meter"
             [energyStats]="meterData.energyStats"></app-meter-energy-timeseries-graph>
     </div>
     }
@@ -96,7 +96,7 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Distribution of Total Consumption
         </h4>
-        <app-meter-energy-histogram [meterData]="meterData.data"
+        <app-meter-energy-histogram #meterEnergyHistogram [meterData]="meterData.data"
             [selectedMeter]="meterData.meter"></app-meter-energy-histogram>
     </div>
     }
@@ -148,7 +148,7 @@ facilityReport.dataQualityReportSettings.includePredictorHistogram)) {
         <h4>
             Predictor Time Series
         </h4>
-        <app-predictor-timeseries-graph [predictorData]="predictorData.data"
+        <app-predictor-timeseries-graph #predictorTimeseries [predictorData]="predictorData.data"
             [selectedPredictor]="predictorData.predictor" [stats]="predictorData.stats"
             [missingMonthsList]="predictorData.missingMonthsList"></app-predictor-timeseries-graph>
     </div>
@@ -158,10 +158,12 @@ facilityReport.dataQualityReportSettings.includePredictorHistogram)) {
         <h4>
             Distribution of Predictors
         </h4>
-        <app-predictor-histogram-graph [predictorData]="predictorData.data"
+        <app-predictor-histogram-graph #predictorHistogram [predictorData]="predictorData.data"
             [selectedPredictor]="predictorData.predictor"></app-predictor-histogram-graph>
     </div>
     }
 </div>
 }
 }
+
+<app-facility-print-report-button [isDataQuality]="true" (exportPdf)="onExportPdf()"></app-facility-print-report-button>

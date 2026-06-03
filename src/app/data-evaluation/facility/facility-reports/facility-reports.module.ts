@@ -36,6 +36,7 @@ import { FacilityDataQualityReportSetupComponent } from './facility-report-setup
 import { FacilityDataQualityReportResultsComponent } from './report-results/facility-data-quality-report-results/facility-data-quality-report-results.component';
 import { SharedDataQualityReportMetersModule } from 'src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
 import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
+import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 
 
 
@@ -85,7 +86,8 @@ import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-d
 providers: [
     FacilityReportTypePipe,
     CalculatingSpinnerModule,
-    SharedAnalysisModule
+    SharedAnalysisModule,
+    CustomNumberPipe
   ]
 })
 export class FacilityReportsModule { }

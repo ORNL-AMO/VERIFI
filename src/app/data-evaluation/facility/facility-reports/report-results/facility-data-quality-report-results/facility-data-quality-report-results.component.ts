@@ -1,9 +1,8 @@
-import { Component, inject, Signal } from '@angular/core';
+import { Component, inject, QueryList, Signal, ViewChildren } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
@@ -19,6 +18,14 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { getStatistics, Statistics } from 'src/app/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { getPredictorStatistics, PredictorStatistics } from 'src/app/shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
+import { FacilityDataQualityReportAdapter } from './facility-data-quality-report.adapter';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { MeterEnergyTimeseriesGraphComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-energy-timeseries-graph/meter-energy-timeseries-graph.component';
+import { MeterCostTimeseriesGraphComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-cost-timeseries-graph/meter-cost-timeseries-graph.component';
+import { MeterEnergyHistogramComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-energy-histogram/meter-energy-histogram.component';
+import { MeterCostHistogramComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
+import { PredictorTimeseriesGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
+import { PredictorHistogramGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
 
 @Component({
   selector: 'app-facility-data-quality-report-results',
@@ -45,13 +52,21 @@ export class FacilityDataQualityReportResultsComponent {
 
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
+  @ViewChildren('meterConsumption') meterConsumption !: QueryList<MeterEnergyTimeseriesGraphComponent>;
+  @ViewChildren('meterCost') meterCost !: QueryList<MeterCostTimeseriesGraphComponent>;
+  @ViewChildren('meterEnergyHistogram') meterEnergy !: QueryList<MeterEnergyHistogramComponent>;
+  @ViewChildren('meterCostHistogram') meterCostHistogram !: QueryList<MeterCostHistogramComponent>;
+  @ViewChildren('predictorTimeseries') predictorTimeseries !: QueryList<PredictorTimeseriesGraphComponent>;
+  @ViewChildren('predictorHistogram') predictorHistogram !: QueryList<PredictorHistogramGraphComponent>;
+
   constructor(
     private facilityReportsDbService: FacilityReportsDbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
-    private dataEvaluationService: DataEvaluationService
+    private facilityDataQualityReportAdapter: FacilityDataQualityReportAdapter,
+    private exportReportPdfService: ExportReportPdfService
   ) { }
 
   ngOnInit() {
@@ -127,6 +142,97 @@ export class FacilityDataQualityReportResultsComponent {
     return Object.keys(dateCount)
       .filter(key => dateCount[key] > 1)
       .map(key => ({ monthYear: key }));
+  }
+
+  onExportPdf() {
+    const document = this.facilityDataQualityReportAdapter.buildDocument({
+      facilityReport: this.facilityReport,
+      meterDataStatsList: this.meterDataStatsList,
+      predictorDataStatsList: this.predictorDataStatsList,
+      chartImageProviders: this.getChartImageProviders()
+    });
+    this.exportReportPdfService.export(document, `${this.facilityReport.name} - Data Quality Report`);
+  }
+
+  getChartImageProviders() {
+    const meterConsumptionMap: Record<string, () => Promise<string>> = {};
+    const meterCostMap: Record<string, () => Promise<string>> = {};
+    const meterEnergyHistogramMap: Record<string, () => Promise<string>> = {};
+    const meterCostHistogramMap: Record<string, () => Promise<string>> = {};
+    const predictorTimeseriesMap: Record<string, () => Promise<string>> = {};
+    const predictorHistogramMap: Record<string, () => Promise<string>> = {};
+
+    this.meterDataStatsList.forEach(stats => {
+      const meterId = stats.meter.guid;
+      meterConsumptionMap[meterId] = async () => {
+        const chartComponent = this.meterConsumption.find(m => m.selectedMeter?.guid === stats.meter.guid);
+        if (chartComponent) {
+          const base64Str = await chartComponent.getChartAsBase64Image();
+          return base64Str;
+        }
+
+        return '';
+      };
+
+      meterCostMap[meterId] = async () => {
+        const chartComponent = this.meterCost.find(m => m.meterData?.some(d => d.meterId === stats.meter.guid));
+        if (chartComponent) {
+          const base64Str = await chartComponent.getChartAsBase64Image();
+          return base64Str;
+        }
+
+        return '';
+      };
+
+      meterEnergyHistogramMap[meterId] = async () => {
+        const chartComponent = this.meterEnergy.find(m => m.selectedMeter?.guid === stats.meter.guid);
+        if (chartComponent) {          
+          const base64Str = await chartComponent.getChartAsBase64Image();
+          return base64Str;
+        }
+        return '';
+      };
+
+      meterCostHistogramMap[meterId] = async () => {
+        const chartComponent = this.meterCostHistogram.find(m => m.meterData?.some(d => d.meterId === stats.meter.guid));
+        if (chartComponent) {
+          const base64Str = await chartComponent.getChartAsBase64Image();
+          return base64Str;
+        }
+        return '';
+      };
+    });
+
+    this.predictorDataStatsList.forEach(stats => {
+      const predictorId = stats.predictor.guid;
+
+      predictorTimeseriesMap[predictorId] = async () => {
+        const chartComponent = this.predictorTimeseries.find(m => m.selectedPredictor?.guid === stats.predictor.guid);
+        if (chartComponent) {
+          const base64Str = await chartComponent.getChartAsBase64Image();
+          return base64Str;
+        }
+        return '';
+      };
+
+      predictorHistogramMap[predictorId] = async () => {
+        const chartComponent = this.predictorHistogram.find(m => m.selectedPredictor?.guid === stats.predictor.guid);
+        if (chartComponent) {          
+          const base64Str = await chartComponent.getChartAsBase64Image();
+          return base64Str;
+        }
+        return '';
+      };
+    });
+    
+    return {
+      meterConsumptionTimeseries: meterConsumptionMap,
+      meterCostTimeseries: meterCostMap,
+      meterEnergyHistogram: meterEnergyHistogramMap,
+      meterCostHistogram: meterCostHistogramMap,
+      predictorTimeseries: predictorTimeseriesMap,
+      predictorHistogram: predictorHistogramMap
+    };
   }
 }
 
