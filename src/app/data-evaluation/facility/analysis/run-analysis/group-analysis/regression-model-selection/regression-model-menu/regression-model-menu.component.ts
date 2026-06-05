@@ -176,6 +176,7 @@ export class RegressionModelMenuComponent {
   changedModel: { modelId: string, oldModel: JStatRegressionModel, newModel: JStatRegressionModel } | null = null;
   showModelComparison: boolean = false;
   private lastPredictorIds: Array<string> = [];
+  private _suppressFormPatch = false;
 
   // --- Form ---
   form: RegressionMenuForm = this.fb.group({
@@ -220,6 +221,14 @@ export class RegressionModelMenuComponent {
           );
         });
       }
+      // Skip patching form values when the signal update originated from our own save —
+      // the form already has the correct values and patching would reset cursor position.
+      if (this._suppressFormPatch) {
+        this._suppressFormPatch = false;
+        this.updateFieldDisabledStates(group.isGeneratedModel);
+        return;
+      }
+
       // Patch the scalar fields without triggering valueChanges
       this.form.patchValue({
         isGeneratedModel: group.isGeneratedModel,
@@ -327,6 +336,7 @@ export class RegressionModelMenuComponent {
     const selectedAccount: IdbAccount = this.selectedAccount();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
     this.analysisDbService.selectedAnalysisItem.next(_analysisItem);
+    this._suppressFormPatch = true;
     this.analysisService.selectedGroup.next(_group);
   }
 
