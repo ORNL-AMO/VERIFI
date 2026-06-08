@@ -10,6 +10,7 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { convertConsumptionRate, getMeterCollectionUnit } from 'src/app/shared/sharedHelperFunctions';
@@ -30,6 +31,8 @@ export class BlendedEnergyRateModalComponent {
   year: number;
   @Input()
   selectedAnalysisItem: IdbAnalysisItem;
+  @Input()
+  report: IdbFacilityReport;
 
   groupMeters: Array<IdbUtilityMeter>;
   unitCostPerMeter: { [meterId: string]: number } = {};
@@ -40,6 +43,11 @@ export class BlendedEnergyRateModalComponent {
   consumptionPercentagePerMeter: { [meterId: string]: number } = {};
   convertedConsumptionRatePerMeter: { [meterId: string]: number } = {};
   finalUnit: string;
+  blendedRate: number;
+  convertedBlendedRate: number;
+  groupCalculatedUnit: string;
+  sameUnitForAllMeters: boolean;
+  finalBlendedRate: number;
 
   @Output()
   close = new EventEmitter<void>();
@@ -58,6 +66,10 @@ export class BlendedEnergyRateModalComponent {
     this.groupMeters = facilityMeters.filter(meter => {
       return this.group.idbGroupId == meter.groupId;
     });
+    this.isMeterUnitSame();
+    if (this.report && this.report.costSavingsReportSettings && this.report.costSavingsReportSettings.groupUnits) {
+      this.groupCalculatedUnit = this.report.costSavingsReportSettings.groupUnits[this.group.idbGroupId];
+    }
     this.setFinalUnit();
     this.calculateGroupEnergyForYear();
   }
@@ -138,6 +150,10 @@ export class BlendedEnergyRateModalComponent {
   convertConsumptionRates(meter: IdbUtilityMeter) {
     const unitCost = this.getUnitCost(meter);
     this.convertedConsumptionRatePerMeter[meter.guid] = convertConsumptionRate(meter, unitCost, this.finalUnit, this.selectedAnalysisItem.analysisCategory);
+    if(this.sameUnitForAllMeters) {
+      this.calculateTotalUnitCost();
+    }
+    this.calculateConvertedTotalUnitCost();
   }
 
   getUnitCost(meter: IdbUtilityMeter): number {
@@ -145,19 +161,55 @@ export class BlendedEnergyRateModalComponent {
     return (unitCost && !isNaN(unitCost)) ? unitCost : 0;
   }
 
-  calculateBlendedRate() {
-    let blendedRate = 0;
-    this.groupMeters.forEach(meter => {
-      const consumptionPercentage = this.consumptionPercentagePerMeter[meter.guid] || 0;
-      const convertedRate = this.convertedConsumptionRatePerMeter[meter.guid] || 0;
-      blendedRate += consumptionPercentage * convertedRate;
-    });
-    blendedRate = Math.round(blendedRate * 100) / 100;
-    this.calculatedBlendedRate.emit(blendedRate);
+  saveBlendedRate() {
+    this.calculatedBlendedRate.emit(this.finalBlendedRate);
   }
 
   getRoundedValue(meter: IdbUtilityMeter): number {
     const convertedRate = this.convertedConsumptionRatePerMeter[meter.guid] || 0;
     return Math.round(convertedRate * 100) / 100;
+  }
+
+  calculateTotalUnitCost() {
+    this.blendedRate = 0;
+    this.groupMeters.forEach(meter => {
+      const consumptionPercentage = this.consumptionPercentagePerMeter[meter.guid] || 0;
+      const unitCost = this.unitCostPerMeter[meter.guid] || 0;
+      this.blendedRate += consumptionPercentage * unitCost;
+    });
+    this.blendedRate = Math.round(this.blendedRate * 100) / 100;
+    this.finalBlendedRate = this.blendedRate;
+  }
+
+  calculateConvertedTotalUnitCost() {
+    this.convertedBlendedRate = 0;
+    this.groupMeters.forEach(meter => {
+      const consumptionPercentage = this.consumptionPercentagePerMeter[meter.guid] || 0;
+      const convertedRate = this.convertedConsumptionRatePerMeter[meter.guid] || 0;
+      this.convertedBlendedRate += consumptionPercentage * convertedRate;
+    });
+    this.convertedBlendedRate = Math.round(this.convertedBlendedRate * 100) / 100;
+    if(!this.sameUnitForAllMeters) {
+      this.blendedRate = this.convertedBlendedRate;
+      this.finalBlendedRate = this.convertedBlendedRate;
+    }
+  }
+
+  isMeterUnitSame() {
+    let mobileMeters = this.groupMeters.filter(meter => (meter.source == 'Other Fuels' && meter.scope == 2));
+    if (mobileMeters.length == 0) {
+      this.sameUnitForAllMeters = this.groupMeters.every(meter => meter.startingUnit == this.groupMeters[0].startingUnit);
+    }
+    else if (mobileMeters.length == this.groupMeters.length) {
+      this.sameUnitForAllMeters = mobileMeters.every(meter => meter.vehicleCollectionUnit == mobileMeters[0].vehicleCollectionUnit);
+    }
+    else if (mobileMeters.length > 0 && mobileMeters.length < this.groupMeters.length) {
+      let nonMobileMeters = this.groupMeters.filter(meter => !(meter.source == 'Other Fuels' && meter.scope == 2));
+      let isNonMobileSameUnit = nonMobileMeters.every(meter => meter.startingUnit == nonMobileMeters[0].startingUnit);
+      let isMobileSameUnit = mobileMeters.every(meter => meter.vehicleCollectionUnit == mobileMeters[0].vehicleCollectionUnit);
+      if (isNonMobileSameUnit && isMobileSameUnit && nonMobileMeters[0].startingUnit == mobileMeters[0].vehicleCollectionUnit) {
+        this.sameUnitForAllMeters = true;
+      }
+    }
   }
 }

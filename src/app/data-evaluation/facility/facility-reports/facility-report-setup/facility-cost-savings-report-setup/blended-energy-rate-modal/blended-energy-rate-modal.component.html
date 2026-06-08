@@ -36,20 +36,36 @@
             </td>
             <td class="text-center">
               <div class="input-group input-group-sm">
-                <input type="number" class="form-control form-control-sm"
-                  [value]="getRoundedValue(meter)" disabled>
+                <input type="number" class="form-control form-control-sm" [value]="getRoundedValue(meter)" disabled>
                 <span class="input-group-text">$/{{ finalUnit }}</span>
               </div>
             </td>
           </tr>
           }
+          <tr>
+            <td class="text-center final-row fw-bold" colspan="2">
+              Blended Rate
+            </td>
+            <td class="text-center final-row">
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control form-control-sm fw-bold" [value]="blendedRate" disabled>
+                <span class="input-group-text fw-bold">$/{{ groupCalculatedUnit }}</span>
+              </div>
+            </td>
+            <td class="text-center final-row">
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control form-control-sm fw-bold" [value]="convertedBlendedRate" disabled>
+                <span class="input-group-text fw-bold">$/{{ finalUnit }}</span>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
       <hr>
     </div>
     <div class="popup-footer text-end mt-1">
       <button class="btn btn-secondary" (click)="closeCalculator()">Cancel</button>
-      <button class="btn btn-success" (click)="calculateBlendedRate()">Calculate</button>
+      <button class="btn btn-success" (click)="saveBlendedRate()">Calculate</button>
     </div>
   </div>
 </div>
