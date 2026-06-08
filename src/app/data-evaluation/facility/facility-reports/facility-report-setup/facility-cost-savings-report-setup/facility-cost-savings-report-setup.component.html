@@ -85,6 +85,6 @@
 
 @if (showModal) {
 <app-blended-energy-rate-modal [showModal]="showModal" [group]="selectedGroup" [year]="selectedYear"
-  [selectedAnalysisItem]="selectedAnalysisItem" (close)="closeCalculator()"
+  [selectedAnalysisItem]="selectedAnalysisItem" [report]="facilityReport" (close)="closeCalculator()"
   (calculatedBlendedRate)="updateBlendedRate($event)"></app-blended-energy-rate-modal>
 }

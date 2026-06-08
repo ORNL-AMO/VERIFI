@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    @if(years && selectedAnalysisItem && costSavingsTable) {
+    @if(years && selectedAnalysisItem && costSavingsTable && dataComplete) {
     <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="costSavingsTable"></app-annual-savings-graph>
     }
@@ -102,7 +102,7 @@
         </div>
     </div>
 
-    @if(years && selectedAnalysisItem && cumulativeCostSavingsTable) {
+    @if(years && selectedAnalysisItem && cumulativeCostSavingsTable && dataComplete) {
     <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="cumulativeCostSavingsTable"></app-annual-savings-graph>
     }
@@ -127,7 +127,7 @@
                     <tr>
                         <th></th>
                         @for (group of filteredGroups; track group) {
-                        <th class="fst-italic">$/{{ convertedGroupUnits[group.idbGroupId] }}</th>
+                        <th class="fst-italic">$/{{ groupUnits[group.idbGroupId] }}</th>
                         }
                     </tr>
                 </thead>
@@ -201,5 +201,130 @@
         </div>
     </div>
 
+</div>
+
+<div class="report">
+    <div class="text-center">
+        <h3 class="fs-3 fw-bold mt-2">
+            Group Level Data
+        </h3>
+    </div>
+    @for (group of filteredGroups; track group) {
+    <h4 class="mt-5">
+        {{ group.idbGroupId | groupName }}
+    </h4>
+
+    <div class="table-responsive">
+        <table class="table table-bordered report-table mt-3">
+            <thead class="text-center primary-header">
+                <tr>
+                    <th>Year</th>
+                    <th>Actual Use</th>
+                    <th>Estimated Cost</th>
+                    <th>Adjusted Use</th>
+                    <th>Expected Cost</th>
+                    <th>Energy Savings</th>
+                    <th>Cost Savings</th>
+                    <th>Cumulative Cost Savings</th>
+                </tr>
+            </thead>
+            <thead class="sub-header">
+                <tr>
+                    <th></th>
+                    <th class="fst-italic">{{finalUnit}}</th>
+                    <th class="fst-italic">$</th>
+                    <th class="fst-italic">{{finalUnit}}</th>
+                    <th class="fst-italic">$</th>
+                    <th class="fst-italic">{{finalUnit}}</th>
+                    <th class="fst-italic">$</th>
+                    <th class="fst-italic">$</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(year of years; track year) {
+                <tr>
+                    <td>{{year}}</td>
+                    @if (getReportData(year, group.idbGroupId).energyUse !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).energyUse | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+
+                    @if (getReportData(year, group.idbGroupId).estimatedEnergyCost !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).estimatedEnergyCost | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+
+                    @if (getReportData(year, group.idbGroupId).adjustedEnergyUse !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).adjustedEnergyUse | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+
+                    @if (getReportData(year, group.idbGroupId).expectedEnergyCost !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).expectedEnergyCost | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+
+                    @if (getReportData(year, group.idbGroupId).energySavings !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).energySavings | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+
+                    @if (getReportData(year, group.idbGroupId).costSavings !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).costSavings | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+
+                    @if (getReportData(year, group.idbGroupId).cumulativeCostSavings !== 0) {
+                    <td class="text-center">
+                        {{ getReportData(year, group.idbGroupId).cumulativeCostSavings | number:'1.2-2' }}
+                    </td>
+                    }
+                    @else {
+                    <td class="text-center">
+                        &mdash;
+                    </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
 </div>
 }
