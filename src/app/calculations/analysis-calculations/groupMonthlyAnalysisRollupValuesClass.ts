@@ -200,6 +200,7 @@ export class GroupMonthlyAnalysisRollupValues {
     //step 2: calculate the BP adjusted baseline
     setAdjusted(modelYearDataAdjusted: number) {
         this.rollingAdjusted = (this.rollingActualBaseline + this.rollingBaselineAdjustmentInput) * this.getAdjustmentRatio(modelYearDataAdjusted);
+
     }
 
     //step 3: calculate BP adjusted savings
@@ -256,6 +257,9 @@ export class GroupMonthlyAnalysisRollupValues {
         } else {
             this.adjusted = this.rollingAdjusted;
         }
+        if (isNaN(this.adjusted)) {
+            debugger
+        }
         this.yearToDateAdjustedEnergyUse = this.yearToDateAdjustedEnergyUse + this.adjusted;
     }
 
@@ -290,7 +294,13 @@ export class GroupMonthlyAnalysisRollupValues {
     }
 
     getAdjustmentRatio(modelYearDataAdjusted: number): number {
-        return ((this.rollingModeled - modelYearDataAdjusted) / (this.rollingModeledBaseline - modelYearDataAdjusted)) * (this.rollingActual / (this.rollingActual - this.rollingDataAdjustment));
+        const adjustmentRatio = ((this.rollingModeled - modelYearDataAdjusted) / (this.rollingModeledBaseline - modelYearDataAdjusted))
+            * (this.rollingActual / (this.rollingActual - this.rollingDataAdjustment));
+
+        if (isNaN(adjustmentRatio)) {
+            return 1;
+        }
+        return adjustmentRatio;
     }
 
     setBaselineAdjustment() {
