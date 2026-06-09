@@ -27,6 +27,7 @@ export class FacilityEmissionFactorsReportSetupComponent {
   baselineYears: Array<number>;
   months: Array<Month> = Months;
 
+  invalidDateRange: boolean = false;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -44,6 +45,7 @@ export class FacilityEmissionFactorsReportSetupComponent {
       } else {
         this.isFormChange = false;
       }
+      this.setInvalidDateRange();
     });
     this.setYearOptions();
   }
@@ -70,5 +72,13 @@ export class FacilityEmissionFactorsReportSetupComponent {
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
+  }
+
+  setInvalidDateRange() {
+    if (this.reportSettings.startYear && this.reportSettings.endYear) {
+      this.invalidDateRange = this.reportSettings.startYear > this.reportSettings.endYear;
+    } else {
+      this.invalidDateRange = false;
+    }
   }
 }

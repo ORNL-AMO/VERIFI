@@ -22,6 +22,7 @@ import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
 import { AnalysisStatusCheck } from './analysisStatusCheck';
 import { AnalysisGroupStatusCheck } from './analysisGroupStatusCheck';
 import { AccountAnalysisStatusCheck } from './accountAnalysisStatusCheck';
+import { FacilityReportStatusCheck } from './facilityReportStatusCheck';
 
 export class AccountStatusCheck {
 
@@ -86,10 +87,10 @@ export class AccountStatusCheck {
         return errors ?? emptyAnalysisSetupErrors();
     }
 
-    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        const facilityReportStatusChecks: Array<FacilityReportErrors> = this.facilityStatusChecks.flatMap(fc => fc.facilityReportErrors);
-        return facilityReportStatusChecks.find(fr => fr.reportId === reportId);
-    }
+    // getFacilityReportErrorsByReportId(reportId: string): FacilityReportStatusCheck {
+    //     const facilityReportStatusChecks: Array<FacilityReportStatusCheck> = this.facilityStatusChecks.flatMap(fc => fc.facilityReportStatusChecks);
+    //     return facilityReportStatusChecks.find(fr => fr.guid === reportId);
+    // }
 
     getAccountAnalysisStatusCheckById(analysisId: string): AccountAnalysisStatusCheck | undefined {
         return this.accountAnalysisStatusChecks.find(aasc => aasc.analysisItemId === analysisId);

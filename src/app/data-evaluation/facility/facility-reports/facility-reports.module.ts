@@ -25,7 +25,6 @@ import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-anal
 import { FacilityReportsDashboardTableComponent } from './facility-reports-dashboard/facility-reports-dashboard-table/facility-reports-dashboard-table.component';
 import { TableItemsDropdownModule } from "src/app/shared/table-items-dropdown/table-items-dropdown.module";
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
-import { FacilityReportOrderByPipe } from './facility-report-pipes/facility-report-order-by.pipe';
 import { FacilityReportBadgeClassPipe } from './facility-report-pipes/facility-report-badge-class.pipe';
 import { FacilityModelingReportSetupComponent } from './facility-report-setup/facility-modeling-report-setup/facility-modeling-report-setup.component';
 import { FacilityModelingReportResultsComponent } from './report-results/facility-modeling-report-results/facility-modeling-report-results.component';
@@ -57,7 +56,6 @@ import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savi
     FacilityEmissionFactorsReportSetupComponent,
     FacilityEmissionFactorsReportTableComponent,
     FacilityReportsDashboardTableComponent,
-    FacilityReportOrderByPipe,
     FacilityReportBadgeClassPipe,
     FacilityModelingReportSetupComponent,
     FacilityModelingReportResultsComponent,

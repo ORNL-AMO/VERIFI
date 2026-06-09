@@ -137,10 +137,6 @@ export class AccountStatusCheckService implements OnDestroy {
         return this.accountStatusCheck.getValue()?.getErrorsByAnalysisId(analysisId) ?? emptyAnalysisSetupErrors();
     }
 
-    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        return this.accountStatusCheck.getValue()?.getFacilityReportErrorsByReportId(reportId) ?? emptyFacilityReportErrors();
-    }
-
     getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
         return this.accountStatusCheck.getValue()?.getAccountAnalysisErrorsByAnalysisId(analysisId) ?? emptyAccountAnalysisSetupErrors();
     }

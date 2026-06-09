@@ -17,6 +17,7 @@ import { emptyFacilityReportErrors, getFacilityReportErrors } from './validation
 import { AnalysisGroupStatusCheck } from './analysisGroupStatusCheck';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
+import { FacilityReportStatusCheck } from './facilityReportStatusCheck';
 
 export class FacilityStatusCheck {
 
@@ -46,7 +47,7 @@ export class FacilityStatusCheck {
     hasOutdatedPredictors: boolean;
 
     facilityLatestEntry: { month: number; year: number, date: Date } | undefined;
-    facilityReportErrors: Array<FacilityReportErrors>;
+    facilityReportStatusChecks: Array<FacilityReportStatusCheck>;
 
     // Staleness settings
     stalenessEnabled: boolean;
@@ -94,7 +95,7 @@ export class FacilityStatusCheck {
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setAnalysisStatusChecks(analysisItemsForFacility, facilityCalanderizedMeters, facilityPredictorData);
-        this.setFacilityReportErrors(facilityReportsForFacility);
+        this.setFacilityReportStatusChecks(facilityReportsForFacility);
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
         this.setStatus();
     }
@@ -261,10 +262,10 @@ export class FacilityStatusCheck {
         return items.length > 0 ? _.maxBy(items, 'modifiedDate') : undefined;
     }
 
-    private setFacilityReportErrors(facilityReports: Array<IdbFacilityReport>) {
-        this.facilityReportErrors = facilityReports.map(report => {
-            const errors: FacilityReportErrors = getFacilityReportErrors(report, this.analysisStatusChecks.map(check => check.analysisSetupErrors));
-            return errors;
+    private setFacilityReportStatusChecks(facilityReports: Array<IdbFacilityReport>) {
+        this.facilityReportStatusChecks = facilityReports.map(report => {
+            const facilityReportStatusCheck: FacilityReportStatusCheck = new FacilityReportStatusCheck(report, this.analysisStatusChecks);
+            return facilityReportStatusCheck;
         });
     }
 
@@ -282,10 +283,10 @@ export class FacilityStatusCheck {
         }
     }
 
-    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        const errors = this.facilityReportErrors.find(e => e.reportId === reportId);
-        return errors ?? emptyFacilityReportErrors();
-    }
+    // getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
+    //     const errors = this.facilityReportErrors.find(e => e.reportId === reportId);
+    //     return errors ?? emptyFacilityReportErrors();
+    // }
 
     getAnalysisStatusById(analysisId: string): AnalysisStatusCheck | undefined {
         const analysisStatusCheck: AnalysisStatusCheck = this.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisId);
