@@ -43,11 +43,12 @@ export class FacilityReportsTabsComponent {
     }
     return undefined;
   });
-  
+
   analysisVisited: Signal<boolean> = computed(() => {
     const selectedReport = this.selectedReport();
+    const analysisItems = this.analysisItems();
     if (selectedReport) {
-      let analysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(selectedReport.analysisItemId);
+      let analysisItem: IdbAnalysisItem = analysisItems.find(item => item.guid === selectedReport.analysisItemId);
       return analysisItem ? analysisItem.isAnalysisVisited : false;
     }
     return false;

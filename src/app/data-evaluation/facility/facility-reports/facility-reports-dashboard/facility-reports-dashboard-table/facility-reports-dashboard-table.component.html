@@ -18,7 +18,7 @@
         <i class="fa fa-filter text-primary"></i>
         Report Type
       </label>
-      <select class="form-select" [(ngModel)]="selectedReportType">
+      <select class="form-select" [ngModel]="selectedReportType()" (ngModelChange)="selectedReportType.set($event)">
         <option value="">All</option>
         @for (type of reportTypes; track type) {
         <option [value]="type">{{ type | facilityReportType }}</option>
@@ -43,7 +43,7 @@
       <thead>
         <tr>
           <th class="input">
-            <input type="checkbox" [checked]="allChecked()" (change)="checkAll()">
+            <input type="checkbox" [checked]="allChecked()" (change)="checkAll($event)">
           </th>
           <th class="status-col text-center">Status</th>
           <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField === 'name'}">

@@ -155,8 +155,10 @@ export class AccountReportsDashboardTableComponent {
     }
   }
 
-  checkAll() {
-    if (this.allChecked()) {
+  checkAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.allChecked.set(checked);
+    if (checked) {
       this.checkedGuids.set(new Set(this.filteredReports().map(r => r.guid)));
     } else {
       this.checkedGuids.set(new Set());

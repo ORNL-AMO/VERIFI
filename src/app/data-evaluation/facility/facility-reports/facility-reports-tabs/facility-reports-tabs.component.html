@@ -1,8 +1,9 @@
 @let _selectedReport = selectedReport();
 @let _selectedReportStatusCheck = selectedReportStatusCheck();
 @let _inDashboard = inDashboard();
+@let _analysisVisited = analysisVisited();
 @if (!_inDashboard && _selectedReport && _selectedReportStatusCheck) {
-<div class="reports banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen}">
+<div class="reports banner sticky-top d-flex justify-content-between" [ngClass]="{'modal-open': modalOpen()}">
   <div>
     <ul class="nav nav-tabs">
       <li class="nav-item">
@@ -23,7 +24,7 @@
       </li>
       }
       @if (_selectedReport.facilityReportType == 'analysis') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || _selectedReportStatusCheck.status == 'error'}">
+      <li class="nav-item" [ngClass]="{'disabled': !_analysisVisited || _selectedReportStatusCheck.status == 'error'}">
         <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Analysis Report</a>
@@ -37,7 +38,7 @@
       </li>
       }
       @if (_selectedReport.facilityReportType == 'savings') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || _selectedReportStatusCheck.status == 'error'}">
+      <li class="nav-item" [ngClass]="{'disabled': !_analysisVisited || _selectedReportStatusCheck.status == 'error'}">
         <a class="nav-link" routerLink="savings-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Savings Report</a>
@@ -58,7 +59,7 @@
       </li>
       }
       @if (_selectedReport.facilityReportType == 'costSavings') {
-      <li class="nav-item" [ngClass]="{'disabled': !analysisVisited || _selectedReportStatusCheck.status == 'error'}">
+      <li class="nav-item" [ngClass]="{'disabled': !_analysisVisited || _selectedReportStatusCheck.status == 'error'}">
         <a class="nav-link" routerLink="cost-savings-report" [routerLinkActive]="['active']">
           <i class="fa fa-file"></i>
           Cost Savings Report</a>

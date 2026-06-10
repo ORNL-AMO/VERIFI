@@ -43,7 +43,7 @@
       <thead>
         <tr>
           <th class="input">
-            <input type="checkbox" [checked]="allChecked()" (change)="checkAll()">
+            <input type="checkbox" [checked]="allChecked()" (change)="checkAll($event)">
           </th>
           <th class="status-col text-center">Status</th>
           <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField === 'name'}">

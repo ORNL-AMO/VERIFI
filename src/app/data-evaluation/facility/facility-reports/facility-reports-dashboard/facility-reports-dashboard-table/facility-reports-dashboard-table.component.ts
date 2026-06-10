@@ -32,7 +32,7 @@ interface FacilityReportTableItem {
   analysisItemName: string;
   facilityReportType: FacilityReportType;
   modifiedDate: Date;
-  reportYear: number;
+  reportYear: number | undefined;
   statusCheck: FacilityReportStatusCheck | undefined;
 }
 
@@ -168,8 +168,10 @@ export class FacilityReportsDashboardTableComponent {
     }
   }
 
-  checkAll() {
-    if (this.allChecked()) {
+  checkAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.allChecked.set(checked);
+    if (checked) {
       this.checkedGuids.set(new Set(this.filteredReports().map(r => r.guid)));
     } else {
       this.checkedGuids.set(new Set());
@@ -216,7 +218,7 @@ export class FacilityReportsDashboardTableComponent {
     this.checkedGuids.set(new Set());
   }
 
-  getReportYear(report: IdbFacilityReport): number {
+  getReportYear(report: IdbFacilityReport): number | undefined {
     switch (report.facilityReportType) {
       case 'emissionFactors':
         return report.emissionFactorsReportSettings.endYear ?? report.emissionFactorsReportSettings.startYear;
@@ -224,6 +226,10 @@ export class FacilityReportsDashboardTableComponent {
         return report.dataOverviewReportSettings.endYear ?? report.dataOverviewReportSettings.startYear;
       case 'savings':
         return report.savingsReportSettings.endYear;
+      case 'modeling':
+        return report.modelingReportSettings.reportYear;
+      case 'costSavings':
+        return report.costSavingsReportSettings.reportYear;
       default:
         return undefined;
     }
