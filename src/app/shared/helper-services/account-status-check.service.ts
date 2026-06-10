@@ -141,10 +141,6 @@ export class AccountStatusCheckService implements OnDestroy {
         return this.accountStatusCheck.getValue()?.getAccountAnalysisErrorsByAnalysisId(analysisId) ?? emptyAccountAnalysisSetupErrors();
     }
 
-    getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
-        return this.accountStatusCheck.getValue()?.getAccountReportErrorsByReportId(reportId) ?? emptyAccountReportErrors();
-    }
-
     private isCollectionForAccount<T>(items: Array<T>, accountId: string, getAccountId: (item: T) => string): boolean {
         return items.every(item => getAccountId(item) === accountId);
     }

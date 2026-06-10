@@ -45,7 +45,6 @@ import { InvalidGroupAnalysisPipe } from './validation-pipes/invalid-group-analy
 import { InvalidAccountAnalysisPipe } from './validation-pipes/invalid-account-analysis.pipe';
 import { InvalidAnalysisPipe } from './validation-pipes/invalid-analysis.pipe';
 import { AnalysisItemPipe } from './analysis-item.pipe';
-import { InvalidAccountReportPipe } from './validation-pipes/invalid-account-report.pipe';
 import { AccountReportNamePipe } from './account-report-name-pipe';
 import { EquipmentSourceIconsPipe } from './equipment-source-icons.pipe';
 
@@ -96,7 +95,6 @@ import { EquipmentSourceIconsPipe } from './equipment-source-icons.pipe';
     InvalidAccountAnalysisPipe,
     InvalidAnalysisPipe,
     AnalysisItemPipe,
-    InvalidAccountReportPipe,
     AccountReportNamePipe,
     EquipmentSourceIconsPipe
   ],
@@ -149,7 +147,6 @@ import { EquipmentSourceIconsPipe } from './equipment-source-icons.pipe';
     InvalidAccountAnalysisPipe,
     InvalidAnalysisPipe,
     AnalysisItemPipe,
-    InvalidAccountReportPipe,
     AccountReportNamePipe,
     EquipmentSourceIconsPipe
   ]
