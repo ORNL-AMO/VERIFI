@@ -3,6 +3,7 @@
 @let _orderByCharge = orderByCharge();
 @let _orderedMeterData = orderedMeterData();
 @let _itemsPerPage = itemsPerPage();
+@let _account = account();
 
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable
   [ngClass]="{'copying-table': copyingTable}">
@@ -10,7 +11,9 @@
     <tr class="table-mh">
       <th></th>
       <th colspan="3">General Information</th>
+      @if(_account.displayEmissions) {
       <th>Emissions</th>
+      }
       @if (numDetailedCharges() > 0) {
       <th [attr.colspan]="numDetailedCharges()">Detailed Charges</th>
       }
@@ -32,6 +35,7 @@
       <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': _orderDataField == 'totalCost'}">
         Total Cost
       </th>
+      @if(_account.displayEmissions) {
       @if (_meter.scope == 5) {
       <th (click)="setOrderDataField('fugitiveEmissions')"
         [ngClass]="{'active': _orderDataField == 'fugitiveEmissions'}">
@@ -42,6 +46,7 @@
       <th (click)="setOrderDataField('processEmissions')" [ngClass]="{'active': _orderDataField == 'processEmissions'}">
         Total Process<br>Emissions (tonne CO<sub>2</sub>e)
       </th>
+      }
       }
       @for (charge of _meter.charges; track charge.guid) {
       @if (charge.displayChargeInTable) {
