@@ -7,6 +7,7 @@
 @let _meter = selectedMeter();
 @let _orderByChargeId = orderByChargeId();
 @let _itemsPerPage = itemsPerPage();
+@let _account = account();
 
 @if (!_isRECs) {
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable
@@ -17,7 +18,7 @@
       <th [attr.colspan]="numGeneralInformation()">
         General Information
       </th>
-      @if (_emissionsFilters.showSection) {
+      @if (_emissionsFilters.showSection && _account.displayEmissions) {
       <th [attr.colspan]="numEmissions()">
         Emissions
       </th>
@@ -63,20 +64,20 @@
       <th (click)="setOrderDataField('powerFactor')" [ngClass]="{'active': _orderDataField == 'powerFactor'}">
         Power Factor</th>
       }
-      @if (_emissionsFilters.marketEmissions) {
+      @if (_emissionsFilters.marketEmissions && _account.displayEmissions) {
       <th (click)="setOrderDataField('totalMarketEmissions')"
         [ngClass]="{'active': _orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
         (tonne
         CO<sub>2</sub>e)</th>
       }
-      @if (_emissionsFilters.locationEmissions) {
+      @if (_emissionsFilters.locationEmissions && _account.displayEmissions) {
       <th (click)="setOrderDataField('totalLocationEmissions')"
         [ngClass]="{'active': _orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based
         <br>Emissions (tonne
         CO<sub>2</sub>e)
       </th>
       }
-      @if (_emissionsFilters.recs) {
+      @if (_emissionsFilters.recs && _account.displayEmissions) {
       <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': _orderDataField == 'RECs'}">RECs<br> (MWh)</th>
       }
       @for (charge of _meter.charges; track charge.guid) {
@@ -136,13 +137,13 @@
       @if (_generalInformationFilters.powerFactor) {
       <td>{{meterData.powerFactor | customNumber}}</td>
       }
-      @if (_emissionsFilters.marketEmissions) {
+      @if (_emissionsFilters.marketEmissions && _account.displayEmissions) {
       <td>{{meterData.totalWithMarketEmissions | customNumber}}</td>
       }
-      @if (_emissionsFilters.locationEmissions) {
+      @if (_emissionsFilters.locationEmissions && _account.displayEmissions) {
       <td>{{meterData.totalWithLocationEmissions | customNumber}}</td>
       }
-      @if (_emissionsFilters.recs) {
+      @if (_emissionsFilters.recs && _account.displayEmissions) {
       <td>{{meterData.RECs | customNumber}}</td>
       }
       @for (meterCharge of _meter.charges; track meterCharge) {
