@@ -8,13 +8,12 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
-import { AccountReportErrors, AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
+import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
 import { FacilityStatusCheck } from "./facilityStatusCheck";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 import { emptyGroupAnalysisErrors } from "src/app/calculations/status-check-calculations/validation/groupAnalysisValidation";
 import { emptyAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/analysisValidation";
 import { emptyAccountAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/accountAnalysisValidation";
-import { getAccountReportErrors, emptyAccountReportErrors } from "src/app/calculations/status-check-calculations/validation/accountReportValidation";
 import { IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
@@ -87,11 +86,6 @@ export class AccountStatusCheck {
         return errors ?? emptyAnalysisSetupErrors();
     }
 
-    // getFacilityReportErrorsByReportId(reportId: string): FacilityReportStatusCheck {
-    //     const facilityReportStatusChecks: Array<FacilityReportStatusCheck> = this.facilityStatusChecks.flatMap(fc => fc.facilityReportStatusChecks);
-    //     return facilityReportStatusChecks.find(fr => fr.guid === reportId);
-    // }
-
     getAccountAnalysisStatusCheckById(analysisId: string): AccountAnalysisStatusCheck | undefined {
         return this.accountAnalysisStatusChecks.find(aasc => aasc.analysisItemId === analysisId);
     }
@@ -100,11 +94,6 @@ export class AccountStatusCheck {
         const errors = this.getAccountAnalysisStatusCheckById(analysisId)?.accountAnalysisSetupErrors;
         return errors ?? emptyAccountAnalysisSetupErrors();
     }
-
-    // getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
-    //     const errors = this.accountReportErrors.find(e => e.reportId === reportId);
-    //     return errors ?? emptyAccountReportErrors();
-    // }
 
     getFacilityStatusCheckByFacilityId(facilityId: string): FacilityStatusCheck | undefined {
         return this.facilityStatusChecks.find(fc => fc.facility.guid === facilityId);
