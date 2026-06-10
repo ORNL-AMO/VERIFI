@@ -1,4 +1,5 @@
 @let _facilityStatusCheck = facilityStatusCheck();
+@let _selectedFacility = selectedFacility();
 
 <div class="accordion" id="facilityStatusCheckAccordion">
     <div class="accordion-item card">
@@ -34,9 +35,16 @@
                     Some data may have issues. Please review the items below for details and recommended actions.
                 </div>
                 }@else if(_facilityStatusCheck.status == 'outdated') {
-                <div class="alert alert-outdated mb-2">
-                    <span class="fa fa-clock me-1"></span>
-                    Some meters or predictors have outdated data. Please update them with recent readings.
+                <div class="alert alert-secondary mb-2">
+                    <span class="fa fa-clock me-2"></span>
+                    Some meters or predictors have outdated data. Please update them with recent readings. If you don't
+                    want warnings about outdated data, you can set your facility's data freshness preference with the
+                    <span class="italic">"Enable
+                        time-based staleness alerts"</span> toggle in the
+                    <a [routerLink]="'/data-evaluation/facility/' + _selectedFacility.guid + '/settings'" class="click-link">
+                        <span class="fa fa-gear me-1"></span>
+                        Facility Settings.
+                    </a>
                 </div>
                 }@else{
                 <div class="alert alert-danger mb-2">
@@ -47,15 +55,13 @@
                 }
 
                 <div class="accordion" id="statusCheckItemsAccordion">
-                    <app-meters-status-check
-                        [metersStatusChecks]="_facilityStatusCheck.metersStatusChecks"
+                    <app-meters-status-check [metersStatusChecks]="_facilityStatusCheck.metersStatusChecks"
                         [metersStatus]="_facilityStatusCheck.metersStatus"
                         [hasNoMeters]="_facilityStatusCheck.hasNoMeters"
                         [hasNoMeterGroups]="_facilityStatusCheck.hasNoMeterGroups"
                         [facilityMeterActionUrl]="'/data-management/' + _facilityStatusCheck.facility.accountId + '/facilities/' + _facilityStatusCheck.facility.guid">
                     </app-meters-status-check>
-                    <app-predictors-status-check
-                        [predictorsStatusChecks]="_facilityStatusCheck.predictorsStatusChecks"
+                    <app-predictors-status-check [predictorsStatusChecks]="_facilityStatusCheck.predictorsStatusChecks"
                         [predictorsStatus]="_facilityStatusCheck.predictorsStatus"
                         [hasNoPredictors]="_facilityStatusCheck.hasNoPredictors"
                         [facilityPredictorActionUrl]="'/data-management/' + _facilityStatusCheck.facility.accountId + '/facilities/' + _facilityStatusCheck.facility.guid">
