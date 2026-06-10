@@ -9,6 +9,7 @@
 @let _displayDeleteModal = displayDeleteModal();
 @let _deletedReport = deletedReport();
 @let _checkedItems = checkedItems();
+@let _account = account();
 
 @if (_facilityReports.length !== 0) {
 <div class="wrapper m-0">
@@ -21,7 +22,11 @@
       <select class="form-select" [ngModel]="selectedReportType()" (ngModelChange)="selectedReportType.set($event)">
         <option value="">All</option>
         @for (type of reportTypes; track type) {
+        @if(_account.displayEmissions){
         <option [value]="type">{{ type | facilityReportType }}</option>
+        }@else if(type !== 'emissionFactors'){
+        <option [value]="type">{{ type | facilityReportType }}</option>
+        }
         }
       </select>
     </div>
