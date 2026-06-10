@@ -253,7 +253,7 @@
         <label class="bold form-check-label" for="productionVariables">Production Variables
         </label>
       </div>
-      @for (predictorOption of analysisTableColumns.predictors; track predictorOption) {
+      @for (predictorOption of analysisTableColumns.predictors; track predictorOption.predictor.id) {
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name={{predictorOption.predictor.name}}
           [(ngModel)]="predictorOption.display" (change)="save()" id={{predictorOption.predictor.name}}>

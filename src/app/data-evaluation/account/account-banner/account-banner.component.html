@@ -1,8 +1,12 @@
+@let _selectedAccount = selectedAccount();
+@let _disableTabs = disableTabs();
+@let _analysisWarnings = hasAnalysisWarnings();
+
 <div class="account banner d-flex justify-content-between w-100 pb-0 hide-print">
     <div class="d-flex w-100">
         <div class="banner-title ellipsis">
             <span class="fa fa-building"></span>
-            {{selectedAccount.name}}
+            {{_selectedAccount.name}}
         </div>
 
         <div class="flex-fill" #navTabs [ngClass]="{'hide-tab-text': hideTabText, 'hide-all-text': hideAllText}">
@@ -14,7 +18,7 @@
                         </span>
                     </a>
                 </li>
-                <li class="nav-item" title="Account Overview" [ngClass]="{'disabled': meterData.length == 0}">
+                <li class="nav-item" title="Account Overview" [ngClass]="{'disabled': _disableTabs}">
                     <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']"><i
                             class="fa fa-chart-column"></i>
                         <span class="nav-text">
@@ -22,15 +26,18 @@
                         </span>
                     </a>
                 </li>
-                <li class="nav-item" title="Account Analysis" [ngClass]="{'disabled': meterData.length == 0}">
+                <li class="nav-item" title="Account Analysis" [ngClass]="{'disabled': _disableTabs}">
                     <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
                             class="fa fa-microscope"></i>
                         <span class="nav-text">
                             Analysis
+                            @if(_analysisWarnings){
+                            <i class="fa fa-exclamation-triangle text-warning"></i>
+                            }
                         </span>
                     </a>
                 </li>
-                <li class="nav-item" title="Account Reports" [ngClass]="{'disabled': meterData.length == 0}">
+                <li class="nav-item" title="Account Reports" [ngClass]="{'disabled': _disableTabs}">
                     <a class="nav-link" routerLink="reports" [routerLinkActive]="['active']"><i
                             class="fa fa-folder"></i>
                         <span class="nav-text">

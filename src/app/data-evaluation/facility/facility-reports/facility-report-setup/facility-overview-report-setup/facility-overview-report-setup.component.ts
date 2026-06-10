@@ -27,6 +27,7 @@ export class FacilityOverviewReportSetupComponent {
   months: Array<Month> = Months;
   account: IdbAccount;
   accountSub: Subscription;
+  invalidDateRange: boolean = false;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -47,6 +48,7 @@ export class FacilityOverviewReportSetupComponent {
       } else {
         this.isFormChange = false;
       }
+      this.setInvalidDateRange();
     });
     this.setYearOptions();
   }
@@ -73,5 +75,17 @@ export class FacilityOverviewReportSetupComponent {
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
+  }
+
+  setInvalidDateRange(){
+    if(this.reportSettings.startYear && this.reportSettings.endYear){
+      if(this.reportSettings.startYear !== this.reportSettings.endYear){
+        this.invalidDateRange = this.reportSettings.startYear > this.reportSettings.endYear;
+      } else {
+        this.invalidDateRange = this.reportSettings.startMonth > this.reportSettings.endMonth;
+      }
+    } else {
+      this.invalidDateRange = false;
+    }
   }
 }

@@ -8,13 +8,12 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
-import { AccountReportErrors, AnalysisSetupErrors, FacilityReportErrors, GroupAnalysisErrors } from "src/app/models/validation";
+import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
 import { FacilityStatusCheck } from "./facilityStatusCheck";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 import { emptyGroupAnalysisErrors } from "src/app/calculations/status-check-calculations/validation/groupAnalysisValidation";
 import { emptyAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/analysisValidation";
 import { emptyAccountAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/accountAnalysisValidation";
-import { getAccountReportErrors, emptyAccountReportErrors } from "src/app/calculations/status-check-calculations/validation/accountReportValidation";
 import { IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
@@ -22,6 +21,7 @@ import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
 import { AnalysisStatusCheck } from './analysisStatusCheck';
 import { AnalysisGroupStatusCheck } from './analysisGroupStatusCheck';
 import { AccountAnalysisStatusCheck } from './accountAnalysisStatusCheck';
+import { AccountReportStatusCheck } from './accountReportStatusCheck';
 
 export class AccountStatusCheck {
 
@@ -29,7 +29,7 @@ export class AccountStatusCheck {
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
 
-    accountReportErrors: Array<AccountReportErrors>;
+    accountReportStatusChecks: Array<AccountReportStatusCheck>;
     accountAnalysisStatusChecks: Array<AccountAnalysisStatusCheck>;
     energyAnalysisStatusCheck: AccountAnalysisStatusCheck;
     waterAnalysisStatusCheck: AccountAnalysisStatusCheck;
@@ -63,7 +63,7 @@ export class AccountStatusCheck {
             );
         });
         this.computeAccountAnalysisSetupErrors(account, accountAnalysisItems);
-        this.computeAccountReportErrors(account, accountReports);
+        this.computeAccountReportStatusChecks(account, accountReports);
         this.setAccountActions(account, facilities);
         this.setStatus();
     }
@@ -86,11 +86,6 @@ export class AccountStatusCheck {
         return errors ?? emptyAnalysisSetupErrors();
     }
 
-    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        const facilityReportStatusChecks: Array<FacilityReportErrors> = this.facilityStatusChecks.flatMap(fc => fc.facilityReportErrors);
-        return facilityReportStatusChecks.find(fr => fr.reportId === reportId);
-    }
-
     getAccountAnalysisStatusCheckById(analysisId: string): AccountAnalysisStatusCheck | undefined {
         return this.accountAnalysisStatusChecks.find(aasc => aasc.analysisItemId === analysisId);
     }
@@ -98,11 +93,6 @@ export class AccountStatusCheck {
     getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
         const errors = this.getAccountAnalysisStatusCheckById(analysisId)?.accountAnalysisSetupErrors;
         return errors ?? emptyAccountAnalysisSetupErrors();
-    }
-
-    getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
-        const errors = this.accountReportErrors.find(e => e.reportId === reportId);
-        return errors ?? emptyAccountReportErrors();
     }
 
     getFacilityStatusCheckByFacilityId(facilityId: string): FacilityStatusCheck | undefined {
@@ -135,12 +125,11 @@ export class AccountStatusCheck {
         return items.length > 0 ? _.maxBy(items, 'modifiedDate') : undefined;
     }
 
-    private computeAccountReportErrors(account: IdbAccount, accountReports: Array<IdbAccountReport>) {
-        this.accountReportErrors = [];
+    private computeAccountReportStatusChecks(account: IdbAccount, accountReports: Array<IdbAccountReport>) {
+        this.accountReportStatusChecks = [];
         for (const report of accountReports.filter(accountReport => accountReport.accountId === account.guid)) {
-            const accountAnalysisSetupErrors: Array<AccountAnalysisSetupErrors> = this.accountAnalysisStatusChecks.flatMap(aasc => aasc.accountAnalysisSetupErrors);
-            const errors = getAccountReportErrors(report, accountAnalysisSetupErrors);
-            this.accountReportErrors.push(errors);
+            const accountReportStatusCheck: AccountReportStatusCheck = new AccountReportStatusCheck(report, this.accountAnalysisStatusChecks.map(aasc => aasc.accountAnalysisSetupErrors));
+            this.accountReportStatusChecks.push(accountReportStatusCheck);
         }
     }
 

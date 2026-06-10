@@ -4,7 +4,7 @@
             <h4 class="pt-0">
                 <div class="d-flex justify-content-between">
                     <div class="mt-auto">
-                        <i class="fa fa-folder pe-2"></i>{{selectedFacility.name}} {{reportType}} Reports
+                        <i class="fa fa-folder pe-2"></i>{{selectedFacility().name}} Reports
                     </div>
 
                     <div>
@@ -39,7 +39,7 @@
                             id="overview" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="overview">Data Overview</label>
                     </div>
-                    @if(account.displayEmissions){
+                    @if(account().displayEmissions){
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="newReportType" [value]="'emissionFactors'"
                             id="emissionFactors" [(ngModel)]="newReportType">
