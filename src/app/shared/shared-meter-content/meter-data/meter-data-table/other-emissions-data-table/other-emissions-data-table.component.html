@@ -83,11 +83,13 @@
           {{meterData.totalVolume | customNumber}}
       </td>
       <td>{{meterData.totalCost | customNumber:true}}</td>
+      @if (_account.displayEmissions) {
       @if (_meter.scope == 5) {
       <td>{{meterData.fugitiveEmissions | customNumber}}</td>
       }
       @if (_meter.scope == 6) {
       <td>{{meterData.processEmissions | customNumber}}</td>
+      }
       }
       @for (meterCharge of _meter.charges; track meterCharge.guid) {
       @if (meterCharge.displayChargeInTable) {

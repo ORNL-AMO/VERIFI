@@ -79,7 +79,7 @@ export class GeneralUtilityDataTableComponent {
   showEmissions: Signal<boolean> = computed(() => {
     const meter = this.selectedMeter();
     const account = this.account();
-    if(account.displayEmissions === false) return false;
+    if (!account || account.displayEmissions === false) return false;
     return meter ? checkShowEmissionsOutputRate(meter) : false;
   });
 
