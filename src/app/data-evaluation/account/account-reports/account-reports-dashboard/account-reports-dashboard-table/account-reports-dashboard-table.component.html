@@ -99,36 +99,40 @@
           <td class="text-center align-middle status-col">
             <span class="fa fa-fw fa-lg" [ngClass]="{
               'fa-circle-check text-success': !sc || sc.status === 'good',
-              'fa-circle-xmark text-danger': sc?.status === 'error'
+              'fa-circle-xmark text-danger': sc?.status === 'error',
+              'fa-triangle-exclamation text-warning': sc?.status === 'warning'
             }"></span>
-            @if (sc?.status === 'error') {
+            @if (sc?.status !== 'good') {
             <div class="d-flex flex-column gap-1 mt-1 align-items-center">
-              @if (sc.errors?.missingName) {
+              @if (sc?.errors?.missingName) {
               <span class="badge bg-danger issue-badge">Missing Name</span>
               }
-              @if (sc.errors?.missingReportType) {
+              @if (sc?.errors?.missingReportType) {
               <span class="badge bg-danger issue-badge">Missing Report Type</span>
               }
-              @if (sc.errors?.missingReportYear) {
+              @if (sc?.errors?.missingReportYear) {
               <span class="badge bg-danger issue-badge">Missing Report Year</span>
               }
-              @if (sc.errors?.missingBaselineYear) {
+              @if (sc?.errors?.missingBaselineYear) {
               <span class="badge bg-danger issue-badge">Missing Baseline Year</span>
               }
-              @if (sc.errors?.missingStartDate) {
+              @if (sc?.errors?.missingStartDate) {
               <span class="badge bg-danger issue-badge">Missing Start Date</span>
               }
-              @if (sc.errors?.missingEndDate) {
+              @if (sc?.errors?.missingEndDate) {
               <span class="badge bg-danger issue-badge">Missing End Date</span>
               }
-              @if (sc.errors?.invalidDateRange) {
+              @if (sc?.errors?.invalidDateRange) {
               <span class="badge bg-danger issue-badge">Invalid Date Range</span>
               }
-              @if (sc.errors?.baselineAfterReportYear) {
+              @if (sc?.errors?.baselineAfterReportYear) {
               <span class="badge bg-danger issue-badge">Baseline After Report Year</span>
               }
-              @if (sc.errors?.analysisHasErrors) {
+              @if (sc?.errors?.analysisHasErrors) {
               <span class="badge bg-danger issue-badge">Analysis Errors</span>
+              }
+              @if(sc?.status === 'warning') {
+              <span class="badge bg-warning text-dark issue-badge">Warnings in Analysis</span>
               }
             </div>
             }

@@ -128,7 +128,7 @@ export class AccountStatusCheck {
     private computeAccountReportStatusChecks(account: IdbAccount, accountReports: Array<IdbAccountReport>) {
         this.accountReportStatusChecks = [];
         for (const report of accountReports.filter(accountReport => accountReport.accountId === account.guid)) {
-            const accountReportStatusCheck: AccountReportStatusCheck = new AccountReportStatusCheck(report, this.accountAnalysisStatusChecks.map(aasc => aasc.accountAnalysisSetupErrors));
+            const accountReportStatusCheck: AccountReportStatusCheck = new AccountReportStatusCheck(report, this.accountAnalysisStatusChecks);
             this.accountReportStatusChecks.push(accountReportStatusCheck);
         }
     }

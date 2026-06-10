@@ -6,25 +6,38 @@ import { STATUS_CHECK_OPTIONS } from "./statusCheckModels";
 
 
 export class FacilityReportStatusCheck {
-    
+
     guid: string;
     errors: FacilityReportErrors;
     status: STATUS_CHECK_OPTIONS;
     constructor(report: IdbFacilityReport, analysisStatusChecks: Array<AnalysisStatusCheck>) {
         this.guid = report.guid;
         this.setErrors(report, analysisStatusChecks);
-        this.setStatus();
+        this.setStatus(report, analysisStatusChecks);
     }
 
     setErrors(report: IdbFacilityReport, analysisStatusChecks: Array<AnalysisStatusCheck>) {
         this.errors = getFacilityReportErrors(report, analysisStatusChecks.map(check => check.analysisSetupErrors));
     }
 
-    setStatus() {
+    setStatus(report: IdbFacilityReport, analysisStatusChecks: Array<AnalysisStatusCheck>) {
         if (this.errors.hasErrors) {
             this.status = 'error';
         } else {
-            this.status = 'good';
+            const analysisStatusCheck = this.getAnalysisStatusCheck(report, analysisStatusChecks);
+            if (analysisStatusCheck?.status === 'warning') {
+                this.status = 'warning';
+            } else {
+                this.status = 'good';
+            }
+        }
+    }
+
+    getAnalysisStatusCheck(report: IdbFacilityReport, analysisStatusChecks: Array<AnalysisStatusCheck>): AnalysisStatusCheck | undefined {
+        if (report.facilityReportType === 'emissionFactors' || report.facilityReportType === 'overview') {
+            return undefined;
+        } else {
+            return analysisStatusChecks.find(asc => asc.analysisItem.guid === report.analysisItemId);
         }
     }
 }
