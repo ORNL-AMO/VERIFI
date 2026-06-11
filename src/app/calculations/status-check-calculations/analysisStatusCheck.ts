@@ -19,6 +19,8 @@ export class AnalysisStatusCheck {
     latestDataAllEntries: Date;
     /** True when every meter and predictor has data up to the same month/year as latestDataDate. */
     allDatesCurrent: boolean;
+    /// latest complete year of data
+    latestCompleteYear: number;
 
     analysisSetupErrors: AnalysisSetupErrors;
     groupStatusChecks: Array<AnalysisGroupStatusCheck>;
@@ -33,6 +35,7 @@ export class AnalysisStatusCheck {
     status: 'good' | 'warning' | 'error';
     groupsHaveWarnings: boolean;
     groupsHaveErrors: boolean;
+    isDateCurrentWithAccountAnalysis: boolean;
     constructor(analysisItem: IdbAnalysisItem,
         meterStatusChecks: Array<MeterStatusCheck>,
         predictorStatusChecks: Array<PredictorStatusCheck>,
@@ -47,6 +50,7 @@ export class AnalysisStatusCheck {
         this.setPredictorSetupErrors();
         this.setMeterSetupErrors();
         this.setStatus();
+        this.setLatestCompleteYear(facility);
     }
 
     private setAnalysisGroupErrors(
@@ -110,6 +114,38 @@ export class AnalysisStatusCheck {
 
         //latest data entry date for which all meters and predictors have data entered
         this.latestDataAllEntries = _.min(allDates);
+    }
+
+    private setLatestCompleteYear(facility: IdbFacility) {
+        if (this.latestDataAllEntries) {
+            if (facility.fiscalYear === 'calendarYear') {
+                if(this.latestDataAllEntries.getMonth() === 11) {
+                    this.latestCompleteYear = this.latestDataAllEntries.getFullYear();
+                } else {
+                    this.latestCompleteYear = this.latestDataAllEntries.getFullYear() - 1;
+                }
+            } else if(facility.fiscalYearCalendarEnd) {
+                //fiscal year ends in the fiscalYearMonth
+                if(facility.fiscalYearMonth){
+                    if(this.latestDataAllEntries.getMonth() === (facility.fiscalYearMonth - 1 + 12) % 12) {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear();
+                    } else {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear() - 1;
+                    }
+                }
+            } else if(!facility.fiscalYearCalendarEnd){
+                //fiscal year starts in the fiscalYearMonth
+                if(facility.fiscalYearMonth){
+                    if(this.latestDataAllEntries.getMonth() === (facility.fiscalYearMonth - 2 + 12) % 12) {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear();
+                    } else {
+                        this.latestCompleteYear = this.latestDataAllEntries.getFullYear() - 1;
+                    }
+                }
+            }
+        } else {
+            this.latestCompleteYear = undefined;
+        }
     }
 
     /**

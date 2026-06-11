@@ -5,6 +5,8 @@
 @let _selectedFacility = selectedFacility();
 @let _orderedAnalysisItems = orderedAnalysisItems();
 @let _orderDataField = orderDataField();
+@let _yearOptionsEnergy = yearOptionsEnergy();
+@let _yearOptionsWater = yearOptionsWater();
 
 @if (!_baselineYearErrorMaxEnergy && !_baselineYearErrorMinEnergy && !_baselineYearErrorMaxWater &&
 !_baselineYearErrorMinWater) {
@@ -242,10 +244,10 @@
     The baseline year for your energy reduction goal is
     {{_selectedFacility.sustainabilityQuestions.energyReductionBaselineYear}}
     @if (_baselineYearErrorMinEnergy) {
-    and your meter readings start {{yearOptionsEnergy[0]}}.
+    and your meter readings start {{_yearOptionsEnergy[0]}}.
     }
     @if (_baselineYearErrorMaxEnergy) {
-    and your meter readings end {{yearOptionsEnergy[yearOptionsEnergy.length -1]}}.
+    and your meter readings end {{_yearOptionsEnergy[_yearOptionsEnergy.length -1]}}.
     }
     Fix your reduction goal year in <a class="click-link" (click)="goToSettings()">facility settings</a> or <a
       class="click-link" (click)="goToUtilityData()">add data</a>.
@@ -259,10 +261,10 @@
     The baseline year for your water reduction goal is
     {{_selectedFacility.sustainabilityQuestions.waterReductionBaselineYear}}
     @if (_baselineYearErrorMinWater) {
-    and your meter readings start {{yearOptionsWater[0]}}.
+    and your meter readings start {{_yearOptionsWater[0]}}.
     }
     @if (_baselineYearErrorMaxWater) {
-    and your meter readings end {{yearOptionsWater[yearOptionsWater.length -1]}}.
+    and your meter readings end {{_yearOptionsWater[_yearOptionsWater.length -1]}}.
     }
     Fix your reduction goal year in <a class="click-link" (click)="goToSettings()">facility settings</a> or <a
       class="click-link" (click)="goToUtilityData()">add data</a>.

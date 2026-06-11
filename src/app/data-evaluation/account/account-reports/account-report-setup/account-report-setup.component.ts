@@ -12,6 +12,9 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { getAllYearsWithDataAccount, getLatestDataDate, getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountReportStatusCheck } from 'src/app/calculations/status-check-calculations/accountReportStatusCheck';
 
 @Component({
   selector: 'app-account-report-setup',
@@ -25,10 +28,12 @@ export class AccountReportSetupComponent {
   private dbChangesService: DbChangesService = inject(DbChangesService);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
   account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
   selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport);
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   setupForm: WritableSignal<FormGroup> = signal(undefined);
   reportYears: Signal<Array<number>> = computed(() => {
@@ -61,6 +66,15 @@ export class AccountReportSetupComponent {
     }
     return null;
   });
+
+  reportStatusCheck: Signal<AccountReportStatusCheck> = computed(() => {
+    const selectedReport = this.selectedReport();
+    const accountStatusCheck = this.accountStatusCheck();
+    if (selectedReport && accountStatusCheck) {
+      return accountStatusCheck.accountReportStatusChecks.find(reportCheck => reportCheck.guid === selectedReport.guid);
+    }
+    return null;
+  })
 
   months: Array<Month> = Months;
   currentReportId: string;

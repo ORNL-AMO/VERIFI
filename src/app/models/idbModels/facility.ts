@@ -3,6 +3,7 @@ import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters }
 import { IdbAccount } from "./account";
 import { AccountAndFacility } from "./accountAndFacility";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
+import { DEFAULT_DATA_STALENESS_MONTHS } from "../../calculations/status-check-calculations/statusCheckModels";
 
 
 export interface IdbFacility extends IdbEntry, AccountAndFacility {
@@ -57,6 +58,11 @@ export function getNewIdbFacility(account: IdbAccount): IdbFacility {
         contactEmail: undefined,
         contactPhone: undefined,
         facilityOrder: undefined,
-        classification: 'Manufacturing'
+        classification: 'Manufacturing',
+        dataStalenessSettings: {
+            enabled: true,
+            thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS,
+            useAccountSettings: true
+        }
     }
 }

@@ -1,156 +1,149 @@
 @if (predictorForm) {
-  <form [formGroup]="predictorForm">
-    <p class="bold">Predictor Information</p>
-    <div class="row">
-      <div class="col-lg-6 col-md-12 col-sm-12">
-        <label class="semibold" for="name">Name</label>
-        <div class="mb-3">
-          <input id="name" class="form-control" type="text" formControlName="name" onfocus="this.select();"
-            minlength="0" maxlength="100">
-        </div>
-        @if (predictorForm.get('name').hasError('required')) {
-          <div class="alert alert-danger">Predictor name is
-          required</div>
-        }
+<form [formGroup]="predictorForm">
+  <p class="bold">Predictor Information</p>
+  <div class="row">
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="name">Name</label>
+      <div class="mb-3">
+        <input id="name" class="form-control" type="text" formControlName="name" onfocus="this.select();" minlength="0"
+          maxlength="100">
       </div>
-      <div class="col-lg-6 col-md-12 col-sm-12">
-        <label class="semibold" for="isProductionPredictor">Is Production?</label>
-        <div class="mb-3">
-          <select id="isProductionPredictor" class="form-select" formControlName="production">
-            <option [ngValue]="true">Yes</option>
-            <option [ngValue]="false">No</option>
-          </select>
-        </div>
-      </div>
-      <div class="col-lg-6 col-md-12 col-sm-12">
-        <label class="semibold" for="predictorUnit">Unit</label>
-        <div class="mb-3">
-          <input id="predictorUnit" class="form-control" type="text" formControlName="unit"
-            onfocus="this.select();" minlength="0" maxlength="100">
-        </div>
-      </div>
-      <div class="col-lg-6 col-md-12 col-sm-12">
-        <label class="semibold" for="description">Description</label>
-        <div class="mb-3">
-          <textarea id="description" class="form-control" type="text" formControlName="description"
-          onfocus="this.select();"></textarea>
-        </div>
+      @if (predictorForm.get('name').hasError('required')) {
+      <div class="alert alert-danger">Predictor name is
+        required</div>
+      }
+    </div>
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="isProductionPredictor">Is Production?</label>
+      <div class="mb-3">
+        <select id="isProductionPredictor" class="form-select" formControlName="production">
+          <option [ngValue]="true">Yes</option>
+          <option [ngValue]="false">No</option>
+        </select>
       </div>
     </div>
-    <div class="row">
-      <div class="col-12">
-        <hr>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12">
-          <label class="semibold" for="predictorType">Predictor Type</label>
-          <div class="mb-3">
-            <select id="predictorType" class="form-select" formControlName="predictorType"
-              (change)="changePredictorType()">
-              <option [value]="'Standard'">Standard</option>
-              <!-- <option [value]="'Conversion'">Conversion</option>
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="predictorUnit">Unit</label>
+      <div class="mb-3">
+        <input id="predictorUnit" class="form-control" type="text" formControlName="unit" onfocus="this.select();"
+          minlength="0" maxlength="100">
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="description">Description</label>
+      <div class="mb-3">
+        <textarea id="description" class="form-control" type="text" formControlName="description"
+          onfocus="this.select();"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <hr>
+    </div>
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="predictorType">Predictor Type</label>
+      <div class="mb-3">
+        <select id="predictorType" class="form-select" formControlName="predictorType" (change)="changePredictorType()">
+          <option [value]="'Standard'">Standard</option>
+          <!-- <option [value]="'Conversion'">Conversion</option>
               <option [value]="'Math'">Math</option> -->
-              <option [value]="'Weather'">Weather</option>
-            </select>
-          </div>
-        </div>
-        <!--weather-->
-        @if (predictorForm.controls.predictorType.value == 'Weather') {
-          <div class="col-lg-6 col-md-12 col-sm-12">
-            <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
-            <div class="mb-3">
-              <select id="weatherDataType" class="form-select" formControlName="weatherDataType"
-                (change)="setValidators()">
-                <option [value]="'HDD'">Heating Degree Days</option>
-                <option [value]="'CDD'">Cooling Degree Days</option>
-                <option [value]="'relativeHumidity'">Relative Humidity</option>
-                <option [value]="'dryBulbTemp'">Dry Bulb Temp</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-lg-6 col-md-12 col-sm-12">
-            <label class="semibold w-100" for="weatherStationId">Weather Station
-              <a class="click-link float-right" (click)="openStationModal()">
-                <i class="fa fa-search"></i>
-                Search Stations
-              </a>
-            </label>
-            @if (predictor.weatherStationName) {
-              <div class="mb-3">
-                {{predictor.weatherStationName}}
-              </div>
-            }
-            @if (predictorForm.get('weatherStationId').hasError('required')) {
-              <div class="alert alert-danger">
-                Weather station is
-              required</div>
-            }
-          </div>
-          @if (predictorForm.controls.weatherDataType.value == 'HDD') {
-            <div class="col-lg-6 col-md-12 col-sm-12">
-              <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
-              <div class="mb-3 input-group">
-                <input id="heatingBaseTemperature" class="form-control" type="number"
-                  formControlName="heatingBaseTemperature" onfocus="this.select();"
-                  name="heatingBaseTemperature">
-                <span class="input-group-text">
-                  &#8457;
-                </span>
-              </div>
-              @if (predictorForm.get('heatingBaseTemperature').hasError('required')) {
-                <div class="alert alert-danger"
-                  >Heating base
-                  temperature is
-                required</div>
-              }
-            </div>
-          }
-          @if (predictorForm.controls.weatherDataType.value == 'CDD') {
-            <div class="col-lg-6 col-md-12 col-sm-12">
-              <label class="semibold" for="coolingBaseTemperature">Cooling Base Temperature</label>
-              <div class="mb-3 input-group">
-                <input id="coolingBaseTemperature" class="form-control" type="number"
-                  formControlName="coolingBaseTemperature" onfocus="this.select();"
-                  name="coolingBaseTemperature">
-                <span class="input-group-text">
-                  &#8457;
-                </span>
-              </div>
-              @if (predictorForm.get('coolingBaseTemperature').hasError('required')) {
-                <div class="alert alert-danger"
-                  >Cooling base
-                  temperature is
-                required</div>
-              }
-            </div>
-          }
-          @if (addOrEdit == 'add' && firstMeterReading && latestMeterReading) {
-            <div class="col-lg-6 col-md-12 col-sm-12"
-              >
-              <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
-              <app-label-with-tooltip [field]="'createPredictorData'" [labelId]="'createPredictorData'"
-              [isBold]="true" [label]="'Create Predictor Entries'"></app-label-with-tooltip>
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" name="createPredictorData"
-                  id="createPredictorData" formControlName="createPredictorData">
-                <label class="form-check-label" for="createPredictorData">
-                  {{firstMeterReading| date:'MMM, yyyy'}}&mdash;{{latestMeterReading|
-                date:'MMM, yyyy'}}</label>
-              </div>
-            </div>
-          }
-          <div class="col-12 mt-2">
-            <div class="alert alert-info">
-              Heating and cooling degree days will be calculated using the dry bulb
-              temperature readings from the selected weather station. Weather station data quality varies, you
-              may
-              need to try multiple weather stations before getting accurate degree days. Explore station data
-              and
-              calculation results in VERIFI's <a (click)="goToWeatherData()">Weather Data</a> page.
-            </div>
-          </div>
-        }
-        <!--Math/Conversion-->
-        <!-- <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
+          <option [value]="'Weather'">Weather</option>
+        </select>
+      </div>
+    </div>
+    <!--weather-->
+    @if (predictorForm.controls.predictorType.value == 'Weather') {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
+      <div class="mb-3">
+        <select id="weatherDataType" class="form-select" formControlName="weatherDataType" (change)="setValidators()">
+          <option [value]="'HDD'">Heating Degree Days</option>
+          <option [value]="'CDD'">Cooling Degree Days</option>
+          <option [value]="'relativeHumidity'">Relative Humidity</option>
+          <option [value]="'dryBulbTemp'">Dry Bulb Temp</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold w-100" for="weatherStationId">Weather Station
+        <a class="click-link float-right" (click)="openStationModal()">
+          <i class="fa fa-search"></i>
+          Search Stations
+        </a>
+      </label>
+      @if (predictor.weatherStationName) {
+      <div class="mb-3">
+        {{predictor.weatherStationName}}
+      </div>
+      }
+      @if (predictorForm.get('weatherStationId').hasError('required')) {
+      <div class="alert alert-danger">
+        Weather station is
+        required</div>
+      }
+    </div>
+    @if (predictorForm.controls.weatherDataType.value == 'HDD') {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
+      <div class="mb-3 input-group">
+        <input id="heatingBaseTemperature" class="form-control" type="number" formControlName="heatingBaseTemperature"
+          onfocus="this.select();" name="heatingBaseTemperature">
+        <span class="input-group-text">
+          &#8457;
+        </span>
+      </div>
+      @if (predictorForm.get('heatingBaseTemperature').hasError('required')) {
+      <div class="alert alert-danger">Heating base
+        temperature is
+        required</div>
+      }
+    </div>
+    }
+    @if (predictorForm.controls.weatherDataType.value == 'CDD') {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="coolingBaseTemperature">Cooling Base Temperature</label>
+      <div class="mb-3 input-group">
+        <input id="coolingBaseTemperature" class="form-control" type="number" formControlName="coolingBaseTemperature"
+          onfocus="this.select();" name="coolingBaseTemperature">
+        <span class="input-group-text">
+          &#8457;
+        </span>
+      </div>
+      @if (predictorForm.get('coolingBaseTemperature').hasError('required')) {
+      <div class="alert alert-danger">Cooling base
+        temperature is
+        required</div>
+      }
+    </div>
+    }
+    @if (addOrEdit == 'add' && firstMeterReading && latestMeterReading) {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
+      <app-label-with-tooltip [field]="'createPredictorData'" [labelId]="'createPredictorData'" [isBold]="true"
+        [label]="'Create Predictor Entries'"></app-label-with-tooltip>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="createPredictorData" id="createPredictorData"
+          formControlName="createPredictorData">
+        <label class="form-check-label" for="createPredictorData">
+          {{firstMeterReading| date:'MMM, yyyy'}}&mdash;{{latestMeterReading|
+          date:'MMM, yyyy'}}</label>
+      </div>
+    </div>
+    }
+    <div class="col-12 mt-2">
+      <div class="alert alert-info">
+        Heating and cooling degree days will be calculated using the dry bulb
+        temperature readings from the selected weather station. Weather station data quality varies, you
+        may
+        need to try multiple weather stations before getting accurate degree days. Explore station data
+        and
+        calculation results in VERIFI's <a (click)="goToWeatherData()">Weather Data</a> page.
+      </div>
+    </div>
+    }
+    <!--Math/Conversion-->
+    <!-- <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
         <label class="semibold" for="referencePredictorId">Reference Predictor</label>
         <div class="mb-3">
           <select id="referencePredictorId" class="form-select" formControlName="referencePredictorId"
@@ -160,8 +153,8 @@
           </select>
         </div>
       </div> -->
-      <!--Conversion method not implemented yet-->
-      <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
+    <!--Conversion method not implemented yet-->
+    <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
       <div class="col-lg-6 col-md-12 col-sm-12">
         <label class="semibold" for="conversionType">Conversion Type</label>
         <div class="mb-3">
@@ -232,7 +225,44 @@
       </div>
     </div>
   </ng-container> -->
-</div>
+    <div class="col-12">
+      <hr>
+    </div>
+    <div class="col-12">
+      <p class="bold">Status Settings</p>
+      <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="predictorNoLongerInUse" formControlName="noLongerInUse">
+            <label class="form-check-label semibold" for="predictorNoLongerInUse">No Longer In Use</label>
+          </div>
+          @if (predictorForm.controls.noLongerInUse.value) {
+          <div class="row">
+            <div class="col">
+              <label class="semibold" for="predictorNoLongerInUseDate">Stop Month/Year</label>
+              <div class="mb-3">
+                <input id="predictorNoLongerInUseDate" class="form-control" type="month"
+                  [value]="noLongerInUseDateValue" (change)="setNoLongerInUseDate($event)">
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="predictorCanBeNegative" formControlName="canBeNegative">
+            <label class="form-check-label semibold" for="predictorCanBeNegative">Allow Negative Data</label>
+          </div>
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="predictorIgnoreDateStatusChecks"
+              formControlName="ignoreDateStatusChecks">
+            <label class="form-check-label semibold" for="predictorIgnoreDateStatusChecks">Ignore Date Related Status
+              Checks</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 }
 
@@ -245,19 +275,19 @@
   </div>
   <div class="popup-body">
     @if (displaySationModal) {
-      <app-weather-station-modal [facility]="facility"
+    <app-weather-station-modal [facility]="facility"
       (emitSelectStation)="selectStation($event)"></app-weather-station-modal>
     }
   </div>
   <div class="d-flex w-100 justify-content-between">
     <div class="p-0">
       <p class="fw-light mb-0">
-        For more details about weather station go to the "<a class="click-link"
-      (click)="goToWeatherData()">Weather Data</a>" page.
-    </p>
+        For more details about weather station go to the "<a class="click-link" (click)="goToWeatherData()">Weather
+          Data</a>" page.
+      </p>
+    </div>
+    <div class="p-0">
+      <button class="btn btn-secondary" (click)="cancelStationSelect()">Cancel</button>
+    </div>
   </div>
-  <div class="p-0">
-    <button class="btn btn-secondary" (click)="cancelStationSelect()">Cancel</button>
-  </div>
-</div>
 </div>

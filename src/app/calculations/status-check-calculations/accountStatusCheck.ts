@@ -8,19 +8,20 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbUtilityMeterGroup } from "src/app/models/idbModels/utilityMeterGroup";
-import { AccountReportErrors, AnalysisSetupErrors, FacilityReportErrors, GroupAnalysisErrors } from "src/app/models/validation";
+import { AnalysisSetupErrors, GroupAnalysisErrors } from "src/app/models/validation";
 import { FacilityStatusCheck } from "./facilityStatusCheck";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
 import { emptyGroupAnalysisErrors } from "src/app/calculations/status-check-calculations/validation/groupAnalysisValidation";
 import { emptyAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/analysisValidation";
-import { getAccountAnalysisSetupErrors, emptyAccountAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/accountAnalysisValidation";
-import { getAccountReportErrors, emptyAccountReportErrors } from "src/app/calculations/status-check-calculations/validation/accountReportValidation";
+import { emptyAccountAnalysisSetupErrors } from "src/app/calculations/status-check-calculations/validation/accountAnalysisValidation";
 import { IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 import { IdbAccountReport } from "src/app/models/idbModels/accountReport";
 import { AccountAnalysisSetupErrors } from "src/app/models/accountAnalysis";
 import { AnalysisStatusCheck } from './analysisStatusCheck';
 import { AnalysisGroupStatusCheck } from './analysisGroupStatusCheck';
+import { AccountAnalysisStatusCheck } from './accountAnalysisStatusCheck';
+import { AccountReportStatusCheck } from './accountReportStatusCheck';
 
 export class AccountStatusCheck {
 
@@ -28,8 +29,10 @@ export class AccountStatusCheck {
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
 
-    accountAnalysisSetupErrors: Array<AccountAnalysisSetupErrors>;
-    accountReportErrors: Array<AccountReportErrors>;
+    accountReportStatusChecks: Array<AccountReportStatusCheck>;
+    accountAnalysisStatusChecks: Array<AccountAnalysisStatusCheck>;
+    energyAnalysisStatusCheck: AccountAnalysisStatusCheck;
+    waterAnalysisStatusCheck: AccountAnalysisStatusCheck;
 
     constructor(
         account: IdbAccount,
@@ -55,11 +58,12 @@ export class AccountStatusCheck {
                 facilityAnalysisItems,
                 meters,
                 meterGroups,
-                facilityReports
+                facilityReports,
+                account
             );
         });
         this.computeAccountAnalysisSetupErrors(account, accountAnalysisItems);
-        this.computeAccountReportErrors(account, accountReports);
+        this.computeAccountReportStatusChecks(account, accountReports);
         this.setAccountActions(account, facilities);
         this.setStatus();
     }
@@ -82,44 +86,50 @@ export class AccountStatusCheck {
         return errors ?? emptyAnalysisSetupErrors();
     }
 
-    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        const facilityReportStatusChecks: Array<FacilityReportErrors> = this.facilityStatusChecks.flatMap(fc => fc.facilityReportErrors);
-        return facilityReportStatusChecks.find(fr => fr.reportId === reportId);
+    getAccountAnalysisStatusCheckById(analysisId: string): AccountAnalysisStatusCheck | undefined {
+        return this.accountAnalysisStatusChecks.find(aasc => aasc.analysisItemId === analysisId);
     }
 
     getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
-        const errors = this.accountAnalysisSetupErrors.find(e => e.analysisId === analysisId);
+        const errors = this.getAccountAnalysisStatusCheckById(analysisId)?.accountAnalysisSetupErrors;
         return errors ?? emptyAccountAnalysisSetupErrors();
     }
 
-    getAccountReportErrorsByReportId(reportId: string): AccountReportErrors {
-        const errors = this.accountReportErrors.find(e => e.reportId === reportId);
-        return errors ?? emptyAccountReportErrors();
+    getFacilityStatusCheckByFacilityId(facilityId: string): FacilityStatusCheck | undefined {
+        return this.facilityStatusChecks.find(fc => fc.facility.guid === facilityId);
     }
 
     private computeAccountAnalysisSetupErrors(account: IdbAccount, accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
-        this.accountAnalysisSetupErrors = [];
-        const analysisStatusChecks: Array<AnalysisStatusCheck> = this.facilityStatusChecks.flatMap(fc => fc.analysisStatusChecks)
-        const allAnalysisSetupErrors: Array<AnalysisSetupErrors> = analysisStatusChecks.map(asc => asc.analysisSetupErrors);
+        this.accountAnalysisStatusChecks = [];
         const accountAnalysisItemsForAccount: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(accountAnalysisItem => accountAnalysisItem.accountId === account.guid);
         for (const item of accountAnalysisItemsForAccount) {
-            const itemAnalysisIds: Set<string> = new Set(
-                item.facilityAnalysisItems
-                    .map(facilityAnalysisItem => facilityAnalysisItem.analysisItemId)
-                    .filter((analysisItemId): analysisItemId is string => analysisItemId !== undefined && analysisItemId !== null)
-            );
-            const analysisSetupErrors: Array<AnalysisSetupErrors> = allAnalysisSetupErrors
-                .filter(errors => itemAnalysisIds.has(errors.analysisId));
-            const errors = getAccountAnalysisSetupErrors(item, analysisSetupErrors);
-            this.accountAnalysisSetupErrors.push(errors);
+            const accountAnalysisStatusCheck = new AccountAnalysisStatusCheck(item, this.facilityStatusChecks, account);
+            this.accountAnalysisStatusChecks.push(accountAnalysisStatusCheck);
+        }
+        const energyAnalysisItem = this.getLatestAnalysisItem(account, accountAnalysisItemsForAccount, 'energy');
+        if (energyAnalysisItem) {
+            this.energyAnalysisStatusCheck = this.accountAnalysisStatusChecks.find(check => check.analysisItemId === energyAnalysisItem.guid);
+        }
+        const waterAnalysisItem = this.getLatestAnalysisItem(account, accountAnalysisItemsForAccount, 'water');
+        if (waterAnalysisItem) {
+            this.waterAnalysisStatusCheck = this.accountAnalysisStatusChecks.find(check => check.analysisItemId === waterAnalysisItem.guid);
         }
     }
 
-    private computeAccountReportErrors(account: IdbAccount, accountReports: Array<IdbAccountReport>) {
-        this.accountReportErrors = [];
+    private getLatestAnalysisItem(account: IdbAccount, accountAnalysisItems: Array<IdbAccountAnalysisItem>, category: 'energy' | 'water'): IdbAccountAnalysisItem | undefined {
+        const selectedId = category === 'energy' ? account.selectedEnergyAnalysisId : account.selectedWaterAnalysisId;
+        if (selectedId) {
+            return accountAnalysisItems.find(item => item.guid === selectedId);
+        }
+        const items = accountAnalysisItems.filter(item => item.accountId === account.guid && item.analysisCategory === category);
+        return items.length > 0 ? _.maxBy(items, 'modifiedDate') : undefined;
+    }
+
+    private computeAccountReportStatusChecks(account: IdbAccount, accountReports: Array<IdbAccountReport>) {
+        this.accountReportStatusChecks = [];
         for (const report of accountReports.filter(accountReport => accountReport.accountId === account.guid)) {
-            const errors = getAccountReportErrors(report, this.accountAnalysisSetupErrors);
-            this.accountReportErrors.push(errors);
+            const accountReportStatusCheck: AccountReportStatusCheck = new AccountReportStatusCheck(report, this.accountAnalysisStatusChecks);
+            this.accountReportStatusChecks.push(accountReportStatusCheck);
         }
     }
 
@@ -162,6 +172,8 @@ export class AccountStatusCheck {
         const allStatuses: Array<STATUS_CHECK_OPTIONS> = this.facilityStatusChecks.map(fc => fc.status);
         if (allStatuses.includes('error')) {
             this.status = 'error';
+        } else if (allStatuses.includes('outdated')) {
+            this.status = 'outdated';
         } else if (allStatuses.includes('warning')) {
             this.status = 'warning';
         } else {

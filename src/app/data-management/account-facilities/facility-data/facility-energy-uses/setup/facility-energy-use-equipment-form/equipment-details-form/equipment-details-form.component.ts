@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EquipmentTypes } from './equipmentTypes';
 import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -18,12 +18,9 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
   styleUrl: './equipment-details-form.component.css',
 })
 export class EquipmentDetailsFormComponent {
-  @Input({ required: true })
-  equipmentDetailsForm: FormGroup;
-  @Input({ required: true })
-  utilityDataForms: Array<UtilityDataForm>;
-  @Input({ required: true })
-  annualOperatingConditionsDataForms: Array<FormGroup>;
+  equipmentDetailsForm = input.required<FormGroup>();
+  utilityDataForms = input.required<Array<UtilityDataForm>>();
+  annualOperatingConditionsDataForms = input.required<Array<FormGroup>>();
 
   equipmentTypes: Array<EquipmentType> = EquipmentTypes;
   utilityMeterGroups: Array<IdbUtilityMeterGroup>;
@@ -42,7 +39,7 @@ export class EquipmentDetailsFormComponent {
   ) { }
 
   ngOnInit() {
-    this.linkedMeterGroupIds = this.equipmentDetailsForm.controls['utilityMeterGroupIds'].value.map(id => id);
+    this.linkedMeterGroupIds = this.equipmentDetailsForm().controls['utilityMeterGroupIds'].value.map(id => id);
     this.utilityMetersSub = this.utiltiyMeterDbService.facilityMeters.subscribe(meters => {
       this.utilityMeters = meters;
     });
@@ -73,7 +70,7 @@ export class EquipmentDetailsFormComponent {
     } else {
       this.linkedMeterGroupIds.splice(this.linkedMeterGroupIds.findIndex(id => id == meterGroup.guid), 1);
     }
-    this.equipmentDetailsForm.markAsDirty()
+    this.equipmentDetailsForm().markAsDirty()
     this.setLinkedMeterGroupSources();
   }
   setLinkedMeterGroupSources() {
@@ -85,9 +82,9 @@ export class EquipmentDetailsFormComponent {
   }
 
   cancelLinkMeterGroup() {
-    this.linkedMeterGroupIds = this.equipmentDetailsForm.controls['utilityMeterGroupIds'].value;
+    this.linkedMeterGroupIds = this.equipmentDetailsForm().controls['utilityMeterGroupIds'].value;
     this.showLinkMeterModal = false;
-    this.equipmentDetailsForm.markAsDirty()
+    this.equipmentDetailsForm().markAsDirty()
   }
 
   closeLinkMeterGroup() {
@@ -100,8 +97,8 @@ export class EquipmentDetailsFormComponent {
       return this.linkedMeterGroupIds.includes(group.guid);
     });
 
-    if (!_.isEqual(this.linkedMeterGroupIds, this.equipmentDetailsForm.controls['utilityMeterGroupIds'].value)) {
-      this.equipmentDetailsForm.patchValue({
+    if (!_.isEqual(this.linkedMeterGroupIds, this.equipmentDetailsForm().controls['utilityMeterGroupIds'].value)) {
+      this.equipmentDetailsForm().patchValue({
         utilityMeterGroupIds: this.linkedMeterGroupIds.map(id => id)
       });
     }

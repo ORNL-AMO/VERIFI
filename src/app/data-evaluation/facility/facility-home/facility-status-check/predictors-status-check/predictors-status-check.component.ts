@@ -1,6 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
+import { STATUS_CHECK_OPTIONS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -12,7 +13,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class PredictorsStatusCheckComponent {
   @Input({ required: true }) predictorsStatusChecks: Array<PredictorStatusCheck>;
-  @Input({ required: true }) predictorsStatus: 'good' | 'warning' | 'error';
+  @Input({ required: true }) predictorsStatus: STATUS_CHECK_OPTIONS;
   @Input({ required: true }) hasNoPredictors: boolean;
   @Input({ required: true }) facilityPredictorActionUrl: string;
 

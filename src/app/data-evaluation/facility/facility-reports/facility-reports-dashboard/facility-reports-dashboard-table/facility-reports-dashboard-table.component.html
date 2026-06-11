@@ -1,139 +1,177 @@
-@if (facilityReports.length != 0) {
+@let _facilityReports = facilityReports();
+@let _filteredReports = filteredReports();
+@let _orderDataField = orderDataField();
+@let _orderByDirection = orderByDirection();
+@let _itemsPerPage = itemsPerPage();
+@let _checkedGuids = checkedGuids();
+@let _hasCheckedItems = hasCheckedItems();
+@let _showBulkDelete = showBulkDelete();
+@let _displayDeleteModal = displayDeleteModal();
+@let _deletedReport = deletedReport();
+@let _checkedItems = checkedItems();
+@let _account = account();
+
+@if (_facilityReports.length !== 0) {
 <div class="wrapper m-0">
-  <div class="d-flex  align-items-start mb-1">
+  <div class="d-flex align-items-end mb-1">
     <div class="pe-4 col-2">
       <label class="form-label fw-bold">
         <i class="fa fa-filter text-primary"></i>
         Report Type
       </label>
-      <select class="form-select" [(ngModel)]="selectedReportType">
+      <select class="form-select" [ngModel]="selectedReportType()" (ngModelChange)="selectedReportType.set($event)">
         <option value="">All</option>
         @for (type of reportTypes; track type) {
-        <option [value]="type">{{ type | facilityReportType}}</option>
+        @if(_account.displayEmissions){
+        <option [value]="type">{{ type | facilityReportType }}</option>
+        }@else if(type !== 'emissionFactors'){
+        <option [value]="type">{{ type | facilityReportType }}</option>
+        }
         }
       </select>
     </div>
     <div class="col-2 mt-auto pe-4">
       <app-table-items-dropdown></app-table-items-dropdown>
     </div>
-
-    @if(anyChecked) {
-    <div class="col-1 mt-auto">
-      <button class="btn btn-danger" (click)="openBulkDeleteModal()">Bulk Delete</button>
+    @if (_hasCheckedItems) {
+    <div class="col-auto mt-auto">
+      <button class="btn btn-danger" (click)="openBulkDeleteModal()">
+        <i class="fa fa-trash me-1"></i> Bulk Delete
+        <span class="badge bg-light text-danger ms-1">{{ _checkedGuids.size }}</span>
+      </button>
     </div>
     }
   </div>
+
   <div class="table-responsive mt-2">
     <table class="table table-bordered table-hover">
       <thead>
         <tr>
           <th class="input">
-            <input type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            <input type="checkbox" [checked]="allChecked()" (change)="checkAll($event)">
           </th>
-          <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
+          <th class="status-col text-center">Status</th>
+          <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField === 'name'}">
             Report Name
+            @if (_orderDataField === 'name') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th class="can-click" (click)="setOrderDataField('facilityReportType')"
-            [ngClass]="{'active': orderDataField == 'facilityReportType'}">
+            [ngClass]="{'active': _orderDataField === 'facilityReportType'}">
             Report Type
+            @if (_orderDataField === 'facilityReportType') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
-          <th class="can-click" (click)="setOrderDataField('analysisItemId')"
-            [ngClass]="{'active': orderDataField == 'analysisItemId'}">
+          <th class="can-click" (click)="setOrderDataField('analysisItemName')"
+            [ngClass]="{'active': _orderDataField === 'analysisItemName'}">
             Analysis Item
+            @if (_orderDataField === 'analysisItemName') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
-          <th class="can-click" (click)="setOrderDataField(sortYear)"
-            [ngClass]="{'active': orderDataField == sortYear}">
+          <th class="can-click" (click)="setOrderDataField('reportYear')"
+            [ngClass]="{'active': _orderDataField === 'reportYear'}">
             Report Year
+            @if (_orderDataField === 'reportYear') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th class="can-click" (click)="setOrderDataField('modifiedDate')"
-            [ngClass]="{'active': orderDataField == 'modifiedDate'}">
+            [ngClass]="{'active': _orderDataField === 'modifiedDate'}">
             Last Modified
+            @if (_orderDataField === 'modifiedDate') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        @for (facilityReport of facilityReports | facilityReportOrderBy: orderDataField: orderByDirection:
-        selectedReportType |
-        slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track facilityReport.guid) {
-        @let reportErrors = facilityReport.guid | invalidFacilityReport;
-        <tr>
+        @for (report of _filteredReports | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber *
+        _itemsPerPage; track report.guid) {
+        @let sc = report.statusCheck;
+        <tr [ngClass]="{'analysis-row-error': sc?.status === 'error'}">
           <td class="input text-center">
-            <input type="checkbox" name="reportSelected" (change)="toggleChecked()"
-              [(ngModel)]="facilityReport.checked">
+            <input type="checkbox" name="reportSelected" [checked]="_checkedGuids.has(report.guid)"
+              (change)="toggleCheck(report.guid, $any($event.target).checked)">
+          </td>
+
+          <!-- Status column -->
+          <td class="text-center align-middle status-col">
+            <span class="fa fa-fw fa-lg" [ngClass]="{
+              'fa-circle-check text-success': !sc || sc.status === 'good',
+              'fa-circle-xmark text-danger': sc?.status === 'error',
+              'fa-triangle-exclamation text-warning': sc?.status === 'warning'
+            }"></span>
+            @if (sc?.status != 'good') {
+            <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+              @if (sc?.errors?.missingName) {
+              <span class="badge bg-danger issue-badge">Missing Name</span>
+              }
+              @if (sc?.errors?.analysisHasErrors) {
+              <span class="badge bg-danger issue-badge">Analysis Errors</span>
+              }
+              @if (sc?.errors?.missingReportYear) {
+              <span class="badge bg-danger issue-badge">Missing Report Year</span>
+              }
+              @if (sc?.errors?.missingBaselineYear) {
+              <span class="badge bg-danger issue-badge">Missing Baseline Year</span>
+              }
+              @if (sc?.errors?.missingStartDate) {
+              <span class="badge bg-danger issue-badge">Missing Start Date</span>
+              }
+              @if (sc?.errors?.missingEndDate) {
+              <span class="badge bg-danger issue-badge">Missing End Date</span>
+              }
+              @if (sc?.errors?.invalidDateRange) {
+              <span class="badge bg-danger issue-badge">Invalid Date Range</span>
+              }
+              @if (!sc?.errors?.isDataComplete) {
+              <span class="badge bg-warning text-dark issue-badge">Incomplete Data</span>
+              }
+              @if (sc?.status === 'warning') {
+              <span class="badge bg-warning text-dark issue-badge">Warnings in Analysis</span>
+              }
+            </div>
+            }
+          </td>
+
+          <td>
+            <a (click)="selectReport(report)" class="can-click">{{ report.name }}</a>
           </td>
           <td>
-            @if (reportErrors.hasErrors) {
-            <span class="fa fa-exclamation-circle"></span>
-            }
-            <a (click)="selectReport(facilityReport)">{{ facilityReport.name }}</a>
+            <span class="badge" [ngClass]="report.facilityReportType | facilityReportBadgeClass">{{
+              report.facilityReportType | facilityReportType }}</span>
           </td>
           <td>
-            <span class="badge" [ngClass]="facilityReport.facilityReportType | facilityReportBadgeClass">{{
-              facilityReport.facilityReportType |
-              facilityReportType }}</span>
-          </td>
-          @if (facilityReport.analysisItemId) {
-          <td>{{ facilityReport.analysisItemId | facilityAnalysisName}}</td>
-          }
-          @if (!facilityReport.analysisItemId) {
-          <td> &mdash; </td>
-          }
-          <td>
-            @switch (facilityReport.facilityReportType) {
-            @case ('emissionFactors') {
-            @if (facilityReport.emissionFactorsReportSettings.startYear != undefined) {
-            {{ facilityReport.emissionFactorsReportSettings.startYear }} -
-            }
-            @if (facilityReport.emissionFactorsReportSettings.endYear != undefined) {
-            {{ facilityReport.emissionFactorsReportSettings.endYear }}
-            }
-            @if (facilityReport.emissionFactorsReportSettings.startYear === undefined &&
-            facilityReport.emissionFactorsReportSettings.endYear === undefined) {
+            @if (report.analysisItemName) {
+            {{ report.analysisItemName }}
+            } @else {
             &mdash;
-            }
-            }
-            @case ('overview') {
-            @if (facilityReport.dataOverviewReportSettings.startMonth != undefined &&
-            facilityReport.dataOverviewReportSettings.startYear !=
-            undefined) {
-            {{ facilityReport.dataOverviewReportSettings.startMonth | reportDate:
-            facilityReport.dataOverviewReportSettings.startYear | date: 'MMM. y' }} -
-            }
-            @if (facilityReport.dataOverviewReportSettings.endMonth != undefined &&
-            facilityReport.dataOverviewReportSettings.endYear !=
-            undefined) {
-            {{ facilityReport.dataOverviewReportSettings.endMonth | reportDate:
-            facilityReport.dataOverviewReportSettings.endYear | date: 'MMM. y' }}
-            }
-            @if (facilityReport.dataOverviewReportSettings.startMonth === undefined &&
-            facilityReport.dataOverviewReportSettings.startYear
-            === undefined && facilityReport.dataOverviewReportSettings.endMonth === undefined &&
-            facilityReport.dataOverviewReportSettings.endYear === undefined) {
-            &mdash;
-            }
-            }
-            @case ('savings') {
-            @if (facilityReport.savingsReportSettings.endYear !== undefined) {
-            {{ facilityReport.savingsReportSettings.endYear }}
-            }
-            @if (facilityReport.savingsReportSettings.endYear === undefined) {
-            &mdash;
-            }
-            }
-            @default {
-            &mdash;
-            }
             }
           </td>
           <td>
-            {{ facilityReport.modifiedDate | date:'short' }}
+            @if (report.reportYear !== undefined) {
+            {{ report.reportYear }}
+            } @else {
+            &mdash;
+            }
+          </td>
+          <td>
+            {{ report.modifiedDate | date:'short' }}
           </td>
           <td class="text-center">
-            <button title="Copy" class="btn action-btn btn-sm m-1" (click)="createCopy(facilityReport)">
+            <button title="Copy" class="btn action-btn btn-sm m-1 icon-style" (click)="createCopy(report)">
               <i class="fa fa-copy"></i>
             </button>
-            <button title="Delete" class="btn action-btn btn-sm m-1" (click)="deleteItem(facilityReport)">
+            <button title="Delete" class="btn action-btn btn-sm m-1 icon-style" (click)="deleteItem(report)">
               <i class="fa fa-trash"></i>
             </button>
           </td>
@@ -142,17 +180,20 @@
       </tbody>
     </table>
   </div>
+  @if (_filteredReports.length === 0) {
+  <div class="text-center text-muted py-3">
+    No reports match the selected filter.
+  </div>
+  }
   <div class="d-flex w-100 justify-content-end">
-    <ngb-pagination
-      [collectionSize]="(facilityReports | facilityReportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
-      [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    <ngb-pagination [collectionSize]="_filteredReports.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"
+      [maxSize]="5" [rotate]="true" aria-label="Pagination">
     </ngb-pagination>
   </div>
 </div>
 }
 
-
-@if (facilityReports.length == 0) {
+@if (_facilityReports.length === 0) {
 <div class="card card-body">
   <div class="text-center bold">
     No reports found for this facility. Click "+Add New Report" to create your first report!
@@ -160,13 +201,14 @@
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': displayDeleteModal || showBulkDelete}"></div>
-<div class="popup" [class.open]="displayDeleteModal">
-  @if (displayDeleteModal) {
-  <div class="popup-header">Delete: {{deletedReport.name}}
+<div [ngClass]="{'windowOverlay': _displayDeleteModal || _showBulkDelete}"></div>
+
+<!--DELETE MODAL-->
+<div class="popup" [class.open]="_displayDeleteModal">
+  @if (_displayDeleteModal && _deletedReport) {
+  <div class="popup-header">Delete: {{ _deletedReport.name }}
     <button class="item-right" (click)="cancelDelete()">x</button>
   </div>
-  }
   <div class="popup-body">
     <p>WARNING: Deleting this report cannot be undone.</p>
   </div>
@@ -174,28 +216,44 @@
     <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
   </div>
+  }
 </div>
 
-<div class="popup" [class.open]="showBulkDelete">
+<!--BULK DELETE MODAL-->
+<div class="popup" [class.open]="_showBulkDelete">
   <div class="popup-header">Delete Report Items
     <button class="item-right" (click)="cancelBulkDelete()">x</button>
   </div>
+  @if (_showBulkDelete) {
   <div class="popup-body">
     <p>WARNING: Deleting report items cannot be undone.
       Are you sure you want to perform this action?</p>
-    @if (selectedItemsForBulkDelete && selectedItemsForBulkDelete.length > 0) {
-    <div class="alert alert-warning my-3 text-center" role="alert">
-      <div class="fw-bold mb-2 fs-5 text-danger">
+    @if (_checkedItems.length > 0) {
+    <div class="alert alert-warning my-3" role="alert">
+      <div class="fw-bold mb-2 fs-5 text-danger text-center">
         <i class="fa fa-exclamation-triangle me-2 text-danger"></i>
         Items to be deleted
       </div>
-      <ul class="mb-0 d-inline-block text-start">
-        @for (item of selectedItemsForBulkDelete; track item.guid) {
-        <li>
-          <span class="fw-semibold">{{item.name}}</span>
-        </li>
-        }
-      </ul>
+      <table class="table table-bordered table-sm align-middle my-3">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of _checkedItems; track item.guid) {
+          <tr>
+            <td class="fw-semibold">{{ item.name }}</td>
+            <td>
+              <span class="badge" [ngClass]="item.facilityReportType | facilityReportBadgeClass">
+                {{ item.facilityReportType | facilityReportType }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
     </div>
     }
   </div>
@@ -203,4 +261,5 @@
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
   </div>
+  }
 </div>

@@ -1,4 +1,5 @@
 @let _facilityStatusCheck = facilityStatusCheck();
+@let _selectedFacility = selectedFacility();
 
 <div class="accordion" id="facilityStatusCheckAccordion">
     <div class="accordion-item card">
@@ -7,14 +8,16 @@
                 data-bs-target="#statusCheckCollapse" aria-expanded="false" aria-controls="statusCheckCollapse"
                 [ngClass]="{
                     'bg-warning': _facilityStatusCheck?.status === 'warning',
-                    'bg-danger': _facilityStatusCheck?.status === 'error'
+                    'bg-danger': _facilityStatusCheck?.status === 'error',
+                    'bg-outdated': _facilityStatusCheck?.status === 'outdated'
                 }">
                 <span class="fa me-2" [ngClass]="{
                         'fa-circle-check text-success': _facilityStatusCheck?.status === 'good',
                         'fa-exclamation-triangle': _facilityStatusCheck?.status === 'warning',
-                        'fa-circle-xmark': _facilityStatusCheck?.status === 'error'
+                        'fa-circle-xmark': _facilityStatusCheck?.status === 'error',
+                        'fa-clock': _facilityStatusCheck?.status === 'outdated'
                     }"></span>
-                <strong>Facility Status Check</strong>
+                <strong>Facility Status</strong>
             </button>
         </h2>
         <div id="statusCheckCollapse" class="accordion-collapse collapse" aria-labelledby="statusCheckHeading"
@@ -31,6 +34,18 @@
                     <span class="fa fa-exclamation-triangle me-1"></span>
                     Some data may have issues. Please review the items below for details and recommended actions.
                 </div>
+                }@else if(_facilityStatusCheck.status == 'outdated') {
+                <div class="alert alert-secondary mb-2">
+                    <span class="fa fa-clock me-2"></span>
+                    Some meters or predictors have outdated data. Please update them with recent readings. If you don't
+                    want warnings about outdated data, you can set your facility's data freshness preference with the
+                    <span class="italic">"Enable
+                        time-based staleness alerts"</span> toggle in the
+                    <a [routerLink]="'/data-evaluation/facility/' + _selectedFacility?.guid + '/settings'" class="click-link">
+                        <span class="fa fa-gear me-1"></span>
+                        Facility Settings.
+                    </a>
+                </div>
                 }@else{
                 <div class="alert alert-danger mb-2">
                     <span class="fa fa-exclamation-circle me-1"></span>
@@ -40,15 +55,13 @@
                 }
 
                 <div class="accordion" id="statusCheckItemsAccordion">
-                    <app-meters-status-check
-                        [metersStatusChecks]="_facilityStatusCheck.metersStatusChecks"
+                    <app-meters-status-check [metersStatusChecks]="_facilityStatusCheck.metersStatusChecks"
                         [metersStatus]="_facilityStatusCheck.metersStatus"
                         [hasNoMeters]="_facilityStatusCheck.hasNoMeters"
                         [hasNoMeterGroups]="_facilityStatusCheck.hasNoMeterGroups"
                         [facilityMeterActionUrl]="'/data-management/' + _facilityStatusCheck.facility.accountId + '/facilities/' + _facilityStatusCheck.facility.guid">
                     </app-meters-status-check>
-                    <app-predictors-status-check
-                        [predictorsStatusChecks]="_facilityStatusCheck.predictorsStatusChecks"
+                    <app-predictors-status-check [predictorsStatusChecks]="_facilityStatusCheck.predictorsStatusChecks"
                         [predictorsStatus]="_facilityStatusCheck.predictorsStatus"
                         [hasNoPredictors]="_facilityStatusCheck.hasNoPredictors"
                         [facilityPredictorActionUrl]="'/data-management/' + _facilityStatusCheck.facility.accountId + '/facilities/' + _facilityStatusCheck.facility.guid">

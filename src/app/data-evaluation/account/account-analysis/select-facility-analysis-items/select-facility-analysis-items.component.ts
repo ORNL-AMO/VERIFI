@@ -10,6 +10,15 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+
+interface FacilityListItem {
+  facility: IdbFacility;
+  analysisItemId: string;
+  analysisStatusCheck: AnalysisStatusCheck;
+}
 
 @Component({
   selector: 'app-select-facility-analysis-items',
@@ -24,16 +33,47 @@ export class SelectFacilityAnalysisItemsComponent {
   private router: Router = inject(Router);
   private accountAnalysisService: AccountAnalysisService = inject(AccountAnalysisService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
   facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities);
   selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
   accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
+
+  facilityList: Signal<Array<FacilityListItem>> = computed(() => {
+    const facilities = this.facilities();
+    const facilityAnalysisItems = this.facilityAnalysisItems();
+    const analysisItem = this.selectedAnalysisItem();
+    const accountStatusCheck = this.accountStatusCheck();
+    if (!facilities || !facilityAnalysisItems || !analysisItem || !accountStatusCheck) {
+      return [];
+    }
+    return analysisItem.facilityAnalysisItems.map(facilityItem => {
+      const facility = facilities.find(fac => fac.guid === facilityItem.facilityId);
+      const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(facilityItem.facilityId);
+      const analysisStatusCheck = facilityStatusCheck?.getAnalysisStatusById(facilityItem.analysisItemId);
+      return {
+        facility: facility,
+        analysisItemId: facilityItem.analysisItemId,
+        analysisStatusCheck: analysisStatusCheck
+      }
+    });
+  });
+
+  configuredCount: Signal<number> = computed(() => {
+    return this.facilityList().filter(item => item.analysisItemId != null && item.analysisItemId !== undefined).length;
+  });
 
   showInUseMessage: Signal<boolean> = computed(() => {
     const selectedItem = this.selectedAnalysisItem();
     const reports = this.accountReports();
+    const hideInUseMessage = this.hideInUseMessage();
+    if (hideInUseMessage) {
+      return false;
+    }
     if (selectedItem && reports) {
       const hasCorrespondingReport = reports.some(report => {
         if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == selectedItem.guid) {
@@ -47,7 +87,7 @@ export class SelectFacilityAnalysisItemsComponent {
         }
         return false;
       });
-      return hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false;
+      return hasCorrespondingReport;
     }
     return false;
   });
@@ -74,7 +114,7 @@ export class SelectFacilityAnalysisItemsComponent {
     this.facilityDbService.selectedFacility.next(selectedFacility);
   }
 
-  hideInUseMessage() {
-    this.accountAnalysisService.hideInUseMessage = true;
+  toggleHideInUseMessage() {
+    this.accountAnalysisService.hideInUseMessage.next(true);
   }
 }

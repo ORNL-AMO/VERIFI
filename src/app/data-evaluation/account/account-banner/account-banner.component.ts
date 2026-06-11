@@ -1,9 +1,11 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-account-banner',
@@ -11,34 +13,36 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrls: ['./account-banner.component.css'],
   standalone: false
 })
-export class AccountBannerComponent implements OnInit {
+export class AccountBannerComponent {
+  private accountDbService: AccountdbService = inject(AccountdbService);
+  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   @ViewChild('navTabs') navTabs: ElementRef;
-  selectedAccount: IdbAccount;
-  selectedAccountSub: Subscription;
-  meterDataSub: Subscription;
-  meterData: Array<IdbUtilityMeterData>;
+
+  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
+  meterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: undefined });
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
+
+  disableTabs: Signal<boolean> = computed(() => {
+    const meterData = this.meterData();
+    return meterData ? meterData.length === 0 : true;
+  });
+
+  hasAnalysisWarnings: Signal<boolean> = computed(() => {
+    const accountStatusCheck = this.accountStatusCheck();
+    if (!accountStatusCheck) return false;
+    const energyAnalysisStatusCheck = accountStatusCheck.energyAnalysisStatusCheck;
+    const waterAnalysisStatusCheck = accountStatusCheck.waterAnalysisStatusCheck;
+    return (energyAnalysisStatusCheck && energyAnalysisStatusCheck.status != 'good') || (waterAnalysisStatusCheck && waterAnalysisStatusCheck.status != 'good');
+  });
 
   hideTabText: boolean = false;
   hideAllText: boolean = false;
-  constructor(private accountDbService: AccountdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private cd: ChangeDetectorRef) { }
+  constructor() { }
 
-  ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
-      this.selectedAccount = account;
-    });
 
-    this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-      this.meterData = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.selectedAccountSub.unsubscribe();
-    this.meterDataSub.unsubscribe();
-  }
   ngAfterViewInit() {
     this.setHideTabText();
     this.cd.detectChanges();

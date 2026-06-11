@@ -29,7 +29,14 @@ export interface IdbPredictor extends IdbEntry {
     sidebarOpen?: boolean,
     isValid?: boolean,
     skipImport?: boolean
-    // weatherOverride: boolean
+    //status checks
+    ignoreWeatherDataWarning?: boolean,
+    //status settings
+    noLongerInUse?: boolean,
+    noLongerInUseMonth?: number,
+    noLongerInUseYear?: number,
+    canBeNegative?: boolean,
+    ignoreDateStatusChecks?: boolean
 }
 
 export function getNewIdbPredictor(accountId: string, facilityId: string): IdbPredictor {

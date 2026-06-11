@@ -14,9 +14,9 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         invalidDateRange: false,
         baselineAfterReportYear: false,
         analysisHasErrors: false,
+        isDataComplete: true,
         missingSelection: false
     };
-
     errors.missingName = !facilityReport.name || facilityReport.name.toString().trim() === '';
 
     let linkedAnalysisItemId: string;
@@ -75,6 +75,11 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         analysisNeeded = true;
         linkedAnalysisItemId = facilityReport.analysisItemId;
         errors.missingReportYear = facilityReport.modelingReportSettings.reportYear === undefined || facilityReport.modelingReportSettings.reportYear === null || isNaN(facilityReport.modelingReportSettings.reportYear);
+    } else if (facilityReport.facilityReportType == 'costSavings') {
+        analysisNeeded = true;
+        linkedAnalysisItemId = facilityReport.analysisItemId;
+        errors.missingReportYear = facilityReport.costSavingsReportSettings.reportYear === undefined || facilityReport.costSavingsReportSettings.reportYear === null || isNaN(facilityReport.costSavingsReportSettings.reportYear);
+        errors.isDataComplete = facilityReport.costSavingsReportSettings.isDataComplete;
     } else if (facilityReport.facilityReportType == 'dataQuality') {
         errors.missingSelection = facilityReport.dataQualityReportSettings.missingSelection;
     }
@@ -91,7 +96,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         }
     }
 
-    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors || errors.missingSelection;
+    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors || !errors.isDataComplete || errors.missingSelection;
     return errors;
 }
 
@@ -107,6 +112,7 @@ export function emptyFacilityReportErrors(): FacilityReportErrors {
         invalidDateRange: false,
         baselineAfterReportYear: false,
         analysisHasErrors: false,
+        isDataComplete: true,
         missingSelection: false
     }
 }

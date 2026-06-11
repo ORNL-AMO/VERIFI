@@ -4,6 +4,7 @@
 @let _orderByCharge = orderByCharge();
 @let _orderedMeterData = orderedMeterData();
 @let _itemsPerPage = itemsPerPage();
+@let _account = account();
 
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable
   [ngClass]="{'copying-table': copyingTable}">
@@ -11,7 +12,7 @@
     <tr class="table-mh">
       <th></th>
       <th [attr.colspan]="numGeneralInformation()">General Information</th>
-      @if (showEmissionsSection()) {
+      @if (_account.displayEmissions && showEmissionsSection()) {
       <th [attr.colspan]="numEmissions()">Emissions</th>
       }
       @if (numDetailedCharges() > 0) {
@@ -49,25 +50,25 @@
         Total Cost
       </th>
       }
-      @if (_filters.mobileBiogenicEmissions) {
+      @if (_account.displayEmissions && _filters.mobileBiogenicEmissions) {
       <th (click)="setOrderDataField('mobileBiogenicEmissions')"
         [ngClass]="{'active': _orderDataField == 'mobileBiogenicEmissions'}">
         Total Biogenic<br>Emissions (tonne CO<sub>2</sub>e)
       </th>
       }
-      @if (_filters.mobileCarbonEmissions) {
+      @if (_account.displayEmissions && _filters.mobileCarbonEmissions) {
       <th (click)="setOrderDataField('mobileCarbonEmissions')"
         [ngClass]="{'active': _orderDataField == 'mobileCarbonEmissions'}">
         Total Carbon<br>Emissions (tonne CO<sub>2</sub>e)
       </th>
       }
-      @if (_filters.mobileOtherEmissions) {
+      @if (_account.displayEmissions && _filters.mobileOtherEmissions) {
       <th (click)="setOrderDataField('mobileOtherEmissions')"
         [ngClass]="{'active': _orderDataField == 'mobileOtherEmissions'}">
         Total Other<br>Emissions (tonne CO<sub>2</sub>e)
       </th>
       }
-      @if (_filters.mobileTotalEmissions) {
+      @if (_account.displayEmissions && _filters.mobileTotalEmissions) {
       <th (click)="setOrderDataField('mobileTotalEmissions')"
         [ngClass]="{'active': _orderDataField == 'mobileTotalEmissions'}">
         Total<br>Emissions (tonne CO<sub>2</sub>e)
@@ -89,7 +90,9 @@
   <tbody class="table-group-divider">
     @for (meterData of _orderedMeterData | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber *
     _itemsPerPage; track meterData.guid) {
-    <tr>
+    <tr [ngClass]="{
+      'data-row-error': (meterData.totalVolume < 0 && !_meter.canBeNegative)
+      }">
       @if (!copyingTable) {
       <td class="input">
         <input type="checkbox" name="metersSelected" [checked]="isChecked(meterData.guid)"
@@ -101,7 +104,9 @@
         @if (meterData.isEstimated) {
         <span class="fa fa-asterisk"></span>
         }
-        {{meterData.totalVolume | customNumber}}
+        @if(meterData.totalVolume < 0 && !_meter.canBeNegative){ <span class="fa fa-exclamation-triangle"></span>
+          }
+          {{meterData.totalVolume | customNumber}}
       </td>
       @if (_filters.totalEnergy) {
       <td>{{meterData.totalEnergyUse | customNumber}}</td>
@@ -112,16 +117,16 @@
       @if (_filters.totalCost) {
       <td>{{meterData.totalCost | customNumber:true}}</td>
       }
-      @if (_filters.mobileBiogenicEmissions) {
+      @if (_account.displayEmissions && _filters.mobileBiogenicEmissions) {
       <td>{{meterData.mobileBiogenicEmissions | customNumber}}</td>
       }
-      @if (_filters.mobileCarbonEmissions) {
+      @if (_account.displayEmissions && _filters.mobileCarbonEmissions) {
       <td>{{meterData.mobileCarbonEmissions | customNumber}}</td>
       }
-      @if (_filters.mobileOtherEmissions) {
+      @if (_account.displayEmissions && _filters.mobileOtherEmissions) {
       <td>{{meterData.mobileOtherEmissions | customNumber}}</td>
       }
-      @if (_filters.mobileTotalEmissions) {
+      @if (_account.displayEmissions && _filters.mobileTotalEmissions) {
       <td>{{meterData.mobileTotalEmissions | customNumber}}</td>
       }
       @for (meterCharge of _meter.charges; track meterCharge.guid) {

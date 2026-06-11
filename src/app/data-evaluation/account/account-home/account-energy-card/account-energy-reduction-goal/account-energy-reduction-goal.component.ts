@@ -8,6 +8,9 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 
 @Component({
   selector: 'app-account-energy-reduction-goal',
@@ -21,10 +24,12 @@ export class AccountEnergyReductionGoalComponent {
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   latestAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
   account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
   monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyEnergyAnalysisData, { initialValue: [] });
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: null });
 
   latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
     const monthlyEnergyAnalysisData = this.monthlyEnergyAnalysisData();
@@ -41,7 +46,7 @@ export class AccountEnergyReductionGoalComponent {
   percentTowardsGoal: Signal<number> = computed(() => {
     const percentSavings = this.percentSavings();
     const percentGoal = this.percentGoal();
-    if(percentGoal === 0){
+    if (percentGoal === 0) {
       return 0;
     }
     const percentTowardsGoal = percentGoal ? (percentSavings / percentGoal) * 100 : 0;
@@ -58,6 +63,14 @@ export class AccountEnergyReductionGoalComponent {
   latestAnalysisDate: Signal<Date> = computed(() => {
     const latestAnalysisSummary = this.latestAnalysisSummary();
     return latestAnalysisSummary ? new Date(latestAnalysisSummary.date) : undefined;
+  });
+  analysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
+    const latestAnalysisItem = this.latestAnalysisItem();
+    const accountStatusCheck = this.accountStatusCheck();
+    if (latestAnalysisItem && accountStatusCheck) {
+      return accountStatusCheck.getAccountAnalysisStatusCheckById(latestAnalysisItem.guid);
+    }
+    return null;
   });
 
   goToAnalysisItem() {

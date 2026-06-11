@@ -3,12 +3,11 @@
 @let _reportYears = reportYears();
 @let _setupForm = setupForm();
 @let _reportDateWarning = reportDateWarning();
-
+@let _reportStatusCheck = reportStatusCheck();
 @if(_selectedReport && _setupForm){
 <div class="wrapper main-content p-0">
   <div class="content-padding">
     <h4>{{_selectedReport.reportType| accountReportType}} Report Setup</h4>
-    @let reportErrors = _selectedReport.guid | invalidAccountReport;
     <form [formGroup]="_setupForm">
       <div class="row">
         <div class="col-6">
@@ -50,7 +49,7 @@
               </select>
             </div>
           </div>
-          @if (reportErrors.baselineAfterReportYear) {
+          @if (_reportStatusCheck && _reportStatusCheck.errors.baselineAfterReportYear) {
           <div>
             <span class="alert alert-danger">
               Report Year cannot be earlier than Baseline Year.
@@ -106,7 +105,7 @@
               </select>
             </div>
           </div>
-          @if (reportErrors.invalidDateRange) {
+          @if (_reportStatusCheck && _reportStatusCheck.errors.invalidDateRange) {
           <span class="alert alert-danger">
             Start date cannot be later than the end date.
           </span>

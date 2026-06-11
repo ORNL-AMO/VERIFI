@@ -3,14 +3,16 @@
         <button class="accordion-button collapsed status-check-header" type="button" data-bs-toggle="collapse"
             data-bs-target="#metersStatusCollapse" aria-expanded="false" aria-controls="metersStatusCollapse" [ngClass]="{
                     'bg-warning': metersStatus === 'warning',
-                    'bg-danger': metersStatus === 'error'
+                    'bg-danger': metersStatus === 'error',
+                    'bg-outdated': metersStatus === 'outdated'
                 }">
             <span class="fa fa-gauge me-2"></span>
             Meters
             <span class="fa ms-2" [ngClass]="{
                         'fa-circle-check text-success': metersStatus === 'good',
                         'fa-exclamation-triangle': metersStatus === 'warning',
-                        'fa-circle-xmark': metersStatus === 'error'
+                        'fa-circle-xmark': metersStatus === 'error',
+                        'fa-clock': metersStatus === 'outdated'
                     }"></span>
         </button>
     </h2>
@@ -44,7 +46,8 @@
                         <span class="fa fa-fw" [ngClass]="{
                             'fa-circle-check text-success': meterCheck.status === 'good',
                             'fa-exclamation-triangle text-warning': meterCheck.status === 'warning',
-                            'fa-circle-xmark text-danger': meterCheck.status === 'error'
+                            'fa-circle-xmark text-danger': meterCheck.status === 'error',
+                            'fa-clock text-outdated': meterCheck.status === 'outdated'
                         }"></span>
                         <div class="flex-grow-1">
                             <strong>{{meterCheck.meterName}}</strong>
@@ -60,11 +63,13 @@
                             @if (meterCheck.hasNoCalendarizationMethod) {
                             <span class="badge bg-warning text-dark ms-2">No Calendarization Method</span>
                             }
-                            @if (!meterCheck.isDataCurrent && !meterCheck.hasNoData) {
+                            @if (meterCheck.isDataOutdated && !meterCheck.hasNoData) {
+                            <span class="badge bg-outdated ms-2">Outdated</span>
+                            } @else if (!meterCheck.isDataCurrent && !meterCheck.hasNoData) {
                             <span class="badge bg-warning text-dark ms-2">Data Not Current</span>
                             }
                             @if(meterCheck.hasNegativeReadings){
-                            <span class="badge bg-warning text-dark ms-2">Negative Readings</span>
+                            <span class="badge bg-danger ms-2">Negative Readings</span>
                             }
                             @if (meterCheck.lastDateEntry && !meterCheck.hasNoData) {
                             <span class="text-muted ms-2 small">({{meterCheck.lastDateEntry | date:'MMMM yyyy'}})</span>

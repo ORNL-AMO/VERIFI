@@ -78,11 +78,16 @@ export class GeneralUtilityDataTableComponent {
 
   showEmissions: Signal<boolean> = computed(() => {
     const meter = this.selectedMeter();
+    const account = this.account();
+    if (!account || account.displayEmissions === false) return false;
     return meter ? checkShowEmissionsOutputRate(meter) : false;
   });
 
   showVolumeColumn: Signal<boolean> = computed(() => {
-    return this.selectedMeterData().some(d => d.totalVolume !== undefined && d.totalVolume !== 0);
+    const selectedMeterData = this.selectedMeterData();
+    return selectedMeterData.some(d => {
+      return d.totalVolume != null && d.totalVolume != undefined && d.totalVolume !== 0;
+    });
   });
 
   showEnergyColumn: Signal<boolean> = computed(() => {

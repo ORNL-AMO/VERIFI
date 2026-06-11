@@ -55,6 +55,9 @@ export class FacilityReportAnalysisSelectionComponent {
   ngOnInit() {
     this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
       this.analysisItems = items;
+      if (this.facilityReport.facilityReportType == 'costSavings') {
+        this.analysisItems = items.filter(item => (item.analysisCategory == 'water') || (item.analysisCategory == 'energy' && !item.energyIsSource));
+      }
       this.applyFilters();
     });
     

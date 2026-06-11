@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { CalanderizedMeter } from "src/app/models/calanderization";
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
@@ -11,10 +11,13 @@ import { AnalysisSetupErrors, FacilityReportErrors } from "src/app/models/valida
 import { AnalysisStatusCheck } from "./analysisStatusCheck";
 import { MeterStatusCheck } from "./meterStatusCheck";
 import { PredictorStatusCheck } from "./predictorStatusCheck";
-import { STATUS_CHECK_OPTIONS, StatusCheckAction } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, DEFAULT_DATA_STALENESS_MONTHS } from "./statusCheckModels";
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { emptyFacilityReportErrors, getFacilityReportErrors } from './validation/facilityReportValidation';
 import { AnalysisGroupStatusCheck } from './analysisGroupStatusCheck';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
+import { FacilityReportStatusCheck } from './facilityReportStatusCheck';
 
 export class FacilityStatusCheck {
 
@@ -40,10 +43,15 @@ export class FacilityStatusCheck {
     hasNonCurrentMeters: boolean;
     hasPredictorWeatherWarnings: boolean;
     hasInvalidMeters: boolean;
+    hasOutdatedMeters: boolean;
+    hasOutdatedPredictors: boolean;
 
-    facilityLatestEntry: { month: number; year: number } | undefined;
+    facilityLatestEntry: { month: number; year: number, date: Date } | undefined;
+    facilityReportStatusChecks: Array<FacilityReportStatusCheck>;
 
-    facilityReportErrors: Array<FacilityReportErrors>;
+    // Staleness settings
+    stalenessEnabled: boolean;
+    stalenessThresholdMonths: DataStalenessMonths;
 
     constructor(
         facility: IdbFacility,
@@ -55,6 +63,7 @@ export class FacilityStatusCheck {
         meters: Array<IdbUtilityMeter>,
         meterGroups: Array<IdbUtilityMeterGroup>,
         facilityReports: Array<IdbFacilityReport> = [],
+        account?: IdbAccount
     ) {
         const facilityMeters: Array<IdbUtilityMeter> = meters.filter(m => m.facilityId === facility.guid);
         const facilityPredictors: Array<IdbPredictor> = predictors.filter(p => p.facilityId === facility.guid);
@@ -70,20 +79,51 @@ export class FacilityStatusCheck {
         this.hasNoMeterData = facilityMeterData.length === 0;
         this.hasNoMeterGroups = !this.hasNoMeters && facilityMeterGroups.length === 0;
         this.hasNoPredictors = facilityPredictors.length === 0;
-        this.facilityLatestEntry = this.computeFacilityLatestEntry(facilityMeterData);
+        this.facilityLatestEntry = this.computeFacilityLatestEntry(facilityCalanderizedMeters);
+
+        // Compute effective staleness settings (facility can inherit from account)
+        this.computeStalenessSettings(facility, account);
 
         this.setMetersStatusChecks(facilityMeters, facilityCalanderizedMeters, facilityMeterData);
         this.setMetersStatus();
-        this.hasInvalidMeters = this.metersStatusChecks.some(check => !check.isMeterValid);
+        this.hasInvalidMeters = this.metersStatusChecks.some(check => check.status === 'error');
+        this.hasOutdatedMeters = this.metersStatusChecks.some(check => check.status === 'outdated');
         this.setHasNonCurrentMeters();
         this.setPredictorsStatusChecks(facilityPredictors, facilityPredictorData);
         this.hasPredictorWeatherWarnings = this.predictorsStatusChecks.some(check => check.hasWeatherDataWarning);
+        this.hasOutdatedPredictors = this.predictorsStatusChecks.some(check => check.status === 'outdated');
         this.setPredictorsStatus();
         this.setHasNonCurrentPredictors();
         this.setAnalysisStatusChecks(analysisItemsForFacility, facilityCalanderizedMeters, facilityPredictorData);
-        this.setFacilityReportErrors(facilityReportsForFacility);
+        this.setFacilityReportStatusChecks(facilityReportsForFacility);
         this.setActions(facility, facilityMeters, facilityMeterGroups, facilityPredictors);
         this.setStatus();
+    }
+
+    /**
+     * Compute the effective staleness settings for this facility.
+     * If facility is configured to use account settings, inherit from account.
+     */
+    private computeStalenessSettings(facility: IdbFacility, account?: IdbAccount): void {
+        const facilitySettings: DataStalenessSettings | undefined = facility.dataStalenessSettings;
+        const accountSettings: DataStalenessSettings | undefined = account?.dataStalenessSettings;
+
+        // Check if facility should use account settings
+        if (facilitySettings?.useAccountSettings && accountSettings) {
+            this.stalenessEnabled = accountSettings.enabled;
+            this.stalenessThresholdMonths = accountSettings.thresholdMonths;
+        } else if (facilitySettings) {
+            this.stalenessEnabled = facilitySettings.enabled;
+            this.stalenessThresholdMonths = facilitySettings.thresholdMonths;
+        } else if (accountSettings) {
+            // Fallback to account settings if facility has no settings
+            this.stalenessEnabled = accountSettings.enabled;
+            this.stalenessThresholdMonths = accountSettings.thresholdMonths;
+        } else {
+            // Default values
+            this.stalenessEnabled = true;
+            this.stalenessThresholdMonths = DEFAULT_DATA_STALENESS_MONTHS;
+        }
     }
 
     get allActions(): Array<StatusCheckAction> {
@@ -93,30 +133,46 @@ export class FacilityStatusCheck {
         return actions;
     }
 
-    private computeFacilityLatestEntry(utilityMeterData: Array<IdbUtilityMeterData>): { month: number; year: number } | undefined {
-        if (!utilityMeterData || utilityMeterData.length === 0) return undefined;
-        const latest = _.maxBy(utilityMeterData, d => d.year * 12 + d.month);
-        return latest ? { month: latest.month, year: latest.year } : undefined;
+    private computeFacilityLatestEntry(calanderizedMeters: Array<CalanderizedMeter>): { month: number; year: number, date: Date } | undefined {
+        if (!calanderizedMeters || calanderizedMeters.length === 0) return undefined;
+        const allMonthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cm => cm.monthlyData);
+        const latest = _.maxBy(allMonthlyData, d => d.year * 12 + d.monthNumValue);
+        return latest ? { month: latest.monthNumValue + 1, year: latest.year, date: new Date(latest.year, latest.monthNumValue) } : undefined;
     }
 
     private setMetersStatusChecks(meters: Array<IdbUtilityMeter>, calanderizedMeters: Array<CalanderizedMeter>, utilityMeterData: Array<IdbUtilityMeterData>) {
         this.metersStatusChecks = meters.map(meter => {
             const calanderizedMeter = calanderizedMeters.find(cm => cm.meter.guid === meter.guid);
             const meterReadings = utilityMeterData.filter(data => data.meterId === meter.guid);
-            return new MeterStatusCheck(meter, meterReadings, calanderizedMeter, this.facilityLatestEntry);
+            return new MeterStatusCheck(
+                meter,
+                meterReadings,
+                calanderizedMeter,
+                this.facilityLatestEntry,
+                this.stalenessEnabled,
+                this.stalenessThresholdMonths
+            );
         });
     }
 
     private setPredictorsStatusChecks(predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData>) {
         this.predictorsStatusChecks = predictors.map(predictor => {
             const predictorReadings = predictorData.filter(data => data.predictorId === predictor.guid);
-            return new PredictorStatusCheck(predictor, predictorReadings, this.facilityLatestEntry);
+            return new PredictorStatusCheck(
+                predictor,
+                predictorReadings,
+                this.facilityLatestEntry,
+                this.stalenessEnabled,
+                this.stalenessThresholdMonths
+            );
         });
     }
 
     private setMetersStatus() {
         if (this.hasNoMeters || this.metersStatusChecks.some(c => c.status === 'error')) {
             this.metersStatus = 'error';
+        } else if (this.metersStatusChecks.some(c => c.status === 'outdated')) {
+            this.metersStatus = 'outdated';
         } else if (this.hasNoMeterGroups || this.metersStatusChecks.some(c => c.status === 'warning')) {
             this.metersStatus = 'warning';
         } else {
@@ -127,6 +183,8 @@ export class FacilityStatusCheck {
     private setPredictorsStatus() {
         if (this.hasNoPredictors || this.predictorsStatusChecks.some(c => c.status === 'error')) {
             this.predictorsStatus = 'error';
+        } else if (this.predictorsStatusChecks.some(c => c.status === 'outdated')) {
+            this.predictorsStatus = 'outdated';
         } else if (this.predictorsStatusChecks.some(c => c.status === 'warning')) {
             this.predictorsStatus = 'warning';
         } else {
@@ -204,10 +262,10 @@ export class FacilityStatusCheck {
         return items.length > 0 ? _.maxBy(items, 'modifiedDate') : undefined;
     }
 
-    private setFacilityReportErrors(facilityReports: Array<IdbFacilityReport>) {
-        this.facilityReportErrors = facilityReports.map(report => {
-            const errors: FacilityReportErrors = getFacilityReportErrors(report, this.analysisStatusChecks.map(check => check.analysisSetupErrors));
-            return errors;
+    private setFacilityReportStatusChecks(facilityReports: Array<IdbFacilityReport>) {
+        this.facilityReportStatusChecks = facilityReports.map(report => {
+            const facilityReportStatusCheck: FacilityReportStatusCheck = new FacilityReportStatusCheck(report, this.analysisStatusChecks);
+            return facilityReportStatusCheck;
         });
     }
 
@@ -216,6 +274,8 @@ export class FacilityStatusCheck {
 
         if (statuses.includes('error')) {
             this.status = 'error';
+        } else if (statuses.includes('outdated')) {
+            this.status = 'outdated';
         } else if (statuses.includes('warning')) {
             this.status = 'warning';
         } else {
@@ -223,13 +283,14 @@ export class FacilityStatusCheck {
         }
     }
 
-    getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
-        const errors = this.facilityReportErrors.find(e => e.reportId === reportId);
-        return errors ?? emptyFacilityReportErrors();
-    }
+    // getFacilityReportErrorsByReportId(reportId: string): FacilityReportErrors {
+    //     const errors = this.facilityReportErrors.find(e => e.reportId === reportId);
+    //     return errors ?? emptyFacilityReportErrors();
+    // }
 
     getAnalysisStatusById(analysisId: string): AnalysisStatusCheck | undefined {
-        return this.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisId);
+        const analysisStatusCheck: AnalysisStatusCheck = this.analysisStatusChecks.find(asc => asc.analysisItem.guid === analysisId);
+        return analysisStatusCheck;
     }
 
     getGroupStatusChecksByGroupId(groupId: string, analysisId: string): AnalysisGroupStatusCheck | undefined {

@@ -15,6 +15,13 @@
     Latest Meter Reading: {{_predictorStatusCheck.latestFacilityEntryDate| date:'MMM, yyyy'}}
   </span>
   }
+  @if(_predictorStatusCheck && _predictorStatusCheck.isDataOutdated) {
+  <div class="my-auto">
+    <span class="badge bg-outdated">
+      <span class="fa fa-clock me-1"></span>Outdated
+    </span>
+  </div>
+  }
   <!--Bulk Delete-->
   <div class="ps-1 pe-1 mb-2 bulk-delete" [class.show]="_hasCheckedItems">
     <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!_hasCheckedItems">Bulk
@@ -41,7 +48,7 @@
       Update</button>
   </div>
   }
-  @if (_predictor.predictorType == 'Weather' && _predictorStatusCheck && _predictorStatusCheck.hasWeatherDataWarning) {
+  @if (_predictorStatusCheck && (_predictorStatusCheck.hasWeatherDataWarning || _predictorStatusCheck.hasNegativeData)) {
   <div class="ps-1 pe-1 mb-2">
     <button class="btn action-btn" (click)="toggleFilterErrors()">
       <i class="fa fa-filter"></i>
@@ -67,17 +74,30 @@
   </div>
 </div>
 @if (_predictorStatusCheck && _predictorStatusCheck.hasWeatherDataWarning) {
-<div class="alert alert-warning text-center p-1">
-  <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated from weather
-  data
-  with gaps of twelve hours or more and the
-  results may not be accurate. To inspect the weather data for that month, click the <span
-    class="fa fa-thermometer-half"></span> button. To manually override
-  the values click the <span class="fa fa-pencil"></span> button. If you have several <span
-    class="fa fa-exclamation-circle"></span>, it may be best to select a different weather station for
-  this facility - use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
-  area
-  of this facility.
+<div class="alert alert-warning p-2">
+  <div class="text-center">
+    <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated from weather
+    data with gaps of twelve hours or more and the results may not be accurate. To inspect the weather data for
+    that month, click the <span class="fa fa-thermometer-half"></span> button. To manually override the values
+    click the <span class="fa fa-pencil"></span> button. If you have several <span
+      class="fa fa-exclamation-circle"></span>, it may be best to select a different weather station for this
+    facility - use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the area
+    of this facility.
+  </div>
+  <div class="text-center mt-2">
+    <button class="btn btn-sm btn-outline-warning" (click)="openIgnoreWarningModal()">
+      <i class="fa fa-eye-slash"></i> Dismiss Warning
+    </button>
+  </div>
+</div>
+}
+@if (_predictor.ignoreWeatherDataWarning) {
+<div class="alert alert-secondary d-flex align-items-center justify-content-center gap-2 p-2">
+  <i class="fa fa-eye-slash"></i>
+  <span>Weather data gap warnings are dismissed for this predictor.</span>
+  <button class="btn btn-sm btn-outline-secondary" (click)="setIgnoreWeatherDataWarning()">
+    <i class="fa fa-eye"></i> Re-enable Warning
+  </button>
 </div>
 }
 
@@ -96,6 +116,13 @@
   @for (monthYear of _predictorStatusCheck.duplicateEntryMonths; track monthYear.date) {
   <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
   }
+</div>
+}
+
+@if(_predictorStatusCheck && _predictorStatusCheck.hasNegativeData){
+<div class="alert alert-danger text-center p-1 fw-bold">
+  <span class="fa fa-triangle-exclamation"></span> Negative predictor entries found. To allow negative entries, edit the predictor setup by clicking
+    <a class="click-link" (click)="editPredictor()">here</a> and enabling the "Allow Negative Data" option.
 </div>
 }
 
@@ -138,10 +165,14 @@
   <tbody class="table-group-divider">
     @for (pData of _orderedPredictorData | slice: ((currentPageNumber-1) * _itemsPerPage): currentPageNumber *
     _itemsPerPage ; track pData) {
-    <tr>
+    <tr [ngClass]="{
+      'data-row-error': (pData.amount < 0 && !_predictor.canBeNegative),
+      'data-row-warning': (pData.weatherDataWarning && !_predictor.ignoreWeatherDataWarning)
+      }">
       @if (!copyingTable) {
       <td class="input">
-        <input type="checkbox" name="predictorEntry" [checked]="isChecked(pData.guid)" (change)="toggleChecked(pData.guid)">
+        <input type="checkbox" name="predictorEntry" [checked]="isChecked(pData.guid)"
+          (change)="toggleChecked(pData.guid)">
       </td>
       }
       <td>{{pData | displayPredictorDataDate}}</td>
@@ -155,7 +186,10 @@
           data-bs-html="true"></span>
         }
         @if (pData.amount != undefined) {
-        {{pData.amount | customNumber}}
+          @if(pData.amount < 0 && !_predictor.canBeNegative) {
+            <span class="fa fa-exclamation-triangle"></span>  
+          }
+          {{pData.amount | customNumber}}
         }
         @if (pData.amount == undefined) {
         &mdash;
@@ -223,7 +257,7 @@
 }
 
 
-<div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete}"></div>
+<div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete || showIgnoreWarningModal}"></div>
 <div class="popup" [class.open]="predictorDataToDelete">
   @if(predictorDataToDelete) {
   <div class="popup-header">
@@ -255,4 +289,30 @@
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="bulkDelete()">Confirm Delete</button>
   </div>
+</div>
+<div class="popup" [class.open]="showIgnoreWarningModal">
+  @if (showIgnoreWarningModal) {
+  <div class="popup-header">
+    Dismiss Weather Data Warning?
+    <button class="item-right" (click)="cancelIgnoreWarningModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>
+      Are you sure you want to dismiss weather data gap warnings for
+      <strong>{{_predictor?.name}}</strong>?
+    </p>
+    <p>
+      Some entries for this predictor were calculated from weather data with gaps of 12 or more hours and
+      <strong>may not be accurate</strong>. Dismissing this warning will hide it from the status checks.
+    </p>
+    <p class="mb-0 text-muted small">
+      <i class="fa fa-info-circle"></i> You can re-enable the warning at any time from this table.
+    </p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelIgnoreWarningModal()">Cancel</button>
+    <button class="btn btn-warning" (click)="confirmIgnoreWarningModal()"><i class="fa fa-eye-slash"></i> Dismiss
+      Warning</button>
+  </div>
+  }
 </div>

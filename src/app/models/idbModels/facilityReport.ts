@@ -14,6 +14,7 @@ export interface IdbFacilityReport extends IdbEntry {
     savingsReportSettings: SavingsFacilityReportSettings,
     emissionFactorsReportSettings: EmissionFactorsReportSettings,
     modelingReportSettings: ModelingReportSettings,
+    costSavingsReportSettings: CostSavingsReportSettings,
     dataQualityReportSettings: DataQualityReportSettings
 }
 
@@ -32,11 +33,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         savingsReportSettings: getSavingsReportSettings(),
         emissionFactorsReportSettings: getEmissionFactorsReportSettings(),
         modelingReportSettings: getModelingReportSettings(),
+        costSavingsReportSettings: getCostSavingsReportSettings(),
         dataQualityReportSettings: getDataQualityReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling' | 'dataQuality';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling' | 'costSavings' | 'dataQuality';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -269,6 +271,24 @@ export interface ModelingReportSettings {
     includeIssuesSummary: boolean,
     includeExecutiveSummary: boolean,
     includeDataValidationTables: boolean
+}
+
+export function getCostSavingsReportSettings(): CostSavingsReportSettings {
+    return {
+        reportYear: undefined,
+        costSavingsTable: {},
+        groupUnits: {},
+        isDataComplete: false
+    };
+}
+
+export interface CostSavingsReportSettings {
+    reportYear: number,
+    costSavingsTable: {
+        [year: number]: {[groupId: string]: number}
+    },
+    groupUnits: {[groupId: string]: string},
+    isDataComplete?: boolean
 }
 
 export function getDataQualityReportSettings(): DataQualityReportSettings {

@@ -9,19 +9,16 @@
                 data-bs-target="#accountStatusCollapse" aria-expanded="false" aria-controls="accountStatusCollapse"
                 [ngClass]="{
           'bg-warning': _statusCheck.status === 'warning',
-          'bg-danger':  _statusCheck.status === 'error'
+          'bg-danger text-white':  _statusCheck.status === 'error',
+          'bg-outdated text-white': _statusCheck.status === 'outdated'
         }">
                 <span class="fa me-2" [ngClass]="{
           'fa-circle-check text-success':      _statusCheck.status === 'good',
           'fa-exclamation-triangle':           _statusCheck.status === 'warning',
-          'fa-circle-xmark':                   _statusCheck.status === 'error'
+          'fa-circle-xmark text-white':                   _statusCheck.status === 'error',
+          'fa-clock':                          _statusCheck.status === 'outdated'
         }"></span>
                 <strong>Account Status</strong>
-                @if (_statusCheck.totalActionCount > 0) {
-                <span class="badge bg-secondary ms-2">
-                    {{_statusCheck.totalActionCount}} item{{_statusCheck.totalActionCount !== 1 ? 's' : ''}}
-                </span>
-                }
             </button>
         </h2>
 
@@ -36,7 +33,8 @@
                         <div class="d-flex align-items-center gap-2">
                             <span class="fa fa-fw" [ngClass]="{
                 'fa-circle-xmark text-danger':        action.status === 'error',
-                'fa-exclamation-triangle text-warning': action.status === 'warning'
+                'fa-exclamation-triangle text-warning': action.status === 'warning',
+                'fa-clock text-outdated':             action.status === 'outdated'
               }"></span>
                             <div class="flex-grow-1">
                                 <strong class="small">{{action.label}}</strong>
@@ -65,14 +63,16 @@
                             <span class="facility-status-strip" [ngClass]="{
                 'bg-success': fc.status === 'good',
                 'bg-warning': fc.status === 'warning',
-                'bg-danger':  fc.status === 'error'
+                'bg-danger':  fc.status === 'error',
+                'bg-outdated': fc.status === 'outdated'
               }"></span>
 
                             <!--Status icon-->
                             <span class="fa fa-fw" [ngClass]="{
                 'fa-circle-check text-success':        fc.status === 'good',
                 'fa-exclamation-triangle text-warning': fc.status === 'warning',
-                'fa-circle-xmark text-danger':         fc.status === 'error'
+                'fa-circle-xmark text-danger':         fc.status === 'error',
+                'fa-clock text-outdated':              fc.status === 'outdated'
               }"></span>
 
                             <!--Facility color dot + name-->
@@ -84,7 +84,8 @@
                                 @if (fc.metersStatus !== 'good') {
                                 <span class="badge" [ngClass]="{
                   'bg-warning text-dark': fc.metersStatus === 'warning',
-                  'bg-danger':           fc.metersStatus === 'error'
+                  'bg-danger':           fc.metersStatus === 'error',
+                  'bg-outdated':         fc.metersStatus === 'outdated'
                 }">
                                     <span class="fa fa-gauge me-1"></span>Meters
                                 </span>
@@ -92,25 +93,38 @@
                                 @if (fc.predictorsStatus !== 'good') {
                                 <span class="badge" [ngClass]="{
                   'bg-warning text-dark': fc.predictorsStatus === 'warning',
-                  'bg-danger':           fc.predictorsStatus === 'error'
+                  'bg-danger':           fc.predictorsStatus === 'error',
+                  'bg-outdated':         fc.predictorsStatus === 'outdated'
                 }">
                                     <span class="fa fa-boxes-stacked me-1"></span>Predictors
                                 </span>
                                 }
-                                @if (fc.energyAnalysisStatusCheck && fc.energyAnalysisStatusCheck?.status !== 'good') {
+                                @if (fc.energyAnalysisStatusCheck) {
                                 <span class="badge" [ngClass]="{
                   'bg-warning text-dark': fc.energyAnalysisStatusCheck?.status === 'warning',
-                  'bg-danger':           fc.energyAnalysisStatusCheck?.status === 'error'
+                  'bg-danger':           fc.energyAnalysisStatusCheck?.status === 'error',
+                  'bg-success text-white':    fc.energyAnalysisStatusCheck?.status === 'good'
                 }">
                                     <span class="fa fa-bolt me-1"></span>Energy Analysis
+
+                                    @if(fc.energyAnalysisStatusCheck.latestDataAllEntries) {
+                                    ({{fc.energyAnalysisStatusCheck.latestDataAllEntries | date:'MMMM yyyy'}})
+                                    }@else{ (N/A)
+                                    }
                                 </span>
                                 }
-                                @if (fc.waterAnalysisStatusCheck && fc.waterAnalysisStatusCheck?.status !== 'good') {
+                                @if (fc.waterAnalysisStatusCheck) {
                                 <span class="badge" [ngClass]="{
                   'bg-warning text-dark': fc.waterAnalysisStatusCheck?.status === 'warning',
-                  'bg-danger':           fc.waterAnalysisStatusCheck?.status === 'error'
+                  'bg-danger':           fc.waterAnalysisStatusCheck?.status === 'error',
+                  'bg-success text-white':    fc.waterAnalysisStatusCheck?.status === 'good'
                 }">
                                     <span class="fa fa-droplet me-1"></span>Water Analysis
+                                    @if(fc.waterAnalysisStatusCheck.latestDataAllEntries) {
+                                    ({{fc.waterAnalysisStatusCheck.latestDataAllEntries | date:'MMMM yyyy'}})
+                                    }@else{
+                                    (N/A)
+                                    }
                                 </span>
                                 }
                             </span>
@@ -140,7 +154,7 @@
                                 <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
                                     [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
                                     <span class="fa fa-circle-xmark text-danger me-2"></span>One or more meters have
-                                    invalid configuration
+                                    errors
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }
@@ -151,7 +165,13 @@
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }
-                                @if(fc.hasNonCurrentMeters){
+                                @if(fc.hasOutdatedMeters){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
+                                    <span class="fa fa-clock text-outdated me-2"></span>Some meter data is outdated
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                } @else if(fc.hasNonCurrentMeters){
                                 <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
                                     [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/energy-consumption/energy-source/meters'">
                                     <span class="fa fa-circle-xmark text-warning me-2"></span>All Meter data is not
@@ -159,7 +179,28 @@
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }
-                                @if(fc.hasNonCurrentPredictors){
+                                @if(fc.predictorsStatus === 'error'){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>Some predictors have
+                                    errors
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }@else if(fc.hasPredictorWeatherWarnings){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Some predictors have
+                                    weather data warnings
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
+                                @if(fc.hasOutdatedPredictors){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
+                                    <span class="fa fa-clock text-outdated me-2"></span>Some predictor data is outdated
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                } @else if(fc.hasNonCurrentPredictors){
                                 <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
                                     [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
                                     <span class="fa fa-circle-xmark text-warning me-2"></span>All Predictor data is not
@@ -167,13 +208,39 @@
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
                                 }
-                                @if(fc.hasPredictorWeatherWarnings){
+                                @if(fc.energyAnalysisStatusCheck && fc.energyAnalysisStatusCheck.status !== 'good'){
+                                @if(fc.energyAnalysisStatusCheck.status === 'error'){
                                 <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
-                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/utility/predictors'">
-                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Some predictors have
-                                    weather data warnings
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/analysis'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>Energy analysis has
+                                    errors
                                     <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
                                 </li>
+                                }@else {
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/analysis'">
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Energy analysis has
+                                    warnings
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
+                                }
+                                @if(fc.waterAnalysisStatusCheck && fc.waterAnalysisStatusCheck.status !== 'good'){
+                                @if(fc.waterAnalysisStatusCheck.status === 'error'){
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/analysis/water'">
+                                    <span class="fa fa-circle-xmark text-danger me-2"></span>Water analysis has
+                                    errors
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }@else{
+                                <li class="list-group-item list-group-item-action sub-issue py-1 d-flex align-items-center gap-2"
+                                    [routerLink]="'/data-evaluation/facility/' + fc.facility.guid + '/analysis/water'">
+                                    <span class="fa fa-circle-xmark text-warning me-2"></span>Water analysis has
+                                    warnings
+                                    <span class="fa fa-chevron-right text-muted float-end mt-1 small"></span>
+                                </li>
+                                }
                                 }
                             </ul>
                         </div>
@@ -189,6 +256,18 @@
                 <div class="alert alert-success m-3 mb-2">
                     <span class="fa fa-circle-check me-2"></span>
                     All facilities are looking good! Data is current and complete.
+                </div>
+                } @else if (_statusCheck.status === 'outdated') {
+                <div class="alert alert-outdated ms-2 mt-2 mb-2">
+                    <span class="fa fa-clock me-2"></span>
+                    Some meters or predictors have outdated data. Please update them with recent readings. If you don't
+                    want warnings about outdated data, you can set your account's data freshness preference with the
+                    <span class="italic">"Enable
+                        time-based staleness alerts"</span> toggle in the
+                    <a [routerLink]="'/data-evaluation/account/settings'" class="click-link">
+                        <span class="fa fa-gear me-1"></span>
+                        Account Settings.
+                    </a>
                 </div>
                 }
 

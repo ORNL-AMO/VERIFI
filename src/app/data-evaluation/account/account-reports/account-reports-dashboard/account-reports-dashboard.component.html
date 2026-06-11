@@ -1,10 +1,12 @@
+@let _account = selectedAccount();
+
 <div class="main-content p-0">
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
                 <div class="d-flex justify-content-between">
                     <div class="mt-auto">
-                        <i class="fa fa-folder pe-2"></i>{{selectedAccount.name}}
+                        <i class="fa fa-folder pe-2"></i>{{_account.name}}
                         Reports
                     </div>
 
@@ -15,10 +17,10 @@
             </h4>
         </div>
         <hr>
+        <app-account-reports-dashboard-table></app-account-reports-dashboard-table>
     </div>
 </div>
 
-<app-account-reports-dashboard-table></app-account-reports-dashboard-table>
 
 <div [ngClass]="{'windowOverlay': displayNewReport}"></div>
 <div class="popup" [class.open]="displayNewReport">
@@ -45,7 +47,7 @@
                             id="dataOverview" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="dataOverview">Data Overview Report</label>
                     </div>
-                    @if(selectedAccount.displayEmissions){
+                    @if(_account.displayEmissions){
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="reportType" [value]="'betterClimate'"
                             id="betterClimate" [(ngModel)]="newReportType">
@@ -62,7 +64,7 @@
                             id="accountSavings" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="accountSavings">Savings Report</label>
                     </div>
-                    @if(selectedAccount.displayEmissions){
+                    @if(_account.displayEmissions){
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="reportType"
                             [value]="'accountEmissionFactors'" id="accountEmissionFactors" [(ngModel)]="newReportType">

@@ -1,6 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
+import { STATUS_CHECK_OPTIONS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -12,7 +13,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class MetersStatusCheckComponent {
     @Input({ required: true }) metersStatusChecks: Array<MeterStatusCheck>;
-    @Input({ required: true }) metersStatus: 'good' | 'warning' | 'error';
+    @Input({ required: true }) metersStatus: STATUS_CHECK_OPTIONS;
     @Input({ required: true }) hasNoMeters: boolean;
     @Input({ required: true }) hasNoMeterGroups: boolean;
     @Input({ required: true }) facilityMeterActionUrl: string;

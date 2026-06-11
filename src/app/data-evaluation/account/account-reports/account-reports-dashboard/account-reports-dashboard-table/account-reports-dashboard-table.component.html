@@ -1,76 +1,157 @@
-@if (reports.length != 0) {
-<div class="wrapper mt-2 pt-2">
-  <div class="row mb-5">
-    <label class="form-label fw-bold">Filter by Report Type:</label>
-    <div class="col-2">
-      <select class="form-select" [(ngModel)]="selectedReportType">
+@let _reports = reports();
+@let _filteredReports = filteredReports();
+@let _orderDataField = orderDataField();
+@let _orderByDirection = orderByDirection();
+@let _itemsPerPage = itemsPerPage();
+@let _checkedGuids = checkedGuids();
+@let _hasCheckedItems = hasCheckedItems();
+@let _showBulkDelete = showBulkDelete();
+@let _displayDeleteModal = displayDeleteModal();
+@let _deletedReport = deletedReport();
+@let _checkedItems = checkedItems();
+@let _selectedAccount = selectedAccount();
+
+@if (_reports.length !== 0) {
+<div class="wrapper m-0">
+  <div class="d-flex align-items-end mb-1">
+    <div class="pe-4 col-2">
+      <label class="form-label fw-bold">
+        <i class="fa fa-filter text-primary"></i>
+        Report Type
+      </label>
+      <select class="form-select" [ngModel]="selectedReportType()" (ngModelChange)="selectedReportType.set($event)">
         <option value="">All</option>
         @for (type of reportTypes; track type) {
-        <option [value]="type">{{ type | accountReportType}}</option>
+        @if(_selectedAccount.displayEmissions){
+        <option [value]="type">{{ type | accountReportType }}</option>
+        }@else if(type !== 'betterClimate' && type !== 'accountEmissionFactors'){
+        <option [value]="type">{{ type | accountReportType }}</option>
+        }
         }
       </select>
     </div>
-    <div class="col-2 pe-3">
+    <div class="col-2 mt-auto pe-4">
       <app-table-items-dropdown></app-table-items-dropdown>
     </div>
-
-    @if(anyChecked) {
-    <div class="col-2 mt-auto">
-      <button class="btn btn-danger" (click)="openBulkDeleteModal()">Bulk Delete</button>
+    @if (_hasCheckedItems) {
+    <div class="col-auto mt-auto">
+      <button class="btn btn-danger" (click)="openBulkDeleteModal()">
+        <i class="fa fa-trash me-1"></i> Bulk Delete
+        <span class="badge bg-light text-danger ms-1">{{ _checkedGuids.size }}</span>
+      </button>
     </div>
     }
   </div>
-  <div class="table-responsive mt-4">
+
+  <div class="table-responsive mt-2">
     <table class="table table-bordered table-hover">
       <thead>
         <tr>
           <th class="input">
-            <input type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            <input type="checkbox" [checked]="allChecked()" (change)="checkAll($event)">
           </th>
-          <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">
+          <th class="status-col text-center">Status</th>
+          <th class="can-click" (click)="setOrderDataField('name')" [ngClass]="{'active': _orderDataField === 'name'}">
             Report Name
+            @if (_orderDataField === 'name') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th class="can-click" (click)="setOrderDataField('reportType')"
-            [ngClass]="{'active': orderDataField == 'reportType'}">
+            [ngClass]="{'active': _orderDataField === 'reportType'}">
             Report Type
+            @if (_orderDataField === 'reportType') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th class="can-click" (click)="setOrderDataField('reportYear')"
-            [ngClass]="{'active': orderDataField == 'reportYear'}">
+            [ngClass]="{'active': _orderDataField === 'reportYear'}">
             Report Year
+            @if (_orderDataField === 'reportYear') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th class="can-click" (click)="setOrderDataField('modifiedDate')"
-            [ngClass]="{'active': orderDataField == 'modifiedDate'}">
+            [ngClass]="{'active': _orderDataField === 'modifiedDate'}">
             Last Modified
+            @if (_orderDataField === 'modifiedDate') {
+            <i class="fa fa-fw fa-xs"
+              [ngClass]="{'fa-sort-up': _orderByDirection === 'asc', 'fa-sort-down': _orderByDirection === 'desc'}"></i>
+            }
           </th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        @for (report of reports | reportOrderBy: orderDataField: orderByDirection: selectedReportType | slice:
-        ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track report.guid) {
-        <tr>
+        @for (report of _filteredReports | slice: ((currentPageNumber - 1) * _itemsPerPage): currentPageNumber *
+        _itemsPerPage; track report.guid) {
+        @let sc = report.statusCheck;
+        <tr [ngClass]="{'analysis-row-error': sc?.status === 'error'}">
           <td class="input text-center">
-            <input type="checkbox" name="reportSelected" (change)="toggleChecked()" [(ngModel)]="report.checked">
+            <input type="checkbox" name="reportSelected" [checked]="_checkedGuids.has(report.guid)"
+              (change)="toggleCheck(report.guid, $any($event.target).checked)">
           </td>
-          <td>
-            @let reportErrors = report.guid | invalidAccountReport;
-            @if (reportErrors.hasErrors) {
-            <span class="fa fa-exclamation-circle"></span>
+
+          <!-- Status column -->
+          <td class="text-center align-middle status-col">
+            <span class="fa fa-fw fa-lg" [ngClass]="{
+              'fa-circle-check text-success': !sc || sc.status === 'good',
+              'fa-circle-xmark text-danger': sc?.status === 'error',
+              'fa-triangle-exclamation text-warning': sc?.status === 'warning'
+            }"></span>
+            @if (sc?.status !== 'good') {
+            <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+              @if (sc?.errors?.missingName) {
+              <span class="badge bg-danger issue-badge">Missing Name</span>
+              }
+              @if (sc?.errors?.missingReportType) {
+              <span class="badge bg-danger issue-badge">Missing Report Type</span>
+              }
+              @if (sc?.errors?.missingReportYear) {
+              <span class="badge bg-danger issue-badge">Missing Report Year</span>
+              }
+              @if (sc?.errors?.missingBaselineYear) {
+              <span class="badge bg-danger issue-badge">Missing Baseline Year</span>
+              }
+              @if (sc?.errors?.missingStartDate) {
+              <span class="badge bg-danger issue-badge">Missing Start Date</span>
+              }
+              @if (sc?.errors?.missingEndDate) {
+              <span class="badge bg-danger issue-badge">Missing End Date</span>
+              }
+              @if (sc?.errors?.invalidDateRange) {
+              <span class="badge bg-danger issue-badge">Invalid Date Range</span>
+              }
+              @if (sc?.errors?.baselineAfterReportYear) {
+              <span class="badge bg-danger issue-badge">Baseline After Report Year</span>
+              }
+              @if (sc?.errors?.analysisHasErrors) {
+              <span class="badge bg-danger issue-badge">Analysis Errors</span>
+              }
+              @if(sc?.status === 'warning') {
+              <span class="badge bg-warning text-dark issue-badge">Warnings in Analysis</span>
+              }
+            </div>
             }
-            <a (click)="selectReport(report)">{{ report.name }}</a>
+          </td>
+
+          <td>
+            <a (click)="selectReport(report)" class="can-click">{{ report.name }}</a>
           </td>
           <td>
             <span class="badge" [ngClass]="report.reportType | reportBadgeClass">{{
-              report.reportType |
-              accountReportType }}</span>
+              report.reportType | accountReportType }}</span>
           </td>
           <td>
             @switch (report.reportType) {
             @case ('accountEmissionFactors') {
-            @if (report.startYear != undefined) {
+            @if (report.startYear !== undefined) {
             {{ report.startYear }} -
             }
-            @if (report.endYear != undefined) {
+            @if (report.endYear !== undefined) {
             {{ report.endYear }}
             }
             @if (report.startYear === undefined && report.endYear === undefined) {
@@ -78,10 +159,10 @@
             }
             }
             @case ('dataOverview') {
-            @if (report.startMonth != undefined && report.startYear != undefined) {
+            @if (report.startMonth !== undefined && report.startYear !== undefined) {
             {{ report.startMonth | reportDate: report.startYear | date: 'MMM. y' }} -
             }
-            @if (report.endMonth != undefined && report.endYear != undefined) {
+            @if (report.endMonth !== undefined && report.endYear !== undefined) {
             {{ report.endMonth | reportDate: report.endYear | date: 'MMM. y' }}
             }
             @if (report.startMonth === undefined && report.startYear === undefined && report.endMonth ===
@@ -92,8 +173,7 @@
             @case ('accountSavings') {
             @if (report.endYear !== undefined) {
             {{ report.endYear }}
-            }
-            @if (report.endYear === undefined) {
+            } @else {
             &mdash;
             }
             }
@@ -106,12 +186,14 @@
             }
             }
           </td>
-          <td>{{report.modifiedDate | date:'short'}}</td>
+          <td>
+            {{ report.modifiedDate | date:'short' }}
+          </td>
           <td class="text-center">
-            <button title="Copy" class="btn action-btn btn-sm me-2" (click)="createCopy(report)">
+            <button title="Copy" class="btn action-btn btn-sm m-1 icon-style" (click)="createCopy(report)">
               <i class="fa fa-copy"></i>
             </button>
-            <button title="Delete" class="btn action-btn btn-sm me-2" (click)="deleteReport(report)">
+            <button title="Delete" class="btn action-btn btn-sm m-1 icon-style" (click)="deleteItem(report)">
               <i class="fa fa-trash"></i>
             </button>
           </td>
@@ -120,17 +202,20 @@
       </tbody>
     </table>
   </div>
+  @if (_filteredReports.length === 0) {
+  <div class="text-center text-muted py-3">
+    No reports match the selected filter.
+  </div>
+  }
   <div class="d-flex w-100 justify-content-end">
-    <ngb-pagination
-      [collectionSize]="(reports | reportOrderBy: orderDataField: orderByDirection: selectedReportType).length"
-      [(page)]="currentPageNumber" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    <ngb-pagination [collectionSize]="_filteredReports.length" [(page)]="currentPageNumber" [pageSize]="_itemsPerPage"
+      [maxSize]="5" [rotate]="true" aria-label="Pagination">
     </ngb-pagination>
   </div>
 </div>
 }
 
-
-@if (reports.length == 0) {
+@if (_reports.length === 0) {
 <div class="card card-body">
   <div class="text-center bold">
     No reports found for this account. Click "+Add New Report" to create your first report!
@@ -138,13 +223,14 @@
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': displayDeleteModal || showBulkDelete}"></div>
-<div class="popup" [class.open]="displayDeleteModal">
-  @if (displayDeleteModal) {
-  <div class="popup-header">Delete: {{deletedReport.name}}
+<div [ngClass]="{'windowOverlay': _displayDeleteModal || _showBulkDelete}"></div>
+
+<!--DELETE MODAL-->
+<div class="popup" [class.open]="_displayDeleteModal">
+  @if (_displayDeleteModal && _deletedReport) {
+  <div class="popup-header">Delete: {{ _deletedReport.name }}
     <button class="item-right" (click)="cancelDelete()">x</button>
   </div>
-  }
   <div class="popup-body">
     <p>WARNING: Deleting this report cannot be undone.</p>
   </div>
@@ -152,28 +238,44 @@
     <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
   </div>
+  }
 </div>
 
-<div class="popup" [class.open]="showBulkDelete">
+<!--BULK DELETE MODAL-->
+<div class="popup" [class.open]="_showBulkDelete">
   <div class="popup-header">Delete Report Items
     <button class="item-right" (click)="cancelBulkDelete()">x</button>
   </div>
+  @if (_showBulkDelete) {
   <div class="popup-body">
     <p>WARNING: Deleting report items cannot be undone.
       Are you sure you want to perform this action?</p>
-    @if (selectedItemsForBulkDelete && selectedItemsForBulkDelete.length > 0) {
-    <div class="alert alert-warning my-3 text-center" role="alert">
-      <div class="fw-bold mb-2 fs-5 text-danger">
+    @if (_checkedItems.length > 0) {
+    <div class="alert alert-warning my-3" role="alert">
+      <div class="fw-bold mb-2 fs-5 text-danger text-center">
         <i class="fa fa-exclamation-triangle me-2 text-danger"></i>
         Items to be deleted
       </div>
-      <ul class="mb-0 d-inline-block text-start">
-        @for (item of selectedItemsForBulkDelete; track item.guid) {
-        <li>
-          <span class="fw-semibold">{{item.name}}</span>
-        </li>
-        }
-      </ul>
+      <table class="table table-bordered table-sm align-middle my-3">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of _checkedItems; track item.guid) {
+          <tr>
+            <td class="fw-semibold">{{ item.name }}</td>
+            <td>
+              <span class="badge" [ngClass]="item.reportType | reportBadgeClass">
+                {{ item.reportType | accountReportType }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
     </div>
     }
   </div>
@@ -181,4 +283,5 @@
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
   </div>
+  }
 </div>

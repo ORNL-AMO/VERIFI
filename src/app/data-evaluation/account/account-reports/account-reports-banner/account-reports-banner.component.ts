@@ -10,6 +10,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { AccountReportErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { emptyAccountReportErrors } from 'src/app/calculations/status-check-calculations/validation/accountReportValidation';
+import { AccountReportStatusCheck } from 'src/app/calculations/status-check-calculations/accountReportStatusCheck';
 
 @Component({
   selector: 'app-account-reports-banner',
@@ -27,8 +28,8 @@ export class AccountReportsBannerComponent {
   readonly selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport, { initialValue: null });
   readonly reportList: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports, { initialValue: [] });
   readonly accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
-  readonly accountReportErrors: Signal<Array<AccountReportErrors>> = toSignal(
-    this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.accountReportErrors ?? [])),
+  readonly accountReportStatusChecks: Signal<Array<AccountReportStatusCheck>> = toSignal(
+    this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.accountReportStatusChecks ?? [])),
     { initialValue: [] }
   );
 
@@ -72,16 +73,16 @@ export class AccountReportsBannerComponent {
 
   readonly showDropdown: WritableSignal<boolean> = signal(false);
 
-  readonly reportErrors: Signal<AccountReportErrors> = computed(() => {
+  readonly reportStatusCheck: Signal<AccountReportStatusCheck> = computed(() => {
     const selectedReport = this.selectedReport();
-    const reportErrors = this.accountReportErrors();
-    if (selectedReport && reportErrors) {
-      const selectedReportErrors = reportErrors.find(errors => errors.reportId == selectedReport.guid);
-      if (selectedReportErrors) {
-        return selectedReportErrors;
+    const reportStatusChecks = this.accountReportStatusChecks();
+    if (selectedReport && reportStatusChecks) {
+      const selectedReportStatusChecks = reportStatusChecks.find(checks => checks.guid == selectedReport.guid);
+      if (selectedReportStatusChecks) {
+        return selectedReportStatusChecks;
       }
     }
-    return emptyAccountReportErrors();
+    return null;
   });
 
   constructor() {

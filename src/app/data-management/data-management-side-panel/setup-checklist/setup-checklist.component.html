@@ -33,7 +33,8 @@
       <div class="d-flex align-items-center gap-2">
         <span class="fa fa-fw" [ngClass]="{
                   'fa-circle-xmark text-danger': meterItem.status === 'error',
-                  'fa-exclamation-triangle text-warning': meterItem.status === 'warning'
+                  'fa-exclamation-triangle text-warning': meterItem.status === 'warning',
+                  'fa-clock text-outdated': meterItem.status === 'outdated'
                 }"></span>
         <span class="flex-grow-1 small">{{meterItem.label}}</span>
         <span class="fa fa-chevron-right text-muted small"></span>
@@ -48,7 +49,8 @@
       <div class="d-flex align-items-center gap-2">
         <span class="fa fa-fw" [ngClass]="{
                   'fa-circle-xmark text-danger': predictorItem.status === 'error',
-                  'fa-exclamation-triangle text-warning': predictorItem.status === 'warning'
+                  'fa-exclamation-triangle text-warning': predictorItem.status === 'warning',
+                  'fa-clock text-outdated': predictorItem.status === 'outdated'
                 }"></span>
         <span class="flex-grow-1 small">
           @if (predictorItem.isWeather) {
