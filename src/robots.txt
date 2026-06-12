@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /data-evaluation/
+Disallow: /data-management/
+
+Sitemap: https://verifi.ornl.gov/sitemap.xml

@@ -67,6 +67,7 @@ export class AnalyticsService {
         params: {
           verifi_platform: 'verifi-desktop',
           page_path: path,
+          page_location: 'https://verifi.ornl.gov' + path,
           session_id: this.analyticsSessionId
         }
       }
@@ -145,6 +146,7 @@ export class AnalyticsService {
       if (!this.electronService.isElectron) {
         let eventParams: EventParameters = {
           page_path: path,
+          page_location: window.location.href,
           verifi_platform: 'verifi-web',
           session_id: undefined
         }
@@ -180,6 +182,7 @@ export interface GAEvent {
 
 export interface EventParameters {
   page_path?: string,
+  page_location?: string,
   verifi_platform?: VerifiPlatformString,
   session_id: string,
   engagement_time_msec?: string,
