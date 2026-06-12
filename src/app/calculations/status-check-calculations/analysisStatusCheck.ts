@@ -80,12 +80,12 @@ export class AnalysisStatusCheck {
         const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(analysisItem.groups, meterStatusChecks);
         this.includedPredictorStatusChecks = includedPredictorIds.map(predictorId =>
             this.getPredictorDateEntry(predictorId, predictorStatusChecks)
-        );
+        ).filter(p => p !== undefined);
         const latestPredictorDates: Array<Date> = this.includedPredictorStatusChecks.map(d => d.latestEntryDate);
 
         this.includedMeterStatusChecks = includedMeterIds.map(meterId =>
             this.getMeterDateEntry(meterId, meterStatusChecks)
-        );
+        ).filter(m => m !== undefined);
         const latestMeterData: Array<Date> = this.includedMeterStatusChecks.map(d => d.lastDateEntry);
 
         const allDates: Array<Date> = [
@@ -196,7 +196,7 @@ export class AnalysisStatusCheck {
             // Collect unique meter IDs for all calanderized meters belonging to this group.
             const groupMeters: Array<MeterStatusCheck> = meterStatusChecks.filter(cm => cm.groupId === group.idbGroupId);
             for (const cm of groupMeters) {
-                if (!includedMeterIds.includes(cm.meterId)) {
+                if (!cm.isMeterNoLongerInUse && !includedMeterIds.includes(cm.meterId)) {
                     includedMeterIds.push(cm.meterId);
                 }
             }

@@ -23,6 +23,7 @@ export class MeterStatusCheck {
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date;
+    isMeterNoLongerInUse: boolean;
 
     constructor(
         meter: IdbUtilityMeter,
@@ -37,6 +38,7 @@ export class MeterStatusCheck {
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
+        this.isMeterNoLongerInUse = meter.noLongerInUse;
         this.setHasNegativeReadings(meter, meterReadings);
         this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1) : undefined;
         if (calanderizedMeter) {

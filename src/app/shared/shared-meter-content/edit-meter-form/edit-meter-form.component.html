@@ -350,13 +350,23 @@
             <label class="form-check-label semibold" for="meterNoLongerInUse">No Longer In Use</label>
           </div>
           @if (meterForm.controls.noLongerInUse.value) {
-          <div class="row">
-            <div class="col">
-              <label class="semibold" for="meterNoLongerInUseDate">Stop Month/Year</label>
-              <div class="mb-3">
-                <input id="meterNoLongerInUseDate" class="form-control" type="month"
-                  [value]="noLongerInUseDateValue" (change)="setNoLongerInUseDate($event)">
-              </div>
+          <div class="row g-2 align-items-end mb-3">
+            <div class="col-auto">
+              <label class="semibold d-block" for="noLongerInUseMonth">Stop Month / Year</label>
+              <select id="noLongerInUseMonth" class="form-select" formControlName="noLongerInUseMonth">
+                <option [ngValue]="null" disabled>Month</option>
+                @for (month of months; track month.monthNumValue) {
+                  <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
+                }
+              </select>
+            </div>
+            <div class="col-auto">
+              <select id="noLongerInUseYear" class="form-select" formControlName="noLongerInUseYear" aria-label="Stop year">
+                <option [ngValue]="null" disabled>Year</option>
+                @for (year of noLongerInUseYearOptions; track year) {
+                  <option [ngValue]="year">{{year}}</option>
+                }
+              </select>
             </div>
           </div>
           }
