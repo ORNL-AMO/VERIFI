@@ -20,6 +20,7 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
+import { Month, Months } from '../../form-data/months';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -61,6 +62,13 @@ export class CalculatedPredictorDataUpdateComponent {
 
   displayUpdatesModal: boolean = false;
   checkForUpdates: boolean = false;
+
+  months: Array<Month> = Months;
+  today: Date = new Date();
+  yearOptions: Array<number> = Array.from(
+    { length: new Date().getFullYear() - 1999 },
+    (_, i) => new Date().getFullYear() - i
+  );
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -343,6 +351,34 @@ export class CalculatedPredictorDataUpdateComponent {
     //-1 on month
     this.startDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
     await this.updateDataDateChange();
+  }
+
+  async onStartMonthChange(month: number) {
+    if (this.startDate && month != null) {
+      this.startDate = new Date(this.startDate.getFullYear(), month, 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  async onStartYearChange(year: number) {
+    if (this.startDate && year != null) {
+      this.startDate = new Date(year, this.startDate.getMonth(), 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  async onEndMonthChange(month: number) {
+    if (this.endDate && month != null) {
+      this.endDate = new Date(this.endDate.getFullYear(), month, 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  async onEndYearChange(year: number) {
+    if (this.endDate && year != null) {
+      this.endDate = new Date(year, this.endDate.getMonth(), 1);
+      await this.updateDataDateChange();
+    }
   }
 
   openCheckForUpdatesModal() {

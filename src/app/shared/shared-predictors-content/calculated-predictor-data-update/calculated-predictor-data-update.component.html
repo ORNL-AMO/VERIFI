@@ -1,21 +1,58 @@
 <div class="d-flex w-100 justify-content-between mb-2">
-  <div class="d-flex">
-    <div class="d-flex pe-4">
-      <label class="label mt-auto" for="startDate">Start Date</label>
-      <div class="input-group">
-        <input id="startDate" class="form-control" type="month" [ngModel]="startDate | date:'yyyy-MM'"
-          (ngModelChange)="setStartDate($event)" name="date" [disabled]="calculatingData">
+  <div class="d-flex gap-3">
+    <div>
+      <label class="label d-block mb-1" for="startDateMonth">Start Date</label>
+      <div class="d-flex gap-1">
+        <select id="startDateMonth" class="form-select form-select-sm"
+          [ngModel]="startDate?.getMonth() ?? null"
+          (ngModelChange)="onStartMonthChange($event)"
+          [disabled]="calculatingData">
+          <option [ngValue]="null" disabled>Month</option>
+          @for (month of months; track month.monthNumValue) {
+            <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
+          }
+        </select>
+        <select id="startDateYear" class="form-select form-select-sm"
+          [ngModel]="startDate?.getFullYear() ?? null"
+          (ngModelChange)="onStartYearChange($event)"
+          [disabled]="calculatingData">
+          <option [ngValue]="null" disabled>Year</option>
+          @for (year of yearOptions; track year) {
+            <option [ngValue]="year">{{year}}</option>
+          }
+        </select>
       </div>
     </div>
-    <div class="d-flex">
-      <label class="label mt-auto" for="endDate">End Date</label>
-      <div class="input-group">
-        <input id="endDate" class="form-control" type="month" [ngModel]="endDate | date:'yyyy-MM'"
-          (ngModelChange)="setEndDate($event)" name="date" [disabled]="calculatingData">
+    <div>
+      <label class="label d-block mb-1" for="endDateMonth">End Date</label>
+      <div class="d-flex gap-1">
+        <select id="endDateMonth" class="form-select form-select-sm"
+          [ngModel]="endDate?.getMonth() ?? null"
+          (ngModelChange)="onEndMonthChange($event)"
+          [disabled]="calculatingData">
+          <option [ngValue]="null" disabled>Month</option>
+          @for (month of months; track month.monthNumValue) {
+            <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
+          }
+        </select>
+        <select id="endDateYear" class="form-select form-select-sm"
+          [ngModel]="endDate?.getFullYear() ?? null"
+          (ngModelChange)="onEndYearChange($event)"
+          [disabled]="calculatingData">
+          <option [ngValue]="null" disabled>Year</option>
+          @for (year of yearOptions; track year) {
+            <option [ngValue]="year">{{year}}</option>
+          }
+        </select>
       </div>
+      @if (endDate > today) {
+        <div class="text-danger small mt-1">
+          <i class="fa fa-clock me-1"></i>Sorry, we can't predict the weather...
+        </div>
+      }
     </div>
   </div>
-  <div class="d-flex">
+  <div class="d-flex align-items-end">
     <!--Items Per Page-->
     @if (firstMeterReading) {
       <button class="btn btn-outline me-1" (click)="openCheckForUpdatesModal()">

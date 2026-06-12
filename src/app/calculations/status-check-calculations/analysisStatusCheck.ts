@@ -80,12 +80,12 @@ export class AnalysisStatusCheck {
         const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(analysisItem.groups, meterStatusChecks);
         this.includedPredictorStatusChecks = includedPredictorIds.map(predictorId =>
             this.getPredictorDateEntry(predictorId, predictorStatusChecks)
-        );
+        ).filter(p => p !== undefined);
         const latestPredictorDates: Array<Date> = this.includedPredictorStatusChecks.map(d => d.latestEntryDate);
 
         this.includedMeterStatusChecks = includedMeterIds.map(meterId =>
             this.getMeterDateEntry(meterId, meterStatusChecks)
-        );
+        ).filter(m => m !== undefined);
         const latestMeterData: Array<Date> = this.includedMeterStatusChecks.map(d => d.lastDateEntry);
 
         const allDates: Array<Date> = [
