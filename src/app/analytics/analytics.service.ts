@@ -67,7 +67,6 @@ export class AnalyticsService {
         params: {
           verifi_platform: 'verifi-desktop',
           page_path: path,
-          page_location: 'https://verifi.ornl.gov' + path,
           session_id: this.analyticsSessionId
         }
       }
@@ -129,8 +128,10 @@ export class AnalyticsService {
     pageViewEvent.params.page_path = this.getPageWithoutId(pageViewEvent.params.page_path);
     // Never send real paths while in dev
     if (!environment.production) {
-      pageViewEvent.params.page_path = '/testing'
+      pageViewEvent.params.page_path = '/testing';
     }
+    // Derive page_location from the already-sanitized page_path so IDs are never sent
+    pageViewEvent.params.page_location = 'https://verifi.ornl.gov' + pageViewEvent.params.page_path;
   }
 
   getPageWithoutId(pagePath: string) {
