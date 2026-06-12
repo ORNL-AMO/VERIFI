@@ -354,15 +354,17 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   async onStartMonthChange(month: number) {
-    if (this.startDate && month != null) {
-      this.startDate = new Date(this.startDate.getFullYear(), month, 1);
+    if (month != null) {
+      const year = this.startDate?.getFullYear() ?? this.today.getFullYear();
+      this.startDate = new Date(year, month, 1);
       await this.updateDataDateChange();
     }
   }
 
   async onStartYearChange(year: number) {
-    if (this.startDate && year != null) {
-      this.startDate = new Date(year, this.startDate.getMonth(), 1);
+    if (year != null) {
+      const month = this.startDate?.getMonth() ?? this.today.getMonth();
+      this.startDate = new Date(year, month, 1);
       await this.updateDataDateChange();
     }
   }
