@@ -157,7 +157,7 @@ export class AnnualAccountAnalysisSummaryClass {
                 // Collect unique meter IDs for all calanderized meters belonging to this group.
                 const groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => meter.groupId === group.idbGroupId);
                 for (const meter of groupMeters) {
-                    if (!includedMeterIds.includes(meter.guid)) {
+                    if (!meter.noLongerInUse && !includedMeterIds.includes(meter.guid)) {
                         includedMeterIds.push(meter.guid);
                     }
                 }

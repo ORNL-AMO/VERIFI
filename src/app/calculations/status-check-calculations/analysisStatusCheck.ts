@@ -196,7 +196,7 @@ export class AnalysisStatusCheck {
             // Collect unique meter IDs for all calanderized meters belonging to this group.
             const groupMeters: Array<MeterStatusCheck> = meterStatusChecks.filter(cm => cm.groupId === group.idbGroupId);
             for (const cm of groupMeters) {
-                if (!includedMeterIds.includes(cm.meterId)) {
+                if (!cm.isMeterNoLongerInUse && !includedMeterIds.includes(cm.meterId)) {
                     includedMeterIds.push(cm.meterId);
                 }
             }
