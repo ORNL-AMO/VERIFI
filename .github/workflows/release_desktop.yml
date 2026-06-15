@@ -79,9 +79,6 @@ jobs:
           APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
           APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
           APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           CERT_A_PATH=$RUNNER_TEMP/app_certificate.p12
           PROV_PROF_PATH=$RUNNER_TEMP/AMO.provisionprofile
