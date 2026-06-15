@@ -8,13 +8,19 @@
 
         <div class="d-flex w-100 justify-content-end">
           <div>
+            <button class="btn nav-btn me-2" (click)="goToMeterData()">
+              <i class="fa fa-table me-1"></i>View Meter Data
+            </button>
+          </div>
+          <div>
             <button class="btn btn-primary me-2" (click)="saveChanges()"
               [disabled]="meterForm.invalid || meterForm.pristine">
               <span class="fa fa-save"></span>
               Save Changes</button>
           </div>
         </div>
-        <app-edit-meter-form [meterForm]="meterForm" [facility]="facility"></app-edit-meter-form>
+        <app-edit-meter-form [meterForm]="meterForm" [facility]="facility"
+          [meterDataExists]="meterDataExists"></app-edit-meter-form>
         <hr>
         <div class="d-flex w-100 justify-content-end">
           <div>

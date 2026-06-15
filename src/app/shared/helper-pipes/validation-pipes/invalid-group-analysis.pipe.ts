@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
-import { AnalysisGroupValidationService } from '../../validation/services/analysis-group-validation.service';
+import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 
 @Pipe({
   name: 'invalidGroupAnalysis',
@@ -9,11 +9,10 @@ import { AnalysisGroupValidationService } from '../../validation/services/analys
 })
 export class InvalidGroupAnalysisPipe implements PipeTransform {
 
-  constructor(private analysisGroupValidationService: AnalysisGroupValidationService
-  ) { }
+  constructor(private accountStatusCheckService: AccountStatusCheckService) { }
 
   transform(groupID: string, analysisId: string): GroupAnalysisErrors {
-    return this.analysisGroupValidationService.getGroupErrorsByGroupId(groupID, analysisId);
+    return this.accountStatusCheckService.getGroupErrorsByGroupId(groupID, analysisId);
   }
 
 }

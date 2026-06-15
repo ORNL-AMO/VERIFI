@@ -4,7 +4,6 @@ import { PredictorTableComponent } from './predictor-table/predictor-table.compo
 import { EditPredictorFormComponent } from './edit-predictor-form/edit-predictor-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PredictorsDataTableComponent } from './predictors-data-table/predictors-data-table.component';
-import { OrderPredictorDataTablePipe } from './predictors-data-table/order-predictor-data-table.pipe';
 import { TableItemsDropdownModule } from '../table-items-dropdown/table-items-dropdown.module';
 import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -24,7 +23,6 @@ import { SharedDataQualityReportPredictorsModule } from '../shared-data-quality-
     PredictorTableComponent,
     EditPredictorFormComponent,
     PredictorsDataTableComponent,
-    OrderPredictorDataTablePipe,
     WeatherDataSubLabelComponent,
     EditPredictorDataEntryFormComponent,
     CalculatedPredictorDataUpdateComponent,
@@ -46,7 +44,6 @@ import { SharedDataQualityReportPredictorsModule } from '../shared-data-quality-
     PredictorTableComponent,
     EditPredictorFormComponent,
     PredictorsDataTableComponent,
-    OrderPredictorDataTablePipe,
     WeatherDataSubLabelComponent,
     EditPredictorDataEntryFormComponent,
     CalculatedPredictorDataUpdateComponent,

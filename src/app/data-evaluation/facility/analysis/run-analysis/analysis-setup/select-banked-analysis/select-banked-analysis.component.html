@@ -34,7 +34,8 @@
             <div class="d-flex justify-content-center">
               <input type="radio" class="form-check-input" name="bankedAnalysisItemId"
                 [value]="analysisItemOption.guid" id="{{analysisItemOption.guid}}"
-                [(ngModel)]="analysisItem.bankedAnalysisItemId" (change)="save()" [disabled]="disabled">
+                [checked]="analysisItem.bankedAnalysisItemId === analysisItemOption.guid"
+                (change)="selectItem(analysisItemOption.guid)" [disabled]="disabled">
             </div>
           </td>
           <td>

@@ -8,7 +8,7 @@ import { FacilityAnalysisComponent } from './run-analysis/facility-analysis/faci
 import { GroupAnalysisComponent } from './run-analysis/group-analysis/group-analysis.component';
 import { GroupAnalysisOptionsComponent } from './run-analysis/group-analysis/group-analysis-options/group-analysis-options.component';
 import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-setup.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
@@ -18,7 +18,6 @@ import { MonthlyAnalysisSummaryComponent } from './run-analysis/group-analysis/m
 import { MonthlyFacilityAnalysisComponent } from './run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component';
 import { AnnualFacilityAnalysisComponent } from './run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
-import { ModelFilterPipe } from './run-analysis/group-analysis/regression-model-selection/model-filter.pipe';
 import { RegressionModelMenuComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-menu/regression-model-menu.component';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { AccountAnalysisListComponent } from './account-analysis-list/account-analysis-list.component';
@@ -51,7 +50,6 @@ import { RegressionModelComparison } from './run-analysis/group-analysis/regress
     MonthlyAnalysisSummaryComponent,
     MonthlyFacilityAnalysisComponent,
     AnnualFacilityAnalysisComponent,
-    ModelFilterPipe,
     RegressionModelMenuComponent,
     AccountAnalysisListComponent,
     AnalysisFooterComponent,
@@ -68,6 +66,7 @@ import { RegressionModelComparison } from './run-analysis/group-analysis/regress
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule,
     HelperPipesModule,
     NgbPaginationModule,

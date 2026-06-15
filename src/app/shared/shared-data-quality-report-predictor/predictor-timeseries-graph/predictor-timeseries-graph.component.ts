@@ -20,6 +20,8 @@ export class PredictorTimeseriesGraphComponent {
   selectedPredictor: IdbPredictor;
   @Input({ required: true })
   stats: PredictorStatistics;
+  @Input({ required: true })
+  missingMonthsList: Array<{ monthYear: string, month: number, year: number }> = [];
 
   @ViewChild('predictorTimeSeriesGraph', { static: false }) predictorTimeSeriesGraph: ElementRef;
   viewInitialized: boolean = false;
@@ -74,7 +76,31 @@ export class PredictorTimeseriesGraphComponent {
     let markerColors: Array<string> = markers.map(marker => marker.color);
     let markerSymbols: Array<string> = markers.map(marker => marker.symbol);
 
-    var data = [
+    // Build vertical dashed-line shapes for each missing month
+    let missingMonthShapes = (this.missingMonthsList || []).map(({ month, year }) => {
+      let x = new Date(year, month - 1, 15); // mid-month
+      return {
+        type: 'line',
+        xref: 'x',
+        yref: 'paper',
+        x0: x,
+        x1: x,
+        y0: 0,
+        y1: 1,
+        line: {
+          color: '#f57c00',
+          width: 2,
+          dash: 'dot'
+        }
+      };
+    });
+
+    // Invisible scatter trace for missing month legend entry
+    let missingMonthDates = (this.missingMonthsList || []).map(({ month, year }) =>
+      new Date(year, month - 1, 15)
+    );
+
+    var data: any[] = [
       {
         type: "scatter",
         mode: "lines+markers",
@@ -92,9 +118,27 @@ export class PredictorTimeseriesGraphComponent {
       }
     ];
 
+    if (missingMonthDates.length > 0) {
+      data.push({
+        type: 'scatter',
+        mode: 'markers',
+        name: 'Missing Month',
+        x: missingMonthDates,
+        y: missingMonthDates.map(() => null),
+        marker: {
+          color: '#f57c00',
+          symbol: 'line-ns',
+          size: 16,
+          line: { width: 2, color: '#f57c00' }
+        },
+        showlegend: true,
+        hoverinfo: 'skip'
+      });
+    }
+
     let height: number = 400;
 
-    var layout = {
+    var layout: any = {
       height: height,
       autosize: true,
       plot_bgcolor: "#e7f1f2",
@@ -102,6 +146,7 @@ export class PredictorTimeseriesGraphComponent {
       legend: {
         orientation: "h"
       },
+      shapes: missingMonthShapes,
       xaxis: {
         hoverformat: "%b, %Y",
       },

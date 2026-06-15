@@ -1,77 +1,81 @@
+@let _calculatingWater = calculatingWater();
+@let _calculatingOverview = calculatingOverview();
+@let _monthlyWaterAnalysisData = monthlyWaterAnalysisData();
+@let _annualWaterAnalysisSummary = annualWaterAnalysisSummary();
+@let _accountOverviewData = accountOverviewData();
+@let _carouselIndex = carouselIndex();
+@let _latestWaterAnalysisItem = latestWaterAnalysisItem();
+@let _account = account();
+
 <div class="card">
   <div class="card-body">
     <div class="row">
       <div class="col-12">
         <app-account-water-reduction-goal></app-account-water-reduction-goal>
-        @if (calculatingWater != false) {
-          <app-calculating-spinner [message]="'Calculating Water...'"
-            [error]="calculatingWater == 'error'">
-          </app-calculating-spinner>
+        @if (_calculatingWater != false) {
+        <app-calculating-spinner [message]="'Calculating Water...'" [error]="_calculatingWater == 'error'">
+        </app-calculating-spinner>
         }
-        @let setupErrors = latestWaterAnalysisItem.guid | invalidAccountAnalysis;
+        @let setupErrors = _latestWaterAnalysisItem.guid | invalidAccountAnalysis;
         @if (setupErrors.hasError) {
-          <div class="alert alert-danger">
-            Errors found in selected analysis.
-          </div>
+        <div class="alert alert-danger">
+          Errors found in selected analysis.
+        </div>
         }
       </div>
       <div class="col-12">
         <hr>
-        </div>
-        @if (calculatingWater == false && calculatingOverview == false && monthlyWaterAnalysisData && annualWaterAnalysisSummary && accountOverviewData) {
-          <div class="col-12">
-            @if ( carouselIndex == 0) {
-              <app-monthly-analysis-summary-graph
-                [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData" [analysisItem]="latestWaterAnalysisItem"
-                [facilityOrAccount]="account" [inHomeScreen]="true">
-              </app-monthly-analysis-summary-graph>
-            }
-            @if ( carouselIndex == 1) {
-              <app-monthly-analysis-summary-savings-graph
-                [analysisItem]="latestWaterAnalysisItem" [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
-                [facilityOrAccount]="account" [inHomeScreen]="true">
-              </app-monthly-analysis-summary-savings-graph>
-            }
-            @if ( carouselIndex == 2) {
-              <app-annual-analysis-summary-graph
-                [annualAnalysisSummary]="annualWaterAnalysisSummary" [analysisItem]="latestWaterAnalysisItem"
-                [inHomeScreen]="true">
-              </app-annual-analysis-summary-graph>
-            }
-            @if ( carouselIndex == 3) {
-              <app-facility-usage-donut [dataType]="'water'"
-                [accountOverviewFacilities]="accountOverviewData.facilitiesWater" [waterUnit]="waterUnit"
-              [inHomeScreen]="true"></app-facility-usage-donut>
-            }
+      </div>
+      @if (_calculatingWater == false && _calculatingOverview == false && _monthlyWaterAnalysisData &&
+      _annualWaterAnalysisSummary && _accountOverviewData) {
+      <div class="col-12">
+        @if (_carouselIndex == 0) {
+        <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="_monthlyWaterAnalysisData"
+          [analysisItem]="_latestWaterAnalysisItem" [facilityOrAccount]="_account" [inHomeScreen]="true">
+        </app-monthly-analysis-summary-graph>
+        }
+        @if (_carouselIndex == 1) {
+        <app-monthly-analysis-summary-savings-graph [analysisItem]="_latestWaterAnalysisItem"
+          [monthlyAnalysisSummaryData]="_monthlyWaterAnalysisData" [facilityOrAccount]="_account" [inHomeScreen]="true">
+        </app-monthly-analysis-summary-savings-graph>
+        }
+        @if (_carouselIndex == 2) {
+        <app-annual-analysis-summary-graph [annualAnalysisSummary]="_annualWaterAnalysisSummary"
+          [analysisItem]="_latestWaterAnalysisItem" [inHomeScreen]="true">
+        </app-annual-analysis-summary-graph>
+        }
+        @if (_carouselIndex == 3) {
+        <app-facility-usage-donut [dataType]="'water'"
+          [accountOverviewFacilities]="_accountOverviewData.facilitiesWater" [waterUnit]="_account.volumeLiquidUnit"
+          [inHomeScreen]="true"></app-facility-usage-donut>
+        }
+      </div>
+      <div class="col-12">
+        <hr>
+        <div class="d-flex justify-content-between">
+          <div>
+            <button class="btn nav-btn" type="button" (click)="goBack()" [disabled]="_carouselIndex == 0">
+              <span class="fa fa-chevron-left"></span>
+            </button>
           </div>
-          <div class="col-12">
-            <hr>
-              <div class="d-flex justify-content-between">
-                <div>
-                  <button class="btn nav-btn" type="button" (click)="goBack()"
-                    [disabled]="carouselIndex == 0">
-                    <span class="fa fa-chevron-left"></span>
-                  </button>
-                </div>
-                <div>
-                  <span (click)="goToIndex(0)" class="fa"
-                  [ngClass]="{'fa-circle-dot': carouselIndex == 0, 'fa-circle': carouselIndex != 0}"></span>
-                  <span (click)="goToIndex(1)" class="fa"
-                  [ngClass]="{'fa-circle-dot': carouselIndex == 1, 'fa-circle': carouselIndex != 1}"></span>
-                  <span (click)="goToIndex(2)" class="fa"
-                  [ngClass]="{'fa-circle-dot': carouselIndex == 2, 'fa-circle': carouselIndex != 2}"></span>
-                  <span (click)="goToIndex(3)" class="fa"
-                  [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span>
-                </div>
-                <div>
-                  <button class="btn nav-btn" type="button" (click)="goNext()"
-                    [disabled]="carouselIndex == 3">
-                    <span class="fa fa-chevron-right"></span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          }
+          <div>
+            <span (click)="goToIndex(0)" class="fa"
+              [ngClass]="{'fa-circle-dot': _carouselIndex == 0, 'fa-circle': _carouselIndex != 0}"></span>
+            <span (click)="goToIndex(1)" class="fa"
+              [ngClass]="{'fa-circle-dot': _carouselIndex == 1, 'fa-circle': _carouselIndex != 1}"></span>
+            <span (click)="goToIndex(2)" class="fa"
+              [ngClass]="{'fa-circle-dot': _carouselIndex == 2, 'fa-circle': _carouselIndex != 2}"></span>
+            <span (click)="goToIndex(3)" class="fa"
+              [ngClass]="{'fa-circle-dot': _carouselIndex == 3, 'fa-circle': _carouselIndex != 3}"></span>
+          </div>
+          <div>
+            <button class="btn nav-btn" type="button" (click)="goNext()" [disabled]="_carouselIndex == 3">
+              <span class="fa fa-chevron-right"></span>
+            </button>
+          </div>
         </div>
       </div>
+      }
     </div>
+  </div>
+</div>

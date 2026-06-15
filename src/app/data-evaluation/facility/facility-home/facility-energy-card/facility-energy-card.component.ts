@@ -1,90 +1,44 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { FacilityHomeService } from '../facility-home.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-facility-energy-card',
-    templateUrl: './facility-energy-card.component.html',
-    styleUrls: ['./facility-energy-card.component.css'],
-    standalone: false
+  selector: 'app-facility-energy-card',
+  templateUrl: './facility-energy-card.component.html',
+  styleUrls: ['./facility-energy-card.component.css'],
+  standalone: false
 })
 export class FacilityEnergyCardComponent {
+  private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
+  private facilityDbService: FacilitydbService= inject(FacilitydbService);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
 
-  monthlyEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyEnergyAnalysisDataSub: Subscription;
-  calculatingEnergy: boolean | 'error';
-  calculatingEnergySub: Subscription;
-  calculatingOverview: boolean | 'error';
-  calculatingOverviewSub: Subscription;
-  
-  annualEnergyAnalysisSummary: Array<AnnualAnalysisSummary>;
-  annualEnergyAnalysisSummarySub: Subscription;
+  monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityEnergyAnalysisData, { initialValue: undefined });
+  calculatingEnergy: Signal<boolean | 'error'> = toSignal(this.facilityHomeService.calculatingEnergy, { initialValue: true });
+  calculatingOverview: Signal<boolean | 'error'> = toSignal(this.facilityHomeService.calculatingOverview, { initialValue: true });
 
-  latestEnergyAnalysisItem: IdbAnalysisItem;
-  facility: IdbFacility;
-  selectedFacilitySub: Subscription;
-  carouselIndex: number = 0;
-  energyUnit: string;
-  facilityOverviewData: FacilityOverviewData
-  facilityOverviewDataSub: Subscription;
+  annualEnergyAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.facilityHomeService.annualEnergyAnalysisSummary, { initialValue: undefined });
 
-  constructor(private facilityHomeService: FacilityHomeService,
-    private facilityDbService: FacilitydbService,
-    private sharedDataService: SharedDataService) {
-  }
-
-  ngOnInit() {
-    this.carouselIndex = this.sharedDataService.energyHomeCarouselIndex.getValue();
-
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
-      this.facility = val;
-    });
-    this.calculatingEnergySub = this.facilityHomeService.calculatingEnergy.subscribe(val => {
-      this.calculatingEnergy = val;
-    });
-    this.calculatingOverviewSub = this.facilityHomeService.calculatingOverview.subscribe(val => {
-      this.calculatingOverview = val;
-    });
-
-    this.monthlyEnergyAnalysisDataSub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
-      this.monthlyEnergyAnalysisData = val;
-    });
-    this.annualEnergyAnalysisSummarySub = this.facilityHomeService.annualEnergyAnalysisSummary.subscribe(val => {
-      this.annualEnergyAnalysisSummary = val;
-    });
-    this.facilityOverviewDataSub = this.facilityHomeService.facilityOverviewData.subscribe(val => {
-      this.facilityOverviewData = val;
-    });
-  }
-
-  ngOnDestroy() {
-    this.calculatingEnergySub.unsubscribe();
-    this.monthlyEnergyAnalysisDataSub.unsubscribe();
-    this.selectedFacilitySub.unsubscribe();
-    this.annualEnergyAnalysisSummarySub.unsubscribe();
-    this.facilityOverviewDataSub.unsubscribe();
-    this.calculatingOverviewSub.unsubscribe();
-  }
+  latestEnergyAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
+  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  carouselIndex: Signal<number> = toSignal(this.sharedDataService.energyHomeCarouselIndex, { initialValue: 0 });
+  facilityOverviewData: Signal<FacilityOverviewData> = toSignal(this.facilityHomeService.facilityOverviewData, { initialValue: undefined });
 
   goNext() {
-    this.carouselIndex++;
-    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex() + 1);
   }
 
   goBack() {
-    this.carouselIndex--;
-    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex() - 1);
   }
 
   goToIndex(index: number) {
-    this.carouselIndex = index;
-    this.sharedDataService.energyHomeCarouselIndex.next(this.carouselIndex);
+    this.sharedDataService.energyHomeCarouselIndex.next(index);
   }
 }

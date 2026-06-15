@@ -13,7 +13,8 @@ export interface IdbFacilityReport extends IdbEntry {
     dataOverviewReportSettings: DataOverviewFacilityReportSettings,
     savingsReportSettings: SavingsFacilityReportSettings,
     emissionFactorsReportSettings: EmissionFactorsReportSettings,
-    modelingReportSettings: ModelingReportSettings
+    modelingReportSettings: ModelingReportSettings,
+    costSavingsReportSettings: CostSavingsReportSettings
 }
 
 export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
@@ -30,11 +31,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         dataOverviewReportSettings: getDataOverviewReportSettings(groups),
         savingsReportSettings: getSavingsReportSettings(),
         emissionFactorsReportSettings: getEmissionFactorsReportSettings(),
-        modelingReportSettings: getModelingReportSettings()
+        modelingReportSettings: getModelingReportSettings(),
+        costSavingsReportSettings: getCostSavingsReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling' | 'costSavings';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -267,4 +269,22 @@ export interface ModelingReportSettings {
     includeIssuesSummary: boolean,
     includeExecutiveSummary: boolean,
     includeDataValidationTables: boolean
+}
+
+export function getCostSavingsReportSettings(): CostSavingsReportSettings {
+    return {
+        reportYear: undefined,
+        costSavingsTable: {},
+        groupUnits: {},
+        isDataComplete: false
+    };
+}
+
+export interface CostSavingsReportSettings {
+    reportYear: number,
+    costSavingsTable: {
+        [year: number]: {[groupId: string]: number}
+    },
+    groupUnits: {[groupId: string]: string},
+    isDataComplete?: boolean
 }

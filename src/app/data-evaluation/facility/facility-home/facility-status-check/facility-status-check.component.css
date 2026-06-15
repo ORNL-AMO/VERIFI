@@ -1,0 +1,60 @@
+.status-check-header {
+    color: white;
+}
+
+.status-check-header.bg-warning {
+    color: #212529;
+}
+
+/* Keep the background color when collapsed (Bootstrap resets it on .collapsed) */
+.status-check-header.bg-success,
+.status-check-header.bg-success:not(.collapsed),
+.status-check-header.bg-success strong {
+    background-color: var(--bs-success) !important;
+    color: white;
+}
+
+.status-check-header.bg-warning,
+.status-check-header.bg-warning:not(.collapsed) {
+    background-color: var(--bs-warning) !important;
+}
+
+.status-check-header.bg-danger,
+.status-check-header.bg-danger:not(.collapsed),
+.status-check-header.bg-danger strong {
+    background-color: var(--bs-danger) !important;
+    color: white;
+}
+
+/* Purple/outdated status styling */
+.status-check-header.bg-outdated,
+.status-check-header.bg-outdated:not(.collapsed),
+.status-check-header.bg-outdated strong {
+    background-color: #6f42c1 !important;
+    color: white;
+}
+
+.bg-outdated {
+    background-color: #6f42c1 !important;
+    color: white;
+}
+
+.text-outdated {
+    color: #6f42c1 !important;
+}
+
+/* White chevron arrow for success/danger/outdated headers */
+.status-check-header.bg-success::after,
+.status-check-header.bg-danger::after,
+.status-check-header.bg-outdated::after {
+    filter: brightness(0) invert(1);
+}
+
+.status-check-header .fa {
+    font-size: 1.1rem;
+    color: inherit;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+}

@@ -13,3 +13,7 @@
 a.click-link .fa{
     color: inherit;
 }
+
+.bg-success .fa{
+    color: white; 
+}

@@ -84,7 +84,7 @@ export class AccountAnalysisDbService {
       }
     });
     await firstValueFrom(this.updateWithObservable(analysiItem));
-    this.selectedAnalysisItem.next(analysiItem);
+    this.selectedAnalysisItem.next({ ...analysiItem });
   }
 
   getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {

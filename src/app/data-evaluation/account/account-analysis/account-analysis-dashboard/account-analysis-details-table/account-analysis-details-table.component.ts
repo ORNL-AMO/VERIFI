@@ -10,19 +10,22 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 
 interface AnalysisDetailsTableRow {
   analysisItem: IdbAccountAnalysisItem,
   isDeleteChecked: boolean,
-  linkedReports: Array<string>
+  linkedReports: Array<string>,
+  accountAnalysisStatusCheck: AccountAnalysisStatusCheck | undefined
 }
 
 @Component({
@@ -41,11 +44,13 @@ export class AccountAnalysisDetailsTableComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private loadingService: LoadingService = inject(LoadingService);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
   accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
 
   selectedAnalysisCategory: WritableSignal<'energy' | 'water' | 'all'> = signal('all');
@@ -105,6 +110,7 @@ export class AccountAnalysisDetailsTableComponent {
     const selectedAnalysisCategory = this.selectedAnalysisCategory();
     const accountReports = this.accountReports();
     const accountAnalysisItems = this.accountAnalysisItems();
+    const accountStatusCheck = this.accountStatusCheck();
     if (selectedAnalysisCategory && accountReports && accountAnalysisItems) {
       let analysisItemsList: Array<AnalysisDetailsTableRow> = [];
       let filteredAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => selectedAnalysisCategory == 'all' || item.analysisCategory == selectedAnalysisCategory);
@@ -117,10 +123,12 @@ export class AccountAnalysisDetailsTableComponent {
             (report.reportType == 'analysis' && report.analysisReportSetup.analysisItemId == analysisItem.guid);
         }).map(report => report.guid);
 
+        const accountAnalysisStatusCheck = accountStatusCheck?.getAccountAnalysisStatusCheckById(analysisItem.guid);
         analysisItemsList.push({
           analysisItem: analysisItem,
           isDeleteChecked: false,
-          linkedReports: linkedReports
+          linkedReports: linkedReports,
+          accountAnalysisStatusCheck: accountAnalysisStatusCheck
         });
       });
       return analysisItemsList;
@@ -214,9 +222,10 @@ export class AccountAnalysisDetailsTableComponent {
     }
   }
 
-  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem, setupErrors: AccountAnalysisSetupErrors) {
+  selectAnalysisItem(analysisItem: IdbAccountAnalysisItem, accountAnalysisStatusCheck: AccountAnalysisStatusCheck | undefined) {
     this.accountAnalysisDbService.selectedAnalysisItem.next(analysisItem);
-    if (setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid) {
+    const setupErrors = accountAnalysisStatusCheck?.accountAnalysisSetupErrors;
+    if (setupErrors?.hasError || setupErrors?.facilitiesSelectionsInvalid) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
     } else {
       this.router.navigateByUrl('/data-evaluation/account/analysis/results');

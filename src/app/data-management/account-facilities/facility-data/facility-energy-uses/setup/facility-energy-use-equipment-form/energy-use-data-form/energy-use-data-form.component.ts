@@ -1,4 +1,4 @@
-import { Component, inject, Input, Signal } from '@angular/core';
+import { Component, inject, input, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup } from '@angular/forms';
 import { footprintEnergyUseUnits } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
@@ -13,14 +13,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   styleUrl: './energy-use-data-form.component.css',
 })
 export class EnergyUseDataFormComponent {
-  @Input({ required: true })
-  energyUseForms: Array<FormGroup>;
-  @Input({ required: true })
-  energySource: MeterSource;
-  @Input({ required: true })
-  utilityDataForm: FormGroup;
-  @Input()
-  inSetup: boolean = false;
+  energyUseForms = input.required<Array<FormGroup>>();
+  energySource = input.required<MeterSource>();
+  utilityDataForm = input.required<FormGroup>();
+  inSetup = input(false);
 
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
 

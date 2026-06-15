@@ -1,38 +1,72 @@
+<!-- @let _selectedAnalysisItem = selectedAnalysisItem(); -->
+@let _facilityList = facilityList();
+
+@if(_facilityList){
 <div class="wrapper">
   <div class="d-flex w-100 h-100">
-    <div class="p-2 nav flex-column">
-      @for (facilityItem of selectedAnalysisItem.facilityAnalysisItems; track facilityItem.facilityId) {
-      <div class="nav-item"><a class="nav-link" (click)="selectFacility(facilityItem.facilityId)"
-          [ngClass]="{'active': facilityItem.facilityId == selectedFacility.guid}">
-          <i class="pe-2 fa" [ngClass]="{
-              'fa-square-minus': !facilityItem.analysisItemId || facilityItem.analysisItemId === 'skip',
-              'fa-square-check': facilityItem.analysisItemId && facilityItem.analysisItemId !== 'skip'
-            }"></i>
-          @if(facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
-          @let analysisItem = facilityItem.analysisItemId | analysisItem;
-          @let analysisSetupErrors = analysisItem.guid | invalidAnalysis;
-          @if (analysisSetupErrors.hasError || analysisSetupErrors.groupsHaveErrors) {
-          <span class="fa fa-exclamation-circle"></span>
-          }
-          }@else if(!facilityItem.analysisItemId){
-          <span class="fa fa-exclamation-circle"></span>
-          }
-          {{facilityItem.facilityId | facilityName}}</a>
-      </div>
-      }
-    </div>
-    <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
-      @if (showInUseMessage) {
-      <div class="p-2">
-        <div class="alert alert-info text-center mb-0">
-          <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
-          This analysis is used in one or more reports. Changes to this analysis may effect the results of the
-          corresponding reports.
+
+    <!-- ── Sidebar ─────────────────────────────────────────── -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Facilities</span>
+        <div class="d-flex justify-content-between align-items-center mt-1">
+          <span class="sidebar-count">{{configuredCount()}} / {{_facilityList.length}} assigned</span>
+        </div>
+        <div class="progress mt-2">
+          <div class="progress-bar bg-success"
+            [style.width.%]="_facilityList.length ? (configuredCount() / _facilityList.length) * 100 : 0">
+          </div>
         </div>
       </div>
-      }
-      <app-select-item-table [selectedAnalysisItem]="selectedAnalysisItem"
-        [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
+
+      <nav class="facility-nav">
+        @for (facilityItem of _facilityList; track facilityItem.facility.guid) {
+        @let isSkipped = facilityItem.analysisItemId === 'skip';
+        @let isAssigned = facilityItem.analysisItemId != null && !isSkipped;
+        @let isNotConfigured = !isSkipped && !isAssigned;
+        @let isError = isAssigned && facilityItem.analysisStatusCheck?.status === 'error';
+        @let isWarning = isAssigned && facilityItem.analysisStatusCheck?.status === 'warning';
+        @let isGood = isAssigned && facilityItem.analysisStatusCheck?.status === 'good';
+        <button class="facility-item" (click)="selectFacility(facilityItem.facility.guid)"
+          [ngClass]="{
+            'active':       facilityItem.facility.guid == selectedFacility()?.guid,
+            'item-error':   isNotConfigured || isError,
+            'item-warning': isWarning,
+            'item-good':    isGood,
+            'item-skip':    isSkipped
+          }">
+          <span class="facility-dot" [style.backgroundColor]="facilityItem.facility.color || '#6c757d'"></span>
+          <span class="facility-name">{{facilityItem.facility.name}}</span>
+          <span class="status-icon-sm">
+            @if (isNotConfigured) {
+            <i class="fa fa-circle-minus text-danger" title="Not configured"></i>
+            } @else if (isError) {
+            <i class="fa fa-circle-xmark text-danger" title="Has errors"></i>
+            } @else if (isWarning) {
+            <i class="fa fa-exclamation-triangle text-warning" title="Has warnings"></i>
+            } @else if (isGood) {
+            <i class="fa fa-circle-check text-success" title="Valid"></i>
+            } @else if (isSkipped) {
+            <i class="fa fa-forward-step text-muted" title="Skipped"></i>
+            }
+          </span>
+        </button>
+        }
+      </nav>
     </div>
+
+    <!-- ── Main content ───────────────────────────────────── -->
+    <div class="content-area">
+      @if (showInUseMessage()) {
+      <div class="alert alert-info text-center mb-3">
+        <button type="button" class="btn-close" aria-label="Close" (click)="toggleHideInUseMessage()"></button>
+        This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+        corresponding reports.
+      </div>
+      }
+      <app-select-item-table></app-select-item-table>
+    </div>
+
   </div>
 </div>
+}

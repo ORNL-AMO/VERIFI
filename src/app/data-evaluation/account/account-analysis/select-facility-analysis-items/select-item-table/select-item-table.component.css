@@ -10,3 +10,47 @@ i.fa-industry{
 .fa.fa-exclamation-circle, .banner a.nav-link:not(.active) .fa.fa.fa-exclamation-circle{
     color: red;
 }
+
+.table {
+    overflow: hidden;
+    border: black 1px solid;
+}
+
+.table th {
+    background-color: #154c79;
+    color: white;
+    text-align: center;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.status-col {
+    width: 90px;
+    min-width: 90px;
+}
+
+.analysis-row-warning td {
+    background-color: rgba(255, 193, 7, 0.08) !important;
+}
+
+.analysis-row-error td {
+    background-color: rgba(220, 53, 69, 0.08) !important;
+}
+
+.issue-badge {
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.data-through-col {
+    width: 90px;
+    min-width: 90px;
+}
+
+.modified-col {
+    width: 100px;
+    min-width: 100px;
+}

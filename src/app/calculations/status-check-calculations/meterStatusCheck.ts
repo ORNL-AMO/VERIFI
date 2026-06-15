@@ -1,0 +1,241 @@
+import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import * as _ from 'lodash';
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { isMeterInvalid } from "src/app/calculations/status-check-calculations/validation/meterValidation";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, computeDataOutdated } from "./statusCheckModels";
+
+export class MeterStatusCheck {
+
+    meterId: string;
+    groupId: string;
+    meterName: string;
+    isMeterValid: boolean;
+    lastDateEntry: Date;
+    hasDuplicateEntries: boolean;
+    duplicateEntryDates: Array<Date>;
+    hasNoData: boolean;
+    hasNoCalendarizationMethod: boolean;
+    hasNegativeReadings: boolean;
+    isDataCurrent: boolean;
+    isDataOutdated: boolean;
+    outdatedMonths: number;
+    status: STATUS_CHECK_OPTIONS;
+    actions: Array<StatusCheckAction>;
+    latestFacilityEntryDate: Date;
+    isMeterNoLongerInUse: boolean;
+
+    constructor(
+        meter: IdbUtilityMeter,
+        meterReadings: Array<IdbUtilityMeterData>,
+        calanderizedMeter: CalanderizedMeter | undefined,
+        facilityLatestEntry: { month: number; year: number } | undefined,
+        stalenessEnabled: boolean = false,
+        stalenessThresholdMonths: DataStalenessMonths = 3
+    ) {
+        this.meterId = meter.guid;
+        this.groupId = meter.groupId;
+        this.meterName = meter.name;
+        this.hasNoData = meterReadings.length === 0;
+        this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
+        this.isMeterNoLongerInUse = meter.noLongerInUse;
+        this.setHasNegativeReadings(meter, meterReadings);
+        this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1) : undefined;
+        if (calanderizedMeter) {
+            this.isMeterValid = isMeterInvalid(calanderizedMeter.meter) == false;
+            this.setLastDateEntry(calanderizedMeter.monthlyData);
+            this.setHasDuplicateEntries(meterReadings);
+        } else {
+            this.isMeterValid = true;
+            this.hasDuplicateEntries = false;
+            this.duplicateEntryDates = [];
+        }
+        // Apply noLongerInUse: filter readings and entries after stop date
+        const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(meter, facilityLatestEntry);
+        this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry, meter);
+        this.isDataOutdated = (stalenessEnabled && !meter.ignoreDateStatusChecks && !meter.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
+        this.outdatedMonths = stalenessThresholdMonths;
+        this.setStatus(meter);
+        this.setActions(meter, noLongerInUseFacilityEntry);
+    }
+
+    private setLastDateEntry(calanderizedMeterData: Array<MonthlyData>) {
+        if (calanderizedMeterData && calanderizedMeterData.length > 0) {
+            let lastEntry: MonthlyData = _.maxBy(calanderizedMeterData, (data: MonthlyData) => new Date(data.year, data.monthNumValue, 1));
+            this.lastDateEntry = new Date(lastEntry.year, lastEntry.monthNumValue, 1);
+        }
+    }
+
+    private setHasDuplicateEntries(meterReadings: Array<IdbUtilityMeterData>) {
+        let dayMonthYearCounts: {
+            [key: string]: number;
+        } = {};
+        if (meterReadings.length === 0) {
+            this.hasDuplicateEntries = false;
+            this.duplicateEntryDates = [];
+            return;
+        }
+        meterReadings.forEach(reading => {
+            let key = `${reading.month}-${reading.year}-${reading.day}`;
+            if (dayMonthYearCounts[key]) {
+                dayMonthYearCounts[key] += 1;
+            } else {
+                dayMonthYearCounts[key] = 1;
+            }
+        });
+        this.hasDuplicateEntries = _.some(dayMonthYearCounts, count => count > 1);
+        this.duplicateEntryDates = Object.keys(dayMonthYearCounts)
+            .filter(key => dayMonthYearCounts[key] > 1)
+            .map(key => {
+                const [month, year, day] = key.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            });
+    }
+
+    private computeIsDataCurrent(facilityLatestEntry: { month: number; year: number } | undefined, meter: IdbUtilityMeter): boolean {
+        if(meter.ignoreDateStatusChecks){
+            return true;
+        }
+
+        if (this.hasNoData || !facilityLatestEntry || !this.lastDateEntry) return false;
+        const entryYear = this.lastDateEntry.getFullYear();
+        const entryMonth = this.lastDateEntry.getMonth() + 1;
+        return entryYear > facilityLatestEntry.year ||
+            (entryYear === facilityLatestEntry.year && entryMonth >= facilityLatestEntry.month);
+    }
+
+    /**
+     * Compute if the data is outdated based on the time-based staleness threshold.
+     * Data is considered outdated if the last entry date is older than the threshold months from today.
+     */
+    private computeIsDataOutdated(thresholdMonths: DataStalenessMonths): boolean {
+        if (this.hasNoData) return false;
+        return computeDataOutdated(this.lastDateEntry, thresholdMonths);
+    }
+
+    private setStatus(meter: IdbUtilityMeter) {
+        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries || this.hasNegativeReadings) {
+            this.status = 'error';
+        } else if (this.isDataOutdated) {
+            // Outdated status takes precedence over warning when data is time-stale
+            this.status = 'outdated';
+        } else if (this.hasNoCalendarizationMethod || (!meter.ignoreDateStatusChecks && !meter.noLongerInUse && !this.isDataCurrent)) {
+            this.status = 'warning';
+        } else {
+            this.status = 'good';
+        }
+    }
+
+    private setActions(meter: IdbUtilityMeter, facilityLatestEntry: { month: number; year: number } | undefined) {
+        this.actions = [];
+        const baseUrl = `/data-management/${meter.accountId}/facilities/${meter.facilityId}/meters/${meter.guid}`;
+
+        if (this.isMeterValid === false) {
+            this.actions.push({
+                label: 'Edit ' + meter.name,
+                url: baseUrl,
+                description: 'This meter has configuration errors that need to be resolved before data can be properly assessed.',
+                facilityId: meter.facilityId,
+                type: 'meter',
+                status: 'error',
+                trackGuid: meter.guid + '_edit'
+            });
+        } else if (this.hasNoData) {
+            this.actions.push({
+                label: 'Add meter data for ' + meter.name,
+                url: baseUrl + '/meter-data',
+                description: 'No data has been entered for this meter.',
+                facilityId: meter.facilityId,
+                type: 'meter',
+                status: 'error',
+                trackGuid: meter.guid + '_add'
+            });
+        } else {
+            if (this.hasNoCalendarizationMethod) {
+                this.actions.push({
+                    label: 'Set calendarization method for ' + meter.name,
+                    url: baseUrl + '/meter-monthly-data',
+                    description: 'A calendarization method is required to properly assign energy use to calendar months.',
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'warning',
+                    trackGuid: meter.guid + '_calendarization'
+                });
+            }
+            if(this.hasDuplicateEntries){
+                this.actions.push({
+                    label: 'Resolve duplicate entries for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: 'This meter has duplicate data entries for the following dates: ' + this.duplicateEntryDates.map(d => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })).join(', '),
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_duplicates'
+                });
+            }
+            if(this.hasNegativeReadings){
+                this.actions.push({
+                    label: 'Review negative readings for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: 'This meter has negative energy use or volume readings, which may indicate data entry errors unless negative values are expected for this meter.',
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_negative_readings'
+                });
+            }
+            if (this.isDataOutdated && this.lastDateEntry) {
+                const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
+                this.actions.push({
+                    label: 'Update outdated meter data for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: `This meter has not received data in over ${this.outdatedMonths} months. Last entry: ${dataLabel}.`,
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'outdated',
+                    trackGuid: meter.guid + '_outdated'
+                });
+            } else if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {
+                const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
+
+                const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
+                this.actions.push({
+                    label: 'Update meter data for ' + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: `Facility data runs through ${latestLabel} but this meter has data through ${dataLabel}.`,
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'warning',
+                    trackGuid: meter.guid + '_update'
+                });
+            }
+        }
+    }
+
+    private monthLabel(month: number, year: number): string {
+        const date = new Date(year, month - 1, 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    private setHasNegativeReadings(meter: IdbUtilityMeter, meterReadings: Array<IdbUtilityMeterData>) {
+        if (meter.canBeNegative) {
+            this.hasNegativeReadings = false;
+            return;
+        }
+        this.hasNegativeReadings = meterReadings.some(reading => reading.totalEnergyUse < 0 || (reading.totalVolume !== undefined && reading.totalVolume < 0));
+    }
+
+    /**
+     * When noLongerInUse is set, use the stop date as the effective latest entry
+     * for currency checks (so data up to the stop date is considered current).
+     */
+    private getNoLongerInUseFacilityEntry(
+        meter: IdbUtilityMeter,
+        facilityLatestEntry: { month: number; year: number } | undefined
+    ): { month: number; year: number } | undefined {
+        if (meter.noLongerInUse && meter.noLongerInUseMonth != null && meter.noLongerInUseYear) {
+            return { month: meter.noLongerInUseMonth + 1, year: meter.noLongerInUseYear };
+        }
+        return facilityLatestEntry;
+    }
+}

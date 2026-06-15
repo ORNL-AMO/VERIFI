@@ -78,6 +78,13 @@
           <label for="totalVolume" class="form-check-label">Total Volume</label>
         </div>
         }
+        @if (showHeatCapacity) {
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="heatCapacity" id="heatCapacity"
+            [(ngModel)]="generalUtilityDataFilters.heatCapacity" (change)="save()">
+          <label for="heatCapacity" class="form-check-label">Heat Capacity</label>
+        </div>
+        }
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="totalCost" id="totalCost"
             [(ngModel)]="generalUtilityDataFilters.totalCost" (change)="save()">
@@ -124,6 +131,13 @@
             [(ngModel)]="vehicleDataFilters.totalEnergy" (change)="save()">
           <label for="totalEnergy" class="form-check-label">Total Energy</label>
         </div>
+        @if (showFuelEfficiency) {
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="fuelEfficiency" id="fuelEfficiency"
+            [(ngModel)]="vehicleDataFilters.fuelEfficiency" (change)="save()">
+          <label for="fuelEfficiency" class="form-check-label">Fuel Efficiency</label>
+        </div>
+        }
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="totalCost" id="totalCost"
             [(ngModel)]="vehicleDataFilters.totalCost" (change)="save()">

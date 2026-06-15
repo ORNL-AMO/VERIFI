@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
@@ -26,9 +27,15 @@ export class HomePageComponent {
     private backupDataService: BackupDataService,
     private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private titleService: Title,
+    private metaService: Meta) { }
 
   ngOnInit(): void {
+    this.titleService.setTitle('VERIFI | Industrial Utility & Energy Analytics');
+    this.metaService.updateTag({ name: 'description', content: 'VERIFI is a free tool for tracking and analyzing industrial utility consumption data at corporate and facility levels, enabling energy performance analysis and DOE Better Plants reporting.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'VERIFI | Industrial Utility & Energy Analytics' });
+    this.metaService.updateTag({ property: 'og:url', content: 'https://verifi.ornl.gov/welcome' });
     this.accounts = this.accountDbService.allAccounts.getValue().filter(account => {
       return !account.deleteAccount;
     });
@@ -39,6 +46,7 @@ export class HomePageComponent {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'load-example-data') {
         this.navigateToAccount();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

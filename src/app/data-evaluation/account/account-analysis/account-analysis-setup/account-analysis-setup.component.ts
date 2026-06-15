@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -6,7 +6,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { debounceTime, firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
@@ -22,6 +22,14 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { getYearsWithFullDataAccountAnalysis } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -29,186 +37,275 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   styleUrls: ['./account-analysis-setup.component.css'],
   standalone: false
 })
-export class AccountAnalysisSetupComponent implements OnInit {
+export class AccountAnalysisSetupComponent {
+  private readonly accountDbService = inject(AccountdbService);
+  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
+  private readonly router = inject(Router);
+  private readonly dbChangesService = inject(DbChangesService);
+  private readonly analysisDbService = inject(AnalysisDbService);
+  private readonly calendarizationService = inject(CalanderizationService);
+  private readonly accountReportDbService = inject(AccountReportDbService);
+  private readonly accountAnalysisService = inject(AccountAnalysisService);
+  private readonly facilityDbService = inject(FacilitydbService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly toastNotificationService = inject(ToastNotificationsService);
+  private readonly utiltiyMeterGroupDbService = inject(UtilityMeterGroupdbService);
+  private readonly predictorDbService = inject(PredictorDbService);
+  private readonly fb = inject(FormBuilder);
+  private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 
-  energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
-  waterUnitOptions: Array<UnitOption> = VolumeLiquidOptions;
-  months: Array<Month> = Months;
+  readonly account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  readonly analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  readonly calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
+  readonly accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  private readonly _accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
+  private readonly _hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
 
-  account: IdbAccount;
-  energyUnit: string;
-  analysisItem: IdbAccountAnalysisItem;
-  yearOptions: Array<number>;
-  baselineYearWarning: string;
-  disableForm: boolean;
-  showInUseMessage: boolean;
-  displayEnableForm: boolean = false;
-  displayBulkAnalysisModal: boolean = false;
-  analysisType: AnalysisType = 'absoluteEnergyConsumption';
+  readonly analysisStatusCheck: Signal<AccountAnalysisStatusCheck | undefined> = computed(() => {
+    const accountStatusCheck = this._accountStatusCheck();
+    const analysisItem = this.analysisItem();
+    if (!accountStatusCheck || !analysisItem) { return undefined; }
+    return accountStatusCheck.getAccountAnalysisStatusCheckById(analysisItem.guid);
+  });
 
-  analysisItemSub: Subscription;
-  isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router,
-    private dbChangesService: DbChangesService,
-    private analysisDbService: AnalysisDbService,
-    private calendarizationService: CalanderizationService,
-    private accountReportDbService: AccountReportDbService,
-    private accountAnalysisService: AccountAnalysisService,
-    private facilityDbService: FacilitydbService,
-    private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService,
-    private utiltiyMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictorDbService) { }
+  readonly energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  readonly waterUnitOptions: Array<UnitOption> = VolumeLiquidOptions;
+  readonly months: Array<Month> = Months;
 
-  ngOnInit(): void {
-    this.analysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
-      if (!this.isFormChange) {
-        this.analysisItem = item;
-        if (!this.analysisItem) {
-          this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
+  readonly showInUseMessage: Signal<boolean> = computed(() => {
+    const analysisItem = this.analysisItem();
+    const reports = this.accountReports();
+    if (this._hideInUseMessage()) { return false; }
+    if (analysisItem && reports) {
+      return reports.some(report => {
+        if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == analysisItem.guid) {
+          return true;
+        } else if (report.reportType == 'analysis' && report.analysisReportSetup.analysisItemId == analysisItem.guid) {
+          return true;
+        } else if (report.reportType == 'accountSavings' && report.accountSavingsReportSetup.analysisItemId == analysisItem.guid) {
+          return true;
+        } else if (report.reportType == 'performance' && report.performanceReportSetup.analysisItemId == analysisItem.guid) {
+          return true;
         }
-        this.account = this.accountDbService.selectedAccount.getValue();
-        this.setDisableForm();
-        this.setShowInUseMessage();
-        this.energyUnit = this.account.energyUnit;
-        this.yearOptions = this.calendarizationService.getYearOptions(this.analysisItem.analysisCategory, true);
-        this.setBaselineYearWarning();
+        return false;
+      });
+    }
+    return false;
+  });
+
+  readonly baselineYearWarning: Signal<string> = computed(() => {
+    const analysisItem = this.analysisItem();
+    const account = this.account();
+    if (!analysisItem) {
+      return undefined;
+    }
+    if (analysisItem.analysisCategory == 'water') {
+      if (analysisItem.baselineYear && account.sustainabilityQuestions.waterReductionGoal && account.sustainabilityQuestions.waterReductionBaselineYear != analysisItem.baselineYear) {
+        return 'This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate water goal.';
+      }
+    } else if (analysisItem.analysisCategory == 'energy') {
+      if (analysisItem.baselineYear && account.sustainabilityQuestions.energyReductionGoal && account.sustainabilityQuestions.energyReductionBaselineYear != analysisItem.baselineYear) {
+        return 'This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate energy goal.';
+      }
+    }
+    return undefined;
+  });
+
+  readonly yearOptions: Signal<Array<number>> = computed(() => {
+    const account: IdbAccount = this.account();
+    const analysisItem: IdbAccountAnalysisItem = this.analysisItem();
+    const calanderizedMeters = this.calanderizedMeters();
+    if (account && analysisItem && calanderizedMeters) {
+      return getYearsWithFullDataAccountAnalysis(calanderizedMeters, analysisItem, account);
+    }
+    return [];
+  });
+
+  readonly disableForm: Signal<boolean> = computed(() => {
+    const analysisItem = this.analysisItem();
+    if (!analysisItem) { return false; }
+    return analysisItem.facilityAnalysisItems.some(item => item.analysisItemId != undefined);
+  });
+
+  displayEnableForm = false;
+  displayBulkAnalysisModal = false;
+
+  // Tracks the GUID of the selected analysis item to detect item switches vs. saves of the same item.
+  private readonly _currentItemGuid = computed(() => this.analysisItem()?.guid);
+
+  readonly form: FormGroup<{
+    name: FormControl<string>;
+    energyIsSource: FormControl<boolean>;
+    energyUnit: FormControl<string>;
+    waterUnit: FormControl<string>;
+    baselineYear: FormControl<number | null>;
+  }> = this.fb.group({
+    name: this.fb.nonNullable.control('', Validators.required),
+    energyIsSource: this.fb.nonNullable.control<boolean>(true),
+    energyUnit: this.fb.nonNullable.control(''),
+    waterUnit: this.fb.nonNullable.control(''),
+    baselineYear: this.fb.control<number | null>(null, Validators.required),
+  });
+
+  readonly analysisTypeControl = this.fb.nonNullable.control<AnalysisType>('absoluteEnergyConsumption');
+
+  constructor() {
+    // Patch form only when switching to a different analysis item (GUID change).
+    // Using untracked() to read the item value without creating an additional reactive dependency.
+    effect(() => {
+      this._currentItemGuid();
+      const item = untracked(() => this.analysisItem());
+      if (!item) {
+        this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
+        return;
+      }
+      this.form.patchValue({
+        name: item.name,
+        energyIsSource: item.energyIsSource,
+        energyUnit: item.energyUnit,
+        waterUnit: item.waterUnit,
+        baselineYear: item.baselineYear ?? null,
+      }, { emitEvent: false });
+    });
+
+    // Manage control disabled states based on disableForm signal.
+    effect(() => {
+      const disabled = this.disableForm();
+      const { energyIsSource, energyUnit, waterUnit, baselineYear } = this.form.controls;
+      if (disabled) {
+        energyIsSource.disable({ emitEvent: false });
+        energyUnit.disable({ emitEvent: false });
+        waterUnit.disable({ emitEvent: false });
+        baselineYear.disable({ emitEvent: false });
       } else {
-        this.isFormChange = false;
+        energyIsSource.enable({ emitEvent: false });
+        energyUnit.enable({ emitEvent: false });
+        waterUnit.enable({ emitEvent: false });
+        baselineYear.enable({ emitEvent: false });
+      }
+    });
+
+    // Auto-save on any valid form value change.
+    this.form.valueChanges.pipe(
+      debounceTime(100),
+      takeUntilDestroyed()
+    ).subscribe(() => {
+      if (this.form.valid) {
+        this.saveItem();
       }
     });
   }
 
-  ngOnDestroy() {
-    this.analysisItemSub.unsubscribe();
-  }
-
-  async saveItem() {
-    this.isFormChange = true;
-    this.analysisItem.isAnalysisVisited = false;
-    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  async saveItem(): Promise<void> {
+    const item = this.analysisItem();
+    if (!item) { return; }
+    const raw = this.form.getRawValue();
+    const updatedItem: IdbAccountAnalysisItem = {
+      ...item,
+      isAnalysisVisited: false,
+      name: raw.name,
+      energyIsSource: raw.energyIsSource,
+      energyUnit: raw.energyUnit,
+      waterUnit: raw.waterUnit,
+      baselineYear: raw.baselineYear ?? item.baselineYear,
+    };
+    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
+    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
   }
 
-  async changeBaselineYear(){
-    this.setBaselineYearWarning();
-    await this.saveItem();
+  toggleHideInUseMessage(): void {
+    this.accountAnalysisService.hideInUseMessage.next(true);
   }
 
-  setBaselineYearWarning() {
-    if (this.analysisItem.analysisCategory == 'water') {
-      if (this.analysisItem.baselineYear && this.account.sustainabilityQuestions.waterReductionGoal && this.account.sustainabilityQuestions.waterReductionBaselineYear != this.analysisItem.baselineYear) {
-        this.baselineYearWarning = "This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate water goal."
-      } else {
-        this.baselineYearWarning = undefined;
-      }
-    } else if (this.analysisItem.analysisCategory == 'energy') {
-      if (this.analysisItem.baselineYear && this.account.sustainabilityQuestions.energyReductionGoal && this.account.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
-        this.baselineYearWarning = "This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate energy goal."
-      } else {
-        this.baselineYearWarning = undefined;
-      }
-    } else {
-      this.baselineYearWarning = undefined;
-    }
-  }
-
-  setDisableForm() {
-    let hasItemsSelected: boolean = false;
-    this.analysisItem.facilityAnalysisItems.forEach(item => {
-      if (item.analysisItemId != undefined) {
-        hasItemsSelected = true;
-      }
-    });
-    this.disableForm = hasItemsSelected;
-  }
-
-  setShowInUseMessage() {
-    let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.analysisItem.guid);
-    if (hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false) {
-      this.showInUseMessage = true;
-    }
-  }
-
-  hideInUseMessage() {
-    this.showInUseMessage = false;
-    this.accountAnalysisService.hideInUseMessage = true;
-  }
-
-  showEnableForm() {
+  showEnableForm(): void {
     this.displayEnableForm = true;
   }
 
-  cancelEnableForm() {
+  cancelEnableForm(): void {
     this.displayEnableForm = false;
   }
 
-  async confirmEnableForm() {
-    this.analysisItem.facilityItemsInitialized = false;
-    this.analysisItem.facilityAnalysisItems.forEach(item => {
-      item.analysisItemId = undefined;
-    });
-    await this.saveItem();
-    this.disableForm = false;
-    this.displayEnableForm = undefined;
+  async confirmEnableForm(): Promise<void> {
+    const item = this.analysisItem();
+    if (!item) { return; }
+    const clearedItem: IdbAccountAnalysisItem = {
+      ...item,
+      facilityItemsInitialized: false,
+      facilityAnalysisItems: item.facilityAnalysisItems.map(fi => ({
+        ...fi,
+        analysisItemId: undefined,
+      })),
+    };
+    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
+    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(clearedItem);
+    this.displayEnableForm = false;
   }
 
-  openBulkAnalysisModal() {
+  openBulkAnalysisModal(): void {
     this.displayBulkAnalysisModal = true;
   }
 
-  closeBulkAnalysisModal() {
+  closeBulkAnalysisModal(): void {
     this.displayBulkAnalysisModal = false;
   }
 
-  async confirmBulkAnalysisCreate() {
+  async confirmBulkAnalysisCreate(): Promise<void> {
     this.closeBulkAnalysisModal();
     this.loadingService.setLoadingMessage('Creating Analysis Items...');
     this.loadingService.setLoadingStatus(true);
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    const account = this.account();
+    const analysisItem = this.analysisItem();
+    const accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
+    const accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    const facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    const analysisType = this.analysisTypeControl.value;
+    let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
     for (let i = 0; i < facilities.length; i++) {
-      let facility: IdbFacility = facilities[i];
+      const facility: IdbFacility = facilities[i];
       this.dbChangesService.selectFacility(facility);
-      let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
-      newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
+      let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, analysisItem.analysisCategory);
+      newIdbItem.energyIsSource = analysisItem.energyIsSource;
       let facilityBaselineYear: number;
-      if (this.analysisItem.analysisCategory == 'energy') {
+      if (analysisItem.analysisCategory == 'energy') {
         facilityBaselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
-      }
-      else if (this.analysisItem.analysisCategory == 'water') {
+      } else if (analysisItem.analysisCategory == 'water') {
         facilityBaselineYear = facility.sustainabilityQuestions.waterReductionBaselineYear;
       }
-      if (facility.isNewFacility && (facilityBaselineYear > this.analysisItem.baselineYear)) {
+      if (facility.isNewFacility && (facilityBaselineYear > analysisItem.baselineYear)) {
         newIdbItem.baselineYear = facilityBaselineYear;
       } else {
-        newIdbItem.baselineYear = this.analysisItem.baselineYear;
+        newIdbItem.baselineYear = analysisItem.baselineYear;
       }
-      if (this.analysisItem.name != '') {
-        newIdbItem.name = this.analysisItem.name;
+      if (analysisItem.name != '') {
+        newIdbItem.name = analysisItem.name;
       }
       newIdbItem.groups.forEach(group => {
-        group.analysisType = this.analysisType;
+        group.analysisType = analysisType;
       });
       newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-      for (let f = 0; f < this.analysisItem.facilityAnalysisItems.length; f++) {
-        if (this.analysisItem.facilityAnalysisItems[f].facilityId == facility.guid) {
-          this.analysisItem.facilityAnalysisItems[f].analysisItemId = newIdbItem.guid;
-        }
-      }
+      updatedFacilityAnalysisItems = updatedFacilityAnalysisItems.map(fi =>
+        fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
+      );
     }
-    await this.dbChangesService.setAnalysisItems(this.account, true);
-    await this.saveItem();
+    await this.dbChangesService.setAnalysisItems(account, true);
+    const updatedItem: IdbAccountAnalysisItem = {
+      ...analysisItem,
+      isAnalysisVisited: false,
+      facilityAnalysisItems: updatedFacilityAnalysisItems,
+    };
+    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
+    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
   }
 
-  goToSettings(){
+  goToSettings(): void {
     this.router.navigateByUrl('/data-evaluation/account/settings');
   }
 }

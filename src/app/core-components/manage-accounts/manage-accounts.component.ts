@@ -48,6 +48,7 @@ export class ManageAccountsComponent {
       if (context === 'export-facilities-to-excel') {
         this.exportToExcelTemplateV3Service.triggerExportDownload();
         this.showFacilityExportToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

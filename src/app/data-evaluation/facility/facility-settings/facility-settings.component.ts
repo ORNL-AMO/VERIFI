@@ -42,6 +42,7 @@ export class FacilitySettingsComponent implements OnInit {
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context === 'delete-facility') {
         this.showFacilityDeletionToast();
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

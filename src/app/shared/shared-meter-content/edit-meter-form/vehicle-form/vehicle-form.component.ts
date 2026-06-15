@@ -107,7 +107,6 @@ export class VehicleFormComponent {
 
   updateVehicleValidation() {
     let additionalVehicleValidation: Array<ValidatorFn> = this.editMeterFormService.getAdditionalVehicleValidation(this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value);
-
     this.meterForm.controls.vehicleType.setValidators(additionalVehicleValidation);
     this.meterForm.controls.vehicleType.updateValueAndValidity();
 

@@ -17,46 +17,37 @@
 </div>
 } @else {
   @if (showAlert) {
-    <div
-      class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center">
+    <div class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center">
       <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"></i>
       <div>
-        @if (outlierCount > 0) {
+        @if (duplicateDatesList.length > 0) {
           <span class="alert-message">
-            There is an issue in
-            <span class="fw-bold text-danger">{{ outlierCount }}</span>
-            reading@if (outlierCount > 1) {
-            <span>s</span>
-          }
-          <br>
+            There @if (duplicateDatesList.length === 1) { is } @else { are }
+            <span class="fw-bold text-danger">{{ duplicateDatesList.length }}</span>
+            month@if (duplicateDatesList.length > 1) { s }
+            with multiple readings.
+            <br>
           </span>
         }
-        @if (datesList.length > 0) {
+        @if (missingMonthsList.length > 0) {
           <span class="alert-message">
-            There @if (datesList.length == 1) {
-            is
-          }
-          @if (datesList.length > 1) {
-            are
-          }
-          <span class="fw-bold text-danger">{{ datesList.length}}</span>
-          month@if (datesList.length > 1) {
-          s
+            There @if (missingMonthsList.length === 1) { is } @else { are }
+            <span class="fw-bold text-danger">{{ missingMonthsList.length }}</span>
+            missing month@if (missingMonthsList.length > 1) { s }
+            in the predictor data.
+            <br>
+          </span>
         }
-        with multiple readings.
-        <br>
-        </span>
-      }
+      </div>
     </div>
-  </div>
-}
-<h5>
-  <i class="fa fa-table me-2"></i>
-  Total Consumption Statistics
-</h5>
-<app-predictor-statistics-table [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
-[stats]="stats"></app-predictor-statistics-table>
-<hr>
+  }
+  <h5>
+    <i class="fa fa-table me-2"></i>
+    Total Consumption Statistics
+  </h5>
+  <app-predictor-statistics-table [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
+  [stats]="stats"></app-predictor-statistics-table>
+  <hr>
   <div class="row">
     <div class="col-md-6 col-sm-12">
       <h5>
@@ -64,7 +55,7 @@
         Predictor Time Series
       </h5>
       <app-predictor-timeseries-graph [predictorData]="predictorData" [selectedPredictor]="selectedPredictor"
-      [stats]="stats"></app-predictor-timeseries-graph>
+      [stats]="stats" [missingMonthsList]="missingMonthsList"></app-predictor-timeseries-graph>
     </div>
     <div class="col-md-6 col-sm-12">
       <h5>
@@ -75,18 +66,33 @@
       [selectedPredictor]="selectedPredictor"></app-predictor-histogram-graph>
     </div>
   </div>
-  @if (datesList.length > 0) {
+  @if (duplicateDatesList.length > 0) {
     <div>
       <hr>
-        <h5 class="mt-5">
-          <i class="fa fa-table me-2 mb-3"></i>
-          Months with multiple readings
-        </h5>
-        @for (date of datesList; track date) {
-          <span class="badge bg-warning text-dark px-2 py-2 fs-5 me-2 mb-2 ms-3">
-            {{ date.monthYear }}
-          </span>
-        }
-      </div>
-    }
+      <h5 class="mt-5">
+        <i class="fa fa-table me-2 mb-3"></i>
+        Months with multiple readings
+      </h5>
+      @for (date of duplicateDatesList; track date) {
+        <span class="badge bg-warning text-dark px-2 py-2 fs-5 me-2 mb-2 ms-3">
+          {{ date.monthYear }}
+        </span>
+      }
+    </div>
   }
+  @if (missingMonthsList.length > 0) {
+    <div>
+      <hr>
+      <h5 class="mt-5">
+        <i class="fa fa-calendar-xmark me-2 mb-3"></i>
+        Missing months
+      </h5>
+      @for (date of missingMonthsList; track date) {
+        <span class="badge bg-danger text-white px-2 py-2 fs-5 me-2 mb-2 ms-3">
+          {{ date.monthYear }}
+        </span>
+      }
+    </div>
+  }
+}
+

@@ -55,6 +55,9 @@ export interface EnergyEquipmentOperatingConditionsData {
     loadFactor: number,
     dutyFactor: number,
     efficiency: number,
+    hoursPerDay?: number,
+    daysPerWeek?: number,
+    weeksPerYear?: number
 }
 
 export interface EquipmentUtilityData {

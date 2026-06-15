@@ -40,7 +40,7 @@ export class AccountAnalysisComponent implements OnInit {
   ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
     this.accountSub.unsubscribe();
-    this.accountAnalysisService.hideInUseMessage = false; 
+    this.accountAnalysisService.hideInUseMessage.next(false); 
     this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
     this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
   }

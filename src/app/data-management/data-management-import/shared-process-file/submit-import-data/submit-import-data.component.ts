@@ -63,6 +63,7 @@ export class SubmitImportDataComponent {
         this.uploadDataService.navigate();
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
         this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
+        this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
   }

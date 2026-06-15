@@ -37,26 +37,36 @@ thead th.can-click:hover {
     font-size: 18px;
 }
 
-.fa-circle-check {
-    color: green;
-}
-
-
-.fa-circle {
-    color: lightgray;
-}
-
-.fa-circle:hover {
-    color: gray;
+.selection-star {
+    font-size: 18px;
     cursor: pointer;
+    transition: opacity 0.15s ease;
 }
 
-.fa-circle-check:hover {
-    cursor: pointer;
+.selection-star:hover {
+    opacity: 0.7;
 }
 
 .icon-style {
     vertical-align: middle;
+}
+
+.status-col {
+    width: 80px;
+    min-width: 80px;
+}
+
+.analysis-row-warning td {
+    background-color: rgba(255, 193, 7, 0.08) !important;
+}
+
+.analysis-row-error td {
+    background-color: rgba(220, 53, 69, 0.08) !important;
+}
+
+.issue-badge {
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .form-select{

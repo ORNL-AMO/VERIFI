@@ -58,7 +58,13 @@ export interface IdbUtilityMeter {
     globalWarmingPotentialOption?: number,
     // globalWarmingPotential?: number,
     sidebarOpen?: boolean,
-    charges?: Array<MeterCharge>
+    charges?: Array<MeterCharge>,
+    //status settings
+    noLongerInUse?: boolean,
+    noLongerInUseMonth?: number,
+    noLongerInUseYear?: number,
+    canBeNegative?: boolean,
+    ignoreDateStatusChecks?: boolean
 }
 
 export function getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, energyUnit: string): IdbUtilityMeter {

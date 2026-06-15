@@ -1,8 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import * as _ from 'lodash';
 
 @Component({
   selector: 'app-annual-operating-conditions-form',
@@ -11,18 +8,14 @@ import * as _ from 'lodash';
   styleUrl: './annual-operating-conditions-form.component.css',
 })
 export class AnnualOperatingConditionsFormComponent {
-  @Input({ required: true })
-  annualOperatingConditionsDataForm: FormGroup;
+  annualOperatingConditionsDataForm = input.required<FormGroup>();
   @Output()
   emitRemoveOperatingConditionsData: EventEmitter<void> = new EventEmitter<void>();
-  @Input()
-  inSetup: boolean = false;
+  inSetup = input(false);
+  hasElectricityUtility = input.required<boolean>();
 
   showRemoveOperatingConditionsModal: boolean = false;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
-
-  ngOnInit() {
-  }
+  showCalculateHoursOfOperationModal: boolean = false;
 
   openRemoveOperatingConditionsModal() {
     this.showRemoveOperatingConditionsModal = true;
@@ -35,5 +28,21 @@ export class AnnualOperatingConditionsFormComponent {
   confirmRemoveOperatingConditionsData() {
     this.closeRemoveOperatingConditionsModal();
     this.emitRemoveOperatingConditionsData.emit();
+  }
+
+  openCalculateHoursOfOperationModal() {
+    this.showCalculateHoursOfOperationModal = true;
+  }
+
+  closeCalculateHoursOfOperationModal() {
+    this.showCalculateHoursOfOperationModal = false;
+  }
+
+  handleCalculatedValues({ calculatedHoursPerYear, hoursPerDay, daysPerWeek, weeksPerYear }: { calculatedHoursPerYear: number, hoursPerDay: number, daysPerWeek: number, weeksPerYear: number }) {
+    const annualOperatingConditionsDataForm = this.annualOperatingConditionsDataForm();
+    annualOperatingConditionsDataForm.controls.hoursOfOperation.setValue(calculatedHoursPerYear);
+    annualOperatingConditionsDataForm.controls.hoursPerDay.setValue(hoursPerDay);
+    annualOperatingConditionsDataForm.controls.daysPerWeek.setValue(daysPerWeek);
+    annualOperatingConditionsDataForm.controls.weeksPerYear.setValue(weeksPerYear);
   }
 }

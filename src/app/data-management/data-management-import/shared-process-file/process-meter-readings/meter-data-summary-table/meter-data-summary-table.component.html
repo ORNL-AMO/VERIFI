@@ -39,9 +39,7 @@
             {{summary.facilityName}}
           </td>
           <td>
-            <!-- <a class="click-link" (click)="selectMeterSummary(summary)"> -->
             {{summary.meterName}}
-          <!-- </a> -->
         </td>
         <td>
           {{summary.newEntries}}
@@ -104,11 +102,11 @@
               </th>
               <th class="col-existing can-click" (click)="setOrderDataField('oldReading')"
                 [ngClass]="{'active': orderDataField == 'oldReading'}">
-                Current Total Consumption ({{meterUnit}})
+                Current Usage ({{meterUnit}})
               </th>
               <th class="col-new can-click" (click)="setOrderDataField('newReading')"
                 [ngClass]="{'active': orderDataField == 'newReading'}">
-                Imported Total Consumption ({{meterUnit}})
+                Imported Usage ({{meterUnit}})
               </th>
               <th class="col-difference can-click" (click)="setOrderDataField('difference')"
                 [ngClass]="{'active': orderDataField == 'difference'}">
