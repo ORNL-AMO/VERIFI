@@ -46,11 +46,12 @@ export class FacilityCostSavingsReportResultsComponent {
   calculating: boolean | 'error' = false;
 
   groupUnits: { [groupId: string]: string } = {};
-  convertedGroupUnits: { [groupId: string]: string } = {};
   costDataTable: YearGroupData = {};
   convertedCostDataTable: YearGroupData = {};
   finalUnit: string;
   baselineYear: number;
+  baselineYearCost: { [groupId: string]: number } = {};
+  dataComplete: boolean = false;
 
   costSavingsTable: YearGroupData = {};
   cumulativeCostSavingsTable: YearGroupData = {};
@@ -59,8 +60,15 @@ export class FacilityCostSavingsReportResultsComponent {
   energyUseTable: YearGroupData = {};
   adjustedEnergyUseTable: YearGroupData = {};
   energySavingsTable: YearGroupData = {};
-  baselineYearCost: { [groupId: string]: number } = {};
-  dataComplete: boolean = false;
+
+  monthKeys: Array<string> = [];
+  monthlyCostSavingsTable: MonthlyGroupData = {};
+  cumulativeMonthlyCostSavingsTable: MonthlyGroupData = {};
+  estimatedMonthlyEnergyCostTable: MonthlyGroupData = {};
+  expectedMonthlyEnergyCostTable: MonthlyGroupData = {};
+  monthlyEnergyUseTable: MonthlyGroupData = {};
+  monthlyAdjustedEnergyUseTable: MonthlyGroupData = {};
+  monthlyEnergySavingsTable: MonthlyGroupData = {};
 
   constructor(
     private facilityReportsDbService: FacilityReportsDbService,
@@ -80,8 +88,6 @@ export class FacilityCostSavingsReportResultsComponent {
       this.baselineYear = this.selectedAnalysisItem?.baselineYear;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
       this.groupUnits = this.reportSettings.groupUnits;
-      this.convertedGroupUnits = JSON.parse(JSON.stringify(this.reportSettings.groupUnits));
-      this.checkGroupUnits();
       this.costDataTable = this.reportSettings.costSavingsTable;
       this.convertedCostDataTable = JSON.parse(JSON.stringify(this.reportSettings.costSavingsTable));
       this.convertToRequiredUnit();
@@ -95,20 +101,6 @@ export class FacilityCostSavingsReportResultsComponent {
     this.facilityReportSub.unsubscribe();
     if (this.worker) {
       this.worker.terminate();
-    }
-  }
-
-  checkGroupUnits() {
-    for (const group of this.selectedAnalysisItem.groups) {
-      let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == group.idbGroupId);
-      if (groupMeters.length > 1) {
-        if (this.selectedAnalysisItem.analysisCategory == 'energy') {
-          this.convertedGroupUnits[group.idbGroupId] = this.selectedAnalysisItem.energyUnit;
-        }
-        else if (this.selectedAnalysisItem.analysisCategory == 'water') {
-          this.convertedGroupUnits[group.idbGroupId] = this.selectedAnalysisItem.waterUnit;
-        }
-      }
     }
   }
 
@@ -141,7 +133,7 @@ export class FacilityCostSavingsReportResultsComponent {
   }
 
   setYears() {
-    this.years = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.reportYear);
+    this.years = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.endYear);
   }
 
   getGroupSummaries() {
@@ -159,6 +151,7 @@ export class FacilityCostSavingsReportResultsComponent {
         if (!data.error) {
           this.groupSummaries = data.groupSummaries;
           this.setSavings();
+          this.setMonthlySavings();
           this.dataComplete = true;
         } else {
           this.calculating = 'error';
@@ -198,17 +191,17 @@ export class FacilityCostSavingsReportResultsComponent {
         const groupId = groupSummary.group.idbGroupId;
         const annualAnalysisSummaryData = groupSummary.annualAnalysisSummaryData;
         annualAnalysisSummaryData.forEach(summary => {
-          if (summary.year <= this.reportSettings.reportYear) {
+          if (summary.year <= this.reportSettings.endYear) {
             const year = summary.year;
             const energyUse = summary.energyUse;
             const adjustedEnergyUse = summary.adjusted;
 
-            if(!this.energyUseTable[year]){
+            if (!this.energyUseTable[year]) {
               this.energyUseTable[year] = {};
             }
             this.energyUseTable[year][groupId] = energyUse;
 
-            if(!this.adjustedEnergyUseTable[year]){
+            if (!this.adjustedEnergyUseTable[year]) {
               this.adjustedEnergyUseTable[year] = {};
             }
             this.adjustedEnergyUseTable[year][groupId] = adjustedEnergyUse;
@@ -244,29 +237,99 @@ export class FacilityCostSavingsReportResultsComponent {
     }
   }
 
-  getReportData(year: number, groupId: string) {
-    const energyUse = this.energyUseTable[year] && this.energyUseTable[year][groupId] !== undefined && !isNaN(this.energyUseTable[year][groupId]) ? this.energyUseTable[year][groupId] : 0;
-    const adjustedEnergyUse = this.adjustedEnergyUseTable[year] && this.adjustedEnergyUseTable[year][groupId] !== undefined && !isNaN(this.adjustedEnergyUseTable[year][groupId]) ? this.adjustedEnergyUseTable[year][groupId] : 0;
-    const estimatedEnergyCost = this.estimatedEnergyCostTable[year] && this.estimatedEnergyCostTable[year][groupId] !== undefined && !isNaN(this.estimatedEnergyCostTable[year][groupId]) ? this.estimatedEnergyCostTable[year][groupId] : 0;
-    const expectedEnergyCost = this.expectedEnergyCostTable[year] && this.expectedEnergyCostTable[year][groupId] !== undefined && !isNaN(this.expectedEnergyCostTable[year][groupId]) ? this.expectedEnergyCostTable[year][groupId] : 0;
-    const energySavings = this.energySavingsTable[year] && this.energySavingsTable[year][groupId] !== undefined && !isNaN(this.energySavingsTable[year][groupId]) ? this.energySavingsTable[year][groupId] : 0;
-    const costSavings = this.costSavingsTable[year] && this.costSavingsTable[year][groupId] !== undefined && !isNaN(this.costSavingsTable[year][groupId]) ? this.costSavingsTable[year][groupId] : 0;
-    const cumulativeCostSavings = this.cumulativeCostSavingsTable[year] && this.cumulativeCostSavingsTable[year][groupId] !== undefined && !isNaN(this.cumulativeCostSavingsTable[year][groupId]) ? this.cumulativeCostSavingsTable[year][groupId] : 0;
-    return {
-      energyUse: energyUse,
-      adjustedEnergyUse: adjustedEnergyUse,
-      estimatedEnergyCost: estimatedEnergyCost,
-      expectedEnergyCost: expectedEnergyCost,
-      energySavings: energySavings,
-      costSavings: costSavings,
-      cumulativeCostSavings: cumulativeCostSavings
-    };
-  }
-
   get filteredGroups() {
     return this.selectedAnalysisItem.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis');
+  }
+
+  setMonthlySavings() {
+    if (!this.groupSummaries) {
+      return;
+    }
+
+    const allKeys = new Set<string>();
+
+    if (this.groupSummaries) {
+      this.groupSummaries.forEach(groupSummary => {
+        const groupId = groupSummary.group.idbGroupId;
+        const monthlyData = groupSummary.monthlyAnalysisSummaryData;
+        let runningCumulativeSavings = 0;
+        monthlyData.forEach(monthlySummary => {
+          if (this.isWithinReportEnd(monthlySummary.date.getFullYear(), monthlySummary.date.getMonth())) {
+            const monthKey = this.getMonthKey(monthlySummary.date.getFullYear(), monthlySummary.date.getMonth() + 1);
+            allKeys.add(monthKey);
+
+            if (!this.monthlyEnergyUseTable[monthKey]) {
+              this.monthlyEnergyUseTable[monthKey] = {};
+            }
+            this.monthlyEnergyUseTable[monthKey][groupId] = monthlySummary.energyUse;
+
+            if (!this.monthlyAdjustedEnergyUseTable[monthKey]) {
+              this.monthlyAdjustedEnergyUseTable[monthKey] = {};
+            }
+            this.monthlyAdjustedEnergyUseTable[monthKey][groupId] = monthlySummary.adjusted;
+
+            if (!this.monthlyEnergySavingsTable[monthKey]) {
+              this.monthlyEnergySavingsTable[monthKey] = {};
+            }
+            this.monthlyEnergySavingsTable[monthKey][groupId] = monthlySummary.savings;
+
+            if (!this.estimatedMonthlyEnergyCostTable[monthKey]) {
+              this.estimatedMonthlyEnergyCostTable[monthKey] = {};
+            }
+            this.estimatedMonthlyEnergyCostTable[monthKey][groupId] = monthlySummary.energyUse * this.getYearlyRateForMonth(groupId, monthlySummary.date.getFullYear());
+
+            if (!this.expectedMonthlyEnergyCostTable[monthKey]) {
+              this.expectedMonthlyEnergyCostTable[monthKey] = {};
+            }
+            this.expectedMonthlyEnergyCostTable[monthKey][groupId] = monthlySummary.adjusted * this.baselineYearCost[groupId];
+
+            if (!this.monthlyCostSavingsTable[monthKey]) {
+              this.monthlyCostSavingsTable[monthKey] = {};
+            }
+            this.monthlyCostSavingsTable[monthKey][groupId] = this.expectedMonthlyEnergyCostTable[monthKey][groupId] - this.estimatedMonthlyEnergyCostTable[monthKey][groupId];
+
+            if (!this.cumulativeMonthlyCostSavingsTable[monthKey]) {
+              this.cumulativeMonthlyCostSavingsTable[monthKey] = {};
+            }
+            runningCumulativeSavings += this.monthlyCostSavingsTable[monthKey][groupId];
+            this.cumulativeMonthlyCostSavingsTable[monthKey][groupId] = runningCumulativeSavings;
+          }
+        });
+        this.monthKeys = Array.from(allKeys).sort((a, b) => {
+          const [aYear, aMonth] = a.split('-').map(Number);
+          const [bYear, bMonth] = b.split('-').map(Number);
+          if (aYear === bYear) {
+            return aMonth - bMonth;
+          }
+          return aYear - bYear;
+        });
+      });
+    }
+  }
+
+  getMonthKey(year: number, month: number) {
+    return `${year}-${month - 1}`;
+  }
+
+  getYearlyRateForMonth(groupId: string, year: number) {
+    const rate = this.convertedCostDataTable[year] && this.convertedCostDataTable[year][groupId] !== undefined && !isNaN(this.convertedCostDataTable[year][groupId]) ? this.convertedCostDataTable[year][groupId] : 0;
+    return rate;
+  }
+
+  isWithinReportEnd(year: number, month: number) {
+    const reportEndYear = this.reportSettings.endYear;
+    const reportEndMonth = this.reportSettings.endMonth;
+    if (year < reportEndYear) {
+      return true;
+    } else if (year === reportEndYear) {
+      return month <= reportEndMonth;
+    } else {
+      return false;
+    }
   }
 }
 
 type YearGroupData = { [year: number]: { [groupId: string]: number } };
+type MonthlyGroupData = { [monthKey: string]: { [groupId: string]: number } };
+
 

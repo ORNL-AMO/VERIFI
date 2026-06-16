@@ -1,0 +1,31 @@
+<div class="table-responsive">
+    <table class="table table-bordered report-table mt-3">
+        <thead class="text-center primary-header">
+            <tr>
+                <th>Month</th>
+                @for (group of filteredGroups; track group) {
+                <th>{{ group.idbGroupId | groupName }}</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for(monthKey of monthKeys; track monthKey) {
+            <tr [ngClass]="{'year-end': checkYearEnd(monthKey)}">
+                <td>{{ formatMonthLabel(monthKey) }}</td>
+                @for (group of filteredGroups; track group) {
+                @if (costSavingsTable[monthKey] && checkValidNumber(costSavingsTable[monthKey][group.idbGroupId])) {
+                <td class="text-center">
+                    $ {{ costSavingsTable[monthKey][group.idbGroupId] | number:'1.2-2'}}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

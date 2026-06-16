@@ -273,18 +273,48 @@ export interface ModelingReportSettings {
 
 export function getCostSavingsReportSettings(): CostSavingsReportSettings {
     return {
-        reportYear: undefined,
+        endYear: undefined,
+        endMonth: undefined,
         costSavingsTable: {},
         groupUnits: {},
-        isDataComplete: false
+        isDataComplete: false,
+        annualSavingsTable: true,
+        annualSavingsGraph: true,
+        monthlySavingsTable: true,
+        annualCumulativeSavingsTable: true,
+        annualCumulativeSavingsGraph: true,
+        monthlyCumulativeSavingsTable: true,
+        userCostSummary: true,
+        calculatedCostSummary: true,
+        groupAnnualTable: true,
+        groupMonthlyTable: true,
+        includeFacility: true,
+        includeAnnual: true,
+        includeMonthly: true,
+        includeGroup: true
     };
 }
 
 export interface CostSavingsReportSettings {
-    reportYear: number,
+    endYear: number,
+    endMonth: number,
     costSavingsTable: {
         [year: number]: {[groupId: string]: number}
     },
     groupUnits: {[groupId: string]: string},
-    isDataComplete?: boolean
+    isDataComplete?: boolean,
+    annualSavingsTable: boolean,
+    annualSavingsGraph: boolean,
+    monthlySavingsTable: boolean,
+    annualCumulativeSavingsTable: boolean,
+    annualCumulativeSavingsGraph: boolean,
+    monthlyCumulativeSavingsTable: boolean,
+    userCostSummary: boolean,
+    calculatedCostSummary: boolean,
+    groupAnnualTable: boolean,
+    groupMonthlyTable: boolean,
+    includeFacility: boolean,
+    includeAnnual: boolean,
+    includeMonthly: boolean,
+    includeGroup: boolean
 }

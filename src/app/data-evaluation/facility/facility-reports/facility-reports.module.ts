@@ -35,6 +35,9 @@ import { FacilityCostSavingsReportSetupComponent } from './facility-report-setup
 import { BlendedEnergyRateModalComponent } from './facility-report-setup/facility-cost-savings-report-setup/blended-energy-rate-modal/blended-energy-rate-modal.component';
 import { FacilityCostSavingsReportResultsComponent } from './report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component';
 import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savings-report-results/annual-savings-graph/annual-savings-graph.component';
+import { MonthlySavingsTableComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-table/monthly-savings-table.component';
+import { GroupSavingsTableComponent } from './report-results/facility-cost-savings-report-results/group-savings-table/group-savings-table.component';
+import { AnnualSavingsTableComponent } from './report-results/facility-cost-savings-report-results/annual-savings-table/annual-savings-table.component';
 
 
 
@@ -64,7 +67,10 @@ import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savi
     FacilityCostSavingsReportSetupComponent,
     BlendedEnergyRateModalComponent,
     FacilityCostSavingsReportResultsComponent,
-    AnnualSavingsGraphComponent
+    AnnualSavingsGraphComponent,
+    MonthlySavingsTableComponent,
+    GroupSavingsTableComponent,
+    AnnualSavingsTableComponent
     
   ],
   imports: [

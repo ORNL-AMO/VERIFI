@@ -1,0 +1,53 @@
+<div class="table-responsive">
+    <table class="table table-bordered report-table mt-3">
+        <thead class="text-center primary-header">
+            <tr>
+                <th>Year</th>
+                @for (group of filteredGroups; track group) {
+                <th>{{ group.idbGroupId | groupName }}</th>
+                }
+            </tr>
+        </thead>
+        @if (showUnitHeader) {
+        <thead class="text-center sub-header">
+            <tr>
+                <th></th>
+                @for (group of filteredGroups; track group) {
+                <th class="fst-italic">
+                    @if (unitMode === 'group') {
+                        $/{{ groupUnits[group.idbGroupId] }}
+                    }
+                    @else {
+                        $/{{ singleUnit }}
+                    }
+                </th>
+                }
+            </tr>
+        </thead>
+        }
+        <tbody>
+            @for(year of years; track year) {
+            <tr>
+                <td>{{year}}</td>
+                @for (group of filteredGroups; track group) {
+                @if (getValue(year, group.idbGroupId) && getValue(year, group.idbGroupId) !== undefined &&
+                getValue(year, group.idbGroupId) !== null && getValue(year, group.idbGroupId)
+                !== 0) {
+                <td class="text-center">
+                    @if (currencyPrefix) {
+                        $
+                    }
+                    {{ getValue(year, group.idbGroupId) | number:'1.2-2'}}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

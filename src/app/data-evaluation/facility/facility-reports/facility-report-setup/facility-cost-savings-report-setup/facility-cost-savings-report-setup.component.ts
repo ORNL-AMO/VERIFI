@@ -12,6 +12,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, CostSavingsReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getMeterCollectionUnit, getYearsArray } from 'src/app/shared/sharedHelperFunctions';
 
@@ -37,6 +38,7 @@ export class FacilityCostSavingsReportSetupComponent {
 
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   yearsList: Array<number>;
+  months: Array<Month> = Months;
 
   hasDataChanged: boolean = false;
   costTableData: { [year: number]: { [groupId: string]: number } } = {};
@@ -102,7 +104,7 @@ export class FacilityCostSavingsReportSetupComponent {
 
   checkSelectedYearError() {
     if (this.selectedAnalysisItem) {
-      if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.reportYear) {
+      if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.endYear) {
         this.selectedYearError = false;
         this.setTableYears();
         this.setGroupUnits();
@@ -116,7 +118,7 @@ export class FacilityCostSavingsReportSetupComponent {
 
   async reportYearChanged() {
     if (this.selectedAnalysisItem) {
-      if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.reportYear) {
+      if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.endYear) {
         this.selectedYearError = false;
         this.setTableYears();
         this.setGroupUnits();
@@ -142,7 +144,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   setTableYears() {
-    this.yearsList = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.reportYear);
+    this.yearsList = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.endYear);
     this.setCostValues();
   }
 
@@ -182,10 +184,10 @@ export class FacilityCostSavingsReportSetupComponent {
           unit = groupMeters[0].startingUnit;
         }
         else {
-          if(this.selectedAnalysisItem?.analysisCategory == 'energy') {
+          if (this.selectedAnalysisItem?.analysisCategory == 'energy') {
             unit = this.selectedAnalysisItem.energyUnit;
           }
-          else if(this.selectedAnalysisItem?.analysisCategory == 'water') {
+          else if (this.selectedAnalysisItem?.analysisCategory == 'water') {
             unit = this.selectedAnalysisItem.waterUnit;
           }
         }
@@ -250,15 +252,18 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   isDataComplete(): boolean {
-    for (let year of this.yearsList) {
-      for (const group of this.filteredGroups) {
-        const cost = this.costTableData[year][group.idbGroupId];
-        if (cost === null || cost === undefined || isNaN(cost)) {
-          return false;
+    if (this.yearsList) {
+      for (let year of this.yearsList) {
+        for (const group of this.filteredGroups) {
+          const cost = this.costTableData[year][group.idbGroupId];
+          if (cost === null || cost === undefined || isNaN(cost)) {
+            return false;
+          }
         }
       }
+      return true;
     }
-    return true;
+    return false;
   }
 
   get filteredGroups() {

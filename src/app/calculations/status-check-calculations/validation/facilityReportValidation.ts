@@ -77,7 +77,8 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
     } else if (facilityReport.facilityReportType == 'costSavings') {
         analysisNeeded = true;
         linkedAnalysisItemId = facilityReport.analysisItemId;
-        errors.missingReportYear = facilityReport.costSavingsReportSettings.reportYear === undefined || facilityReport.costSavingsReportSettings.reportYear === null || isNaN(facilityReport.costSavingsReportSettings.reportYear);
+        errors.missingReportYear = facilityReport.costSavingsReportSettings.endYear === undefined || facilityReport.costSavingsReportSettings.endYear === null || isNaN(facilityReport.costSavingsReportSettings.endYear);
+        errors.missingEndDate = facilityReport.costSavingsReportSettings.endMonth === undefined || facilityReport.costSavingsReportSettings.endMonth === null || isNaN(facilityReport.costSavingsReportSettings.endMonth);
         errors.isDataComplete = facilityReport.costSavingsReportSettings.isDataComplete;
     }
     if (analysisNeeded) {
