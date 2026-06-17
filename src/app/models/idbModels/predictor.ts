@@ -2,7 +2,7 @@ import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather';
-export type WeatherDataType = 'HDD' | 'CDD' | 'relativeHumidity' | 'dryBulbTemp';
+export type WeatherDataType = 'HDD' | 'CDD' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp';
 
 export interface IdbPredictor extends IdbEntry {
     facilityId: string,

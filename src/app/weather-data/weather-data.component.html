@@ -114,6 +114,26 @@
             </label>
           </div>
         </div>
+
+         <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+          <div class="col-12">
+            <input type="checkbox" id="wetBulbTempSelected" name="wetBulbTempSelected" class="form-check-input"
+              [(ngModel)]="wetBulbTempSelected">
+            <label for="wetBulbTempSelected" class="fw-bold ps-2">
+              Wet Bulb Temperature
+            </label>
+          </div>
+        </div>
+
+         <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+          <div class="col-12">
+            <input type="checkbox" id="dewPointTempSelected" name="dewPointTempSelected" class="form-check-input"
+              [(ngModel)]="dewPointTempSelected">
+            <label for="dewPointTempSelected" class="fw-bold ps-2">
+              Dew Point Temperature
+            </label>
+          </div>
+        </div>
       </div>
       }
     </form>
