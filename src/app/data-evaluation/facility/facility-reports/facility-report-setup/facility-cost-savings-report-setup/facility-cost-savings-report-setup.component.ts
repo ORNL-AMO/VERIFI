@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
+import { MonthlyData } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -50,16 +55,19 @@ export class FacilityCostSavingsReportSetupComponent {
   selectedYearError: boolean = false;
   calanderizedMetersSub: Subscription;
 
+  groupMeterCalendarizedData: GroupMeterCalendarizedMap = {};
+
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
@@ -76,7 +84,8 @@ export class FacilityCostSavingsReportSetupComponent {
       this.setYearOptions();
     });
 
-    this.setSelectedAnalysisItem();
+    await this.setSelectedAnalysisItem();
+    this.setGroupMeterCalendarizedData();
   }
 
   ngOnDestroy() {
@@ -146,6 +155,43 @@ export class FacilityCostSavingsReportSetupComponent {
   setTableYears() {
     this.yearsList = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.endYear);
     this.setCostValues();
+  }
+
+  setGroupMeterCalendarizedData() {
+    const facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    const selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    const account = this.accountDbService.selectedAccount.getValue();
+
+    this.groupMeterCalendarizedData = {};
+    if (!this.selectedAnalysisItem) return;
+
+    this.selectedAnalysisItem.groups.forEach(group => {
+      const groupMeters = facilityMeters.filter(m => m.groupId == group.idbGroupId);
+
+      const calanderizedMeters = getCalanderizedMeterData(
+        groupMeters,
+        facilityMeterData,
+        selectedFacility,
+        false,
+        { energyIsSource: false, neededUnits: getNeededUnits(this.selectedAnalysisItem) },
+        [],
+        [],
+        [selectedFacility],
+        account.assessmentReportVersion,
+        []
+      );
+
+      const meterMap: { [meterId: string]: MeterCalendarizedData } = {};
+      calanderizedMeters.forEach(cMeter => {
+        meterMap[cMeter.meter.guid] = {
+          unit: getMeterCollectionUnit(cMeter.meter),
+          monthlyData: cMeter.monthlyData
+        };
+      });
+
+      this.groupMeterCalendarizedData[group.idbGroupId] = meterMap;
+    });
   }
 
   setCostValues() {
@@ -268,5 +314,38 @@ export class FacilityCostSavingsReportSetupComponent {
 
   get filteredGroups() {
     return this.selectedAnalysisItem.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis');
+  }
+
+  calculateCostFromCalendarizedMeters() {
+    for (let year of this.yearsList) {
+      for (const group of this.filteredGroups) {
+        const groupCalendarizedMeters = this.groupMeterCalendarizedData[group.idbGroupId];
+        let totalEnergyCost = 0;
+        let totalEnergyConsumption = 0;
+        for (const meterId in groupCalendarizedMeters) {
+          const meterData = groupCalendarizedMeters[meterId].monthlyData.filter(m => m.year == year);
+          meterData.forEach(m => {
+            totalEnergyCost += m.energyCost;
+
+            const converted = new ConvertValue(m.energyConsumption, getNeededUnits(this.selectedAnalysisItem), groupCalendarizedMeters[meterId].unit).convertedValue;
+            totalEnergyConsumption += isNaN(converted) ? 0 : converted;
+          });
+        }
+        const blendedRate = totalEnergyConsumption > 0 ? totalEnergyCost / totalEnergyConsumption : 0;
+        this.costTableData[year][group.idbGroupId] = Math.round(blendedRate * 10000)/10000;
+      }
+    }
+    this.updateReportSettings();
+  }
+}
+
+interface MeterCalendarizedData {
+  unit: string,
+  monthlyData: Array<MonthlyData>
+}
+
+type GroupMeterCalendarizedMap = {
+  [groupId: string]: {
+    [meterId: string]: MeterCalendarizedData
   }
 }

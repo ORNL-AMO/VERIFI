@@ -48,10 +48,13 @@
 @if (selectedAnalysisItem && !selectedYearError && filteredAnalysisItems?.length !== 0) {
 <hr class="mt-4">
 <div class="setup-info mt-4">
-  Enter the cost of energy for each group and year below. For groups with multiple meters, click the calculator icon to
+  To pre-populate the cost fields with the utility data, click on the calculate button below. Otherwise, enter the cost of energy for each group and year below. For groups with multiple meters, click the calculator icon to
   assist with your calculation
 </div>
-<div class="table-responsive mt-3">
+<div class="mt-2 text-center">
+  <button class="btn btn-primary" (click)="calculateCostFromCalendarizedMeters()">Calculate</button>
+</div>
+<div class="table-responsive mt-4">
   <table class="table table-bordered table-hover">
     <thead class="text-center">
       <tr>

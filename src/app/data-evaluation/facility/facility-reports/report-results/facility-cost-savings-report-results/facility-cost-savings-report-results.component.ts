@@ -50,7 +50,6 @@ export class FacilityCostSavingsReportResultsComponent {
   convertedCostDataTable: YearGroupData = {};
   finalUnit: string;
   baselineYear: number;
-  baselineYearCost: { [groupId: string]: number } = {};
   dataComplete: boolean = false;
 
   costSavingsTable: YearGroupData = {};
@@ -91,7 +90,6 @@ export class FacilityCostSavingsReportResultsComponent {
       this.costDataTable = this.reportSettings.costSavingsTable;
       this.convertedCostDataTable = JSON.parse(JSON.stringify(this.reportSettings.costSavingsTable));
       this.convertToRequiredUnit();
-      this.setBaselineYearCost();
       this.setYears();
       this.getGroupSummaries();
     });
@@ -123,12 +121,6 @@ export class FacilityCostSavingsReportResultsComponent {
           this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, this.finalUnit, this.selectedAnalysisItem.analysisCategory);
         }
       }
-    }
-  }
-
-  setBaselineYearCost() {
-    for (const groupId in this.convertedCostDataTable[this.baselineYear]) {
-      this.baselineYearCost[groupId] = this.convertedCostDataTable[this.baselineYear][groupId];
     }
   }
 
@@ -218,7 +210,7 @@ export class FacilityCostSavingsReportResultsComponent {
             if (!this.expectedEnergyCostTable[year]) {
               this.expectedEnergyCostTable[year] = {};
             }
-            this.expectedEnergyCostTable[year][groupId] = adjustedEnergyUse * this.baselineYearCost[groupId];
+            this.expectedEnergyCostTable[year][groupId] = adjustedEnergyUse * this.convertedCostDataTable[groupId];
 
             if (!this.costSavingsTable[year]) {
               this.costSavingsTable[year] = {};
@@ -281,7 +273,7 @@ export class FacilityCostSavingsReportResultsComponent {
             if (!this.expectedMonthlyEnergyCostTable[monthKey]) {
               this.expectedMonthlyEnergyCostTable[monthKey] = {};
             }
-            this.expectedMonthlyEnergyCostTable[monthKey][groupId] = monthlySummary.adjusted * this.baselineYearCost[groupId];
+            this.expectedMonthlyEnergyCostTable[monthKey][groupId] = monthlySummary.adjusted * this.getYearlyRateForMonth(groupId, monthlySummary.date.getFullYear());
 
             if (!this.monthlyCostSavingsTable[monthKey]) {
               this.monthlyCostSavingsTable[monthKey] = {};

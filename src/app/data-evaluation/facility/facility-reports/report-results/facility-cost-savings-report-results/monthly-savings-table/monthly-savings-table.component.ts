@@ -16,6 +16,12 @@ export class MonthlySavingsTableComponent {
   @Input()
   costSavingsTable: { [monthKey: string]: { [groupId: string]: number } } = {};
 
+  ngOnInit() {
+    if (this.monthKeys.length > 0) {
+      this.monthKeys = this.monthKeys.slice(12);
+    }
+  }
+
   formatMonthLabel(monthKey: string) {
     const [year, month] = monthKey.split('-').map(Number);
     const date = new Date(year, month);;
