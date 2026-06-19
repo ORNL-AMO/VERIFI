@@ -230,7 +230,7 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
         let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
             if (isNaN(degreeDay.minutesBetween) == false) {
                 return degreeDay.minutesBetween;
-            }            
+            }
             return 0;
         });
         let weightedAverage: number = (totalWeightedWetBulb / totalMinutes);
@@ -256,7 +256,14 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
             weightedAverage = 0;
         }
         return weightedAverage;
-    } 
+    } else if (weatherDataSelection == 'precipitation') {
+        return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            if (isNaN(degreeDay.precipitation) == false) {
+                return degreeDay.precipitation;
+            }
+            return 0;
+        });
+    }
 }
 
 export function getMinutesBetweenDates(firstDate: Date, secondDate: Date): number {
@@ -343,15 +350,15 @@ export function getEnergyUseSourceIcons(equipment: IdbFacilityEnergyUseEquipment
 }
 
 export function getYearsArray(startYear: number, endYear: number): number[] {
-  const years: number[] = [];
-  for (let year = startYear; year <= endYear; year++) {
-    years.push(year);
-  }
-  return years;
+    const years: number[] = [];
+    for (let year = startYear; year <= endYear; year++) {
+        years.push(year);
+    }
+    return years;
 }
 
 export function getMeterCollectionUnit(meter: IdbUtilityMeter): string {
-  return (meter.source === 'Other Fuels' && meter.scope === 2)
-    ? meter.vehicleCollectionUnit
-    : meter.startingUnit;
+    return (meter.source === 'Other Fuels' && meter.scope === 2)
+        ? meter.vehicleCollectionUnit
+        : meter.startingUnit;
 }

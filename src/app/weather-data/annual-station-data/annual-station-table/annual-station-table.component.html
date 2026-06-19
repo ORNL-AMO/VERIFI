@@ -21,6 +21,9 @@
       @if (weatherDataSelection == 'dewPointTemp') {
         <th>Dew Point Temp.</th>
       }
+      @if (weatherDataSelection == 'precipitation') {
+        <th>Precipitation</th>
+      }
     </tr>
   </thead>
   <tbody class="table-group-divider">
@@ -64,10 +67,15 @@
             {{degreeDay.dewPointTemp | number:'1.0-1'}} &#8457;
           </td>
         }
+        @if (weatherDataSelection == 'precipitation') {
+          <td>
+            {{degreeDay.precipitation | number:'1.0-2'}} in
+          </td>
+        }
       </tr>
     }
   </tbody>
-  @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'dryBulbTemp' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection != 'dewPointTemp') {
+  @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'dryBulbTemp' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
     <tfoot>
       <tr>
         <th>

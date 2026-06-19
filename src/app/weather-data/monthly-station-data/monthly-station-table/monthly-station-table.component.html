@@ -11,7 +11,8 @@
         Reading<br> Minutes</th>
       <th (click)="setOrderDataField('percentOfDay')" [ngClass]="{'active': orderDataField == 'percentOfDay'}">%
         of Day</th>
-      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection != 'dewPointTemp') {
+      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection
+      != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
       <th (click)="setOrderDataField('dryBulbTemp')" [ngClass]="{'active': orderDataField == 'dryBulbTemp'}">Dry<br>
         Bulb Temp</th>
       }
@@ -37,6 +38,10 @@
       <th (click)="setOrderDataField('dewPointTemp')" [ngClass]="{'active': orderDataField == 'dewPointTemp'}">
         Dew Point<br> Temp</th>
       }
+      @if (weatherDataSelection == 'precipitation') {
+      <th (click)="setOrderDataField('precipitation')" [ngClass]="{'active': orderDataField == 'precipitation'}">
+        Precipitation</th>
+      }
     </tr>
   </thead>
   <tbody class="table-group-divider">
@@ -55,7 +60,8 @@
       <td>
         {{summaryData.percentOfDay * 100 | number}}
       </td>
-      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection != 'dewPointTemp') {
+      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection
+      != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
       <td>
         {{summaryData.dryBulbTemp | number}} &#8457;
       </td>
@@ -85,6 +91,18 @@
         {{summaryData.dewPointTemp | number:'1.0-1'}} &#8457;
       </td>
       }
+      @if (weatherDataSelection == 'precipitation') {
+      @if (summaryData.precipitation !== null && summaryData.precipitation !== undefined) {
+      <td>
+        {{summaryData.precipitation | number:'1.0-2'}} in
+      </td>
+      }
+      @else {
+        <td>
+          &mdash;
+        </td>
+      }
+      }
     </tr>
     }
   </tbody>
@@ -100,7 +118,8 @@
       <th>
 
       </th>
-      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection != 'dewPointTemp') {
+      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection
+      != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
       <th>
         {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &#8457;
       </th>
@@ -127,7 +146,12 @@
       }
       @if (weatherDataSelection == 'dewPointTemp') {
       <th>
-        {{detailedDegreeDays | degreeDayTotal: 'dewPointTemp' | number:'1.0-1'}} &#8457;  
+        {{detailedDegreeDays | degreeDayTotal: 'dewPointTemp' | number:'1.0-1'}} &#8457;
+      </th>
+      }
+      @if (weatherDataSelection == 'precipitation') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'precipitation' | number:'1.0-2'}} in
       </th>
       }
     </tr>

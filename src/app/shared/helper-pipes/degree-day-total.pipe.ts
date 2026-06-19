@@ -10,7 +10,7 @@ import { getDegreeDayAmount } from '../sharedHelperFunctions';
 })
 export class DegreeDayTotalPipe implements PipeTransform {
 
-  transform(values: Array<DetailDegreeDay>, sumBy: 'minutesBetween' | 'heatingDegreeDay' | 'coolingDegreeDay' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp' | 'days'): number {
+  transform(values: Array<DetailDegreeDay>, sumBy: 'minutesBetween' | 'heatingDegreeDay' | 'coolingDegreeDay' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp' | 'precipitation' | 'days'): number {
     if (sumBy == 'minutesBetween') {
       return _.sumBy(values, (degreeDay: DetailDegreeDay) => {
         return degreeDay.minutesBetween;
@@ -34,6 +34,8 @@ export class DegreeDayTotalPipe implements PipeTransform {
         weatherDataSelection = 'wetBulbTemp';
       } else if (sumBy == 'dewPointTemp') {
         weatherDataSelection = 'dewPointTemp';
+      } else if (sumBy == 'precipitation') {
+        weatherDataSelection = 'precipitation';
       }
       return getDegreeDayAmount(values, weatherDataSelection);
     }

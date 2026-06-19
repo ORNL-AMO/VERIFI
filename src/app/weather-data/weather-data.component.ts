@@ -38,6 +38,7 @@ export class WeatherDataComponent {
   dryBulbTempSelected: boolean = false;
   wetBulbTempSelected: boolean = false;
   dewPointTempSelected: boolean = false;
+  precipitationSelected: boolean = false;
   cddBaseTemp: number;
   hddBaseTemp: number;
   selectedValues: Array<{ name: WeatherDataSelection, value?: number }> = [];
@@ -104,6 +105,9 @@ export class WeatherDataComponent {
     this.hddSelected = false;
     this.relativeHumiditySelected = false;
     this.dryBulbTempSelected = false;
+    this.wetBulbTempSelected = false;
+    this.dewPointTempSelected = false;
+    this.precipitationSelected = false;
     this.cddBaseTemp = undefined;
     this.hddBaseTemp = undefined;
 
@@ -134,6 +138,9 @@ export class WeatherDataComponent {
       case 'dewPointTemp':
         this.dewPointTempSelected = true;
         break;
+      case 'precipitation':
+        this.precipitationSelected = true;
+        break;
     }
   }
 
@@ -141,7 +148,7 @@ export class WeatherDataComponent {
     if (!this.selectedFacility || this.facilityMeterData?.length == 0) {
       return true;
     }
-    if (!this.cddSelected && !this.hddSelected && !this.relativeHumiditySelected && !this.dryBulbTempSelected && !this.wetBulbTempSelected && !this.dewPointTempSelected) {
+    if (!this.cddSelected && !this.hddSelected && !this.relativeHumiditySelected && !this.dryBulbTempSelected && !this.wetBulbTempSelected && !this.dewPointTempSelected && !this.precipitationSelected) {
       return true;
     }
     if (this.cddSelected && (this.cddBaseTemp == undefined || this.cddBaseTemp == null)) {
@@ -173,6 +180,9 @@ export class WeatherDataComponent {
     }
     if (this.dewPointTempSelected) {
       this.selectedValues.push({ name: 'dewPointTemp' });
+    }
+    if (this.precipitationSelected) {
+      this.selectedValues.push({ name: 'precipitation' });
     }
   }
 

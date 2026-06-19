@@ -70,10 +70,11 @@ export interface DetailDegreeDay {
     weightedDryBulbTemp: number,
     weightedWetBulbTemp: number,
     weightedDewPointTemp: number,
+    precipitation: number,
     minutesBetween: number
 }
 
-export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp';
+export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp' | 'precipitation';
 
 export interface WeatherDataSelectionOption {
     selection: WeatherDataSelection,
@@ -108,5 +109,9 @@ export const WeatherDataSelectionOptions: Array<WeatherDataSelectionOption> = [
     {
         selection: 'dewPointTemp',
         label: 'Dew Point Temp.'
+    },
+    {
+        selection: 'precipitation',
+        label: 'Precipitation'
     }
 ]

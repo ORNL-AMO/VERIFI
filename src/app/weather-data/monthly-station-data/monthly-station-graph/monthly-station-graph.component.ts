@@ -118,7 +118,7 @@ export class MonthlyStationGraphComponent {
         tickmode: undefined
       };
 
-      if (this.weatherDataSelection != 'relativeHumidity' && this.weatherDataSelection != 'wetBulbTemp' && this.weatherDataSelection != 'dewPointTemp') {
+      if (this.weatherDataSelection != 'relativeHumidity' && this.weatherDataSelection != 'wetBulbTemp' && this.weatherDataSelection != 'dewPointTemp' && this.weatherDataSelection != 'precipitation') {
         graphTitle = 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
         let correspondingYaxis = 'y2';
         if (this.weatherDataSelection == 'dryBulbTemp') {
@@ -252,6 +252,23 @@ export class MonthlyStationGraphComponent {
           type: 'scatter',
           name: 'Dew Point Temp',
           yaxis: 'y',
+        });
+      }
+
+      if (this.weatherDataSelection == 'precipitation') {
+        yAxis.title.text = 'Precipitation';
+        yAxis.ticksuffix = ' in';
+        graphTitle = 'Precipitation <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')';
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.precipitation }),
+          type: 'scatter',
+          name: 'Precipitation Readings',
+          mode: 'lines+markers',
+          yaxis: 'y',
+          marker: {
+            color: '#1B4F72'
+          }
         });
       }
 
