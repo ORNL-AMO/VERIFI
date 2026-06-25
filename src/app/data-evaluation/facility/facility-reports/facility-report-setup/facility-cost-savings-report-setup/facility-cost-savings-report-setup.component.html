@@ -23,202 +23,243 @@
 </form>
 <hr>
 
-<div class="d-flex flex-wrap">
-  <div class="mb-3 fw-bold fst-italic fs-6">
-    * Cost Savings Report is only available for site energy and water analyses.
+@if (reportSettings.endYear && reportSettings.endMonth) {
+<div>
+  <div class="d-flex flex-wrap">
+    <div class="mb-3 fw-bold fst-italic fs-6">
+      * Cost Savings Report is only available for site energy and water analyses.
+    </div>
   </div>
-</div>
 
-<app-facility-report-analysis-selection [facilityReport]="facilityReport" [baselineYears]="baselineYears"
-  [selectedAnalysisItem]="selectedAnalysisItem" (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"
-  (filteredItemsChange)="onFilteredItemsChange($event)"></app-facility-report-analysis-selection>
+  <app-facility-report-analysis-selection [facilityReport]="facilityReport" [baselineYears]="baselineYears"
+    [selectedAnalysisItem]="selectedAnalysisItem" (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"
+    (filteredItemsChange)="onFilteredItemsChange($event)"></app-facility-report-analysis-selection>
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
-<div class="alert alert-warning text-center">
-  No analysis items matching selected filters. Please adjust filters to view analysis items.
-</div>
-}
+  @if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
+  <div class="alert alert-warning text-center">
+    No analysis items matching selected filters. Please adjust filters to view analysis items.
+  </div>
+  }
 
-@if(selectedYearError) {
-<div class="alert alert-danger text-center">
-  Report Year must be greater than or equal to Baseline Year of the selected analysis item.
-</div>
-}
+  @if(selectedYearError) {
+  <div class="alert alert-danger text-center">
+    Report Year must be greater than or equal to Baseline Year of the selected analysis item.
+  </div>
+  }
 
-@if (selectedAnalysisItem && !selectedYearError && filteredAnalysisItems?.length !== 0) {
-<hr class="mt-4">
-<div class="setup-info mt-4">
-  To pre-populate the cost fields with the utility data, click on the calculate button below. Otherwise, enter the cost of energy for each group and year below. For groups with multiple meters, click the calculator icon to
-  assist with your calculation
-</div>
-<div class="mt-2 text-center">
-  <button class="btn btn-primary" (click)="calculateCostFromCalendarizedMeters()">Calculate</button>
-</div>
-<div class="table-responsive mt-4">
-  <table class="table table-bordered table-hover">
-    <thead class="text-center">
-      <tr>
-        <th>Year</th>
-        @for (group of filteredGroups; track group) {
-        <th>{{ group.idbGroupId | groupName }}</th>
-        }
-      </tr>
-      <tr>
-        <th></th>
-        @for (group of filteredGroups; track group) {
-        <th>$/{{ groupUnits[group.idbGroupId] }}</th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      @for (year of yearsList; track year) {
-      <tr>
-        <td> {{year}} </td>
-        @for (group of filteredGroups; track group) {
-        <td>
-          <div class="input-group input-group-sm">
-            <input type="number" placeholder="Enter cost" class="form-control form-control-sm"
-              [(ngModel)]="costTableData[year][group.idbGroupId]" (ngModelChange)="updateReportSettings()">
-
-            @if (hasMultipleMeters(group)) {
-            <span class="input-group-text">
-              <i class="fa fa-calculator text-primary calculator-pointer" (click)="openCalculator(group, year)"></i>
-            </span>
+  @if (selectedAnalysisItem && !selectedYearError && filteredAnalysisItems?.length !== 0) {
+  <hr class="mt-4">
+  <div class="alert alert-info text-center">
+    <div class="fw-bold mt-2">
+      Click 'Calculate' below to auto-populate fields with utility data, or enter your energy costs manually. For groups
+      with multiple meters, click the 'Calculator Icon' for assistance.
+    </div>
+    <div class="mt-4 text-center">
+      <button class="btn btn-primary" (click)="calculateCostFromCalendarizedMeters()">Calculate</button>
+    </div>
+    @if ((missingCostData | keyvalue).length > 0) {
+    <div class="mt-4 text-center text-danger fw-bold">
+      You have missing cost data for the following groups and dates. If this is not as expected, please check your meter
+      data:
+      <ul class="mb-0 mt-2">
+        @for (entry of missingCostData | keyvalue; track entry.key) {
+          <span class="fw-bold text-decoration-underline">{{ entry.key | groupName }}:</span>
+          <span>
+            @for (missingDate of entry.value; track $index) {
+            {{ missingDate | date:'MMM yyyy' }}@if (!$last) {, }
             }
-          </div>
-        </td>
+          </span>
+          <br>
         }
-      </tr>
-      }
-    </tbody>
-  </table>
-</div>
-}
-
-@if (showModal) {
-<app-blended-energy-rate-modal [showModal]="showModal" [group]="selectedGroup" [year]="selectedYear"
-  [selectedAnalysisItem]="selectedAnalysisItem" [report]="facilityReport" (close)="closeCalculator()"
-  (calculatedBlendedRate)="updateBlendedRate($event)"></app-blended-energy-rate-modal>
-}
-
-@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
-<form>
-  <span class="bold">
-    Choose Report Content
-  </span>
-  <div class="row">
-    <div class="col">
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="includeFacility"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.includeFacility" (change)="save()" id="includeFacility">
-        <label class="bold form-check-label" for="includeFacility">Facility Reports
-        </label>
-      </div>
-      @if (facilityReport.costSavingsReportSettings.includeFacility) {
-      <div class="form-check ms-2">
-        <input class="form-check-input" type="checkbox" name="includeAnnual"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.includeAnnual" (change)="save()" id="includeAnnual">
-        <label class="form-check-label" for="includeAnnual">Facility Annual Results
-        </label>
-      </div>
-      @if (facilityReport.costSavingsReportSettings.includeAnnual) {
-      <div class="form-check ms-4">
-        <input class="form-check-input" type="checkbox" name="annualSavingsTable"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.annualSavingsTable" (change)="save()"
-          id="annualSavingsTable">
-        <label class="form-check-label" for="annualSavingsTable">
-          Annual Cost Savings Table
-        </label>
-      </div>
-      <div class="form-check ms-4">
-        <input class="form-check-input" type="checkbox" name="annualSavingsGraph"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.annualSavingsGraph" (change)="save()"
-          id="annualSavingsGraph">
-        <label class="form-check-label" for="annualSavingsGraph">
-          Annual Cost Savings Graph
-        </label>
-      </div>
-      <div class="form-check ms-4">
-        <input class="form-check-input" type="checkbox" name="annualCumulativeSavingsTable"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.annualCumulativeSavingsTable" (change)="save()"
-          id="annualCumulativeSavingsTable">
-        <label class="form-check-label" for="annualCumulativeSavingsTable">
-          Cumulative Cost Savings Table
-        </label>
-      </div>
-      <div class="form-check ms-4">
-        <input class="form-check-input" type="checkbox" name="annualCumulativeSavingsGraph"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.annualCumulativeSavingsGraph" (change)="save()"
-          id="annualCumulativeSavingsGraph">
-        <label class="form-check-label" for="annualCumulativeSavingsGraph">
-          Cumulative Cost Savings Graph
-        </label>
-      </div>
-      }
-      <div class="form-check ms-2">
-        <input class="form-check-input" type="checkbox" name="includeMonthly"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.includeMonthly" (change)="save()" id="includeMonthly">
-        <label class="form-check-label" for="includeMonthly">Facility Monthly Results
-        </label>
-      </div>
-      @if (facilityReport.costSavingsReportSettings.includeMonthly) {
-      <div class="form-check ms-4">
-        <input class="form-check-input" type="checkbox" name="monthlySavingsTable"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.monthlySavingsTable" (change)="save()"
-          id="monthlySavingsTable">
-        <label class="form-check-label" for="monthlySavingsTable">
-          Monthly Cost Savings Table
-        </label>
-      </div>
-      <div class="form-check ms-4">
-        <input class="form-check-input" type="checkbox" name="monthlyCumulativeSavingsTable"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.monthlyCumulativeSavingsTable" (change)="save()"
-          id="monthlyCumulativeSavingsTable">
-        <label class="form-check-label" for="monthlyCumulativeSavingsTable">
-          Monthly Cumulative Cost Savings Table
-        </label>
-      </div>
-      }
-      }
+      </ul>
     </div>
-
-    <div class="col">
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="includeGroup"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.includeGroup" (change)="save()" id="includeGroup">
-        <label class="bold form-check-label" for="includeGroup">Group Reports
-        </label>
-      </div>
-      @if (facilityReport.costSavingsReportSettings.includeGroup) {
-      <div class="form-check ms-2">
-        <input class="form-check-input" type="checkbox" name="groupAnnualTable"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.groupAnnualTable" (change)="save()"
-          id="groupAnnualTable">
-        <label class="form-check-label" for="groupAnnualTable">Annual Savings Details
-        </label>
-      </div>
-      <div class="form-check ms-2">
-        <input class="form-check-input" type="checkbox" name="groupMonthlyTable"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.groupMonthlyTable" (change)="save()"
-          id="groupMonthlyTable">
-        <label class="form-check-label" for="groupMonthlyTable">Monthly Savings Details
-        </label>
-      </div>
-      }
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="userCostSummary"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.userCostSummary" (change)="save()" id="userCostSummary">
-        <label class="bold form-check-label" for="userCostSummary">User Cost Summary
-        </label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="calculatedCostSummary"
-          [(ngModel)]="facilityReport.costSavingsReportSettings.calculatedCostSummary" (change)="save()"
-          id="calculatedCostSummary">
-        <label class="bold form-check-label" for="calculatedCostSummary">Calculated Cost Summary
-        </label>
-      </div>
-    </div>
+    }
   </div>
-</form>
+  <div class="table-responsive mt-4">
+    <table class="table table-bordered table-hover">
+      <thead class="text-center">
+        <tr>
+          <th>Year</th>
+          @for (group of filteredGroups; track group) {
+          <th>{{ group.idbGroupId | groupName }}</th>
+          }
+        </tr>
+        <tr>
+          <th></th>
+          @for (group of filteredGroups; track group) {
+          <th>$/{{ groupUnits[group.idbGroupId] }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (year of yearsList; track year) {
+        <tr>
+          <td> {{year}} </td>
+          @for (group of filteredGroups; track group) {
+          <td>
+            <div class="input-group input-group-sm">
+              <input type="number" placeholder="Enter cost" class="form-control form-control-sm"
+                [(ngModel)]="costTableData[year][group.idbGroupId]" (ngModelChange)="updateReportSettings()">
+
+              @if (hasMultipleMeters(group)) {
+              <span class="input-group-text">
+                <i class="fa fa-calculator text-primary calculator-pointer" (click)="openCalculator(group, year)"></i>
+              </span>
+              }
+            </div>
+          </td>
+          }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  @if (showModal) {
+  <app-blended-energy-rate-modal [showModal]="showModal" [group]="selectedGroup" [year]="selectedYear"
+    [selectedAnalysisItem]="selectedAnalysisItem" [report]="facilityReport" (close)="closeCalculator()"
+    (calculatedBlendedRate)="updateBlendedRate($event)"></app-blended-energy-rate-modal>
+  }
+
+  @if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+  <form>
+    <span class="bold">
+      Choose Report Content
+    </span>
+    <div class="row">
+      <div class="col">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="includeFacility"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.includeFacility" (change)="save()"
+            id="includeFacility">
+          <label class="bold form-check-label" for="includeFacility">Facility Reports
+          </label>
+        </div>
+        @if (facilityReport.costSavingsReportSettings.includeFacility) {
+        <div class="form-check ms-2">
+          <input class="form-check-input" type="checkbox" name="includeAnnual"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.includeAnnual" (change)="save()" id="includeAnnual">
+          <label class="form-check-label" for="includeAnnual">Facility Annual Results
+          </label>
+        </div>
+        @if (facilityReport.costSavingsReportSettings.includeAnnual) {
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="annualSavingsTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.annualSavingsTable" (change)="save()"
+            id="annualSavingsTable">
+          <label class="form-check-label" for="annualSavingsTable">
+            Annual Cost Savings Table
+          </label>
+        </div>
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="annualSavingsGraph"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.annualSavingsGraph" (change)="save()"
+            id="annualSavingsGraph">
+          <label class="form-check-label" for="annualSavingsGraph">
+            Annual Cost Savings Graph
+          </label>
+        </div>
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="annualCumulativeSavingsTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.annualCumulativeSavingsTable" (change)="save()"
+            id="annualCumulativeSavingsTable">
+          <label class="form-check-label" for="annualCumulativeSavingsTable">
+            Cumulative Cost Savings Table
+          </label>
+        </div>
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="annualCumulativeSavingsGraph"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.annualCumulativeSavingsGraph" (change)="save()"
+            id="annualCumulativeSavingsGraph">
+          <label class="form-check-label" for="annualCumulativeSavingsGraph">
+            Cumulative Cost Savings Graph
+          </label>
+        </div>
+        }
+        <div class="form-check ms-2">
+          <input class="form-check-input" type="checkbox" name="includeMonthly"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.includeMonthly" (change)="save()" id="includeMonthly">
+          <label class="form-check-label" for="includeMonthly">Facility Monthly Results
+          </label>
+        </div>
+        @if (facilityReport.costSavingsReportSettings.includeMonthly) {
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="monthlySavingsTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.monthlySavingsTable" (change)="save()"
+            id="monthlySavingsTable">
+          <label class="form-check-label" for="monthlySavingsTable">
+            Monthly Cost Savings Table
+          </label>
+        </div>
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="monthlySavingsGraph"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.monthlySavingsGraph" (change)="save()"
+            id="monthlySavingsGraph">
+          <label class="form-check-label" for="monthlySavingsGraph">
+            Monthly Cost Savings Graph
+          </label>
+        </div>
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="monthlyCumulativeSavingsTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.monthlyCumulativeSavingsTable" (change)="save()"
+            id="monthlyCumulativeSavingsTable">
+          <label class="form-check-label" for="monthlyCumulativeSavingsTable">
+            Monthly Cumulative Cost Savings Table
+          </label>
+        </div>
+        <div class="form-check ms-4">
+          <input class="form-check-input" type="checkbox" name="monthlyCumulativeSavingsGraph"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.monthlyCumulativeSavingsGraph" (change)="save()"
+            id="monthlyCumulativeSavingsGraph">
+          <label class="form-check-label" for="monthlyCumulativeSavingsGraph">
+            Monthly Cumulative Cost Savings Graph
+          </label>
+        </div>
+        }
+        }
+      </div>
+
+      <div class="col">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="includeGroup"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.includeGroup" (change)="save()" id="includeGroup">
+          <label class="bold form-check-label" for="includeGroup">Group Reports
+          </label>
+        </div>
+        @if (facilityReport.costSavingsReportSettings.includeGroup) {
+        <div class="form-check ms-2">
+          <input class="form-check-input" type="checkbox" name="groupAnnualTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.groupAnnualTable" (change)="save()"
+            id="groupAnnualTable">
+          <label class="form-check-label" for="groupAnnualTable">Annual Savings Details
+          </label>
+        </div>
+        <div class="form-check ms-2">
+          <input class="form-check-input" type="checkbox" name="groupMonthlyTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.groupMonthlyTable" (change)="save()"
+            id="groupMonthlyTable">
+          <label class="form-check-label" for="groupMonthlyTable">Monthly Savings Details
+          </label>
+        </div>
+        }
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="userCostSummary"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.userCostSummary" (change)="save()"
+            id="userCostSummary">
+          <label class="bold form-check-label" for="userCostSummary">User Cost Summary
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="calculatedCostSummary"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.calculatedCostSummary" (change)="save()"
+            id="calculatedCostSummary">
+          <label class="bold form-check-label" for="calculatedCostSummary">Calculated Cost Summary
+          </label>
+        </div>
+      </div>
+    </div>
+  </form>
+  }
+</div>
 }

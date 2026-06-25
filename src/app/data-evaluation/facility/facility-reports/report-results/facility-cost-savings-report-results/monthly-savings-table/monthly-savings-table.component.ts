@@ -37,4 +37,13 @@ export class MonthlySavingsTableComponent {
   checkValidNumber(value: number) {
     return value === undefined || isNaN(value) || value === null || value === 0 ? false : true;
   }
+
+  getTotal(monthKey: string) {
+    let total = 0;
+    for (const group of this.filteredGroups) {
+      const value = this.costSavingsTable[monthKey]?.[group.idbGroupId];
+      total += value !== undefined && value !== null && !isNaN(value) ? value : 0;
+    }
+    return total !== undefined && total !== null && !isNaN(total) ? total : 0;
+  }
 }

@@ -38,6 +38,7 @@ import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savi
 import { MonthlySavingsTableComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-table/monthly-savings-table.component';
 import { GroupSavingsTableComponent } from './report-results/facility-cost-savings-report-results/group-savings-table/group-savings-table.component';
 import { AnnualSavingsTableComponent } from './report-results/facility-cost-savings-report-results/annual-savings-table/annual-savings-table.component';
+import { MonthlySavingsGraphComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
 
 
 
@@ -70,7 +71,8 @@ import { AnnualSavingsTableComponent } from './report-results/facility-cost-savi
     AnnualSavingsGraphComponent,
     MonthlySavingsTableComponent,
     GroupSavingsTableComponent,
-    AnnualSavingsTableComponent
+    AnnualSavingsTableComponent,
+    MonthlySavingsGraphComponent
     
   ],
   imports: [

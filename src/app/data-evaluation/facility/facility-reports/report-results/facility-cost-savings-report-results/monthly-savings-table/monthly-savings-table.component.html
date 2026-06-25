@@ -6,6 +6,7 @@
                 @for (group of filteredGroups; track group) {
                 <th>{{ group.idbGroupId | groupName }}</th>
                 }
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
@@ -15,7 +16,7 @@
                 @for (group of filteredGroups; track group) {
                 @if (costSavingsTable[monthKey] && checkValidNumber(costSavingsTable[monthKey][group.idbGroupId])) {
                 <td class="text-center">
-                    $ {{ costSavingsTable[monthKey][group.idbGroupId] | number:'1.2-2'}}
+                    $ {{ costSavingsTable[monthKey][group.idbGroupId] | number:'1.2-4'}}
                 </td>
                 }
                 @else {
@@ -23,6 +24,16 @@
                     &mdash;
                 </td>
                 }
+                }
+                @if (costSavingsTable[monthKey] && getTotal(monthKey) && getTotal(monthKey) !== undefined && getTotal(monthKey) !== null && getTotal(monthKey) !== 0) {
+                <td class="text-center total-column">
+                    $ {{ getTotal(monthKey) | number:'1.2-4'}}
+                </td>
+                }
+                @else {
+                <td class="text-center total-column">
+                    &mdash;
+                </td>
                 }
             </tr>
             }

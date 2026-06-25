@@ -56,6 +56,7 @@ export class FacilityCostSavingsReportSetupComponent {
   calanderizedMetersSub: Subscription;
 
   groupMeterCalendarizedData: GroupMeterCalendarizedMap = {};
+  missingCostData: { [groupId: string]: Date[] } = {};
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
@@ -67,12 +68,12 @@ export class FacilityCostSavingsReportSetupComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
       if (this.reportSettings && this.reportSettings.costSavingsTable) {
-        this.costTableData = this.reportSettings.costSavingsTable;
+        this.costTableData = this.reportSettings.costSavingsTable ? JSON.parse(JSON.stringify(this.reportSettings.costSavingsTable)) : {};
       }
     });
 
@@ -84,8 +85,7 @@ export class FacilityCostSavingsReportSetupComponent {
       this.setYearOptions();
     });
 
-    await this.setSelectedAnalysisItem();
-    this.setGroupMeterCalendarizedData();
+    this.setSelectedAnalysisItem();
   }
 
   ngOnDestroy() {
@@ -97,7 +97,8 @@ export class FacilityCostSavingsReportSetupComponent {
   onSelectedAnalysisItemChange(item: IdbAnalysisItem) {
     this.selectedAnalysisItem = item;
     this.checkSelectedYearError();
-    this.save();
+    this.clearUnitCostData();
+    this.updateReportSettings();
   }
 
   onFilteredItemsChange(items: Array<IdbAnalysisItem>) {
@@ -122,7 +123,6 @@ export class FacilityCostSavingsReportSetupComponent {
         this.selectedYearError = true;
       }
     }
-
   }
 
   async reportYearChanged() {
@@ -135,7 +135,7 @@ export class FacilityCostSavingsReportSetupComponent {
         this.selectedYearError = true;
       }
     }
-    this.save();
+    this.updateReportSettings();
   }
 
   async save() {
@@ -155,6 +155,15 @@ export class FacilityCostSavingsReportSetupComponent {
   setTableYears() {
     this.yearsList = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.endYear);
     this.setCostValues();
+  }
+
+  clearUnitCostData() {
+    for (let year of this.yearsList) {
+      for (const group of this.selectedAnalysisItem.groups) {
+        this.costTableData[year][group.idbGroupId] = null;
+      }
+    }
+    this.missingCostData = {};
   }
 
   setGroupMeterCalendarizedData() {
@@ -317,22 +326,31 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   calculateCostFromCalendarizedMeters() {
+    this.missingCostData = {};
+    this.setGroupMeterCalendarizedData();
     for (let year of this.yearsList) {
       for (const group of this.filteredGroups) {
         const groupCalendarizedMeters = this.groupMeterCalendarizedData[group.idbGroupId];
         let totalEnergyCost = 0;
         let totalEnergyConsumption = 0;
+
         for (const meterId in groupCalendarizedMeters) {
           const meterData = groupCalendarizedMeters[meterId].monthlyData.filter(m => m.year == year);
           meterData.forEach(m => {
+            if(m.energyCost == 0) {
+              if(!this.missingCostData[group.idbGroupId]) {
+                this.missingCostData[group.idbGroupId] = [];
+              }
+              this.missingCostData[group.idbGroupId].push(m.date);
+            }
             totalEnergyCost += m.energyCost;
-
             const converted = new ConvertValue(m.energyConsumption, getNeededUnits(this.selectedAnalysisItem), groupCalendarizedMeters[meterId].unit).convertedValue;
             totalEnergyConsumption += isNaN(converted) ? 0 : converted;
           });
         }
+
         const blendedRate = totalEnergyConsumption > 0 ? totalEnergyCost / totalEnergyConsumption : 0;
-        this.costTableData[year][group.idbGroupId] = Math.round(blendedRate * 10000)/10000;
+        this.costTableData[year][group.idbGroupId] = Math.round(blendedRate * 10000) / 10000;
       }
     }
     this.updateReportSettings();

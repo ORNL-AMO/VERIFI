@@ -26,3 +26,10 @@
 tr.year-end:not(:first-of-type){
     border-top: solid 5px;
 }
+
+.total-column {
+    font-weight: 600;
+    background-color: #e3e7ec;
+    color: #2c386b;
+    text-align: center;
+}

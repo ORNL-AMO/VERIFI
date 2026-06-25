@@ -42,6 +42,12 @@
     </div>
     }
 
+    @if (monthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlySavingsGraph &&
+    reportSettings.includeFacility && reportSettings.includeMonthly) {
+    <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
+        [savingsData]="monthlyCostSavingsTable"></app-monthly-savings-graph>
+    }
+
     @if(cumulativeCostSavingsTable) {
     @if(reportSettings.annualCumulativeSavingsTable && reportSettings.includeFacility && reportSettings.includeAnnual) {
     <div class="mt-4">
@@ -72,6 +78,12 @@
     </div>
     }
 
+    @if (monthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlyCumulativeSavingsGraph &&
+    reportSettings.includeFacility && reportSettings.includeMonthly) {
+    <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
+        [savingsData]="cumulativeMonthlyCostSavingsTable"></app-monthly-savings-graph>
+    }
+
     @if (costDataTable && reportSettings.userCostSummary) {
     <div class="mt-4">
         <h4 class="mb-0">
@@ -98,8 +110,10 @@
 @if (reportSettings.includeGroup) {
 @for (group of filteredGroups; track group) {
 <div class="report">
-    @if ((!reportSettings.includeAnnual || (!reportSettings.annualSavingsTable && !reportSettings.annualSavingsGraph && !reportSettings.annualCumulativeSavingsTable && !reportSettings.annualCumulativeSavingsGraph)) &&
-    (!reportSettings.includeMonthly || (!reportSettings.monthlySavingsTable && !reportSettings.monthlyCumulativeSavingsTable)) &&
+    @if ((!reportSettings.includeAnnual || (!reportSettings.annualSavingsTable && !reportSettings.annualSavingsGraph &&
+    !reportSettings.annualCumulativeSavingsTable && !reportSettings.annualCumulativeSavingsGraph)) &&
+    (!reportSettings.includeMonthly || (!reportSettings.monthlySavingsTable &&
+    !reportSettings.monthlyCumulativeSavingsTable)) &&
     !reportSettings.userCostSummary && !reportSettings.calculatedCostSummary) {
     <div class="text-center">
         <h3>

@@ -210,7 +210,7 @@ export class FacilityCostSavingsReportResultsComponent {
             if (!this.expectedEnergyCostTable[year]) {
               this.expectedEnergyCostTable[year] = {};
             }
-            this.expectedEnergyCostTable[year][groupId] = adjustedEnergyUse * this.convertedCostDataTable[groupId];
+            this.expectedEnergyCostTable[year][groupId] = adjustedEnergyUse * this.convertedCostDataTable[year][groupId];
 
             if (!this.costSavingsTable[year]) {
               this.costSavingsTable[year] = {};

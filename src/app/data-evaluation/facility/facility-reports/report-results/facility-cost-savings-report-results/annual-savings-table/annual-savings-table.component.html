@@ -6,6 +6,9 @@
                 @for (group of filteredGroups; track group) {
                 <th>{{ group.idbGroupId | groupName }}</th>
                 }
+                @if (!showUnitHeader) {
+                <th>Total</th>
+                }
             </tr>
         </thead>
         @if (showUnitHeader) {
@@ -15,10 +18,10 @@
                 @for (group of filteredGroups; track group) {
                 <th class="fst-italic">
                     @if (unitMode === 'group') {
-                        $/{{ groupUnits[group.idbGroupId] }}
+                    $/{{ groupUnits[group.idbGroupId] }}
                     }
                     @else {
-                        $/{{ singleUnit }}
+                    $/{{ singleUnit }}
                     }
                 </th>
                 }
@@ -35,13 +38,29 @@
                 !== 0) {
                 <td class="text-center">
                     @if (currencyPrefix) {
-                        $
+                    $
                     }
-                    {{ getValue(year, group.idbGroupId) | number:'1.2-2'}}
+                    {{ getValue(year, group.idbGroupId) | number:'1.2-4'}}
                 </td>
                 }
                 @else {
                 <td class="text-center">
+                    &mdash;
+                </td>
+                }
+                }
+                @if (!showUnitHeader) {
+                @if (getTotal(year) && getTotal(year) !== undefined && getTotal(year) !== null && getTotal(year) !== 0)
+                {
+                <td class="text-center total-column">
+                    @if (currencyPrefix) {
+                    $
+                    }
+                    {{ getTotal(year) | number:'1.2-4'}}
+                </td>
+                }
+                @else {
+                <td class="text-center total-column">
                     &mdash;
                 </td>
                 }
