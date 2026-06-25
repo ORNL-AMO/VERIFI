@@ -59,7 +59,7 @@ export class AnnualSavingsGraphComponent {
         const xVals = graphYears;
         const yVals = graphYears.map(year => {
           if (this.savingsData[year] && this.savingsData[year][group.idbGroupId] !== undefined && !isNaN(this.savingsData[year][group.idbGroupId])) {
-            return this.savingsData[year][group.idbGroupId];
+            return Math.round(this.savingsData[year][group.idbGroupId]);
           }
         });
         const computedOffset = startOffset + (index * (innerBarWidth + gapBetweenSubBars));
@@ -82,7 +82,7 @@ export class AnnualSavingsGraphComponent {
             total += this.savingsData[year][group.idbGroupId];
           }
         });
-        return total;
+        return Math.round(total);
       });
 
       const totalTrace = {
@@ -95,10 +95,10 @@ export class AnnualSavingsGraphComponent {
           color: 'rgba(44, 56, 107, 0.18)',
           line: { color: 'rgba(44, 56, 107, 0.45)', width: 1 }
         },
-        text: totalSavings.map(v => `$${v.toLocaleString(undefined, { maximumFractionDigits: 4 })}`),
+        text: totalSavings.map(v => `$${v.toLocaleString()}`),
         textposition: 'outside',
         cliponaxis: false,
-        hovertemplate: 'Year %{x}<br>Total: $%{y:,.4f}<extra></extra>'
+        hovertemplate: 'Year %{x}<br>Total: $%{y:,.0f}<extra></extra>'
       };
 
       const data = [totalTrace, ...groupData];

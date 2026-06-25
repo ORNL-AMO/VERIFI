@@ -56,7 +56,7 @@ export class FacilityCostSavingsReportSetupComponent {
   calanderizedMetersSub: Subscription;
 
   groupMeterCalendarizedData: GroupMeterCalendarizedMap = {};
-  missingCostData: { [groupId: string]: Date[] } = {};
+  missingCostData: { [meterId: string]: Date[] } = {};
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private analysisDbService: AnalysisDbService,
@@ -158,9 +158,11 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   clearUnitCostData() {
-    for (let year of this.yearsList) {
-      for (const group of this.selectedAnalysisItem.groups) {
-        this.costTableData[year][group.idbGroupId] = null;
+    if (this.yearsList && this.selectedAnalysisItem) {
+      for (let year of this.yearsList) {
+        for (const group of this.selectedAnalysisItem.groups) {
+          this.costTableData[year][group.idbGroupId] = null;
+        }
       }
     }
     this.missingCostData = {};
@@ -337,11 +339,11 @@ export class FacilityCostSavingsReportSetupComponent {
         for (const meterId in groupCalendarizedMeters) {
           const meterData = groupCalendarizedMeters[meterId].monthlyData.filter(m => m.year == year);
           meterData.forEach(m => {
-            if(m.energyCost == 0) {
-              if(!this.missingCostData[group.idbGroupId]) {
-                this.missingCostData[group.idbGroupId] = [];
+            if (m.energyCost == 0) {
+              if (!this.missingCostData[meterId]) {
+                this.missingCostData[meterId] = [];
               }
-              this.missingCostData[group.idbGroupId].push(m.date);
+              this.missingCostData[meterId].push(m.date);
             }
             totalEnergyCost += m.energyCost;
             const converted = new ConvertValue(m.energyConsumption, getNeededUnits(this.selectedAnalysisItem), groupCalendarizedMeters[meterId].unit).convertedValue;
@@ -350,10 +352,16 @@ export class FacilityCostSavingsReportSetupComponent {
         }
 
         const blendedRate = totalEnergyConsumption > 0 ? totalEnergyCost / totalEnergyConsumption : 0;
-        this.costTableData[year][group.idbGroupId] = Math.round(blendedRate * 10000) / 10000;
+        this.costTableData[year][group.idbGroupId] = Math.round(blendedRate * 100) / 100;
       }
     }
     this.updateReportSettings();
+  }
+
+  getMeterName(meterId: string): string {
+    const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    const meter = facilityMeters.find(m => m.guid == meterId);
+    return meter ? meter.name : '';
   }
 }
 

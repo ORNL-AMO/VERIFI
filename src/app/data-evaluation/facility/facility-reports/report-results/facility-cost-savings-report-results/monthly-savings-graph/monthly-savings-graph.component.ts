@@ -53,7 +53,7 @@ export class MonthlySavingsGraphComponent {
         });
         const yVals = this.monthKeys.map(monthKey => {
           if (this.savingsData[monthKey] && this.savingsData[monthKey][group.idbGroupId] !== undefined && !isNaN(this.savingsData[monthKey][group.idbGroupId])) {
-            return this.savingsData[monthKey][group.idbGroupId];
+            return Math.round(this.savingsData[monthKey][group.idbGroupId]);
           }
           return null;
         });

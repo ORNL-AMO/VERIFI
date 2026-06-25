@@ -42,7 +42,7 @@
 
                 @if (getValue(estimatedEnergyCostTable, rowKey) !== 0) {
                 <td class="text-center">
-                    {{ getValue(estimatedEnergyCostTable, rowKey) | number:'1.2-4' }}
+                    {{ getValue(estimatedEnergyCostTable, rowKey) | number:'1.0-0' }}
                 </td>
                 }
                 @else {
@@ -64,7 +64,7 @@
 
                 @if (getValue(expectedEnergyCostTable, rowKey) !== 0) {
                 <td class="text-center">
-                    {{ getValue(expectedEnergyCostTable, rowKey) | number:'1.2-4' }}
+                    {{ getValue(expectedEnergyCostTable, rowKey) | number:'1.0-0' }}
                 </td>
                 }
                 @else {
@@ -86,7 +86,7 @@
 
                 @if (getValue(costSavingsTable, rowKey) !== 0) {
                 <td class="text-center">
-                    {{ getValue(costSavingsTable, rowKey) | number:'1.2-4' }}
+                    {{ getValue(costSavingsTable, rowKey) | number:'1.0-0' }}
                 </td>
                 }
                 @else {
@@ -97,7 +97,7 @@
 
                 @if (getValue(cumulativeCostSavingsTable, rowKey) !== 0) {
                 <td class="text-center">
-                    {{ getValue(cumulativeCostSavingsTable, rowKey) | number:'1.2-4' }}
+                    {{ getValue(cumulativeCostSavingsTable, rowKey) | number:'1.0-0' }}
                 </td>
                 }
                 @else {

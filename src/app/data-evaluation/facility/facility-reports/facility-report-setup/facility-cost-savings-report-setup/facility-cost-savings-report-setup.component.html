@@ -59,11 +59,11 @@
     </div>
     @if ((missingCostData | keyvalue).length > 0) {
     <div class="mt-4 text-center text-danger fw-bold">
-      You have missing cost data for the following groups and dates. If this is not as expected, please check your meter
+      You have cost data entered as 0 for the following meters and dates. If this is not as expected, please check your meter
       data:
       <ul class="mb-0 mt-2">
         @for (entry of missingCostData | keyvalue; track entry.key) {
-          <span class="fw-bold text-decoration-underline">{{ entry.key | groupName }}:</span>
+          <span class="fw-bold text-decoration-underline">{{ getMeterName(entry.key) }}:</span>
           <span>
             @for (missingDate of entry.value; track $index) {
             {{ missingDate | date:'MMM yyyy' }}@if (!$last) {, }

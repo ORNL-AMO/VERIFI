@@ -40,7 +40,12 @@
                     @if (currencyPrefix) {
                     $
                     }
-                    {{ getValue(year, group.idbGroupId) | number:'1.2-4'}}
+                    @if (showUnitHeader) {
+                    {{ getValue(year, group.idbGroupId) | number:'1.2-2'}}
+                    }
+                    @else {
+                    {{ getValue(year, group.idbGroupId) | number:'1.0-0'}}
+                    }
                 </td>
                 }
                 @else {
@@ -56,7 +61,7 @@
                     @if (currencyPrefix) {
                     $
                     }
-                    {{ getTotal(year) | number:'1.2-4'}}
+                    {{ getTotal(year) | number:'1.0-0'}}
                 </td>
                 }
                 @else {
