@@ -15,11 +15,11 @@ import { MonthlyData } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbFacilityReport, CostSavingsReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { IdbFacilityReport, CostSavingsReportSettings, YearGroupData } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { getMeterCollectionUnit, getYearsArray } from 'src/app/shared/sharedHelperFunctions';
+import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from 'src/app/shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-facility-cost-savings-report-setup',
@@ -45,8 +45,7 @@ export class FacilityCostSavingsReportSetupComponent {
   yearsList: Array<number>;
   months: Array<Month> = Months;
 
-  hasDataChanged: boolean = false;
-  costTableData: { [year: number]: { [groupId: string]: number } } = {};
+  unitCostTable: YearGroupData = {};
   groupUnits: { [groupId: string]: string } = {};
 
   showModal: boolean = false;
@@ -72,8 +71,8 @@ export class FacilityCostSavingsReportSetupComponent {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
-      if (this.reportSettings && this.reportSettings.costSavingsTable) {
-        this.costTableData = this.reportSettings.costSavingsTable ? JSON.parse(JSON.stringify(this.reportSettings.costSavingsTable)) : {};
+      if (this.reportSettings && this.reportSettings.unitCostTable) {
+        this.unitCostTable = this.reportSettings.unitCostTable ? JSON.parse(JSON.stringify(this.reportSettings.unitCostTable)) : {};
       }
     });
 
@@ -161,7 +160,7 @@ export class FacilityCostSavingsReportSetupComponent {
     if (this.yearsList && this.selectedAnalysisItem) {
       for (let year of this.yearsList) {
         for (const group of this.selectedAnalysisItem.groups) {
-          this.costTableData[year][group.idbGroupId] = null;
+          this.unitCostTable[year][group.idbGroupId] = null;
         }
       }
     }
@@ -207,12 +206,12 @@ export class FacilityCostSavingsReportSetupComponent {
 
   setCostValues() {
     for (let year of this.yearsList) {
-      if (!this.costTableData[year]) {
-        this.costTableData[year] = {};
+      if (!this.unitCostTable[year]) {
+        this.unitCostTable[year] = {};
       }
       for (const group of this.selectedAnalysisItem.groups) {
-        if (this.costTableData[year][group.idbGroupId] === undefined) {
-          this.costTableData[year][group.idbGroupId] = null;
+        if (this.unitCostTable[year][group.idbGroupId] === undefined) {
+          this.unitCostTable[year][group.idbGroupId] = null;
         }
       }
     }
@@ -227,53 +226,11 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   checkUnit(group: AnalysisGroup): string {
-    let unit: string;
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
+    const facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    const groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return group.idbGroupId == meter.groupId;
     });
-    if (groupMeters.length > 1) {
-      let mobileMeters = groupMeters.filter(meter => (meter.source == 'Other Fuels' && meter.scope == 2));
-
-      if (mobileMeters.length == 0) {
-        let isSameUnit = groupMeters.every(meter => meter.startingUnit == groupMeters[0].startingUnit);
-        if (isSameUnit) {
-          unit = groupMeters[0].startingUnit;
-        }
-        else {
-          if (this.selectedAnalysisItem?.analysisCategory == 'energy') {
-            unit = this.selectedAnalysisItem.energyUnit;
-          }
-          else if (this.selectedAnalysisItem?.analysisCategory == 'water') {
-            unit = this.selectedAnalysisItem.waterUnit;
-          }
-        }
-      }
-      else if (mobileMeters.length == groupMeters.length) {
-        let isSameUnit = mobileMeters.every(meter => meter.vehicleCollectionUnit == mobileMeters[0].vehicleCollectionUnit);
-        if (isSameUnit) {
-          unit = mobileMeters[0].vehicleCollectionUnit;
-        }
-        else {
-          unit = this.selectedAnalysisItem?.energyUnit;
-        }
-      }
-      else if (mobileMeters.length > 0 && mobileMeters.length < groupMeters.length) {
-        let nonMobileMeters = groupMeters.filter(meter => !(meter.source == 'Other Fuels' && meter.scope == 2));
-        let isNonMobileSameUnit = nonMobileMeters.every(meter => meter.startingUnit == nonMobileMeters[0].startingUnit);
-        let isMobileSameUnit = mobileMeters.every(meter => meter.vehicleCollectionUnit == mobileMeters[0].vehicleCollectionUnit);
-        if (isNonMobileSameUnit && isMobileSameUnit && nonMobileMeters[0].startingUnit == mobileMeters[0].vehicleCollectionUnit) {
-          unit = nonMobileMeters[0].startingUnit;
-        }
-        else {
-          unit = this.selectedAnalysisItem?.energyUnit;
-        }
-      }
-    }
-    else if (groupMeters.length == 1) {
-      unit = getMeterCollectionUnit(groupMeters[0]);
-    }
-    return unit;
+    return getGroupUnit(groupMeters, this.selectedAnalysisItem);
   }
 
   hasMultipleMeters(group: AnalysisGroup): boolean {
@@ -296,14 +253,14 @@ export class FacilityCostSavingsReportSetupComponent {
 
   updateBlendedRate(blendedRate: number) {
     if (this.selectedGroup && this.selectedYear) {
-      this.costTableData[this.selectedYear][this.selectedGroup.idbGroupId] = blendedRate;
+      this.unitCostTable[this.selectedYear][this.selectedGroup.idbGroupId] = blendedRate;
       this.updateReportSettings();
     }
     this.showModal = false;
   }
 
   updateReportSettings() {
-    this.reportSettings.costSavingsTable = JSON.parse(JSON.stringify(this.costTableData));
+    this.reportSettings.unitCostTable = JSON.parse(JSON.stringify(this.unitCostTable));
     this.reportSettings.isDataComplete = this.isDataComplete();
     this.save();
   }
@@ -312,7 +269,7 @@ export class FacilityCostSavingsReportSetupComponent {
     if (this.yearsList) {
       for (let year of this.yearsList) {
         for (const group of this.filteredGroups) {
-          const cost = this.costTableData[year][group.idbGroupId];
+          const cost = this.unitCostTable[year][group.idbGroupId];
           if (cost === null || cost === undefined || isNaN(cost)) {
             return false;
           }
@@ -352,7 +309,7 @@ export class FacilityCostSavingsReportSetupComponent {
         }
 
         const blendedRate = totalEnergyConsumption > 0 ? totalEnergyCost / totalEnergyConsumption : 0;
-        this.costTableData[year][group.idbGroupId] = Math.round(blendedRate * 100) / 100;
+        this.unitCostTable[year][group.idbGroupId] = Math.round(blendedRate * 100) / 100;
       }
     }
     this.updateReportSettings();

@@ -99,7 +99,7 @@
           <td>
             <div class="input-group input-group-sm">
               <input type="number" placeholder="Enter cost" class="form-control form-control-sm"
-                [(ngModel)]="costTableData[year][group.idbGroupId]" (ngModelChange)="updateReportSettings()">
+                [(ngModel)]="unitCostTable[year][group.idbGroupId]" (ngModelChange)="updateReportSettings()">
 
               @if (hasMultipleMeters(group)) {
               <span class="input-group-text">

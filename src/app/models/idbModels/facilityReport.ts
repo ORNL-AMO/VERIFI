@@ -275,7 +275,7 @@ export function getCostSavingsReportSettings(): CostSavingsReportSettings {
     return {
         endYear: undefined,
         endMonth: undefined,
-        costSavingsTable: {},
+        unitCostTable: {},
         groupUnits: {},
         isDataComplete: false,
         annualSavingsTable: true,
@@ -300,9 +300,7 @@ export function getCostSavingsReportSettings(): CostSavingsReportSettings {
 export interface CostSavingsReportSettings {
     endYear: number,
     endMonth: number,
-    costSavingsTable: {
-        [year: number]: {[groupId: string]: number}
-    },
+    unitCostTable: YearGroupData,
     groupUnits: {[groupId: string]: string},
     isDataComplete?: boolean,
     annualSavingsTable: boolean,
@@ -322,3 +320,10 @@ export interface CostSavingsReportSettings {
     includeMonthly: boolean,
     includeGroup: boolean
 }
+
+
+export type YearGroupData = { [year: number]: { [groupId: string]: number } };
+export type MonthlyGroupData = { [monthKey: string]: { [groupId: string]: number } };
+
+
+
