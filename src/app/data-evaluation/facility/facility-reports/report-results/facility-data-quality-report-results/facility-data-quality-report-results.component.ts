@@ -1,7 +1,5 @@
-import { Component, inject, QueryList, Signal, ViewChildren } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, QueryList, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
@@ -15,7 +13,6 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
-import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { getStatistics, Statistics } from 'src/app/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { getPredictorStatistics, PredictorStatistics } from 'src/app/shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
 import { FacilityDataQualityReportAdapter } from './facility-data-quality-report.adapter';
@@ -26,6 +23,7 @@ import { MeterEnergyHistogramComponent } from 'src/app/shared/shared-data-qualit
 import { MeterCostHistogramComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
 import { PredictorTimeseriesGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
 import { PredictorHistogramGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-facility-data-quality-report-results',
@@ -48,10 +46,6 @@ export class FacilityDataQualityReportResultsComponent {
   meterDataStatsList: Array<MeterDataStats> = [];
   predictorDataStatsList: Array<PredictorDataStats> = [];
 
-  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
-
-  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-
   @ViewChildren('meterConsumption') meterConsumption !: QueryList<MeterEnergyTimeseriesGraphComponent>;
   @ViewChildren('meterCost') meterCost !: QueryList<MeterCostTimeseriesGraphComponent>;
   @ViewChildren('meterEnergyHistogram') meterEnergy !: QueryList<MeterEnergyHistogramComponent>;
@@ -66,7 +60,8 @@ export class FacilityDataQualityReportResultsComponent {
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private facilityDataQualityReportAdapter: FacilityDataQualityReportAdapter,
-    private exportReportPdfService: ExportReportPdfService
+    private exportReportPdfService: ExportReportPdfService,
+    private analysisDbService: AnalysisDbService
   ) { }
 
   ngOnInit() {
@@ -83,13 +78,56 @@ export class FacilityDataQualityReportResultsComponent {
   }
 
   setMetersAndPredictors() {
+    this.selectedMeterIds = [];
+    this.selectedPredictorIds = [];
+
     if (this.selectedMode === 'analysis') {
       this.selectedAnalysisItemId = this.dataQualityReportSettings.selectedAnalysisItemId;
-      const facilityCheck = this.facilityStatusCheck();
-      const analysisStatusCheck = facilityCheck?.analysisStatusChecks.find(a => a.analysisItem.guid === this.selectedAnalysisItemId);
-      if (analysisStatusCheck) {
-        this.selectedMeterIds = analysisStatusCheck.includedMeterStatusChecks.map(m => m.meterId);
-        this.selectedPredictorIds = analysisStatusCheck.includedPredictorStatusChecks.map(p => p.predictorId);
+      this.analysisItem = this.analysisDbService.getByGuid(this.selectedAnalysisItemId);
+      if (this.analysisItem) {
+        const meterIds = new Set<string>();
+        const predictorIds = new Set<string>();
+
+        this.analysisItem.groups.forEach(group => {
+          if (group.analysisType === 'skip' || group.analysisType === 'skipAnalysis') {
+            return;
+          }
+
+          const groupMeters = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
+          groupMeters.forEach(meter => {
+            if (meter.guid) {
+              meterIds.add(meter.guid);
+            }
+          });
+
+          if (group.analysisType === 'energyIntensity' || group.analysisType === 'modifiedEnergyIntensity') {
+            group.predictorVariables.forEach(predictorVariable => {
+              if (predictorVariable.id && predictorVariable.productionInAnalysis) {
+                predictorIds.add(predictorVariable.id);
+              }
+            });
+          }
+
+          if (group.analysisType === 'regression') {
+            if (group.isGeneratedModel) {
+              const selectedModel = group.models?.find(model => model.modelId === group.selectedModelId);
+              selectedModel?.predictorVariables.forEach(predictorVariable => {
+                if (predictorVariable.id && predictorVariable.productionInAnalysis) {
+                  predictorIds.add(predictorVariable.id);
+                }
+              });
+            }
+            else {
+              group.predictorVariables.forEach(predictorVariable => {
+                if (predictorVariable.id && predictorVariable.productionInAnalysis) {
+                  predictorIds.add(predictorVariable.id);
+                }
+              });
+            }
+          }
+        });
+        this.selectedMeterIds = Array.from(meterIds);
+        this.selectedPredictorIds = Array.from(predictorIds);
       }
     } else if (this.selectedMode === 'manual') {
       this.selectedMeterIds = this.dataQualityReportSettings.selectedMeterIds;
@@ -186,7 +224,7 @@ export class FacilityDataQualityReportResultsComponent {
 
       meterEnergyHistogramMap[meterId] = async () => {
         const chartComponent = this.meterEnergy.find(m => m.selectedMeter?.guid === stats.meter.guid);
-        if (chartComponent) {          
+        if (chartComponent) {
           const base64Str = await chartComponent.getChartAsBase64Image();
           return base64Str;
         }
@@ -217,14 +255,14 @@ export class FacilityDataQualityReportResultsComponent {
 
       predictorHistogramMap[predictorId] = async () => {
         const chartComponent = this.predictorHistogram.find(m => m.selectedPredictor?.guid === stats.predictor.guid);
-        if (chartComponent) {          
+        if (chartComponent) {
           const base64Str = await chartComponent.getChartAsBase64Image();
           return base64Str;
         }
         return '';
       };
     });
-    
+
     return {
       meterConsumptionTimeseries: meterConsumptionMap,
       meterCostTimeseries: meterCostMap,
