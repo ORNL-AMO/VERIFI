@@ -6,11 +6,12 @@
         [dateRange]="dateRange"></app-emissions-stacked-line-chart>
       }
       @if (dataType != 'emissions') {
-        <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
+        <app-meters-overview-stacked-line-chart #meterStackedLineChart [dataType]="dataType" [facilityId]="facility.guid"
           [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
         [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
       }
     </div>
+
   }
   @if (sectionOptions.includeMeterUsageTable) {
     <div class="print-break-before"
@@ -43,15 +44,15 @@
         [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
       }
       @if (dataType == 'energyUse') {
-        <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
+        <app-meter-usage-donut #meterBarChart [dataType]="dataType" [facilityId]="facility.guid"
         [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
       }
       @if (dataType == 'cost') {
-        <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
+        <app-meter-usage-donut #meterBarChart [dataType]="dataType" [facilityId]="facility.guid"
         [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-donut>
       }
       @if (dataType == 'water') {
-        <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
+        <app-meter-usage-donut #meterBarChart [dataType]="dataType" [facilityId]="facility.guid"
         [facilityOverviewMeters]="facilityOverviewData.waterMeters"></app-meter-usage-donut>
       }
     </div>
@@ -79,7 +80,7 @@
           [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
         }
         @if (dataType != 'emissions') {
-          <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
+          <app-utilities-usage-chart #annualBarChart [dataType]="dataType" [facilityId]="facility.guid"
           [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
         }
       </div>
@@ -88,7 +89,7 @@
   @if (sectionOptions.includeMonthlyLineChartForFacility) {
     <div class="row print-break-avoid">
       <div class="col-12">
-        <app-monthly-utility-usage-line-chart [dataType]="dataType" [facilityId]="facility.guid"
+        <app-monthly-utility-usage-line-chart #monthlyUsageLineChart [dataType]="dataType" [facilityId]="facility.guid"
         [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
       </div>
     </div>

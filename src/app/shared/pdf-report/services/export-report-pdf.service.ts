@@ -76,7 +76,7 @@ export class ExportReportPdfService {
 
   private async renderSection(pdf: jsPDF, section: BaseSection, currentY: number): Promise<number> {
     const bottomThreshold = PAGE_HEIGHT_MM - PAGE_MARGIN_MM;
-    const titleHeight = section.title ? 6 : 0;
+    const titleHeight = section?.title ? 6 : 0;
     let contentHeight = 0;
 
     switch (section.type) {
@@ -148,7 +148,7 @@ export class ExportReportPdfService {
   private renderTableSection(pdf: jsPDF, section: TableSection, currentY: number): number {
     currentY = this.renderSectionTitle(pdf, section.title, currentY);
     autoTable(pdf, {
-      head: [section.headers],
+      head: section.subHeaders?.length ? [section.headers, section.subHeaders] : [section.headers],
       body: section.rows,
       startY: currentY,
       margin: { left: PAGE_MARGIN_MM, right: PAGE_MARGIN_MM },
@@ -158,6 +158,14 @@ export class ExportReportPdfService {
         fontStyle: 'bold',
         halign: 'center'
       },
+      didParseCell: (data) => {
+        if(data.section === 'head' && data.row.index === 1) {
+          data.cell.styles.fontStyle = 'normal';
+          data.cell.styles.fillColor = [255, 255, 255];
+          data.cell.styles.textColor = [40, 40, 40];
+        }
+      },
+      tableWidth: CONTENT_WIDTH_MM,
       styles: {
         fontSize: BODY_FONT_SIZE,
         cellPadding: 2,

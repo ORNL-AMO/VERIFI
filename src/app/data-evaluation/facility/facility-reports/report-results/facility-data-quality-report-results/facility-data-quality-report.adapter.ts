@@ -51,7 +51,9 @@ export class FacilityDataQualityReportAdapter {
 
                 if (this.report.dataQualityReportSettings.includeMeterStatisticsTable) {
                     let tableSection = this.createMeterTableSection(stats, 'Total Consumption and Cost Statistics');
-                    sections.push(tableSection);
+                    if (tableSection) {
+                        sections.push(tableSection);
+                    }
                 }
 
                 if (this.report.dataQualityReportSettings.includeMeterConsumptionTimeseriesGraph) {

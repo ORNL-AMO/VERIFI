@@ -17,12 +17,19 @@ export interface HeadingSection extends BaseSection {
 
 export interface TableSection extends BaseSection {
     type: 'table';
-    headers: string[];
+    headers: Array<string | TableHeaderCell>;
+    subHeaders?: Array<string | TableHeaderCell>;
     rows: string[][];
 }
 
 export interface ChartSection extends BaseSection {
     type: 'chart';
     imageDataProvider?: () => Promise<string>;
+}
+
+export interface TableHeaderCell {
+    content: string;
+    colSpan?: number;
+    rowSpan?: number;
 }
 

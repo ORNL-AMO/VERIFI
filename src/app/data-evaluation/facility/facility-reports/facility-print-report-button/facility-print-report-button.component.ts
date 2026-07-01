@@ -11,7 +11,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 export class FacilityPrintReportButtonComponent {
 
   @Input()
-  isDataQuality: boolean = false;
+  isNewReport: boolean = false;
 
   print: boolean;
   printSub: Subscription;
@@ -47,7 +47,7 @@ export class FacilityPrintReportButtonComponent {
   }
 
   printReport() {
-    if (!this.isDataQuality) {
+    if (!this.isNewReport) {
       setTimeout(() => {
         window.dispatchEvent(new Event("resize"));
         setTimeout(() => {
