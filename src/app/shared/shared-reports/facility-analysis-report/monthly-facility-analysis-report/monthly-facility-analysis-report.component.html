@@ -78,12 +78,12 @@
   @if (analysisReportSettings.facilityMonthlyResultsGraphs) {
     <div class="d-flex w-100 print-break-avoid" [ngClass]="{'flex-column': print}">
       <div [ngClass]="{'w-50 pe-1': !print, 'w-100 pb-3': print}">
-        <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+        <app-monthly-analysis-summary-graph #monthlyAnalysisGraph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
           [analysisItem]="analysisItem" [facilityOrAccount]="facility">
         </app-monthly-analysis-summary-graph>
       </div>
       <div [ngClass]="{'w-50 pe-1': !print, 'w-100': print}">
-        <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
+        <app-monthly-analysis-summary-savings-graph #monthlyAnalysisSavingsGraph [analysisItem]="analysisItem"
           [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
         </app-monthly-analysis-summary-savings-graph>
       </div>

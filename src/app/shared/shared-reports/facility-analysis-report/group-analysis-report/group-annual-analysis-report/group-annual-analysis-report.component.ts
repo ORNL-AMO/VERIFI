@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AnalysisGroup, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { AnnualAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 
 @Component({
     selector: 'app-group-annual-analysis-report',
@@ -26,6 +27,9 @@ export class GroupAnnualAnalysisReportComponent {
 
   print: boolean;
   printSub: Subscription;
+
+  @ViewChild(AnnualAnalysisSummaryGraphComponent) annualAnalysisSummaryGraphComponent ?: AnnualAnalysisSummaryGraphComponent;
+  
   constructor(private dataEvaluationService: DataEvaluationService) {
 
   }
@@ -38,5 +42,19 @@ export class GroupAnnualAnalysisReportComponent {
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+  }
+
+  async getEnergyIntensityChart(): Promise<string> {
+    if (this.annualAnalysisSummaryGraphComponent) {
+      return await this.annualAnalysisSummaryGraphComponent.getEnergyIntensityChartAsBase64Image();
+    }
+    return '';
+  }
+
+  async getPercentImprovementChart(): Promise<string> {
+    if (this.annualAnalysisSummaryGraphComponent) {
+      return await this.annualAnalysisSummaryGraphComponent.getPercentImprovementChartAsBase64Image();
+    }
+    return '';
   }
 }

@@ -12,6 +12,8 @@ export class FacilityPrintReportButtonComponent {
 
   @Input()
   isNewReport: boolean = false;
+  @Input()
+  isLoading: boolean = false;
 
   print: boolean;
   printSub: Subscription;
@@ -43,10 +45,21 @@ export class FacilityPrintReportButtonComponent {
 
 
   togglePrint() {
+    if (this.isLoading) {
+      return;
+    }
+    if (this.isNewReport) {
+      this.exportPdf.emit();
+      return;
+    }
     this.dataEvaluationService.print.next(true);
   }
 
   printReport() {
+    if (this.isLoading) {
+      return;
+    }
+
     if (!this.isNewReport) {
       setTimeout(() => {
         window.dispatchEvent(new Event("resize"));
@@ -55,10 +68,6 @@ export class FacilityPrintReportButtonComponent {
           this.dataEvaluationService.print.next(false)
         }, 1000)
       }, 100)
-    }
-    else {
-      this.exportPdf.emit();
-      this.dataEvaluationService.print.next(false);
     }
   }
 }

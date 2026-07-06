@@ -36,8 +36,13 @@ export class ExportReportPdfService {
     });
     let currentY = this.renderCoverPage(pdf, document);
     const sections = [...document.sections];
-    for (const section of sections) {
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
       currentY = await this.renderSection(pdf, section, currentY);
+      if (section.pageBreakAfter && i < sections.length - 1) {
+        pdf.addPage();
+        currentY = PAGE_MARGIN_MM;
+      }
     }
 
     pdf.save(fileName);

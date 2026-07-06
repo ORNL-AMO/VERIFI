@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { MonthlyAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 
 @Component({
     selector: 'app-group-monthly-analysis-report',
@@ -32,6 +34,10 @@ export class GroupMonthlyAnalysisReportComponent {
   modelYearIsReportYear: boolean = false;
   print: boolean;
   printSub: Subscription;
+
+  @ViewChild(MonthlyAnalysisSummaryGraphComponent) monthlyAnalysisSummaryGraphComponent ?: MonthlyAnalysisSummaryGraphComponent;
+  @ViewChild(MonthlyAnalysisSummarySavingsGraphComponent) monthlyAnalysisSummarySavingsGraphComponent ?: MonthlyAnalysisSummarySavingsGraphComponent;
+  
   constructor(private dataEvaluationService: DataEvaluationService) {
 
   }
@@ -72,5 +78,19 @@ export class GroupMonthlyAnalysisReportComponent {
         });
       }
     }
+  }
+
+  async getMonthlyAnalysisGraph(): Promise<string> {
+    if (this.monthlyAnalysisSummaryGraphComponent) {
+      return await this.monthlyAnalysisSummaryGraphComponent.getChartAsBase64Image();
+    }
+    return '';
+  }
+
+  async getMonthlyAnalysisSavingsGraph(): Promise<string> {
+    if (this.monthlyAnalysisSummarySavingsGraphComponent) {
+      return await this.monthlyAnalysisSummarySavingsGraphComponent.getChartAsBase64Image();
+    }
+    return '';
   }
 }

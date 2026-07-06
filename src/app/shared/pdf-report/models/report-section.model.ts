@@ -4,6 +4,7 @@ export interface BaseSection {
     type: ReportSectionType;
     title?: string;
     pageBreakBefore?: boolean;
+    pageBreakAfter?: boolean;
 }
 
 export interface TextSection extends BaseSection {

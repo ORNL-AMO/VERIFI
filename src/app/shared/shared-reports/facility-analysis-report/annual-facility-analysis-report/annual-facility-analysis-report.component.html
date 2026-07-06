@@ -40,7 +40,7 @@
   <hr>
   }
   @if (analysisReportSettings.facilityAnnualResultsGraphs) {
-  <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
+  <app-annual-analysis-summary-graph #annualAnalysisSummaryGraph [annualAnalysisSummary]="annualAnalysisSummaries" [analysisItem]="analysisItem"
     [inReport]="true" [print]="print">
   </app-annual-analysis-summary-graph>
   }

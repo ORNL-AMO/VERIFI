@@ -40,6 +40,7 @@ import { FacilityDataQualityReportResultsComponent } from './report-results/faci
 import { SharedDataQualityReportMetersModule } from 'src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
 import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
+import { RegressionNumberPipe } from 'src/app/shared/helper-pipes/regression-number.pipe';
 
 
 
@@ -93,7 +94,8 @@ providers: [
     FacilityReportTypePipe,
     CalculatingSpinnerModule,
     SharedAnalysisModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    RegressionNumberPipe
   ]
 })
 export class FacilityReportsModule { }
