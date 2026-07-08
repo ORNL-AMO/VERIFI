@@ -233,5 +233,21 @@ export class RollingEnergyConsumptionGraphComponent implements OnInit {
   getPercentValue(value: number): string {
     return (value).toLocaleString(undefined, { maximumFractionDigits: 2, minimumIntegerDigits: 1 })
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.rollingEnergyConsumptionGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.rollingEnergyConsumptionGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }
 
