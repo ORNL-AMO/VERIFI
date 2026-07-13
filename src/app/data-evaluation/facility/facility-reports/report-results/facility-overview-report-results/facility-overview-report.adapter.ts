@@ -70,6 +70,7 @@ export class FacilityOverviewReportAdapter {
         if (this.reportSettings.includeMeterUsageStackedLineChart && this.hasMeterData(dataType)) {
             let chartSection = this.createChartSection(chartImageProviders?.meterStackedLineChart?.[dataType], '');
             if (chartSection) {
+                chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
@@ -77,6 +78,7 @@ export class FacilityOverviewReportAdapter {
         if (this.reportSettings.includeMeterUsageTable && this.hasMeterData(dataType)) {
             let tableSection = this.createMeterUsageTableSection(dataType, 'Consumption by Meter');
             if (tableSection) {
+                tableSection.pageBreakAfter = true;
                 sections.push(tableSection);
             }
         }
@@ -84,6 +86,7 @@ export class FacilityOverviewReportAdapter {
         if (this.reportSettings.includeMeterUsageDonut && this.hasMeterData(dataType)) {
             let chartSection = this.createChartSection(chartImageProviders?.meterBarChart?.[dataType], '');
             if (chartSection) {
+                chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
@@ -91,6 +94,7 @@ export class FacilityOverviewReportAdapter {
         if (this.reportSettings.includeUtilityTableForFacility && this.hasUtilityData(dataType)) {
             let tableSection = this.createUtilityTableSection(dataType, '');
             if (tableSection) {
+                tableSection.pageBreakAfter = true;
                 sections.push(tableSection);
             }
         }
@@ -98,6 +102,7 @@ export class FacilityOverviewReportAdapter {
         if (this.reportSettings.includeAnnualBarChart && this.hasAnnualSourceData(dataType)) {
             let chartSection = this.createChartSection(chartImageProviders?.annualBarChart?.[dataType], '');
             if (chartSection) {
+                chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
@@ -105,16 +110,13 @@ export class FacilityOverviewReportAdapter {
         if (this.reportSettings.includeMonthlyLineChartForFacility && this.hasYearMonthData(dataType)) {
             let chartSection = this.createChartSection(chartImageProviders?.monthlyUsageLineChart?.[dataType], '');
             if (chartSection) {
+                chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
 
         if (sections.length === 0) {
             return [];
-        }
-
-        for (let i = 1; i < sections.length; i++) {
-            sections[i].pageBreakBefore = true;
         }
 
         let titleSection: HeadingSection = {

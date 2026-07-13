@@ -6,6 +6,7 @@ export interface ReportMetaData {
     facilityName?: string;
     dateGenerated: string;
     moduleColor?: [number, number, number];
+    skipPage?: boolean;
 }
 
 export interface ReportDocument {

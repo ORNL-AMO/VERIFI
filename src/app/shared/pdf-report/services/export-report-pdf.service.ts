@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ReportDocument } from '../models/report-document.model';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { BaseSection, ChartSection, HeadingSection, TableSection, TextSection } from '../models/report-section.model';
+import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableSection, TextSection } from '../models/report-section.model';
 
 const DEFAULT_ACCENT_COLOR: [number, number, number] = [30, 90, 140];
 
@@ -34,7 +34,7 @@ export class ExportReportPdfService {
       format: 'a4',
       compress: true
     });
-    let currentY = this.renderCoverPage(pdf, document);
+    let currentY = document.metadata.skipPage ? PAGE_MARGIN_MM : this.renderCoverPage(pdf, document);
     const sections = [...document.sections];
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
@@ -55,11 +55,13 @@ export class ExportReportPdfService {
     const centerY = PAGE_HEIGHT_MM / 2;
     let startY = centerY - 15;
 
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(18);
-    pdf.setTextColor(...this.moduleColor);
-    pdf.text(meta.title, centerX, startY, { align: 'center' });
-    startY += 8;
+    if (meta.title) {
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(18);
+      pdf.setTextColor(...this.moduleColor);
+      pdf.text(meta.title, centerX, startY, { align: 'center' });
+      startY += 8;
+    }
 
     if (meta.subtitle) {
       pdf.setFontSize(12);
@@ -69,11 +71,13 @@ export class ExportReportPdfService {
       startY += 6;
     }
 
-    pdf.setFontSize(BODY_FONT_SIZE);
-    pdf.setTextColor(100, 100, 100);
-    const formattedDate = meta.dateGenerated ? new Date(meta.dateGenerated).toLocaleDateString('en-US', { dateStyle: 'long' }) : '';
-    pdf.text(`Generated: ${formattedDate}`, centerX, startY, { align: 'center' });
-    startY += 6;
+    if (meta.dateGenerated) {
+      pdf.setFontSize(BODY_FONT_SIZE);
+      pdf.setTextColor(100, 100, 100);
+      const formattedDate = meta.dateGenerated ? new Date(meta.dateGenerated).toLocaleDateString('en-US', { dateStyle: 'long' }) : '';
+      pdf.text(`Generated: ${formattedDate}`, centerX, startY, { align: 'center' });
+      startY += 6;
+    }
 
     pdf.addPage();
     return PAGE_MARGIN_MM;
@@ -90,19 +94,21 @@ export class ExportReportPdfService {
         const nextContentHeightBuffer = 30;
         contentHeight = baseHeadingHeight + nextContentHeightBuffer;
         break;
-      case 'text': {
+      case 'text': 
         const textLines = pdf.splitTextToSize((section as TextSection).content, CONTENT_WIDTH_MM);
         contentHeight = textLines.length * 4.5 + SECTION_GAP_MM;
         break;
-      }
       case 'table':
         contentHeight = 25;
         break;
-      case 'chart': {
+      case 'chart': 
         const imageAspectRatio = 2;
         contentHeight = CONTENT_WIDTH_MM / imageAspectRatio + SECTION_GAP_MM;
         break;
-      }
+      case 'styledText':
+        const styledTextLines = (section as StyledTextSection).content;
+        contentHeight = styledTextLines.reduce((acc, line) => acc + (line.spaceAfter ?? 4.5), 0) + SECTION_GAP_MM;
+        break;
     }
 
     const totalRequiredSpace = titleHeight + contentHeight;
@@ -120,6 +126,8 @@ export class ExportReportPdfService {
         return this.renderChartSection(pdf, section as ChartSection, currentY);
       case 'heading':
         return this.renderHeadingSection(pdf, section as HeadingSection, currentY);
+      case 'styledText':
+        return this.renderStyledTextSection(pdf, section as StyledTextSection, currentY);
       default:
         return currentY;
     }
@@ -128,13 +136,13 @@ export class ExportReportPdfService {
   private renderHeadingSection(pdf: jsPDF, section: HeadingSection, currentY: number): number {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(HEADING_FONT_SIZE);
-    pdf.setTextColor(...this.moduleColor);
+    pdf.setTextColor(40, 40, 40);
     pdf.text(section.title, HALF_PAGE_WIDTH_MM, currentY, { align: 'center' });
     currentY += 2;
-    const textWidthMM = pdf.getTextWidth(section.title) + 4; 
+    const textWidthMM = pdf.getTextWidth(section.title) + 4;
     const underLineStartX = HALF_PAGE_WIDTH_MM - textWidthMM / 2;
     const underLineEndX = HALF_PAGE_WIDTH_MM + textWidthMM / 2;
-    pdf.setDrawColor(...this.moduleColor);
+    pdf.setDrawColor(40, 40, 40);
     pdf.setLineWidth(0.5);
     pdf.line(underLineStartX, currentY, underLineEndX, currentY);
     return currentY + SECTION_GAP_MM;
@@ -164,7 +172,7 @@ export class ExportReportPdfService {
         halign: 'center'
       },
       didParseCell: (data) => {
-        if(data.section === 'head' && data.row.index === 1) {
+        if (data.section === 'head' && data.row.index === 1) {
           data.cell.styles.fontStyle = 'normal';
           data.cell.styles.fillColor = [255, 255, 255];
           data.cell.styles.textColor = [40, 40, 40];
@@ -224,5 +232,17 @@ export class ExportReportPdfService {
     pdf.setTextColor(...this.moduleColor);
     pdf.text(title, HALF_PAGE_WIDTH_MM, currentY, { align: 'center' });
     return currentY + 6;
+  }
+
+  private renderStyledTextSection(pdf: jsPDF, section: StyledTextSection, currentY: number): number {
+    for (const line of section.content) {
+      pdf.setFont('helvetica', line.bold ? 'bold' : 'normal');
+      pdf.setFontSize(line.fontSize ?? BODY_FONT_SIZE);
+      pdf.setTextColor(...(line.color ?? [40, 40, 40]));
+      const x = line.align === 'center' ? HALF_PAGE_WIDTH_MM : PAGE_MARGIN_MM;
+      pdf.text(line.text, x, currentY, { align: line.align ?? 'left' });
+      currentY += line.spaceAfter ?? (line.fontSize ?? 10) * 10.5;
+    }
+    return currentY + SECTION_GAP_MM;
   }
 }

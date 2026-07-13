@@ -1,4 +1,4 @@
-export type ReportSectionType = 'text' | 'heading' | 'table' | 'chart'; 
+export type ReportSectionType = 'text' | 'heading' | 'table' | 'chart' | 'styledText'; 
 
 export interface BaseSection {
     type: ReportSectionType;
@@ -32,5 +32,19 @@ export interface TableHeaderCell {
     content: string;
     colSpan?: number;
     rowSpan?: number;
+}
+
+export interface StyledTextSection extends BaseSection {
+    type: 'styledText';
+    content: StyledText[];
+}
+
+export interface StyledText {
+    text: string;
+    fontSize?: number;
+    color?: [number, number, number];
+    bold?: boolean;
+    align?: 'left' | 'center' | 'right';
+    spaceAfter?: number;
 }
 
