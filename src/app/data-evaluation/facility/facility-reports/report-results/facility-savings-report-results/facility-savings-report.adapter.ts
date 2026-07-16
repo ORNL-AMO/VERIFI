@@ -102,10 +102,17 @@ export class FacilitySavingsReportAdapter {
         if (energyHeadersCount === 0 && predictorHeadersCount === 0 && incrementalHeadersCount === 0) {
             return undefined;
         }
+        let energyHeader: string = '';
+        if (this.analysisItem.analysisCategory === 'energy') {
+            energyHeader = 'Energy' + ` (${this.unit})`;
+        }
+        else if (this.analysisItem.analysisCategory === 'water') {
+            energyHeader = 'Consumption' + ` (${this.unit})`;
+        }
 
         headers.push({ content: '', colSpan: 1 });
         if (energyHeadersCount > 0) {
-            headers.push({ content: 'Energy' + ` (${this.unit})`, colSpan: energyHeadersCount });
+            headers.push({ content: energyHeader, colSpan: energyHeadersCount });
         }
         if (predictorHeadersCount > 0) {
             headers.push({ content: 'Production Variables', colSpan: predictorHeadersCount });
@@ -330,9 +337,17 @@ export class FacilitySavingsReportAdapter {
             return undefined;
         }
 
+        let energyHeader: string;
+        if (this.analysisItem.analysisCategory === 'energy') {
+            energyHeader = 'Energy' + ` (${this.unit})`;
+        }
+        else if (this.analysisItem.analysisCategory === 'water') {
+            energyHeader = 'Consumption' + ` (${this.unit})`;
+        }
+
         headers.push({ content: '', colSpan: 2 });
         if (energyHeadersCount > 0) {
-            headers.push({ content: 'Energy' + ` (${this.unit})`, colSpan: energyHeadersCount });
+            headers.push({ content: energyHeader, colSpan: energyHeadersCount });
         }
         if (predictorHeadersCount > 0) {
             headers.push({ content: 'Production Variables', colSpan: predictorHeadersCount });
