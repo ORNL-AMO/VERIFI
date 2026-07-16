@@ -61,13 +61,13 @@ export class FacilityModelingReportAdapter {
         };
 
         if (this.reportSettings.includeIssuesSummary && this.regressionGroupItems.length > 0) {
-            sections.push(...this.buildIssuesSummarySection('Issues Summary'));
+            sections.push(...this.buildIssuesSummarySection('Issues Summary', this.criticalItems, this.moderateItems, this.minorItems));
         }
         if (this.reportSettings.includeExecutiveSummary) {
-            sections.push(...this.buildExecutiveSummarySection('Executive Summary'));
+            sections.push(...this.buildExecutiveSummarySection('Executive Summary', this.regressionGroupItems, this.classicIntensityGroupItems, this.absoluteGroupItems));
         }
         if (this.reportSettings.includeDataValidationTables && this.regressionGroupItems.length > 0) {
-            sections.push(...this.buildDataValidationTablesSection('Data Validation Tables'));
+            sections.push(...this.buildDataValidationTablesSection('Data Validation Tables', this.regressionGroupItems));
         }
 
         return {
@@ -76,33 +76,33 @@ export class FacilityModelingReportAdapter {
         };
     }
 
-    buildIssuesSummarySection(title: string): BaseSection[] {
+    buildIssuesSummarySection(title: string, criticalItems: Array<FacilityGroupAnalysisItem>, moderateItems: Array<FacilityGroupAnalysisItem>, minorItems: Array<FacilityGroupAnalysisItem>): BaseSection[] {
         let sections: BaseSection[] = [];
         sections.push({
             type: 'heading',
             title: title
         });
 
-        if (this.criticalItems.length > 0) {
-            const criticalSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Validation Failures'], 'Critical Issues', this.criticalItems);
+        if (criticalItems.length > 0) {
+            const criticalSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Validation Failures'], 'Critical Issues', criticalItems);
             if (criticalSection) {
                 sections.push(criticalSection);
             }
         }
-        if (this.moderateItems.length > 0) {
-            const moderateSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Data Validation Failures'], 'Moderate Issues', this.moderateItems);
+        if (moderateItems.length > 0) {
+            const moderateSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Data Validation Failures'], 'Moderate Issues', moderateItems);
             if (moderateSection) {
                 sections.push(moderateSection);
             }
         }
-        if (this.minorItems.length > 0) {
-            const minorSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Notes'], 'Minor Issues', this.minorItems);
+        if (minorItems.length > 0) {
+            const minorSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Notes'], 'Minor Issues', minorItems);
             if (minorSection) {
                 sections.push(minorSection);
             }
         }
 
-        if (this.criticalItems.length === 0 && this.moderateItems.length === 0 && this.minorItems.length === 0) {
+        if (criticalItems.length === 0 && moderateItems.length === 0 && minorItems.length === 0) {
             const noIssuesSection: TextSection = {
                 type: 'text',
                 content: 'No Issues Identified',
@@ -117,29 +117,29 @@ export class FacilityModelingReportAdapter {
         return sections;
     }
 
-    buildExecutiveSummarySection(title: string): BaseSection[] {
+    buildExecutiveSummarySection(title: string, regressionGroupItems: Array<FacilityGroupAnalysisItem>, classicIntensityGroupItems: Array<FacilityGroupAnalysisItem>, absoluteGroupItems: Array<FacilityGroupAnalysisItem>): BaseSection[] {
         let sections: BaseSection[] = [];
         sections.push({
             type: 'heading',
             title: title
         });
 
-        if (this.regressionGroupItems.length > 0) {
-            const regressionSummarySection = this.buildRegressionSection('Analysis Type: Regression', this.regressionGroupItems);
+        if (regressionGroupItems.length > 0) {
+            const regressionSummarySection = this.buildRegressionSection('Analysis Type: Regression', regressionGroupItems);
             if (regressionSummarySection) {
                 regressionSummarySection.pageBreakAfter = true;
                 sections.push(regressionSummarySection);
             }
         }
-        if (this.classicIntensityGroupItems.length > 0) {
-            const classicIntensitySummarySection = this.buildClassicIntensitySection('Analysis Type: Classic Intensity');
+        if (classicIntensityGroupItems.length > 0) {
+            const classicIntensitySummarySection = this.buildClassicIntensitySection('Analysis Type: Classic Intensity', classicIntensityGroupItems);
             if (classicIntensitySummarySection) {
                 classicIntensitySummarySection.pageBreakAfter = true;
                 sections.push(classicIntensitySummarySection);
             }
         }
-        if (this.absoluteGroupItems.length > 0) {
-            const absoluteSummarySection = this.buildAbsoluteSection('Analysis Type: Absolute');
+        if (absoluteGroupItems.length > 0) {
+            const absoluteSummarySection = this.buildAbsoluteSection('Analysis Type: Absolute', absoluteGroupItems);
             if (absoluteSummarySection) {
                 absoluteSummarySection.pageBreakAfter = true;
                 sections.push(absoluteSummarySection);
@@ -148,15 +148,15 @@ export class FacilityModelingReportAdapter {
         return sections;
     }
 
-    buildDataValidationTablesSection(title: string): BaseSection[] {
+    buildDataValidationTablesSection(title: string, regressionGroupItems: Array<FacilityGroupAnalysisItem>): BaseSection[] {
         let sections: BaseSection[] = [];
         sections.push({
             type: 'heading',
             title: title
         });
 
-        if (this.regressionGroupItems.length > 0) {
-            this.regressionGroupItems.forEach(item => {
+        if (regressionGroupItems.length > 0) {
+            regressionGroupItems.forEach(item => {
                 const regressionSummarySection = this.buildRegressionSection('', [item]);
                 if (regressionSummarySection) {
                     sections.push(regressionSummarySection);
@@ -295,18 +295,24 @@ export class FacilityModelingReportAdapter {
         return tableSection;
     }
 
-    buildClassicIntensitySection(title: string): TableSection | undefined {
+    buildClassicIntensitySection(title: string, classicIntensityGroupItems: Array<FacilityGroupAnalysisItem>): TableSection | undefined {
         let headers = ['Facility', 'Group', 'Baseline Year', 'Predictor Variables']
         let rows: string[][] = [];
 
-        this.classicIntensityGroupItems.forEach(item => {
+        classicIntensityGroupItems.forEach(item => {
             const facilityName = this.facilityDbService.getFacilityNameById(item.facilityId);
             let groupName = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+            let predictorVariables: string = '';
+            item.group.predictorVariables.forEach(p => {
+               if (p.productionInAnalysis) {
+                   predictorVariables += `${p.name}\n`;
+               }
+            });
             rows.push([
                 facilityName,
                 groupName,
                 item.baselineYear ? item.baselineYear.toString() : '',
-                item.group.predictorVariables.map(p => p.name).join('\n')
+                predictorVariables
             ]);
         });
 
@@ -319,11 +325,11 @@ export class FacilityModelingReportAdapter {
         return tableSection;
     }
 
-    buildAbsoluteSection(title: string): TableSection | undefined {
+    buildAbsoluteSection(title: string, absoluteGroupItems: Array<FacilityGroupAnalysisItem>): TableSection | undefined {
         let headers = ['Facility', 'Group', 'Baseline Year']
         let rows: string[][] = [];
 
-        this.absoluteGroupItems.forEach(item => {
+        absoluteGroupItems.forEach(item => {
             const facilityName = this.facilityDbService.getFacilityNameById(item.facilityId);
             let groupName = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
             rows.push([

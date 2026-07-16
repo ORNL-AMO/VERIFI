@@ -16,6 +16,8 @@ import { ModelingExecutiveSummaryExcelWriter } from '../excel-writer-services/mo
 import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AnalysisReportAdapter } from './analysis-report.adapter';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 
 @Component({
   selector: 'app-analysis-report',
@@ -33,6 +35,7 @@ export class AnalysisReportComponent {
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   generateExcelSub: Subscription;
   analysisItemsSub: Subscription;
+  isExportingPdf: boolean = false;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
@@ -43,7 +46,9 @@ export class AnalysisReportComponent {
     private loadingService: LoadingService,
     private modelingExecutiveSummaryExcelWriter: ModelingExecutiveSummaryExcelWriter,
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private analysisReportAdapter: AnalysisReportAdapter,
+    private exportReportPdfService: ExportReportPdfService) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -115,5 +120,24 @@ export class AnalysisReportComponent {
     this.modelingExecutiveSummaryExcelWriter.exportToExcel(this.selectedReport, this.executiveSummaryItems);
     this.accountReportsService.generateExcel.next(false);
     this.loadingService.setLoadingStatus(false);
+  }
+
+  async onExportPdf() {
+    if (!this.selectedReport || this.isExportingPdf) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      const document = this.analysisReportAdapter.buildDocument({
+        accountReport: this.selectedReport,
+        facilityAnalysisItems: this.facilityAnalysisItems,
+        executiveSummaryItems: this.executiveSummaryItems
+      });
+
+      await this.exportReportPdfService.export(document, `${this.selectedReport.name} - Modeling Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
   }
 }
