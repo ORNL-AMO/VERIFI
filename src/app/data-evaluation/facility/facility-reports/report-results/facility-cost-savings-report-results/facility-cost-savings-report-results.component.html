@@ -78,7 +78,7 @@
     </div>
     }
 
-    @if (monthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlyCumulativeSavingsGraph &&
+    @if (cumulativeMonthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlyCumulativeSavingsGraph &&
     reportSettings.includeFacility && reportSettings.includeMonthly) {
     <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="cumulativeMonthlyCostSavingsTable"></app-monthly-savings-graph>

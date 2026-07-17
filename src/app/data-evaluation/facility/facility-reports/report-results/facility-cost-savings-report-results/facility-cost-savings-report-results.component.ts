@@ -104,10 +104,10 @@ export class FacilityCostSavingsReportResultsComponent {
   }
 
   convertToRequiredUnit() {
-    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+    if (this.selectedAnalysisItem?.analysisCategory == 'energy') {
       this.finalUnit = this.selectedAnalysisItem.energyUnit;
     }
-    else if (this.selectedAnalysisItem.analysisCategory == 'water') {
+    else if (this.selectedAnalysisItem?.analysisCategory == 'water') {
       this.finalUnit = this.selectedAnalysisItem.waterUnit;
     }
     for (const year in this?.convertedCostDataTable) {
@@ -119,28 +119,38 @@ export class FacilityCostSavingsReportResultsComponent {
 
         const groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == groupId);
         if (groupMeters.length > 0) {
-          this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, this.finalUnit, this.selectedAnalysisItem.analysisCategory);
+          this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, this.finalUnit, this.selectedAnalysisItem?.analysisCategory);
         }
       }
     }
   }
 
   setYears() {
-    this.years = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.endYear);
+    this.years = getYearsArray(this.selectedAnalysisItem?.baselineYear, this.reportSettings.endYear);
   }
 
   getGroupSummaries() {
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+    }
+
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.selectedAnalysisItem.facilityId);
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.selectedAnalysisItem.facilityId);
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.selectedAnalysisItem.facilityId);
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedAnalysisItem.facilityId);
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.selectedAnalysisItem.facilityId);
+    this.facility = this.facilityDbService.getFacilityById(this.selectedAnalysisItem?.facilityId);
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.selectedAnalysisItem?.facilityId);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.selectedAnalysisItem?.facilityId);
+    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../web-workers/facility-cost-savings-report.worker', import.meta.url));
-      this.worker.onmessage = ({ data }) => {
-        this.worker.terminate();
+      const worker = new Worker(new URL('../../../../../web-workers/facility-cost-savings-report.worker', import.meta.url));
+      this.worker = worker;
+      worker.onmessage = ({ data }) => {
+        if (worker !== this.worker) {
+          return;
+        }
+        worker.terminate();
+        this.worker = null;
         if (!data.error) {
           this.groupSummaries = data.groupSummaries;
           this.setSavings();
@@ -163,10 +173,10 @@ export class FacilityCostSavingsReportResultsComponent {
         assessmentReportVersion: account.assessmentReportVersion,
         report: this.facilityReport
       };
-      this.worker.postMessage(workerMessage);
+      worker.postMessage(workerMessage);
     } else {
       // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.selectedAnalysisItem?.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.selectedAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, true);
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;
       this.setSavings();
@@ -199,6 +209,6 @@ export class FacilityCostSavingsReportResultsComponent {
   }
 
   get filteredGroups() {
-    return this.selectedAnalysisItem.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis');
+    return this.selectedAnalysisItem?.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') ?? [];
   }
 }

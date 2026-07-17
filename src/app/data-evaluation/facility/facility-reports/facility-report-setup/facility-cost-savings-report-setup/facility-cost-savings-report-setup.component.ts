@@ -105,6 +105,10 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   async setSelectedAnalysisItem() {
+    if (!this.analysisItems) {
+      return;
+    }
+
     this.selectedAnalysisItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
@@ -112,15 +116,16 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   checkSelectedYearError() {
-    if (this.selectedAnalysisItem) {
-      if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.endYear) {
-        this.selectedYearError = false;
-        this.setTableYears();
-        this.setGroupUnits();
-      }
-      else {
-        this.selectedYearError = true;
-      }
+    if (!this.selectedAnalysisItem || !this.reportSettings) {
+      return;
+    }
+    if (this.selectedAnalysisItem.baselineYear <= this.reportSettings.endYear) {
+      this.selectedYearError = false;
+      this.setTableYears();
+      this.setGroupUnits();
+    }
+    else {
+      this.selectedYearError = true;
     }
   }
 
@@ -152,7 +157,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   setTableYears() {
-    this.yearsList = getYearsArray(this.selectedAnalysisItem.baselineYear, this.reportSettings.endYear);
+    this.yearsList = getYearsArray(this.selectedAnalysisItem?.baselineYear, this.reportSettings.endYear);
     this.setCostValues();
   }
 
@@ -160,6 +165,9 @@ export class FacilityCostSavingsReportSetupComponent {
     if (this.yearsList && this.selectedAnalysisItem) {
       for (let year of this.yearsList) {
         for (const group of this.selectedAnalysisItem.groups) {
+          if (!this.unitCostTable[year]) {
+            this.unitCostTable[year] = {};
+          }
           this.unitCostTable[year][group.idbGroupId] = null;
         }
       }
@@ -209,7 +217,7 @@ export class FacilityCostSavingsReportSetupComponent {
       if (!this.unitCostTable[year]) {
         this.unitCostTable[year] = {};
       }
-      for (const group of this.selectedAnalysisItem.groups) {
+      for (const group of this.selectedAnalysisItem?.groups ?? []) {
         if (this.unitCostTable[year][group.idbGroupId] === undefined) {
           this.unitCostTable[year][group.idbGroupId] = null;
         }
@@ -219,7 +227,7 @@ export class FacilityCostSavingsReportSetupComponent {
 
   setGroupUnits() {
     this.groupUnits = {};
-    for (const group of this.selectedAnalysisItem.groups) {
+    for (const group of this.selectedAnalysisItem?.groups ?? []) {
       this.groupUnits[group.idbGroupId] = this.checkUnit(group);
     }
     this.reportSettings.groupUnits = { ...this.groupUnits };
@@ -269,7 +277,7 @@ export class FacilityCostSavingsReportSetupComponent {
     if (this.yearsList) {
       for (let year of this.yearsList) {
         for (const group of this.filteredGroups) {
-          const cost = this.unitCostTable[year][group.idbGroupId];
+          const cost = this.unitCostTable[year]?.[group.idbGroupId];
           if (cost === null || cost === undefined || isNaN(cost)) {
             return false;
           }
@@ -281,7 +289,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   get filteredGroups() {
-    return this.selectedAnalysisItem.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis');
+    return this.selectedAnalysisItem?.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') ?? [];
   }
 
   calculateCostFromCalendarizedMeters() {
