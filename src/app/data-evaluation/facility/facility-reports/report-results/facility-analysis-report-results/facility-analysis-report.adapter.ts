@@ -580,6 +580,10 @@ export class FacilityAnalysisReportAdapter {
         const rows: string[][] = [];
         const groupItem: AnalysisGroupItem = this.analysisService.getGroupItem(group);
 
+        if (!groupItem?.selectedModel) {
+            return undefined;
+        }
+
         groupItem.selectedModel.SEPValidation?.forEach(validationItem => {
             headers.push(validationItem.predictorVariable);
         });
