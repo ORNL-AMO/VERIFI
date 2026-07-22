@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -13,6 +13,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 })
 export class PrintReportButtonComponent {
 
+  @Output() onExportPpt = new EventEmitter<void>();
   print: boolean;
   printSub: Subscription;
   selectedReport: IdbAccountReport;
@@ -60,5 +61,9 @@ export class PrintReportButtonComponent {
 
   generateExcel() {
     this.accountReportsService.generateExcel.next(true);
+  }
+
+  generatePPT() {
+    this.onExportPpt.emit();
   }
 }

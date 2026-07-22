@@ -279,5 +279,5 @@
 </div>
 
 @if (selectedReport) {
-<app-print-report-button></app-print-report-button>
+<app-print-report-button (onExportPpt)="downloadPpt()"></app-print-report-button>
 }

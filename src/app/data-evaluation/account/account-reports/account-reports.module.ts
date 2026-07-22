@@ -62,6 +62,7 @@ import { ReportBadgeClassPipe } from './report-pipes/report-badge-class.pipe';
 import { SharedReportsModule } from "../../../shared/shared-reports/shared-reports.module";
 import { AccountReportsDataCheckComponent } from './account-reports-data-check/account-reports-data-check.component';
 import { AccountReportAnalysisSelectionComponent } from './account-report-setup/account-report-analysis-selection/account-report-analysis-selection.component';
+import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 
 @NgModule({
   declarations: [
@@ -134,7 +135,8 @@ import { AccountReportAnalysisSelectionComponent } from './account-report-setup/
     SharedReportsModule
 ],
   providers: [
-    AccountReportTypePipe
+    AccountReportTypePipe,
+    CustomNumberPipe
   ]
 })
 export class AccountReportsModule { }

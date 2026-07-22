@@ -26,6 +26,8 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { AccountSavingsReport } from 'src/app/calculations/savings-report-calculations/accountSavingsReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
+import { AccountSavingsReportPptAdapter } from './account-savings-report-ppt.adapter';
 
 @Component({
   selector: 'app-account-savings-report',
@@ -85,7 +87,9 @@ export class AccountSavingsReportComponent {
     private sharedDataService: SharedDataService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private pptReportService: PptReportService,
+    private accountSavingsReportAdapter: AccountSavingsReportPptAdapter
   ) { }
 
   ngOnInit(): void {
@@ -195,6 +199,22 @@ export class AccountSavingsReportComponent {
       this.facilitySummaries = accountSavingsReport.facilitySummaries;
       this.calculating = false;
     }
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.accountSavingsReportAdapter.buildDocument({
+      report: this.selectedReport,
+      account: this.account,
+      analysisItem: this.selectedAnalysisItem,
+      setup: this.accountSavingsReportSetup,
+      annualAnalysisSummaries: this.annualAnalysisSummaries,
+      monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+      facilitySummaries: this.facilitySummaries,
+      lastMonthSummary: this.latestMonthSummary,
+      performanceReport: this.performanceReport,
+      analysisTableColumns: this.analysisService.analysisTableColumns.getValue()
+    });
+    await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.selectedReport.name}.pptx`);
   }
 }
 
