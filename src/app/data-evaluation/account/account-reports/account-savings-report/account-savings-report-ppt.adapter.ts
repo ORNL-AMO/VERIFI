@@ -49,19 +49,26 @@ export class AccountSavingsReportPptAdapter {
             date: new Date().toISOString(),
         });
 
-        // Annual company section
         if (data.setup.includeAnnualResults && (data.setup.includeAnnualResultsTable || data.setup.includeAnnualResultsGraph || data.setup.includeAccountMonthlyTable || data.setup.includeAccountMonthlyResults)) {
             if (data.setup.includeAnnualResultsTable && data.annualAnalysisSummaries?.length) {
-                slides.push(this.buildAnnualConsumptionTable(data.annualAnalysisSummaries, data.lastMonthSummary));
-                slides.push(this.buildAnnualSavingsTable(data.annualAnalysisSummaries, data.lastMonthSummary));
+                if (this.analysisTableColumns.actualEnergy || this.analysisTableColumns.adjusted || this.analysisTableColumns.baselineAdjustmentForNormalization || this.analysisTableColumns.baselineAdjustmentForOther || this.analysisTableColumns.baselineAdjustment) {
+                    slides.push(this.buildAnnualConsumptionTable(data.annualAnalysisSummaries, data.lastMonthSummary));
+                }
+                if (this.analysisTableColumns.SEnPI || this.analysisTableColumns.bankedSavings || this.analysisTableColumns.savingsUnbanked || this.analysisTableColumns.savings || this.analysisTableColumns.totalSavingsPercentImprovement || this.analysisTableColumns.newSavings || this.analysisTableColumns.annualSavingsPercentImprovement || this.analysisTableColumns.cummulativeSavings) {
+                    slides.push(this.buildAnnualSavingsTable(data.annualAnalysisSummaries, data.lastMonthSummary));
+                }
             }
             if (data.setup.includeAnnualResultsGraph && data.annualAnalysisSummaries?.length) {
                 slides.push(this.buildAnnualConsumptionChart(data.annualAnalysisSummaries, unit));
                 slides.push(this.buildAnnualPercentImprovementChart(data.annualAnalysisSummaries));
             }
             if (data.setup.includeAccountMonthlyTable && data.monthlyAnalysisSummaryData?.length) {
-                slides.push(this.buildMonthlyConsumptionTable(data.monthlyAnalysisSummaryData));
-                slides.push(this.buildMonthlySavingsTable(data.monthlyAnalysisSummaryData));
+                if (this.analysisTableColumns.actualEnergy || this.analysisTableColumns.adjusted || this.analysisTableColumns.baselineAdjustmentForNormalization || this.analysisTableColumns.baselineAdjustmentForOther || this.analysisTableColumns.baselineAdjustment) {
+                    slides.push(this.buildMonthlyConsumptionTable(data.monthlyAnalysisSummaryData));
+                }
+                if (this.analysisTableColumns.SEnPI || this.analysisTableColumns.bankedSavings || this.analysisTableColumns.savingsUnbanked || this.analysisTableColumns.savings || this.analysisTableColumns.rollingSavings || this.analysisTableColumns.rolling12MonthImprovement) {
+                    slides.push(this.buildMonthlySavingsTable(data.monthlyAnalysisSummaryData));
+                }
             }
             if (data.setup.includeAccountMonthlyResults && data.monthlyAnalysisSummaryData?.length) {
                 slides.push(this.buildMonthlyConsumptionChart(data.monthlyAnalysisSummaryData, unit));
@@ -69,10 +76,13 @@ export class AccountSavingsReportPptAdapter {
             }
         }
 
-        // Per-facility section
         if (data.setup.includeFacilityResults) {
             data.facilitySummaries?.forEach(fs => {
-                slides.push({ type: 'title', title: fs.facility.name, subtitle: 'Facility Analysis' });
+                slides.push({
+                    type: 'title',
+                    title: `${fs.facility.name}\nFacility Analysis`,
+                    layout: 'section'
+                });
 
                 if (data.setup.includeFacilityResultsTable && fs.annualAnalysisSummaries?.length) {
                     slides.push(this.buildAnnualConsumptionTable(fs.annualAnalysisSummaries, fs.latestMonthSummary, fs.facility.name));
@@ -89,13 +99,20 @@ export class AccountSavingsReportPptAdapter {
             });
         }
 
-        // Performance section
         if (data.setup.includePerformanceResults) {
+            if ((data.setup.includePerformanceResultsTable && data.performanceReport?.annualFacilityData?.length) || (data.setup.includePerformanceResultsGraph && data.performanceReport?.facilityTotals?.length)) {
+                slides.push({
+                    type: 'title',
+                    title: 'Facility Performance Analysis',
+                    layout: 'section'
+                });
+            }
+
             if (data.setup.includePerformanceResultsTable && data.performanceReport?.annualFacilityData?.length) {
                 if (data.setup.includePerformanceActual) {
                     slides.push(this.buildPerformanceMetricTable(
                         data.performanceReport,
-                        'Facility Performance - Actual',
+                        'Facility Performance Analysis - Actual',
                         `Actual (${unit})`,
                         d => this.formatValue(d.actual, false),
                         d => this.formatPercent(d.changeInSavings),
@@ -105,7 +122,7 @@ export class AccountSavingsReportPptAdapter {
                 if (data.setup.includePerformanceAdjusted) {
                     slides.push(this.buildPerformanceMetricTable(
                         data.performanceReport,
-                        'Facility Performance - Adjusted',
+                        'Facility Performance Analysis - Adjusted',
                         `Adjusted (${unit})`,
                         d => this.formatValue(d.adjusted, false),
                         d => this.formatPercent(d.changeInSavings),
@@ -115,7 +132,7 @@ export class AccountSavingsReportPptAdapter {
                 if (data.setup.includePerformanceSavings) {
                     slides.push(this.buildPerformanceMetricTable(
                         data.performanceReport,
-                        'Facility Performance - Savings (%)',
+                        'Facility Performance Analysis - Savings (%)',
                         'Savings (%)',
                         d => this.formatPercent(d.savings),
                         d => this.formatPercent(d.changeInSavings),
@@ -125,7 +142,7 @@ export class AccountSavingsReportPptAdapter {
                 if (data.setup.includePerformanceContribution) {
                     slides.push(this.buildPerformanceMetricTable(
                         data.performanceReport,
-                        'Facility Performance - Contribution (%)',
+                        'Facility Performance Analysis - Contribution (%)',
                         'Contribution (%)',
                         d => this.formatPercent(d.contribution),
                         d => this.formatPercent(d.changeInSavings),

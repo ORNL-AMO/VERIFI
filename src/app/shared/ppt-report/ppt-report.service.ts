@@ -30,7 +30,10 @@ export class PptReportService {
   }
 
   private addTitleSlide(pptx: pptxgen, model: TitleSlide): void {
-    const slide = pptx.addSlide({ masterName: SLIDE_MASTERS.TITLE });
+    const masterName = model.layout === 'titleOnly' ? SLIDE_MASTERS.TITLE_ONLY :
+                       model.layout === 'section' ? SLIDE_MASTERS.SECTION :
+                       SLIDE_MASTERS.TITLE;
+    const slide = pptx.addSlide({ masterName: masterName });
 
     const titleText = model.title + (model.subtitle ? `\n${model.subtitle}` : '');
     slide.addText(titleText, { placeholder: 'title' });
@@ -43,11 +46,14 @@ export class PptReportService {
   }
 
   private addTableSlide(pptx: pptxgen, model: TableSlide): void {
-    const slide = pptx.addSlide({ masterName: SLIDE_MASTERS.TITLE_ONLY });
+    const slide = pptx.addSlide({ masterName: SLIDE_MASTERS.BLANK });
 
-    slide.addText(model.title, { placeholder: 'title' });
+    slide.addText(model.title, { x: 0.5, y: 0.2, w: 9, h: 1, align: 'left', bold: true, fontSize: 24, fontFace: PPT_THEME.fonts.heading, color: '000000' });
 
     const { fullContent } = PPT_THEME.regions;
+    const firstPageY = 1.0;
+    const overflowPageY = 0.2;
+    
     const allRows: any[][] = [];
     allRows.push(this.buildHeaderRow(model.headers, PPT_THEME.colors.primary, 'FFFFFF'));
     if (model.subHeaders?.length) {
@@ -69,12 +75,12 @@ export class PptReportService {
 
     slide.addTable(allRows, {
       x: fullContent.x,
-      y: fullContent.y,
+      y: firstPageY,
       w: fullContent.w,
       border: { type: 'solid', color: 'DDDDDD', pt: 0.5 },
       autoPage: true,
-      autoPageSlideStartY: fullContent.y,
-      autoPageRepeatHeader: true,
+      autoPageSlideStartY: overflowPageY,
+      autoPageRepeatHeader: true
     });
 
     if (model.note) {

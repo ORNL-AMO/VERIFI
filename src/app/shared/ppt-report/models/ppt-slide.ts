@@ -10,6 +10,7 @@ export interface TitleSlide {
     title: string;
     subtitle?: string;
     date?: string;
+    layout?: 'title' | 'titleOnly' | 'section';
 }
 
 export interface TableSlide {

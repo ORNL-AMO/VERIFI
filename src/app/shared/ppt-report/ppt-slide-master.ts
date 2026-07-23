@@ -5,6 +5,7 @@ export const SLIDE_MASTERS = {
   TITLE_ONLY:    'Title Only',
   TITLE_CONTENT: 'Title and Content',
   SECTION:       'SubTitle Slide',
+  BLANK:         'Blank Slide',
 } as const;
 
 export function defineSlideMasters(pptx: any): void {
@@ -106,5 +107,11 @@ export function defineSlideMasters(pptx: any): void {
         },
       },
     ],
+  });
+
+  pptx.defineSlideMaster({
+    title: SLIDE_MASTERS.BLANK,
+    objects: [],
+    margin: 0.0,
   });
 }
