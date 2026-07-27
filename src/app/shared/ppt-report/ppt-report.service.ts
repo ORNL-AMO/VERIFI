@@ -51,8 +51,8 @@ export class PptReportService {
     slide.addText(model.title, { x: 0.5, y: 0.2, w: 9, h: 1, align: 'left', bold: true, fontSize: 24, fontFace: PPT_THEME.fonts.heading, color: '000000' });
 
     const { fullContent } = PPT_THEME.regions;
-    const firstPageY = 1.0;
-    const overflowPageY = 0.2;
+    const firstPageY = 1.2;
+    const overflowPageY = 0.4;
     
     const allRows: any[][] = [];
     allRows.push(this.buildHeaderRow(model.headers, PPT_THEME.colors.primary, 'FFFFFF'));
@@ -80,7 +80,8 @@ export class PptReportService {
       border: { type: 'solid', color: 'DDDDDD', pt: 0.5 },
       autoPage: true,
       autoPageSlideStartY: overflowPageY,
-      autoPageRepeatHeader: true
+      autoPageRepeatHeader: true,
+      autoPageHeaderRows: model.subHeaders?.length ? 2 : 1,
     });
 
     if (model.note) {
@@ -131,6 +132,7 @@ export class PptReportService {
       valAxisTitle: model.yAxisUnit ?? '',
       showValAxisTitle: !!model.yAxisUnit,
       valAxisMinVal: model.valAxisMinVal ?? 0,
+      valAxisMaxVal: model.valAxisMaxVal,
       valGridLine: { style: 'solid', color: 'E8E8E8', pt: 0.5 },
       barGapWidthPct: 75,
       fontFace: PPT_THEME.fonts.body,
@@ -140,6 +142,7 @@ export class PptReportService {
     if (model.chartType === 'combo') {
       const barSeries = model.series.filter(s => (s.type ?? 'bar') === 'bar');
       const lineSeries = model.series.filter(s => s.type === 'line');
+      const areaSeries = model.series.filter(s => s.type === 'area');
       const charts: any[] = [];
 
       if (barSeries.length) {
@@ -166,8 +169,19 @@ export class PptReportService {
           },
         });
       }
+      if (areaSeries.length) {
+        charts.push({
+          type: pptx.charts.AREA,
+          data: areaSeries.map(s => ({ name: s.name, labels: model.labels, values: s.data })),
+          options: {  
+          chartColors: areaSeries.map((s, i) =>
+              s.color ?? PPT_THEME.chartPalette[(barSeries.length + lineSeries.length + i) % PPT_THEME.chartPalette.length]
+            ),
+            barGrouping: 'stacked'
+          },
+        });
+      }
       slide.addChart(charts as any, chartOpts);
-
     } else {
       const typeMap: Record<string, any> = {
         bar: pptx.charts.BAR,

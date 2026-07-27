@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
@@ -14,6 +14,10 @@ export class FacilityPrintReportButtonComponent {
   printSub: Subscription;
   helpWidth: number;
   helpWidthSub: Subscription;
+
+  @Output()
+  onExportPpt = new EventEmitter<void>();
+
   constructor(private dataEvaluationService: DataEvaluationService) {
 
   }
@@ -48,5 +52,9 @@ export class FacilityPrintReportButtonComponent {
         this.dataEvaluationService.print.next(false)
       }, 1000)
     }, 100)
+  }
+
+  exportPpt() {
+    this.onExportPpt.emit();
   }
 }

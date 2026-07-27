@@ -35,6 +35,7 @@ import { FacilityCostSavingsReportSetupComponent } from './facility-report-setup
 import { BlendedEnergyRateModalComponent } from './facility-report-setup/facility-cost-savings-report-setup/blended-energy-rate-modal/blended-energy-rate-modal.component';
 import { FacilityCostSavingsReportResultsComponent } from './report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component';
 import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savings-report-results/annual-savings-graph/annual-savings-graph.component';
+import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 
 
 
@@ -83,7 +84,8 @@ import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savi
 providers: [
     FacilityReportTypePipe,
     CalculatingSpinnerModule,
-    SharedAnalysisModule
+    SharedAnalysisModule,
+    CustomNumberPipe
   ]
 })
 export class FacilityReportsModule { }

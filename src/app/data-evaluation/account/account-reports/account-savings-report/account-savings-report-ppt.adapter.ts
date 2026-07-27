@@ -8,7 +8,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
-import { PptSlide, TableSlide, ChartSlide, TableHeaderCell } from 'src/app/shared/ppt-report/models/ppt-slide';
+import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 
 export interface AccountSavingsReportPptInput {
@@ -63,11 +63,33 @@ export class AccountSavingsReportPptAdapter {
                 slides.push(this.buildAnnualPercentImprovementChart(data.annualAnalysisSummaries));
             }
             if (data.setup.includeAccountMonthlyTable && data.monthlyAnalysisSummaryData?.length) {
-                if (this.analysisTableColumns.actualEnergy || this.analysisTableColumns.adjusted || this.analysisTableColumns.baselineAdjustmentForNormalization || this.analysisTableColumns.baselineAdjustmentForOther || this.analysisTableColumns.baselineAdjustment) {
-                    slides.push(this.buildMonthlyConsumptionTable(data.monthlyAnalysisSummaryData));
+                const years = this.groupMonthlyDataByYear(data.monthlyAnalysisSummaryData);
+
+                const includeConsumption =
+                    this.analysisTableColumns.actualEnergy ||
+                    this.analysisTableColumns.adjusted ||
+                    this.analysisTableColumns.baselineAdjustmentForNormalization ||
+                    this.analysisTableColumns.baselineAdjustmentForOther ||
+                    this.analysisTableColumns.baselineAdjustment;
+
+                const includeSavings =
+                    this.analysisTableColumns.SEnPI ||
+                    this.analysisTableColumns.bankedSavings ||
+                    this.analysisTableColumns.savingsUnbanked ||
+                    this.analysisTableColumns.savings ||
+                    this.analysisTableColumns.rollingSavings ||
+                    this.analysisTableColumns.rolling12MonthImprovement;
+
+                if (includeConsumption) {
+                    years.forEach(({ year, rows }) => {
+                        slides.push(this.buildMonthlyConsumptionTable(rows));
+                    });
                 }
-                if (this.analysisTableColumns.SEnPI || this.analysisTableColumns.bankedSavings || this.analysisTableColumns.savingsUnbanked || this.analysisTableColumns.savings || this.analysisTableColumns.rollingSavings || this.analysisTableColumns.rolling12MonthImprovement) {
-                    slides.push(this.buildMonthlySavingsTable(data.monthlyAnalysisSummaryData));
+
+                if (includeSavings) {
+                    years.forEach(({ year, rows }) => {
+                        slides.push(this.buildMonthlySavingsTable(rows));
+                    });
                 }
             }
             if (data.setup.includeAccountMonthlyResults && data.monthlyAnalysisSummaryData?.length) {
@@ -85,16 +107,16 @@ export class AccountSavingsReportPptAdapter {
                 });
 
                 if (data.setup.includeFacilityResultsTable && fs.annualAnalysisSummaries?.length) {
-                    slides.push(this.buildAnnualConsumptionTable(fs.annualAnalysisSummaries, fs.latestMonthSummary, fs.facility.name));
-                    slides.push(this.buildAnnualSavingsTable(fs.annualAnalysisSummaries, fs.latestMonthSummary, fs.facility.name));
+                    slides.push(this.buildAnnualConsumptionTable(fs.annualAnalysisSummaries, fs.latestMonthSummary));
+                    slides.push(this.buildAnnualSavingsTable(fs.annualAnalysisSummaries, fs.latestMonthSummary));
                 }
                 if (data.setup.includeFacilityResultsGraph && fs.annualAnalysisSummaries?.length) {
-                    slides.push(this.buildAnnualConsumptionChart(fs.annualAnalysisSummaries, unit, fs.facility.name));
-                    slides.push(this.buildAnnualPercentImprovementChart(fs.annualAnalysisSummaries, fs.facility.name));
+                    slides.push(this.buildAnnualConsumptionChart(fs.annualAnalysisSummaries, unit));
+                    slides.push(this.buildAnnualPercentImprovementChart(fs.annualAnalysisSummaries));
                 }
                 if (data.setup.includeFacilityMonthlyResultsGraph && fs.monthlySummaryData?.length) {
-                    slides.push(this.buildMonthlyConsumptionChart(fs.monthlySummaryData, unit, fs.facility.name));
-                    slides.push(this.buildMonthlySavingsChart(fs.monthlySummaryData, fs.facility.name));
+                    slides.push(this.buildMonthlyConsumptionChart(fs.monthlySummaryData, unit));
+                    slides.push(this.buildMonthlySavingsChart(fs.monthlySummaryData));
                 }
             });
         }
@@ -161,8 +183,8 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildAnnualConsumptionTable(summaries: Array<AnnualAnalysisSummary>, latestMonthSummary: MonthlyAnalysisSummaryData, facilityName?: string): TableSlide {
-        const title = facilityName ? `${facilityName} — Annual Consumption` : 'Annual Company Analysis — Consumption';
+    private buildAnnualConsumptionTable(summaries: Array<AnnualAnalysisSummary>, latestMonthSummary: MonthlyAnalysisSummaryData): TableSlide {
+        const title = 'Annual Company Analysis — Consumption';
         const subHeaders: Array<string | TableHeaderCell> = this.getEnergyColumns(this.analysisTableColumns);
         const energyColCount = subHeaders.length - 1;
         let rows: string[][] = [];
@@ -218,8 +240,8 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildAnnualSavingsTable(summaries: Array<AnnualAnalysisSummary>, latestMonthSummary: MonthlyAnalysisSummaryData, facilityName?: string): TableSlide {
-        const title = facilityName ? `${facilityName} — Annual Savings` : 'Annual Company Analysis — Savings';
+    private buildAnnualSavingsTable(summaries: Array<AnnualAnalysisSummary>, latestMonthSummary: MonthlyAnalysisSummaryData): TableSlide {
+        const title = 'Annual Company Analysis — Savings';
         const subHeaders: Array<string | TableHeaderCell> = this.getSavingsColumns(this.analysisTableColumns);
         const savingsColCount = subHeaders.length - 1;
         let rows: string[][] = [];
@@ -293,16 +315,20 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildAnnualConsumptionChart(summaries: Array<AnnualAnalysisSummary>, unit: string, facilityName?: string): ChartSlide {
+    private buildAnnualConsumptionChart(summaries: Array<AnnualAnalysisSummary>, unit: string): ChartSlide {
         const isWater = this.accountAnalysisItem.analysisCategory === 'water';
         const allValues = summaries.flatMap(s => [s.energyUse ?? 0, s.adjusted ?? 0]).filter(v => isFinite(v) && !isNaN(v));
+        const axis = getPptAxisSpec(allValues);
         return {
             type: 'chart',
-            title: isWater ? (facilityName ? `${facilityName} — Annual Water Consumption` : 'Annual Water Consumption') : (facilityName ? `${facilityName} — Annual Energy Use` : 'Annual Energy Use'),
+            title: isWater ? 'Annual Water Consumption' : 'Annual Energy Use',
             chartType: 'bar',
             labels: summaries.map(s => String(s.year)),
             yAxisUnit: unit,
-            valAxisMinVal: this.calculateAxisMin(allValues),
+            valAxisMinVal: axis.min,
+            valAxisMaxVal: axis.max,
+            valAxisMajorUnit: axis.majorUnit,
+            valAxisLabelFormatCode: axis.labelFormat,
             showLegend: true,
             series: [
                 {
@@ -319,17 +345,20 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildAnnualPercentImprovementChart(summaries: Array<AnnualAnalysisSummary>, facilityName?: string): ChartSlide {
+    private buildAnnualPercentImprovementChart(summaries: Array<AnnualAnalysisSummary>): ChartSlide {
         const isWater = this.accountAnalysisItem.analysisCategory === 'water';
         const label = isWater ? 'Annual Consumption Improvement (%)' : 'Annual Energy Improvement (%)';
         const allValues = summaries.flatMap(s => [s.totalSavingsPercentImprovement ?? 0, s.annualSavingsPercentImprovement ?? 0]).filter(v => isFinite(v) && !isNaN(v));
+        const axis = getPptAxisSpec(allValues, { isPercent: true });
         return {
             type: 'chart',
-            title: facilityName ? `${facilityName} — ${label}` : label,
+            title: label,
             chartType: 'line',
             labels: summaries.map(s => String(s.year)),
-            valAxisLabelFormatCode: '0.0"%"',
-            valAxisMinVal: this.calculateAxisMin(allValues),
+            valAxisMinVal: axis.min,
+            valAxisMaxVal: axis.max,
+            valAxisMajorUnit: axis.majorUnit,
+            valAxisLabelFormatCode: axis.labelFormat,
             showLegend: true,
             series: [
                 {
@@ -346,8 +375,8 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildMonthlyConsumptionTable(data: Array<MonthlyAnalysisSummaryData>, facilityName?: string): TableSlide {
-        const title = facilityName ? `${facilityName} — Monthly Consumption` : 'Monthly Company Analysis — Consumption';
+    private buildMonthlyConsumptionTable(data: Array<MonthlyAnalysisSummaryData>): TableSlide {
+        const title = 'Monthly Company Analysis — Consumption';
         const subHeaders: Array<string | TableHeaderCell> = this.getEnergyColumns(this.analysisTableColumns, true);
         const energyColCount = subHeaders.length - 2;
         let rows: string[][] = [];
@@ -385,8 +414,8 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildMonthlySavingsTable(data: Array<MonthlyAnalysisSummaryData>, facilityName?: string): TableSlide {
-        const title = facilityName ? `${facilityName} — Monthly Savings` : 'Monthly Company Analysis — Savings';
+    private buildMonthlySavingsTable(data: Array<MonthlyAnalysisSummaryData>): TableSlide {
+        const title = 'Monthly Company Analysis — Savings';
         const subHeaders: Array<string | TableHeaderCell> = this.getSavingsColumns(this.analysisTableColumns, true);
         const savingsColCount = subHeaders.length - 2;
         let rows: string[][] = [];
@@ -427,18 +456,22 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildMonthlyConsumptionChart(data: Array<MonthlyAnalysisSummaryData>, unit: string, facilityName?: string): ChartSlide {
+    private buildMonthlyConsumptionChart(data: Array<MonthlyAnalysisSummaryData>, unit: string): ChartSlide {
         const isWater = this.accountAnalysisItem.analysisCategory === 'water';
         const label1 = isWater ? 'Actual Water Consumption' : 'Actual Energy Use';
         const label2 = isWater ? 'Calculated Water Consumption' : 'Calculated Energy Use';
         const allValues = data.flatMap(m => [m.energyUse ?? 0, m.adjusted ?? 0]).filter(v => isFinite(v) && !isNaN(v));
+        const axis = getPptAxisSpec(allValues);
         return {
             type: 'chart',
-            title: facilityName ? `${facilityName} — Monthly Analysis` : 'Monthly Analysis',
+            title: 'Monthly Analysis',
             chartType: 'line',
             labels: data.map(m => m.date.toLocaleString('en-US', { month: 'short', year: 'numeric' })),
             yAxisUnit: unit,
-            valAxisMinVal: this.calculateAxisMin(allValues),
+            valAxisMinVal: axis.min,
+            valAxisMaxVal: axis.max,
+            valAxisMajorUnit: axis.majorUnit,
+            valAxisLabelFormatCode: axis.labelFormat,
             showLegend: true,
             series: [
                 {
@@ -455,16 +488,19 @@ export class AccountSavingsReportPptAdapter {
         };
     }
 
-    private buildMonthlySavingsChart(data: Array<MonthlyAnalysisSummaryData>, facilityName?: string): ChartSlide {
+    private buildMonthlySavingsChart(data: Array<MonthlyAnalysisSummaryData>): ChartSlide {
         const allValues = data.flatMap(m => [m.rolling12MonthImprovement ?? 0]).filter(v => isFinite(v) && !isNaN(v));
+        const axis = getPptAxisSpec(allValues, { isPercent: true });
         return {
             type: 'chart',
-            title: facilityName ? `${facilityName} — Monthly Savings` : 'Monthly Savings',
+            title: 'Monthly Savings',
             chartType: 'bar',
             labels: data.map(m => m.date.toLocaleString('en-US', { month: 'short', year: 'numeric' })),
             yAxisUnit: 'Percent Savings',
-            valAxisLabelFormatCode: '0"%"',
-            valAxisMinVal: this.calculateAxisMin(allValues),
+            valAxisMinVal: axis.min,
+            valAxisMaxVal: axis.max,
+            valAxisMajorUnit: axis.majorUnit,
+            valAxisLabelFormatCode: axis.labelFormat,
             showLegend: true,
             series: [
                 {
@@ -562,13 +598,15 @@ export class AccountSavingsReportPptAdapter {
             lineDash: 'dash' as const,
             lineSize: 2
         };
+        const axis = getPptAxisSpec(allValues, { isPercent: true });
         return {
             type: 'chart',
             title: 'Savings by Facility',
             chartType: 'line',
-            valAxisLabelFormatCode: '0"%"',
-            valAxisMajorUnit: 2,
-            valAxisMinVal: this.calculateAxisMin(allValues),
+            valAxisLabelFormatCode: axis.labelFormat,
+            valAxisMajorUnit: axis.majorUnit,
+            valAxisMinVal: axis.min,
+            valAxisMaxVal: axis.max,
             labels: years,
             showLegend: true,
             series: [
@@ -652,6 +690,21 @@ export class AccountSavingsReportPptAdapter {
         return headers;
     }
 
+    groupMonthlyDataByYear(data: Array<MonthlyAnalysisSummaryData>): Array<{ year: number, rows: Array<MonthlyAnalysisSummaryData> }> {
+        const dataByYear: { [year: number]: Array<MonthlyAnalysisSummaryData> } = {};
+        data.forEach(monthlyData => {
+            const year = monthlyData.fiscalYear ?? monthlyData.date.getFullYear();
+            if (!dataByYear[year]) {
+                dataByYear[year] = [];
+            }
+            dataByYear[year].push(monthlyData);
+        });
+        return Object.keys(dataByYear).map(year => ({
+            year: Number(year),
+            rows: dataByYear[Number(year)]
+        }));
+    }
+
     private formatValue(value: number, isCurrrency: boolean): string {
         if (value === null || isNaN(value) || value === 0 || value === undefined)
             return '—';
@@ -662,13 +715,5 @@ export class AccountSavingsReportPptAdapter {
         if (value == null || isNaN(value) || value === 0 || value === undefined)
             return '—';
         return `${value.toFixed(2)}%`;
-    }
-
-    private calculateAxisMin(values: number[]): number {
-        const valid = values.filter(v => isFinite(v) && !isNaN(v));
-        const min = valid.length ? Math.min(...valid) : 0;
-        if (min === 0) return 0;
-        const magnitude = Math.pow(10, Math.floor(Math.log10(Math.abs(min))));
-        return Math.floor(min / magnitude) * magnitude;
     }
 }

@@ -24,6 +24,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisService } from '../../../analysis/analysis.service';
+import { FacilitySavingsReportPptAdapter } from './facility-savings-report-ppt.adapter';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-savings-report-results',
@@ -66,7 +68,9 @@ export class FacilitySavingsReportResultsComponent {
     private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
     private analysisService: AnalysisService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private facilitySavingsReportAdapter: FacilitySavingsReportPptAdapter,
+    private pptReportService: PptReportService
   ) { }
   
   ngOnInit(): void {
@@ -144,5 +148,19 @@ export class FacilitySavingsReportResultsComponent {
     this.facilityReportSub.unsubscribe();
     this.printSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.facilitySavingsReportAdapter.buildDocument({
+      report: this.facilityReport,
+      facility: this.facility,
+      analysisItem: this.analysisItem,
+      annualAnalysisSummaries: this.annualAnalysisSummaries,
+      monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+      groupSummaries: this.groupSummaries,
+      latestMonthSummary: this.latestMonthSummary,
+      analysisTableColumns: this.analysisService.analysisTableColumns.getValue()
+    });
+    await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.facilityReport.name}.pptx`);
   }
 }
