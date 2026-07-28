@@ -1,7 +1,8 @@
 import { Component, inject, Signal } from '@angular/core';
 import { EmailListSubscribeService } from './email-list-subscribe.service';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-email-list-subscribe',
@@ -17,6 +18,15 @@ export class EmailListSubscribeComponent {
   subscriberEmail: string;
   invalidEmailMessage: string;
   submittedStatus: Signal<'error' | 'success' | 'sending'> = toSignal(this.emailSubscribeService.submittedStatus, { initialValue: undefined });
+
+  inHomeScreen: Signal<boolean> = toSignal(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map((event: NavigationEnd) => event.urlAfterRedirects === '/welcome'),
+      startWith(this.router.url === '/welcome')
+    ),
+    { initialValue: this.router.url === '/welcome' }
+  );
 
   privacyNotice() {
     this.router.navigate(['/privacy']);
