@@ -5,6 +5,9 @@ export interface BaseSection {
     title?: string;
     pageBreakBefore?: boolean;
     pageBreakAfter?: boolean;
+    tocInclude?: boolean;
+    tocLabel?: string;
+    bookmarkLevel?: number;
 }
 
 export interface TextSection extends BaseSection {
@@ -37,6 +40,7 @@ export interface TableHeaderCell {
 export interface StyledTextSection extends BaseSection {
     type: 'styledText';
     content: StyledText[];
+    verticalCenter?: boolean;
 }
 
 export interface StyledText {

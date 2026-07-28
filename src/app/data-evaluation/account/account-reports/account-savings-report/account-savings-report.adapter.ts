@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
-import { BaseSection, ChartSection, HeadingSection, TableHeaderCell, TableSection, TextSection } from "src/app/shared/pdf-report/models/report-section.model";
+import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "src/app/shared/pdf-report/models/report-section.model";
 import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe";
 import { AccountSavingsReportSetup, PerformanceReportSetup } from "src/app/models/overview-report";
 import { IdbAccount } from "src/app/models/idbModels/account";
@@ -51,6 +51,23 @@ export class AccountSavingsReportAdapter {
         };
 
         if (this.reportSettings.includeAnnualResults && (this.reportSettings.includeAnnualResultsTable || this.reportSettings.includeAnnualResultsGraph)) {
+            let dividerSection: StyledTextSection = {
+                type: 'styledText',
+                verticalCenter: true,
+                content: [
+                    {
+                        text: `Company Analysis`,
+                        fontSize: 16,
+                        bold: true,
+                        align: 'center'
+                    }
+                ],
+                pageBreakAfter: true,
+                tocInclude: true,
+                tocLabel: 'Company Analysis',
+                bookmarkLevel: 0
+            };
+            sections.push(dividerSection);
             sections.push(...this.buildAccountAnnualSection());
         }
         if (this.reportSettings.includeAnnualResults && (this.reportSettings.includeAccountMonthlyTable || this.reportSettings.includeAccountMonthlyResults)) {
@@ -59,10 +76,44 @@ export class AccountSavingsReportAdapter {
 
         if (this.reportSettings.includeFacilityResults && (this.reportSettings.includeFacilityResultsTable || this.reportSettings.includeFacilityResultsGraph || this.reportSettings.includeFacilityMonthlyResultsGraph)) {
             for (let summary of input.facilitySummaries) {
+                let dividerSection: StyledTextSection = {
+                    type: 'styledText',
+                    verticalCenter: true,
+                    content: [
+                        {
+                            text: `${summary.facility.name}`,
+                            fontSize: 16,
+                            bold: true,
+                            align: 'center'
+                        }
+                    ],
+                    pageBreakAfter: true,
+                    tocInclude: true,
+                    tocLabel: `${summary.facility.name} Analysis`,  
+                    bookmarkLevel: 0
+                };
+                sections.push(dividerSection);
                 sections.push(...this.buildFacilitySections(summary));
             }
         }
         if (this.reportSettings.includePerformanceResults && (this.reportSettings.includePerformanceResultsTable || this.reportSettings.includePerformanceResultsGraph)) {
+            let dividerSection: StyledTextSection = {
+                type: 'styledText',
+                verticalCenter: true,
+                content: [
+                    {
+                        text: `Facility Performance Analysis`,
+                        fontSize: 16,
+                        bold: true,
+                        align: 'center'
+                    }
+                ],
+                pageBreakAfter: true,
+                tocInclude: true,
+                tocLabel: 'Facility Performance Analysis',
+                bookmarkLevel: 0
+            };
+            sections.push(dividerSection);
             sections.push(...this.buildPerformanceSection());
         }
         return {
@@ -76,7 +127,7 @@ export class AccountSavingsReportAdapter {
 
         const headingSection: HeadingSection = {
             type: 'heading',
-            title: 'Annual Company Analysis'
+            title: 'Annual Analysis',
         };
 
         if (this.reportSettings.includeAnnualResultsTable) {
@@ -97,20 +148,29 @@ export class AccountSavingsReportAdapter {
                     content: '* This represents the rolling 12-month energy use and savings for the last month of the report',
                     pageBreakAfter: true
                 }
+                annualTableSections[0].tocInclude = true;
+                annualTableSections[0].tocLabel = 'Annual Company Analysis';
+                annualTableSections[0].bookmarkLevel = 1;
                 sections.push(...annualTableSections);
                 sections.push(textSection);
             }
         }
 
         if (this.reportSettings.includeAnnualResultsGraph) {
-            const chartSection = this.createChartSection(this.chartImageProviders?.annualEnergyIntensityChart, '');
+            const chartSection = this.createChartSection(this.chartImageProviders?.annualEnergyIntensityChart, 'Annual Consumption');
             if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = 'Annual Consumption',
+                chartSection.bookmarkLevel = 1;
                 chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
 
-            const percentImprovementChart = this.createChartSection(this.chartImageProviders?.annualPercentImprovementChart, '');
+            const percentImprovementChart = this.createChartSection(this.chartImageProviders?.annualPercentImprovementChart, 'Annual Incremental Improvement');
             if (percentImprovementChart) {
+                percentImprovementChart.tocInclude = true;
+                percentImprovementChart.tocLabel = 'Annual Incremental Improvement';
+                percentImprovementChart.bookmarkLevel = 1;
                 percentImprovementChart.pageBreakAfter = true;
                 sections.push(percentImprovementChart);
             }
@@ -123,29 +183,42 @@ export class AccountSavingsReportAdapter {
 
         const headingSection: HeadingSection = {
             type: 'heading',
-            title: 'Monthly Company Analysis'
+            title: 'Monthly Analysis'
         };
 
         if (this.reportSettings.includeAccountMonthlyTable) {
+            let monthlyTableSections: TableSection[] = [];
             const consumptionSection = this.buildMonthlyTableSection('consumption');
             if (consumptionSection) {
                 consumptionSection.pageBreakAfter = true;
-                sections.push(consumptionSection);
+                monthlyTableSections.push(consumptionSection);
             }
             const savingsSection = this.buildMonthlyTableSection('savings');
-            if (savingsSection) {
+            if (savingsSection) { 
                 savingsSection.pageBreakAfter = true;
-                sections.push(savingsSection);
+                monthlyTableSections.push(savingsSection);
+            }
+            if (monthlyTableSections.length > 0) {
+                monthlyTableSections[0].tocInclude = true;
+                monthlyTableSections[0].tocLabel = 'Monthly Company Analysis';
+                monthlyTableSections[0].bookmarkLevel = 1;
+                sections.push(...monthlyTableSections);
             }
         }
         if (this.reportSettings.includeAccountMonthlyResults) {
-            const monthlyAnalysisGraphSection = this.createChartSection(this.chartImageProviders?.monthlyAnalysisGraph, '');
+            const monthlyAnalysisGraphSection = this.createChartSection(this.chartImageProviders?.monthlyAnalysisGraph, 'Monthly Consumption');
             if (monthlyAnalysisGraphSection) {
+                monthlyAnalysisGraphSection.tocInclude = true;
+                monthlyAnalysisGraphSection.tocLabel = 'Monthly Consumption';
+                monthlyAnalysisGraphSection.bookmarkLevel = 1;
                 monthlyAnalysisGraphSection.pageBreakAfter = true;
                 sections.push(monthlyAnalysisGraphSection);
             }
-            const monthlyAnalysisSavingsGraphSection = this.createChartSection(this.chartImageProviders?.monthlyAnalysisSavingsGraph, '');
+            const monthlyAnalysisSavingsGraphSection = this.createChartSection(this.chartImageProviders?.monthlyAnalysisSavingsGraph, 'Monthly Percent Savings');
             if (monthlyAnalysisSavingsGraphSection) {
+                monthlyAnalysisSavingsGraphSection.tocInclude = true;
+                monthlyAnalysisSavingsGraphSection.tocLabel = 'Monthly Percent Savings';
+                monthlyAnalysisSavingsGraphSection.bookmarkLevel = 1;
                 monthlyAnalysisSavingsGraphSection.pageBreakAfter = true;
                 sections.push(monthlyAnalysisSavingsGraphSection);
             }
@@ -161,66 +234,89 @@ export class AccountSavingsReportAdapter {
         annualAnalysisSummaries: Array<AnnualAnalysisSummary>,
         latestMonthSummary: MonthlyAnalysisSummaryData
     }): BaseSection[] {
-        let sections: BaseSection[] = [];
-        const headingSection: HeadingSection = {
-            type: 'heading',
-            title: `Annual ${summary.facility.name} Analysis`
-        };
+        let annualSections: BaseSection[] = [];
+        let monthlySections: BaseSection[] = [];
 
-        if (this.reportSettings.includeFacilityResultsTable) {
-            const facilityTableSections: TableSection[] = [];
-            const consumptionTable = this.buildAnnualTable(summary.annualAnalysisSummaries, summary.latestMonthSummary, 'consumption');
-            if (consumptionTable) {
-                facilityTableSections.push(consumptionTable);
+        if (this.reportSettings.includeFacilityResults && (this.reportSettings.includeFacilityResultsTable || this.reportSettings.includeFacilityResultsGraph)) {
+            const annualHeadingSection: HeadingSection = {
+                type: 'heading',
+                title: `Annual Analysis`
+            };
+            annualSections.push(annualHeadingSection);
+            if (this.reportSettings.includeFacilityResultsTable) {
+                const facilityTableSections: TableSection[] = [];
+                const consumptionTable = this.buildAnnualTable(summary.annualAnalysisSummaries, summary.latestMonthSummary, 'consumption');
+                if (consumptionTable) {
+                    consumptionTable.tocInclude = false;
+                    facilityTableSections.push(consumptionTable);
+                }
+                const savingsTable = this.buildAnnualTable(summary.annualAnalysisSummaries, summary.latestMonthSummary, 'savings');
+                if (savingsTable) {
+                    savingsTable.tocInclude = false;
+                    facilityTableSections.push(savingsTable);
+                }
+                if (facilityTableSections.length > 0) {
+                    const textSection: TextSection = {
+                        type: 'text',
+                        content: '* This represents the rolling 12-month energy use and savings for the last month of the report',
+                        pageBreakAfter: true
+                    };
+                    if (facilityTableSections.length > 0) {
+                        facilityTableSections[0].tocInclude = true;
+                        facilityTableSections[0].tocLabel = 'Annual Analysis';
+                        facilityTableSections[0].bookmarkLevel = 1;
+                        annualSections.push(...facilityTableSections);
+                        annualSections.push(textSection);
+                    }
+                }
             }
-            const savingsTable = this.buildAnnualTable(summary.annualAnalysisSummaries, summary.latestMonthSummary, 'savings');
-            if (savingsTable) {
-                facilityTableSections.push(savingsTable);
-            }
-            if (facilityTableSections.length > 0) {
-                const textSection: TextSection = {
-                    type: 'text',
-                    content: '* This represents the rolling 12-month energy use and savings for the last month of the report',
-                    pageBreakAfter: true
-                };
-                sections.push(...facilityTableSections);
-                sections.push(textSection);
+            if (this.reportSettings.includeFacilityResultsGraph) {
+                const chartSection = this.createChartSection(this.chartImageProviders?.facilityEnergyIntensityChart?.[summary.facility.guid], `${summary.facility.name} Annual Consumption`);
+                if (chartSection) {
+                    chartSection.tocInclude = true;
+                    chartSection.tocLabel = 'Annual Consumption';
+                    chartSection.bookmarkLevel = 1;
+                    chartSection.pageBreakAfter = true;
+                    annualSections.push(chartSection);
+                }
+                const percentImprovementChart = this.createChartSection(this.chartImageProviders?.facilityPercentImprovementChart?.[summary.facility.guid], `${summary.facility.name} Annual Incremental Improvement`);
+                if (percentImprovementChart) {
+                    percentImprovementChart.tocInclude = true;
+                    percentImprovementChart.tocLabel = 'Annual Incremental Improvement';
+                    percentImprovementChart.bookmarkLevel = 1;
+                    percentImprovementChart.pageBreakAfter = true;
+                    annualSections.push(percentImprovementChart);
+                }
             }
         }
-        if (this.reportSettings.includeFacilityResultsGraph) {
-            const chartSection = this.createChartSection(this.chartImageProviders?.facilityEnergyIntensityChart?.[summary.facility.guid], '');
-            if (chartSection) {
-                chartSection.pageBreakAfter = true;
-                sections.push(chartSection);
-            }
-            const percentImprovementChart = this.createChartSection(this.chartImageProviders?.facilityPercentImprovementChart?.[summary.facility.guid], '');
-            if (percentImprovementChart) {
-                percentImprovementChart.pageBreakAfter = true;
-                sections.push(percentImprovementChart);
-            }
-        }
-        if (this.reportSettings.includeFacilityMonthlyResultsGraph) {
-            const monthlyResultsGraphSection = this.createChartSection(this.chartImageProviders?.facilityMonthlyAnalysisGraph?.[summary.facility.guid], '');
+        if (this.reportSettings.includeFacilityResults && this.reportSettings.includeFacilityMonthlyResultsGraph) {
+            const monthlyHeadingSection: HeadingSection = {
+                type: 'heading',
+                title: `Monthly Analysis`
+            };
+            monthlySections.push(monthlyHeadingSection);
+            const monthlyResultsGraphSection = this.createChartSection(this.chartImageProviders?.facilityMonthlyAnalysisGraph?.[summary.facility.guid], `${summary.facility.name} Monthly Consumption`);
             if (monthlyResultsGraphSection) {
+                monthlyResultsGraphSection.tocInclude = true;
+                monthlyResultsGraphSection.tocLabel = 'Monthly Consumption';
+                monthlyResultsGraphSection.bookmarkLevel = 1;
                 monthlyResultsGraphSection.pageBreakAfter = true;
-                sections.push(monthlyResultsGraphSection);
+                monthlySections.push(monthlyResultsGraphSection);
             }
-            const monthlyResultsSavingsGraph = this.createChartSection(this.chartImageProviders?.facilityMonthlyAnalysisSavingsGraph?.[summary.facility.guid], '');
+            const monthlyResultsSavingsGraph = this.createChartSection(this.chartImageProviders?.facilityMonthlyAnalysisSavingsGraph?.[summary.facility.guid], `${summary.facility.name} Monthly Percent Savings`);
             if (monthlyResultsSavingsGraph) {
+                monthlyResultsSavingsGraph.tocInclude = true;
+                monthlyResultsSavingsGraph.tocLabel = 'Monthly Percent Savings';
+                monthlyResultsSavingsGraph.bookmarkLevel = 1;
                 monthlyResultsSavingsGraph.pageBreakAfter = true;
-                sections.push(monthlyResultsSavingsGraph);
+                monthlySections.push(monthlyResultsSavingsGraph);
             }
         }
-
-        return [headingSection, ...sections];
+        return [...annualSections, ...monthlySections];
     }
 
     buildPerformanceSection(): BaseSection[] {
         let sections: BaseSection[] = [];
-        let headingSection: HeadingSection = {
-            type: 'heading',
-            title: 'Facility Performance Analysis'
-        }
         const blocks: string[] = [];
         if (this.reportSettings.includePerformanceActual) {
             blocks.push('actual');
@@ -248,16 +344,22 @@ export class AccountSavingsReportAdapter {
                     content: '',
                     pageBreakAfter: true
                 }
+                blockSections[0].tocInclude = true;
+                blockSections[0].tocLabel = 'Performance Analysis';
+                blockSections[0].bookmarkLevel = 1;
                 sections.push(...blockSections, textSection);
             }
         }
         if (this.reportSettings.includePerformanceResultsGraph) {
             const chartSection = this.createChartSection(this.chartImageProviders?.performanceChart, '');
             if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = 'Savings by Facility';
+                chartSection.bookmarkLevel = 1;
                 sections.push(chartSection);
             }
         }
-        return [headingSection, ...sections];
+        return [...sections];
     }
 
     buildAnnualTable(summaries: Array<AnnualAnalysisSummary>, latestMonthSummary: MonthlyAnalysisSummaryData, printBlock: 'consumption' | 'savings'): TableSection | undefined {

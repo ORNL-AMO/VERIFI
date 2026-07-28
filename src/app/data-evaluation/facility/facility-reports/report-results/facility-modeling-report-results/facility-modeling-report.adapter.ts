@@ -80,24 +80,36 @@ export class FacilityModelingReportAdapter {
         let sections: BaseSection[] = [];
         sections.push({
             type: 'heading',
-            title: title
+            title: title,
+            tocInclude: true,
+            tocLabel: title,
+            bookmarkLevel: 0
         });
 
         if (criticalItems.length > 0) {
             const criticalSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Validation Failures'], 'Critical Issues', criticalItems);
             if (criticalSection) {
+                criticalSection.tocInclude = true;
+                criticalSection.tocLabel = 'Critical Issues';
+                criticalSection.bookmarkLevel = 1;
                 sections.push(criticalSection);
             }
         }
         if (moderateItems.length > 0) {
             const moderateSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Data Validation Failures'], 'Moderate Issues', moderateItems);
             if (moderateSection) {
+                moderateSection.tocInclude = true;
+                moderateSection.tocLabel = 'Moderate Issues';
+                moderateSection.bookmarkLevel = 1;
                 sections.push(moderateSection);
             }
         }
         if (minorItems.length > 0) {
             const minorSection = this.buildIssuesSummaryTableSection(['Facility', 'Group', 'Model Notes'], 'Minor Issues', minorItems);
             if (minorSection) {
+                minorSection.tocInclude = true;
+                minorSection.tocLabel = 'Minor Issues';
+                minorSection.bookmarkLevel = 1;
                 sections.push(minorSection);
             }
         }
@@ -121,12 +133,18 @@ export class FacilityModelingReportAdapter {
         let sections: BaseSection[] = [];
         sections.push({
             type: 'heading',
-            title: title
+            title: title,
+            tocInclude: true,
+            tocLabel: title,
+            bookmarkLevel: 0
         });
 
         if (regressionGroupItems.length > 0) {
             const regressionSummarySection = this.buildRegressionSection('Analysis Type: Regression', regressionGroupItems);
             if (regressionSummarySection) {
+                regressionSummarySection.tocInclude = true;
+                regressionSummarySection.tocLabel = 'Analysis Type: Regression';
+                regressionSummarySection.bookmarkLevel = 1;
                 regressionSummarySection.pageBreakAfter = true;
                 sections.push(regressionSummarySection);
             }
@@ -134,6 +152,9 @@ export class FacilityModelingReportAdapter {
         if (classicIntensityGroupItems.length > 0) {
             const classicIntensitySummarySection = this.buildClassicIntensitySection('Analysis Type: Classic Intensity', classicIntensityGroupItems);
             if (classicIntensitySummarySection) {
+                classicIntensitySummarySection.tocInclude = true;
+                classicIntensitySummarySection.tocLabel = 'Analysis Type: Classic Intensity';
+                classicIntensitySummarySection.bookmarkLevel = 1;
                 classicIntensitySummarySection.pageBreakAfter = true;
                 sections.push(classicIntensitySummarySection);
             }
@@ -141,6 +162,9 @@ export class FacilityModelingReportAdapter {
         if (absoluteGroupItems.length > 0) {
             const absoluteSummarySection = this.buildAbsoluteSection('Analysis Type: Absolute', absoluteGroupItems);
             if (absoluteSummarySection) {
+                absoluteSummarySection.tocInclude = true;
+                absoluteSummarySection.tocLabel = 'Analysis Type: Absolute';
+                absoluteSummarySection.bookmarkLevel = 1;
                 absoluteSummarySection.pageBreakAfter = true;
                 sections.push(absoluteSummarySection);
             }
@@ -152,13 +176,19 @@ export class FacilityModelingReportAdapter {
         let sections: BaseSection[] = [];
         sections.push({
             type: 'heading',
-            title: title
+            title: title,
+            tocInclude: true,
+            tocLabel: title,
+            bookmarkLevel: 0
         });
 
         if (regressionGroupItems.length > 0) {
             regressionGroupItems.forEach(item => {
                 const regressionSummarySection = this.buildRegressionSection('', [item]);
                 if (regressionSummarySection) {
+                    regressionSummarySection.tocInclude = true;
+                    regressionSummarySection.tocLabel = this.facilityDbService.getFacilityNameById(item.facilityId) + ' - ' + this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+                    regressionSummarySection.bookmarkLevel = 1;
                     sections.push(regressionSummarySection);
                 }
 

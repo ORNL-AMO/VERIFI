@@ -49,13 +49,13 @@ export class FacilityOverviewReportAdapter {
         };
 
         if (this.reportSettings.includeEnergySection) {
-            sections.push(...this.buildSection(input.chartImageProviders, 'Energy Consumption', 'energyUse'));
+            sections.push(...this.buildSection(input.chartImageProviders, 'Energy Consumption', 'energyUse', 'Utility Usage'));
         }
         if (this.reportSettings.includeWaterSection) {
-            sections.push(...this.buildSection(input.chartImageProviders, 'Water', 'water'));
+            sections.push(...this.buildSection(input.chartImageProviders, 'Water', 'water', 'Water Usage'));
         }
         if (this.reportSettings.includeCostsSection) {
-            sections.push(...this.buildSection(input.chartImageProviders, 'Costs', 'cost'));
+            sections.push(...this.buildSection(input.chartImageProviders, 'Costs', 'cost', 'Utility Costs'));
         }
 
         return {
@@ -64,52 +64,70 @@ export class FacilityOverviewReportAdapter {
         };
     }
 
-    private buildSection(chartImageProviders: any, title: string, dataType: 'energyUse' | 'cost' | 'water'): BaseSection[] {
+    private buildSection(chartImageProviders: any, title: string, dataType: 'energyUse' | 'cost' | 'water', tocLabel: string): BaseSection[] {
         let sections: BaseSection[] = [];
 
         if (this.reportSettings.includeMeterUsageStackedLineChart && this.hasMeterData(dataType)) {
             let chartSection = this.createChartSection(chartImageProviders?.meterStackedLineChart?.[dataType], '');
             if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = tocLabel;
+                chartSection.bookmarkLevel = 1;
                 chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
 
         if (this.reportSettings.includeMeterUsageTable && this.hasMeterData(dataType)) {
-            let tableSection = this.createMeterUsageTableSection(dataType, 'Consumption by Meter');
+            let tableSection = this.createMeterUsageTableSection(dataType, `${tocLabel} Breakdown`);
             if (tableSection) {
+                tableSection.tocInclude = true;
+                tableSection.tocLabel = `${tocLabel} Breakdown Table`;
+                tableSection.bookmarkLevel = 1;
                 tableSection.pageBreakAfter = true;
                 sections.push(tableSection);
             }
         }
 
         if (this.reportSettings.includeMeterUsageDonut && this.hasMeterData(dataType)) {
-            let chartSection = this.createChartSection(chartImageProviders?.meterBarChart?.[dataType], '');
+            let chartSection = this.createChartSection(chartImageProviders?.meterBarChart?.[dataType], `${tocLabel} Breakdown`);
             if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `${tocLabel} Breakdown Chart`;
+                chartSection.bookmarkLevel = 1;
                 chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
 
         if (this.reportSettings.includeUtilityTableForFacility && this.hasUtilityData(dataType)) {
-            let tableSection = this.createUtilityTableSection(dataType, '');
+            let tableSection = this.createUtilityTableSection(dataType, `${tocLabel} Comparison`);
             if (tableSection) {
+                tableSection.tocInclude = true;
+                tableSection.tocLabel = `${tocLabel} Comparison Table`;
+                tableSection.bookmarkLevel = 1;
                 tableSection.pageBreakAfter = true;
                 sections.push(tableSection);
             }
         }
 
         if (this.reportSettings.includeAnnualBarChart && this.hasAnnualSourceData(dataType)) {
-            let chartSection = this.createChartSection(chartImageProviders?.annualBarChart?.[dataType], '');
+            let chartSection = this.createChartSection(chartImageProviders?.annualBarChart?.[dataType], `Annual ${tocLabel}`);
             if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `Annual ${tocLabel}`,
+                chartSection.bookmarkLevel = 1;
                 chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
         }
 
         if (this.reportSettings.includeMonthlyLineChartForFacility && this.hasYearMonthData(dataType)) {
-            let chartSection = this.createChartSection(chartImageProviders?.monthlyUsageLineChart?.[dataType], '');
+            let chartSection = this.createChartSection(chartImageProviders?.monthlyUsageLineChart?.[dataType], `Monthly ${tocLabel}`);
             if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `Monthly ${tocLabel}`,
+                chartSection.bookmarkLevel = 1;
                 chartSection.pageBreakAfter = true;
                 sections.push(chartSection);
             }
@@ -121,7 +139,10 @@ export class FacilityOverviewReportAdapter {
 
         let titleSection: HeadingSection = {
             type: 'heading',
-            title: this.facility.name + ' ' + title
+            title: this.facility.name + ' ' + title,
+            tocInclude: true,
+            tocLabel: this.facility.name + ' ' + title,
+            bookmarkLevel: 0,
         };
         return [titleSection, ...sections];
     }
