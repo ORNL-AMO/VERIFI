@@ -13,6 +13,8 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 interface FacilityListItem {
   facility: IdbFacility;
@@ -34,6 +36,7 @@ export class SelectFacilityAnalysisItemsComponent {
   private accountAnalysisService: AccountAnalysisService = inject(AccountAnalysisService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private accountDbService: AccountdbService = inject(AccountdbService);
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
@@ -42,15 +45,22 @@ export class SelectFacilityAnalysisItemsComponent {
   accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
   hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
+  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
 
   facilityList: Signal<Array<FacilityListItem>> = computed(() => {
     const facilities = this.facilities();
     const facilityAnalysisItems = this.facilityAnalysisItems();
     const analysisItem = this.selectedAnalysisItem();
     const accountStatusCheck = this.accountStatusCheck();
+    const account = this.account();
     if (!facilities || !facilityAnalysisItems || !analysisItem || !accountStatusCheck) {
       return [];
     }
+
+    if(account && account.guid != analysisItem.accountId){
+      return [];
+    }
+    
     return analysisItem.facilityAnalysisItems.map(facilityItem => {
       const facility = facilities.find(fac => fac.guid === facilityItem.facilityId);
       const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(facilityItem.facilityId);
