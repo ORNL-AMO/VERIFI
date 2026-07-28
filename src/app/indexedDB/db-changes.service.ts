@@ -93,6 +93,17 @@ export class DbChangesService {
       }
     }
     this.facilityDbService.accountFacilities.next(accountFacilites);
+    // const selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    // if (selectedFacility) {
+    //   const facilityInAccount = accountFacilites.find(fac => fac.guid === selectedFacility.guid);
+    //   if (!facilityInAccount) {
+    //     if (accountFacilites.length > 0) {
+    //       this.facilityDbService.selectedFacility.next(accountFacilites[0]);
+    //     }else{
+    //       this.facilityDbService.selectedFacility.next(null);
+    //     }
+    //   }
+    // }
     //set reports
     await this.setAccountReports(account);
     //set predictors

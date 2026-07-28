@@ -455,7 +455,7 @@ export class BackupDataService {
       accountAnalysisItem.accountId = accountGUIDs.newId;
       accountAnalysisItem.facilityAnalysisItems.forEach(item => {
         item.facilityId = this.getNewId(item.facilityId, facilityGUIDs);
-        if (item.analysisItemId) {
+        if (item.analysisItemId && item.analysisItemId != 'skip') {
           item.analysisItemId = this.getNewId(item.analysisItemId, facilityAnalysisGUIDs);
         }
       });
