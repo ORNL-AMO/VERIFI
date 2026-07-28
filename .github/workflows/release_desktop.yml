@@ -49,86 +49,86 @@ jobs:
       NODE_VERSION: ${{ steps.output.outputs.NODE_VERSION }}
       BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
 
-  # bundle_mac:
-  #   if: github.ref_name == 'master'
-  #   runs-on: macos-14
-  #   needs: [build]
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 1
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: build-artifact
-  #         path: dist/
-  #     - name: Node setup
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ needs.build.outputs.NODE_VERSION }}
-  #     - name: Cache setup
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: ~/.npm
-  #         key: npm-${{ hashFiles('package-lock.json') }}
-  #         restore-keys: npm-
-  #     - name: Cert setup
-  #       env:
-  #         APPLE_CERT_A_BASE64: ${{ secrets.APPLE_CERT_A_BASE64 }}
-  #         APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
-  #         APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
-  #         APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
-  #       run: |
-  #         CERT_A_PATH=$RUNNER_TEMP/app_certificate.p12
-  #         PROV_PROF_PATH=$RUNNER_TEMP/AMO.provisionprofile
-  #         KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+  bundle_mac:
+    if: github.ref_name == 'master'
+    runs-on: macos-14
+    needs: [build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: dist/
+      - name: Node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.build.outputs.NODE_VERSION }}
+      - name: Cache setup
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+      - name: Cert setup
+        env:
+          APPLE_CERT_A_BASE64: ${{ secrets.APPLE_CERT_A_BASE64 }}
+          APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
+          APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
+          APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
+        run: |
+          CERT_A_PATH=$RUNNER_TEMP/app_certificate.p12
+          PROV_PROF_PATH=$RUNNER_TEMP/AMO.provisionprofile
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
 
-  #         echo -n "$APPLE_CERT_A_BASE64" | base64 --decode -o $CERT_A_PATH
-  #         echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode -o $PROV_PROF_PATH
+          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode -o $CERT_A_PATH
+          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode -o $PROV_PROF_PATH
 
-  #         security -v create-keychain -p "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
-  #         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-  #         security -v default-keychain -s $KEYCHAIN_PATH
-  #         security -v unlock-keychain -p "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
+          security -v create-keychain -p "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security -v default-keychain -s $KEYCHAIN_PATH
+          security -v unlock-keychain -p "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
 
-  #         security -v import $CERT_A_PATH -P "$APPLE_CERT_SECRET" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-  #         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
+          security -v import $CERT_A_PATH -P "$APPLE_CERT_SECRET" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_SECRET" $KEYCHAIN_PATH
 
-  #         cp "$PROV_PROF_PATH" ./embedded.provisionprofile
-  #     - name: Install dependencies
-  #       run: npm install
-  #     - name: Build
-  #       run: npm run build-prod-electron
-  #     - name: Package [Mac]
-  #       run: npm run dist-nopublish -- --mac --universal
-  #     - name: Notarize
-  #       env:
-  #         APPLE_ID: ${{ secrets.APPLE_ID }}
-  #         APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
-  #         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-  #       run: |
-  #         xcrun notarytool submit --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" $(find ./output -name "VERIFI-*.*.*.dmg")
-  #         xcrun stapler staple $(find ./output -name "VERIFI-*.*.*.dmg")
-  #     - name: Prepare output
-  #       id: output
-  #       run: |
-  #         VERSION=$(grep -A3 'version:' ./output/latest-mac.yml | head -n1 | awk '{print $2}')
-  #         echo "BUILD_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-  #     - name: Upload artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: release-1-artifact
-  #         path: |
-  #           output/*.blockmap
-  #           output/*.dmg
-  #           output/*.zip
-  #           output/latest-mac.yml
-  #         compression-level: 1
-  #         if-no-files-found: error
-  #         retention-days: 1
-  #   outputs:
-  #     BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
+          cp "$PROV_PROF_PATH" ./embedded.provisionprofile
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build-prod-electron
+      - name: Package [Mac]
+        run: npm run dist-nopublish -- --mac --universal
+      - name: Notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcrun notarytool submit --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" $(find ./output -name "VERIFI-*.*.*.dmg")
+          xcrun stapler staple $(find ./output -name "VERIFI-*.*.*.dmg")
+      - name: Prepare output
+        id: output
+        run: |
+          VERSION=$(grep -A3 'version:' ./output/latest-mac.yml | head -n1 | awk '{print $2}')
+          echo "BUILD_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-1-artifact
+          path: |
+            output/*.blockmap
+            output/*.dmg
+            output/*.zip
+            output/latest-mac.yml
+          compression-level: 1
+          if-no-files-found: error
+          retention-days: 1
+    outputs:
+      BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
 
   bundle_winux:
     if: github.ref_name == 'master'
@@ -230,7 +230,7 @@ jobs:
   release:
     if: github.ref_name == 'master'
     runs-on: ubuntu-22.04
-    needs: [build, bundle_winux, sign_win]
+    needs: [build, bundle_mac, bundle_winux, sign_win]
     env:
       VERSION: ${{ needs.build.outputs.BUILD_VERSION }}
     steps:
