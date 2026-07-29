@@ -228,7 +228,7 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
             return 0;
         });
         let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            if (isNaN(degreeDay.minutesBetween) == false) {
+            if (isNaN(degreeDay.minutesBetween) == false && isNaN(degreeDay.weightedWetBulbTemp) == false) {
                 return degreeDay.minutesBetween;
             }
             return 0;
@@ -246,7 +246,7 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
             return 0;
         });
         let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            if (isNaN(degreeDay.minutesBetween) == false) {
+            if (isNaN(degreeDay.minutesBetween) == false && isNaN(degreeDay.weightedDewPointTemp) == false) {
                 return degreeDay.minutesBetween;
             }
             return 0;
@@ -258,7 +258,7 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
         return weightedAverage;
     } else if (weatherDataSelection == 'precipitation') {
         return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            if (isNaN(degreeDay.precipitation) == false) {
+            if (degreeDay.precipitation !== null && degreeDay.precipitation !== undefined && isNaN(degreeDay.precipitation) == false) {
                 return degreeDay.precipitation;
             }
             return 0;
