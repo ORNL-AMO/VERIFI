@@ -11,6 +11,7 @@
         </thead>
         <tbody>
             @for(monthKey of monthKeys; track monthKey) {
+                @let totalValue = getTotal(monthKey);
             <tr [ngClass]="{'year-end': checkYearEnd(monthKey)}">
                 <td>{{ formatMonthLabel(monthKey) }}</td>
                 @for (group of filteredGroups; track group) {
@@ -25,9 +26,9 @@
                 </td>
                 }
                 }
-                @if (costSavingsTable[monthKey] && getTotal(monthKey) && getTotal(monthKey) !== undefined && getTotal(monthKey) !== null && getTotal(monthKey) !== 0) {
+                @if (costSavingsTable[monthKey] && totalValue && totalValue !== undefined && totalValue !== null && totalValue !== 0) {
                 <td class="text-center total-column">
-                    $ {{ getTotal(monthKey) | number:'1.0-0'}}
+                    $ {{ totalValue | number:'1.0-0'}}
                 </td>
                 }
                 @else {

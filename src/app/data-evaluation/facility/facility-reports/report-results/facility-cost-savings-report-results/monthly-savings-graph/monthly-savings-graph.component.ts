@@ -44,14 +44,14 @@ export class MonthlySavingsGraphComponent {
       return group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis';
     });
     if (filteredGroups && this.monthKeys) {
-      this.monthKeys = this.monthKeys.slice(12);
+      const graphMonthKeys = this.monthKeys.slice(12);
       const data = filteredGroups.map(group => {
-        const xVals = this.monthKeys.map(monthKey => {
+        const xVals = graphMonthKeys.map(monthKey => {
           const [year, month] = monthKey.split('-').map(Number);
           const date = new Date(year, month).toLocaleString('en-US', { month: 'short', year: 'numeric' });
           return date;
         });
-        const yVals = this.monthKeys.map(monthKey => {
+        const yVals = graphMonthKeys.map(monthKey => {
           if (this.savingsData[monthKey] && this.savingsData[monthKey][group.idbGroupId] !== undefined && !isNaN(this.savingsData[monthKey][group.idbGroupId])) {
             return Math.round(this.savingsData[monthKey][group.idbGroupId]);
           }

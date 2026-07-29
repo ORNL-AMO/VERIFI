@@ -30,21 +30,23 @@
         }
         <tbody>
             @for(year of years; track year) {
+            @let totalValue = getTotal(year);
             <tr>
                 <td>{{year}}</td>
                 @for (group of filteredGroups; track group) {
-                @if (getValue(year, group.idbGroupId) && getValue(year, group.idbGroupId) !== undefined &&
-                getValue(year, group.idbGroupId) !== null && getValue(year, group.idbGroupId)
+                @let yearValue = getValue(year, group.idbGroupId);
+                @if (yearValue && yearValue !== undefined &&
+                yearValue !== null && yearValue
                 !== 0) {
                 <td class="text-center">
                     @if (currencyPrefix) {
                     $
                     }
                     @if (showUnitHeader) {
-                    {{ getValue(year, group.idbGroupId) | number:'1.2-2'}}
+                    {{ yearValue | number:'1.2-2'}}
                     }
                     @else {
-                    {{ getValue(year, group.idbGroupId) | number:'1.0-0'}}
+                    {{ yearValue | number:'1.0-0'}}
                     }
                 </td>
                 }
@@ -55,13 +57,13 @@
                 }
                 }
                 @if (!showUnitHeader) {
-                @if (getTotal(year) && getTotal(year) !== undefined && getTotal(year) !== null && getTotal(year) !== 0)
+                @if (totalValue && totalValue !== undefined && totalValue !== null && totalValue !== 0)
                 {
                 <td class="text-center total-column">
                     @if (currencyPrefix) {
                     $
                     }
-                    {{ getTotal(year) | number:'1.0-0'}}
+                    {{ totalValue | number:'1.0-0'}}
                 </td>
                 }
                 @else {

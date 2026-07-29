@@ -43,7 +43,11 @@ export class AnnualSavingsGraphComponent {
       return group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis';
     });
 
-    const totalBarWidth = 0.6; 
+    if (!filteredGroups || filteredGroups.length === 0 || !this.years || this.years.length < 2) {
+      return;
+    }
+
+    const totalBarWidth = 0.6;
     const outerPadding = 0.04;
     const gapBetweenSubBars = 0.02;
     const totalGroups = filteredGroups.length;

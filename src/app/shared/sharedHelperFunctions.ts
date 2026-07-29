@@ -353,7 +353,14 @@ export function getGroupUnit(groupMeters: IdbUtilityMeter[], analysisItem: IdbAn
             let nonMobileMeters = groupMeters.filter(meter => !(meter.source == 'Other Fuels' && meter.scope == 2));
             let isSameUnit = nonMobileMeters.every(meter => meter.startingUnit == nonMobileMeters[0].startingUnit);
             if (isSameUnit) {
-                unit = nonMobileMeters[0].startingUnit;
+                const nonMobileUnit = nonMobileMeters[0].startingUnit;
+                const isMobileUnitSame = mobileMeters.every(meter => meter.vehicleCollectionUnit == nonMobileUnit);
+                if (isMobileUnitSame) {
+                    unit = nonMobileUnit;
+                }
+                else {
+                    unit = analysisItem?.energyUnit;
+                }
             }
             else {
                 unit = analysisItem?.energyUnit;
