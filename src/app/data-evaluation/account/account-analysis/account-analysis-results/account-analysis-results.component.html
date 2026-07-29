@@ -23,6 +23,9 @@
                 </div>
             </div>
         </h4>
+        <app-calculated-report-year-warning [reportYear]="calculatedReportYear()"
+            [analysisStatusChecks]="selectedAnalysisStatusChecks()" [showFacilityNames]="true">
+        </app-calculated-report-year-warning>
         <router-outlet></router-outlet>
     </div>
 </div>

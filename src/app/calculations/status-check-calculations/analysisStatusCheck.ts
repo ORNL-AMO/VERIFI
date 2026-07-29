@@ -13,6 +13,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 export class AnalysisStatusCheck {
 
     analysisItem: IdbAnalysisItem;
+    facility: IdbFacility;
     /** The most recent data date across all meters and predictors used in the analysis. */
     latestDataDate: Date;
     /** The most recent same day/month across all meters and predictors used in the analysis */
@@ -44,6 +45,7 @@ export class AnalysisStatusCheck {
         facility: IdbFacility
     ) {
         this.analysisItem = analysisItem;
+        this.facility = facility;
         this.setAnalysisGroupErrors(analysisItem.groups, predictorStatusChecks, meterStatusChecks, calanderizedMeters, predictorData);
         this.setAnalysisSetupErrors(calanderizedMeters, facility);
         this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);

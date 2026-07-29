@@ -1,8 +1,8 @@
-import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { MonthlyAccountAnalysisClass } from "./monthlyAccountAnalysisClass";
-import { checkAnalysisValue, getLatestYearWithData, getYearsWithFullData } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestCompleteAnalysisYear } from "../shared-calculations/calculationsHelpers";
 import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
@@ -13,8 +13,8 @@ import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
-import { getNeededUnits, getFiscalYear } from "../shared-calculations/calanderizationFunctions";
-import * as _ from 'lodash';
+import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
+import { AnalysisCalculationOptions } from "./analysisCalculationOptions";
 
 export class AnnualAccountAnalysisSummaryClass {
 
@@ -32,8 +32,9 @@ export class AnnualAccountAnalysisSummaryClass {
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
-        accountPredictors: Array<IdbPredictor>) {
-        this.setReportYear(accountAnalysisItem, meters, meterData, account, accountFacilities, allAccountAnalysisItems, accountPredictorEntries);
+        accountPredictors: Array<IdbPredictor>,
+        options: AnalysisCalculationOptions = {}) {
+        this.setReportYear(options.reportYear, accountAnalysisItem, meters, meterData, account, accountFacilities, allAccountAnalysisItems, accountPredictorEntries);
         this.setMonthlyAnalysisSummaryData(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
         this.setBaselineYear(accountAnalysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, accountPredictors);
@@ -43,7 +44,18 @@ export class AnnualAccountAnalysisSummaryClass {
         accountPredictorEntries: Array<IdbPredictorData>, allAccountAnalysisItems: Array<IdbAnalysisItem>, calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>, accountPredictors: Array<IdbPredictor>) {
-        let monthlyAnalysisSummaryClass: MonthlyAccountAnalysisClass = new MonthlyAccountAnalysisClass(analysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
+        let monthlyAnalysisSummaryClass: MonthlyAccountAnalysisClass = new MonthlyAccountAnalysisClass(
+            analysisItem,
+            account,
+            accountFacilities,
+            accountPredictorEntries,
+            allAccountAnalysisItems,
+            calculateAllMonthlyData,
+            meters,
+            meterData,
+            accountPredictors,
+            { reportYear: this.reportYear }
+        );
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
         this.facilitySummaries = monthlyAnalysisSummaryClass.facilitySummaries;
     }
@@ -52,15 +64,16 @@ export class AnnualAccountAnalysisSummaryClass {
         this.baselineYear = analysisItem.baselineYear;
     }
 
-    setReportYear(analysisItem: IdbAccountAnalysisItem,
+    setReportYear(reportYear: number | undefined,
+        analysisItem: IdbAccountAnalysisItem,
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         account: IdbAccount,
         accountFacilities: Array<IdbFacility>,
         facilityAnalysisItems: Array<IdbAnalysisItem>,
         predictorData: Array<IdbPredictorData>) {
-        if (analysisItem.calculatedReportYear) {
-            this.reportYear = analysisItem.calculatedReportYear;
+        if (reportYear !== undefined) {
+            this.reportYear = reportYear;
         } else {
             let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, account.assessmentReportVersion, []);
             let includedFacilityAnalysis: Array<IdbAnalysisItem> = new Array();
@@ -72,99 +85,13 @@ export class AnnualAccountAnalysisSummaryClass {
                     }
                 }
             });
-            const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(meters, includedFacilityAnalysis);
-            let latestYears: Array<number> = [];
-            for (const meterId of includedMeterIds) {
-                const cMeter: CalanderizedMeter = calanderizedMeters.find(cMeter => cMeter.meter.guid === meterId);
-                const facility: IdbFacility = accountFacilities.find(fac => {
-                    return fac.guid == cMeter.meter.facilityId
-                });
-                const fullYearsWithData: Array<number> = getYearsWithFullData([cMeter], facility)
-                const latestYearWithData = _.max(fullYearsWithData);
-                if (latestYearWithData) {
-                    latestYears.push(latestYearWithData);
-                }
-            }
-            for (const predictorId of includedPredictorIds) {
-                const predictorDataForPredictor = predictorData.filter(predictorEntry => predictorEntry.predictorId === predictorId);
-                if (predictorDataForPredictor.length != 0) {
-                    const facility: IdbFacility = accountFacilities.find(fac => {
-                        return fac.guid == predictorDataForPredictor[0].facilityId
-                    });
-                    //years with 12 months of data
-                    const years: Array<number> = predictorDataForPredictor.map(entry => {
-                        const date: Date = new Date(entry.year, entry.month - 1, 1);
-                        const fiscalYear: number = getFiscalYear(date, facility)
-                        return fiscalYear;
-                    });
-                    //get counts of years to find full years of data
-                    const yearCounts = _.countBy(years);
-                    const fullYears = Object.keys(yearCounts).filter(year => yearCounts[year] >= 12).map(year => parseInt(year));
-                    const latestYearWithData = _.max(fullYears);
-                    if (latestYearWithData) {
-                        latestYears.push(latestYearWithData);
-                    }
-                }
-            }
-            //minimum date of all meters and predictors included in the analysis groups will determine the 
-            //report year to ensure full year of data for all inputs
-            const minYear: number = _.min(latestYears);
-            this.reportYear = minYear;
-            analysisItem.calculatedReportYear = this.reportYear;
+            this.reportYear = getLatestCompleteAnalysisYear(
+                includedFacilityAnalysis.flatMap(item => item.groups),
+                calanderizedMeters,
+                predictorData,
+                accountFacilities
+            );
         }
-    }
-
-    collectRegressionGroupInputIds(
-        meters: Array<IdbUtilityMeter>,
-        facilityAnalysisItems: Array<IdbAnalysisItem>
-    ): { includedMeterIds: Array<string>; includedPredictorIds: Array<string> } {
-        const includedMeterIds: Array<string> = [];
-        const includedPredictorIds: Array<string> = [];
-        for (const analysisItem of facilityAnalysisItems) {
-            for (const group of analysisItem.groups) {
-                if (group.analysisType == 'skip' || group.analysisType == 'skipAnalysis') {
-                    continue;
-                }
-                if (group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity') {
-                    group.predictorVariables.forEach(pv => {
-                        if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id) && pv.id) {
-                            includedPredictorIds.push(pv.id);
-                        }
-                    });
-                }
-
-                // Collect predictor IDs from the group's selected regression model.
-                if (group.analysisType == 'regression') {
-                    if (group.isGeneratedModel) {
-                        const selectedModel: JStatRegressionModel = group.models?.find(m => m.modelId === group.selectedModelId);
-                        if (selectedModel) {
-                            for (const pv of selectedModel.predictorVariables) {
-                                if (!includedPredictorIds.includes(pv.id) && pv.id) {
-                                    includedPredictorIds.push(pv.id);
-                                }
-                            }
-                        }
-                    } else {
-                        //user defined model
-                        group.predictorVariables.forEach(pv => {
-                            if (pv.productionInAnalysis && !includedPredictorIds.includes(pv.id) && pv.id) {
-                                includedPredictorIds.push(pv.id);
-                            }
-                        });
-                    }
-                }
-
-                // Collect unique meter IDs for all calanderized meters belonging to this group.
-                const groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => meter.groupId === group.idbGroupId);
-                for (const meter of groupMeters) {
-                    if (!meter.noLongerInUse && !includedMeterIds.includes(meter.guid)) {
-                        includedMeterIds.push(meter.guid);
-                    }
-                }
-            }
-        }
-
-        return { includedMeterIds, includedPredictorIds };
     }
 
 
