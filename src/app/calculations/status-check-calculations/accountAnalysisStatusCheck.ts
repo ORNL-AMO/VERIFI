@@ -24,6 +24,7 @@ export class AccountAnalysisStatusCheck {
     /** True when every meter and predictor has data up to the same month/year as latestDataDate. */
     allDatesCurrent: boolean;
     facilityAnalysisHasWarnings: boolean;
+    includedFacilityAnalysisStatusChecks: Array<AnalysisStatusCheck>;
 
     constructor(analysisItem: IdbAccountAnalysisItem, facilityStatusChecks: Array<FacilityStatusCheck>, account: IdbAccount) {
         this.analysisItemId = analysisItem.guid;
@@ -32,11 +33,11 @@ export class AccountAnalysisStatusCheck {
                 .map(facilityAnalysisItem => facilityAnalysisItem.analysisItemId)
                 .filter((analysisItemId): analysisItemId is string => analysisItemId !== undefined && analysisItemId !== null)
         );
-        const facilityAnalysisStatusChecks: Array<AnalysisStatusCheck> = facilityStatusChecks.flatMap(fc => fc.analysisStatusChecks)
-        const includedFacilityAnalysisStatusChecks: Array<AnalysisStatusCheck> = facilityAnalysisStatusChecks.filter(fc => facilityAnalysisItemIds.has(fc.analysisItem.guid));
-        this.setAnalysisSetupErrors(includedFacilityAnalysisStatusChecks, analysisItem);
-        this.setDates(includedFacilityAnalysisStatusChecks, account);
-        this.setStatus(includedFacilityAnalysisStatusChecks);
+        const facilityAnalysisStatusChecks: Array<AnalysisStatusCheck> = facilityStatusChecks.flatMap(fc => fc.analysisStatusChecks);
+        this.includedFacilityAnalysisStatusChecks = facilityAnalysisStatusChecks.filter(fc => facilityAnalysisItemIds.has(fc.analysisItem.guid));
+        this.setAnalysisSetupErrors(this.includedFacilityAnalysisStatusChecks, analysisItem);
+        this.setDates(this.includedFacilityAnalysisStatusChecks, account);
+        this.setStatus(this.includedFacilityAnalysisStatusChecks);
     }
 
     private setAnalysisSetupErrors(facilityAnalysisStatusChecks: Array<AnalysisStatusCheck>, analysisItem: IdbAccountAnalysisItem) {

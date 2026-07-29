@@ -13,12 +13,14 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestCompleteAnalysisYear } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -36,6 +38,7 @@ export class GroupAnalysisOptionsComponent {
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
 
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup, { initialValue: null });
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem, { initialValue: null });
@@ -43,6 +46,7 @@ export class GroupAnalysisOptionsComponent {
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems, { initialValue: [] });
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  predictorData: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.accountPredictorData, { initialValue: [] });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
   //COMPUTED SIGNALS
@@ -67,11 +71,11 @@ export class GroupAnalysisOptionsComponent {
     const calanderizedMeters = this.calanderizedMeters();
     const facility = this.facility();
     const group = this.group();
+    const predictorData = this.predictorData();
     if (!calanderizedMeters || !facility || !group) {
       return null;
     }
-    let filteredCMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => cMeter.meter.groupId == group.idbGroupId);
-    return getLatestYearWithData(filteredCMeters, [facility]);
+    return getLatestCompleteAnalysisYear([group], calanderizedMeters, predictorData, [facility]);
   })
 
   baselineYearOptions: Signal<Array<number>> = computed(() => {

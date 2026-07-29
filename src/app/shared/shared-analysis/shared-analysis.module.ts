@@ -16,6 +16,8 @@ import { AnalysisFacilityReportComponent } from './data-check/analysis-facility-
 import { AnalysisProblemsInformationComponent } from './data-check/analysis-problems-information/analysis-problems-information.component';
 import { RegressionModelDetailsTable } from './data-check/regression-model-details-table/regression-model-details-table.component';
 import { UserDefineModelDateRangePipe } from './data-check/regression-model-details-table/user-define-model-date-range.pipe';
+import { CalculatedReportYearWarningComponent } from './calculated-report-year-warning/calculated-report-year-warning.component';
+import { RouterModule } from '@angular/router';
 
 
 @NgModule({
@@ -32,13 +34,15 @@ import { UserDefineModelDateRangePipe } from './data-check/regression-model-deta
     AnalysisFacilityReportComponent,
     AnalysisProblemsInformationComponent,
     RegressionModelDetailsTable,
-    UserDefineModelDateRangePipe
+    UserDefineModelDateRangePipe,
+    CalculatedReportYearWarningComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     NgbPaginationModule,
-    HelperPipesModule
+    HelperPipesModule,
+    RouterModule
   ],
   exports: [
     AnalysisSummaryTableFilterComponent,
@@ -51,7 +55,8 @@ import { UserDefineModelDateRangePipe } from './data-check/regression-model-deta
     AnnualAnalysisGroupSavingsGraphComponent,
     AnalysisDataValidationTablesComponent,
     AnalysisFacilityReportComponent,
-    AnalysisProblemsInformationComponent
+    AnalysisProblemsInformationComponent,
+    CalculatedReportYearWarningComponent
   ]
 })
 export class SharedAnalysisModule { }

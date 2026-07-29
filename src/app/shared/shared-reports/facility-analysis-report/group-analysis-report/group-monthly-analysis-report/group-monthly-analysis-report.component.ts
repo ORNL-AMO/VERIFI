@@ -21,6 +21,8 @@ export class GroupMonthlyAnalysisReportComponent {
   facility: IdbFacility;
   @Input({ required: true })
   analysisReportSettings: AnalysisReportSettings;
+  @Input({ required: true })
+  reportYear: number;
   @Input({required: true})
   group: AnalysisGroup;
 
@@ -58,14 +60,14 @@ export class GroupMonthlyAnalysisReportComponent {
 
   setReportYearMonthlyData() {
     this.reportYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
-      return summaryData.fiscalYear == this.analysisItem.calculatedReportYear;
+      return summaryData.fiscalYear == this.reportYear;
     });
   }
 
   setModelYearMonthlyData() {
     if (this.group.analysisType == 'regression') {
       this.modelYearIsBaselineYear = this.group.regressionModelYear == this.analysisItem.baselineYear;
-      this.modelYearIsReportYear = this.group.regressionModelYear == this.analysisItem.calculatedReportYear;
+      this.modelYearIsReportYear = this.group.regressionModelYear == this.reportYear;
       if (!this.modelYearIsBaselineYear && !this.modelYearIsReportYear) {
         this.modelYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
           return summaryData.fiscalYear == this.group.regressionModelYear;

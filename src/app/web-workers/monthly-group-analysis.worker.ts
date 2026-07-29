@@ -10,7 +10,16 @@ addEventListener('message', ({ data }) => {
   try {
     let calanderizationOptions: CalanderizationOptions = { energyIsSource: data.analysisItem.energyIsSource, neededUnits: getNeededUnits(data.analysisItem) };
     let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, calanderizationOptions, [], [], [data.facility], data.assessmentReportVersion, []);
-    let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, calanderizedMeterData, data.accountPredictorEntries, false, data.accountAnalysisItems);
+    let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(
+      data.selectedGroup,
+      data.analysisItem,
+      data.facility,
+      calanderizedMeterData,
+      data.accountPredictorEntries,
+      false,
+      data.accountAnalysisItems,
+      { reportYear: data.reportYear }
+    );
     let monthlyAnalysisSummary: MonthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
     postMessage({
       monthlyAnalysisSummary: monthlyAnalysisSummary,

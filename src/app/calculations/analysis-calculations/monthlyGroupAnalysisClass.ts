@@ -1,6 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
-import { filterYearMeterData, filterYearPredictorData, getLatestYearWithData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
+import { filterYearMeterData, filterYearPredictorData, getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisGroup } from "src/app/models/analysis";
 import { IdbFacility } from "src/app/models/idbModels/facility";
@@ -8,6 +8,7 @@ import { AnalysisGroupPredictorVariable } from "src/app/models/analysis";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { getDateFromPredictorData, getLatestPredictorData } from "src/app/shared/dateHelperFunctions";
+import { AnalysisCalculationOptions } from "./analysisCalculationOptions";
 
 export class MonthlyGroupAnalysisClass {
 
@@ -33,15 +34,16 @@ export class MonthlyGroupAnalysisClass {
     endYear: number
   }
   isNew: boolean;
+  reportYear: number;
 
   dataEndDate: Date;
-  constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean) {
+  constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, options: AnalysisCalculationOptions = {}) {
     this.selectedGroup = selectedGroup;
     this.analysisItem = analysisItem;
     this.facility = facility;
     this.isNew = this.facility.isNewFacility;
     let calanderizedGroupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == this.selectedGroup.idbGroupId});
-    this.setReportYear(calanderizedGroupMeters);
+    this.setReportYear(options.reportYear, calanderizedGroupMeters, accountPredictorEntries);
     this.setModelYear();
     this.setPredictorVariables();
     this.setGroupPredictorData(accountPredictorEntries);
@@ -54,14 +56,12 @@ export class MonthlyGroupAnalysisClass {
   }
 
 
-  setReportYear(calanderizedMeters: Array<CalanderizedMeter>) {
-    if (!this.analysisItem.calculatedReportYear) {
-      this.analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [this.facility]);
-    }
+  setReportYear(reportYear: number | undefined, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>) {
+    this.reportYear = reportYear ?? getLatestCompleteAnalysisYear([this.selectedGroup], calanderizedMeters, predictorData, [this.facility]);
   }
 
   setStartAndEndDate(calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem, this.selectedGroup);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem, this.selectedGroup, this.reportYear);
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
     this.bankedAnalysisDate = monthlyStartAndEndDate.bankedAnalysisDate;
     if (calculateAllMonthlyData) {
