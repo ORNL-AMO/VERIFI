@@ -6,6 +6,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getSelectedRegressionModel } from 'src/app/shared/shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'
@@ -157,10 +158,15 @@ export class AnalysisService {
     let selectedModel: JStatRegressionModel;
     if (group.analysisType == 'regression') {
       if (group.selectedModelId) {
-        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-        adjust_R2 = selectedModel.adjust_R2;
-        predictorVariables = selectedModel.predictorVariables;
-        regressionEquation = this.getRegressionsEquationFromModel(selectedModel);
+        selectedModel = getSelectedRegressionModel(group);
+        if (selectedModel) {
+          adjust_R2 = selectedModel.adjust_R2;
+          predictorVariables = selectedModel.predictorVariables;
+          regressionEquation = this.getRegressionsEquationFromModel(selectedModel);
+        } else {
+          predictorVariables = group.predictorVariables.filter(variable => variable.productionInAnalysis);
+          regressionEquation = this.getRegressionEquationNoModel(group, predictorVariables);
+        }
       } else {
         predictorVariables = group.predictorVariables.filter(variable => {
           return (variable.productionInAnalysis == true);
@@ -213,5 +219,5 @@ export interface AnalysisGroupItem {
   predictorVariables: Array<AnalysisGroupPredictorVariable>,
   adjust_R2: number,
   regressionEquation: string,
-  selectedModel: JStatRegressionModel
+  selectedModel?: JStatRegressionModel
 }

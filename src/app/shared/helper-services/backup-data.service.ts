@@ -801,7 +801,7 @@ export class BackupDataService {
         group.predictorVariables.forEach(variable => {
           variable.id = this.getNewId(variable.id, predictorGUIDs);
         });
-        group.models.forEach(model => {
+        group.models?.forEach(model => {
           model.predictorVariables.forEach(variable => {
             variable.id = this.getNewId(variable.id, predictorGUIDs);
             if (variable.id == undefined) {
@@ -994,18 +994,20 @@ export class BackupDataService {
 
   //only export selected model in analysis items
   trimAnalysisModels(analysisItems: Array<IdbAnalysisItem>): Array<IdbAnalysisItem> {
-    analysisItems.forEach(item => {
-      item.groups.forEach(group => {
-        if (group.analysisType == 'regression' && group.models) {
-          group.models = group.models.filter(model => {
-            return model.modelId == group.selectedModelId;
-          });
-        } else {
-          group.models = [];
-        }
-      });
+    return analysisItems.map(item => {
+      return {
+        ...item,
+        groups: item.groups.map(group => {
+          if (group.analysisType == 'regression' && group.models) {
+            const selectedModels = group.models.filter(model => {
+              return model.modelId == group.selectedModelId;
+            });
+            return { ...group, models: selectedModels };
+          }
+          return { ...group, models: [] };
+        })
+      };
     });
-    return analysisItems;
   }
 }
 
@@ -1033,5 +1035,3 @@ export interface BackupFile {
   facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>
   facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>
 }
-
-

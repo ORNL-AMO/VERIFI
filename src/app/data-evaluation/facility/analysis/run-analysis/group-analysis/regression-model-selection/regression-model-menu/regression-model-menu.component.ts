@@ -325,7 +325,7 @@ export class RegressionModelMenuComponent {
     await this.saveItem(this.formValueToGroup());
   }
 
-  async saveItem(group?: AnalysisGroup) {
+  async saveItem(group?: AnalysisGroup, suppressFormPatch = true) {
     const _group: AnalysisGroup = group ?? this.group();
     const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
     const groupIndex: number = _analysisItemCurrent.groups.findIndex(g => g.idbGroupId == _group.idbGroupId);
@@ -336,7 +336,7 @@ export class RegressionModelMenuComponent {
     const selectedAccount: IdbAccount = this.selectedAccount();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
     this.analysisDbService.selectedAnalysisItem.next(_analysisItem);
-    this._suppressFormPatch = true;
+    this._suppressFormPatch = suppressFormPatch;
     this.analysisService.selectedGroup.next(_group);
   }
 
@@ -414,13 +414,24 @@ export class RegressionModelMenuComponent {
     previousSelectedModel: JStatRegressionModel | undefined
   ): Promise<void> {
     const { updatedGroup, newSelectedModel } = this.regressionModelsService.applyGeneratedModelsToGroup(
-      group, generatedModels, autoSelect, previousSelectedModelId
+      group,
+      generatedModels,
+      autoSelect,
+      previousSelectedModelId,
+      previousSelectedModel,
+      this.selectedFacility(),
+      this.analysisItem().baselineYear
     );
     if (previousSelectedModelId) {
       this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
     }
-    this.analysisDbService.setGeneratedModelsForGroup(updatedGroup.idbGroupId, generatedModels);
-    await this.saveItem(updatedGroup);
+    this.analysisDbService.setGeneratedModelsForGroup(
+      updatedGroup.idbGroupId,
+      updatedGroup.isGeneratedModel ? generatedModels : []
+    );
+    // Regeneration can change the selected model's coefficients even when the
+    // logical model is equivalent, so refresh the form from the saved group.
+    await this.saveItem(updatedGroup, false);
     this.generatingModels.set(false);
   }
 

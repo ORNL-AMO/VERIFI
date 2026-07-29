@@ -12,6 +12,11 @@ import { RegressionModelsCalculator } from './regression-models-calculator';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import * as _ from 'lodash';
+import {
+  convertOrphanedGeneratedModelToUserDefined,
+  findEquivalentRegressionModel,
+  getSelectedRegressionModel
+} from './regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'
@@ -81,46 +86,58 @@ export class RegressionModelsService {
     group: AnalysisGroup,
     generatedModels: Array<JStatRegressionModel>,
     autoSelect: boolean,
-    previousSelectedModelId: string | undefined
+    previousSelectedModelId: string | undefined,
+    previousSelectedModel: JStatRegressionModel | undefined,
+    facility: IdbFacility,
+    fallbackYear: number | undefined
   ): { updatedGroup: AnalysisGroup; newSelectedModel: JStatRegressionModel | undefined } {
-    group.dateModelsGenerated = new Date();
+    let updatedGroup: AnalysisGroup = { ...group, dateModelsGenerated: new Date() };
+    const hadPreviousSelection = previousSelectedModelId != undefined;
+    let selectedModel = generatedModels.find(model => model.modelId === previousSelectedModelId);
 
-    if (previousSelectedModelId) {
-      const previousModelExists = generatedModels.find(model => model.modelId === previousSelectedModelId);
-      if (previousModelExists) {
-        group.selectedModelId = previousSelectedModelId;
-      }
+    if (!selectedModel && hadPreviousSelection) {
+      selectedModel = findEquivalentRegressionModel(previousSelectedModel, generatedModels);
     }
 
-    if (group.selectedModelId) {
-      const selectedModel = generatedModels.find(model => model.modelId === group.selectedModelId);
-      group.models = selectedModel ? [selectedModel] : [];
-      if (selectedModel) {
-        group.regressionConstant = selectedModel.coef[0];
-        group.regressionModelYear = selectedModel.modelYear;
-        group.predictorVariables.forEach(variable => {
-          const coefIndex = selectedModel.predictorVariables.findIndex(pVariable => pVariable.id === variable.id);
-          variable.regressionCoefficient = coefIndex !== -1 ? selectedModel.coef[coefIndex + 1] : 0;
-        });
-      }
+    if (selectedModel) {
+      updatedGroup = this.applySelectedModelToGroup(updatedGroup, selectedModel);
+      return { updatedGroup, newSelectedModel: selectedModel };
+    }
+
+    if (hadPreviousSelection) {
+      updatedGroup = convertOrphanedGeneratedModelToUserDefined(updatedGroup, facility, fallbackYear);
+      return { updatedGroup, newSelectedModel: undefined };
     }
 
     if (autoSelect) {
       const bestModel = _.maxBy(generatedModels, 'adjust_R2');
       if (bestModel) {
-        group.selectedModelId = bestModel.modelId;
-        group.regressionConstant = bestModel.coef[0];
-        group.regressionModelYear = bestModel.modelYear;
-        group.predictorVariables.forEach(variable => {
-          const coefIndex = bestModel.predictorVariables.findIndex(pVariable => pVariable.id === variable.id);
-          variable.regressionCoefficient = coefIndex !== -1 ? bestModel.coef[coefIndex + 1] : 0;
-        });
+        updatedGroup = this.applySelectedModelToGroup(updatedGroup, bestModel);
+        return { updatedGroup, newSelectedModel: bestModel };
       }
-      group.models = bestModel ? [bestModel] : [];
     }
 
-    const newSelectedModel = generatedModels.find(model => model.modelId === group.selectedModelId);
-    return { updatedGroup: group, newSelectedModel };
+    return {
+      updatedGroup: { ...updatedGroup, selectedModelId: undefined, models: undefined },
+      newSelectedModel: undefined
+    };
+  }
+
+  private applySelectedModelToGroup(group: AnalysisGroup, selectedModel: JStatRegressionModel): AnalysisGroup {
+    return {
+      ...group,
+      selectedModelId: selectedModel.modelId,
+      models: [selectedModel],
+      regressionConstant: selectedModel.coef[0],
+      regressionModelYear: selectedModel.modelYear,
+      predictorVariables: group.predictorVariables.map(variable => {
+        const coefIndex = selectedModel.predictorVariables.findIndex(pVariable => pVariable.id === variable.id);
+        return {
+          ...variable,
+          regressionCoefficient: coefIndex !== -1 ? selectedModel.coef[coefIndex + 1] : 0
+        };
+      })
+    };
   }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
@@ -178,22 +195,27 @@ export class RegressionModelsService {
     let selectedModel: JStatRegressionModel;
     if (group.analysisType == 'regression') {
       if (group.selectedModelId) {
-        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-        //set model validation for report year
-        let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
-        //check p-variable ids for model object, was not getting updated on import prior to v0.14.9
-        //group p-variable ids will be correctly mapped to data use them to check model variable ids and update if needed
-        let groupPredictorVariableIds: Array<string> = group.predictorVariables.map(variable => variable.id);
-        selectedModel.predictorVariables.forEach(modelVariable => {
-          if (!groupPredictorVariableIds.includes(modelVariable.id)) {
-            let matchVariable: AnalysisGroupPredictorVariable = group.predictorVariables.find(v => v.name == modelVariable.name);
-            if(matchVariable) {
-              modelVariable.id = matchVariable.id;
+        selectedModel = getSelectedRegressionModel(group);
+        if (selectedModel) {
+          //set model validation for report year
+          let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+          //check p-variable ids for model object, was not getting updated on import prior to v0.14.9
+          //group p-variable ids will be correctly mapped to data use them to check model variable ids and update if needed
+          let groupPredictorVariableIds: Array<string> = group.predictorVariables.map(variable => variable.id);
+          selectedModel.predictorVariables.forEach(modelVariable => {
+            if (!groupPredictorVariableIds.includes(modelVariable.id)) {
+              let matchVariable: AnalysisGroupPredictorVariable = group.predictorVariables.find(v => v.name == modelVariable.name);
+              if (matchVariable) {
+                modelVariable.id = matchVariable.id;
+              }
             }
-          }
-        });
+          });
 
-        selectedModel = new RegressionModelsCalculator(facilityPredictorData).setModelVaildAndNotes(selectedModel, reportYear, facility, analysisItem.baselineYear, group);
+          selectedModel = new RegressionModelsCalculator(facilityPredictorData).setModelVaildAndNotes(selectedModel, reportYear, facility, analysisItem.baselineYear, group);
+        } else if (group.isGeneratedModel) {
+          group = convertOrphanedGeneratedModelToUserDefined(group, facility, analysisItem.baselineYear);
+          selectedModel = this.getUserDefinedModel(group, facility, analysisItem, reportYear);
+        }
 
       } else if (!group.isGeneratedModel) {
         selectedModel = this.getUserDefinedModel(group, facility, analysisItem, reportYear);
@@ -210,7 +232,7 @@ export class RegressionModelsService {
 
 export interface FacilityGroupAnalysisItem {
   group: AnalysisGroup,
-  selectedModel: JStatRegressionModel,
+  selectedModel?: JStatRegressionModel,
   facilityId: string,
   baselineYear: number
 }
