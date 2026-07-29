@@ -7,6 +7,7 @@ import { DataManagementRoutes } from './data-management.routes';
 import { DataEvaluationRoutes } from './data-evaluation.routes';
 import { FeedbackComponent } from '../static-content/feedback/feedback.component';
 import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
+import { environment } from 'src/environments/environment';
 
 const routes: Routes = [
   {
@@ -27,7 +28,7 @@ const routes: Routes = [
 const routerOptions: ExtraOptions = {
   anchorScrolling: 'enabled',
   scrollPositionRestoration: 'enabled',
-  useHash: true
+  useHash: environment.useHash
 }
 
 @NgModule({

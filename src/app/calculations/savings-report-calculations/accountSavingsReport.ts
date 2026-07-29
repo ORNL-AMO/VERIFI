@@ -39,10 +39,6 @@ export class AccountSavingsReport {
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>) {
 
-        selectedAnalysisItem.calculatedReportYear = report.endYear;
-        accountAnalysisItems.forEach(item => {
-            item.calculatedReportYear = report.endYear;
-        });
         this.performanceReport = new PerformanceReport(
             selectedAnalysisItem.baselineYear,
             report.endYear,
@@ -55,7 +51,18 @@ export class AccountSavingsReport {
             meterData,
             accountPredictors
         );
-        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, false, meters, meterData, accountPredictors);
+        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(
+            selectedAnalysisItem,
+            account,
+            facilities,
+            accountPredictorEntries,
+            accountAnalysisItems,
+            false,
+            meters,
+            meterData,
+            accountPredictors,
+            { reportYear: report.endYear }
+        );
         this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.endMonth, report.endYear);
         this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.endMonth, report.endYear);
         this.latestMonthSummary = getLatestMonthSummary(this.monthlyAnalysisSummaryData);

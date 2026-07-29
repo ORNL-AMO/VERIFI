@@ -176,13 +176,23 @@ export class FacilityCostSavingsReportResultsComponent {
         accountAnalysisItems: accountAnalysisItems,
         includeGroupSummaries: true,
         assessmentReportVersion: account.assessmentReportVersion,
-        report: this.facilityReport
+        reportYear: this.reportSettings.reportYear
       };
       this.worker.postMessage(workerMessage);
     } else {
       // Web Workers are not supported in this environment.  
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
-      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.selectedAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, true);
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
+        this.selectedAnalysisItem,
+        this.facility,
+        calanderizedMeters,
+        accountPredictorEntries,
+        false,
+        accountPredictors,
+        accountAnalysisItems,
+        true,
+        { reportYear: this.reportSettings.reportYear }
+      );
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;
       this.setSavings();
       this.dataComplete = true;
@@ -269,4 +279,3 @@ export class FacilityCostSavingsReportResultsComponent {
 }
 
 type YearGroupData = { [year: number]: { [groupId: string]: number } };
-

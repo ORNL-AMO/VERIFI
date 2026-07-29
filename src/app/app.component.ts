@@ -94,7 +94,6 @@ export class AppComponent {
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
     if (environment.production) {
-      gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {

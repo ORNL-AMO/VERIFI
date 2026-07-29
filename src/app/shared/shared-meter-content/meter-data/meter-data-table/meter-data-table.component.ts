@@ -11,7 +11,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -81,6 +81,7 @@ export class MeterDataTableComponent {
   showDeleteModal: boolean = false;
   showBulkDelete: boolean = false;
   showIndividualDelete: boolean = false;
+  showFillMissingDataModal: boolean = false;
   showFilterDropdown: boolean = false;
 
   inDataManagement: boolean;
@@ -163,6 +164,82 @@ export class MeterDataTableComponent {
   cancelBulkDelete() {
     this.sharedDataService.modalOpen.next(false);
     this.showBulkDelete = false;
+  }
+
+  openFillMissingDataModal() {
+    if (!this.meterStatusCheck()?.missingDataMonths.length) {
+      return;
+    }
+    this.sharedDataService.modalOpen.next(true);
+    this.showFillMissingDataModal = true;
+  }
+
+  cancelFillMissingDataModal() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showFillMissingDataModal = false;
+  }
+
+  async fillMissingDataWithZeros() {
+    const selectedMeter = this.selectedMeter();
+    const meterStatusCheck = this.meterStatusCheck();
+    if (!selectedMeter || !meterStatusCheck?.missingDataMonths.length) {
+      this.cancelFillMissingDataModal();
+      return;
+    }
+
+    const currentMonthKeys = new Set(this.meterData().map(data => `${data.year}-${data.month}`));
+    const missingMonths = meterStatusCheck.missingDataMonths.filter(({ month, year }) =>
+      !currentMonthKeys.has(`${year}-${month}`)
+    );
+    if (missingMonths.length === 0) {
+      this.cancelFillMissingDataModal();
+      return;
+    }
+
+    this.loadingService.setLoadingMessage("Filling Missing Meter Data...");
+    this.loadingService.setLoadingStatus(true);
+    const selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    const selectedAccount = this.accountDbService.selectedAccount.getValue();
+    try {
+      const accountMeterData = this.utilityMeterDataDbService.accountMeterData.getValue();
+      for (const missingMonth of missingMonths) {
+        const newMeterData = getNewIdbUtilityMeterData(selectedMeter, accountMeterData);
+        delete newMeterData.id;
+        newMeterData.day = 1;
+        newMeterData.month = missingMonth.month;
+        newMeterData.year = missingMonth.year;
+        newMeterData.totalEnergyUse = 0;
+        newMeterData.totalVolume = 0;
+        newMeterData.totalCost = 0;
+        newMeterData.isEstimated = false;
+        await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(newMeterData));
+      }
+
+      await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+      this.cancelFillMissingDataModal();
+      this.toastNoticationService.showToast(
+        `${missingMonths.length} Missing Month${missingMonths.length === 1 ? '' : 's'} Filled!`,
+        undefined,
+        undefined,
+        false,
+        "alert-success"
+      );
+    } catch {
+      try {
+        await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+      } catch {
+        // The original save error is the useful error to report to the user.
+      }
+      this.toastNoticationService.showToast(
+        "Unable to Fill Missing Meter Data",
+        "Some missing months may not have been added. Review the list and try again.",
+        undefined,
+        false,
+        "alert-danger"
+      );
+    } finally {
+      this.loadingService.setLoadingStatus(false);
+    }
   }
 
   meterDataAdd() {

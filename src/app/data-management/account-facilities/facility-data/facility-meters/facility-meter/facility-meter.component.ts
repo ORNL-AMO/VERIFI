@@ -180,6 +180,10 @@ export class FacilityMeterComponent {
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
   }
 
+  goToMeterData() {
+    this.router.navigateByUrl('/data-management/' + this.utilityMeter.accountId + '/facilities/' + this.utilityMeter.facilityId + '/meters/' + this.utilityMeter.guid + '/meter-data');
+  }
+
   canDeactivate(): Observable<boolean> {
     if (this.meterForm && this.meterForm.dirty) {
       this.routerGuardService.setShowSave(true);

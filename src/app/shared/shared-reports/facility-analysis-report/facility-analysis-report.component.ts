@@ -19,8 +19,6 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { CalanderizationService } from '../../helper-services/calanderization.service';
-import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-analysis-report',
@@ -39,6 +37,7 @@ export class FacilityAnalysisReportComponent {
   worker: Worker;
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+  reportYear: number;
 
   groupSummaries: Array<{
     group: AnalysisGroup,
@@ -54,8 +53,7 @@ export class FacilityAnalysisReportComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
-    private calanderizationService: CalanderizationService
+    private accountDbService: AccountdbService
   ) { }
 
   ngOnInit(): void {
@@ -66,17 +64,7 @@ export class FacilityAnalysisReportComponent {
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.analysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.analysisReportSettings.reportYear) {
-      this.analysisItem.calculatedReportYear = this.analysisReportSettings.reportYear;
-    } else if (this.inQuickReport) {
-      let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
-      let facilityCalanderizedMeters: Array<CalanderizedMeter> = calanderizedMeterData.filter(meter => meter.meter.facilityId === this.analysisItem.facilityId);
-      let yearOptions: Array<number> = getYearsWithFullData(facilityCalanderizedMeters, this.facility);
-      if (yearOptions.length > 0) {
-        this.analysisItem.calculatedReportYear = Math.max(...yearOptions);
-        this.analysisReportSettings.reportYear = this.analysisItem.calculatedReportYear;
-      }
-    }
+    this.reportYear = this.analysisReportSettings.reportYear;
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -85,6 +73,10 @@ export class FacilityAnalysisReportComponent {
           this.annualAnalysisSummaries = data.annualAnalysisSummaries;
           this.monthlyAnalysisSummaryData = data.monthlyAnalysisSummaryData;
           this.groupSummaries = data.groupSummaries;
+          this.reportYear = data.reportYear;
+          if (this.inQuickReport) {
+            this.analysisReportSettings.reportYear = this.reportYear;
+          }
           this.calculating = false;
         } else {
           this.calculating = 'error';
@@ -101,15 +93,30 @@ export class FacilityAnalysisReportComponent {
         accountPredictors: accountPredictors,
         accountAnalysisItems: accountAnalysisItems,
         includeGroupSummaries: true,
-        assessmentReportVersion: account.assessmentReportVersion
+        assessmentReportVersion: account.assessmentReportVersion,
+        reportYear: this.reportYear
       });
     } else {
       // Web Workers are not supported in this environment.     
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
-      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined, true);
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
+        this.analysisItem,
+        this.facility,
+        calanderizedMeters,
+        accountPredictorEntries,
+        false,
+        accountPredictors,
+        undefined,
+        true,
+        { reportYear: this.reportYear }
+      );
       this.annualAnalysisSummaries = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       this.monthlyAnalysisSummaryData = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;
+      this.reportYear = annualAnalysisSummaryClass.reportYear;
+      if (this.inQuickReport) {
+        this.analysisReportSettings.reportYear = this.reportYear;
+      }
     }
   }
 
