@@ -23,7 +23,10 @@ export class MeterStatusCheck {
     status: STATUS_CHECK_OPTIONS;
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date;
-
+    isMeterNoLongerInUse: boolean;
+    isMissingData: boolean;
+    missingDataMonths: Array<{ month: number, year: number, date: Date }>;
+    missingDataYears: Array<number>;
     constructor(
         meter: IdbUtilityMeter,
         meterReadings: Array<IdbUtilityMeterData>,
@@ -37,6 +40,7 @@ export class MeterStatusCheck {
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
+        this.isMeterNoLongerInUse = meter.noLongerInUse;
         this.setHasNegativeReadings(meter, meterReadings);
         this.latestFacilityEntryDate = facilityLatestEntry ? new Date(facilityLatestEntry.year, facilityLatestEntry.month - 1, 1) : undefined;
         if (calanderizedMeter) {
@@ -51,6 +55,7 @@ export class MeterStatusCheck {
         // Apply noLongerInUse: filter readings and entries after stop date
         const noLongerInUseFacilityEntry = this.getNoLongerInUseFacilityEntry(meter, facilityLatestEntry);
         this.isDataCurrent = this.computeIsDataCurrent(noLongerInUseFacilityEntry, meter);
+        this.setMissingDataMonths(calanderizedMeter);
         this.isDataOutdated = (stalenessEnabled && !meter.ignoreDateStatusChecks && !meter.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
         this.setStatus(meter);
@@ -112,7 +117,7 @@ export class MeterStatusCheck {
     }
 
     private setStatus(meter: IdbUtilityMeter) {
-        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries || this.hasNegativeReadings) {
+        if (!this.isMeterValid || this.hasNoData || this.hasDuplicateEntries || this.hasNegativeReadings || this.isMissingData) {
             this.status = 'error';
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
@@ -182,6 +187,20 @@ export class MeterStatusCheck {
                     trackGuid: meter.guid + '_negative_readings'
                 });
             }
+            if (this.isMissingData) {
+                const isFullYear = meter.meterReadingDataApplication === 'fullYear';
+                this.actions.push({
+                    label: (isFullYear ? 'Add missing yearly data for ' : 'Fill missing data for ') + meter.name,
+                    url: baseUrl + '/meter-data',
+                    description: isFullYear
+                        ? this.missingDataYears.map(year => `No readings for ${year}`).join(', ') + '.'
+                        : `This meter is missing data for ${this.missingDataMonths.length} month(s) between the first and last recorded entries.`,
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                    status: 'error',
+                    trackGuid: meter.guid + '_missing_data'
+                });
+            }
             if (this.isDataOutdated && this.lastDateEntry) {
                 const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
                 this.actions.push({
@@ -235,5 +254,55 @@ export class MeterStatusCheck {
             return { month: meter.noLongerInUseMonth + 1, year: meter.noLongerInUseYear };
         }
         return facilityLatestEntry;
+    }
+
+    private setMissingDataMonths(calanderizedMeter: CalanderizedMeter | undefined): void {
+        this.missingDataMonths = [];
+        this.missingDataYears = [];
+        if (!calanderizedMeter) {
+            this.isMissingData = false;
+            return;
+        }
+
+        const dataApplication = calanderizedMeter.meter.meterReadingDataApplication;
+        const monthlyData: Array<MonthlyData> = calanderizedMeter.monthlyData;
+        if (!monthlyData || monthlyData.length === 0) {
+            this.isMissingData = false;
+            return;
+        }
+
+        if (dataApplication === 'fullMonth' && monthlyData.length > 1) {
+            const monthKeys = new Set(monthlyData.map(data => `${data.year}-${data.monthNumValue}`));
+            const firstEntry = _.minBy(monthlyData, data => data.year * 12 + data.monthNumValue);
+            const lastEntry = _.maxBy(monthlyData, data => data.year * 12 + data.monthNumValue);
+            const firstMonthIndex = firstEntry.year * 12 + firstEntry.monthNumValue;
+            const lastMonthIndex = lastEntry.year * 12 + lastEntry.monthNumValue;
+
+            for (let monthIndex = firstMonthIndex; monthIndex <= lastMonthIndex; monthIndex++) {
+                const year = Math.floor(monthIndex / 12);
+                const zeroBasedMonth = monthIndex % 12;
+                if (!monthKeys.has(`${year}-${zeroBasedMonth}`)) {
+                    this.missingDataMonths.push({
+                        month: zeroBasedMonth + 1,
+                        year,
+                        date: new Date(year, zeroBasedMonth, 1)
+                    });
+                }
+            }
+        } else if (dataApplication === 'fullYear') {
+            const yearsWithData = Array.from(new Set(monthlyData.map(data => data.year))).sort((a, b) => a - b);
+            if (yearsWithData.length > 1) {
+                const firstYear = yearsWithData[0];
+                const lastYear = yearsWithData[yearsWithData.length - 1];
+                const yearSet = new Set(yearsWithData);
+                for (let year = firstYear; year <= lastYear; year++) {
+                    if (!yearSet.has(year)) {
+                        this.missingDataYears.push(year);
+                    }
+                }
+            }
+        }
+
+        this.isMissingData = this.missingDataMonths.length > 0 || this.missingDataYears.length > 0;
     }
 }

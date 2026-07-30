@@ -111,7 +111,8 @@ export class FacilityReportsDashboardTableComponent {
     this.filteredReports().filter(item => this.checkedGuids().has(item.guid))
   );
 
-  reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors', 'savings', 'modeling', 'costSavings'];
+  //TODO: add back in cost savings report type once ready to be released.
+  reportTypes: Array<FacilityReportType> = ['analysis', 'overview', 'emissionFactors', 'savings', 'modeling'];
 
   selectReport(report: FacilityReportTableItem) {
     const raw = this.facilityReports().find(r => r.guid === report.guid);

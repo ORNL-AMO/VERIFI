@@ -5,3 +5,7 @@
 .filter-reading {
     width: auto;
 }
+
+.fw-inherit{
+    font-size: inherit;
+}

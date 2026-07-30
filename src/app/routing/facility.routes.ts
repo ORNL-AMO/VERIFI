@@ -60,6 +60,7 @@ import { MeterGroupingResultsGraphComponent } from "../shared/shared-meter-conte
 import { FacilityModelingReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-results.component";
 import { FacilityReportsDataCheckComponent } from "../data-evaluation/facility/facility-reports/facility-reports-data-check/facility-reports-data-check.component";
 import { FacilityCostSavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component";
+import { FacilityDataQualityReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-data-quality-report-results/facility-data-quality-report-results.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -330,7 +331,8 @@ export const FacilityRoutes: Route = {
                 { path: 'savings-report', component: FacilitySavingsReportResultsComponent },
                 { path: 'emission-factors-report', component: FacilityEmissionFactorsReportResultsComponent },
                 { path: 'modeling-report', component: FacilityModelingReportResultsComponent },
-                { path: 'cost-savings-report', component: FacilityCostSavingsReportResultsComponent }
+                { path: 'cost-savings-report', component: FacilityCostSavingsReportResultsComponent },
+                { path: 'data-quality-report', component: FacilityDataQualityReportResultsComponent }
             ]
         }
     ]

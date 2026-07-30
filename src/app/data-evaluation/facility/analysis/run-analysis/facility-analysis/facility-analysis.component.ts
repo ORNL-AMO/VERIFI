@@ -49,12 +49,28 @@ export class FacilityAnalysisComponent implements OnInit {
 
   private readonly facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   private readonly analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  private readonly annualAnalysisSummaries: Signal<Array<AnnualAnalysisSummary>> = toSignal(
+    this.analysisService.annualAnalysisSummary,
+    { initialValue: [] }
+  );
 
   readonly analysisStatusCheck: Signal<AnalysisStatusCheck> = computed(() => {
     const facilityStatusCheck = this.facilityStatusCheck();
     const analysisItem = this.analysisItem();
     if (!facilityStatusCheck || !analysisItem) { return undefined; }
     return facilityStatusCheck.getAnalysisStatusById(analysisItem.guid);
+  });
+
+  readonly selectedAnalysisStatusChecks: Signal<Array<AnalysisStatusCheck>> = computed(() => {
+    const analysisStatusCheck = this.analysisStatusCheck();
+    return analysisStatusCheck ? [analysisStatusCheck] : [];
+  });
+
+  readonly calculatedReportYear: Signal<number | undefined> = computed(() => {
+    const annualAnalysisSummaries = this.annualAnalysisSummaries();
+    return annualAnalysisSummaries?.length > 0
+      ? annualAnalysisSummaries[annualAnalysisSummaries.length - 1].year
+      : undefined;
   });
 
   readonly hasGroupSetupErrors: Signal<boolean> = computed(() =>
@@ -75,7 +91,6 @@ export class FacilityAnalysisComponent implements OnInit {
     const accountPredictorEntries: IdbPredictorData[] = this.predictorDataDbService.accountPredictorData.getValue();
     const accountPredictors: IdbPredictor[] = this.predictorDbService.accountPredictors.getValue();
     const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-
     const payload = {
       analysisItem,
       facility,

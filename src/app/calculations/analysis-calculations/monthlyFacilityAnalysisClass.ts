@@ -1,7 +1,7 @@
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnalysisGroup, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
-import { checkAnalysisValue, getLatestYearWithData, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisDataClass } from "./monthlyFacilityAnalysisDataClass";
@@ -11,6 +11,7 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { getDateFromPredictorData, getLatestPredictorData } from "src/app/shared/dateHelperFunctions";
+import { AnalysisCalculationOptions } from "./analysisCalculationOptions";
 
 export class MonthlyFacilityAnalysisClass {
 
@@ -25,9 +26,10 @@ export class MonthlyFacilityAnalysisClass {
     facilityPredictorEntries: Array<IdbPredictorData>;
     facilityPredictors: Array<IdbPredictor>;
     baselineYear: number;
+    reportYear: number;
     facility: IdbFacility;
     analysisItem: IdbAnalysisItem;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>, options: AnalysisCalculationOptions = {}) {
         this.facility = facility;
         this.analysisItem = analysisItem;
         if (analysisItem.hasBanking) {
@@ -35,7 +37,7 @@ export class MonthlyFacilityAnalysisClass {
             this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
         }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
-        this.setReportYear(calanderizedFacilityMeters)
+        this.setReportYear(options.reportYear, analysisItem.groups, calanderizedFacilityMeters, accountPredictorEntries)
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setFacilityPredictors(accountPredictors, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
@@ -45,7 +47,7 @@ export class MonthlyFacilityAnalysisClass {
     }
 
     setStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem, calculateAllMonthlyData: boolean, calanderizedMeters: Array<CalanderizedMeter>) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, undefined);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, undefined, this.reportYear);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let includedCalanderizedMeters: Array<CalanderizedMeter> = new Array();
@@ -84,17 +86,24 @@ export class MonthlyFacilityAnalysisClass {
         }
     }
 
-    setReportYear(calanderizedMeters: Array<CalanderizedMeter>) {
-        if (!this.analysisItem.calculatedReportYear) {
-            this.analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [this.facility]);
-        }
+    setReportYear(reportYear: number | undefined, groups: Array<AnalysisGroup>, calanderizedMeters: Array<CalanderizedMeter>, predictorData: Array<IdbPredictorData>) {
+        this.reportYear = reportYear ?? getLatestCompleteAnalysisYear(groups, calanderizedMeters, predictorData, [this.facility]);
     }
 
     setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.groupMonthlySummariesClasses = new Array();
         analysisItem.groups.forEach(group => {
             if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
-                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData, accountAnalysisItems);
+                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(
+                    group,
+                    analysisItem,
+                    facility,
+                    calanderizedMeters,
+                    this.facilityPredictorEntries,
+                    calculateAllMonthlyData,
+                    accountAnalysisItems,
+                    { reportYear: this.reportYear }
+                );
                 this.groupMonthlySummariesClasses.push(monthlySummary);
             }
         });

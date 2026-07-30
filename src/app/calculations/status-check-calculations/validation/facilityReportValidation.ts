@@ -14,7 +14,8 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         invalidDateRange: false,
         baselineAfterReportYear: false,
         analysisHasErrors: false,
-        isDataComplete: true
+        isDataComplete: true,
+        missingSelection: false
     };
     errors.missingName = !facilityReport.name || facilityReport.name.toString().trim() === '';
 
@@ -80,6 +81,8 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         errors.missingReportYear = facilityReport.costSavingsReportSettings.endYear === undefined || facilityReport.costSavingsReportSettings.endYear === null || isNaN(facilityReport.costSavingsReportSettings.endYear);
         errors.missingEndDate = facilityReport.costSavingsReportSettings.endMonth === undefined || facilityReport.costSavingsReportSettings.endMonth === null || isNaN(facilityReport.costSavingsReportSettings.endMonth);
         errors.isDataComplete = facilityReport.costSavingsReportSettings.isDataComplete;
+    } else if (facilityReport.facilityReportType == 'dataQuality') {
+        errors.missingSelection = facilityReport.dataQualityReportSettings.missingSelection;
     }
     if (analysisNeeded) {
         if (!linkedAnalysisItemId) {
@@ -94,7 +97,7 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
         }
     }
 
-    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors || !errors.isDataComplete;
+    errors.hasErrors = errors.missingName || errors.missingBaselineYear || errors.missingReportYear || errors.missingStartDate || errors.missingEndDate || errors.invalidDateRange || errors.baselineAfterReportYear || errors.analysisHasErrors || !errors.isDataComplete || errors.missingSelection;
     return errors;
 }
 
@@ -110,6 +113,7 @@ export function emptyFacilityReportErrors(): FacilityReportErrors {
         invalidDateRange: false,
         baselineAfterReportYear: false,
         analysisHasErrors: false,
-        isDataComplete: true
+        isDataComplete: true,
+        missingSelection: false
     }
 }

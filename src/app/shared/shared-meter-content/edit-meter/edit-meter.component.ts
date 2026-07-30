@@ -116,6 +116,10 @@ export class EditMeterComponent implements OnInit {
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/energy-source/meters')
   }
 
+  goToMeterData() {
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.editMeter.guid + '/data-table');
+  }
+
   async updateMeterData(meter: IdbUtilityMeter) {
     this.loadingService.setLoadingMessage('Updating Meter Data...')
     this.loadingService.setLoadingStatus(true);

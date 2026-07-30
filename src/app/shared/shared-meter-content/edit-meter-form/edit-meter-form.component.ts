@@ -64,6 +64,10 @@ export class EditMeterFormComponent implements OnInit {
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
   months: Array<Month> = Months;
+  noLongerInUseYearOptions: Array<number> = Array.from(
+    { length: new Date().getFullYear() - 1999 },
+    (_, i) => new Date().getFullYear() - i
+  );
 
   assessmentReportOption: AssessmentReportVersion = 'AR6';
   constructor(
