@@ -88,6 +88,8 @@
     "electron-updater": "6.3.0",
     "fs-jetpack": "5.1.0",
     "jquery": "3.6.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "jstat": "1.9.5",
     "jszip": "3.10.1",
     "ngx-indexed-db": "22.0.0",

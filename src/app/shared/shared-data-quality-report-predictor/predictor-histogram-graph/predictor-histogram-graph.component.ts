@@ -111,6 +111,22 @@ export class PredictorHistogramGraphComponent {
     };
     this.plotlyService.newPlot(this.predictorHistogram.nativeElement, data, layout, config);
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.predictorHistogram?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.predictorHistogram.nativeElement, { format: 'png', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }
 
 
