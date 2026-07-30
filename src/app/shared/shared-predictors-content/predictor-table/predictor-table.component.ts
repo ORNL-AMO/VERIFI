@@ -88,7 +88,7 @@ export class PredictorTableComponent {
     if (!degreeDayPredictorsList) return false;
     return degreeDayPredictorsList.some(item => item.predictor.ignoreWeatherDataWarning);
   });
-  
+
   predictorUsedGroupIds: Array<string> = [];
   displayDeletePredictor: boolean = false;
   showIgnoreAllWarningsModal: boolean = false;
@@ -219,6 +219,12 @@ export class PredictorTableComponent {
         this.weatherDataService.weatherDataSelection = 'relativeHumidity';
       } else if (predictor.weatherDataType == 'dryBulbTemp') {
         this.weatherDataService.weatherDataSelection = 'dryBulbTemp';
+      } else if (predictor.weatherDataType == 'wetBulbTemp') {
+        this.weatherDataService.weatherDataSelection = 'wetBulbTemp';
+      } else if (predictor.weatherDataType == 'dewPointTemp') {
+        this.weatherDataService.weatherDataSelection = 'dewPointTemp';
+      } else if (predictor.weatherDataType == 'precipitation') {
+        this.weatherDataService.weatherDataSelection = 'precipitation';
       }
       let endDate: Date = new Date(weatherStation.end);
       endDate.setFullYear(endDate.getFullYear() - 1);

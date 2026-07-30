@@ -118,7 +118,7 @@ export class MonthlyStationGraphComponent {
         tickmode: undefined
       };
 
-      if (this.weatherDataSelection != 'relativeHumidity') {
+      if (this.weatherDataSelection != 'relativeHumidity' && this.weatherDataSelection != 'wetBulbTemp' && this.weatherDataSelection != 'dewPointTemp' && this.weatherDataSelection != 'precipitation') {
         graphTitle = 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
         let correspondingYaxis = 'y2';
         if (this.weatherDataSelection == 'dryBulbTemp') {
@@ -203,8 +203,74 @@ export class MonthlyStationGraphComponent {
         })
       }
 
+      if (this.weatherDataSelection == 'wetBulbTemp') {
+        yAxis.title.text = 'Wet Bulb Temp';
+        yAxis.ticksuffix = ' &#8457;';
+        graphTitle = 'Wet Bulb Temp. <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')';
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.wetBulbTemp }),
+          type: 'scatter',
+          name: 'Wet Bulb Temp Readings',
+          mode: 'lines+markers',
+          yaxis: 'y',
+          marker: {
+            color: '#7a215e'
+          }
+        });
 
+        let results = getDegreeDayAmount(this.detailedDegreeDays, 'wetBulbTemp');
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return results.toFixed(1) }),
+          type: 'scatter',
+          name: 'Wet Bulb Temp',
+          yaxis: 'y',
+        });
+      }
 
+      if (this.weatherDataSelection == 'dewPointTemp') {
+        yAxis.title.text = 'Dew Point Temp';
+        yAxis.ticksuffix = ' &#8457;';
+        graphTitle = 'Dew Point Temp. <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')';
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.dewPointTemp }),
+          type: 'scatter',
+          name: 'Dew Point Temp Readings',
+          mode: 'lines+markers',
+          yaxis: 'y',
+          marker: {
+            color: '#117864'
+          }
+        });
+
+        let results = getDegreeDayAmount(this.detailedDegreeDays, 'dewPointTemp');
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return results.toFixed(1) }),
+          type: 'scatter',
+          name: 'Dew Point Temp',
+          yaxis: 'y',
+        });
+      }
+
+      if (this.weatherDataSelection == 'precipitation') {
+        yAxis.title.text = 'Precipitation';
+        yAxis.ticksuffix = ' in';
+        graphTitle = 'Precipitation <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')';
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.precipitation }),
+          type: 'scatter',
+          name: 'Precipitation Readings',
+          mode: 'lines+markers',
+          yaxis: 'y',
+          marker: {
+            color: '#1B4F72'
+          }
+        });
+      }
 
       var layout = {
         legend: {

@@ -89,6 +89,45 @@ export class AnnualStationGraphComponent {
         })
       }
 
+      if (this.weatherDataSelection == 'wetBulbTemp') {
+        chartTitle = 'Wet Bulb Temp. <br>(' + this.selectedYear + ')';
+        traceData.push({
+          x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
+          y: this.yearSummaryData.map(data => { return data.wetBulbTemp }),
+          type: 'bar',
+          name: 'Wet Bulb Temp',
+          marker: {
+            color: '#e89220'
+          }
+        });
+      }
+
+      if (this.weatherDataSelection == 'dewPointTemp') {
+        chartTitle = 'Dew Point Temp. <br>(' + this.selectedYear + ')';
+        traceData.push({
+          x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
+          y: this.yearSummaryData.map(data => { return data.dewPointTemp }),
+          type: 'bar',
+          name: 'Dew Point Temp',
+          marker: {
+            color: '#117A65'
+          }
+        });
+      }
+
+      if (this.weatherDataSelection == 'precipitation') {
+        chartTitle = 'Precipitation <br>(' + this.selectedYear + ')';
+        traceData.push({
+          x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
+          y: this.yearSummaryData.map(data => { return data.precipitation }),
+          type: 'bar',
+          name: 'Precipitation',
+          marker: {
+            color: '#1B4F72'
+          }
+        });
+      }
+
       var layout = {
         legend: {
           orientation: "h"

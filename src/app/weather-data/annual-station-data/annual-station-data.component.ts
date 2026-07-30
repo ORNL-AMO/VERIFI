@@ -94,6 +94,9 @@ export class AnnualStationDataComponent {
         let totalCoolingDegreeDays: number = getDegreeDayAmount(monthData, 'CDD');
         let relativeHumidity: number = getDegreeDayAmount(monthData, 'relativeHumidity');
         let dryBulbTemp: number = getDegreeDayAmount(monthData, 'dryBulbTemp');
+        let wetBulbTemp: number = getDegreeDayAmount(monthData, 'wetBulbTemp');
+        let dewPointTemp: number = getDegreeDayAmount(monthData, 'dewPointTemp');
+        let precipitation: number = getDegreeDayAmount(monthData, 'precipitation');
         let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
           return degreeDay.gapInData == true
         });
@@ -106,7 +109,10 @@ export class AnnualStationDataComponent {
           coolingDegreeDays: totalCoolingDegreeDays,
           hasErrors: hasErrors != undefined,
           relativeHumidity: relativeHumidity,
-          dryBulbTemp: dryBulbTemp
+          dryBulbTemp: dryBulbTemp,
+          wetBulbTemp: wetBulbTemp,
+          dewPointTemp: dewPointTemp,
+          precipitation: precipitation
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }
@@ -143,4 +149,4 @@ export class AnnualStationDataComponent {
 }
 
 
-export interface AnnualStationDataSummary { date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean, relativeHumidity: number, dryBulbTemp: number }
+export interface AnnualStationDataSummary { date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean, relativeHumidity: number, dryBulbTemp: number, wetBulbTemp: number, dewPointTemp: number, precipitation: number }

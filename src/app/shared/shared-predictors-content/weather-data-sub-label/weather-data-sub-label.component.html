@@ -18,3 +18,18 @@
         (Dry Bulb Temp., &#8457;)
       </span>
     }
+    @if (predictor.weatherDataType == 'wetBulbTemp') {
+      <span class="small block">
+        (Wet Bulb Temp., &#8457;)
+      </span>
+    }
+    @if (predictor.weatherDataType == 'dewPointTemp') {
+      <span class="small block">
+        (Dew Point Temp., &#8457;)
+      </span>
+    }
+    @if (predictor.weatherDataType == 'precipitation') {
+      <span class="small block">
+        (Precipitation, in)
+      </span>
+    }
