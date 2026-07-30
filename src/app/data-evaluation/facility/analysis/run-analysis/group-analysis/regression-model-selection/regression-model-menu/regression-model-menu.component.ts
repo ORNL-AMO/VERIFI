@@ -380,7 +380,7 @@ export class RegressionModelMenuComponent {
     await this.saveItem(_group);
   }
 
-  async generateModels(autoSelect = false) {
+  async generateModels() {
     const group = _.cloneDeep(this.group());
     const _analysisItem = this.analysisItem();
     const _selectedFacility = this.selectedFacility();
@@ -399,7 +399,7 @@ export class RegressionModelMenuComponent {
       const generatedModels = await this.regressionModelsService.generateModels(
         group, _analysisItem, _selectedFacility, _meters, _meterData, _predictorData, assessmentReportVersion
       );
-      await this.handleGenerateResult(generatedModels, group, autoSelect, previousSelectedModelId, previousSelectedModel);
+      await this.handleGenerateResult(generatedModels, group, previousSelectedModelId, previousSelectedModel);
     } catch {
       this.modelingError.set(true);
       this.generatingModels.set(false);
@@ -409,14 +409,12 @@ export class RegressionModelMenuComponent {
   private async handleGenerateResult(
     generatedModels: Array<JStatRegressionModel>,
     group: AnalysisGroup,
-    autoSelect: boolean,
     previousSelectedModelId: string | undefined,
     previousSelectedModel: JStatRegressionModel | undefined
   ): Promise<void> {
     const { updatedGroup, newSelectedModel } = this.regressionModelsService.applyGeneratedModelsToGroup(
       group,
       generatedModels,
-      autoSelect,
       previousSelectedModelId,
       previousSelectedModel,
       this.selectedFacility(),

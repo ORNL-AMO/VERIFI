@@ -85,7 +85,6 @@ export class RegressionModelsService {
   applyGeneratedModelsToGroup(
     group: AnalysisGroup,
     generatedModels: Array<JStatRegressionModel>,
-    autoSelect: boolean,
     previousSelectedModelId: string | undefined,
     previousSelectedModel: JStatRegressionModel | undefined,
     facility: IdbFacility,
@@ -107,14 +106,6 @@ export class RegressionModelsService {
     if (hadPreviousSelection) {
       updatedGroup = convertOrphanedGeneratedModelToUserDefined(updatedGroup, facility, fallbackYear);
       return { updatedGroup, newSelectedModel: undefined };
-    }
-
-    if (autoSelect) {
-      const bestModel = _.maxBy(generatedModels, 'adjust_R2');
-      if (bestModel) {
-        updatedGroup = this.applySelectedModelToGroup(updatedGroup, bestModel);
-        return { updatedGroup, newSelectedModel: bestModel };
-      }
     }
 
     return {
