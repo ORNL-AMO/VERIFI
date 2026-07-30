@@ -4,10 +4,10 @@ import { AccountOverviewData, AccountOverviewFacility, WaterTypeData } from 'src
 import * as _ from 'lodash';
 
 @Component({
-    selector: 'app-account-water-stacked-bar-chart',
-    templateUrl: './account-water-stacked-bar-chart.component.html',
-    styleUrls: ['./account-water-stacked-bar-chart.component.css'],
-    standalone: false
+  selector: 'app-account-water-stacked-bar-chart',
+  templateUrl: './account-water-stacked-bar-chart.component.html',
+  styleUrls: ['./account-water-stacked-bar-chart.component.css'],
+  standalone: false
 })
 export class AccountWaterStackedBarChartComponent {
   @Input()
@@ -89,5 +89,21 @@ export class AccountWaterStackedBarChartComponent {
       }
     });
     return yData;
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.stackedBarChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.stackedBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
   }
 }

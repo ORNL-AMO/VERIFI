@@ -8,7 +8,7 @@ addEventListener('message', ({ data }) => {
         let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(
             data.accountAnalysisItem, data.account, data.accountFacilities, data.accountPredictorEntries,
             data.allAccountAnalysisItems, data.calculateAllMonthlyData, data.meters, data.meterData,
-            data.accountPredictors
+            data.accountPredictors, { reportYear: data.reportYear }
         );
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
@@ -16,7 +16,8 @@ addEventListener('message', ({ data }) => {
             annualAnalysisSummaries: annualAnalysisSummaries,
             monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
             error: false,
-            facilitySummaries: annualAnalysisSummaryClass.facilitySummaries
+            facilitySummaries: annualAnalysisSummaryClass.facilitySummaries,
+            reportYear: annualAnalysisSummaryClass.reportYear
         });
     } catch (err) {
         postMessage({

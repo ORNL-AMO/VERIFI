@@ -303,6 +303,22 @@ export class RollingEnergySavingsGraphComponent {
     return (value).toLocaleString(undefined, { maximumFractionDigits: 2, minimumIntegerDigits: 1 })
   }
 
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.rollingEnergySavingsGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.rollingEnergySavingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
+
   private toNumber(value: number): number {
     if (value === null || value === undefined) {
       return 0;

@@ -9,10 +9,10 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-facilities-usage-stacked-bar-chart',
-    templateUrl: './facilities-usage-stacked-bar-chart.component.html',
-    styleUrls: ['./facilities-usage-stacked-bar-chart.component.css'],
-    standalone: false
+  selector: 'app-facilities-usage-stacked-bar-chart',
+  templateUrl: './facilities-usage-stacked-bar-chart.component.html',
+  styleUrls: ['./facilities-usage-stacked-bar-chart.component.css'],
+  standalone: false
 })
 export class FacilitiesUsageStackedBarChartComponent {
   @Input()
@@ -56,7 +56,7 @@ export class FacilitiesUsageStackedBarChartComponent {
           data = this.getEnergyUseData();
         } else if (this.dataType == 'cost') {
           data = this.getCostData();
-        } 
+        }
 
         var layout = {
           barmode: 'stack',
@@ -76,7 +76,7 @@ export class FacilitiesUsageStackedBarChartComponent {
           margin: { t: 10 }
         };
         let config = {
-          modeBarButtonsToRemove:['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+          modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
           displaylogo: false,
           responsive: true,
         };
@@ -320,4 +320,19 @@ export class FacilitiesUsageStackedBarChartComponent {
     return;
   }
 
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.stackedBarChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.stackedBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }

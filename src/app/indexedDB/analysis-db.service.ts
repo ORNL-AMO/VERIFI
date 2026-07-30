@@ -102,7 +102,7 @@ export class AnalysisDbService {
   }
 
   addWithObservable(analysisItem: IdbAnalysisItem): Observable<IdbAnalysisItem> {
-    return this.dbService.add('analysisItems', analysisItem);
+    return this.dbService.add('analysisItems', this.getPersistableAnalysisItem(analysisItem));
   }
 
   deleteWithObservable(id: number): Observable<any> {
@@ -111,7 +111,13 @@ export class AnalysisDbService {
 
   updateWithObservable(values: IdbAnalysisItem): Observable<IdbAnalysisItem> {
     values.modifiedDate = new Date();
-    return this.dbService.update('analysisItems', values);
+    return this.dbService.update('analysisItems', this.getPersistableAnalysisItem(values));
+  }
+
+  private getPersistableAnalysisItem(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+    const persistableItem = { ...analysisItem } as IdbAnalysisItem & { calculatedReportYear?: number };
+    delete persistableItem.calculatedReportYear;
+    return persistableItem;
   }
 
   getUnits(predictorVariables: Array<AnalysisGroupPredictorVariable>): string {

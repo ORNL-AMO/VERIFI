@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -24,6 +24,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { DataOverviewReportAdapter } from './data-overview-report.adapter';
+import { DataOverviewAccountReportComponent } from './data-overview-account-report/data-overview-account-report.component';
+import { DataOverviewFacilityReportComponent } from './data-overview-facility-report/data-overview-facility-report.component';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -50,6 +54,11 @@ export class DataOverviewReportComponent {
 
   calculatingFacilities: boolean = true;
   calculatingAccounts: boolean = true;
+  isExportingPdf: boolean = false;
+
+  @ViewChild(DataOverviewAccountReportComponent) dataOverviewAccountReport: DataOverviewAccountReportComponent;
+  @ViewChildren(DataOverviewFacilityReportComponent) dataOverviewFacilityReports!: QueryList<DataOverviewFacilityReportComponent>;
+
   constructor(private accountReportDbService: AccountReportDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -59,7 +68,9 @@ export class DataOverviewReportComponent {
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService,
     private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService) {
+    private customGWPDbService: CustomGWPDbService,
+    private exportReportPdfService: ExportReportPdfService,
+    private dataOverviewReportAdapter: DataOverviewReportAdapter) {
 
   }
 
@@ -263,8 +274,95 @@ export class DataOverviewReportComponent {
     }
   }
 
-}
+  async onExportPdf() {
+    let selectedReport = this.accountReportDbService.selectedReport.value;
+    if (!selectedReport || this.isExportingPdf) {
+      return;
+    }
 
+    this.isExportingPdf = true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const document = this.dataOverviewReportAdapter.buildDocument({
+        account: this.account,
+        report: selectedReport,
+        overviewReport: this.overviewReport,
+        accountData: this.accountData,
+        facilitiesData: this.facilitiesData,
+        chartImageProviders: this.getChartImageProviders(),
+        facilityChartImageProviders: this.getFacilityChartImageProviders()
+      });
+      await this.exportReportPdfService.export(document, `${selectedReport.name} - Data Overview Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
+  }
+
+  getChartImageProviders() {
+    return {
+      utilityUsageMap: {
+        energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'energyUse') ?? '',
+        cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'cost') ?? '',
+        water: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'water') ?? '',
+      },
+      usageDonut: {
+        energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
+        cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'cost') ?? '',
+        water: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'water') ?? '',
+      },
+      utilityUsageDonut: {
+        energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'energyUse') ?? '',
+        cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'cost') ?? '',
+        water: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'water') ?? '',
+      },
+      utilityUsageStackedBar: {
+        energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'energyUse') ?? '',
+        cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'cost') ?? '',
+        water: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'water') ?? '',
+      },
+      monthlyUsageLineChart: {
+        energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'energyUse') ?? '',
+        cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'cost') ?? '',
+        water: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'water') ?? '',
+      }
+    };
+  }
+
+  getFacilityChartImageProviders() {
+    const map: Record<string, any> = {};
+    const buildChartProviders = (facilityReport: DataOverviewFacilityReportComponent) => ({
+      meterStackedLineChart: {
+        energyUse: async () => facilityReport.getImage('energyUse', 'meterStackedLineChart'),
+        cost: async () => facilityReport.getImage('cost', 'meterStackedLineChart'),
+        water: async () => facilityReport.getImage('water', 'meterStackedLineChart')
+      },
+      meterBarChart: {
+        energyUse: async () => facilityReport.getImage('energyUse', 'meterBarChart'),
+        cost: async () => facilityReport.getImage('cost', 'meterBarChart'),
+        water: async () => facilityReport.getImage('water', 'meterBarChart')
+      },
+      annualBarChart: {
+        energyUse: async () => facilityReport.getImage('energyUse', 'annualBarChart'),
+        cost: async () => facilityReport.getImage('cost', 'annualBarChart'),
+        water: async () => facilityReport.getImage('water', 'annualBarChart')
+      },
+      monthlyUsageLineChart: {
+        energyUse: async () => facilityReport.getImage('energyUse', 'monthlyUsageLineChart'),
+        cost: async () => facilityReport.getImage('cost', 'monthlyUsageLineChart'),
+        water: async () => facilityReport.getImage('water', 'monthlyUsageLineChart')
+      }
+    });
+
+    this.dataOverviewFacilityReports.forEach(facilityReport => {
+      const facilityId = facilityReport?.dataOverviewFacility?.facility?.guid;
+      if (facilityId) {
+        map[facilityId] = buildChartProviders(facilityReport);
+      }
+    });
+
+    return map;
+  }
+}
 
 export interface DataOverviewFacility {
   facility: IdbFacility,

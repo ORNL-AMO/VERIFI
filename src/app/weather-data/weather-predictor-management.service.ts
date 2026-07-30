@@ -74,6 +74,9 @@ export class WeatherPredictorManagementService {
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;
     let dryBulbTempPredictor: IdbPredictor;
+    let wetBulbTempPredictor: IdbPredictor;
+    let dewPointTempPredictor: IdbPredictor;
+    let precipitationPredictor: IdbPredictor;
     if (selectedValues.find(val => val.name == 'HDD')) {
       //create HDD predictor
       hddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
@@ -135,6 +138,44 @@ export class WeatherPredictorManagementService {
       await this.analysisDbService.addAnalysisPredictor(dryBulbTempPredictor);
     }
 
+    if (selectedValues.find(val => val.name == 'wetBulbTemp')) {
+      //create wet bulb temp predictor
+      wetBulbTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      wetBulbTempPredictor.name = "Wet Bulb Temp";
+      wetBulbTempPredictor.predictorType = 'Weather';
+      wetBulbTempPredictor.weatherDataType = 'wetBulbTemp';
+      wetBulbTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      wetBulbTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+      await firstValueFrom(this.predictorDbService.addWithObservable(wetBulbTempPredictor));
+      //add predictor to analysis
+      await this.analysisDbService.addAnalysisPredictor(wetBulbTempPredictor);
+    }
+
+    if (selectedValues.find(val => val.name == 'dewPointTemp')) {
+      //create dew point temp predictor
+      dewPointTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      dewPointTempPredictor.name = "Dew Point Temp";
+      dewPointTempPredictor.predictorType = 'Weather';
+      dewPointTempPredictor.weatherDataType = 'dewPointTemp';
+      dewPointTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      dewPointTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+      await firstValueFrom(this.predictorDbService.addWithObservable(dewPointTempPredictor)); 
+      //add predictor to analysis
+      await this.analysisDbService.addAnalysisPredictor(dewPointTempPredictor);
+    }
+
+    if (selectedValues.find(val => val.name == 'precipitation')) {
+        //create precipitation predictor
+        precipitationPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+        precipitationPredictor.name = "Precipitation";
+        precipitationPredictor.predictorType = 'Weather';
+        precipitationPredictor.weatherDataType = 'precipitation';
+        precipitationPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+        precipitationPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+        await firstValueFrom(this.predictorDbService.addWithObservable(precipitationPredictor));
+        //add predictor to analysis
+        await this.analysisDbService.addAnalysisPredictor(precipitationPredictor);
+    }
 
     //create predictor data
     //predictor data created to match start/end of meter data in facility
@@ -196,6 +237,34 @@ export class WeatherPredictorManagementService {
           newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newDryBulbTempPredictorData));
         }
+
+        if (wetBulbTempPredictor) {
+          let newWetBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(wetBulbTempPredictor);
+          newWetBulbTempPredictorData.month = entryDate.getMonth() + 1;
+          newWetBulbTempPredictorData.year = entryDate.getFullYear();
+          newWetBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'wetBulbTemp');
+          newWetBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newWetBulbTempPredictorData));
+        }
+
+        if (dewPointTempPredictor) {
+          let newDewPointTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dewPointTempPredictor);
+          newDewPointTempPredictorData.month = entryDate.getMonth() + 1;
+          newDewPointTempPredictorData.year = entryDate.getFullYear();
+          newDewPointTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dewPointTemp');
+          newDewPointTempPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newDewPointTempPredictorData));
+        }
+
+        if (precipitationPredictor) {
+          let newPrecipitationPredictorData: IdbPredictorData = getNewIdbPredictorData(precipitationPredictor);
+          newPrecipitationPredictorData.month = entryDate.getMonth() + 1;
+          newPrecipitationPredictorData.year = entryDate.getFullYear();
+          newPrecipitationPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
+          newPrecipitationPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newPrecipitationPredictorData));
+        }
+
         startDate.setMonth(startDate.getMonth() + 1);
       }
 
@@ -301,6 +370,12 @@ export class WeatherPredictorManagementService {
                 newPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
               } else if (weatherPredictor.weatherDataType == 'dryBulbTemp') {
                 newPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
+              } else if (weatherPredictor.weatherDataType == 'wetBulbTemp') {
+                newPredictorData.amount = getDegreeDayAmount(degreeDays, 'wetBulbTemp');
+              } else if (weatherPredictor.weatherDataType == 'dewPointTemp') {
+                newPredictorData.amount = getDegreeDayAmount(degreeDays, 'dewPointTemp');
+              } else if (weatherPredictor.weatherDataType == 'precipitation') {
+                newPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
               }
               newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
               if (newPredictorData.weatherDataWarning) {

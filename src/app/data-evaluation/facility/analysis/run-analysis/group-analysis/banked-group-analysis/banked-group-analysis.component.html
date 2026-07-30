@@ -9,6 +9,7 @@
   @if (calculating == false) {
     <app-group-analysis-report [groupSummary]="groupSummary"
       [analysisItem]="bankedAnalysisItem" [facility]="facility"
-    [analysisReportSettings]="analysisReportSettings"></app-group-analysis-report>
+      [analysisReportSettings]="analysisReportSettings"
+      [reportYear]="selectedGroup.bankedAnalysisYear"></app-group-analysis-report>
   }
 </div>

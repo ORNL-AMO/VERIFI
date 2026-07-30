@@ -6,7 +6,9 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityModelingReportAdapter } from './facility-modeling-report.adapter';
 
 @Component({
   selector: 'app-facility-modeling-report-results',
@@ -20,11 +22,14 @@ export class FacilityModelingReportResultsComponent {
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
   analysisItem: IdbAnalysisItem;
+  isExportingPdf: boolean = false;
 
   constructor(private analysisDbService: AnalysisDbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private facilityModelingReportAdapter: FacilityModelingReportAdapter,
+    private exportReportPdfService: ExportReportPdfService) { }
 
   ngOnInit(): void {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
@@ -53,7 +58,7 @@ export class FacilityModelingReportResultsComponent {
     } else if (this.facilityReport.facilityReportType == 'savings') {
       reportYear = this.facilityReport.savingsReportSettings.endYear;
     } else if (this.facilityReport.facilityReportType == 'costSavings') {
-      reportYear = this.facilityReport.costSavingsReportSettings.reportYear;
+      reportYear = this.facilityReport.costSavingsReportSettings.endYear;
     }
 
     this.analysisItem.groups.forEach(group => {
@@ -71,5 +76,24 @@ export class FacilityModelingReportResultsComponent {
         });
       }
     });
+  }
+
+   async onExportPdf() {
+    if (!this.facilityReport || this.isExportingPdf) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      const document = this.facilityModelingReportAdapter.buildDocument({
+        facilityReport: this.facilityReport,
+        analysisItem: this.analysisItem,
+        executiveSummaryItems: this.executiveSummaryItems
+      });
+
+      await this.exportReportPdfService.export(document, `${this.facilityReport.name} - Modeling Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
   }
 }

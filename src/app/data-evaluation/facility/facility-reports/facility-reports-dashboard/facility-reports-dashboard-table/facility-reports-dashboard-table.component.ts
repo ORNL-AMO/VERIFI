@@ -230,7 +230,7 @@ export class FacilityReportsDashboardTableComponent {
       case 'modeling':
         return report.modelingReportSettings.reportYear;
       case 'costSavings':
-        return report.costSavingsReportSettings.reportYear;
+        return report.costSavingsReportSettings.endYear;
       default:
         return undefined;
     }

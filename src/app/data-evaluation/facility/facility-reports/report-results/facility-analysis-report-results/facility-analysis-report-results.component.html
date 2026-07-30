@@ -1,5 +1,6 @@
 @if (analysisItem) {
   <app-facility-analysis-report [analysisItem]="analysisItem"
-  [analysisReportSettings]="facilityReport.analysisReportSettings"></app-facility-analysis-report>
+  [analysisReportSettings]="facilityReport.analysisReportSettings"
+  (onAnalysisDataEmit)="setAnalysisData($event)"></app-facility-analysis-report>
 }
-<app-facility-print-report-button></app-facility-print-report-button>
+<app-facility-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()"></app-facility-print-report-button>

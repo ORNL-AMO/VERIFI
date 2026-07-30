@@ -31,7 +31,12 @@ import { MeterDataQualityStatusPipe } from './meter-data-quality-status.pipe';
   exports: [
     MeterDataQualityReportModalComponent,
     MeterDataQualityReportComponent,
-    MeterDataQualityStatusPipe
+    MeterDataQualityStatusPipe,
+    MeterStatisticsTableComponent,
+    MeterCostTimeseriesGraphComponent,
+    MeterEnergyTimeseriesGraphComponent,
+    MeterCostHistogramComponent,
+    MeterEnergyHistogramComponent
   ]
 })
 export class SharedDataQualityReportMetersModule { }

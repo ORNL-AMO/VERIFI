@@ -79,6 +79,14 @@ thead th.can-click:hover {
     border-radius: 0.50rem;
 }
 
+.badge-data-quality {
+    background-color: #bdb76b;
+    color: #fff;
+    font-size: 12px;
+    padding: 0.5em 0.75em;
+    border-radius: 0.50rem;
+}
+
 .badge-cost-savings {
     background-color: #2a3685;
     color: #fff;

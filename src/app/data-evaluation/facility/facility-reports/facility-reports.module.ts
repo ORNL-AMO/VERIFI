@@ -35,7 +35,17 @@ import { FacilityCostSavingsReportSetupComponent } from './facility-report-setup
 import { BlendedEnergyRateModalComponent } from './facility-report-setup/facility-cost-savings-report-setup/blended-energy-rate-modal/blended-energy-rate-modal.component';
 import { FacilityCostSavingsReportResultsComponent } from './report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component';
 import { AnnualSavingsGraphComponent } from './report-results/facility-cost-savings-report-results/annual-savings-graph/annual-savings-graph.component';
+import { FacilityDataQualityReportSetupComponent } from './facility-report-setup/facility-data-quality-report-setup/facility-data-quality-report-setup.component';
+import { FacilityDataQualityReportResultsComponent } from './report-results/facility-data-quality-report-results/facility-data-quality-report-results.component';
+import { SharedDataQualityReportMetersModule } from 'src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
+import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
+import { MonthlySavingsTableComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-table/monthly-savings-table.component';
+import { GroupSavingsTableComponent } from './report-results/facility-cost-savings-report-results/group-savings-table/group-savings-table.component';
+import { AnnualSavingsTableComponent } from './report-results/facility-cost-savings-report-results/annual-savings-table/annual-savings-table.component';
+import { MonthlySavingsGraphComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
+import { RegressionNumberPipe } from 'src/app/shared/helper-pipes/regression-number.pipe';
+import { UserDefineModelDateRangePipe } from 'src/app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
 
 
 
@@ -62,10 +72,16 @@ import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe
     FacilityModelingReportResultsComponent,
     FacilityReportsDataCheckComponent,
     FacilityReportAnalysisSelectionComponent,
+    FacilityDataQualityReportSetupComponent,
+    FacilityDataQualityReportResultsComponent,
     FacilityCostSavingsReportSetupComponent,
     BlendedEnergyRateModalComponent,
     FacilityCostSavingsReportResultsComponent,
-    AnnualSavingsGraphComponent
+    AnnualSavingsGraphComponent,
+    MonthlySavingsTableComponent,
+    GroupSavingsTableComponent,
+    AnnualSavingsTableComponent,
+    MonthlySavingsGraphComponent
     
   ],
   imports: [
@@ -79,13 +95,17 @@ import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe
     TableItemsDropdownModule,
     NgbPagination,
     SharedAnalysisModule,
-    AccountReportsModule
+    AccountReportsModule,
+    SharedDataQualityReportMetersModule,
+    SharedDataQualityReportPredictorsModule
 ], 
 providers: [
     FacilityReportTypePipe,
     CalculatingSpinnerModule,
     SharedAnalysisModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    RegressionNumberPipe,
+    UserDefineModelDateRangePipe
   ]
 })
 export class FacilityReportsModule { }

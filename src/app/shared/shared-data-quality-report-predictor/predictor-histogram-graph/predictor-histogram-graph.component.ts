@@ -48,11 +48,23 @@ export class PredictorHistogramGraphComponent {
     if (this.selectedPredictor.unit && this.selectedPredictor.predictorType != 'Weather') {
       return this.selectedPredictor.unit;
     } else if (this.selectedPredictor.predictorType == 'Weather') {
-      return '&#8457;';
+      if (this.selectedPredictor.weatherDataType == 'CDD' || this.selectedPredictor.weatherDataType == 'HDD') {
+        return 'days';
+      } else if (this.selectedPredictor.weatherDataType == 'dryBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'relativeHumidity') {
+        return '%';
+      } else if (this.selectedPredictor.weatherDataType == 'wetBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'dewPointTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'precipitation') {
+        return 'in';
+      }
     }
     return '';
   }
-
+  
   drawChart() {
     let unit = this.calculateUnit();
     if (unit != null && unit != undefined && unit != '') {
@@ -110,6 +122,22 @@ export class PredictorHistogramGraphComponent {
       responsive: true
     };
     this.plotlyService.newPlot(this.predictorHistogram.nativeElement, data, layout, config);
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.predictorHistogram?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.predictorHistogram.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
   }
 }
 

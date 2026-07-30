@@ -51,6 +51,12 @@ export class PredictorTimeseriesGraphComponent {
         return '&#8457;';
       } else if (this.selectedPredictor.weatherDataType == 'relativeHumidity') {
         return '%';
+      } else if (this.selectedPredictor.weatherDataType == 'wetBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'dewPointTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'precipitation') {
+        return 'in';
       }
     }
     return '';
@@ -188,6 +194,22 @@ export class PredictorTimeseriesGraphComponent {
         symbol: 'x',
         line: { width: 2, color: '#fff' }
       };
+    }
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.predictorTimeSeriesGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.predictorTimeSeriesGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
     }
   }
 }

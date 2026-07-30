@@ -20,3 +20,9 @@
     }
   </div>
 </div>
+
+@if (isLoading) {
+    <div class="loading-overlay">
+        <app-calculating-spinner [message]="'Generating PDF...'"></app-calculating-spinner>
+    </div>
+}

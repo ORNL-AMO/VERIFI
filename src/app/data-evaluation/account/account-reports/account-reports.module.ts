@@ -63,6 +63,7 @@ import { SharedReportsModule } from "../../../shared/shared-reports/shared-repor
 import { AccountReportsDataCheckComponent } from './account-reports-data-check/account-reports-data-check.component';
 import { AccountReportAnalysisSelectionComponent } from './account-report-setup/account-report-analysis-selection/account-report-analysis-selection.component';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
+import { NaicsDisplayPipe } from 'src/app/shared/helper-pipes/naics-display.pipe';
 
 @NgModule({
   declarations: [
@@ -136,7 +137,8 @@ import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe
 ],
   providers: [
     AccountReportTypePipe,
-    CustomNumberPipe
+    CustomNumberPipe,
+    NaicsDisplayPipe
   ]
 })
 export class AccountReportsModule { }

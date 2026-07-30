@@ -14,7 +14,8 @@ export interface IdbFacilityReport extends IdbEntry {
     savingsReportSettings: SavingsFacilityReportSettings,
     emissionFactorsReportSettings: EmissionFactorsReportSettings,
     modelingReportSettings: ModelingReportSettings,
-    costSavingsReportSettings: CostSavingsReportSettings
+    costSavingsReportSettings: CostSavingsReportSettings,
+    dataQualityReportSettings: DataQualityReportSettings
 }
 
 export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
@@ -32,11 +33,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         savingsReportSettings: getSavingsReportSettings(),
         emissionFactorsReportSettings: getEmissionFactorsReportSettings(),
         modelingReportSettings: getModelingReportSettings(),
-        costSavingsReportSettings: getCostSavingsReportSettings()
+        costSavingsReportSettings: getCostSavingsReportSettings(),
+        dataQualityReportSettings: getDataQualityReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling' | 'costSavings';
+export type FacilityReportType = 'analysis' | 'overview' | 'emissionFactors' | 'savings' | 'modeling' | 'costSavings' | 'dataQuality';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -273,18 +275,91 @@ export interface ModelingReportSettings {
 
 export function getCostSavingsReportSettings(): CostSavingsReportSettings {
     return {
-        reportYear: undefined,
-        costSavingsTable: {},
+        endYear: undefined,
+        endMonth: undefined,
+        unitCostTable: {},
         groupUnits: {},
-        isDataComplete: false
+        isDataComplete: false,
+        annualSavingsTable: true,
+        annualSavingsGraph: true,
+        monthlySavingsTable: true,
+        monthlySavingsGraph: true,
+        annualCumulativeSavingsTable: true,
+        annualCumulativeSavingsGraph: true,
+        monthlyCumulativeSavingsTable: true,
+        monthlyCumulativeSavingsGraph: true,
+        userCostSummary: true,
+        calculatedCostSummary: true,
+        groupAnnualTable: true,
+        groupMonthlyTable: true,
+        includeFacility: true,
+        includeAnnual: true,
+        includeMonthly: true,
+        includeGroup: true
     };
 }
 
 export interface CostSavingsReportSettings {
-    reportYear: number,
-    costSavingsTable: {
-        [year: number]: {[groupId: string]: number}
-    },
-    groupUnits: {[groupId: string]: string},
-    isDataComplete?: boolean
+    endYear: number,
+    endMonth: number,
+    unitCostTable: YearGroupData,
+    groupUnits: { [groupId: string]: string },
+    isDataComplete?: boolean,
+    annualSavingsTable: boolean,
+    annualSavingsGraph: boolean,
+    monthlySavingsTable: boolean,
+    monthlySavingsGraph: boolean,
+    annualCumulativeSavingsTable: boolean,
+    annualCumulativeSavingsGraph: boolean,
+    monthlyCumulativeSavingsTable: boolean,
+    monthlyCumulativeSavingsGraph: boolean,
+    userCostSummary: boolean,
+    calculatedCostSummary: boolean,
+    groupAnnualTable: boolean,
+    groupMonthlyTable: boolean,
+    includeFacility: boolean,
+    includeAnnual: boolean,
+    includeMonthly: boolean,
+    includeGroup: boolean
+}
+
+export type YearGroupData = { [year: number]: { [groupId: string]: number } };
+export type MonthlyGroupData = { [monthKey: string]: { [groupId: string]: number } };
+
+export function getDataQualityReportSettings(): DataQualityReportSettings {
+    return {
+        missingSelection: false,
+        selectedAnalysisItemId: undefined,
+        selectedMeterIds: undefined,
+        selectedPredictorIds: undefined,
+        selectedMode: 'analysis',
+        includeMeter: true,
+        includeMeterStatisticsTable: true,
+        includeMeterConsumptionTimeseriesGraph: true,
+        includeMeterCostTimeseriesGraph: true,
+        includeMeterConsumptionHistogram: true,
+        includeMeterCostHistogram: true,
+        includePredictors: true,
+        includePredictorStatisticsTable: true,
+        includePredictorTimeseriesGraph: true,
+        includePredictorHistogram: true
+    }
+}
+
+export interface DataQualityReportSettings {
+    missingSelection: boolean,
+    selectedAnalysisItemId?: string,
+    selectedMeterIds?: Array<string>,
+    selectedPredictorIds?: Array<string>,
+    selectedMode: 'analysis' | 'manual',
+    includeMeter: boolean,
+    includeMeterStatisticsTable: boolean,
+    includeMeterConsumptionTimeseriesGraph: boolean,
+    includeMeterCostTimeseriesGraph: boolean,
+    includeMeterConsumptionHistogram: boolean,
+    includeMeterCostHistogram: boolean,
+    includePredictors: boolean,
+    includePredictorStatisticsTable: boolean,
+    includePredictorTimeseriesGraph: boolean,
+    includePredictorHistogram: boolean
 }

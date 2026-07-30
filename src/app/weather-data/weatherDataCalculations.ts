@@ -28,15 +28,22 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
         let previousDate: Date;
         let previousDryBulbTemp: number;
         let previousRelativeHumidity: number;
+        let previousWetBulbTemp: number;
+        let previousDewPointTemp: number;
+
         if (i == 0) {
             let startDate: Date = new Date(localClimatologicalDataMonth[i].time);
             previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1, 0, 0);
             previousDryBulbTemp = localClimatologicalDataMonth[i].dry_bulb_temp;
             previousRelativeHumidity = localClimatologicalDataMonth[i].humidity;
+            previousWetBulbTemp = localClimatologicalDataMonth[i].wet_bulb_temp;
+            previousDewPointTemp = localClimatologicalDataMonth[i].dew_point_temp;
         } else {
             previousDate = new Date(localClimatologicalDataMonth[i - 1].time)
             previousDryBulbTemp = localClimatologicalDataMonth[i - 1].dry_bulb_temp;
             previousRelativeHumidity = localClimatologicalDataMonth[i - 1].humidity;
+            previousWetBulbTemp = localClimatologicalDataMonth[i - 1].wet_bulb_temp;
+            previousDewPointTemp = localClimatologicalDataMonth[i - 1].dew_point_temp;
         }
 
         let gapInData: boolean = false
@@ -54,8 +61,9 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
             }
         }
 
-        let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].dry_bulb_temp + previousDryBulbTemp) / 2
-
+        let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].dry_bulb_temp + previousDryBulbTemp) / 2;
+        let averageWetBulbTemp: number = (localClimatologicalDataMonth[i].wet_bulb_temp + previousWetBulbTemp) / 2;
+        let averageDewPointTemp: number = (localClimatologicalDataMonth[i].dew_point_temp + previousDewPointTemp) / 2;
 
         let baseRelativeHumidity: number = localClimatologicalDataMonth[i].humidity;
         let averageRelativeHumidity: number = (baseRelativeHumidity + previousRelativeHumidity) / 2
@@ -65,6 +73,9 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
         // weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100))),
         let weightedRelativeHumidity: number = (averageRelativeHumidity * minutesBetween);
         let weightedDryBulbTemp: number = (averageDryBulbTemp * minutesBetween);
+        let weightedWetBulbTemp: number = (averageWetBulbTemp * minutesBetween);
+        let weightedDewPointTemp: number = (averageDewPointTemp * minutesBetween);
+
         if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
             let heatingDegreeDay: number = 0;
             let heatingDegreeDifference: number = 0;
@@ -98,6 +109,8 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 coolingDegreeDifference: coolingDegreeDifference,
                 percentOfDay: portionOfDay,
                 dryBulbTemp: localClimatologicalDataMonth[i].dry_bulb_temp,
+                wetBulbTemp: localClimatologicalDataMonth[i].wet_bulb_temp,
+                dewPointTemp: localClimatologicalDataMonth[i].dew_point_temp,
                 lagDryBulbTemp: averageDryBulbTemp,
                 stationId: stationId,
                 stationName: stationName,
@@ -105,6 +118,9 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 relativeHumidity: localClimatologicalDataMonth[i].humidity,
                 weightedRelativeHumidity: weightedRelativeHumidity,
                 weightedDryBulbTemp: weightedDryBulbTemp,
+                weightedWetBulbTemp: weightedWetBulbTemp,
+                weightedDewPointTemp: weightedDewPointTemp,
+                precipitation: localClimatologicalDataMonth[i].precipitation,
                 minutesBetween: minutesBetween
             })
         } else {
@@ -116,6 +132,8 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 coolingDegreeDifference: 0,
                 percentOfDay: portionOfDay,
                 dryBulbTemp: localClimatologicalDataMonth[i].dry_bulb_temp,
+                wetBulbTemp: localClimatologicalDataMonth[i].wet_bulb_temp,
+                dewPointTemp: localClimatologicalDataMonth[i].dew_point_temp,
                 lagDryBulbTemp: averageDryBulbTemp,
                 stationId: stationId,
                 stationName: stationName,
@@ -123,6 +141,9 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 relativeHumidity: localClimatologicalDataMonth[i].humidity,
                 weightedRelativeHumidity: weightedRelativeHumidity,
                 weightedDryBulbTemp: weightedDryBulbTemp,
+                weightedWetBulbTemp: weightedWetBulbTemp,
+                weightedDewPointTemp: weightedDewPointTemp,
+                precipitation: localClimatologicalDataMonth[i].precipitation,
                 minutesBetween: minutesBetween
             })
         }
