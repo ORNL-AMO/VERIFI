@@ -44,6 +44,8 @@ import { MonthlySavingsTableComponent } from './report-results/facility-cost-sav
 import { GroupSavingsTableComponent } from './report-results/facility-cost-savings-report-results/group-savings-table/group-savings-table.component';
 import { AnnualSavingsTableComponent } from './report-results/facility-cost-savings-report-results/annual-savings-table/annual-savings-table.component';
 import { MonthlySavingsGraphComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
+import { RegressionNumberPipe } from 'src/app/shared/helper-pipes/regression-number.pipe';
+import { UserDefineModelDateRangePipe } from 'src/app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
 
 
 
@@ -101,7 +103,9 @@ providers: [
     FacilityReportTypePipe,
     CalculatingSpinnerModule,
     SharedAnalysisModule,
-    CustomNumberPipe
+    CustomNumberPipe,
+    RegressionNumberPipe,
+    UserDefineModelDateRangePipe
   ]
 })
 export class FacilityReportsModule { }

@@ -133,7 +133,7 @@ export class PredictorHistogramGraphComponent {
       if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
         return '';
       }
-      const dataUrl = await rawPlotly.toImage(this.predictorHistogram.nativeElement, { format: 'png', height: 700, width: 1400, imageDataOnly: false });
+      const dataUrl = await rawPlotly.toImage(this.predictorHistogram.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
       return dataUrl;
     } catch (error) {
       return '';

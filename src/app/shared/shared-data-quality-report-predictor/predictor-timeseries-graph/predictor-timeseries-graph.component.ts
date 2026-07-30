@@ -206,7 +206,7 @@ export class PredictorTimeseriesGraphComponent {
       if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
         return '';
       }
-      const dataUrl = await rawPlotly.toImage(this.predictorTimeSeriesGraph.nativeElement, { format: 'png', height: 700, width: 1400, imageDataOnly: false });
+      const dataUrl = await rawPlotly.toImage(this.predictorTimeSeriesGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
       return dataUrl;
     } catch (error) {
       return '';

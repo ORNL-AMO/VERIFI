@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { FacilitySavingsReport } from 'src/app/calculations/savings-report-calculations/facilitySavingsReport';
@@ -24,6 +24,12 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisService } from '../../../analysis/analysis.service';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { FacilitySavingsReportAdapter } from './facility-savings-report.adapter';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { MonthlyAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { RollingEnergyConsumptionGraphComponent } from 'src/app/shared/shared-reports/facility-savings-report/rolling-energy-consumption-graph/rolling-energy-consumption-graph.component';
+import { RollingEnergySavingsGraphComponent } from 'src/app/shared/shared-reports/facility-savings-report/rolling-energy-savings-graph/rolling-energy-savings-graph.component';
 
 @Component({
   selector: 'app-facility-savings-report-results',
@@ -55,6 +61,17 @@ export class FacilitySavingsReportResultsComponent {
   itemsPerPageSub: Subscription;
   endDate: Date;
   latestMonthSummary: MonthlyAnalysisSummaryData;
+
+  isExportingPdf: boolean = false;
+  @ViewChild('monthlyAnalysisGraph') monthlyAnalysisGraph?: MonthlyAnalysisSummaryGraphComponent;
+  @ViewChild('monthlyAnalysisSavingsGraph') monthlyAnalysisSavingsGraph?: MonthlyAnalysisSummarySavingsGraphComponent;
+  @ViewChild('trailing12MonthConsumptionGraph') trailing12MonthConsumptionGraph?: RollingEnergyConsumptionGraphComponent;
+  @ViewChild('trailing12MonthSavingsGraph') trailing12MonthSavingsGraph?: RollingEnergySavingsGraphComponent;
+  @ViewChildren('groupMonthlyAnalysisGraph') groupMonthlyAnalysisGraphs?: QueryList<MonthlyAnalysisSummaryGraphComponent>;
+  @ViewChildren('groupMonthlyAnalysisSavingsGraph') groupMonthlyAnalysisSavingsGraphs?: QueryList<MonthlyAnalysisSummarySavingsGraphComponent>;
+  @ViewChildren('groupTrailing12MonthConsumptionGraph') groupTrailing12MonthConsumptionGraphs?: QueryList<RollingEnergyConsumptionGraphComponent>;
+  @ViewChildren('groupTrailing12MonthSavingsGraph') groupTrailing12MonthSavingsGraphs?: QueryList<RollingEnergySavingsGraphComponent>;
+
   constructor(
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictorDbService,
@@ -66,9 +83,11 @@ export class FacilitySavingsReportResultsComponent {
     private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
     private analysisService: AnalysisService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private exportReportPdfService: ExportReportPdfService,
+    private facilitySavingsReportAdapter: FacilitySavingsReportAdapter
   ) { }
-  
+
   ngOnInit(): void {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
@@ -144,5 +163,87 @@ export class FacilitySavingsReportResultsComponent {
     this.facilityReportSub.unsubscribe();
     this.printSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+  }
+
+  async onExportPdf() {
+    if (!this.facilityReport || this.isExportingPdf) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const document = this.facilitySavingsReportAdapter.buildDocument({
+        facilityReport: this.facilityReport,
+        facility: this.facility,
+        analysisItem: this.analysisItem,
+        annualAnalysisSummaries: this.annualAnalysisSummaries,
+        monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+        groupSummaries: this.groupSummaries,
+        latestMonthSummary: this.latestMonthSummary,
+        chartImageProviders: this.getChartImageProviders()
+      });
+
+      await this.exportReportPdfService.export(document, `${this.facilityReport.name} - Savings Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
+  }
+
+  getChartImageProviders() {
+    return {
+      monthlyAnalysisGraph: async () => this.monthlyAnalysisGraph?.getChartAsBase64Image() ?? '',
+      monthlyAnalysisSavingsGraph: async () => this.monthlyAnalysisSavingsGraph?.getChartAsBase64Image() ?? '',
+      trailing12MonthConsumptionGraph: async () => this.trailing12MonthConsumptionGraph?.getChartAsBase64Image() ?? '',
+      trailing12MonthSavingsGraph: async () => this.trailing12MonthSavingsGraph?.getChartAsBase64Image() ?? '',
+      groupMonthlyAnalysisGraph: this.getGroupMonthlyAnalysisGraphProvider(),
+      groupMonthlyAnalysisSavingsGraph: this.getGroupMonthlyAnalysisSavingsGraphProvider(),
+      groupTrailing12MonthConsumptionGraph: this.getTrailing12MonthConsumptionGraphImageProvider(),
+      groupTrailing12MonthSavingsGraph: this.getTrailing12MonthSavingsGraphImageProvider()
+    };
+  }
+
+  getGroupMonthlyAnalysisGraphProvider(): Record<string, () => Promise<string>> {
+    const providers: Record<string, () => Promise<string>> = {};
+    if (this.groupMonthlyAnalysisGraphs) {
+      this.groupMonthlyAnalysisGraphs.forEach((graphComponent, index) => {
+        const groupId = this.groupSummaries[index].group.idbGroupId;
+        providers[groupId] = async () => graphComponent.getChartAsBase64Image();
+      });
+    }
+    return providers;
+  }
+
+  getGroupMonthlyAnalysisSavingsGraphProvider(): Record<string, () => Promise<string>> {
+    const providers: Record<string, () => Promise<string>> = {};
+    if (this.groupMonthlyAnalysisSavingsGraphs) {
+      this.groupMonthlyAnalysisSavingsGraphs.forEach((graphComponent, index) => {
+        const groupId = this.groupSummaries[index].group.idbGroupId;
+        providers[groupId] = async () => graphComponent.getChartAsBase64Image();
+      });
+    }
+    return providers;
+  }
+
+  getTrailing12MonthConsumptionGraphImageProvider(): Record<string, () => Promise<string>> {
+    const providers: Record<string, () => Promise<string>> = {};
+    if (this.groupTrailing12MonthConsumptionGraphs) {
+      this.groupTrailing12MonthConsumptionGraphs.forEach((graphComponent, index) => {
+        const groupId = this.groupSummaries[index].group.idbGroupId;
+        providers[groupId] = async () => graphComponent.getChartAsBase64Image();
+      });
+    }
+    return providers;
+  }
+
+  getTrailing12MonthSavingsGraphImageProvider(): Record<string, () => Promise<string>> {
+    const providers: Record<string, () => Promise<string>> = {};
+    if (this.groupTrailing12MonthSavingsGraphs) {
+      this.groupTrailing12MonthSavingsGraphs.forEach((graphComponent, index) => {
+        const groupId = this.groupSummaries[index].group.idbGroupId;
+        providers[groupId] = async () => graphComponent.getChartAsBase64Image();
+      });
+    }
+    return providers;
   }
 }

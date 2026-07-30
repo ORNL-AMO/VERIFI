@@ -99,7 +99,7 @@
             </div>
             <div class="print-break-avoid">
                 @if (monthlyAnalysisSummaryData) {
-                <app-monthly-analysis-summary-graph
+                <app-monthly-analysis-summary-graph #monthlyAnalysisGraph
                     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
                     [facilityOrAccount]="facility">
                 </app-monthly-analysis-summary-graph>
@@ -108,7 +108,7 @@
             </div>
             <div class="print-break-avoid">
                 @if (monthlyAnalysisSummaryData) {
-                <app-monthly-analysis-summary-savings-graph
+                <app-monthly-analysis-summary-savings-graph #monthlyAnalysisSavingsGraph
                     [analysisItem]="analysisItem" [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
                     [facilityOrAccount]="facility">
                 </app-monthly-analysis-summary-savings-graph>
@@ -121,7 +121,7 @@
             @if (facilityReport.savingsReportSettings.facilityMonthlyResults && facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsConsumption) {
                 @if (monthlyAnalysisSummaryData) {
                 <div class="mt-5">
-                    <app-rolling-energy-consumption-graph
+                    <app-rolling-energy-consumption-graph #trailing12MonthConsumptionGraph
                         [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
                         [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
                     <hr>
@@ -132,7 +132,7 @@
             @if (facilityReport.savingsReportSettings.facilityMonthlyResults && facilityReport.savingsReportSettings.facilityTrailingTwelveMonthsSavings) {
                 @if (monthlyAnalysisSummaryData) {
                 <div class="mt-5">
-                    <app-rolling-energy-savings-graph
+                    <app-rolling-energy-savings-graph #trailing12MonthSavingsGraph
                         [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
                         [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
                     <hr>
@@ -251,7 +251,7 @@
             @if (facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupMonthlyResultsGraphs) {
                 <div class="print-break-avoid">
                     @if (monthlyAnalysisSummaryData) {
-                    <app-monthly-analysis-summary-graph
+                    <app-monthly-analysis-summary-graph #groupMonthlyAnalysisGraph
                         [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
                         [analysisItem]="analysisItem" [facilityOrAccount]="facility">
                     </app-monthly-analysis-summary-graph>
@@ -259,7 +259,7 @@
                 </div>
                 <div class="print-break-avoid">
                     @if (monthlyAnalysisSummaryData) {
-                    <app-monthly-analysis-summary-savings-graph
+                    <app-monthly-analysis-summary-savings-graph #groupMonthlyAnalysisSavingsGraph
                         [analysisItem]="analysisItem"
                         [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
                         [facilityOrAccount]="facility">
@@ -273,7 +273,7 @@
             <div class="print-break-avoid">
                 @if (facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupTrailingTwelveMonthsConsumption) {
                     @if (monthlyAnalysisSummaryData) {
-                    <app-rolling-energy-consumption-graph
+                    <app-rolling-energy-consumption-graph #groupTrailing12MonthConsumptionGraph
                         [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
                         [analysisItem]="analysisItem"
                         [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
@@ -283,7 +283,7 @@
                 }
                 @if (facilityReport.savingsReportSettings.groupMonthlyResults && facilityReport.savingsReportSettings.groupTrailingTwelveMonthsSavings) {
                     @if (monthlyAnalysisSummaryData) {
-                    <app-rolling-energy-savings-graph
+                    <app-rolling-energy-savings-graph #groupTrailing12MonthSavingsGraph
                         [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
                         [analysisItem]="analysisItem"
                         [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
@@ -305,4 +305,4 @@
 </div>
 }
 
-<app-facility-print-report-button></app-facility-print-report-button>
+<app-facility-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()"></app-facility-print-report-button>

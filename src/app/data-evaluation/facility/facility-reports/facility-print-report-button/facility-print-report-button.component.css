@@ -15,3 +15,13 @@
 .fa{
     font-size: 25px
 }
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.5);
+}

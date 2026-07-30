@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, QueryList, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -20,6 +20,9 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { FacilityOverviewReportAdapter } from './facility-overview-report.adapter';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { FacilitySectionReportComponent } from 'src/app/shared/data-overview/facility-section-report/facility-section-report.component';
 
 @Component({
   selector: 'app-facility-overview-report-results',
@@ -46,6 +49,9 @@ export class FacilityOverviewReportResultsComponent {
   utilityUseAndCost: UtilityUseAndCost;
   worker: Worker;
   calculating: boolean | 'error' = true;
+
+  @ViewChildren(FacilitySectionReportComponent) sectionReports !: QueryList<FacilitySectionReportComponent>;
+
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -54,7 +60,9 @@ export class FacilityOverviewReportResultsComponent {
     private eGridService: EGridService,
     private accountDbService: AccountdbService,
     private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService
+    private customGWPDbService: CustomGWPDbService,
+    private facilityOverviewReportAdapter: FacilityOverviewReportAdapter,
+    private exportReportPdfService: ExportReportPdfService
   ) {
 
   }
@@ -134,5 +142,57 @@ export class FacilityOverviewReportResultsComponent {
       this.utilityUseAndCost = new UtilityUseAndCost(this.calanderizedMeters, this.dateRange);
       this.calculating = false;
     }
+  }
+
+  onExportPdf() {
+    if (this.calculating !== false || !this.facilityReport) {
+      return;
+    }
+
+    const document = this.facilityOverviewReportAdapter.buildDocument({
+      facilityReport: this.facilityReport,
+      facility: this.facility,
+      facilityOverviewData: this.facilityOverviewData,
+      utilityUseAndCost: this.utilityUseAndCost,
+      dateRange: this.dateRange,
+      chartImageProviders: this.getChartImageProviders()
+    });
+
+    this.exportReportPdfService.export(document, `${this.facilityReport.name} - Data Overview Report`);
+  }
+
+  getSectionsByType(type: 'energyUse' | 'cost' | 'water') {
+    return this.sectionReports?.find(section => section.dataType == type);
+  }
+
+  async getImage(type: 'energyUse' | 'cost' | 'water', chartType: 'meterStackedLineChart' | 'meterBarChart' | 'annualBarChart' | 'monthlyUsageLineChart'): Promise<string> {
+    const section = this.getSectionsByType(type);
+    if (!section) {
+      return '';
+    }
+    switch (chartType) {
+      case 'meterStackedLineChart':
+        return await section.getMeterStackedLineChartImage();
+      case 'meterBarChart':
+        return await section.getMeterBarChartImage();
+      case 'annualBarChart':
+        return await section.getAnnualBarChartImage();
+      case 'monthlyUsageLineChart':
+        return await section.getMonthlyUsageLineChartImage();
+    }
+  }
+
+  getChartImageProviders() {
+    const imageByType = (chartType: 'meterStackedLineChart' | 'meterBarChart' | 'annualBarChart' | 'monthlyUsageLineChart') => ({
+      energyUse: async () => await this.getImage('energyUse', chartType),
+      cost: async () => await this.getImage('cost', chartType),
+      water: async () => await this.getImage('water', chartType)
+    });
+    return {
+      meterStackedLineChart: imageByType('meterStackedLineChart'),
+      meterBarChart: imageByType('meterBarChart'),
+      annualBarChart: imageByType('annualBarChart'),
+      monthlyUsageLineChart: imageByType('monthlyUsageLineChart')
+    };
   }
 }

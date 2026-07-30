@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
@@ -19,6 +19,11 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { CalanderizationService } from '../../helper-services/calanderization.service';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { AnnualFacilityAnalysisReportComponent } from './annual-facility-analysis-report/annual-facility-analysis-report.component';
+import { MonthlyFacilityAnalysisReportComponent } from './monthly-facility-analysis-report/monthly-facility-analysis-report.component';
+import { GroupAnalysisReportComponent } from './group-analysis-report/group-analysis-report.component';
 
 @Component({
   selector: 'app-facility-analysis-report',
@@ -46,6 +51,23 @@ export class FacilityAnalysisReportComponent {
   }>
   calculating: boolean | 'error' = false;
   facility: IdbFacility;
+
+  onAnalysisDataEmit = output<{
+    facility: IdbFacility,
+    annualAnalysisSummaries: Array<AnnualAnalysisSummary>,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    groupSummaries: Array<{
+      group: AnalysisGroup,
+      monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+      annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+    }>
+  }>();
+
+  @ViewChild(AnnualFacilityAnalysisReportComponent) annualFacilityAnalysisReportComponent?: AnnualFacilityAnalysisReportComponent;
+  @ViewChild(MonthlyFacilityAnalysisReportComponent) monthlyFacilityAnalysisReportComponent?: MonthlyFacilityAnalysisReportComponent;
+  @ViewChild(GroupAnalysisReportComponent) groupAnalysisReportComponent?: GroupAnalysisReportComponent;
+  @ViewChildren(GroupAnalysisReportComponent) groupAnalysisReportComponents !: QueryList<GroupAnalysisReportComponent>;
+
   constructor(
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictorDbService,
@@ -78,6 +100,12 @@ export class FacilityAnalysisReportComponent {
             this.analysisReportSettings.reportYear = this.reportYear;
           }
           this.calculating = false;
+          this.onAnalysisDataEmit.emit({
+            facility: this.facility,
+            annualAnalysisSummaries: this.annualAnalysisSummaries,
+            monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+            groupSummaries: this.groupSummaries
+          });
         } else {
           this.calculating = 'error';
         }
@@ -117,6 +145,12 @@ export class FacilityAnalysisReportComponent {
       if (this.inQuickReport) {
         this.analysisReportSettings.reportYear = this.reportYear;
       }
+      this.onAnalysisDataEmit.emit({
+        facility: this.facility,
+        annualAnalysisSummaries: this.annualAnalysisSummaries,
+        monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+        groupSummaries: this.groupSummaries
+      });
     }
   }
 
@@ -124,5 +158,91 @@ export class FacilityAnalysisReportComponent {
     if (this.worker) {
       this.worker.terminate();
     }
+  }
+
+  getEnergyIntensityChartProvider() {
+    return async () => {
+      if (this.annualFacilityAnalysisReportComponent) {
+        return await this.annualFacilityAnalysisReportComponent.getEnergyIntensityChart();
+      }
+      return '';
+    };
+  }
+
+  getPercentImprovementChartProvider() {
+    return async () => {
+      if (this.annualFacilityAnalysisReportComponent) {
+        return await this.annualFacilityAnalysisReportComponent.getPercentImprovementChart();
+      }
+      return '';
+    };
+  }
+
+  getMonthlyAnalysisGraphProvider() {
+    return async () => {
+      if (this.monthlyFacilityAnalysisReportComponent) {
+        return await this.monthlyFacilityAnalysisReportComponent.getMonthlyAnalysisGraph();
+      }
+      return '';
+    };
+  }
+
+  getMonthlyAnalysisSavingsGraphProvider() {
+    return async () => {
+      if (this.monthlyFacilityAnalysisReportComponent) {
+        return await this.monthlyFacilityAnalysisReportComponent.getMonthlyAnalysisSavingsGraph();
+      }
+      return '';
+    };
+  }
+
+  getGroupModelGraphProvider() {
+    const providers: Record<string, () => Promise<string>> = {};
+    this.groupAnalysisReportComponents?.forEach(groupReportComponent => {
+      providers[groupReportComponent.getGroupId()] = async () => {
+        return await groupReportComponent.getGroupGraphImage();
+      };
+    });
+    return providers;
+  }
+
+  getGroupAnnualEnergyIntensityChartProvider() {
+    const providers: Record<string, () => Promise<string>> = {};
+    this.groupAnalysisReportComponents?.forEach(groupReportComponent => {
+      providers[groupReportComponent.getGroupId()] = async () => {
+        return await groupReportComponent.getGroupAnnualEnergyIntensityChart();
+      };
+    });
+    return providers;
+  }
+
+  getGroupAnnualPercentImprovementChartProvider() {
+    const providers: Record<string, () => Promise<string>> = {};
+    this.groupAnalysisReportComponents?.forEach(groupReportComponent => {
+      providers[groupReportComponent.getGroupId()] = async () => {
+        return await groupReportComponent.getGroupAnnualPercentImprovementChart();
+      };
+    });
+    return providers;
+  }
+
+  getGroupMonthlyAnalysisGraphProvider() {
+    const providers: Record<string, () => Promise<string>> = {};
+    this.groupAnalysisReportComponents?.forEach(groupReportComponent => {
+      providers[groupReportComponent.getGroupId()] = async () => {
+        return await groupReportComponent.getGroupMonthlyAnalysisGraph();
+      };
+    });
+    return providers;
+  }
+
+  getGroupMonthlyAnalysisSavingsGraphProvider() {
+    const providers: Record<string, () => Promise<string>> = {};
+    this.groupAnalysisReportComponents?.forEach(groupReportComponent => {
+      providers[groupReportComponent.getGroupId()] = async () => {
+        return await groupReportComponent.getGroupMonthlyAnalysisSavingsGraph();
+      };
+    });
+    return providers;
   }
 }

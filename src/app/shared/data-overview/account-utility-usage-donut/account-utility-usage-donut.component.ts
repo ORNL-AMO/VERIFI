@@ -193,4 +193,20 @@ export class AccountUtilityUsageDonutComponent {
       return sourceTotal.cost;
     }
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.donutChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.donutChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }

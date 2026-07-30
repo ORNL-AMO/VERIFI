@@ -129,4 +129,4 @@
             </div>
           }
         }
-        <app-facility-print-report-button></app-facility-print-report-button>
+        <app-facility-print-report-button [isNewReport]="true" (exportPdf)="onExportPdf()"></app-facility-print-report-button>

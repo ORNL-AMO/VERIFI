@@ -1,9 +1,13 @@
-export type ReportSectionType = 'text' | 'heading' | 'table' | 'chart'; 
+export type ReportSectionType = 'text' | 'heading' | 'table' | 'chart' | 'styledText'; 
 
 export interface BaseSection {
     type: ReportSectionType;
     title?: string;
     pageBreakBefore?: boolean;
+    pageBreakAfter?: boolean;
+    tocInclude?: boolean;
+    tocLabel?: string;
+    bookmarkLevel?: number;
 }
 
 export interface TextSection extends BaseSection {
@@ -17,12 +21,34 @@ export interface HeadingSection extends BaseSection {
 
 export interface TableSection extends BaseSection {
     type: 'table';
-    headers: string[];
+    headers: Array<string | TableHeaderCell>;
+    subHeaders?: Array<string | TableHeaderCell>;
     rows: string[][];
 }
 
 export interface ChartSection extends BaseSection {
     type: 'chart';
     imageDataProvider?: () => Promise<string>;
+}
+
+export interface TableHeaderCell {
+    content: string;
+    colSpan?: number;
+    rowSpan?: number;
+}
+
+export interface StyledTextSection extends BaseSection {
+    type: 'styledText';
+    content: StyledText[];
+    verticalCenter?: boolean;
+}
+
+export interface StyledText {
+    text: string;
+    fontSize?: number;
+    color?: [number, number, number];
+    bold?: boolean;
+    align?: 'left' | 'center' | 'right';
+    spaceAfter?: number;
 }
 

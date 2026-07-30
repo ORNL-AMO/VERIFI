@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 import { IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
 import { MeterDataStats, PredictorDataStats } from "./facility-data-quality-report-results.component";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
-import { BaseSection, ChartSection, HeadingSection, TableSection } from "src/app/shared/pdf-report/models/report-section.model";
+import { BaseSection, ChartSection, HeadingSection, StyledText, StyledTextSection, TableSection } from "src/app/shared/pdf-report/models/report-section.model";
 import { getUnitFromMeter } from "src/app/shared/shared-data-quality-report-meters/meterDataQualityStatistics";
 import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe";
 
@@ -42,39 +42,71 @@ export class FacilityDataQualityReportAdapter {
                     this.report.dataQualityReportSettings.includeMeterCostHistogram
                 ) {
                     let meterTitle = stats.meter.name;
-                    let titleSection: HeadingSection = {
-                        type: 'heading',
-                        title: meterTitle
+                    let titleSection: StyledTextSection = {
+                        type: 'styledText',
+                        verticalCenter: true,
+                        content: [{
+                            text: meterTitle,
+                            fontSize: 16,
+                            bold: true,
+                            align: 'center',
+                        }],
+                        pageBreakAfter: true,
+                        tocInclude: true,
+                        tocLabel: meterTitle,
+                        bookmarkLevel: 0
                     };
                     sections.push(titleSection);
                 }
 
                 if (this.report.dataQualityReportSettings.includeMeterStatisticsTable) {
                     let tableSection = this.createMeterTableSection(stats, 'Total Consumption and Cost Statistics');
-                    sections.push(tableSection);
+                    if (tableSection) {
+                        tableSection.tocInclude = true;
+                        tableSection.tocLabel = 'Total Consumption and Cost Statistics';
+                        tableSection.bookmarkLevel = 1;
+                        tableSection.pageBreakAfter = true;
+                        sections.push(tableSection);
+                    }
                 }
 
                 if (this.report.dataQualityReportSettings.includeMeterConsumptionTimeseriesGraph) {
                     let chartSection = this.createChartSection(chartImageProviders?.meterConsumptionTimeseries[stats.meter.guid], 'Total Consumption');
                     if (chartSection) {
+                        chartSection.tocInclude = true;
+                        chartSection.tocLabel = 'Total Consumption Timeseries';
+                        chartSection.bookmarkLevel = 1;
+                        chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
                     }
                 }
                 if (stats.includeCosts && this.report.dataQualityReportSettings.includeMeterCostTimeseriesGraph) {
                     let chartSection = this.createChartSection(chartImageProviders?.meterCostTimeseries[stats.meter.guid], 'Total Cost');
                     if (chartSection) {
+                        chartSection.tocInclude = true;
+                        chartSection.tocLabel = 'Total Cost Timeseries';
+                        chartSection.bookmarkLevel = 1;
+                        chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
                     }
                 }
                 if (this.report.dataQualityReportSettings.includeMeterConsumptionHistogram) {
                     let chartSection = this.createChartSection(chartImageProviders?.meterEnergyHistogram[stats.meter.guid], 'Distribution of Total Consumption');
                     if (chartSection) {
+                        chartSection.tocInclude = true;
+                        chartSection.tocLabel = 'Distribution of Total Consumption';
+                        chartSection.bookmarkLevel = 1;
+                        chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
                     }
                 }
                 if (stats.includeCosts && this.report.dataQualityReportSettings.includeMeterCostHistogram) {
                     let chartSection = this.createChartSection(chartImageProviders?.meterCostHistogram[stats.meter.guid], 'Distribution of Total Cost');
                     if (chartSection) {
+                        chartSection.tocInclude = true;
+                        chartSection.tocLabel = 'Distribution of Total Cost';
+                        chartSection.bookmarkLevel = 1;
+                        chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
                     }
                 }
@@ -92,26 +124,50 @@ export class FacilityDataQualityReportAdapter {
                     this.report.dataQualityReportSettings.includePredictorHistogram) {
                 } {
                     let predictorTitle = stats.predictor.name;
-                    let titleSection: HeadingSection = {
-                        type: 'heading',
-                        title: predictorTitle
+                    let titleSection: StyledTextSection = {
+                        type: 'styledText',
+                        verticalCenter: true,
+                        content: [{
+                            text: predictorTitle,
+                            fontSize: 16,
+                            bold: true,
+                            align: 'center',
+                        }],
+                        pageBreakAfter: true,
+                        tocInclude: true,
+                        tocLabel: predictorTitle,
+                        bookmarkLevel: 0
                     };
                     sections.push(titleSection);
                 }
-                
+
                 if (this.report.dataQualityReportSettings.includePredictorStatisticsTable) {
                     let tableSection = this.createPredictorTableSection(stats, 'Total Consumption Statistics');
-                    sections.push(tableSection);
+                    if (tableSection) {
+                        tableSection.tocInclude = true;
+                        tableSection.tocLabel = 'Total Consumption Statistics';
+                        tableSection.bookmarkLevel = 1;
+                        tableSection.pageBreakAfter = true;
+                        sections.push(tableSection);
+                    }
                 }
                 if (this.report.dataQualityReportSettings.includePredictorTimeseriesGraph) {
                     let chartSection = this.createChartSection(chartImageProviders?.predictorTimeseries[stats.predictor.guid], 'Predictor Timeseries');
                     if (chartSection) {
+                        chartSection.tocInclude = true;
+                        chartSection.tocLabel = 'Predictor Timeseries';
+                        chartSection.bookmarkLevel = 1;
+                        chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
                     }
                 }
                 if (this.report.dataQualityReportSettings.includePredictorHistogram) {
                     let chartSection = this.createChartSection(chartImageProviders?.predictorHistogram[stats.predictor.guid], 'Distribution of Predictors');
                     if (chartSection) {
+                        chartSection.tocInclude = true;
+                        chartSection.tocLabel = 'Distribution of Predictors';
+                        chartSection.bookmarkLevel = 1;
+                        chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
                     }
                 }

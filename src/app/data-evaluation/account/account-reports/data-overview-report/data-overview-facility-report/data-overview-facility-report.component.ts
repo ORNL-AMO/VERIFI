@@ -1,14 +1,15 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, QueryList, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { DataOverviewFacility } from '../data-overview-report.component';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { FacilitySectionReportComponent } from 'src/app/shared/data-overview/facility-section-report/facility-section-report.component';
 
 @Component({
-    selector: 'app-data-overview-facility-report',
-    templateUrl: './data-overview-facility-report.component.html',
-    styleUrls: ['./data-overview-facility-report.component.css'],
-    standalone: false
+  selector: 'app-data-overview-facility-report',
+  templateUrl: './data-overview-facility-report.component.html',
+  styleUrls: ['./data-overview-facility-report.component.css'],
+  standalone: false
 })
 export class DataOverviewFacilityReportComponent {
   @Input()
@@ -18,6 +19,9 @@ export class DataOverviewFacilityReportComponent {
 
   printSub: Subscription;
   print: boolean;
+
+  @ViewChildren(FacilitySectionReportComponent) sectionReports !: QueryList<FacilitySectionReportComponent>;
+
   constructor(private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
@@ -26,7 +30,32 @@ export class DataOverviewFacilityReportComponent {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.printSub.unsubscribe();
+  }
+
+  getSectionByType(type: 'energyUse' | 'cost' | 'water'): FacilitySectionReportComponent | undefined {
+    return this.sectionReports.find(section => section.dataType === type);
+  }
+
+  async getImage(type: 'energyUse' | 'cost' | 'water',
+    chartType: 'meterStackedLineChart' | 'meterBarChart' | 'annualBarChart' | 'monthlyUsageLineChart'
+  ): Promise<string> {
+    const section = this.getSectionByType(type);
+    if (!section) {
+      return '';
+    }
+    switch (chartType) {
+      case 'meterStackedLineChart':
+        return await section.getMeterStackedLineChartImage();
+      case 'meterBarChart':
+        return await section.getMeterBarChartImage();
+      case 'annualBarChart':
+        return await section.getAnnualBarChartImage();
+      case 'monthlyUsageLineChart':
+        return await section.getMonthlyUsageLineChartImage();
+      default:
+        return '';
+    }
   }
 }

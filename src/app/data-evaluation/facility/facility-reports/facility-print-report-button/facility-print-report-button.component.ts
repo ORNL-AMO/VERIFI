@@ -11,7 +11,9 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 export class FacilityPrintReportButtonComponent {
 
   @Input()
-  isDataQuality: boolean = false;
+  isNewReport: boolean = false;
+  @Input()
+  isLoading: boolean = false;
 
   print: boolean;
   printSub: Subscription;
@@ -43,11 +45,22 @@ export class FacilityPrintReportButtonComponent {
 
 
   togglePrint() {
+    if (this.isLoading) {
+      return;
+    }
+    if (this.isNewReport) {
+      this.exportPdf.emit();
+      return;
+    }
     this.dataEvaluationService.print.next(true);
   }
 
   printReport() {
-    if (!this.isDataQuality) {
+    if (this.isLoading) {
+      return;
+    }
+
+    if (!this.isNewReport) {
       setTimeout(() => {
         window.dispatchEvent(new Event("resize"));
         setTimeout(() => {
@@ -55,10 +68,6 @@ export class FacilityPrintReportButtonComponent {
           this.dataEvaluationService.print.next(false)
         }, 1000)
       }, 100)
-    }
-    else {
-      this.exportPdf.emit();
-      this.dataEvaluationService.print.next(false);
     }
   }
 }
