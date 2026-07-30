@@ -21,7 +21,7 @@
   @if (analysisReportSettings.facilityMonthlyResults) {
   <app-monthly-facility-analysis-report [analysisItem]="analysisItem" [facility]="facility"
     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [groupSummaries]="groupSummaries"
-    [analysisReportSettings]="analysisReportSettings"></app-monthly-facility-analysis-report>
+    [analysisReportSettings]="analysisReportSettings" [reportYear]="reportYear"></app-monthly-facility-analysis-report>
   <div class="report-spacer-container">
     <hr>
   </div>
@@ -30,7 +30,8 @@
   @if (analysisReportSettings.groupReports) {
   @for (groupSummary of groupSummaries; track groupSummary; let i = $index) {
   <app-group-analysis-report [groupSummary]="groupSummary" [analysisItem]="analysisItem" [facility]="facility"
-    [analysisReportSettings]="analysisReportSettings" [isFirstGroup]="i === 0"></app-group-analysis-report>
+    [analysisReportSettings]="analysisReportSettings" [reportYear]="reportYear"
+    [isFirstGroup]="i === 0"></app-group-analysis-report>
   <div class="report-spacer-container">
     <hr>
   </div>

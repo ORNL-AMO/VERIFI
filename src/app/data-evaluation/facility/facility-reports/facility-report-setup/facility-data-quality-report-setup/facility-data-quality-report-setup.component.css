@@ -1,0 +1,38 @@
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-left: 8px;
+  margin-bottom: 16px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 16px;
+  background: #e0e0e0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tag.selected {
+  background: #89568f;
+  color: #fff;
+  font-weight: bold;
+}
+
+.section-header {
+  font-size: 1.2em;
+  color: #2c386b;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  margin: 8px;
+}
+
+.sub-heading-style {
+  font-size: 1.1em;
+  font-style: italic;
+  font-weight: bold;
+}

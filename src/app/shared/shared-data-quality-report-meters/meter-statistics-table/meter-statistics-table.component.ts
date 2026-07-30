@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getUnitFromMeter, Statistics } from '../meterDataQualityStatistics';
+import { CopyTableService } from '../../helper-services/copy-table.service';
 
 @Component({
   selector: 'app-meter-statistics-table',
@@ -21,6 +22,12 @@ export class MeterStatisticsTableComponent {
   costStats: Statistics;
 
   unit: string;
+  copyingTable: boolean = false;
+  @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
+
+  constructor(
+    private copyTableService: CopyTableService
+  ) { }
 
   ngOnChanges() {
     this.setUnit();
@@ -32,5 +39,13 @@ export class MeterStatisticsTableComponent {
 
   isValueNaN(value: any): boolean {
     return isNaN(value);
+  }
+
+  copyTable() {
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.dataTable);
+      this.copyingTable = false;
+    }, 200);
   }
 }

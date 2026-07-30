@@ -3,7 +3,7 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SE
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { getLatestYearWithData, getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -18,10 +18,10 @@ export class RegressionModelsCalculator {
   constructor(private facilityPredictorData: Array<IdbPredictorData>) { }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
-    analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, [facility]);
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
+    const reportYear = getLatestCompleteAnalysisYear([analysisGroup], calanderizedMeters, this.facilityPredictorData, [facility]);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup, reportYear);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
-    let endYear: number = analysisItem.calculatedReportYear;
+    let endYear: number = reportYear;
     let baselineYear: number = getFiscalYear(baselineDate, facility);
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
     let predictorVariableIds: Array<string> = new Array();

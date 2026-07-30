@@ -1,0 +1,152 @@
+<hr>
+
+<div class="card mt-4 mb-4">
+  <div class="card-body">
+    <div class="mb-3 sub-heading-style">Choose an option to generate report</div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" id="modeAnalysis" name="selectionMode" [(ngModel)]="selectionMode"
+        value="analysis" (ngModelChange)="onSelectionModeChange()">
+      <label class="form-check-label" for="modeAnalysis">
+        <span class="fw-semibold">By Analysis</span>
+        <span class="text-muted d-block small">Choose from existing analyses</span>
+      </label>
+    </div>
+    <div class="form-check form-check-inline ms-4">
+      <input class="form-check-input" type="radio" id="modeManual" name="selectionMode" [(ngModel)]="selectionMode"
+        value="manual" (ngModelChange)="onSelectionModeChange()">
+      <label class="form-check-label" for="modeManual">
+        <span class="fw-semibold">By Meters & Predictors</span>
+        <span class="text-muted d-block small">Select meters and predictors manually</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+@if (selectionMode === 'analysis') {
+<div class="card mt-3 p-3">
+  <app-facility-report-analysis-selection [facilityReport]="facilityReport" [baselineYears]="baselineYears"
+    [selectedAnalysisItem]="selectedAnalysisItem" (selectedAnalysisItemChange)="onSelectedAnalysisItemChange($event)"
+    (filteredItemsChange)="onFilteredItemsChange($event)"></app-facility-report-analysis-selection>
+</div>
+}
+
+@if (selectionMode === 'manual' && (facilityMeters?.length > 0 || facilityPredictors?.length > 0)) {
+<div class="card mt-3">
+  <div class="sub-heading-style m-3">
+    Select the meters and predictors you want to include in the report.
+  </div>
+
+  @if (facilityMeters?.length > 0)
+  {
+  <div class="section-header">
+    Meters
+  </div>
+  <div class="tag-list">
+    @for (meter of facilityMeters; track meter.guid) {
+    <span class="tag" [class.selected]="selectedMeters.includes(meter)" (click)="toggleMeter(meter)">
+      {{ meter.name }}
+    </span>
+    }
+  </div>
+  }
+
+  @if (facilityPredictors?.length > 0)
+  {
+  <div class="section-header">
+    Predictors
+  </div>
+  <div class="tag-list">
+    @for (predictor of facilityPredictors; track predictor.guid) {
+    <span class="tag" [class.selected]="selectedPredictors.includes(predictor)" (click)="togglePredictor(predictor)">
+      {{ predictor.name }}
+    </span>
+    }
+  </div>
+  }
+</div>
+}
+
+<div class="mt-5">
+  <span class="bold">
+    Choose Report Content
+  </span>
+  <div class="row mt-3">
+    <div class="col">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="includeMeter"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includeMeter" (change)="onIncludeMeterChange()" id="includeMeter">
+        <label class="bold form-check-label" for="includeMeter">Meter Details
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includeMeterStatisticsTable"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includeMeterStatisticsTable" (change)="onMeterSubOptionChange()"
+          id="includeMeterStatisticsTable">
+        <label class="form-check-label" for="includeMeterStatisticsTable"> Consumption and Cost Statistics
+          Table
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includeMeterConsumptionTimeseriesGraph"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includeMeterConsumptionTimeseriesGraph"
+          (change)="onMeterSubOptionChange()" id="includeMeterConsumptionTimeseriesGraph">
+        <label class="form-check-label" for="includeMeterConsumptionTimeseriesGraph"> Consumption
+          Graph
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includeMeterCostTimeseriesGraph"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includeMeterCostTimeseriesGraph" (change)="onMeterSubOptionChange()"
+          id="includeMeterCostTimeseriesGraph">
+        <label class="form-check-label" for="includeMeterCostTimeseriesGraph"> Cost
+          Graph
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includeMeterConsumptionHistogram"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includeMeterConsumptionHistogram" (change)="onMeterSubOptionChange()"
+          id="includeMeterConsumptionHistogram">
+        <label class="form-check-label" for="includeMeterConsumptionHistogram"> Distribution of Consumption
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includeMeterCostHistogram"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includeMeterCostHistogram" (change)="onMeterSubOptionChange()"
+          id="includeMeterCostHistogram">
+        <label class="form-check-label" for="includeMeterCostHistogram"> Distribution of Cost
+        </label>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="includePredictors"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includePredictors" (change)="onIncludePredictorChange()"
+          id="includePredictors">
+        <label class="bold form-check-label" for="includePredictors">Predictors Details
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includePredictorStatisticsTable"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includePredictorStatisticsTable" (change)="onPredictorSubOptionChange()"
+          id="includePredictorStatisticsTable">
+        <label class="form-check-label" for="includePredictorStatisticsTable">Predictor Statistics Table
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includePredictorTimeseriesGraph"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includePredictorTimeseriesGraph" (change)="onPredictorSubOptionChange()"
+          id="includePredictorTimeseriesGraph">
+        <label class="form-check-label" for="includePredictorTimeseriesGraph">Predictor Timeseries Graph
+        </label>
+      </div>
+      <div class="form-check ms-3">
+        <input class="form-check-input" type="checkbox" name="includePredictorHistogram"
+          [(ngModel)]="facilityReport.dataQualityReportSettings.includePredictorHistogram" (change)="onPredictorSubOptionChange()"
+          id="includePredictorHistogram">
+        <label class="form-check-label" for="includePredictorHistogram">Predictor Histogram
+        </label>
+      </div>
+    </div>
+  </div>
+</div>

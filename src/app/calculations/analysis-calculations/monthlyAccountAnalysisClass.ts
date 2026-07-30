@@ -3,7 +3,7 @@ import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataCla
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import * as _ from 'lodash';
-import { checkAnalysisValue, getLatestYearWithData, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear, getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
@@ -15,6 +15,7 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { AnalysisCalculationOptions } from "./analysisCalculationOptions";
 
 export class MonthlyAccountAnalysisClass {
 
@@ -26,6 +27,7 @@ export class MonthlyAccountAnalysisClass {
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorData>;
     baselineYear: number;
+    reportYear: number;
     annualUsageValues: Array<{ year: number, usage: number }>
     constructor(
         accountAnalysisItem: IdbAccountAnalysisItem,
@@ -36,9 +38,10 @@ export class MonthlyAccountAnalysisClass {
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
-        accountPredictors: Array<IdbPredictor>
+        accountPredictors: Array<IdbPredictor>,
+        options: AnalysisCalculationOptions = {}
     ) {
-        this.setReportYear(accountAnalysisItem, meters, meterData, account, accountAnalysisItem, accountFacilities);
+        this.setReportYear(options.reportYear, meters, meterData, account, accountAnalysisItem, accountFacilities, allAccountAnalysisItems, accountPredictorEntries);
         this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors, account.assessmentReportVersion);
         this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
         this.setBaselineYear(account);
@@ -47,7 +50,7 @@ export class MonthlyAccountAnalysisClass {
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem, undefined);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem, undefined, this.reportYear);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let endDates: Array<Date> = this.monthlyFacilityAnalysisClasses.map(monthFacilityAnalysisClass => { return monthFacilityAnalysisClass.endDate });
@@ -58,17 +61,30 @@ export class MonthlyAccountAnalysisClass {
         }
     }
 
-    setReportYear(analysisItem: IdbAccountAnalysisItem, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, account: IdbAccount, accountAnalysisItem: IdbAccountAnalysisItem, accountFacilities: Array<IdbFacility>) {
-        if (!analysisItem.calculatedReportYear) {
+    setReportYear(
+        reportYear: number | undefined,
+        meters: Array<IdbUtilityMeter>,
+        meterData: Array<IdbUtilityMeterData>,
+        account: IdbAccount,
+        accountAnalysisItem: IdbAccountAnalysisItem,
+        accountFacilities: Array<IdbFacility>,
+        facilityAnalysisItems: Array<IdbAnalysisItem>,
+        predictorData: Array<IdbPredictorData>
+    ) {
+        if (reportYear !== undefined) {
+            this.reportYear = reportYear;
+        } else {
             let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: accountAnalysisItem.energyIsSource, neededUnits: getNeededUnits(accountAnalysisItem) }, [], [], accountFacilities, account.assessmentReportVersion, []);
-            let includedFacilities: Array<IdbFacility> = new Array();
-            analysisItem.facilityAnalysisItems.forEach(facilityItem => {
-                if (facilityItem.analysisItemId) {
-                    let facility: IdbFacility = accountFacilities.find(fac => fac.guid == facilityItem.facilityId);
-                    includedFacilities.push(facility);
-                }
-            });
-            analysisItem.calculatedReportYear = getLatestYearWithData(calanderizedMeters, includedFacilities);
+            const includedFacilityAnalysis = accountAnalysisItem.facilityAnalysisItems
+                .filter(item => item.analysisItemId && item.analysisItemId !== 'skip')
+                .map(item => facilityAnalysisItems.find(analysisItem => analysisItem.guid === item.analysisItemId))
+                .filter((analysisItem): analysisItem is IdbAnalysisItem => analysisItem !== undefined);
+            this.reportYear = getLatestCompleteAnalysisYear(
+                includedFacilityAnalysis.flatMap(item => item.groups),
+                calanderizedMeters,
+                predictorData,
+                accountFacilities
+            );
         }
     }
 
@@ -92,7 +108,6 @@ export class MonthlyAccountAnalysisClass {
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
-                analysisItem.calculatedReportYear = accountAnalysisItem.calculatedReportYear;
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
                 let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, assessmentReportVersion, []);
@@ -103,7 +118,8 @@ export class MonthlyAccountAnalysisClass {
                     accountPredictorEntries,
                     calculateAllMonthlyData,
                     accountPredictors,
-                    allAccountAnalysisItems
+                    allAccountAnalysisItems,
+                    { reportYear: this.reportYear }
                 );
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);

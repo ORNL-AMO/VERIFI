@@ -159,7 +159,7 @@ export class AnalysisDetailsTableComponent {
   baselineYearErrorMinEnergy: Signal<boolean> = computed(() => {
     const selectedFacility = this.selectedFacility();
     const yearOptionsEnergy = this.yearOptionsEnergy();
-    if (yearOptionsEnergy && yearOptionsEnergy.length > 0 && selectedFacility) {
+    if (yearOptionsEnergy && selectedFacility.sustainabilityQuestions.energyReductionGoal && yearOptionsEnergy.length > 0 && selectedFacility) {
       return yearOptionsEnergy[0] > selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
     }
     return false;
@@ -167,7 +167,7 @@ export class AnalysisDetailsTableComponent {
   baselineYearErrorMaxEnergy: Signal<boolean> = computed(() => {
     const selectedFacility = this.selectedFacility();
     const yearOptionsEnergy = this.yearOptionsEnergy();
-    if (yearOptionsEnergy && yearOptionsEnergy.length > 0 && selectedFacility) {
+    if (yearOptionsEnergy && selectedFacility.sustainabilityQuestions.energyReductionGoal && yearOptionsEnergy.length > 0 && selectedFacility) {
       return yearOptionsEnergy[yearOptionsEnergy.length - 1] < selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
     }
     return false;
@@ -175,7 +175,7 @@ export class AnalysisDetailsTableComponent {
   baselineYearErrorMinWater: Signal<boolean> = computed(() => {
     const selectedFacility = this.selectedFacility();
     const yearOptionsWater = this.yearOptionsWater();
-    if (yearOptionsWater && yearOptionsWater.length > 0 && selectedFacility) {
+    if (yearOptionsWater && selectedFacility.sustainabilityQuestions.waterReductionGoal && yearOptionsWater.length > 0 && selectedFacility) {
       return yearOptionsWater[0] > selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
     }
     return false;
@@ -183,7 +183,7 @@ export class AnalysisDetailsTableComponent {
   baselineYearErrorMaxWater: Signal<boolean> = computed(() => {
     const selectedFacility = this.selectedFacility();
     const yearOptionsWater = this.yearOptionsWater();
-    if (yearOptionsWater && yearOptionsWater.length > 0 && selectedFacility) {
+    if (yearOptionsWater && selectedFacility.sustainabilityQuestions.waterReductionGoal && yearOptionsWater.length > 0 && selectedFacility) {
       return yearOptionsWater[yearOptionsWater.length - 1] < selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
     }
     return false;

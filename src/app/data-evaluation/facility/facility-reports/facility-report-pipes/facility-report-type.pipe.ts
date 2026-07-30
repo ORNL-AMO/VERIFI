@@ -7,7 +7,7 @@ import { FacilityReportType } from 'src/app/models/idbModels/facilityReport';
 })
 export class FacilityReportTypePipe implements PipeTransform {
 
-  transform(reportType: FacilityReportType): 'Analysis' | 'Data Overview' | 'Emission Factors' | 'Savings' | 'Modeling' | 'Cost Savings' | undefined {
+  transform(reportType: FacilityReportType): 'Analysis' | 'Data Overview' | 'Emission Factors' | 'Savings' | 'Modeling' | 'Cost Savings' | 'Data Quality' | undefined {
     if(reportType == 'analysis'){
       return 'Analysis'
     } else if(reportType == 'overview'){
@@ -20,6 +20,8 @@ export class FacilityReportTypePipe implements PipeTransform {
       return 'Modeling'
     } else if(reportType == 'costSavings'){
       return 'Cost Savings'
+    } else if(reportType == 'dataQuality'){
+      return 'Data Quality'
     }
     return undefined;
   }

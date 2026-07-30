@@ -196,5 +196,21 @@ export class PredictorTimeseriesGraphComponent {
       };
     }
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.predictorTimeSeriesGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.predictorTimeSeriesGraph.nativeElement, { format: 'png', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }
 

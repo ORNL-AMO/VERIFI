@@ -76,7 +76,7 @@ export class AccountAnalysisDetailsTableComponent {
   baselineYearErrorMinEnergy: Signal<boolean> = computed(() => {
     const account = this.selectedAccount();
     const yearOptionsEnergy = this.yearOptionsEnergy();
-    if (yearOptionsEnergy && yearOptionsEnergy.length > 0 && account) {
+    if (yearOptionsEnergy && account.sustainabilityQuestions.energyReductionGoal && yearOptionsEnergy.length > 0 && account) {
       return yearOptionsEnergy[0] > account.sustainabilityQuestions.energyReductionBaselineYear;
     }
     return false;
@@ -84,7 +84,7 @@ export class AccountAnalysisDetailsTableComponent {
   baselineYearErrorMaxEnergy: Signal<boolean> = computed(() => {
     const account = this.selectedAccount();
     const yearOptionsEnergy = this.yearOptionsEnergy();
-    if (yearOptionsEnergy && yearOptionsEnergy.length > 0 && account) {
+    if (yearOptionsEnergy && account.sustainabilityQuestions.energyReductionGoal && yearOptionsEnergy.length > 0 && account) {
       return yearOptionsEnergy[yearOptionsEnergy.length - 1] < account.sustainabilityQuestions.energyReductionBaselineYear;
     }
     return false;
@@ -92,7 +92,7 @@ export class AccountAnalysisDetailsTableComponent {
   baselineYearErrorMinWater: Signal<boolean> = computed(() => {
     const account = this.selectedAccount();
     const yearOptionsWater = this.yearOptionsWater();
-    if (yearOptionsWater && yearOptionsWater.length > 0 && account) {
+    if (yearOptionsWater && account.sustainabilityQuestions.waterReductionGoal && yearOptionsWater.length > 0 && account) {
       return yearOptionsWater[0] > account.sustainabilityQuestions.waterReductionBaselineYear;
     }
     return false;
@@ -100,7 +100,7 @@ export class AccountAnalysisDetailsTableComponent {
   baselineYearErrorMaxWater: Signal<boolean> = computed(() => {
     const account = this.selectedAccount();
     const yearOptionsWater = this.yearOptionsWater();
-    if (yearOptionsWater && yearOptionsWater.length > 0 && account) {
+    if (yearOptionsWater && account.sustainabilityQuestions.waterReductionGoal && yearOptionsWater.length > 0 && account) {
       return yearOptionsWater[yearOptionsWater.length - 1] < account.sustainabilityQuestions.waterReductionBaselineYear;
     }
     return false;

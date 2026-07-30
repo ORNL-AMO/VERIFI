@@ -19,7 +19,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
-import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestCompleteAnalysisYear } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -62,13 +62,14 @@ export class RegressionUserDefinedModelInspectionComponent {
     const selectedGroup = this.selectedGroup();
     const selectedFacility = this.selectedFacility();
     const calanderizedMeters = this.calanderizedMeters();
+    const accountPredictorEntries = this.accountPredictorEntries();
 
-    if(!analysisItem || !selectedGroup || !selectedFacility || calanderizedMeters.length == 0) {
+    if(!analysisItem || !selectedGroup || !selectedFacility || !accountPredictorEntries || calanderizedMeters.length == 0) {
       return null;
     }
     let analysisItemCopy: IdbAnalysisItem = JSON.parse(JSON.stringify(analysisItem));
     analysisItemCopy.baselineYear = selectedGroup.regressionStartYear;
-    let reportYear: number = getLatestYearWithData(calanderizedMeters, [selectedFacility]);
+    let reportYear: number = getLatestCompleteAnalysisYear([selectedGroup], calanderizedMeters, accountPredictorEntries, [selectedFacility]);
     return this.regressionsModelsService.getUserDefinedModel(selectedGroup, selectedFacility, analysisItemCopy, reportYear);
   });
 

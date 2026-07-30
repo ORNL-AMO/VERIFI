@@ -4,6 +4,7 @@ import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { checkNumberValueValid } from "./validationHelpers";
+import { getSelectedRegressionModel } from "src/app/shared/shared-analysis/calculations/regression-model-recovery";
 
 export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facilityPredictorData: Array<IdbPredictorData>): GroupAnalysisErrors {
 
@@ -74,10 +75,9 @@ export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisIt
                         missingRegressionPredictorCoef = true;
                     }
                 }
-                if (group.isGeneratedModel && !group.selectedModelId) {
-                    missingRegressionModelSelection = true;
-                } else if (group.selectedModelId) {
-                    let model: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+                if (group.isGeneratedModel) {
+                    const model: JStatRegressionModel = getSelectedRegressionModel(group);
+                    missingRegressionModelSelection = !model;
                     hasInvalidRegressionModel = model?.isValid == false;
                 }
 
