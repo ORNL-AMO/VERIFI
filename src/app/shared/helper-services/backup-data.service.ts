@@ -38,6 +38,7 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
+import { normalizeAnalysisGroupModelStorage } from '../shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'
@@ -67,15 +68,16 @@ export class BackupDataService {
   }
 
   getAccountBackupFile(): BackupFile {
+    const facilities = this.facilityDbService.accountFacilities.getValue();
     let backupFile: BackupFile = {
       account: this.accountDbService.selectedAccount.getValue(),
-      facilities: this.facilityDbService.accountFacilities.getValue(),
+      facilities,
       meters: this.utilityMeterDbService.accountMeters.getValue(),
       meterData: this.utilityMeterDataDbService.accountMeterData.getValue(),
       accountReports: this.accountReportsDbService.accountReports.getValue(),
       groups: this.trimGroups(this.utilityMeterGroupDbService.accountMeterGroups.getValue()),
       accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
-      facilityAnalysisItems: this.trimAnalysisModels(this.analysisDbService.accountAnalysisItems.getValue()),
+      facilityAnalysisItems: this.trimAnalysisModels(this.analysisDbService.accountAnalysisItems.getValue(), facilities),
       predictorData: [],
       predictorDataV2: this.predictorDataDbService.accountPredictorData.getValue(),
       predictors: this.predictorDbService.accountPredictors.getValue(),
@@ -109,7 +111,7 @@ export class BackupDataService {
 
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => { return meter.facilityId == facility.guid });
-    facilityAnalysisItems = this.trimAnalysisModels(facilityAnalysisItems);
+    facilityAnalysisItems = this.trimAnalysisModels(facilityAnalysisItems, [facility]);
 
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(meter => { return meter.facilityId == facility.guid });
@@ -992,19 +994,25 @@ export class BackupDataService {
     })
   }
 
-  //only export selected model in analysis items
-  trimAnalysisModels(analysisItems: Array<IdbAnalysisItem>): Array<IdbAnalysisItem> {
+  // Export only a valid selected model, recovering orphaned selections first.
+  trimAnalysisModels(
+    analysisItems: Array<IdbAnalysisItem>,
+    facilities: Array<IdbFacility>
+  ): Array<IdbAnalysisItem> {
     return analysisItems.map(item => {
+      const facility = facilities.find(candidate => candidate.guid === item.facilityId);
       return {
         ...item,
         groups: item.groups.map(group => {
-          if (group.analysisType == 'regression' && group.models) {
-            const selectedModels = group.models.filter(model => {
-              return model.modelId == group.selectedModelId;
-            });
-            return { ...group, models: selectedModels };
-          }
-          return { ...group, models: [] };
+          const normalizedGroup = normalizeAnalysisGroupModelStorage(
+            group,
+            facility,
+            item.baselineYear
+          ).group;
+          return {
+            ...normalizedGroup,
+            models: normalizedGroup.models ? [...normalizedGroup.models] : undefined
+          };
         })
       };
     });
