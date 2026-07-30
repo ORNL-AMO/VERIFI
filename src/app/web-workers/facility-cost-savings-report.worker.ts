@@ -17,8 +17,7 @@ addEventListener('message', ({ data }) => {
             data.calculateAllMonthlyData,
             data.accountPredictors,
             data.accountAnalysisItems,
-            data.includeGroupSummaries,
-            { reportYear: data.reportYear }
+            data.includeGroupSummaries
         );
 
         let groupSummaries: Array<{

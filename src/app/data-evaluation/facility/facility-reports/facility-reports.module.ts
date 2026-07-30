@@ -40,6 +40,10 @@ import { FacilityDataQualityReportResultsComponent } from './report-results/faci
 import { SharedDataQualityReportMetersModule } from 'src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
 import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
+import { MonthlySavingsTableComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-table/monthly-savings-table.component';
+import { GroupSavingsTableComponent } from './report-results/facility-cost-savings-report-results/group-savings-table/group-savings-table.component';
+import { AnnualSavingsTableComponent } from './report-results/facility-cost-savings-report-results/annual-savings-table/annual-savings-table.component';
+import { MonthlySavingsGraphComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
 
 
 
@@ -71,7 +75,11 @@ import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe
     FacilityCostSavingsReportSetupComponent,
     BlendedEnergyRateModalComponent,
     FacilityCostSavingsReportResultsComponent,
-    AnnualSavingsGraphComponent
+    AnnualSavingsGraphComponent,
+    MonthlySavingsTableComponent,
+    GroupSavingsTableComponent,
+    AnnualSavingsTableComponent,
+    MonthlySavingsGraphComponent
     
   ],
   imports: [
