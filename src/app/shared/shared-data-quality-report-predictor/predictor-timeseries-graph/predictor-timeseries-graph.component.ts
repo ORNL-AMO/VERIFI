@@ -51,6 +51,12 @@ export class PredictorTimeseriesGraphComponent {
         return '&#8457;';
       } else if (this.selectedPredictor.weatherDataType == 'relativeHumidity') {
         return '%';
+      } else if (this.selectedPredictor.weatherDataType == 'wetBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'dewPointTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'precipitation') {
+        return 'in';
       }
     }
     return '';
