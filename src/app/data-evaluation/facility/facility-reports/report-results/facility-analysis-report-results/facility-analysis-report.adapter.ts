@@ -340,7 +340,7 @@ export class FacilityAnalysisReportAdapter {
             monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(data => data.fiscalYear === this.analysisItem.baselineYear);
         }
         else if (yearType === 'report') {
-            monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(data => data.fiscalYear === this.analysisItem.calculatedReportYear);
+            monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(data => data.fiscalYear === this.reportSettings.reportYear);
         }
 
         if (!monthlyAnalysisSummaryData || monthlyAnalysisSummaryData.length === 0) {

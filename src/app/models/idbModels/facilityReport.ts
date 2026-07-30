@@ -275,21 +275,56 @@ export interface ModelingReportSettings {
 
 export function getCostSavingsReportSettings(): CostSavingsReportSettings {
     return {
-        reportYear: undefined,
-        costSavingsTable: {},
+        endYear: undefined,
+        endMonth: undefined,
+        unitCostTable: {},
         groupUnits: {},
-        isDataComplete: false
+        isDataComplete: false,
+        annualSavingsTable: true,
+        annualSavingsGraph: true,
+        monthlySavingsTable: true,
+        monthlySavingsGraph: true,
+        annualCumulativeSavingsTable: true,
+        annualCumulativeSavingsGraph: true,
+        monthlyCumulativeSavingsTable: true,
+        monthlyCumulativeSavingsGraph: true,
+        userCostSummary: true,
+        calculatedCostSummary: true,
+        groupAnnualTable: true,
+        groupMonthlyTable: true,
+        includeFacility: true,
+        includeAnnual: true,
+        includeMonthly: true,
+        includeGroup: true
     };
 }
 
 export interface CostSavingsReportSettings {
-    reportYear: number,
-    costSavingsTable: {
-        [year: number]: {[groupId: string]: number}
-    },
-    groupUnits: {[groupId: string]: string},
-    isDataComplete?: boolean
+    endYear: number,
+    endMonth: number,
+    unitCostTable: YearGroupData,
+    groupUnits: { [groupId: string]: string },
+    isDataComplete?: boolean,
+    annualSavingsTable: boolean,
+    annualSavingsGraph: boolean,
+    monthlySavingsTable: boolean,
+    monthlySavingsGraph: boolean,
+    annualCumulativeSavingsTable: boolean,
+    annualCumulativeSavingsGraph: boolean,
+    monthlyCumulativeSavingsTable: boolean,
+    monthlyCumulativeSavingsGraph: boolean,
+    userCostSummary: boolean,
+    calculatedCostSummary: boolean,
+    groupAnnualTable: boolean,
+    groupMonthlyTable: boolean,
+    includeFacility: boolean,
+    includeAnnual: boolean,
+    includeMonthly: boolean,
+    includeGroup: boolean
 }
+
+export type YearGroupData = { [year: number]: { [groupId: string]: number } };
+export type MonthlyGroupData = { [monthKey: string]: { [groupId: string]: number } };
 
 export function getDataQualityReportSettings(): DataQualityReportSettings {
     return {

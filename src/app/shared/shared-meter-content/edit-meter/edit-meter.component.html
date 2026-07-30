@@ -1,19 +1,26 @@
 <div class="row">
   <div class="col-12">
     <div class="d-flex w-100 justify-content-end">
-      <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
-      <button class="btn btn-primary" (click)="saveChanges()" [disabled]="meterForm.invalid">
-        @if (addOrEdit == 'add') {
+      <div>
+        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary me-2" (click)="saveChanges()" [disabled]="meterForm.invalid">
+          @if (addOrEdit == 'add') {
           <span>Add Meter</span>
-        }
-        @if (addOrEdit == 'edit') {
+          }
+          @if (addOrEdit == 'edit') {
           <span>Save Changes</span>
+          }
+        </button>
+        @if (addOrEdit == 'edit') {
+        <button class="btn nav-btn" (click)="goToMeterData()">
+          <i class="fa fa-table me-1"></i>View Meter Data
+        </button>
         }
-      </button>
+      </div>
     </div>
   </div>
   <div class="col-12">
     <app-edit-meter-form [meterForm]="meterForm" [meterDataExists]="meterDataExists"
-    [facility]="selectedFacility"></app-edit-meter-form>
+      [facility]="selectedFacility"></app-edit-meter-form>
   </div>
 </div>

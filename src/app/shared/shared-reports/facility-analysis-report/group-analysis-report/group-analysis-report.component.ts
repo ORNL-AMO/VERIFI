@@ -30,6 +30,8 @@ export class GroupAnalysisReportComponent {
   };
   @Input({ required: true })
   analysisReportSettings: AnalysisReportSettings;
+  @Input({ required: true })
+  reportYear: number;
   @Input()
   isFirstGroup: boolean = false;
 

@@ -48,11 +48,23 @@ export class PredictorHistogramGraphComponent {
     if (this.selectedPredictor.unit && this.selectedPredictor.predictorType != 'Weather') {
       return this.selectedPredictor.unit;
     } else if (this.selectedPredictor.predictorType == 'Weather') {
-      return '&#8457;';
+      if (this.selectedPredictor.weatherDataType == 'CDD' || this.selectedPredictor.weatherDataType == 'HDD') {
+        return 'days';
+      } else if (this.selectedPredictor.weatherDataType == 'dryBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'relativeHumidity') {
+        return '%';
+      } else if (this.selectedPredictor.weatherDataType == 'wetBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'dewPointTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'precipitation') {
+        return 'in';
+      }
     }
     return '';
   }
-
+  
   drawChart() {
     let unit = this.calculateUnit();
     if (unit != null && unit != undefined && unit != '') {

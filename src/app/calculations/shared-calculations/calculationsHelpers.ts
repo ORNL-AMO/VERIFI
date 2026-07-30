@@ -13,7 +13,12 @@ import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysis
 import { getDateFromPredictorData } from "src/app/shared/dateHelperFunctions";
 import { getIsEnergyMeter } from "src/app/shared/sharedHelperFunctions";
 
-export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } {
+export function getMonthlyStartAndEndDate(
+    facilityOrAccount: IdbFacility | IdbAccount,
+    analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem,
+    group: AnalysisGroup,
+    reportYear: number
+): { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } {
     let baselineDate: Date;
     let endDate: Date;
     let bankedAnalysisDate: Date;
@@ -24,20 +29,20 @@ export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAc
 
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         baselineDate = new Date(baselineYear, 0, 1);
-        endDate = new Date(analysisItem.calculatedReportYear + 1, 0, 1);
+        endDate = new Date(reportYear + 1, 0, 1);
         if (analysisItem.hasBanking && group && group.applyBanking) {
             bankedAnalysisDate = new Date(group.bankedAnalysisYear + 1, 0, 1);
         }
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
             baselineDate = new Date(baselineYear - 1, facilityOrAccount.fiscalYearMonth);
-            endDate = new Date(analysisItem.calculatedReportYear, facilityOrAccount.fiscalYearMonth);
+            endDate = new Date(reportYear, facilityOrAccount.fiscalYearMonth);
             if (analysisItem.hasBanking && group && group.applyBanking) {
                 bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
             }
         } else {
             baselineDate = new Date(baselineYear, facilityOrAccount.fiscalYearMonth);
-            endDate = new Date(analysisItem.calculatedReportYear + 1, facilityOrAccount.fiscalYearMonth);
+            endDate = new Date(reportYear + 1, facilityOrAccount.fiscalYearMonth);
             if (analysisItem.hasBanking && group && group.applyBanking) {
                 bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
             }
@@ -97,12 +102,18 @@ export function checkAnalysisValue(val: number): number {
     }
 }
 
-export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>, year: number) {
+export function getIncludedMeters(
+    meters: Array<IdbUtilityMeter>,
+    selectedAnalysisItem: IdbAccountAnalysisItem,
+    accountAnalysisItems: Array<IdbAnalysisItem>,
+    year: number,
+    reportYear: number
+) {
     let includedMeters: Array<IdbUtilityMeter> = new Array()
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
         if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
             let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-            if (facilityAnalysisItem.baselineYear <= year && facilityAnalysisItem.calculatedReportYear >= year) {
+            if (facilityAnalysisItem.baselineYear <= year && reportYear >= year) {
                 facilityAnalysisItem.groups.forEach(group => {
                     if (group.analysisType != 'skip') {
                         let filteredMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
@@ -176,6 +187,102 @@ export function getYearsWithFullData(calanderizedMeters: Array<CalanderizedMeter
         return uniqueMonths.length == 12;
     });
     return _.sortBy(uniqueYears);
+}
+
+export function getIncludedAnalysisInputIds(
+    groups: Array<AnalysisGroup>,
+    calanderizedMeters: Array<CalanderizedMeter>
+): { includedMeterIds: Array<string>, includedPredictorIds: Array<string> } {
+    const includedMeterIds = new Set<string>();
+    const includedPredictorIds = new Set<string>();
+
+    groups.forEach(group => {
+        if (group.analysisType === 'skip' || group.analysisType === 'skipAnalysis') {
+            return;
+        }
+
+        calanderizedMeters
+            .filter(calanderizedMeter =>
+                calanderizedMeter.meter.groupId === group.idbGroupId &&
+                !calanderizedMeter.meter.noLongerInUse
+            )
+            .forEach(calanderizedMeter => includedMeterIds.add(calanderizedMeter.meter.guid));
+
+        if (group.analysisType === 'energyIntensity' || group.analysisType === 'modifiedEnergyIntensity') {
+            group.predictorVariables
+                .filter(variable => variable.productionInAnalysis && variable.id)
+                .forEach(variable => includedPredictorIds.add(variable.id));
+        } else if (group.analysisType === 'regression') {
+            if (group.isGeneratedModel) {
+                const selectedModel = group.models?.find(model => model.modelId === group.selectedModelId);
+                selectedModel?.predictorVariables
+                    .filter(variable => variable.id)
+                    .forEach(variable => includedPredictorIds.add(variable.id));
+            } else {
+                group.predictorVariables
+                    .filter(variable => variable.productionInAnalysis && variable.id)
+                    .forEach(variable => includedPredictorIds.add(variable.id));
+            }
+        }
+    });
+
+    return {
+        includedMeterIds: Array.from(includedMeterIds),
+        includedPredictorIds: Array.from(includedPredictorIds)
+    };
+}
+
+/**
+ * Finds the latest fiscal year for which every considered input has a complete year.
+ * Inputs without any complete year are ignored to preserve account-analysis behavior.
+ */
+export function getLatestCompleteAnalysisYear(
+    groups: Array<AnalysisGroup>,
+    calanderizedMeters: Array<CalanderizedMeter>,
+    predictorData: Array<IdbPredictorData>,
+    facilities: Array<IdbFacility>
+): number | undefined {
+    const { includedMeterIds, includedPredictorIds } = getIncludedAnalysisInputIds(groups, calanderizedMeters);
+    const latestCompleteYears: Array<number> = [];
+
+    includedMeterIds.forEach(meterId => {
+        const calanderizedMeter = calanderizedMeters.find(meter => meter.meter.guid === meterId);
+        const facility = facilities.find(item => item.guid === calanderizedMeter?.meter.facilityId);
+        if (!calanderizedMeter || !facility) {
+            return;
+        }
+
+        const latestCompleteYear = _.max(getYearsWithFullData([calanderizedMeter], facility));
+        if (latestCompleteYear !== undefined) {
+            latestCompleteYears.push(latestCompleteYear);
+        }
+    });
+
+    includedPredictorIds.forEach(predictorId => {
+        const entries = predictorData.filter(entry => entry.predictorId === predictorId);
+        const facility = facilities.find(item => item.guid === entries[0]?.facilityId);
+        if (entries.length === 0 || !facility) {
+            return;
+        }
+
+        const monthsByFiscalYear = new Map<number, Set<number>>();
+        entries.forEach(entry => {
+            const fiscalYear = getFiscalYear(getDateFromPredictorData(entry), facility);
+            const months = monthsByFiscalYear.get(fiscalYear) ?? new Set<number>();
+            months.add(entry.month);
+            monthsByFiscalYear.set(fiscalYear, months);
+        });
+
+        const completeYears = Array.from(monthsByFiscalYear.entries())
+            .filter(([, months]) => months.size === 12)
+            .map(([year]) => year);
+        const latestCompleteYear = _.max(completeYears);
+        if (latestCompleteYear !== undefined) {
+            latestCompleteYears.push(latestCompleteYear);
+        }
+    });
+
+    return latestCompleteYears.length > 0 ? _.min(latestCompleteYears) : undefined;
 }
 
 export function getLatestYearWithData(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>): number {

@@ -18,6 +18,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getSelectedRegressionModel } from 'src/app/shared/shared-analysis/calculations/regression-model-recovery';
 
 @Component({
     selector: 'app-regression-model-inspection',
@@ -282,7 +283,10 @@ export class RegressionModelInspectionComponent implements OnInit {
   }
 
   setCompareSelected() {
-    this.selectedModel = this.selectedGroup.models.find(model => { return model.modelId == this.selectedGroup.selectedModelId });
+    this.selectedModel = getSelectedRegressionModel(this.selectedGroup);
+    if (!this.selectedModel) {
+      return;
+    }
     this.compareSelectedModel = true;
     if (!this.selectedMonthlyAnalysisSummaryData) {
       this.calculateSelectedModel();

@@ -24,6 +24,8 @@ export class MonthlyFacilityAnalysisReportComponent {
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   @Input({ required: true })
   analysisReportSettings: AnalysisReportSettings;
+  @Input({ required: true })
+  reportYear: number;
   @Input()
   groupSummaries: Array<{
     group: AnalysisGroup,
@@ -69,7 +71,7 @@ export class MonthlyFacilityAnalysisReportComponent {
 
   setReportYearMonthlyData() {
     this.reportYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
-      return summaryData.fiscalYear == this.analysisItem.calculatedReportYear;
+      return summaryData.fiscalYear == this.reportYear;
     });
   }
 

@@ -139,7 +139,7 @@ export class RegressionModelSelectionComponent {
           this.selectedGroupId = selectedGroup.idbGroupId;
           const groupMeters = calanderizedMeters.filter(cMeter => cMeter.meter.groupId == selectedGroup.idbGroupId);
           const yearsWithFullData = getYearsWithFullData(groupMeters, facility);
-          this.yearOptionSelections.set(yearsWithFullData.map(year => ({ year, isChecked: true })));
+          this.yearOptionSelections.set(yearsWithFullData.map(year => ({ year, isChecked: year >=  this.analysisItem().baselineYear })));
         }
       }
     });

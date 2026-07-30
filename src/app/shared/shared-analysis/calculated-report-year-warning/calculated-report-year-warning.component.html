@@ -1,0 +1,31 @@
+@if (issues().length > 0) {
+<div class="alert alert-warning" role="alert">
+    <div class="fw-bold mb-1">
+        <span class="fa fa-triangle-exclamation me-1"></span>
+        Why report year {{ reportYear() }} was selected
+    </div>
+    <p class="mb-2">
+        Report year {{ reportYear() }} was calculated because it is the latest year with complete data for every
+        meter and predictor included in this analysis.
+    </p>
+    <ul class="mb-2">
+        @for (issue of issues(); track issue.key) {
+        <li>
+            @if (showFacilityNames()) {
+            <span class="fw-semibold">{{ issue.facilityName }}</span>
+            <span> — </span>
+            }
+            @if (issue.url) {
+            <a [routerLink]="issue.url">{{ issue.name }}</a>
+            } @else {
+            <span>{{ issue.name }}</span>
+            }
+            <span> — {{ issue.details.join('; ') }}</span>
+        </li>
+        }
+    </ul>
+    <p class="small mb-0">
+        Complete the affected data and rerun the analysis to include a later report year.
+    </p>
+</div>
+}

@@ -23,8 +23,17 @@ export class FacilitySavingsReport {
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, accountPredictors: Array<IdbPredictor>,
         report: IdbFacilityReport
     ) {
-        analysisItem.calculatedReportYear = report.savingsReportSettings.endYear;
-        let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined, true);
+        let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
+            analysisItem,
+            facility,
+            calanderizedMeters,
+            accountPredictorEntries,
+            false,
+            accountPredictors,
+            undefined,
+            true,
+            { reportYear: report.savingsReportSettings.endYear }
+        );
         this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.savingsReportSettings.endMonth, report.savingsReportSettings.endYear);
         this.groupSummaries = annualAnalysisSummaryClass.groupSummaries.map((groupSummary: { group: AnalysisGroup, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, annualAnalysisSummaryData: Array<AnnualAnalysisSummary> }) => {

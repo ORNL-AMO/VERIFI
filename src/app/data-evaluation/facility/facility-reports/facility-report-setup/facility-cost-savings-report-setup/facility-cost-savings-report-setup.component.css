@@ -2,9 +2,7 @@
   cursor: pointer;
 }
 
-.setup-info {
-  color: #821d39;
-  font-size: 1.1em;
-  font-style: italic;
-  font-weight: bold;
+.alert-info {
+  background-color: #d8e2dc;
+  border-color: #d8e2dc;
 }

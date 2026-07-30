@@ -128,8 +128,10 @@ export class AnalyticsService {
     pageViewEvent.params.page_path = this.getPageWithoutId(pageViewEvent.params.page_path);
     // Never send real paths while in dev
     if (!environment.production) {
-      pageViewEvent.params.page_path = '/testing'
+      pageViewEvent.params.page_path = '/testing';
     }
+    // Derive page_location from the already-sanitized page_path so IDs are never sent
+    pageViewEvent.params.page_location = 'https://verifi.ornl.gov' + pageViewEvent.params.page_path;
   }
 
   getPageWithoutId(pagePath: string) {
@@ -145,6 +147,7 @@ export class AnalyticsService {
       if (!this.electronService.isElectron) {
         let eventParams: EventParameters = {
           page_path: path,
+          page_location: window.location.href,
           verifi_platform: 'verifi-web',
           session_id: undefined
         }
@@ -180,6 +183,7 @@ export interface GAEvent {
 
 export interface EventParameters {
   page_path?: string,
+  page_location?: string,
   verifi_platform?: VerifiPlatformString,
   session_id: string,
   engagement_time_msec?: string,

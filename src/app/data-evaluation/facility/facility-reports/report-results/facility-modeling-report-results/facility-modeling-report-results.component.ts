@@ -58,7 +58,7 @@ export class FacilityModelingReportResultsComponent {
     } else if (this.facilityReport.facilityReportType == 'savings') {
       reportYear = this.facilityReport.savingsReportSettings.endYear;
     } else if (this.facilityReport.facilityReportType == 'costSavings') {
-      reportYear = this.facilityReport.costSavingsReportSettings.reportYear;
+      reportYear = this.facilityReport.costSavingsReportSettings.endYear;
     }
 
     this.analysisItem.groups.forEach(group => {

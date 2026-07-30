@@ -13,6 +13,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 export class AnalysisStatusCheck {
 
     analysisItem: IdbAnalysisItem;
+    facility: IdbFacility;
     /** The most recent data date across all meters and predictors used in the analysis. */
     latestDataDate: Date;
     /** The most recent same day/month across all meters and predictors used in the analysis */
@@ -44,6 +45,7 @@ export class AnalysisStatusCheck {
         facility: IdbFacility
     ) {
         this.analysisItem = analysisItem;
+        this.facility = facility;
         this.setAnalysisGroupErrors(analysisItem.groups, predictorStatusChecks, meterStatusChecks, calanderizedMeters, predictorData);
         this.setAnalysisSetupErrors(calanderizedMeters, facility);
         this.setAnalysisDataDateCheck(analysisItem, meterStatusChecks, predictorStatusChecks);
@@ -80,12 +82,12 @@ export class AnalysisStatusCheck {
         const { includedMeterIds, includedPredictorIds } = this.collectRegressionGroupInputIds(analysisItem.groups, meterStatusChecks);
         this.includedPredictorStatusChecks = includedPredictorIds.map(predictorId =>
             this.getPredictorDateEntry(predictorId, predictorStatusChecks)
-        );
+        ).filter(p => p !== undefined);
         const latestPredictorDates: Array<Date> = this.includedPredictorStatusChecks.map(d => d.latestEntryDate);
 
         this.includedMeterStatusChecks = includedMeterIds.map(meterId =>
             this.getMeterDateEntry(meterId, meterStatusChecks)
-        );
+        ).filter(m => m !== undefined);
         const latestMeterData: Array<Date> = this.includedMeterStatusChecks.map(d => d.lastDateEntry);
 
         const allDates: Array<Date> = [
@@ -196,7 +198,7 @@ export class AnalysisStatusCheck {
             // Collect unique meter IDs for all calanderized meters belonging to this group.
             const groupMeters: Array<MeterStatusCheck> = meterStatusChecks.filter(cm => cm.groupId === group.idbGroupId);
             for (const cm of groupMeters) {
-                if (!includedMeterIds.includes(cm.meterId)) {
+                if (!cm.isMeterNoLongerInUse && !includedMeterIds.includes(cm.meterId)) {
                     includedMeterIds.push(cm.meterId);
                 }
             }

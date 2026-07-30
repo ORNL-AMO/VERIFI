@@ -1,11 +1,12 @@
 @let _submittedStatus = submittedStatus();
+@let _inHomeScreen = inHomeScreen();
 
 
-<h4>
+<h4 [ngClass]="{'no-border': _inHomeScreen}">
     Stay Up to Date!
 </h4>
 
-<div class="email-content">
+<div [ngClass]="{'email-content': _inHomeScreen}">
     @if(!_submittedStatus || _submittedStatus === 'error') {
     <p>
         Enter your email below to subscribe for VERIFI news on releases, webinars, and training events. The email
@@ -49,6 +50,3 @@
     </div>
     }
 </div>
-<!-- <div class="card-footer text-end">
-    <a class="click-link text-center" (click)="privacyNotice()">Privacy Notice</a>
-</div> -->

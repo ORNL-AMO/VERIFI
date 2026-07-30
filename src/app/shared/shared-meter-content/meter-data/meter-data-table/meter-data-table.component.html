@@ -61,6 +61,10 @@
         [meterData]="_meterData"></app-meter-data-quality-report-modal>
       }
     </div>
+    <!--Meter Settings-->
+    <div class="ps-1 pe-1 mb-2">
+      <button class="btn nav-btn" (click)="editMeter()" title="Meter Settings"><i class="fa fa-gear"></i> Meter Settings</button>
+    </div>
     <!--Import/Export-->
     <div class="ps-1 pe-1 mb-2">
       <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
@@ -88,13 +92,47 @@
     }
   </div>
   }
-  @if(_meterStatusCheck.isDataCurrent == false && _meterStatusCheck.lastDateEntry){
-  <div class="alert alert-warning text-center p-1 fw-bold">
+  @if (_meterStatusCheck.missingDataMonths.length > 0) {
+  <div class="alert alert-danger text-center p-2 fw-bold">
     <span class="fa fa-triangle-exclamation"></span>
-    Facility data calendarized through {{_meterStatusCheck.latestFacilityEntryDate | date:'MMM, yyyy'}} but this meter
-    only has monthly data through
-    {{_meterStatusCheck.lastDateEntry | date:'MMM, yyyy'}}.
+    Missing meter data found for the following months:<br>
+    @for (monthYear of _meterStatusCheck.missingDataMonths; track monthYear.date) {
+    <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
+    }
+    <div class="mt-2">
+      <button class="btn btn-sm btn-danger" (click)="openFillMissingDataModal()">
+        Fill Missing Months with Zeros
+      </button>
+    </div>
   </div>
+  }
+  @if (_meterStatusCheck.missingDataYears.length > 0) {
+  <div class="alert alert-danger text-center p-2 fw-bold">
+    <span class="fa fa-triangle-exclamation"></span>
+    Missing annual meter data:<br>
+    @for (year of _meterStatusCheck.missingDataYears; track year) {
+    <span class="badge bg-danger ms-1">No readings for {{year}}</span>
+    }
+  </div>
+  }
+  @if(_meterStatusCheck.isDataCurrent == false && _meterStatusCheck.lastDateEntry){
+    @if(_meterStatusCheck.isMeterNoLongerInUse){
+    <div class="alert alert-secondary text-center p-1">
+      <span class="fa fa-circle-info me-1"></span>
+      This meter is no longer in use. Data was last recorded through
+      <strong>{{_meterStatusCheck.lastDateEntry | date:'MMM, yyyy'}}</strong>.
+    </div>
+    } @else {
+    <div class="alert alert-warning text-center p-1 fw-bold">
+      <span class="fa fa-triangle-exclamation me-1"></span>
+      Facility data calendarized through {{_meterStatusCheck.latestFacilityEntryDate | date:'MMM, yyyy'}} but this meter
+      only has monthly data through
+      {{_meterStatusCheck.lastDateEntry | date:'MMM, yyyy'}}.
+      <div class="fw-normal mt-1 small">
+        If this meter is no longer active, <a class="click-link fw-inherit" (click)="editMeter()">update the meter settings</a> to mark it as no longer in use.
+      </div>
+    </div>
+    }
   }
   <div class="row no-margin">
     <div class="col no-margin table-responsive">
@@ -138,7 +176,7 @@
 
 
 
-<div [ngClass]="{'windowOverlay': showIndividualDelete || showBulkDelete}"></div>
+<div [ngClass]="{'windowOverlay': showIndividualDelete || showBulkDelete || showFillMissingDataModal}"></div>
 <!--individual delete-->
 <div class="popup" [class.open]="showIndividualDelete">
   @if (meterDataToDelete) {
@@ -170,4 +208,30 @@
     <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
     <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
   </div>
+</div>
+<!--fill missing meter data-->
+<div class="popup" [class.open]="showFillMissingDataModal">
+  @if (showFillMissingDataModal) {
+  <div class="popup-header">
+    Fill Missing Meter Data
+    <button class="item-right" (click)="cancelFillMissingDataModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>
+      Zero-valued meter readings will be added for the following months:
+    </p>
+    <div class="mb-3">
+      @for (monthYear of _meterStatusCheck.missingDataMonths; track monthYear.date) {
+      <span class="badge bg-secondary me-1 mb-1">{{monthYear.date | date:'MMMM, yyyy'}}</span>
+      }
+    </div>
+    <p class="mb-0 text-muted small">
+      Each reading will use the first day of the month and will be treated as a metered reading.
+    </p>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="cancelFillMissingDataModal()">Cancel</button>
+    <button class="btn btn-danger" (click)="fillMissingDataWithZeros()">Fill with Zeros</button>
+  </div>
+  }
 </div>
