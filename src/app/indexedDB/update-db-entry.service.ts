@@ -12,6 +12,7 @@ import { getGUID } from '../shared/sharedHelperFunctions';
 import { MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import * as _ from 'lodash';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
+import { normalizeAnalysisGroupModelStorage } from '../shared/shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'
@@ -98,7 +99,8 @@ export class UpdateDbEntryService {
     }
 
     if (analysisItem.groups) {
-      analysisItem.groups.forEach(group => {
+      const facility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
+      analysisItem.groups.forEach((group, groupIndex) => {
         if (group['groupErrors'] != undefined) {
           delete group['groupErrors'];
           isChanged = true;
@@ -153,6 +155,11 @@ export class UpdateDbEntryService {
           isChanged = true;
         }
 
+        const normalizedGroup = normalizeAnalysisGroupModelStorage(group, facility, analysisItem.baselineYear);
+        if (normalizedGroup.isChanged) {
+          analysisItem.groups[groupIndex] = normalizedGroup.group;
+          isChanged = true;
+        }
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
