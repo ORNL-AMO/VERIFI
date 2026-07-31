@@ -18,6 +18,7 @@ export class PrintReportButtonComponent {
   @Input()
   isLoading: boolean = false;
 
+  @Output() onExportPpt = new EventEmitter<void>();
   print: boolean;
   printSub: Subscription;
   selectedReport: IdbAccountReport;
@@ -81,5 +82,9 @@ export class PrintReportButtonComponent {
 
   generateExcel() {
     this.accountReportsService.generateExcel.next(true);
+  }
+
+  generatePPT() {
+    this.onExportPpt.emit();
   }
 }

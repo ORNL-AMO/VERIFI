@@ -30,6 +30,8 @@ import { MonthlyAnalysisSummarySavingsGraphComponent } from 'src/app/shared/shar
 import { MonthlyAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
 import { RollingEnergyConsumptionGraphComponent } from 'src/app/shared/shared-reports/facility-savings-report/rolling-energy-consumption-graph/rolling-energy-consumption-graph.component';
 import { RollingEnergySavingsGraphComponent } from 'src/app/shared/shared-reports/facility-savings-report/rolling-energy-savings-graph/rolling-energy-savings-graph.component';
+import { FacilitySavingsReportPptAdapter } from './facility-savings-report-ppt.adapter';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-savings-report-results',
@@ -85,7 +87,9 @@ export class FacilitySavingsReportResultsComponent {
     private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService,
     private exportReportPdfService: ExportReportPdfService,
-    private facilitySavingsReportAdapter: FacilitySavingsReportAdapter
+    private facilitySavingsReportAdapter: FacilitySavingsReportAdapter,
+    private facilitySavingsReportPptAdapter: FacilitySavingsReportPptAdapter,
+    private pptReportService: PptReportService
   ) { }
 
   ngOnInit(): void {
@@ -245,5 +249,19 @@ export class FacilitySavingsReportResultsComponent {
       });
     }
     return providers;
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.facilitySavingsReportPptAdapter.buildDocument({
+      report: this.facilityReport,
+      facility: this.facility,
+      analysisItem: this.analysisItem,
+      annualAnalysisSummaries: this.annualAnalysisSummaries,
+      monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+      groupSummaries: this.groupSummaries,
+      latestMonthSummary: this.latestMonthSummary,
+      analysisTableColumns: this.analysisService.analysisTableColumns.getValue()
+    });
+    await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.facilityReport.name}.pptx`);
   }
 }

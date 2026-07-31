@@ -1,6 +1,5 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { max } from 'rxjs';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -36,15 +35,15 @@ export class RollingEnergySavingsGraphComponent {
     const skip = 12;
     let title = 'Trailing 12-Month Actual Energy Savings';
 
-    const fivePercentLowerBound = this.monthlyAnalysisSummaryData.map(results => results.fivePercentSavings);
-    const fivePercentUpperBound = this.monthlyAnalysisSummaryData.map(results => results.tenPercentSavings);
-    const tenPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => results.fifteenPercentSavings);
-    const fifteenPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => results.twentyPercentSavings);
-    const twentyPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => results.twentyFivePercentSavings);
-    const thirtyPercentTarget = this.monthlyAnalysisSummaryData.map(results => results.thirtyPercentSavings);
-    const rollingSavingsForComparison = this.monthlyAnalysisSummaryData.map(results => results.rollingSavings * 1.3);
+    const fivePercentLowerBound = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.fivePercentSavings));
+    const fivePercentUpperBound = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.tenPercentSavings));
+    const tenPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.fifteenPercentSavings));
+    const fifteenPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.twentyPercentSavings));
+    const twentyPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.twentyFivePercentSavings));
+    const thirtyPercentTarget = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.thirtyPercentSavings));
+    const rollingSavingsForComparison = this.monthlyAnalysisSummaryData.map(results => this.toNumber(results.rollingSavings) * 1.3);
     const combinedArray = [...thirtyPercentTarget, ...rollingSavingsForComparison];
-    const maxTarget = Math.max(...combinedArray);
+    const maxTarget = Math.max(0,...combinedArray);
     const twentyFivePercentUpperBound = new Array(this.monthlyAnalysisSummaryData.length).fill(maxTarget);
 
     if (this.rollingEnergySavingsGraph) {
@@ -318,6 +317,14 @@ export class RollingEnergySavingsGraphComponent {
     } catch (error) {
       return '';
     }
+  }
+
+  private toNumber(value: number): number {
+    if (value === null || value === undefined) {
+      return 0;
+    }
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
   }
 }
 

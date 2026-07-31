@@ -22,6 +22,10 @@ export class FacilityPrintReportButtonComponent {
 
   @Output()
   exportPdf: EventEmitter<void> = new EventEmitter<void>();
+
+  @Output()
+  onExportPpt = new EventEmitter<void>();
+
   constructor(private dataEvaluationService: DataEvaluationService  ) {
 
   }
@@ -69,5 +73,9 @@ export class FacilityPrintReportButtonComponent {
         }, 1000)
       }, 100)
     }
+  }
+
+  exportPpt() {
+    this.onExportPpt.emit();
   }
 }

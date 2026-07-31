@@ -32,6 +32,8 @@ import { AnnualAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analy
 import { MonthlyAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
 import { MonthlyAnalysisSummarySavingsGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 import { PerformanceChartComponent } from '../performance-report/performance-chart/performance-chart.component';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
+import { AccountSavingsReportPptAdapter } from './account-savings-report-ppt.adapter';
 
 @Component({
   selector: 'app-account-savings-report',
@@ -103,7 +105,9 @@ export class AccountSavingsReportComponent {
     private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService,
     private accountSavingsReportAdapter: AccountSavingsReportAdapter,
-    private exportReportPdfService: ExportReportPdfService
+    private exportReportPdfService: ExportReportPdfService,
+    private pptReportService: PptReportService,
+    private accountSavingsReportPPTAdapter: AccountSavingsReportPptAdapter
   ) { }
 
   ngOnInit(): void {
@@ -291,6 +295,22 @@ export class AccountSavingsReportComponent {
       charts[facilityId] = async () => graph.getChartAsBase64Image();
     });
     return charts;
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.accountSavingsReportPPTAdapter.buildDocument({
+      report: this.selectedReport,
+      account: this.account,
+      analysisItem: this.selectedAnalysisItem,
+      setup: this.accountSavingsReportSetup,
+      annualAnalysisSummaries: this.annualAnalysisSummaries,
+      monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+      facilitySummaries: this.facilitySummaries,
+      lastMonthSummary: this.latestMonthSummary,
+      performanceReport: this.performanceReport,
+      analysisTableColumns: this.analysisService.analysisTableColumns.getValue()
+    });
+    await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.selectedReport.name}.pptx`);
   }
 }
 
