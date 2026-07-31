@@ -200,7 +200,7 @@ export class FacilitySavingsReportPptAdapter {
         summaries.forEach(s => {
             let row: string[] = [];
             row.push(s.year.toString());
-            if (this.analysisTableColumns.energy) {
+            if (this.analysisTableColumns.actualEnergy) {
                 row.push(this.formatValue(s.energyUse, false));
             }
             if (this.analysisTableColumns.adjusted) {
@@ -219,7 +219,7 @@ export class FacilitySavingsReportPptAdapter {
         });
         let latestRow: string[] = [];
         latestRow.push(latestMonthSummary.date.toLocaleString('en-US', { month: 'short', year: 'numeric' }) + ' *');
-        if (this.analysisTableColumns.energy) {
+        if (this.analysisTableColumns.actualEnergy) {
             latestRow.push(this.formatValue(latestMonthSummary.energyUse, false));
         }
         if (this.analysisTableColumns.adjusted) {
@@ -373,7 +373,7 @@ export class FacilitySavingsReportPptAdapter {
             let row: string[] = [];
             row.push(s.date.toLocaleString('en-US', { month: 'long', year: 'numeric' }));
             row.push(s.fiscalYear.toString());
-            if (this.analysisTableColumns.energy) {
+            if (this.analysisTableColumns.actualEnergy) {
                 row.push(this.formatValue(s.energyUse, false));
             }
             if (this.analysisTableColumns.modeledEnergy && isGroup) {
@@ -750,7 +750,9 @@ export class FacilitySavingsReportPptAdapter {
     getPredictorColumns() {
         let predictors: string[] = [];
         this.analysisTableColumns.predictors.forEach(predictorItem => {
-            predictors.push(predictorItem.predictor.name);
+            if (predictorItem.display) {
+                predictors.push(predictorItem.predictor.name);
+            }
         });
         return predictors;
     }

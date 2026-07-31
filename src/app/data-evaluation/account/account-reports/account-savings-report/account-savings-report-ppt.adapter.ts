@@ -191,14 +191,14 @@ export class AccountSavingsReportPptAdapter {
         summaries.forEach(s => {
             let row: string[] = [];
             row.push(s.year.toString());
-            if (this.analysisTableColumns.energy) {
+            if (this.analysisTableColumns.actualEnergy) {
                 row.push(this.formatValue(s.energyUse, false));
             }
             if (this.analysisTableColumns.adjusted) {
                 row.push(this.formatValue(s.adjusted, false));
             }
             if (this.analysisTableColumns.baselineAdjustmentForNormalization) {
-                row.push(this.formatValue(s.baselineAdjustment, false));
+                row.push(this.formatValue(s.baselineAdjustmentForNormalization, false));
             }
             if (this.analysisTableColumns.baselineAdjustmentForOther) {
                 row.push(this.formatValue(s.baselineAdjustmentForOtherV2, false));
@@ -210,7 +210,7 @@ export class AccountSavingsReportPptAdapter {
         });
         let latestRow: string[] = [];
         latestRow.push(latestMonthSummary.date.toLocaleString('en-US', { month: 'short', year: 'numeric' }) + ' *');
-        if (this.analysisTableColumns.energy) {
+        if (this.analysisTableColumns.actualEnergy) {
             latestRow.push(this.formatValue(latestMonthSummary.energyUse, false));
         }
         if (this.analysisTableColumns.adjusted) {
@@ -384,14 +384,14 @@ export class AccountSavingsReportPptAdapter {
             let row: string[] = [];
             row.push(s.date.toLocaleString('en-US', { month: 'long', year: 'numeric' }));
             row.push(s.fiscalYear.toString());
-            if (this.analysisTableColumns.energy) {
+            if (this.analysisTableColumns.actualEnergy) {
                 row.push(this.formatValue(s.energyUse, false));
             }
             if (this.analysisTableColumns.adjusted) {
                 row.push(this.formatValue(s.adjusted, false));
             }
             if (this.analysisTableColumns.baselineAdjustmentForNormalization) {
-                row.push(this.formatValue(s.baselineAdjustment, false));
+                row.push(this.formatValue(s.baselineAdjustmentForNormalization, false));
             }
             if (this.analysisTableColumns.baselineAdjustmentForOther) {
                 row.push(this.formatValue(s.baselineAdjustmentForOtherV2, false));
