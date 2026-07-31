@@ -37,7 +37,9 @@ export class RegressionModelsCalculator {
       let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
       let models: Array<JStatRegressionModel> = new Array();
-      let startYear: number = getFiscalYear(baselineDate, facility);
+
+      const dataYears = _.uniq(allMeterData.map(d => getFiscalYear(new Date(d.date), facility)));
+      let startYear: number = dataYears.length > 0 ? Math.min(...dataYears) : baselineYear;
       while (startYear <= endYear) {
         let modelDateRange: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, startYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {

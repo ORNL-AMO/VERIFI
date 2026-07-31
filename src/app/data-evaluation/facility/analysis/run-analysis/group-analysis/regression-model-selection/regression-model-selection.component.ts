@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -139,7 +139,7 @@ export class RegressionModelSelectionComponent {
           this.selectedGroupId = selectedGroup.idbGroupId;
           const groupMeters = calanderizedMeters.filter(cMeter => cMeter.meter.groupId == selectedGroup.idbGroupId);
           const yearsWithFullData = getYearsWithFullData(groupMeters, facility);
-          this.yearOptionSelections.set(yearsWithFullData.map(year => ({ year, isChecked: year >=  this.analysisItem().baselineYear })));
+          this.yearOptionSelections.set(yearsWithFullData.map(year => ({ year, isChecked: year >= this.analysisItem().baselineYear })));
         }
       }
     });
@@ -164,6 +164,10 @@ export class RegressionModelSelectionComponent {
           }
           if (selectedModel.SEPValidation && !selectedModel.SEPValidation.every(SEPValidation => SEPValidation.isValid) && !this.showFailedValidationModel()) {
             this.showFailedValidationModel.set(true);
+          }
+          const yearOption = untracked(() => this.yearOptionSelections()).find(option => option.year === selectedModel.modelYear);
+          if (yearOption && !yearOption.isChecked) {
+            this.yearOptionSelections.update(selections => selections.map(s => s.year === selectedModel.modelYear ? { ...s, isChecked: true } : s));
           }
         }
       }
