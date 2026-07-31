@@ -1,6 +1,7 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
 import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
 import { DetailDegreeDay, WeatherDataSelection } from "../models/degreeDays";
+import { IdbAnalysisItem } from "../models/idbModels/analysisItem";
 import { IdbFacility } from "../models/idbModels/facility";
 import { IdbFacilityEnergyUseEquipment } from "../models/idbModels/facilityEnergyUseEquipment";
 import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
@@ -220,6 +221,49 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
             weightedAverage = 0;
         }
         return weightedAverage;
+    } else if (weatherDataSelection == 'wetBulbTemp') {
+        let totalWeightedWetBulb: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            if (isNaN(degreeDay.weightedWetBulbTemp) == false) {
+                return degreeDay.weightedWetBulbTemp;
+            }
+            return 0;
+        });
+        let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            if (isNaN(degreeDay.minutesBetween) == false && isNaN(degreeDay.weightedWetBulbTemp) == false) {
+                return degreeDay.minutesBetween;
+            }
+            return 0;
+        });
+        let weightedAverage: number = (totalWeightedWetBulb / totalMinutes);
+        if (isNaN(weightedAverage)) {
+            weightedAverage = 0;
+        }
+        return weightedAverage;
+    } else if (weatherDataSelection == 'dewPointTemp') {
+        let totalWeightedDewPoint: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            if (isNaN(degreeDay.weightedDewPointTemp) == false) {
+                return degreeDay.weightedDewPointTemp;
+            }
+            return 0;
+        });
+        let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            if (isNaN(degreeDay.minutesBetween) == false && isNaN(degreeDay.weightedDewPointTemp) == false) {
+                return degreeDay.minutesBetween;
+            }
+            return 0;
+        });
+        let weightedAverage: number = (totalWeightedDewPoint / totalMinutes);
+        if (isNaN(weightedAverage)) {
+            weightedAverage = 0;
+        }
+        return weightedAverage;
+    } else if (weatherDataSelection == 'precipitation') {
+        return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            if (degreeDay.precipitation !== null && degreeDay.precipitation !== undefined && isNaN(degreeDay.precipitation) == false) {
+                return degreeDay.precipitation;
+            }
+            return 0;
+        });
     }
 }
 
@@ -307,15 +351,67 @@ export function getEnergyUseSourceIcons(equipment: IdbFacilityEnergyUseEquipment
 }
 
 export function getYearsArray(startYear: number, endYear: number): number[] {
-  const years: number[] = [];
-  for (let year = startYear; year <= endYear; year++) {
-    years.push(year);
-  }
-  return years;
+    const years: number[] = [];
+    for (let year = startYear; year <= endYear; year++) {
+        years.push(year);
+    }
+    return years;
 }
 
 export function getMeterCollectionUnit(meter: IdbUtilityMeter): string {
   return (meter.source === 'Other Fuels' && meter.scope === 2)
     ? meter.vehicleCollectionUnit
     : meter.startingUnit;
+}
+
+export function getGroupUnit(groupMeters: IdbUtilityMeter[], analysisItem: IdbAnalysisItem): string {
+    let unit: string = '';
+
+    if (groupMeters.length > 1) {
+        let mobileMeters = groupMeters.filter(meter => (meter.source == 'Other Fuels' && meter.scope == 2));
+        if (mobileMeters.length == 0) {
+            let isSameUnit = groupMeters.every(meter => meter.startingUnit == groupMeters[0].startingUnit);
+            if (isSameUnit) {
+                unit = groupMeters[0].startingUnit;
+            }
+            else {
+                if (analysisItem?.analysisCategory == 'energy') {
+                    unit = analysisItem.energyUnit;
+                }
+                else if (analysisItem?.analysisCategory == 'water') {
+                    unit = analysisItem.waterUnit;
+                }
+            }
+        }
+        else if (mobileMeters.length == groupMeters.length) {
+            let isSameUnit = mobileMeters.every(meter => meter.vehicleCollectionUnit == mobileMeters[0].vehicleCollectionUnit);
+            if (isSameUnit) {
+                unit = mobileMeters[0].vehicleCollectionUnit;
+            }
+            else {
+                unit = analysisItem?.energyUnit;
+            }
+        }
+        else if (mobileMeters.length > 0 && mobileMeters.length < groupMeters.length) {
+            let nonMobileMeters = groupMeters.filter(meter => !(meter.source == 'Other Fuels' && meter.scope == 2));
+            let isSameUnit = nonMobileMeters.every(meter => meter.startingUnit == nonMobileMeters[0].startingUnit);
+            if (isSameUnit) {
+                const nonMobileUnit = nonMobileMeters[0].startingUnit;
+                const isMobileUnitSame = mobileMeters.every(meter => meter.vehicleCollectionUnit == nonMobileUnit);
+                if (isMobileUnitSame) {
+                    unit = nonMobileUnit;
+                }
+                else {
+                    unit = analysisItem?.energyUnit;
+                }
+            }
+            else {
+                unit = analysisItem?.energyUnit;
+            }
+        }
+    }
+    else if (groupMeters.length == 1) {
+        unit = getMeterCollectionUnit(groupMeters[0]);
+    }
+    return unit;
 }

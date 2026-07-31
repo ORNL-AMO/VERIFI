@@ -246,4 +246,21 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
     };
     this.plotlyService.newPlot(this.monthlyAnalysisSavingsGraph.nativeElement, data, layout, config);
   }
+
+  
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.monthlyAnalysisSavingsGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.monthlyAnalysisSavingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }

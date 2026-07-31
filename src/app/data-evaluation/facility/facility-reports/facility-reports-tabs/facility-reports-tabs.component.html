@@ -65,6 +65,13 @@
           Cost Savings Report</a>
       </li>
       }
+      @if (_selectedReport.facilityReportType == 'dataQuality') {
+      <li class="nav-item" [ngClass]="{'disabled': _selectedReportStatusCheck.status == 'error'}">
+        <a class="nav-link" routerLink="data-quality-report" [routerLinkActive]="['active']">
+          <i class="fa fa-file"></i>
+          Data Quality Report</a>
+      </li>
+      }
     </ul>
   </div>
   <div>

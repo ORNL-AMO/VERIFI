@@ -1,0 +1,112 @@
+<div class="table-responsive">
+    <table class="table table-bordered report-table mt-3">
+        <thead class="text-center primary-header">
+            <tr>
+                <th>{{ rowHeader }}</th>
+                <th>Actual Use</th>
+                <th>Estimated Cost</th>
+                <th>Adjusted Use</th>
+                <th>Expected Cost</th>
+                <th>Energy Savings</th>
+                <th>Cost Savings</th>
+                <th>Cumulative Cost Savings</th>
+            </tr>
+        </thead>
+        <thead class="sub-header">
+            <tr>
+                <th></th>
+                <th class="fst-italic">{{finalUnit}}</th>
+                <th class="fst-italic">$</th>
+                <th class="fst-italic">{{finalUnit}}</th>
+                <th class="fst-italic">$</th>
+                <th class="fst-italic">{{finalUnit}}</th>
+                <th class="fst-italic">$</th>
+                <th class="fst-italic">$</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(rowKey of rowKeys; track rowKey) {
+            <tr [ngClass]="{'year-end': isYearEndRow(rowKey)}">
+                <td>{{formatRowLabel(rowKey)}}</td>
+
+                @if (getValue(energyUseTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(energyUseTable, rowKey) | number:'1.2-4' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(estimatedEnergyCostTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(estimatedEnergyCostTable, rowKey) | number:'1.0-0' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(adjustedEnergyUseTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(adjustedEnergyUseTable, rowKey) | number:'1.2-4' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(expectedEnergyCostTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(expectedEnergyCostTable, rowKey) | number:'1.0-0' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(energySavingsTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(energySavingsTable, rowKey) | number:'1.2-4' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(costSavingsTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(costSavingsTable, rowKey) | number:'1.0-0' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(cumulativeCostSavingsTable, rowKey) !== 0) {
+                <td class="text-center">
+                    {{ getValue(cumulativeCostSavingsTable, rowKey) | number:'1.0-0' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

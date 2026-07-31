@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
@@ -6,6 +6,8 @@ import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { MonthlyAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 
 @Component({
   selector: 'app-monthly-facility-analysis-report',
@@ -22,6 +24,8 @@ export class MonthlyFacilityAnalysisReportComponent {
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   @Input({ required: true })
   analysisReportSettings: AnalysisReportSettings;
+  @Input({ required: true })
+  reportYear: number;
   @Input()
   groupSummaries: Array<{
     group: AnalysisGroup,
@@ -34,6 +38,10 @@ export class MonthlyFacilityAnalysisReportComponent {
   reportYearAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   print: boolean;
   printSub: Subscription;
+
+  @ViewChild('monthlyAnalysisGraph') monthlyAnalysisGraph ?: MonthlyAnalysisSummaryGraphComponent;
+  @ViewChild('monthlyAnalysisSavingsGraph') monthlyAnalysisSavingsGraph ?: MonthlyAnalysisSummarySavingsGraphComponent;
+
   constructor(private dataEvaluationService: DataEvaluationService,
     private facilityReportsDbService: FacilityReportsDbService
   ) { }
@@ -63,7 +71,21 @@ export class MonthlyFacilityAnalysisReportComponent {
 
   setReportYearMonthlyData() {
     this.reportYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
-      return summaryData.fiscalYear == this.analysisItem.calculatedReportYear;
+      return summaryData.fiscalYear == this.reportYear;
     });
+  }
+
+  async getMonthlyAnalysisGraph() : Promise<string> {
+    if (this.monthlyAnalysisGraph) {
+      return await this.monthlyAnalysisGraph.getChartAsBase64Image();
+    }
+    return '';
+  }
+
+  async getMonthlyAnalysisSavingsGraph() : Promise<string> {
+    if (this.monthlyAnalysisSavingsGraph) {
+      return await this.monthlyAnalysisSavingsGraph.getChartAsBase64Image();
+    }
+    return '';
   }
 }

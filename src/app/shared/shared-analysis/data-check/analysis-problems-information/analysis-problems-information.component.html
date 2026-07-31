@@ -1,4 +1,3 @@
-@if (regressionGroupItems.length > 0) {
 <div class="w-100 justify-content-center">
   @if (isDataCheck) {
   <div class="text-center">
@@ -15,13 +14,7 @@
     </h3>
   </div>
   }
-  @if (facilityReport) {
-  <div class="text-center">
-    <h3>
-      {{facilityReport.name}}
-    </h3>
-  </div>
-  }@else if(accountReport) {
+  @else if(accountReport) {
   <div class="text-center">
     <h3>
       {{accountReport.name}}
@@ -34,6 +27,7 @@
     </h6>
   </div>
   }
+  @if (regressionGroupItems.length > 0) {
   <div>
     <h4 class="mb-0">
       Issues Summary
@@ -141,8 +135,9 @@
     </table>
   </div>
   }
+  }
 </div>
-}
+
 
 @if (regressionGroupItems.length == 0) {
 <div class="w-100 justify-content-center">

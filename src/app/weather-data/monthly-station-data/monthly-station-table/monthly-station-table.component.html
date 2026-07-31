@@ -6,120 +6,168 @@
   <thead class="sortable">
     <tr>
       <th (click)="setOrderDataField('time')" [ngClass]="{'active': orderDataField == 'time'}">
-      Date</th>
-      <th (click)="setOrderDataField('minutesBetween')"
-        [ngClass]="{'active': orderDataField == 'minutesBetween'}">
+        Date</th>
+      <th (click)="setOrderDataField('minutesBetween')" [ngClass]="{'active': orderDataField == 'minutesBetween'}">
         Reading<br> Minutes</th>
-        <th (click)="setOrderDataField('percentOfDay')" [ngClass]="{'active': orderDataField == 'percentOfDay'}">%
+      <th (click)="setOrderDataField('percentOfDay')" [ngClass]="{'active': orderDataField == 'percentOfDay'}">%
         of Day</th>
-        @if (weatherDataSelection != 'relativeHumidity') {
-          <th (click)="setOrderDataField('dryBulbTemp')" [ngClass]="{'active': orderDataField == 'dryBulbTemp'}"
-            >Dry<br> Bulb Temp</th>
-          }
-          @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
-            <th (click)="setOrderDataField('heatingDegreeDay')"
-              [ngClass]="{'active': orderDataField == 'heatingDegreeDay'}"
-              >Heating Degree<br> Days
-            </th>
-          }
-          @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
-            <th (click)="setOrderDataField('coolingDegreeDay')"
-              [ngClass]="{'active': orderDataField == 'coolingDegreeDay'}"
-              >Cooling Degree<br> Days
-            </th>
-          }
-          @if (weatherDataSelection == 'relativeHumidity') {
-            <th (click)="setOrderDataField('relativeHumidity')"
-              [ngClass]="{'active': orderDataField == 'relativeHumidity'}"
-              >Relative <br>Humidity</th>
-            }
-          </tr>
-        </thead>
-        <tbody class="table-group-divider">
-          @for (summaryData of detailedDegreeDays | orderDegreeDayDetails: orderDataField:orderByDirection| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track summaryData) {
-            <tr
-              [ngClass]="{'alert alert-danger': summaryData.gapInData}">
-              <td>
-                @if (summaryData.gapInData) {
-                  <span class="fa fa-exclamation-circle"></span>
-                }
-                {{summaryData.time | date:'short'}}
-              </td>
-              <td>
-                {{summaryData.minutesBetween | number}}
-              </td>
-              <td>
-                {{summaryData.percentOfDay * 100 | number}}
-              </td>
-              @if (weatherDataSelection != 'relativeHumidity') {
-                <td>
-                  {{summaryData.dryBulbTemp | number}} &#8457;
-                </td>
-              }
-              @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
-                <td>
-                  {{summaryData.heatingDegreeDay | number}}
-                </td>
-              }
-              @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
-                <td>
-                  {{summaryData.coolingDegreeDay | number}}
-                </td>
-              }
-              @if (weatherDataSelection == 'relativeHumidity') {
-                <td>
-                  {{summaryData.relativeHumidity | number:'1.0-1'}} &percnt;
-                </td>
-              }
-            </tr>
-          }
-        </tbody>
-        <tfoot>
-          <tr>
-            <th>
-              Total
-            </th>
-            <th>
-              {{detailedDegreeDays | degreeDayTotal: 'minutesBetween' | number}}
-              ({{detailedDegreeDays | degreeDayTotal:'days'| number:'1.0-1'}} days)
-            </th>
-            <th>
+      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection
+      != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
+      <th (click)="setOrderDataField('dryBulbTemp')" [ngClass]="{'active': orderDataField == 'dryBulbTemp'}">Dry<br>
+        Bulb Temp</th>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+      <th (click)="setOrderDataField('heatingDegreeDay')" [ngClass]="{'active': orderDataField == 'heatingDegreeDay'}">
+        Heating Degree<br> Days
+      </th>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+      <th (click)="setOrderDataField('coolingDegreeDay')" [ngClass]="{'active': orderDataField == 'coolingDegreeDay'}">
+        Cooling Degree<br> Days
+      </th>
+      }
+      @if (weatherDataSelection == 'relativeHumidity') {
+      <th (click)="setOrderDataField('relativeHumidity')" [ngClass]="{'active': orderDataField == 'relativeHumidity'}">
+        Relative <br>Humidity</th>
+      }
+      @if (weatherDataSelection == 'wetBulbTemp') {
+      <th (click)="setOrderDataField('wetBulbTemp')" [ngClass]="{'active': orderDataField == 'wetBulbTemp'}">
+        Wet<br> Bulb Temp</th>
+      }
+      @if (weatherDataSelection == 'dewPointTemp') {
+      <th (click)="setOrderDataField('dewPointTemp')" [ngClass]="{'active': orderDataField == 'dewPointTemp'}">
+        Dew Point<br> Temp</th>
+      }
+      @if (weatherDataSelection == 'precipitation') {
+      <th (click)="setOrderDataField('precipitation')" [ngClass]="{'active': orderDataField == 'precipitation'}">
+        Precipitation</th>
+      }
+    </tr>
+  </thead>
+  <tbody class="table-group-divider">
+    @for (summaryData of detailedDegreeDays | orderDegreeDayDetails: orderDataField:orderByDirection| slice:
+    ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage; track summaryData) {
+    <tr [ngClass]="{'alert alert-danger': summaryData.gapInData}">
+      <td>
+        @if (summaryData.gapInData) {
+        <span class="fa fa-exclamation-circle"></span>
+        }
+        {{summaryData.time | date:'short'}}
+      </td>
+      <td>
+        {{summaryData.minutesBetween | number}}
+      </td>
+      <td>
+        {{summaryData.percentOfDay * 100 | number}}
+      </td>
+      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection
+      != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
+      <td>
+        {{summaryData.dryBulbTemp | number}} &#8457;
+      </td>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+      <td>
+        {{summaryData.heatingDegreeDay | number}}
+      </td>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+      <td>
+        {{summaryData.coolingDegreeDay | number}}
+      </td>
+      }
+      @if (weatherDataSelection == 'relativeHumidity') {
+      <td>
+        {{summaryData.relativeHumidity | number:'1.0-1'}} &percnt;
+      </td>
+      }
+      @if (weatherDataSelection == 'wetBulbTemp') {
+      <td>
+        {{summaryData.wetBulbTemp | number:'1.0-1'}} &#8457;
+      </td>
+      }
+      @if (weatherDataSelection == 'dewPointTemp') {
+      <td>
+        {{summaryData.dewPointTemp | number:'1.0-1'}} &#8457;
+      </td>
+      }
+      @if (weatherDataSelection == 'precipitation') {
+      @if (summaryData.precipitation !== null && summaryData.precipitation !== undefined) {
+      <td>
+        {{summaryData.precipitation | number:'1.0-2'}} in
+      </td>
+      }
+      @else {
+        <td>
+          &mdash;
+        </td>
+      }
+      }
+    </tr>
+    }
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>
+        Total
+      </th>
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'minutesBetween' | number}}
+        ({{detailedDegreeDays | degreeDayTotal:'days'| number:'1.0-1'}} days)
+      </th>
+      <th>
 
-            </th>
-            @if (weatherDataSelection != 'relativeHumidity') {
-              <th>
-                {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &#8457;
-              </th>
-            }
-            @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
-              <th>
-                {{detailedDegreeDays | degreeDayTotal: 'heatingDegreeDay' | number}}
-              </th>
-            }
-            @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
-              <th>
-                {{detailedDegreeDays | degreeDayTotal: 'coolingDegreeDay' | number}}
-              </th>
-            }
-            @if (weatherDataSelection == 'relativeHumidity') {
-              <th>
-                {{detailedDegreeDays | degreeDayTotal: 'relativeHumidity' | number:'1.0-4'}} &percnt;
-              </th>
-            }
-          </tr>
-        </tfoot>
-      </table>
+      </th>
+      @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection
+      != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &#8457;
+      </th>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'heatingDegreeDay' | number}}
+      </th>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'coolingDegreeDay' | number}}
+      </th>
+      }
+      @if (weatherDataSelection == 'relativeHumidity') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'relativeHumidity' | number:'1.0-4'}} &percnt;
+      </th>
+      }
+      @if (weatherDataSelection == 'wetBulbTemp') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'wetBulbTemp' | number:'1.0-1'}} &#8457;
+      </th>
+      }
+      @if (weatherDataSelection == 'dewPointTemp') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'dewPointTemp' | number:'1.0-1'}} &#8457;
+      </th>
+      }
+      @if (weatherDataSelection == 'precipitation') {
+      <th>
+        {{detailedDegreeDays | degreeDayTotal: 'precipitation' | number:'1.0-2'}} in
+      </th>
+      }
+    </tr>
+  </tfoot>
+</table>
 
-      <div class="d-flex justify-content-between">
-        <div class="w-100">
-          <button class="btn action-btn btn-sm" (click)="copyTable()">
-            <span class="fa fa-copy"></span> Copy Table
-          </button>
-        </div>
+<div class="d-flex justify-content-between">
+  <div class="w-100">
+    <button class="btn action-btn btn-sm" (click)="copyTable()">
+      <span class="fa fa-copy"></span> Copy Table
+    </button>
+  </div>
 
-        <div class="d-flex w-100 justify-content-end">
-          <ngb-pagination [collectionSize]="detailedDegreeDays.length" [(page)]="currentPageNumber"
-            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
-          </ngb-pagination>
-        </div>
-      </div>
+  <div class="d-flex w-100 justify-content-end">
+    <ngb-pagination [collectionSize]="detailedDegreeDays.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+      [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+  </div>
+</div>

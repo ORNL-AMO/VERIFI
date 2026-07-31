@@ -26,7 +26,10 @@ import { PredictorDataQualityStatusPipe } from './predictor-data-quality-status.
   exports: [
     PredictorDataQualityReportComponent,
     PredictorDataQualityReportModalComponent,
-    PredictorDataQualityStatusPipe
+    PredictorDataQualityStatusPipe,
+    PredictorTimeseriesGraphComponent,
+    PredictorHistogramGraphComponent,
+    PredictorStatisticsTableComponent
   ]
 })
 export class SharedDataQualityReportPredictorsModule { }

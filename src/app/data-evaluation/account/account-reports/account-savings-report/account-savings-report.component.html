@@ -101,12 +101,12 @@
                     <h5 class="text-center">Monthly Analysis</h5>
                 </u></i>
             <div class="print-break-avoid">
-                <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+                <app-monthly-analysis-summary-graph #monthlyAnalysisGraph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
                     [analysisItem]="selectedAnalysisItem" [facilityOrAccount]="account">
                 </app-monthly-analysis-summary-graph>
             </div>
             <div class="print-break-avoid">
-                <app-monthly-analysis-summary-savings-graph [analysisItem]="selectedAnalysisItem"
+                <app-monthly-analysis-summary-savings-graph #monthlyAnalysisSavingsGraph [analysisItem]="selectedAnalysisItem"
                     [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [facilityOrAccount]="account">
                 </app-monthly-analysis-summary-savings-graph>
             </div>
@@ -171,7 +171,7 @@
 
                     @if (summary.annualAnalysisSummaries && summary.annualAnalysisSummaries.length > 0 && accountSavingsReportSetup.includeFacilityResultsGraph) {
                         <div class="print-break-avoid">
-                            <app-annual-analysis-summary-graph [annualAnalysisSummary]="summary.annualAnalysisSummaries"
+                            <app-annual-analysis-summary-graph #facilityAnnualGraph [annualAnalysisSummary]="summary.annualAnalysisSummaries"
                                 [analysisItem]="summary.analysisItem">
                             </app-annual-analysis-summary-graph>
                         </div>
@@ -184,13 +184,13 @@
                                 <h5 class="text-center">Monthly Analysis</h5>
                             </u></i>
                         <div class="print-break-avoid">
-                            <app-monthly-analysis-summary-graph
+                            <app-monthly-analysis-summary-graph #facilityMonthlyGraph
                                 [monthlyAnalysisSummaryData]="summary.monthlySummaryData"
                                 [analysisItem]="summary.analysisItem" [facilityOrAccount]="summary.facility">
                             </app-monthly-analysis-summary-graph>
                         </div>
                         <div class="print-break-avoid">
-                            <app-monthly-analysis-summary-savings-graph [analysisItem]="summary.analysisItem"
+                            <app-monthly-analysis-summary-savings-graph #facilityMonthlySavingsGraph [analysisItem]="summary.analysisItem"
                                 [monthlyAnalysisSummaryData]="summary.monthlySummaryData"
                                 [facilityOrAccount]="summary.facility">
                             </app-monthly-analysis-summary-savings-graph>
@@ -262,7 +262,7 @@
             }
 
             @if (performanceReport && accountSavingsReportSetup.includePerformanceResultsGraph) {
-                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'savings'"
+                <app-performance-chart #performanceChart [performanceReport]="performanceReport" [chartDataOption]="'savings'"
                     [chartDataType]="'facility'" [performanceReportSetup]="setupDetails"></app-performance-chart>
             }
         </div>
@@ -279,5 +279,5 @@
 </div>
 
 @if (selectedReport) {
-<app-print-report-button></app-print-report-button>
+<app-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()" (onExportPpt)="downloadPpt()"></app-print-report-button>
 }

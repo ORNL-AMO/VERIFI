@@ -1,5 +1,5 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -19,6 +19,8 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { runWorker } from 'src/app/web-workers/run-worker';
+import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 
 @Component({
   selector: 'app-account-analysis-results',
@@ -37,7 +39,34 @@ export class AccountAnalysisResultsComponent implements OnInit {
   private readonly sharedDataService = inject(SharedDataService);
   private readonly utilityMeterDbService = inject(UtilityMeterdbService);
   private readonly utilityMeterDataDbService = inject(UtilityMeterDatadbService);
+  private readonly accountStatusCheckService = inject(AccountStatusCheckService);
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly accountStatusCheck = toSignal(this.accountStatusCheckService.accountStatusCheck);
+  private readonly accountAnalysisItem = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  private readonly annualAnalysisSummaries: Signal<Array<AnnualAnalysisSummary>> = toSignal(
+    this.accountAnalysisService.annualAnalysisSummary,
+    { initialValue: [] }
+  );
+
+  readonly selectedAnalysisStatusChecks: Signal<Array<AnalysisStatusCheck>> = computed(() => {
+    const accountStatusCheck = this.accountStatusCheck();
+    const accountAnalysisItem = this.accountAnalysisItem();
+    if (!accountStatusCheck || !accountAnalysisItem) {
+      return [];
+    }
+
+    return accountStatusCheck
+      .getAccountAnalysisStatusCheckById(accountAnalysisItem.guid)
+      ?.includedFacilityAnalysisStatusChecks ?? [];
+  });
+
+  readonly calculatedReportYear: Signal<number | undefined> = computed(() => {
+    const annualAnalysisSummaries = this.annualAnalysisSummaries();
+    return annualAnalysisSummaries?.length > 0
+      ? annualAnalysisSummaries[annualAnalysisSummaries.length - 1].year
+      : undefined;
+  });
 
   ngOnInit(): void {
     const accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();

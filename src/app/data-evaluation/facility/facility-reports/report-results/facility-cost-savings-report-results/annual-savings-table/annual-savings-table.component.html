@@ -1,0 +1,79 @@
+<div class="table-responsive">
+    <table class="table table-bordered report-table mt-3">
+        <thead class="text-center primary-header">
+            <tr>
+                <th>Year</th>
+                @for (group of filteredGroups; track group) {
+                <th>{{ group.idbGroupId | groupName }}</th>
+                }
+                @if (!showUnitHeader) {
+                <th>Total</th>
+                }
+            </tr>
+        </thead>
+        @if (showUnitHeader) {
+        <thead class="text-center sub-header">
+            <tr>
+                <th></th>
+                @for (group of filteredGroups; track group) {
+                <th class="fst-italic">
+                    @if (unitMode === 'group') {
+                    $/{{ groupUnits[group.idbGroupId] }}
+                    }
+                    @else {
+                    $/{{ singleUnit }}
+                    }
+                </th>
+                }
+            </tr>
+        </thead>
+        }
+        <tbody>
+            @for(year of years; track year) {
+            @let totalValue = getTotal(year);
+            <tr>
+                <td>{{year}}</td>
+                @for (group of filteredGroups; track group) {
+                @let yearValue = getValue(year, group.idbGroupId);
+                @if (yearValue && yearValue !== undefined &&
+                yearValue !== null && yearValue
+                !== 0) {
+                <td class="text-center">
+                    @if (currencyPrefix) {
+                    $
+                    }
+                    @if (showUnitHeader) {
+                    {{ yearValue | number:'1.2-2'}}
+                    }
+                    @else {
+                    {{ yearValue | number:'1.0-0'}}
+                    }
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+                }
+                @if (!showUnitHeader) {
+                @if (totalValue && totalValue !== undefined && totalValue !== null && totalValue !== 0)
+                {
+                <td class="text-center total-column">
+                    @if (currencyPrefix) {
+                    $
+                    }
+                    {{ totalValue | number:'1.0-0'}}
+                </td>
+                }
+                @else {
+                <td class="text-center total-column">
+                    &mdash;
+                </td>
+                }
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,4 +1,4 @@
-@if(reportSettings.costSavingsTable && convertedCostDataTable && costSavingsTable && cumulativeCostSavingsTable) {
+@if(reportSettings.unitCostTable && convertedCostDataTable && costSavingsTable && cumulativeCostSavingsTable) {
 <div class="report">
     <div class="text-center">
         <h3>
@@ -13,318 +13,147 @@
     </div>
 
     @if(costSavingsTable) {
+    @if (reportSettings.annualSavingsTable && reportSettings.includeFacility && reportSettings.includeAnnual) {
     <div>
         <h4 class="mb-0">
             Annual Cost Savings
         </h4>
-
-        <div class="table-responsive">
-            <table class="table table-bordered report-table mt-3">
-                <thead class="text-center primary-header">
-                    <tr>
-                        <th>Year</th>
-                        @for (group of filteredGroups; track group) {
-                        <th>{{ group.idbGroupId | groupName }}</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(year of years; track year) {
-                    <tr>
-                        <td>{{year}}</td>
-                        @for (group of filteredGroups; track group) {
-                        @if (costSavingsTable[year] && costSavingsTable[year][group.idbGroupId] !== undefined &&
-                        costSavingsTable[year][group.idbGroupId] !== null && costSavingsTable[year][group.idbGroupId]
-                        !== 0) {
-                        <td class="text-center">
-                            $ {{ costSavingsTable[year][group.idbGroupId] | number:'1.2-2'}}
-                        </td>
-                        }
-                        @else {
-                        <td class="text-center">
-                            &mdash;
-                        </td>
-                        }
-                        }
-                    </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <app-annual-savings-table [years]="years" [filteredGroups]="filteredGroups" [tableData]="costSavingsTable"
+            [currencyPrefix]="true"></app-annual-savings-table>
     </div>
+    }
 
-    @if(years && selectedAnalysisItem && costSavingsTable && dataComplete) {
+    @if(years && selectedAnalysisItem && costSavingsTable && dataComplete && reportSettings.annualSavingsGraph &&
+    reportSettings.includeFacility && reportSettings.includeAnnual) {
     <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="costSavingsTable"></app-annual-savings-graph>
     }
     }
 
+    @if(monthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlySavingsTable &&
+    reportSettings.includeFacility && reportSettings.includeMonthly) {
+    <div class="mt-4">
+        <h4 class="mb-0">
+            Monthly Cost Savings
+        </h4>
+
+        <app-monthly-savings-table [monthKeys]="monthKeys" [filteredGroups]="filteredGroups"
+            [costSavingsTable]="monthlyCostSavingsTable"></app-monthly-savings-table>
+    </div>
+    }
+
+    @if (monthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlySavingsGraph &&
+    reportSettings.includeFacility && reportSettings.includeMonthly) {
+    <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
+        [savingsData]="monthlyCostSavingsTable"></app-monthly-savings-graph>
+    }
+
     @if(cumulativeCostSavingsTable) {
-    <div class="report-section">
+    @if(reportSettings.annualCumulativeSavingsTable && reportSettings.includeFacility && reportSettings.includeAnnual) {
+    <div class="mt-4">
         <h4 class="mb-0">
             Cumulative Annual Cost Savings
         </h4>
-
-        <div class="table-responsive">
-            <table class="table table-bordered report-table mt-3">
-                <thead class="text-center primary-header">
-                    <tr>
-                        <th>Year</th>
-                        @for (group of filteredGroups; track group) {
-                        <th>{{ group.idbGroupId | groupName }}</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(year of years; track year) {
-                    <tr>
-                        <td>{{year}}</td>
-                        @for (group of filteredGroups; track group) {
-                        @if (cumulativeCostSavingsTable[year] && cumulativeCostSavingsTable[year][group.idbGroupId] !==
-                        undefined &&
-                        cumulativeCostSavingsTable[year][group.idbGroupId] !== null &&
-                        cumulativeCostSavingsTable[year][group.idbGroupId]
-                        !== 0) {
-                        <td class="text-center">
-                            $ {{ cumulativeCostSavingsTable[year][group.idbGroupId] | number:'1.2-2'}}
-                        </td>
-                        }
-                        @else {
-                        <td class="text-center">
-                            &mdash;
-                        </td>
-                        }
-                        }
-                    </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <app-annual-savings-table [years]="years" [filteredGroups]="filteredGroups"
+            [tableData]="cumulativeCostSavingsTable" [currencyPrefix]="true"></app-annual-savings-table>
     </div>
+    }
 
-    @if(years && selectedAnalysisItem && cumulativeCostSavingsTable && dataComplete) {
+    @if(years && selectedAnalysisItem && cumulativeCostSavingsTable && dataComplete &&
+    reportSettings.annualCumulativeSavingsGraph && reportSettings.includeFacility && reportSettings.includeAnnual) {
     <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="cumulativeCostSavingsTable"></app-annual-savings-graph>
     }
     }
 
-    <div class="report-section">
+    @if (cumulativeMonthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlyCumulativeSavingsTable &&
+    reportSettings.includeFacility && reportSettings.includeMonthly) {
+    <div class="mt-4">
+        <h4 class="mb-0">
+            Cumulative Monthly Cost Savings
+        </h4>
+
+        <app-monthly-savings-table [monthKeys]="monthKeys" [filteredGroups]="filteredGroups"
+            [costSavingsTable]="cumulativeMonthlyCostSavingsTable"></app-monthly-savings-table>
+    </div>
+    }
+
+    @if (cumulativeMonthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlyCumulativeSavingsGraph &&
+    reportSettings.includeFacility && reportSettings.includeMonthly) {
+    <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
+        [savingsData]="cumulativeMonthlyCostSavingsTable"></app-monthly-savings-graph>
+    }
+
+    @if (costDataTable && reportSettings.userCostSummary) {
+    <div class="mt-4">
         <h4 class="mb-0">
             Summary of User Costs
         </h4>
-
-        <div class="table-responsive">
-            <table class="table table-bordered report-table mt-3">
-                <thead class="text-center primary-header">
-                    <tr>
-                        <th>Year</th>
-                        @for (group of filteredGroups; track group) {
-                        <th>{{ group.idbGroupId | groupName }}</th>
-                        }
-                    </tr>
-                </thead>
-                <thead class="sub-header">
-                    <tr>
-                        <th></th>
-                        @for (group of filteredGroups; track group) {
-                        <th class="fst-italic">$/{{ groupUnits[group.idbGroupId] }}</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(year of years; track year) {
-                    <tr>
-                        <td>{{year}}</td>
-                        @for (group of filteredGroups; track group) {
-                        @if(costDataTable[year] && costDataTable[year][group.idbGroupId] !== undefined) {
-                        <td class="text-center">
-                            {{costDataTable[year][group.idbGroupId] | number:'1.2-2'}}
-                        </td>
-                        }
-                        @else {
-                        <td class="text-center">
-                            &mdash;
-                        </td>
-                        }
-                        }
-                    </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <app-annual-savings-table [years]="years" [filteredGroups]="filteredGroups" [tableData]="costDataTable"
+            [showUnitHeader]="true" [groupUnits]="groupUnits" [unitMode]="'group'"
+            [currencyPrefix]="false"></app-annual-savings-table>
     </div>
+    }
 
-    <div class="report-section">
+    @if (convertedCostDataTable && reportSettings.calculatedCostSummary) {
+    <div class="mt-4">
         <h4 class="mb-0">
             Summary of Calculated Costs
         </h4>
-
-        <div class="table-responsive">
-            <table class="table table-bordered report-table mt-3">
-                <thead class="text-center primary-header">
-                    <tr>
-                        <th>Year</th>
-                        @for (group of filteredGroups; track group) {
-                        <th>{{ group.idbGroupId | groupName }}</th>
-                        }
-                    </tr>
-                </thead>
-                <thead class="sub-header">
-                    <tr>
-                        <th></th>
-                        @for (group of filteredGroups; track group) {
-                        <th class="fst-italic">$/{{finalUnit}}</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(year of years; track year) {
-                    <tr>
-                        <td>{{year}}</td>
-                        @for (group of filteredGroups; track group) {
-                        @if(convertedCostDataTable[year] && convertedCostDataTable[year][group.idbGroupId] !==
-                        undefined) {
-                        <td class="text-center">
-                            {{convertedCostDataTable[year][group.idbGroupId] | number:'1.2-2'}}
-                        </td>
-                        }
-                        @else {
-                        <td class="text-center">
-                            &mdash;
-                        </td>
-                        }
-                        }
-                    </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<div class="report">
-    <div class="text-center">
-        <h3 class="fs-3 fw-bold mt-2">
-            Group Level Data
-        </h3>
-    </div>
-    @for (group of filteredGroups; track group) {
-    <h4 class="mt-5">
-        {{ group.idbGroupId | groupName }}
-    </h4>
-
-    <div class="table-responsive">
-        <table class="table table-bordered report-table mt-3">
-            <thead class="text-center primary-header">
-                <tr>
-                    <th>Year</th>
-                    <th>Actual Use</th>
-                    <th>Estimated Cost</th>
-                    <th>Adjusted Use</th>
-                    <th>Expected Cost</th>
-                    <th>Energy Savings</th>
-                    <th>Cost Savings</th>
-                    <th>Cumulative Cost Savings</th>
-                </tr>
-            </thead>
-            <thead class="sub-header">
-                <tr>
-                    <th></th>
-                    <th class="fst-italic">{{finalUnit}}</th>
-                    <th class="fst-italic">$</th>
-                    <th class="fst-italic">{{finalUnit}}</th>
-                    <th class="fst-italic">$</th>
-                    <th class="fst-italic">{{finalUnit}}</th>
-                    <th class="fst-italic">$</th>
-                    <th class="fst-italic">$</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for(year of years; track year) {
-                <tr>
-                    <td>{{year}}</td>
-                    @if (getReportData(year, group.idbGroupId).energyUse !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).energyUse | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-
-                    @if (getReportData(year, group.idbGroupId).estimatedEnergyCost !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).estimatedEnergyCost | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-
-                    @if (getReportData(year, group.idbGroupId).adjustedEnergyUse !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).adjustedEnergyUse | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-
-                    @if (getReportData(year, group.idbGroupId).expectedEnergyCost !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).expectedEnergyCost | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-
-                    @if (getReportData(year, group.idbGroupId).energySavings !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).energySavings | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-
-                    @if (getReportData(year, group.idbGroupId).costSavings !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).costSavings | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-
-                    @if (getReportData(year, group.idbGroupId).cumulativeCostSavings !== 0) {
-                    <td class="text-center">
-                        {{ getReportData(year, group.idbGroupId).cumulativeCostSavings | number:'1.2-2' }}
-                    </td>
-                    }
-                    @else {
-                    <td class="text-center">
-                        &mdash;
-                    </td>
-                    }
-                </tr>
-                }
-            </tbody>
-        </table>
+        <app-annual-savings-table [years]="years" [filteredGroups]="filteredGroups" [tableData]="convertedCostDataTable"
+            [showUnitHeader]="true" [unitMode]="'single'" [singleUnit]="finalUnit"
+            [currencyPrefix]="false"></app-annual-savings-table>
     </div>
     }
 </div>
+
+@if (reportSettings.includeGroup) {
+@for (group of filteredGroups; track group) {
+<div class="report">
+    @if ((!reportSettings.includeAnnual || (!reportSettings.annualSavingsTable && !reportSettings.annualSavingsGraph &&
+    !reportSettings.annualCumulativeSavingsTable && !reportSettings.annualCumulativeSavingsGraph)) &&
+    (!reportSettings.includeMonthly || (!reportSettings.monthlySavingsTable &&
+    !reportSettings.monthlyCumulativeSavingsTable)) &&
+    !reportSettings.userCostSummary && !reportSettings.calculatedCostSummary) {
+    <div class="text-center">
+        <h3>
+            {{facilityReport.name}}
+        </h3>
+    </div>
+
+    <div class="text-center mb-4">
+        <h6>
+            Generated By VERIFI
+        </h6>
+    </div>
+    }
+    <h3 class="text-center fw-bold text-decoration-underline">
+        {{ group.idbGroupId | groupName }}
+    </h3>
+    @if (reportSettings.includeGroup && reportSettings.groupAnnualTable) {
+    <h4 class="mt-5">
+        Annual Details
+    </h4>
+    <app-group-savings-table [groupId]="group.idbGroupId" [finalUnit]="finalUnit" [rowHeader]="'Year'" [rowKeys]="years"
+        [isMonthly]="false" [energyUseTable]="energyUseTable" [estimatedEnergyCostTable]="estimatedEnergyCostTable"
+        [adjustedEnergyUseTable]="adjustedEnergyUseTable" [expectedEnergyCostTable]="expectedEnergyCostTable"
+        [energySavingsTable]="energySavingsTable" [costSavingsTable]="costSavingsTable"
+        [cumulativeCostSavingsTable]="cumulativeCostSavingsTable"></app-group-savings-table>
+    }
+
+    @if (reportSettings.includeGroup && reportSettings.groupMonthlyTable) {
+    <h4 class="mt-5">
+        Monthly Details
+    </h4>
+    <app-group-savings-table [groupId]="group.idbGroupId" [finalUnit]="finalUnit" [rowHeader]="'Month'"
+        [rowKeys]="monthKeys" [isMonthly]="true" [energyUseTable]="monthlyEnergyUseTable"
+        [estimatedEnergyCostTable]="estimatedMonthlyEnergyCostTable"
+        [adjustedEnergyUseTable]="monthlyAdjustedEnergyUseTable"
+        [expectedEnergyCostTable]="expectedMonthlyEnergyCostTable" [energySavingsTable]="monthlyEnergySavingsTable"
+        [costSavingsTable]="monthlyCostSavingsTable"
+        [cumulativeCostSavingsTable]="cumulativeMonthlyCostSavingsTable"></app-group-savings-table>
+    }
+</div>
+}
+}
 }

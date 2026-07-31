@@ -10,10 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-data-overview-map',
-    templateUrl: './data-overview-map.component.html',
-    styleUrls: ['./data-overview-map.component.css'],
-    standalone: false
+  selector: 'app-data-overview-map',
+  templateUrl: './data-overview-map.component.html',
+  styleUrls: ['./data-overview-map.component.css'],
+  standalone: false
 })
 export class DataOverviewMapComponent {
   @Input()
@@ -121,7 +121,7 @@ export class DataOverviewMapComponent {
       };
 
       let config = {
-        modeBarButtonsToRemove:['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true,
         scrollZoom: false
@@ -196,6 +196,22 @@ export class DataOverviewMapComponent {
       return 'Energy Emissions Data';
     } else if (this.dataType == 'water') {
       return 'Water Consumption Data';
+    }
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.utilityUsageMap?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.utilityUsageMap.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
     }
   }
 }

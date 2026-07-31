@@ -232,4 +232,20 @@ export class PerformanceChartComponent {
     });
     return data;
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.performanceChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.performanceChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }

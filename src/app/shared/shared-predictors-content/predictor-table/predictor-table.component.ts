@@ -11,6 +11,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
+import { getSelectedRegressionModel } from '../../shared-analysis/calculations/regression-model-recovery';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -87,7 +88,7 @@ export class PredictorTableComponent {
     if (!degreeDayPredictorsList) return false;
     return degreeDayPredictorsList.some(item => item.predictor.ignoreWeatherDataWarning);
   });
-  
+
   predictorUsedGroupIds: Array<string> = [];
   displayDeletePredictor: boolean = false;
   showIgnoreAllWarningsModal: boolean = false;
@@ -103,8 +104,9 @@ export class PredictorTableComponent {
       let group: AnalysisGroup = allFacilityGroups[i];
       if (group.analysisType == 'regression') {
         if (group.selectedModelId) {
-          let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-          predictorVariables = selectedModel.predictorVariables;
+          let selectedModel: JStatRegressionModel = getSelectedRegressionModel(group);
+          predictorVariables = selectedModel?.predictorVariables
+            ?? group.predictorVariables.filter(variable => variable.productionInAnalysis);
         } else {
           predictorVariables = group.predictorVariables.filter(variable => {
             return (variable.productionInAnalysis == true);
@@ -217,6 +219,12 @@ export class PredictorTableComponent {
         this.weatherDataService.weatherDataSelection = 'relativeHumidity';
       } else if (predictor.weatherDataType == 'dryBulbTemp') {
         this.weatherDataService.weatherDataSelection = 'dryBulbTemp';
+      } else if (predictor.weatherDataType == 'wetBulbTemp') {
+        this.weatherDataService.weatherDataSelection = 'wetBulbTemp';
+      } else if (predictor.weatherDataType == 'dewPointTemp') {
+        this.weatherDataService.weatherDataSelection = 'dewPointTemp';
+      } else if (predictor.weatherDataType == 'precipitation') {
+        this.weatherDataService.weatherDataSelection = 'precipitation';
       }
       let endDate: Date = new Date(weatherStation.end);
       endDate.setFullYear(endDate.getFullYear() - 1);
@@ -289,4 +297,3 @@ export class PredictorTableComponent {
     }
   }
 }
-

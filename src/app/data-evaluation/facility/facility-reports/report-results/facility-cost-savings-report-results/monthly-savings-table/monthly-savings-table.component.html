@@ -1,0 +1,43 @@
+<div class="table-responsive">
+    <table class="table table-bordered report-table mt-3">
+        <thead class="text-center primary-header">
+            <tr>
+                <th>Month</th>
+                @for (group of filteredGroups; track group) {
+                <th>{{ group.idbGroupId | groupName }}</th>
+                }
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(monthKey of monthKeys; track monthKey) {
+                @let totalValue = getTotal(monthKey);
+            <tr [ngClass]="{'year-end': checkYearEnd(monthKey)}">
+                <td>{{ formatMonthLabel(monthKey) }}</td>
+                @for (group of filteredGroups; track group) {
+                @if (costSavingsTable[monthKey] && checkValidNumber(costSavingsTable[monthKey][group.idbGroupId])) {
+                <td class="text-center">
+                    $ {{ costSavingsTable[monthKey][group.idbGroupId] | number:'1.0-0'}}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+                }
+                @if (costSavingsTable[monthKey] && totalValue && totalValue !== undefined && totalValue !== null && totalValue !== 0) {
+                <td class="text-center total-column">
+                    $ {{ totalValue | number:'1.0-0'}}
+                </td>
+                }
+                @else {
+                <td class="text-center total-column">
+                    &mdash;
+                </td>
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

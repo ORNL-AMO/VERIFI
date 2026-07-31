@@ -102,7 +102,7 @@
 
 
 <hr>
-@if (analysisReportSettings.facilityMonthlyResultsGraphs) {
+@if (analysisReportSettings.groupMonthlyResultsGraphs) {
     <div class="d-flex w-100" [ngClass]="{'flex-column': print}">
         <div [ngClass]="{'w-50 pe-1': !print, 'w-100 pb-3 print-break-avoid': print}">
             <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"

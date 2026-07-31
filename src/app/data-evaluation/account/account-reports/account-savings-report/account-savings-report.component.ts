@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -26,6 +26,14 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
 import { AccountSavingsReport } from 'src/app/calculations/savings-report-calculations/accountSavingsReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { AccountSavingsReportAdapter } from './account-savings-report.adapter';
+import { AnnualAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
+import { MonthlyAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from 'src/app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { PerformanceChartComponent } from '../performance-report/performance-chart/performance-chart.component';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
+import { AccountSavingsReportPptAdapter } from './account-savings-report-ppt.adapter';
 
 @Component({
   selector: 'app-account-savings-report',
@@ -73,6 +81,16 @@ export class AccountSavingsReportComponent {
   }>;
   latestMonthSummary: MonthlyAnalysisSummaryData;
 
+  isExportingPdf: boolean = false;
+
+  @ViewChild(AnnualAnalysisSummaryGraphComponent) annualAnalysisSummaryGraphComponent?: AnnualAnalysisSummaryGraphComponent;
+  @ViewChild('monthlyAnalysisGraph') monthlyAnalysisGraphComponent?: MonthlyAnalysisSummaryGraphComponent;
+  @ViewChild('monthlyAnalysisSavingsGraph') monthlyAnalysisSavingsGraphComponent?: MonthlyAnalysisSummarySavingsGraphComponent;
+  @ViewChildren('facilityAnnualGraph') facilityAnnualGraphs!: QueryList<AnnualAnalysisSummaryGraphComponent>;
+  @ViewChildren('facilityMonthlyGraph') facilityMonthlyGraphs!: QueryList<MonthlyAnalysisSummaryGraphComponent>;
+  @ViewChildren('facilityMonthlySavingsGraph') facilityMonthlySavingsGraphs!: QueryList<MonthlyAnalysisSummarySavingsGraphComponent>;
+  @ViewChild('performanceChart') performanceChartComponent?: PerformanceChartComponent;
+
   constructor(private accountReportDbService: AccountReportDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
@@ -85,7 +103,11 @@ export class AccountSavingsReportComponent {
     private sharedDataService: SharedDataService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private accountSavingsReportAdapter: AccountSavingsReportAdapter,
+    private exportReportPdfService: ExportReportPdfService,
+    private pptReportService: PptReportService,
+    private accountSavingsReportPPTAdapter: AccountSavingsReportPptAdapter
   ) { }
 
   ngOnInit(): void {
@@ -195,6 +217,100 @@ export class AccountSavingsReportComponent {
       this.facilitySummaries = accountSavingsReport.facilitySummaries;
       this.calculating = false;
     }
+  }
+
+  async onExportPdf() {
+    let selectedReport = this.accountReportDbService.selectedReport.value;
+    if (!selectedReport || this.isExportingPdf) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const document = this.accountSavingsReportAdapter.buildDocument({
+        account: this.account,
+        report: selectedReport,
+        savingsReport: this.accountSavingsReportSetup,
+        annualAnalysisSummaries: this.annualAnalysisSummaries,
+        latestMonthSummary: this.latestMonthSummary,
+        monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+        facilitySummaries: this.facilitySummaries,
+        analysisItem: this.selectedAnalysisItem,
+        performanceReport: this.performanceReport,
+        performanceSetupDetails: this.setupDetails,
+        chartImageProviders: this.getChartImageProviders()
+      });
+      await this.exportReportPdfService.export(document, `${selectedReport.name} - Account Savings Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
+  }
+
+  getChartImageProviders() {
+    return {
+      annualEnergyIntensityChart: this.annualAnalysisSummaryGraphComponent ? () => this.annualAnalysisSummaryGraphComponent.getEnergyIntensityChartAsBase64Image() : async () => '',
+      annualPercentImprovementChart: this.annualAnalysisSummaryGraphComponent ? () => this.annualAnalysisSummaryGraphComponent.getPercentImprovementChartAsBase64Image() : async () => '',
+      monthlyAnalysisGraph: this.monthlyAnalysisGraphComponent ? () => this.monthlyAnalysisGraphComponent.getChartAsBase64Image() : async () => '',
+      monthlyAnalysisSavingsGraph: this.monthlyAnalysisSavingsGraphComponent ? () => this.monthlyAnalysisSavingsGraphComponent.getChartAsBase64Image() : async () => '',
+      facilityEnergyIntensityChart: this.getFacilityEnergyIntensityCharts(),
+      facilityPercentImprovementChart: this.getFacilityPercentImprovementCharts(),
+      facilityMonthlyAnalysisGraph: this.getFacilityMonthlyAnalysisCharts(),
+      facilityMonthlyAnalysisSavingsGraph: this.getFacilityMonthlySavingsCharts(),
+      performanceChart: this.performanceChartComponent ? () => this.performanceChartComponent.getChartAsBase64Image() : async () => ''
+    };
+  }
+
+  getFacilityEnergyIntensityCharts(): Record<string, () => Promise<string>> {
+    const charts: Record<string, () => Promise<string>> = {};
+    this.facilityAnnualGraphs.forEach((graph, index) => {
+      const facilityId = this.facilitySummaries[index].facility.guid;
+      charts[facilityId] = async () => graph.getEnergyIntensityChartAsBase64Image();
+    });
+    return charts;
+  }
+
+  getFacilityPercentImprovementCharts(): Record<string, () => Promise<string>> {
+    const charts: Record<string, () => Promise<string>> = {};
+    this.facilityAnnualGraphs.forEach((graph, index) => {
+      const facilityId = this.facilitySummaries[index].facility.guid;
+      charts[facilityId] = async () => graph.getPercentImprovementChartAsBase64Image();
+    });
+    return charts;
+  }
+
+  getFacilityMonthlyAnalysisCharts(): Record<string, () => Promise<string>> {
+    const charts: Record<string, () => Promise<string>> = {};
+    this.facilityMonthlyGraphs.forEach((graph, index) => {
+      const facilityId = this.facilitySummaries[index].facility.guid;
+      charts[facilityId] = async () => graph.getChartAsBase64Image();
+    });
+    return charts;
+  }
+
+  getFacilityMonthlySavingsCharts(): Record<string, () => Promise<string>> {
+    const charts: Record<string, () => Promise<string>> = {};
+    this.facilityMonthlySavingsGraphs.forEach((graph, index) => {
+      const facilityId = this.facilitySummaries[index].facility.guid;
+      charts[facilityId] = async () => graph.getChartAsBase64Image();
+    });
+    return charts;
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.accountSavingsReportPPTAdapter.buildDocument({
+      report: this.selectedReport,
+      account: this.account,
+      analysisItem: this.selectedAnalysisItem,
+      setup: this.accountSavingsReportSetup,
+      annualAnalysisSummaries: this.annualAnalysisSummaries,
+      monthlyAnalysisSummaryData: this.monthlyAnalysisSummaryData,
+      facilitySummaries: this.facilitySummaries,
+      lastMonthSummary: this.latestMonthSummary,
+      performanceReport: this.performanceReport,
+      analysisTableColumns: this.analysisService.analysisTableColumns.getValue()
+    });
+    await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.selectedReport.name}.pptx`);
   }
 }
 
