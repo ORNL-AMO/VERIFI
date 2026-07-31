@@ -130,6 +130,11 @@
             </select>
           </div>
         </div>
+        @if (yearOptions().length == 0) {
+        <div class="alert alert-danger text-center p-1">
+          No valid baseline years available. Please check your data.
+        </div>
+        }
         @if (baselineYearWarning()) {
         <div class="alert alert-warning text-center p-1">
           {{baselineYearWarning()}}
