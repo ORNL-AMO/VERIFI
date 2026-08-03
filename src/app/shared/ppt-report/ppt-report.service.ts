@@ -134,9 +134,10 @@ export class PptReportService {
       valAxisMinVal: model.valAxisMinVal ?? 0,
       valAxisMaxVal: model.valAxisMaxVal,
       valGridLine: { style: 'solid', color: 'E8E8E8', pt: 0.5 },
-      barGapWidthPct: 75,
       fontFace: PPT_THEME.fonts.body,
       ...(typeof model.valAxisMajorUnit === 'number' ? { valAxisMajorUnit: model.valAxisMajorUnit } : {}),
+      barDir: model.barDir ?? 'col',
+      barGapWidthPct: model.barGapWidthPct ?? 75,
     };
 
     if (model.chartType === 'combo') {
@@ -188,6 +189,7 @@ export class PptReportService {
         line: pptx.charts.LINE,
         area: pptx.charts.AREA,
       };
+      const colors = model.barColors?.length ? model.barColors : model.series.map((s, i) => s.color ?? PPT_THEME.chartPalette[i % PPT_THEME.chartPalette.length]);
 
       const hasPerSeriesStyle = model.chartType === 'line' && model.series.some(s => s.lineDash || s.lineSize);
 
@@ -205,7 +207,6 @@ export class PptReportService {
         slide.addChart(charts as any, chartOpts);
       } else {
         const data = model.series.map(s => ({ name: s.name, labels: model.labels, values: s.data }));
-        const colors = model.series.map((s, i) => s.color ?? PPT_THEME.chartPalette[i % PPT_THEME.chartPalette.length]);
         slide.addChart(typeMap[model.chartType], data, { ...chartOpts, chartColors: colors });
       }
     }
