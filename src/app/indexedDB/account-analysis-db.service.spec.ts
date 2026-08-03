@@ -1,33 +1,36 @@
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
+import { vi } from 'vitest';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 
 describe('AccountAnalysisDbService', () => {
   let service: AccountAnalysisDbService;
-  let dbService: jasmine.SpyObj<any>;
+  let dbService: {
+    add: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
-    dbService = jasmine.createSpyObj('NgxIndexedDBService', ['add', 'update']);
-    dbService.add.and.callFake((_storeName: string, item: IdbAccountAnalysisItem) => of(item));
-    dbService.update.and.callFake((_storeName: string, item: IdbAccountAnalysisItem) => of(item));
-    service = new AccountAnalysisDbService(dbService, {} as any, {} as any);
+    dbService = {
+      add: vi.fn((_storeName: string, item: IdbAccountAnalysisItem) => of(item)),
+      update: vi.fn((_storeName: string, item: IdbAccountAnalysisItem) => of(item))
+    };
+    service = new AccountAnalysisDbService(dbService as any, {} as any, {} as any);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  it('should omit a legacy calculated report year when adding or updating an account analysis item', () => {
+  it('omits a legacy calculated report year when adding or updating an account analysis item', async () => {
     const analysisItem = {
       guid: 'account-analysis-guid',
       calculatedReportYear: 2024
     } as unknown as IdbAccountAnalysisItem;
 
-    service.addWithObservable(analysisItem).subscribe();
-    service.updateWithObservable(analysisItem).subscribe();
+    await firstValueFrom(service.addWithObservable(analysisItem));
+    await firstValueFrom(service.updateWithObservable(analysisItem));
 
-    const addedItem = dbService.add.calls.mostRecent().args[1] as IdbAccountAnalysisItem & { calculatedReportYear?: number };
-    const updatedItem = dbService.update.calls.mostRecent().args[1] as IdbAccountAnalysisItem & { calculatedReportYear?: number };
+    const addedItem = dbService.add.mock.calls.at(-1)?.[1] as IdbAccountAnalysisItem & { calculatedReportYear?: number };
+    const updatedItem = dbService.update.mock.calls.at(-1)?.[1] as IdbAccountAnalysisItem & { calculatedReportYear?: number };
+    expect(dbService.add).toHaveBeenCalledWith('accountAnalysisItems', addedItem);
+    expect(dbService.update).toHaveBeenCalledWith('accountAnalysisItems', updatedItem);
     expect(addedItem.calculatedReportYear).toBeUndefined();
     expect(updatedItem.calculatedReportYear).toBeUndefined();
     expect((analysisItem as IdbAccountAnalysisItem & { calculatedReportYear?: number }).calculatedReportYear).toBe(2024);
