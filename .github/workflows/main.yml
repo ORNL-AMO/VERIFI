@@ -1,9 +1,5 @@
 name: CI/CD
 
-permissions:
-  contents: read
-  packages: read
-
 on:
   push:
     branches:
