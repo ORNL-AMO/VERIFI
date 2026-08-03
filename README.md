@@ -46,6 +46,19 @@ If you plan to contribute code changes to this repository, please review the [co
 - Production Web Build: `npm run build-prod`
 - Production Electron Build: `npm run build-prod-electron`
 
+### Testing
+
+VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs such as IndexedDB and Web Workers.
+
+- Run fast unit tests in watch mode: `npm test`
+- Run fast unit tests once: `npm run test:ci`
+- Install Chromium before running browser tests locally: `npx playwright install chromium`
+- Run browser tests in Chromium: `npm run test:browser`
+- Run browser tests once in headless Chromium: `npm run test:browser:ci`
+- Run the complete CI test suite: `npm run test:all:ci`
+
+Fast tests use the `.spec.ts` suffix. Tests that require a real browser use `.browser.spec.ts` and are kept out of the fast jsdom suite.
+
 ### Native Installers
 
 - `npm run dist` will create Electron installers for your operating system.
