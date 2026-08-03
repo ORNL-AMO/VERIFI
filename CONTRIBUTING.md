@@ -70,14 +70,15 @@ requests is greatly preferred over one large pull request.** Not only will the r
 shorter, but the review will be more focused and of higher quality, benefitting the author and code
 base. Be sure to write a complete description of these changes in the pull request body.
 
-<!-- TODO: testing not setup properly
 ## Tests
 
 All tests must pass. Pull requests will be rejected or have changes requested if tests do not pass,
 or cannot pass with changes. Tests are automatically run through Github Actions for any pull request
-or push to the main or develop branches, but should also be run locally before submission.
+or push to the master or develop branches, but should also be run locally before submission.
 
-All code changes should be paired with a corresponding unit or integration test. A description of how to run tests using Karma is provided in the [Readme](README.md).
+VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs. Run `npm run test:all:ci` before opening a pull request. Install the local browser dependency once with `npx playwright install chromium`. Additional commands and test-suite conventions are documented in the [Readme](README.md).
+
+All code changes should be paired with a meaningful unit or integration test when behavior changes. Angular CLI-generated creation-only tests must be replaced with behavioral coverage or removed before merge; a passing `should create` assertion alone is not considered sufficient coverage.
 
 ### Test Automation
 
@@ -85,8 +86,8 @@ All pull requests are automatically tested using GitHub Actions. The CI workflow
 
 ### Test Coverage
 
-At this time, our primary requirement is that all existing and new tests pass when a pull request is opened. While we encourage writing tests for new code, we do not currently enforce a specific code coverage threshold.
--->
+At this time, our primary requirement is that all existing and new tests pass when a pull request is opened. We do not currently enforce a specific code coverage threshold. Coverage gates can be introduced once the test suite is representative of the application.
+
 ## Documentation
 
 All new features, changes, and bug fixes should be accompanied by relevant documentation updates. This includes updating code comments, the README, and any relevant files in the docs/ directory. Well-documented code and features help other contributors and users understand and use the project effectively.
