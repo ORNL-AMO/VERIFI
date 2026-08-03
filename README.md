@@ -27,11 +27,13 @@ This tool is written in the Angular framework (TypeScript) and uses Electron for
 
 If you plan to contribute code changes to this repository, please review the [contributing guidelines](CONTRIBUTING.md) first.
 
+AI-assisted contributors should also start with the repository [agent guide](AGENTS.md), [architecture overview](ARCHITECTURE.md), and [agent documentation index](docs/agents/README.md).
+
 ### Getting Started
 
 - We are using NodeJS [nodejs.org](https://nodejs.org/en/download). See [`package.json`](./package.json) for currently supported version.
 - This project was generated with [Angular CLI](https://github.com/angular/angular-cli), and is typically updated to latest versions of angular as often as is reasonable.
-- To install all required packages: `npm install`
+- To install all required packages from the lockfile: `npm ci`
 - When developing for web, run `npm run start` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ### Electron Development

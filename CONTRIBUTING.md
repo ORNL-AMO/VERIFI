@@ -9,6 +9,8 @@ This project and everyone participating in it is expected to adhere to our [Code
 These contributing guidelines should be read by software developers wishing to contribute code or
 documentation changes into VERIFI, or to push changes upstream to the main ORNL-AMO/VERIFI repository.
 
+Contributors using coding agents should also read [AGENTS.md](./AGENTS.md), [ARCHITECTURE.md](./ARCHITECTURE.md), and the [agent documentation index](./docs/agents/README.md).
+
 Public contributions to this project are very much welcomed. However, this project is actively maintained by a group of core developers. Project work by the core development team will take priority to outside contributors. For those looking to contribute externally on existing issues, please check the status of the issues on the project board below and reach out to the team via comment on the issue to ensure the work is ready to be executed and not in the scope of one of the core developers.
 
 ### 📋 Project Board
@@ -73,8 +75,7 @@ base. Be sure to write a complete description of these changes in the pull reque
 ## Tests
 
 All tests must pass. Pull requests will be rejected or have changes requested if tests do not pass,
-or cannot pass with changes. Tests are automatically run through Github Actions for any pull request
-or push to the master or develop branches, but should also be run locally before submission.
+or cannot pass with changes. Run the relevant checks locally before submission.
 
 VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs. Run `npm run test:all:ci` before opening a pull request. Install the local browser dependency once with `npx playwright install chromium`. Additional commands and test-suite conventions are documented in the [Readme](README.md).
 
@@ -82,7 +83,7 @@ All code changes should be paired with a meaningful unit or integration test whe
 
 ### Test Automation
 
-All pull requests are automatically tested using GitHub Actions. The CI workflow unit tests, and build checks on every PR and push to main or develop. You can view the status of these checks in the PR interface. Please ensure your code passes all automated checks before requesting a review.
+The current GitHub Actions workflow runs on pushes to `master` and `develop`, plus manual dispatch. Its test job gates the downstream QA, web, and desktop release jobs. Pull request branches do not currently trigger this workflow, so contributors must run `npm run test:all:ci` locally before requesting review.
 
 ### Test Coverage
 
@@ -91,6 +92,8 @@ At this time, our primary requirement is that all existing and new tests pass wh
 ## Documentation
 
 All new features, changes, and bug fixes should be accompanied by relevant documentation updates. This includes updating code comments, the README, and any relevant files in the docs/ directory. Well-documented code and features help other contributors and users understand and use the project effectively.
+
+Update [ARCHITECTURE.md](./ARCHITECTURE.md) when system boundaries or data flows change, the matching [repository skill](./.agents/skills) when a repeatable workflow changes, and [AGENTS.md](./AGENTS.md) when repository-wide commands, rules, or source-routing guidance change.
 
 ### Changelog
 
