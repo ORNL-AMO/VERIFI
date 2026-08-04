@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -15,9 +15,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
-import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getFacilityDataManagementUrl } from './header-navigation';
 
 @Component({
   selector: 'app-header',
@@ -207,7 +206,11 @@ export class HeaderComponent implements OnInit {
       let url: string = this.router.url;
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-        this.router.navigateByUrl(getFacilityDataManagementUrl(this.activeAccount.guid, selectedFacility));
+        if(selectedFacility){
+          this.router.navigateByUrl(`/data-management/${this.activeAccount.guid}/facilities/${selectedFacility.guid}`)
+        }else{
+          this.router.navigateByUrl(`/data-management/${this.activeAccount.guid}`)
+        }
       } else if (url.includes('weather-data')) {
         this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/weather-data');
       } else if (url.includes('custom-data')) {
