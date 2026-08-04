@@ -129,12 +129,12 @@ export class FacilitiesListComponent {
   }
 
   async setFacilityOrder(facility: IdbFacility) {
-    await this.dbChangesService.updateFacilities(facility, false);
+    await this.dbChangesService.updateFacility(facility);
     for (let i = 0; i < this.facilities.length; i++) {
       if (this.facilities[i].guid != facility.guid) {
         if (this.facilities[i].facilityOrder && this.facilities[i].facilityOrder == facility.facilityOrder) {
           this.facilities[i].facilityOrder = undefined;
-          await this.dbChangesService.updateFacilities(this.facilities[i], false);
+          await this.dbChangesService.updateFacility(this.facilities[i]);
         }
       }
     };

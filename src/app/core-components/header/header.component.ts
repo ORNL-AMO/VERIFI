@@ -17,6 +17,7 @@ import { ToastNotificationsService } from '../toast-notifications/toast-notifica
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getFacilityDataManagementUrl } from './header-navigation';
 
 @Component({
   selector: 'app-header',
@@ -206,7 +207,7 @@ export class HeaderComponent implements OnInit {
       let url: string = this.router.url;
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
+        this.router.navigateByUrl(getFacilityDataManagementUrl(this.activeAccount.guid, selectedFacility));
       } else if (url.includes('weather-data')) {
         this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/weather-data');
       } else if (url.includes('custom-data')) {

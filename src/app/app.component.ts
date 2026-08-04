@@ -157,6 +157,12 @@ export class AppComponent {
         }
         await this.updateAccountAnalysisSelectedItems(account);
         await this.updateFacilityAnalysisSelectedItems();
+        let selectedFacility = this.facilityDbService.selectedFacility.getValue();
+        if (selectedFacility) {
+          this.dbChangesService.setFacilitySelection(selectedFacility);
+        } else {
+          this.dbChangesService.clearFacilitySelection();
+        }
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
       } else {
@@ -415,16 +421,11 @@ export class AppComponent {
   async updateFacilityAnalysisSelectedItems() {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     for (let facility of facilities) {
       let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
       if (updateFacility.isChanged) {
         facility = updateFacility.facility;
-        let onSelect: boolean = false;
-        if (selectedFacility && selectedFacility.id === facility.id) {
-          onSelect = true;
-        }
-        await this.dbChangesService.updateFacilities(facility, onSelect);
+        await this.dbChangesService.updateFacility(facility);
       }
     }
   }

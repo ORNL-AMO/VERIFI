@@ -39,6 +39,7 @@ import { FacilityEnergyUseGroupsDbService } from './facility-energy-use-groups-d
 import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseEquipmentDbService } from './facility-energy-use-equipment-db.service';
 import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
+import { resolveInitialFacility } from './selection-resolvers';
 
 @Injectable({
   providedIn: 'root'
@@ -73,6 +74,9 @@ export class DbChangesService {
 
 
   async selectAccount(account: IdbAccount, skipUpdates: boolean) {
+    const storedFacilityId = this.facilityDbService.getInitialFacility();
+    this.clearFacilitySelection();
+
     if (!skipUpdates) {
       let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
       account = updateAccount.account;
@@ -131,33 +135,66 @@ export class DbChangesService {
       await this.setPredictorDataV2(account, skipUpdates);
     }
     await this.updateFacilityAnalysisSelectedItems();
+
+    const selectedFacility = resolveInitialFacility(
+      account,
+      this.facilityDbService.accountFacilities.getValue(),
+      storedFacilityId
+    );
+    if (selectedFacility) {
+      this.selectFacility(selectedFacility);
+    } else if (storedFacilityId !== undefined && storedFacilityId !== null) {
+      this.facilityDbService.clearInitialFacility();
+    }
   }
 
   selectFacility(facility: IdbFacility) {
     let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
     if (updateFacility.isChanged) {
       facility = updateFacility.facility;
-      this.updateFacilities(facility, true);
+      void this.updateFacility(facility);
     }
-    //set predictors
-    // this.setFacilityPredictorsDeprecated(facility);
+    this.setFacilitySelection(facility);
+  }
+
+  clearFacilitySelection() {
+    this.facilityDbService.selectedFacility.next(undefined);
+    this.predictorsDbServiceDeprecated.facilityPredictorEntries.next([]);
+    this.predictorsDbServiceDeprecated.facilityPredictors.next([]);
+    this.predictorDbService.facilityPredictors.next([]);
+    this.predictorDataDbService.facilityPredictorData.next([]);
+    this.utilityMeterDbService.facilityMeters.next([]);
+    this.utilityMeterDbService.selectedMeter.next(undefined);
+    this.utilityMeterDataDbService.facilityMeterData.next([]);
+    this.utilityMeterGroupDbService.facilityMeterGroups.next([]);
+    this.analysisDbService.facilityAnalysisItems.next([]);
+    this.analysisDbService.selectedAnalysisItem.next(undefined);
+    this.analysisDbService.clearGeneratedModels();
+    this.facilityReportsDbService.facilityReports.next([]);
+    this.facilityReportsDbService.selectedReport.next(undefined);
+    this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.next([]);
+    this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.next([]);
+  }
+
+  setFacilitySelection(facility: IdbFacility) {
+    this.clearFacilitySelection();
+
+    const deprecatedPredictorEntries = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue()
+      .filter(item => item.facilityId == facility.guid);
+    const deprecatedPredictors = deprecatedPredictorEntries
+      .flatMap(entry => entry.predictors ?? []);
+    this.predictorsDbServiceDeprecated.facilityPredictorEntries.next(deprecatedPredictorEntries);
+    this.predictorsDbServiceDeprecated.facilityPredictors.next(deprecatedPredictors);
+
     this.setFacilityPredictorsV2(facility);
     this.setFacilityPredictorDataV2(facility);
-    //set meters
     this.setFacilityMeters(facility);
-    //set meter data
     this.setFacilityMeterData(facility);
-    //set meter groups
     this.setFacilityMeterGroups(facility);
-    //set analaysis
     this.setFacilityAnalysisItems(facility);
-    //set reports
     this.setFacilityReports(facility);
-    //set energy groups
     this.setFacilityEnergyUseGroups(facility);
-    //set energy equipment
     this.setFacilityEnergyUseEquipment(facility);
-    //set facility
     this.facilityDbService.selectedFacility.next(facility);
   }
 
@@ -194,7 +231,7 @@ export class DbChangesService {
         let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, analysisItems);
         if (updateFacility.isChanged) {
           facility = updateFacility.facility;
-          await this.updateFacilities(facility);
+          await this.updateFacility(facility);
         }
       }
     }
@@ -255,13 +292,15 @@ export class DbChangesService {
     this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.next(facilityEnergyUseEquipment);
   }
 
-  async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
-    let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
-    let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(selectedFacility.accountId);
+  async updateFacility(facility: IdbFacility): Promise<IdbFacility> {
+    const selectedFacilityGuid = this.facilityDbService.selectedFacility.getValue()?.guid;
+    let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
+    let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(facility.accountId);
     this.facilityDbService.accountFacilities.next(accountFacilites);
-    if (!onSelect) {
+    if (selectedFacilityGuid === updatedFacility.guid) {
       this.facilityDbService.selectedFacility.next(updatedFacility);
     }
+    return updatedFacility;
   }
 
   async setAccountReports(account: IdbAccount) {
@@ -550,16 +589,11 @@ export class DbChangesService {
   async updateFacilityAnalysisSelectedItems() {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     for (let facility of facilities) {
       let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
       if (updateFacility.isChanged) {
         facility = updateFacility.facility;
-        let onSelect: boolean = false;
-        if (selectedFacility && selectedFacility.id === facility.id) {
-          onSelect = true;
-        }
-        await this.updateFacilities(facility, onSelect);
+        await this.updateFacility(facility);
       }
     }
   }

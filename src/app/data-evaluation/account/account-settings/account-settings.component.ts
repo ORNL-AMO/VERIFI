@@ -182,12 +182,12 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   async setFacilityOrder(facility: IdbFacility) {
-    await this.dbChangesService.updateFacilities(facility, false);
+    await this.dbChangesService.updateFacility(facility);
     for (let i = 0; i < this.facilityList.length; i++) {
       if (this.facilityList[i].guid != facility.guid) {
         if (this.facilityList[i].facilityOrder && this.facilityList[i].facilityOrder == facility.facilityOrder) {
           this.facilityList[i].facilityOrder = undefined;
-          await this.dbChangesService.updateFacilities(this.facilityList[i], false);
+          await this.dbChangesService.updateFacility(this.facilityList[i]);
         }
       }
     };
@@ -221,7 +221,7 @@ export class AccountSettingsComponent implements OnInit {
       if (this.applySettingsOptions.sustainabilityQuestions) {
         facility.sustainabilityQuestions = accountCopy.sustainabilityQuestions
       }
-      await this.dbChangesService.updateFacilities(facility, false);
+      await this.dbChangesService.updateFacility(facility);
     }
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "alert-success");

@@ -295,7 +295,7 @@ export class SharedMeterCalendarizationComponent {
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
-      await this.dbChangesService.updateFacilities(this.selectedFacility);
+      await this.dbChangesService.updateFacility(this.selectedFacility);
       this.setCalanderizedMeterData();
     }
   }
