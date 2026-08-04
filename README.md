@@ -58,8 +58,13 @@ VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests th
 - Run browser tests in Chromium: `npm run test:browser`
 - Run browser tests once in headless Chromium: `npm run test:browser:ci`
 - Run the complete CI test suite: `npm run test:all:ci`
+- Generate informational scoped coverage: `npm run test:coverage`
 
 Fast tests use the `.spec.ts` suffix. Tests that require a real browser use `.browser.spec.ts` and are kept out of the fast jsdom suite.
+
+Behavior-changing pull requests should add the lowest-cost meaningful automated coverage, or document why focused manual evidence is more appropriate. Creation-only specs do not count as coverage. Pull requests targeting `master` or `develop` run both the fast and browser suites in GitHub Actions.
+
+See the [testing guide](docs/testing.md) for the risk-based pull-request policy, test-layer decision table, coverage policy, and executable examples.
 
 ### Native Installers
 

@@ -50,6 +50,7 @@ Use non-watch commands for verification:
 | Fast unit tests | `npm run test:ci` | Pure TypeScript, Angular components, services, pipes, and ordinary utilities |
 | Browser tests | `npm run test:browser:ci` | IndexedDB, Web Workers, and behavior requiring native browser APIs |
 | Full test suite | `npm run test:all:ci` | Final verification before a pull request |
+| Informational coverage | `npm run test:coverage` | Scoped calculation, IndexedDB, and Web Worker coverage; not a gate |
 | Development build | `npm run build` | General Angular/Electron renderer changes |
 | Production web build | `npm run build-prod` | Web deployment behavior and final validation |
 | Production Electron build | `npm run build-prod-electron` | Electron or shared renderer changes |
@@ -66,6 +67,7 @@ Apply the relevant mode from [docs/agents/personas.md](docs/agents/personas.md).
 - `change-indexeddb-persistence`: persisted models, indexes, stores, services, migrations, or backup compatibility.
 - `change-calculations-and-reports`: calculations, units, Web Worker contracts, analyses, and report outputs.
 - `change-data-import-export`: spreadsheets, structured imports/exports, templates, and JSON backups.
+- `design-and-write-tests`: test strategy, regression coverage, test implementation, test-quality review, and layer selection.
 - `validate-web-and-electron`: selecting and running the correct test/build matrix across runtimes.
 
 Use the Designer mode with `implement-angular-feature` for UI implementation. A design-only request does not authorize code changes.
@@ -75,7 +77,7 @@ Use the Designer mode with `implement-angular-feature` for UI implementation. A 
 - Diagnose before editing when the request asks for analysis, investigation, or review only.
 - Keep changes scoped to the issue and preserve unrelated worktree changes.
 - Use the repository's NgModule-based Angular pattern; components are non-standalone unless the surrounding feature has deliberately migrated.
-- Add meaningful behavior tests for changed behavior. Do not rely on creation-only `should create` tests.
+- Follow the risk-based policy in [docs/testing.md](docs/testing.md): protect changed behavior with the lowest-cost valuable automated test, or document why automation is disproportionate and provide focused manual evidence. Do not rely on creation-only `should create` tests.
 - Treat stored user data as durable. Make migrations idempotent and preserve older backups and import formats where supported.
 - Preserve GUID-based domain relationships. Do not confuse IndexedDB's local numeric `id` with cross-record identifiers.
 - Keep calculations deterministic and verify every consumer when changing a shared result, unit, payload, or report field.

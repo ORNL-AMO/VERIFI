@@ -5,7 +5,7 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 
 # Validate web and Electron behavior
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), the delivery and runtime sections of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Reviewer mode in [`docs/agents/personas.md`](../../../docs/agents/personas.md).
+1. Read [`AGENTS.md`](../../../AGENTS.md), [`docs/testing.md`](../../../docs/testing.md), the delivery and runtime sections of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Reviewer and Test Engineer modes in [`docs/agents/personas.md`](../../../docs/agents/personas.md).
 2. Inspect the diff and classify every changed behavior:
    - Pure TypeScript, Angular service/component, pipe, or ordinary utility.
    - IndexedDB, Web Worker, File API, or another native browser dependency.
@@ -20,6 +20,7 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 | Ordinary logic or Angular behavior | `npm run test:ci` |
 | IndexedDB or Web Worker behavior | `npm run test:browser:ci` in addition to fast tests |
 | Final test gate | `npm run test:all:ci` |
+| Informational calculation, IndexedDB, and Worker coverage | `npm run test:coverage` when coverage evidence is requested; never treat it as a required gate |
 | Web behavior | `npm run build-prod` |
 | Shared renderer or Electron behavior | `npm run build-prod-electron` in addition to the web build |
 | Electron IPC or desktop integration | Both builds plus a focused manual desktop check |

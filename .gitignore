@@ -7,6 +7,7 @@ embedded.provisionprofile
 
 .angular
 .vitest-attachments
+/coverage
 
 .vscode
 

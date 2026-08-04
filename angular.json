@@ -8,14 +8,29 @@
       "schematics": {
         "@schematics/angular:component": {
           "standalone": false,
+          "skipTests": true,
           "type": "component"
         },
         "@schematics/angular:pipe": {
           "standalone": false,
+          "skipTests": true,
           "typeSeparator": "."
         },
         "@schematics/angular:service": {
+          "skipTests": true,
           "type": "service"
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true
+        },
+        "@schematics/angular:resolver": {
+          "skipTests": true
         },
         "@schematics/angular:module": {
           "standalone": false,
@@ -240,6 +255,40 @@
             ],
             "browsers": [
               "chromium"
+            ]
+          }
+        },
+        "test-coverage": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "verifi:build:testing",
+            "tsConfig": "tsconfig.coverage-spec.json",
+            "runnerConfig": "vitest.coverage.config.ts",
+            "reporters": [
+              "verbose"
+            ],
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "exclude": [
+              "src/app/web-workers/run-worker.browser.spec.ts"
+            ],
+            "browsers": [
+              "chromium"
+            ],
+            "coverage": true,
+            "coverageInclude": [
+              "src/app/calculations/**/*.ts",
+              "src/app/indexedDB/**/*.ts",
+              "src/app/web-workers/**/*.ts"
+            ],
+            "coverageExclude": [
+              "src/**/*.spec.ts",
+              "src/app/web-workers/testing/**"
+            ],
+            "coverageReporters": [
+              "text-summary",
+              "html"
             ]
           }
         },
