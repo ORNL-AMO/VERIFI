@@ -7,6 +7,8 @@ import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
 import { REQUIRED_INDEXES, VERIFI_DB_VERSION, VERIFI_STORE_NAMES } from './indexed-db-schema';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
+import { PredictorDataDbService } from './predictor-data-db.service';
 
 describe('IndexedDB in Chromium', () => {
   let harness: IndexedDbTestHarness;
@@ -163,6 +165,43 @@ describe('IndexedDB in Chromium', () => {
       accountAFixture.facility.guid
     );
     expect(await harness.getAll('facilityReports')).toEqual([accountBFixture.facilityReport]);
+  });
+
+  it('isolates indexed meter and predictor data relationships', async () => {
+    await harness.seed(twoAccountPersistenceSeed);
+    await firstValueFrom(harness.dbService.add('utilityMeterData', {
+      id: 102,
+      guid: 'other-meter-data-a',
+      accountId: accountAFixture.account.guid,
+      facilityId: accountAFixture.facility.guid,
+      meterId: 'other-meter-a'
+    }));
+    await firstValueFrom(harness.dbService.add('predictorData', {
+      id: 102,
+      guid: 'other-predictor-data-a',
+      accountId: accountAFixture.account.guid,
+      facilityId: accountAFixture.facility.guid,
+      predictorId: 'other-predictor-a'
+    }));
+    const loadingService = { setLoadingMessage: () => undefined };
+    const meterDataService = new UtilityMeterDatadbService(
+      harness.dbService,
+      loadingService as any
+    );
+    const predictorDataService = new PredictorDataDbService(
+      harness.dbService,
+      loadingService as any
+    );
+
+    await expect(meterDataService.getStoredMeterData(accountAFixture.meter.guid as string))
+      .resolves.toEqual([accountAFixture.meterData]);
+    await expect(predictorDataService.getStoredPredictorData(accountAFixture.predictor.guid as string))
+      .resolves.toEqual([accountAFixture.predictorData]);
+
+    await meterDataService.deleteAllFacilityMeterData(accountAFixture.facility.guid as string);
+    await predictorDataService.deleteAllFacilityPredictorData(accountAFixture.facility.guid as string);
+    expect(await harness.getAll('utilityMeterData')).toEqual([accountBFixture.meterData]);
+    expect(await harness.getAll('predictorData')).toEqual([accountBFixture.predictorData]);
   });
 
   it('round-trips an analysis item without persisting transient fields', async () => {

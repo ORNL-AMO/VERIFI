@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { firstValueFrom } from 'rxjs';
-import { IdbEntry } from '../models/idbModels/idbEntry';
 import { VerifiRelationshipIndexName, VerifiStoreName } from './indexed-db-schema';
 
 @Injectable({
@@ -24,7 +23,7 @@ export class IndexedDbAccessService {
     });
   }
 
-  async getByGuid<T extends IdbEntry>(
+  async getByGuid<T extends { id?: number; guid: string }>(
     storeName: VerifiStoreName,
     guid: string
   ): Promise<T | undefined> {

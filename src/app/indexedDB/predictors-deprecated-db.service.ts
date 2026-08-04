@@ -5,6 +5,7 @@ import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idbModels/deprecatedPredictors';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -15,7 +16,8 @@ export class PredictordbServiceDeprecated {
     facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntryDeprecated>>;
     facilityPredictors: BehaviorSubject<Array<PredictorDataDeprecated>>;
     constructor(private dbService: NgxIndexedDBService,
-        private loadingService: LoadingService) {
+        private loadingService: LoadingService,
+        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntryDeprecated>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorDataDeprecated>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntryDeprecated>>(new Array());
@@ -26,9 +28,11 @@ export class PredictordbServiceDeprecated {
     }
 
     async getAllAccountPredictors(accountId: string): Promise<Array<IdbPredictorEntryDeprecated>> {
-        let allPredictors: Array<IdbPredictorEntryDeprecated> = await firstValueFrom(this.getAll());
-        let predictors: Array<IdbPredictorEntryDeprecated> = allPredictors.filter(predictor => { return predictor.accountId == accountId });
-        return predictors;
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorEntryDeprecated>(
+            'predictors',
+            'accountId',
+            accountId
+        );
     }
 
     getById(predictorId: number): Observable<IdbPredictorEntryDeprecated> {
@@ -37,6 +41,18 @@ export class PredictordbServiceDeprecated {
 
     getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbPredictorEntryDeprecated> {
         return this.dbService.getByIndex('predictors', indexName, indexValue);
+    }
+
+    getStoredByGuid(guid: string): Promise<IdbPredictorEntryDeprecated | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbPredictorEntryDeprecated>('predictors', guid);
+    }
+
+    getStoredFacilityPredictors(facilityId: string): Promise<Array<IdbPredictorEntryDeprecated>> {
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorEntryDeprecated>(
+            'predictors',
+            'facilityId',
+            facilityId
+        );
     }
 
     count() {
@@ -48,9 +64,8 @@ export class PredictordbServiceDeprecated {
     }
 
     async deleteAllFacilityPredictors(facilityId: string) {
-        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.accountPredictorEntries.getValue();
-        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(entry => { return entry.facilityId == facilityId });
-        await this.deletePredictorsAsync(facilityPredictorEntries);
+        this.loadingService.setLoadingMessage('Deleting Legacy Facility Predictors...');
+        await this.indexedDbAccess.deleteAllByIndex('predictors', 'facilityId', facilityId);
     }
 
     async deleteAllSelectedAccountPredictors() {

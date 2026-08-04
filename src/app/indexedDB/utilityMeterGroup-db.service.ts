@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,8 @@ export class UtilityMeterGroupdbService {
 
     facilityMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
     accountMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
-    constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
+    constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
         this.facilityMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
     }
@@ -21,9 +23,11 @@ export class UtilityMeterGroupdbService {
     }
 
     async getAllAccountMeterGroups(accountId: string): Promise<Array<IdbUtilityMeterGroup>> {
-        let allMeterGroups: Array<IdbUtilityMeterGroup> = await firstValueFrom(this.getAll());
-        let accountMeterGroups: Array<IdbUtilityMeterGroup> = allMeterGroups.filter(meterGroup => { return meterGroup.accountId == accountId });
-        return accountMeterGroups;
+        return this.indexedDbAccess.getAllByIndex<IdbUtilityMeterGroup>(
+            'utilityMeterGroups',
+            'accountId',
+            accountId
+        );
     }
 
     getById(groupId: number): Observable<IdbUtilityMeterGroup> {
@@ -32,6 +36,18 @@ export class UtilityMeterGroupdbService {
 
     getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbUtilityMeterGroup> {
         return this.dbService.getByIndex('utilityMeterGroups', indexName, indexValue);
+    }
+
+    getStoredByGuid(guid: string): Promise<IdbUtilityMeterGroup | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbUtilityMeterGroup>('utilityMeterGroups', guid);
+    }
+
+    getStoredFacilityGroups(facilityId: string): Promise<Array<IdbUtilityMeterGroup>> {
+        return this.indexedDbAccess.getAllByIndex<IdbUtilityMeterGroup>(
+            'utilityMeterGroups',
+            'facilityId',
+            facilityId
+        );
     }
 
     count() {
@@ -50,10 +66,9 @@ export class UtilityMeterGroupdbService {
         return this.dbService.delete('utilityMeterGroups', meterGroupId);
     }
 
-    deleteAllFacilityMeterGroups(facilityId: string): void {
-        let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
-        let facilityGroupEntries: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facilityId });
-        this.deleteMeterGroupAsync(facilityGroupEntries);
+    async deleteAllFacilityMeterGroups(facilityId: string): Promise<void> {
+        this.loadingService.setLoadingMessage('Deleting Facility Meter Groups...');
+        await this.indexedDbAccess.deleteAllByIndex('utilityMeterGroups', 'facilityId', facilityId);
     }
 
     deleteAllSelectedAccountMeterGroups(): void {
