@@ -30,7 +30,7 @@ export class UtilityMeterGroupdbService {
         return this.dbService.getByKey('utilityMeterGroups', groupId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeterGroup> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbUtilityMeterGroup> {
         return this.dbService.getByIndex('utilityMeterGroups', indexName, indexValue);
     }
 

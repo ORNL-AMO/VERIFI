@@ -3,6 +3,7 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,8 @@ export class FacilityEnergyUseGroupsDbService {
   facilityEnergyUseGroups: BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>;
   accountEnergyUseGroups: BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>;
   constructor(private dbService: NgxIndexedDBService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
     this.facilityEnergyUseGroups = new BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>(new Array());
     this.accountEnergyUseGroups = new BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>(new Array());
   }
@@ -23,17 +25,23 @@ export class FacilityEnergyUseGroupsDbService {
   }
 
   async getAllAccountEnergyUseGroups(accountId: string): Promise<Array<IdbFacilityEnergyUseGroup>> {
-    let allEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = await firstValueFrom(this.getAll())
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = allEnergyUseGroups.filter(group => { return group.accountId == accountId });
-    return accountEnergyUseGroups;
+    return this.indexedDbAccess.getAllByIndex<IdbFacilityEnergyUseGroup>(
+      'facilityEnergyUseGroups',
+      'accountId',
+      accountId
+    );
   }
 
   getById(energyUseGroupId: number): Observable<IdbFacilityEnergyUseGroup> {
     return this.dbService.getByKey('facilityEnergyUseGroups', energyUseGroupId);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbFacilityEnergyUseGroup> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbFacilityEnergyUseGroup> {
     return this.dbService.getByIndex('facilityEnergyUseGroups', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbFacilityEnergyUseGroup | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbFacilityEnergyUseGroup>('facilityEnergyUseGroups', guid);
   }
 
   count() {

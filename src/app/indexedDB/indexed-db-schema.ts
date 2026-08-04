@@ -25,6 +25,14 @@ export const VERIFI_STORE_NAMES = [
 ] as const;
 
 export type VerifiStoreName = typeof VERIFI_STORE_NAMES[number];
+export type VerifiRelationshipIndexName =
+  | 'guid'
+  | 'accountId'
+  | 'facilityId'
+  | 'meterId'
+  | 'predictorId'
+  | 'groupId'
+  | 'energyUseGroupId';
 
 export interface VerifiIndexDefinition {
   name: string;

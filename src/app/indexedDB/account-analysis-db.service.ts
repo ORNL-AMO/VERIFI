@@ -4,6 +4,7 @@ import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,8 @@ export class AccountAnalysisDbService {
   selectedAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
     //subscribe after initialization
@@ -35,17 +37,23 @@ export class AccountAnalysisDbService {
   }
 
   async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAccountAnalysisItem>> {
-    let allAnalysisItesm: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.getAll())
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
-    return accountAnalysisItems;
+    return this.indexedDbAccess.getAllByIndex<IdbAccountAnalysisItem>(
+      'accountAnalysisItems',
+      'accountId',
+      accountId
+    );
   }
 
   getById(id: number): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByKey('accountAnalysisItems', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbAccountAnalysisItem> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByIndex('accountAnalysisItems', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbAccountAnalysisItem | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbAccountAnalysisItem>('accountAnalysisItems', guid);
   }
 
   count() {

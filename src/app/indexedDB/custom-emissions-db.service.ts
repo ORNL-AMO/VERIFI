@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from '../models/id
 export class CustomEmissionsDbService {
 
   accountEmissionsItems: BehaviorSubject<Array<IdbCustomEmissionsItem>>;
-  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
+  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
     this.accountEmissionsItems = new BehaviorSubject<Array<IdbCustomEmissionsItem>>([]);
   }
 
@@ -20,18 +22,23 @@ export class CustomEmissionsDbService {
   }
 
   async getAllAccountCustomEmissions(accountId: string): Promise<Array<IdbCustomEmissionsItem>> {
-    let allCustomEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.getAll());
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = allCustomEmissionsItems.filter(item => { return item.accountId == accountId });
-    return customEmissionsItems;
-
+    return this.indexedDbAccess.getAllByIndex<IdbCustomEmissionsItem>(
+      'customEmissionsItems',
+      'accountId',
+      accountId
+    );
   }
 
   getById(id: number): Observable<IdbCustomEmissionsItem> {
     return this.dbService.getByKey('customEmissionsItems', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbCustomEmissionsItem> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbCustomEmissionsItem> {
     return this.dbService.getByIndex('customEmissionsItems', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbCustomEmissionsItem | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbCustomEmissionsItem>('customEmissionsItems', guid);
   }
 
   count() {

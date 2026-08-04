@@ -5,6 +5,8 @@ import { AnalysisDbService } from './analysis-db.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
 import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
 import { REQUIRED_INDEXES, VERIFI_DB_VERSION, VERIFI_STORE_NAMES } from './indexed-db-schema';
+import { IndexedDbAccessService } from './indexed-db-access.service';
+import { IdbAccount } from '../models/idbModels/account';
 
 describe('IndexedDB in Chromium', () => {
   let harness: IndexedDbTestHarness;
@@ -134,6 +136,33 @@ describe('IndexedDB in Chromium', () => {
       facilityId: accountBFixture.facility.guid,
       energyUseGroupId: accountBFixture.energyUseGroup.guid
     });
+  });
+
+  it('isolates indexed account queries and deterministically resolves duplicate GUIDs', async () => {
+    await harness.seed(twoAccountPersistenceSeed);
+    await firstValueFrom(harness.dbService.add('accounts', {
+      id: 3,
+      guid: accountAFixture.account.guid,
+      name: 'Later duplicate GUID'
+    }));
+    const indexedDbAccess = new IndexedDbAccessService(harness.dbService);
+
+    await expect(indexedDbAccess.getAllByIndex(
+      'facilities',
+      'accountId',
+      accountAFixture.account.guid
+    )).resolves.toEqual([accountAFixture.facility]);
+    await expect(indexedDbAccess.getByGuid<IdbAccount>(
+      'accounts',
+      accountAFixture.account.guid
+    )).resolves.toEqual(accountAFixture.account);
+
+    await indexedDbAccess.deleteAllByIndex(
+      'facilityReports',
+      'facilityId',
+      accountAFixture.facility.guid
+    );
+    expect(await harness.getAll('facilityReports')).toEqual([accountBFixture.facilityReport]);
   });
 
   it('round-trips an analysis item without persisting transient fields', async () => {

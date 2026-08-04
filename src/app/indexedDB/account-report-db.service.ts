@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,8 @@ export class AccountReportDbService {
   accountReports: BehaviorSubject<Array<IdbAccountReport>>;
   selectedReport: BehaviorSubject<IdbAccountReport>;
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
     this.accountReports = new BehaviorSubject<Array<IdbAccountReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbAccountReport>(undefined);
     //subscribe after initialization
@@ -35,9 +37,7 @@ export class AccountReportDbService {
   }
 
   async getAllAccountReports(accountId: string): Promise<Array<IdbAccountReport>> {
-    let allReports: Array<IdbAccountReport> = await firstValueFrom(this.getAll())
-    let accountReports: Array<IdbAccountReport> = allReports.filter(report => { return report.accountId == accountId });
-    return accountReports;
+    return this.indexedDbAccess.getAllByIndex<IdbAccountReport>('accountReports', 'accountId', accountId);
 
   }
 
@@ -45,8 +45,12 @@ export class AccountReportDbService {
     return this.dbService.getByKey('accountReports', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbAccountReport> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbAccountReport> {
     return this.dbService.getByIndex('accountReports', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbAccountReport | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbAccountReport>('accountReports', guid);
   }
 
   count() {

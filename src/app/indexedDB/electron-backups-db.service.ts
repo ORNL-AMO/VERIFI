@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { getNewIdbElectronBackup, IdbElectronBackup } from '../models/idbModels/electronBackup';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +11,8 @@ export class ElectronBackupsDbService {
 
 
     accountBackups: Array<IdbElectronBackup> = [];
-    constructor(private dbService: NgxIndexedDBService) {
+    constructor(private dbService: NgxIndexedDBService,
+        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
     }
 
     getAll(): Observable<Array<IdbElectronBackup>> {
@@ -19,6 +21,14 @@ export class ElectronBackupsDbService {
 
     getById(backupId: number): Observable<IdbElectronBackup> {
         return this.dbService.getByKey('electronBackups', backupId);
+    }
+
+    getAllAccountBackups(accountId: string): Promise<Array<IdbElectronBackup>> {
+        return this.indexedDbAccess.getAllByIndex<IdbElectronBackup>('electronBackups', 'accountId', accountId);
+    }
+
+    getStoredByGuid(guid: string): Promise<IdbElectronBackup | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbElectronBackup>('electronBackups', guid);
     }
 
     count() {

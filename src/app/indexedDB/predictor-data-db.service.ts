@@ -31,7 +31,7 @@ export class PredictorDataDbService {
         return this.dbService.getByKey('predictorData', predictorDataId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbPredictorData> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbPredictorData> {
         return this.dbService.getByIndex('predictorData', indexName, indexValue);
     }
 

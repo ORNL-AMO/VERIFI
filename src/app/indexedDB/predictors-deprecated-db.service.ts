@@ -35,7 +35,7 @@ export class PredictordbServiceDeprecated {
         return this.dbService.getByKey('predictors', predictorId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbPredictorEntryDeprecated> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbPredictorEntryDeprecated> {
         return this.dbService.getByIndex('predictors', indexName, indexValue);
     }
 

@@ -31,7 +31,7 @@ export class UtilityMeterDatadbService {
         return this.dbService.getByKey('utilityMeterData', meterDataId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeterData> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbUtilityMeterData> {
         return this.dbService.getByIndex('utilityMeterData', indexName, indexValue);
     }
 
