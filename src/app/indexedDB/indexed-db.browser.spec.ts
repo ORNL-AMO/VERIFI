@@ -4,6 +4,7 @@ import { dbConfig } from './_dbConfig';
 import { AnalysisDbService } from './analysis-db.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
 import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
+import { REQUIRED_INDEXES, VERIFI_DB_VERSION, VERIFI_STORE_NAMES } from './indexed-db-schema';
 
 describe('IndexedDB in Chromium', () => {
   let harness: IndexedDbTestHarness;
@@ -37,6 +38,68 @@ describe('IndexedDB in Chromium', () => {
     for (const storeName of expectedStoreNames) {
       expect(await harness.getAll(storeName)).toEqual([]);
     }
+  });
+
+  it('creates every required non-unique index in a fresh database', async () => {
+    const schema = await harness.getSchema();
+
+    expect(await firstValueFrom(harness.dbService.getDatabaseVersion())).toBe(VERIFI_DB_VERSION);
+    for (const storeName of VERIFI_STORE_NAMES) {
+      for (const requiredIndex of REQUIRED_INDEXES[storeName]) {
+        expect(schema[storeName][requiredIndex.name]).toEqual({
+          keyPath: requiredIndex.keypath,
+          unique: false
+        });
+      }
+    }
+  });
+
+  it('upgrades version 19 records without changing values or GUID relationships', async () => {
+    await harness.destroy();
+    const duplicateGuidAccount = {
+      id: 3,
+      guid: accountAFixture.account.guid,
+      name: 'Duplicate GUID account',
+      unknownLegacyField: 'preserve me'
+    };
+    harness = await IndexedDbTestHarness.createUpgradedFromVersion19(
+      'version-19-upgrade',
+      {
+        ...twoAccountPersistenceSeed,
+        accounts: [
+          ...twoAccountPersistenceSeed.accounts,
+          duplicateGuidAccount
+        ]
+      }
+    );
+
+    expect(await firstValueFrom(harness.dbService.getDatabaseVersion())).toBe(VERIFI_DB_VERSION);
+    expect(await harness.getAll('accounts')).toEqual([
+      accountAFixture.account,
+      accountBFixture.account,
+      duplicateGuidAccount
+    ]);
+    for (const [storeName, expectedRecords] of Object.entries(twoAccountPersistenceSeed)) {
+      if (storeName !== 'accounts') {
+        expect(await harness.getAll(storeName)).toEqual(expectedRecords);
+      }
+    }
+
+    const schema = await harness.getSchema();
+    expect(schema.utilityMeter.location).toEqual({ keyPath: 'location', unique: false });
+    expect(schema.accounts.guid).toEqual({ keyPath: 'guid', unique: false });
+  });
+
+  it('produces the same required schema for fresh and upgraded databases', async () => {
+    const freshSchema = await harness.getSchema();
+    await harness.destroy();
+    harness = await IndexedDbTestHarness.createUpgradedFromVersion19(
+      'schema-parity',
+      twoAccountPersistenceSeed
+    );
+    const upgradedSchema = await harness.getSchema();
+
+    expect(upgradedSchema).toEqual(freshSchema);
   });
 
   it('reopens a representative two-account database without changing keys or GUID relationships', async () => {
