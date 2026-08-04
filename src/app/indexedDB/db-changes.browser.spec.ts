@@ -123,7 +123,8 @@ describe('DbChangesService account switching in Chromium', () => {
       { migrateAccountPredictors: vi.fn().mockResolvedValue(undefined) } as any,
       facilityReportsDbService,
       facilityEnergyUseGroupsDbService,
-      facilityEnergyUseEquipmentDbService
+      facilityEnergyUseEquipmentDbService,
+      {} as any
     );
 
     await dbChangesService.selectAccount(accountAFixture.account as unknown as IdbAccount, true);

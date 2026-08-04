@@ -44,6 +44,8 @@ Persistence is configured with `ngx-indexed-db` in [`src/app/indexedDB/_dbConfig
 
 Ordinary single-store access uses `ngx-indexed-db`. Atomic operations spanning multiple stores use the internal native transaction adapter in [`indexed-db-transaction.service.ts`](src/app/indexedDB/indexed-db-transaction.service.ts). Transaction operations must use only the adapter's transaction-bound request context; calling an object-store service from inside the operation would open an unrelated transaction.
 
+Account and facility removal are infrastructure-owned cascades in [`indexed-db-cascade-delete.service.ts`](src/app/indexedDB/indexed-db-cascade-delete.service.ts). Every participating store and retained-reference update must remain inside its declared native transaction; application subjects are refreshed only after that transaction commits.
+
 ```mermaid
 flowchart TD
     Account["Account"] --> Facility["Facility"]

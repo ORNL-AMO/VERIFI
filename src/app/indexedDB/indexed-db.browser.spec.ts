@@ -152,17 +152,17 @@ describe('IndexedDB in Chromium', () => {
     await expect(indexedDbAccess.getAllByIndex(
       'facilities',
       'accountId',
-      accountAFixture.account.guid
+      accountAFixture.account.guid as string
     )).resolves.toEqual([accountAFixture.facility]);
     await expect(indexedDbAccess.getByGuid<IdbAccount>(
       'accounts',
-      accountAFixture.account.guid
+      accountAFixture.account.guid as string
     )).resolves.toEqual(accountAFixture.account);
 
     await indexedDbAccess.deleteAllByIndex(
       'facilityReports',
       'facilityId',
-      accountAFixture.facility.guid
+      accountAFixture.facility.guid as string
     );
     expect(await harness.getAll('facilityReports')).toEqual([accountBFixture.facilityReport]);
   });
