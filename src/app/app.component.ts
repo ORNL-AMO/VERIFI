@@ -46,6 +46,7 @@ import { FacilityEnergyUseGroupsDbService } from './indexedDB/facility-energy-us
 import { IdbFacilityEnergyUseGroup } from './models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseEquipmentDbService } from './indexedDB/facility-energy-use-equipment-db.service';
 import { IdbFacilityEnergyUseEquipment } from './models/idbModels/facilityEnergyUseEquipment';
+import { resolveInitialAccount, resolveInitialFacility } from './indexedDB/selection-resolvers';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -120,12 +121,7 @@ export class AppComponent {
       let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(accounts);
       let localStorageAccountId: number = this.accountDbService.getInitialAccount();
-      let account: IdbAccount;
-      if (localStorageAccountId) {
-        account = accounts.find(account => { return account.id == localStorageAccountId });
-      } else if (accounts.length != 0) {
-        account = accounts[0];
-      }
+      let account: IdbAccount = resolveInitialAccount(accounts, localStorageAccountId);
 
       await this.eGridService.parseZipCodeLongLat();
       await this.applicationInstanceDbService.initializeApplicationInstanceData();
@@ -164,6 +160,9 @@ export class AppComponent {
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
       } else {
+        this.accountDbService.clearInitialAccount();
+        this.facilityDbService.selectedFacility.next(undefined);
+        this.facilityDbService.clearInitialFacility();
         await this.eGridService.parseEGridData();
         await this.initializeElectronBackups();
 
@@ -189,9 +188,10 @@ export class AppComponent {
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
     this.facilityDbService.accountFacilities.next(accountFacilites);
     let localStorageFacilityId: number = this.facilityDbService.getInitialFacility();
-    if (localStorageFacilityId) {
-      let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == localStorageFacilityId });
-      this.facilityDbService.selectedFacility.next(facility);
+    let facility: IdbFacility = resolveInitialFacility(account, accountFacilites, localStorageFacilityId);
+    this.facilityDbService.selectedFacility.next(facility);
+    if (!facility && localStorageFacilityId !== undefined && localStorageFacilityId !== null) {
+      this.facilityDbService.clearInitialFacility();
     }
   }
 

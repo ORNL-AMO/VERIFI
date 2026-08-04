@@ -28,6 +28,10 @@ export class FacilitydbService {
         return localStorageFacilityId;
     }
 
+    clearInitialFacility(): void {
+        this.localStorageService.clear('facilityId');
+    }
+
     getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
     }
