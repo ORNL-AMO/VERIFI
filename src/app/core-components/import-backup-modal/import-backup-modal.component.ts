@@ -240,24 +240,22 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewAccount(backupFile: BackupFile) {
-    this.deleteDataService.pauseDelete.next(true);
+    this.deleteDataService.suspendQueuedDeletion();
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
     await this.dbChangesService.updateAccount(newAccount);
     await this.dbChangesService.selectAccount(newAccount, false);
-    this.deleteDataService.pauseDelete.next(false);
-    this.deleteDataService.gatherAndDelete();
+    await this.deleteDataService.resumeQueuedDeletion();
   }
 
   async importExistingAccount(backupFile: BackupFile) {
     //delete existing account and data
-    this.deleteDataService.pauseDelete.next(true);
+    this.deleteDataService.suspendQueuedDeletion();
     this.selectedAccount.deleteAccount = true;
     await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     await this.importNewAccount(backupFile);
-    this.deleteDataService.pauseDelete.next(false);
-    this.deleteDataService.gatherAndDelete();
+    await this.deleteDataService.resumeQueuedDeletion();
   }
 
   async importNewFacility(backupFile: BackupFile, currIdx?: number) {

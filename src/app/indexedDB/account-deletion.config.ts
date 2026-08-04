@@ -1,5 +1,7 @@
+import { VerifiStoreName } from './indexed-db-schema';
+
 export interface AccountDeletionStoreDefinition {
-  storeName: string;
+  storeName: VerifiStoreName;
   message: string;
 }
 
@@ -23,9 +25,9 @@ export const ACCOUNT_DELETION_STORES: ReadonlyArray<AccountDeletionStoreDefiniti
   { storeName: 'facilities', message: 'Deleting Facilities' }
 ];
 
-export const ACCOUNT_ROOT_STORE = 'accounts';
+export const ACCOUNT_ROOT_STORE: VerifiStoreName = 'accounts';
 
-export const GLOBAL_PERSISTENCE_STORES: ReadonlyArray<string> = [
+export const GLOBAL_PERSISTENCE_STORES: ReadonlyArray<VerifiStoreName> = [
   'analyticsData',
   'application'
 ];
