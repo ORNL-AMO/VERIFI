@@ -27,6 +27,10 @@ export class AccountdbService {
         return localStorageAccountId;
     }
 
+    clearInitialAccount(): void {
+        this.localStorageService.clear('accountId');
+    }
+
     getAll(): Observable<Array<IdbAccount>> {
         return this.dbService.getAll('accounts');
     }

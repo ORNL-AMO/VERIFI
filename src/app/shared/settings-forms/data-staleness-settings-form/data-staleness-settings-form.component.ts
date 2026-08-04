@@ -106,7 +106,7 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
         } else {
             this.selectedFacility.dataStalenessSettings = settings;
             await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-            this.dbChangesService.updateFacilities(this.selectedFacility);
+            this.dbChangesService.updateFacility(this.selectedFacility);
         }
     }
 

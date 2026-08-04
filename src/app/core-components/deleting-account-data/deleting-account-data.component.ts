@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
+import { AccountDeletionError, DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Subscription } from 'rxjs';
@@ -31,6 +31,7 @@ export class DeletingAccountDataComponent {
   destroyToast: boolean = true;
   pauseDelete: boolean;
   pauseDeleteSub: Subscription;
+  deletionError: AccountDeletionError;
   allDeleteAccounts: Array<IdbAccount>;
   constructor(private deleteDataService: DeleteDataService,
     private accountDbService: AccountdbService
@@ -54,12 +55,15 @@ export class DeletingAccountDataComponent {
         this.createToast();
       } else {
         this.closeToast();
-        this.deleteDataService.setAccountToDelete(this.allDeleteAccounts);
       }
     });
 
     this.deleteDataService.deletingMessaging.subscribe(message => {
       this.deletingMessaging = message;
+    });
+
+    this.deleteDataService.deletionError.subscribe(error => {
+      this.deletionError = error;
     });
   }
 
@@ -88,6 +92,10 @@ export class DeletingAccountDataComponent {
 
   async cancelDelete() {
     await this.deleteDataService.cancelDelete();
+  }
+
+  async retryDelete() {
+    await this.deleteDataService.retryDelete();
   }
 
   mouseDown($event) {

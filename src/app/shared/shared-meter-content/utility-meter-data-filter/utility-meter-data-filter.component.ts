@@ -90,7 +90,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     } else if (this.meter.scope == 2) {
       selectedFacility.tableVehicleDataFilters = this.vehicleDataFilters;
     }
-    await this.dbChangesService.updateFacilities(selectedFacility);
+    await this.dbChangesService.updateFacility(selectedFacility);
   }
 
   async showAllColumns() {

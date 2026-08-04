@@ -1,426 +1,185 @@
 import { Injectable } from '@angular/core';
-import { AccountdbService } from './account-db.service';
-import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
-import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
-import { UtilityMeterdbService } from './utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
-import { FacilitydbService } from './facility-db.service';
-import { AccountReportDbService } from './account-report-db.service';
-import { AnalysisDbService } from './analysis-db.service';
-import { AccountAnalysisDbService } from './account-analysis-db.service';
-import { CustomEmissionsDbService } from './custom-emissions-db.service';
-import { CustomFuelDbService } from './custom-fuel-db.service';
-import { CustomGWPDbService } from './custom-gwp-db.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { ElectronBackupsDbService } from './electron-backups-db.service';
 import { IdbAccount } from '../models/idbModels/account';
-import { IdbFacility } from '../models/idbModels/facility';
-import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
-import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
-import { IdbCustomGWP } from '../models/idbModels/customGWP';
-import { IdbElectronBackup } from '../models/idbModels/electronBackup';
-import { IdbCustomFuel } from '../models/idbModels/customFuel';
-import { IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
-import { PredictorDbService } from './predictor-db.service';
-import { PredictorDataDbService } from './predictor-data-db.service';
-import { IdbPredictor } from '../models/idbModels/predictor';
-import { IdbPredictorData } from '../models/idbModels/predictorData';
-import { IdbAccountReport } from '../models/idbModels/accountReport';
-import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
-import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
-import { FacilityReportsDbService } from './facility-reports-db.service';
-import { IdbFacilityReport } from '../models/idbModels/facilityReport';
+import {
+  ACCOUNT_DELETION_STORES,
+  ACCOUNT_ROOT_STORE,
+  AccountDeletionStoreDefinition
+} from './account-deletion.config';
+import { AccountdbService } from './account-db.service';
+
+interface AccountOwnedRecord {
+  id?: number;
+  accountId?: string;
+}
+
+export interface AccountDeletionError {
+  accountGuid: string;
+  storeName: string;
+  message: string;
+  cause: unknown;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeleteDataService {
 
-  isDeleting: BehaviorSubject<boolean>;
+  isDeleting: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   deletingMessaging: BehaviorSubject<{
     index: number,
     totalCount: number,
     message: string,
     percent: number
-  }>;
+  }> = new BehaviorSubject(undefined);
+  pauseDelete: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  deletionError: BehaviorSubject<AccountDeletionError> = new BehaviorSubject(undefined);
 
   accountToDelete: IdbAccount;
-  accountPredictorsDeprecated: Array<IdbPredictorEntryDeprecated>;
-  accountPredictors: Array<IdbPredictor>;
-  accountPredictorData: Array<IdbPredictorData>;
+  private activeDeletion: Promise<void>;
+  private activeStoreName: string;
 
-  accountMeterData: Array<IdbUtilityMeterData>;
-  accountMeters: Array<IdbUtilityMeter>;
-  accountGroups: Array<IdbUtilityMeterGroup>;
-  accountFacilities: Array<IdbFacility>;
-  accountReports: Array<IdbAccountReport>;
-  accountFuels: Array<IdbCustomFuel>;
-  accountEmissions: Array<IdbCustomEmissionsItem>;
-  accountGWPs: Array<IdbCustomGWP>;
-  accountElectronBackups: Array<IdbElectronBackup>;
-  accountFacilityAnalysis: Array<IdbAnalysisItem>;
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
-  accountFacilityReports: Array<IdbFacilityReport>;
-
-  pauseDelete: BehaviorSubject<boolean>;
-  constructor(private accountDbService: AccountdbService,
-    private predictorDbServiceDeprecated: PredictordbServiceDeprecated,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private facilityDbService: FacilitydbService,
-    private accountReportDbService: AccountReportDbService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private customEmissionsDbService: CustomEmissionsDbService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService,
-    private dbService: NgxIndexedDBService,
-    private electronBackupsDbService: ElectronBackupsDbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private facilityReportsDbService: FacilityReportsDbService) {
-    this.isDeleting = new BehaviorSubject<boolean>(false);
-    this.deletingMessaging = new BehaviorSubject(undefined);
-    this.pauseDelete = new BehaviorSubject<boolean>(false);
-  }
-
+  constructor(
+    private accountDbService: AccountdbService,
+    private dbService: NgxIndexedDBService
+  ) { }
 
   setDeletingMessage(index: number, totalCount: number, message: string) {
     this.deletingMessaging.next({
-      index: index,
-      totalCount: totalCount,
-      message: message,
-      percent: (index / totalCount) * 100
+      index,
+      totalCount,
+      message,
+      percent: totalCount === 0 ? 100 : (index / totalCount) * 100
     });
   }
 
-  setAccountToDelete(allDeleteAccounts: Array<IdbAccount>) {
+  async setAccountToDelete(allDeleteAccounts: Array<IdbAccount>): Promise<void> {
+    if (this.activeDeletion) {
+      await this.activeDeletion;
+    }
     if (allDeleteAccounts.length > 0 && !this.accountToDelete) {
       this.accountToDelete = allDeleteAccounts[0];
-      this.gatherAndDelete()
+      await this.gatherAndDelete();
     }
   }
 
-  gatherAndDelete() {
-    if (this.accountToDelete) {
-      this.isDeleting.next(true);
-      //predictors
-      this.predictorDbServiceDeprecated.getAll().subscribe((allPredictors: Array<IdbPredictorEntryDeprecated>) => {
-        this.accountPredictorsDeprecated = allPredictors.filter(idbPredictor => {
-          return idbPredictor.accountId == this.accountToDelete.guid;
-        })
-        this.deletePredictorDeprecated(0)
+  async gatherAndDelete(): Promise<void> {
+    if (!this.accountToDelete || this.pauseDelete.getValue()) {
+      return;
+    }
+    if (this.activeDeletion) {
+      return this.activeDeletion;
+    }
+
+    const account = this.accountToDelete;
+    this.activeDeletion = this.deleteAccountData(account);
+    try {
+      await this.activeDeletion;
+    } finally {
+      this.activeDeletion = undefined;
+    }
+  }
+
+  async retryDelete(): Promise<void> {
+    if (this.activeDeletion) {
+      await this.activeDeletion;
+    }
+    this.deletionError.next(undefined);
+    this.pauseDelete.next(false);
+    await this.gatherAndDelete();
+  }
+
+  async cancelDelete(): Promise<void> {
+    if (!this.accountToDelete) {
+      return;
+    }
+    const account = this.accountToDelete;
+    if (this.activeDeletion) {
+      await this.activeDeletion;
+    }
+    if (this.accountToDelete !== account) {
+      return;
+    }
+
+    account.deleteAccount = false;
+    await firstValueFrom(this.accountDbService.updateWithObservable(account));
+    const allAccounts = await firstValueFrom(this.accountDbService.getAll());
+    this.resetDeletionState(allAccounts);
+  }
+
+  private async deleteAccountData(account: IdbAccount): Promise<void> {
+    this.isDeleting.next(true);
+    this.deletionError.next(undefined);
+
+    try {
+      for (const storeDefinition of ACCOUNT_DELETION_STORES) {
+        if (this.pauseDelete.getValue()) {
+          return;
+        }
+        await this.deleteAccountRecords(account, storeDefinition);
+      }
+
+      if (this.pauseDelete.getValue()) {
+        return;
+      }
+
+      this.activeStoreName = ACCOUNT_ROOT_STORE;
+      this.setDeletingMessage(1, 1, 'Finishing Account Deletion');
+      if (account.id === undefined) {
+        throw new Error('The account does not have a local IndexedDB key.');
+      }
+      const allAccounts = await firstValueFrom(this.accountDbService.getAll());
+      await firstValueFrom(this.dbService.delete(ACCOUNT_ROOT_STORE, account.id));
+      this.resetDeletionState(
+        allAccounts.filter(existingAccount => existingAccount.id !== account.id)
+      );
+    } catch (error) {
+      this.pauseDelete.next(true);
+      this.deletionError.next({
+        accountGuid: account.guid,
+        storeName: this.activeStoreName,
+        message: `Account deletion stopped while processing ${this.activeStoreName}. Retry to continue cleanup.`,
+        cause: error
       });
     }
   }
 
-  //predictors (deprecated)
-  deletePredictorDeprecated(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountPredictorsDeprecated.length) {
-        this.dbService.delete('predictors', this.accountPredictorsDeprecated[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountPredictorsDeprecated.length, 'Deleting Predictor Data..');
-          this.deletePredictorDeprecated(index + 1);
-        });
-      } else {
+  private async deleteAccountRecords(
+    account: IdbAccount,
+    storeDefinition: AccountDeletionStoreDefinition
+  ): Promise<void> {
+    this.activeStoreName = storeDefinition.storeName;
+    this.setDeletingMessage(1, 1, storeDefinition.message);
+    const allRecords = await firstValueFrom(
+      this.dbService.getAll<AccountOwnedRecord>(storeDefinition.storeName)
+    );
+    const accountRecords = allRecords.filter(record => record.accountId === account.guid);
 
-        this.predictorDbService.getAll().subscribe((allPredictorData: Array<IdbPredictor>) => {
-          this.accountPredictors = allPredictorData.filter(idbPredictor => {
-            return idbPredictor.accountId == this.accountToDelete.guid;
-          });
-          this.deletePredictor(0)
-        });
+    if (accountRecords.length === 0) {
+      this.setDeletingMessage(1, 1, storeDefinition.message);
+      return;
+    }
+
+    for (let index = 0; index < accountRecords.length; index++) {
+      if (this.pauseDelete.getValue()) {
+        return;
       }
+      const record = accountRecords[index];
+      if (record.id === undefined) {
+        throw new Error(`A record in ${storeDefinition.storeName} does not have a local IndexedDB key.`);
+      }
+      this.setDeletingMessage(index + 1, accountRecords.length, storeDefinition.message);
+      await firstValueFrom(this.dbService.delete(storeDefinition.storeName, record.id));
     }
   }
 
-  //v2 Predictors
-  deletePredictor(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountPredictors.length) {
-        this.dbService.delete('predictor', this.accountPredictors[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountPredictors.length, 'Deleting Predictor..');
-          this.deletePredictor(index + 1);
-        });
-      } else {
-        this.predictorDataDbService.getAll().subscribe((allPredictorData: Array<IdbPredictorData>) => {
-          this.accountPredictorData = allPredictorData.filter(idbPredictorData => {
-            return idbPredictorData.accountId == this.accountToDelete.guid;
-          });
-          this.deletePredictorData(0)
-        });
-      }
-    }
-  }
-
-  //v2 Predictor data
-  deletePredictorData(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountPredictorData.length) {
-        this.dbService.delete('predictorData', this.accountPredictorData[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountPredictorData.length, 'Deleting Predictor Data..');
-          this.deletePredictorData(index + 1);
-        });
-      } else {
-        this.utilityMeterDataDbService.getAll().subscribe((allMeterData: Array<IdbUtilityMeterData>) => {
-          this.accountMeterData = allMeterData.filter(idbMeterData => {
-            return idbMeterData.accountId == this.accountToDelete.guid;
-          });
-          this.deleteMeterData(0)
-        });
-      }
-    }
-  }
-
-  //meter data
-  deleteMeterData(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountMeterData.length) {
-        this.dbService.delete('utilityMeterData', this.accountMeterData[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountMeterData.length, 'Deleting Meter Data..');
-          this.deleteMeterData(index + 1);
-        });
-      } else {
-        this.utilityMeterDbService.getAll().subscribe((allMeters: Array<IdbUtilityMeter>) => {
-          this.accountMeters = allMeters.filter(idbMeter => {
-            return idbMeter.accountId == this.accountToDelete.guid;
-          });
-          this.deleteMeters(0)
-        })
-      }
-    }
-  }
-
-  //meters
-  deleteMeters(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountMeters.length) {
-        this.dbService.delete('utilityMeter', this.accountMeters[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountMeters.length, 'Deleting Meters..');
-          this.deleteMeters(index + 1);
-        });
-      } else {
-        this.utilityMeterGroupDbService.getAll().subscribe((allGroups: Array<IdbUtilityMeterGroup>) => {
-          this.accountGroups = allGroups.filter(group => {
-            return group.accountId == this.accountToDelete.guid;
-          });
-          this.deleteGroups(0);
-        })
-      }
-    }
-  }
-
-  //groups
-  deleteGroups(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountGroups.length) {
-        this.dbService.delete('utilityMeterGroups', this.accountGroups[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountGroups.length, 'Deleting Meter Groups..');
-          this.deleteGroups(index + 1);
-        });
-      } else {
-        this.analysisDbService.getAll().subscribe((allFacilityAnalysis: Array<IdbAnalysisItem>) => {
-          this.accountFacilityAnalysis = allFacilityAnalysis.filter(analysisItem => {
-            return analysisItem.accountId == this.accountToDelete.guid;
-          });
-          this.deleteFacilityAnalysis(0)
-        })
-      }
-    }
-  }
-
-  //facility analysis
-  deleteFacilityAnalysis(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountFacilityAnalysis.length) {
-        this.dbService.delete('analysisItems', this.accountFacilityAnalysis[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountFacilityAnalysis.length, 'Deleting Facility Analysis..');
-          this.deleteFacilityAnalysis(index + 1);
-        });
-      } else {
-        this.facilityReportsDbService.getAll().subscribe((allFacilityReports: Array<IdbFacilityReport>) => {
-          this.accountFacilityReports = allFacilityReports.filter(facilityReport => {
-            return facilityReport.accountId == this.accountToDelete.guid;
-          });
-          this.deleteFacilityReports(0)
-        });
-      }
-    }
-  }
-
-  //facility reports
-  deleteFacilityReports(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountFacilityReports.length) {
-        this.dbService.delete('facilityReports', this.accountFacilityReports[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountFacilityReports.length, 'Deleting Facility Reports..');
-          this.deleteFacilityReports(index + 1);
-        });
-      } else {
-        this.facilityDbService.getAll().subscribe((allFacilities: Array<IdbFacility>) => {
-          this.accountFacilities = allFacilities.filter(facility => {
-            return facility.accountId == this.accountToDelete.guid;
-          });
-          this.deleteFacilites(0)
-        });
-      }
-    }
-  }
-
-  //facilities
-  deleteFacilites(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountFacilities.length) {
-        this.dbService.delete('facilities', this.accountFacilities[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountFacilities.length, 'Deleting Facilities..');
-          this.deleteFacilites(index + 1);
-        });
-      } else {
-        this.accountAnalysisDbService.getAll().subscribe((allAccountAnalysis: Array<IdbAccountAnalysisItem>) => {
-          this.accountAnalysisItems = allAccountAnalysis.filter(accountAnalysisItem => {
-            return accountAnalysisItem.accountId == this.accountToDelete.guid;
-          });
-          this.deleteAccountAnalysis(0);
-        })
-      }
-    }
-  }
-
-  //account analysis
-  deleteAccountAnalysis(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountAnalysisItems.length) {
-        this.dbService.delete('accountAnalysisItems', this.accountAnalysisItems[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountAnalysisItems.length, 'Deleting Account Analysis..');
-          this.deleteAccountAnalysis(index + 1);
-        });
-      } else {
-        this.accountReportDbService.getAll().subscribe((allReports: Array<IdbAccountReport>) => {
-          this.accountReports = allReports.filter(report => {
-            return report.accountId == this.accountToDelete.guid;
-          });
-          this.deleteReports(0)
-        })
-      }
-    }
-  }
-
-  //reports
-  deleteReports(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountReports.length) {
-        this.dbService.delete('accountReports', this.accountReports[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountReports.length, 'Deleting Account Reports..');
-          this.deleteReports(index + 1);
-        });
-      } else {
-        this.customFuelDbService.getAll().subscribe((allCustomFuels: Array<IdbCustomFuel>) => {
-          this.accountFuels = allCustomFuels.filter(fuel => {
-            return fuel.accountId == this.accountToDelete.guid;
-          });
-          this.deleteCustomFuels(0);
-        })
-      }
-    }
-  }
-
-  //custom fuels
-  deleteCustomFuels(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountFuels.length) {
-        this.dbService.delete('customFuels', this.accountFuels[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountFuels.length, 'Deleting Fuels..');
-          this.deleteCustomFuels(index + 1);
-        });
-      } else {
-        this.customEmissionsDbService.getAll().subscribe((allCustomEmissions: Array<IdbCustomEmissionsItem>) => {
-          this.accountEmissions = allCustomEmissions.filter(emissions => {
-            return emissions.accountId == this.accountToDelete.guid;
-          });
-          this.deleteEmissions(0)
-        })
-      }
-    }
-  }
-
-  //custom emissions
-  deleteEmissions(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountEmissions.length) {
-        this.dbService.delete('customEmissionsItems', this.accountEmissions[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountEmissions.length, 'Deleting Emissions..');
-          this.deleteEmissions(index + 1);
-        });
-      } else {
-        this.customGWPDbService.getAll().subscribe((allGWPs: Array<IdbCustomGWP>) => {
-          this.accountGWPs = allGWPs.filter(gwp => {
-            return gwp.accountId == this.accountToDelete.guid;
-          });
-          this.deleteCustomGWPs(0)
-        });
-      }
-    }
-  }
-
-  //custom gwps
-  deleteCustomGWPs(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountGWPs.length) {
-        this.dbService.delete('customGWP', this.accountGWPs[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountGWPs.length, 'Deleting Custom GWPs..');
-          this.deleteCustomGWPs(index + 1);
-        });
-      } else {
-        this.electronBackupsDbService.getAll().subscribe((allBackups: Array<IdbElectronBackup>) => {
-          this.accountElectronBackups = allBackups.filter(electronBackup => {
-            return electronBackup.accountId == this.accountToDelete.guid;
-          });
-          this.deleteElectronBackups(0)
-        });
-      }
-    }
-  }
-
-  //electron backups
-  deleteElectronBackups(index: number) {
-    if (!this.pauseDelete.getValue()) {
-      if (index < this.accountElectronBackups.length) {
-        this.dbService.delete('electronBackups', this.accountElectronBackups[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountElectronBackups.length, 'Deleting Electron Backups..');
-          this.deleteElectronBackups(index + 1);
-        });
-      } else {
-        this.deleteAccount();
-      }
-    }
-  }
-
-  //finish account delete...
-  deleteAccount() {
-    this.dbService.delete('accounts', this.accountToDelete.id).subscribe(() => {
-      this.setDeletingMessage(.99, 1, 'Finishing up..');
-      this.finishDeleteAccount();
-    });
-  }
-
-  finishDeleteAccount() {
-    this.accountToDelete = undefined;
-    this.dbService.getAll('accounts').subscribe((allAccounts: Array<IdbAccount>) => {
-      this.accountDbService.allAccounts.next(allAccounts);
-      this.isDeleting.next(false);
-    });
-  }
-
-  async cancelDelete() {
-    this.accountToDelete.deleteAccount = false;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.accountToDelete));
-    this.finishDeleteAccount();
-    this.isDeleting.next(false);
+  private resetDeletionState(allAccounts: Array<IdbAccount>): void {
+    this.deletingMessaging.next(undefined);
+    this.deletionError.next(undefined);
     this.pauseDelete.next(false);
+    this.isDeleting.next(false);
+    this.accountToDelete = undefined;
+    this.accountDbService.allAccounts.next(allAccounts);
   }
-
 }
