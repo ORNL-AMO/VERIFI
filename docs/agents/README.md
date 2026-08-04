@@ -8,7 +8,7 @@ This directory indexes the repository context used by coding agents and human co
 | --- | --- | --- |
 | Persistent guidance | Rules, commands, source routing, and review expectations that apply to every task | [`AGENTS.md`](../../AGENTS.md) |
 | Architecture | Current runtime boundaries, modules, persistence, calculations, file flows, and invariants | [`ARCHITECTURE.md`](../../ARCHITECTURE.md) |
-| Task modes | Implementer, Investigator, Reviewer, and Designer checklists | [`personas.md`](personas.md) |
+| Task modes | Implementer, Investigator, Reviewer, Test Engineer, and Designer checklists | [`personas.md`](personas.md) |
 | Skills | Repeatable task workflows loaded only when relevant | [`.agents/skills`](../../.agents/skills) |
 
 Executable configuration and source code remain authoritative for volatile facts. These documents explain how to find and safely change that source.
@@ -23,6 +23,7 @@ Executable configuration and source code remain authoritative for volatile facts
 | Calculation, Worker, analysis, or report | Implementer and Reviewer | `change-calculations-and-reports` |
 | Spreadsheet, structured file, or backup flow | Implementer and Reviewer | `change-data-import-export` |
 | Defect diagnosis | Investigator | Add the skill for the affected subsystem |
+| Test strategy, implementation, gap analysis, or test review | Test Engineer, plus Implementer or Reviewer as needed | `design-and-write-tests` |
 | Cross-runtime verification | Reviewer or Implementer | `validate-web-and-electron` |
 
 ## Maintenance

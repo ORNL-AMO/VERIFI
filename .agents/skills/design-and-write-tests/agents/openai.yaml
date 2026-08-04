@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design and Write Tests"
+  short_description: "Create valuable, risk-based VERIFI tests"
+  default_prompt: "Use $design-and-write-tests to design and implement meaningful coverage for this VERIFI change."
