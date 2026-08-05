@@ -168,7 +168,9 @@ describe('DbChangesService account switching in Chromium', () => {
       facilityReportsDbService,
       facilityEnergyUseGroupsDbService,
       facilityEnergyUseEquipmentDbService,
-      {} as any
+      {} as any,
+      { reloadActiveWorkspace: vi.fn().mockResolvedValue('published') } as any,
+      { account: vi.fn(() => undefined) } as any
     );
 
     await dbChangesService.selectAccount(accountAFixture.account as unknown as IdbAccount, true);

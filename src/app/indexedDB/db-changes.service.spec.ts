@@ -75,7 +75,9 @@ describe('DbChangesService facility updates', () => {
       {} as any, // facilityReportsDbService
       {} as any, // facilityEnergyUseGroupsDbService
       {} as any, // facilityEnergyUseEquipmentDbService
-      cascadeDeleteService as any
+      cascadeDeleteService as any,
+      { reloadActiveWorkspace: vi.fn().mockResolvedValue('published') } as any,
+      { account: vi.fn(() => ({ guid: 'account-a' })) } as any
     );
 
     return {

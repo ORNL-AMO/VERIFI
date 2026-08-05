@@ -40,6 +40,8 @@ import { resolveInitialFacility } from './selection-resolvers';
 import { FACILITY_DELETION_MESSAGES } from './facility-deletion.config';
 import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
 import { AnalysisSelectionRepairService } from './analysis-selection-repair.service';
+import { AccountWorkspaceService } from '../account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
 
 @Injectable({
   providedIn: 'root'
@@ -63,13 +65,18 @@ export class DbChangesService {
     private facilityReportsDbService: FacilityReportsDbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private cascadeDeleteService: IndexedDbCascadeDeleteService) { }
+    private cascadeDeleteService: IndexedDbCascadeDeleteService,
+    private workspaceService: AccountWorkspaceService,
+    private workspaceStore: AccountWorkspaceStore) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     this.accountDbService.selectedAccount.next(updatedAccount);
+    if (this.workspaceStore.account()?.guid === updatedAccount.guid) {
+      await this.workspaceService.reloadActiveWorkspace(true);
+    }
   }
 
 
@@ -259,6 +266,9 @@ export class DbChangesService {
     if (selectedFacilityGuid === updatedFacility.guid) {
       this.facilityDbService.selectedFacility.next(updatedFacility);
     }
+    if (this.workspaceStore.account()?.guid === updatedFacility.accountId) {
+      await this.workspaceService.reloadActiveWorkspace(true);
+    }
     return updatedFacility;
   }
 
@@ -396,6 +406,9 @@ export class DbChangesService {
 
     try {
       await this.selectAccount(selectedAccount, false);
+      if (this.workspaceStore.account()?.guid === selectedAccount.guid) {
+        await this.workspaceService.reloadActiveWorkspace(true);
+      }
     } catch (error) {
       this.toastNotificationService.showToast(
         'Facility Refresh Failed',
@@ -443,6 +456,9 @@ export class DbChangesService {
         });
       }
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+    }
+    if (this.workspaceStore.account()?.guid === newFacility.accountId) {
+      await this.workspaceService.reloadActiveWorkspace(true);
     }
   }
 

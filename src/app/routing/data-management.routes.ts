@@ -73,10 +73,13 @@ import { FacilityMeterDataComponent } from "../data-management/account-facilitie
 import { FacilityEnergyUsesModifyAnnualDataComponent } from "../data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-modify-annual-data/facility-energy-uses-modify-annual-data.component";
 import { MapMeterGroupsToEquipmentComponent } from "../data-management/data-management-import/process-footprint-tool-file/map-meter-groups-to-equipment/map-meter-groups-to-equipment.component";
 import { ConfirmEnergyUsesUploadComponent } from "../data-management/data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component";
+import { dataManagementChildGuard, facilityReadyGuard, persistenceReadyGuard } from "./workspace-readiness.guards";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
     component: DataManagementComponent,
+    canActivate: [persistenceReadyGuard],
+    canActivateChild: [dataManagementChildGuard],
     children: [
         { path: '', pathMatch: 'full', redirectTo: 'home' },
         {
@@ -145,6 +148,7 @@ export const DataManagementRoutes: Route = {
                 {
                     path: ':id',
                     component: FacilityDataComponent,
+                    canActivate: [facilityReadyGuard],
                     children: [
                         // { path: '', pathMatch: 'full', redirectTo: 'setup' },
                         {

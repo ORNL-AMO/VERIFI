@@ -8,6 +8,7 @@ import { DataEvaluationRoutes } from './data-evaluation.routes';
 import { FeedbackComponent } from '../static-content/feedback/feedback.component';
 import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
 import { environment } from 'src/environments/environment';
+import { persistenceReadyGuard } from './workspace-readiness.guards';
 
 const routes: Routes = [
   {
@@ -15,10 +16,10 @@ const routes: Routes = [
     pathMatch: 'full',
     redirectTo: 'welcome'
   },
-  { path: 'welcome', component: HomePageComponent },
+  { path: 'welcome', component: HomePageComponent, canActivate: [persistenceReadyGuard] },
   DataEvaluationRoutes,
   DataManagementRoutes,
-  { path: 'manage-accounts', component: ManageAccountsComponent },
+  { path: 'manage-accounts', component: ManageAccountsComponent, canActivate: [persistenceReadyGuard] },
   { path: 'feedback', component: FeedbackComponent },
   { path: 'privacy', component: PrivacyNoticeComponent },
   //wildcard/page not found needs to be last route
