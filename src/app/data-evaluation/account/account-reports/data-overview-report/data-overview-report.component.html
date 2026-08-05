@@ -22,5 +22,5 @@
 }
 
 @if (overviewReport && !calculatingAccounts && !calculatingFacilities) {
-<app-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()"></app-print-report-button>
+<app-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()" (onExportPpt)="downloadPpt()"></app-print-report-button>
 }
