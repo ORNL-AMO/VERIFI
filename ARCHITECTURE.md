@@ -10,7 +10,7 @@ VERIFI is a client-focused Angular application delivered as a web application an
 flowchart LR
     User["User"] --> Renderer["Angular renderer"]
     Renderer --> Features["Data management and evaluation features"]
-    Features <--> State["Angular services and RxJS state"]
+    Features <--> State["Lifecycle and account workspace signals"]
     State <--> IDB["IndexedDB"]
     State --> APIs["Weather and utility APIs"]
     Features --> Workers["Web Workers"]
@@ -27,7 +27,9 @@ The Electron renderer is the same Angular application built with the Electron en
 
 [`src/main.ts`](src/main.ts) bootstraps [`AppModule`](src/app/app.module.ts). The application remains NgModule-based: `AppModule` imports feature modules for data management, data evaluation, weather data, static content, shared utilities, and IndexedDB integration.
 
-[`AppComponent`](src/app/app.component.ts) coordinates initial loading. IndexedDB services load accounts and related records, populate service-owned `BehaviorSubject` state, apply record updates or migrations, select the active account, and start Electron-specific behavior when the preload bridge is present. This startup coupling means changes to persisted models may affect initialization even when an individual feature compiles in isolation.
+[`ApplicationLifecycleService`](src/app/application-lifecycle/application-lifecycle.service.ts) owns idempotent startup. It opens persistence, runs versioned migrations, initializes application metadata and reference data, loads the account catalog, resolves the initial account, publishes its workspace, loads Electron metadata when applicable, and finally enables automatic-backup observation. Concurrent callers share one initialization operation; a failed operation may be retried.
+
+[`AppComponent`](src/app/app.component.ts) triggers and renders that lifecycle but does not query repositories. Its shell exposes accessible initializing, error/retry, and switching states. Application-instance metadata is lifecycle-owned readonly state; its IndexedDB service is persistence-only.
 
 Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts):
 
@@ -38,9 +40,15 @@ Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/ap
 
 Account and facility route trees are intentionally large. Add routes alongside the relevant workflow and inspect adjacent components before changing navigation behavior.
 
+Readiness guards in [`workspace-readiness.guards.ts`](src/app/routing/workspace-readiness.guards.ts) wait for persistence, account workspace, or facility selection as required. Account and facility deep links resolve GUIDs and may switch the active workspace before activation. Static help, privacy, feedback, acknowledgment, and about routes remain available without an active account, including their existing nested URLs. Existing `canDeactivate` guards remain attached to edit routes.
+
 ## Domain and persistence
 
-Persistence is configured with `ngx-indexed-db` in [`src/app/indexedDB/_dbConfig.ts`](src/app/indexedDB/_dbConfig.ts) and registered by [`IndexedDBModule`](src/app/indexedDB/indexed-db.module.ts). Each object-store service owns database operations plus observable application state for its records.
+Persistence is configured with `ngx-indexed-db` in [`src/app/indexedDB/_dbConfig.ts`](src/app/indexedDB/_dbConfig.ts) and registered by [`IndexedDBModule`](src/app/indexedDB/indexed-db.module.ts). Object-store services own queries and writes. New application state must not be added to repositories.
+
+[`AccountWorkspaceStore`](src/app/account-workspace/account-workspace.store.ts) owns the active account snapshot as one private signal. A publication replaces the account, all account-scoped collections, and validated selections atomically. Facility-scoped collections are derived from that snapshot. [`AccountWorkspaceService`](src/app/account-workspace/account-workspace.service.ts) loads indexed account data concurrently, validates ownership, restores valid selection hints, and uses request tokens so stale account switches cannot publish.
+
+During the #2576 consumer migration, [`LegacyWorkspaceStateBridge`](src/app/account-workspace/legacy-workspace-state-bridge.service.ts) mirrors a published snapshot into older repository subjects. It is a compatibility seam only: new code reads workspace signals, and persistence-first compatibility writes refresh the atomic workspace after commit. The full typed write boundary remains assigned to #2577.
 
 Ordinary single-store access uses `ngx-indexed-db`. Atomic operations spanning multiple stores use the internal native transaction adapter in [`indexed-db-transaction.service.ts`](src/app/indexedDB/indexed-db-transaction.service.ts). Transaction operations must use only the adapter's transaction-bound request context; calling an object-store service from inside the operation would open an unrelated transaction.
 
@@ -98,7 +106,9 @@ Spreadsheet upload begins in [`data-management-import`](src/app/data-management/
 
 Excel exports primarily use ExcelJS. [`export-to-excel-template-v3.service.ts`](src/app/shared/helper-services/export-to-excel-template-v3.service.ts) writes the current VERIFI data template, while report-specific writers produce program and analysis workbooks. Template spreadsheets under `src/assets/csv_templates/` are binary source artifacts whose sheet names, headers, types, formulas, and ordering may be part of the import contract.
 
-JSON backup assembly is centered in [`backup-data.service.ts`](src/app/shared/helper-services/backup-data.service.ts). Browser flows download or upload files with Web APIs; Electron flows use the preload bridge, dialogs, and filesystem operations. A persisted-model change must consider both current IndexedDB data and backups created by older application versions.
+JSON backup assembly is centered in [`backup-data.service.ts`](src/app/shared/helper-services/backup-data.service.ts) and reads one coherent account-workspace snapshot. Browser flows download or upload files with Web APIs; Electron flows use the preload bridge, dialogs, and filesystem operations. A persisted-model change must consider both current IndexedDB data and backups created by older application versions.
+
+Automatic Electron backups observe committed workspace revisions. Hydration, selection-only changes, failed writes, and account switches do not produce a revision. Switching cancels unsent work for the previous account; committed bursts retain the existing debounce and save the latest coherent snapshot. File gateway and conflict behavior remain in the Electron layer pending #2578.
 
 Every JSON restore path first clones and prepares the file through [`backup-preparation.service.ts`](src/app/shared/helper-services/backup-preparation.service.ts): validate the envelope and data version, run the same ordered migrations as local data, validate core GUID relationships, then remap GUIDs and persist. Missing version metadata means version `0`; future versions are rejected before replacement or import mutation.
 
