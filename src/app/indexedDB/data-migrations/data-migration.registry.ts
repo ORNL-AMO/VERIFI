@@ -1,19 +1,8 @@
-import {
-  CURRENT_DATA_VERSION,
-  DataMigration,
-  MigrationData
-} from './data-migration.models';
-
-const versionZeroToOne: DataMigration = {
-  fromVersion: 0,
-  toVersion: 1,
-  description: 'Normalize legacy VERIFI persisted records.',
-  affectedStores: [],
-  migrate: (data: MigrationData) => ({ data, changedCollections: [] })
-};
+import { CURRENT_DATA_VERSION, DataMigration } from './data-migration.models';
+import { VERSION_ZERO_TO_ONE_MIGRATION } from './version-zero-to-one.migration';
 
 export const DATA_MIGRATIONS: ReadonlyArray<DataMigration> = validateMigrationRegistry([
-  versionZeroToOne
+  VERSION_ZERO_TO_ONE_MIGRATION
 ]);
 
 export function validateMigrationRegistry(
