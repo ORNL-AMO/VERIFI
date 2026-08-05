@@ -17,7 +17,7 @@ export class PredictordbServiceDeprecated {
     facilityPredictors: BehaviorSubject<Array<PredictorDataDeprecated>>;
     constructor(private dbService: NgxIndexedDBService,
         private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntryDeprecated>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorDataDeprecated>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntryDeprecated>>(new Array());

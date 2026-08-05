@@ -2,6 +2,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 describe('AccountAnalysisDbService', () => {
   let service: AccountAnalysisDbService;
@@ -15,7 +16,12 @@ describe('AccountAnalysisDbService', () => {
       add: vi.fn((_storeName: string, item: IdbAccountAnalysisItem) => of(item)),
       update: vi.fn((_storeName: string, item: IdbAccountAnalysisItem) => of(item))
     };
-    service = new AccountAnalysisDbService(dbService as any, {} as any, {} as any);
+    service = new AccountAnalysisDbService(
+      dbService as any,
+      {} as any,
+      {} as any,
+      new IndexedDbAccessService(dbService as any)
+    );
   });
 
   it('omits a legacy calculated report year when adding or updating an account analysis item', async () => {

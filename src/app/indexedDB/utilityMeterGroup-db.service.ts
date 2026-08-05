@@ -13,7 +13,7 @@ export class UtilityMeterGroupdbService {
     facilityMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
     accountMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
     constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
     }

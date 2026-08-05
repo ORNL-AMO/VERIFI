@@ -15,7 +15,7 @@ export class AccountdbService {
     allAccounts: BehaviorSubject<Array<IdbAccount>>;
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
         private electronService: ElectronService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
         this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
         this.selectedAccount.subscribe(account => {

@@ -15,7 +15,7 @@ export class UtilityMeterdbService {
     selectedMeter: BehaviorSubject<IdbUtilityMeter>;
     constructor(private dbService: NgxIndexedDBService,
         private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.selectedMeter = new BehaviorSubject<IdbUtilityMeter>(undefined);

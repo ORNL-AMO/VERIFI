@@ -13,7 +13,7 @@ export class CustomEmissionsDbService {
 
   accountEmissionsItems: BehaviorSubject<Array<IdbCustomEmissionsItem>>;
   constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountEmissionsItems = new BehaviorSubject<Array<IdbCustomEmissionsItem>>([]);
   }
 

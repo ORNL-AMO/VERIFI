@@ -12,7 +12,7 @@ export class ElectronBackupsDbService {
 
     accountBackups: Array<IdbElectronBackup> = [];
     constructor(private dbService: NgxIndexedDBService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
     }
 
     getAll(): Observable<Array<IdbElectronBackup>> {

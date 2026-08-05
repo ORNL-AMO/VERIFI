@@ -14,7 +14,7 @@ export class UtilityMeterDatadbService {
     facilityMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
     accountMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
     constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
         this.accountMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
     }

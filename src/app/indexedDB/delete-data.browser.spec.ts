@@ -6,6 +6,7 @@ import { AccountdbService } from './account-db.service';
 import { ACCOUNT_DELETION_STORES, GLOBAL_PERSISTENCE_STORES } from './account-deletion.config';
 import { DeleteDataService } from './delete-data.service';
 import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 import {
   IndexedDbTransactionContext,
   IndexedDbTransactionService
@@ -82,7 +83,8 @@ describe('account deletion in Chromium', () => {
         store: vi.fn(),
         clear: vi.fn()
       } as any,
-      { isElectron: false } as any
+      { isElectron: false } as any,
+      new IndexedDbAccessService(harness.dbService)
     );
     accountDbService.allAccounts.next([
       accountAFixture.account as unknown as IdbAccount,

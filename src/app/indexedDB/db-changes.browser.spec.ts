@@ -23,6 +23,7 @@ import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 describe('DbChangesService account switching in Chromium', () => {
   let harness: IndexedDbTestHarness;
@@ -47,26 +48,54 @@ describe('DbChangesService account switching in Chromium', () => {
       clear: vi.fn((key: string) => storedValues.delete(key))
     };
     const loadingService = {};
+    const indexedDbAccess = new IndexedDbAccessService(harness.dbService);
     const accountDbService = new AccountdbService(
       harness.dbService,
       localStorageService as any,
-      { isElectron: false } as any
+      { isElectron: false } as any,
+      indexedDbAccess
     );
     const facilityDbService = new FacilitydbService(
       harness.dbService,
       localStorageService as any,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
-    const predictorDbService = new PredictorDbService(harness.dbService, loadingService as any);
-    const predictorDataDbService = new PredictorDataDbService(harness.dbService, loadingService as any);
-    const predictorsDbServiceDeprecated = new PredictordbServiceDeprecated(harness.dbService, loadingService as any);
-    const utilityMeterDbService = new UtilityMeterdbService(harness.dbService, loadingService as any);
-    const utilityMeterDataDbService = new UtilityMeterDatadbService(harness.dbService, loadingService as any);
-    const utilityMeterGroupDbService = new UtilityMeterGroupdbService(harness.dbService, loadingService as any);
+    const predictorDbService = new PredictorDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const predictorDataDbService = new PredictorDataDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const predictorsDbServiceDeprecated = new PredictordbServiceDeprecated(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const utilityMeterDbService = new UtilityMeterdbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const utilityMeterDataDbService = new UtilityMeterDatadbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const utilityMeterGroupDbService = new UtilityMeterGroupdbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
     const accountAnalysisDbService = new AccountAnalysisDbService(
       harness.dbService,
       localStorageService as any,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
     const analysisDbService = new AnalysisDbService(
       harness.dbService,
@@ -74,23 +103,46 @@ describe('DbChangesService account switching in Chromium', () => {
       facilityDbService,
       accountDbService,
       predictorDbService,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
     const accountReportDbService = new AccountReportDbService(
       harness.dbService,
       localStorageService as any,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
     const facilityReportsDbService = new FacilityReportsDbService(
       harness.dbService,
       localStorageService as any,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
-    const customEmissionsDbService = new CustomEmissionsDbService(harness.dbService, loadingService as any);
-    const customFuelDbService = new CustomFuelDbService(harness.dbService, loadingService as any);
-    const customGWPDbService = new CustomGWPDbService(harness.dbService, loadingService as any);
-    const facilityEnergyUseGroupsDbService = new FacilityEnergyUseGroupsDbService(harness.dbService, loadingService as any);
-    const facilityEnergyUseEquipmentDbService = new FacilityEnergyUseEquipmentDbService(harness.dbService, loadingService as any);
+    const customEmissionsDbService = new CustomEmissionsDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const customFuelDbService = new CustomFuelDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const customGWPDbService = new CustomGWPDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const facilityEnergyUseGroupsDbService = new FacilityEnergyUseGroupsDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
+    const facilityEnergyUseEquipmentDbService = new FacilityEnergyUseEquipmentDbService(
+      harness.dbService,
+      loadingService as any,
+      indexedDbAccess
+    );
     const updateDbEntryService = {
       updateAccount: (account: IdbAccount) => ({ account, isChanged: false }),
       updateFacility: (facility: IdbFacility) => ({ facility, isChanged: false }),

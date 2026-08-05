@@ -15,7 +15,7 @@ export class FacilitydbService {
     selectedFacility: BehaviorSubject<IdbFacility>;
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
         private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
         //subscribe after initialization

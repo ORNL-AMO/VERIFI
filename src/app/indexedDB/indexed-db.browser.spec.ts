@@ -22,7 +22,8 @@ describe('IndexedDB in Chromium', () => {
       {} as any,
       {} as any,
       {} as any,
-      {} as any
+      {} as any,
+      new IndexedDbAccessService(harness.dbService)
     );
   });
 
@@ -184,13 +185,16 @@ describe('IndexedDB in Chromium', () => {
       predictorId: 'other-predictor-a'
     }));
     const loadingService = { setLoadingMessage: () => undefined };
+    const indexedDbAccess = new IndexedDbAccessService(harness.dbService);
     const meterDataService = new UtilityMeterDatadbService(
       harness.dbService,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
     const predictorDataService = new PredictorDataDbService(
       harness.dbService,
-      loadingService as any
+      loadingService as any,
+      indexedDbAccess
     );
 
     await expect(meterDataService.getStoredMeterData(accountAFixture.meter.guid as string))

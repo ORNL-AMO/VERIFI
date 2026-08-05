@@ -2,6 +2,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { AnalysisDbService } from './analysis-db.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 describe('AnalysisDbService', () => {
   let service: AnalysisDbService;
@@ -21,7 +22,8 @@ describe('AnalysisDbService', () => {
       {} as any,
       {} as any,
       {} as any,
-      {} as any
+      {} as any,
+      new IndexedDbAccessService(dbService as any)
     );
   });
 

@@ -13,7 +13,7 @@ export class CustomFuelDbService {
 
   accountCustomFuels: BehaviorSubject<Array<IdbCustomFuel>>;
   constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountCustomFuels = new BehaviorSubject<Array<IdbCustomFuel>>([]);
   }
 

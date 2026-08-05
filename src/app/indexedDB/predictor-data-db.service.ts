@@ -14,7 +14,7 @@ export class PredictorDataDbService {
     accountPredictorData: BehaviorSubject<Array<IdbPredictorData>>;
     constructor(private dbService: NgxIndexedDBService,
         private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityPredictorData = new BehaviorSubject<Array<IdbPredictorData>>(new Array());
         this.accountPredictorData = new BehaviorSubject<Array<IdbPredictorData>>(new Array());
     }

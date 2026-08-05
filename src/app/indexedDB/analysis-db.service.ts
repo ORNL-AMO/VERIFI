@@ -29,7 +29,7 @@ export class AnalysisDbService {
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private predictorDbService: PredictorDbService,
     private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);

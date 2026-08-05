@@ -13,7 +13,7 @@ export class CustomGWPDbService {
 
   accountCustomGWPs: BehaviorSubject<Array<IdbCustomGWP>>;
   constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountCustomGWPs = new BehaviorSubject<Array<IdbCustomGWP>>([]);
   }
 

@@ -17,7 +17,7 @@ export class FacilityReportsDbService {
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountFacilityReports = new BehaviorSubject<Array<IdbFacilityReport>>([]);
     this.facilityReports = new BehaviorSubject<Array<IdbFacilityReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbFacilityReport>(undefined);

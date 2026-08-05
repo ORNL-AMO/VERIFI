@@ -16,7 +16,7 @@ export class AccountReportDbService {
   selectedReport: BehaviorSubject<IdbAccountReport>;
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountReports = new BehaviorSubject<Array<IdbAccountReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbAccountReport>(undefined);
     //subscribe after initialization

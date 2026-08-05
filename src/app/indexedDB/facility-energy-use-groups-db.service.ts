@@ -15,7 +15,7 @@ export class FacilityEnergyUseGroupsDbService {
   accountEnergyUseGroups: BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>;
   constructor(private dbService: NgxIndexedDBService,
     private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService = new IndexedDbAccessService(dbService)) {
+    private indexedDbAccess: IndexedDbAccessService) {
     this.facilityEnergyUseGroups = new BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>(new Array());
     this.accountEnergyUseGroups = new BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>(new Array());
   }
