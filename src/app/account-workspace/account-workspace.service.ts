@@ -8,6 +8,7 @@ import {
 } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceSelectionHints, WorkspaceSelectionStorageService } from './workspace-selection-storage.service';
+import { LegacyWorkspaceStateBridge } from './legacy-workspace-state-bridge.service';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceService {
@@ -16,7 +17,8 @@ export class AccountWorkspaceService {
   constructor(
     private loader: AccountWorkspaceLoaderService,
     private store: AccountWorkspaceStore,
-    private selectionStorage: WorkspaceSelectionStorageService
+    private selectionStorage: WorkspaceSelectionStorageService,
+    private legacyBridge: LegacyWorkspaceStateBridge
   ) { }
 
   async selectAccount(accountGuid: string): Promise<WorkspaceLoadResult> {
@@ -30,6 +32,7 @@ export class AccountWorkspaceService {
 
       const selections = restoreSelections(snapshot, this.selectionStorage.read());
       this.store.publish(snapshot, selections);
+      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
       this.persistPublishedHints(snapshot, selections);
       return 'published';
     } catch (error) {
@@ -67,6 +70,7 @@ export class AccountWorkspaceService {
       } else {
         this.store.publish(snapshot, selections);
       }
+      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
       this.persistPublishedHints(snapshot, selections);
       return 'published';
     } catch (error) {
@@ -87,6 +91,7 @@ export class AccountWorkspaceService {
   selectFacility(facilityGuid?: string): void {
     if (!facilityGuid) {
       this.store.selectFacility(undefined);
+      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
       this.selectionStorage.clearFacility();
       return;
     }
@@ -95,12 +100,14 @@ export class AccountWorkspaceService {
       throw new WorkspaceSelectionError('The requested facility does not belong to the active account.');
     }
     this.store.selectFacility(facility);
+    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
     if (facility.id !== undefined) { this.selectionStorage.storeFacility(facility.id); }
   }
 
   clear(): void {
     ++this.latestRequestToken;
     this.store.clear();
+    this.legacyBridge.clear();
     this.selectionStorage.clearAccount();
     this.selectionStorage.clearFacility();
   }

@@ -50,7 +50,7 @@ describe('AccountWorkspaceService', () => {
     };
     const store = new AccountWorkspaceStore();
     const storage = createSelectionStorage();
-    const service = new AccountWorkspaceService(loader as any, store, storage as any);
+    const service = new AccountWorkspaceService(loader as any, store, storage as any, createLegacyBridge() as any);
 
     const first = service.selectAccount('account-a');
     const second = service.selectAccount('account-b');
@@ -68,7 +68,7 @@ describe('AccountWorkspaceService', () => {
     const loader = { load: vi.fn() };
     const store = new AccountWorkspaceStore();
     const storage = createSelectionStorage();
-    const service = new AccountWorkspaceService(loader as any, store, storage as any);
+    const service = new AccountWorkspaceService(loader as any, store, storage as any, createLegacyBridge() as any);
     loader.load.mockResolvedValueOnce(createSnapshot('account-a', 1));
     await service.selectAccount('account-a');
     loader.load.mockRejectedValueOnce(new Error('storage unavailable'));
@@ -85,7 +85,7 @@ describe('AccountWorkspaceService', () => {
     const loader = { load: vi.fn().mockResolvedValue(createSnapshot('account-a', 1)) };
     const store = new AccountWorkspaceStore();
     const storage = createSelectionStorage();
-    const service = new AccountWorkspaceService(loader as any, store, storage as any);
+    const service = new AccountWorkspaceService(loader as any, store, storage as any, createLegacyBridge() as any);
     await service.selectAccount('account-a');
 
     expect(() => service.selectFacility('foreign-facility')).toThrow('does not belong to the active account');
@@ -99,7 +99,12 @@ describe('AccountWorkspaceService', () => {
   it('increments revision only for a committed reload', async () => {
     const loader = { load: vi.fn().mockResolvedValue(createSnapshot('account-a', 1)) };
     const store = new AccountWorkspaceStore();
-    const service = new AccountWorkspaceService(loader as any, store, createSelectionStorage() as any);
+    const service = new AccountWorkspaceService(
+      loader as any,
+      store,
+      createSelectionStorage() as any,
+      createLegacyBridge() as any
+    );
     await service.selectAccount('account-a');
 
     await service.reloadActiveWorkspace(false);
@@ -163,6 +168,10 @@ function createSelectionStorage() {
     storeFacility: vi.fn(),
     clearFacility: vi.fn()
   };
+}
+
+function createLegacyBridge() {
+  return { publish: vi.fn(), clear: vi.fn() };
 }
 
 function createSnapshot(accountGuid: string, accountId: number): AccountWorkspaceSnapshot {
