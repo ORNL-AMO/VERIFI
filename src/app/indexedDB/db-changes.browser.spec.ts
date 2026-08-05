@@ -143,16 +143,9 @@ describe('DbChangesService account switching in Chromium', () => {
       loadingService as any,
       indexedDbAccess
     );
-    const updateDbEntryService = {
-      updateAccount: (account: IdbAccount) => ({ account, isChanged: false }),
-      updateFacility: (facility: IdbFacility) => ({ facility, isChanged: false }),
-      updateSelectedFacilityAnalysis: (facility: IdbFacility) => ({ facility, isChanged: false }),
-      updateUtilityMeter: (utilityMeter: IdbUtilityMeter, utilityMeterData: Array<unknown>) => ({
-        utilityMeter,
-        utilityMeterData,
-        isChanged: false,
-        meterDataChanged: false
-      })
+    const analysisSelectionRepair = {
+      repairAccount: (account: IdbAccount) => ({ account, isChanged: false }),
+      repairFacility: (facility: IdbFacility) => ({ facility, isChanged: false })
     };
     const dbChangesService = new DbChangesService(
       accountDbService,
@@ -163,7 +156,7 @@ describe('DbChangesService account switching in Chromium', () => {
       utilityMeterDbService,
       utilityMeterDataDbService,
       utilityMeterGroupDbService,
-      updateDbEntryService as any,
+      analysisSelectionRepair as any,
       customEmissionsDbService,
       loadingService as any,
       {} as any,
@@ -172,7 +165,6 @@ describe('DbChangesService account switching in Chromium', () => {
       customGWPDbService,
       predictorDbService,
       predictorDataDbService,
-      { migrateAccountPredictors: vi.fn().mockResolvedValue(undefined) } as any,
       facilityReportsDbService,
       facilityEnergyUseGroupsDbService,
       facilityEnergyUseEquipmentDbService,
