@@ -5,7 +5,7 @@ description: Change VERIFI spreadsheet templates, SheetJS parsers, ExcelJS write
 
 # Change data import or export
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), the file-flow section of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Implementer and Reviewer modes in [`docs/agents/personas.md`](../../../docs/agents/personas.md).
+1. Read [Imports, exports, and backups](../../../ARCHITECTURE.md#imports-exports-and-backups) plus the [Implementer](../../../docs/agents/personas.md#implementer) and [Reviewer](../../../docs/agents/personas.md#reviewer) modes.
 2. Identify the format and direction before editing: current VERIFI template, older template version, general workbook mapping, supported external workbook, report export, or JSON backup.
 3. Trace the complete flow from file selection and parsing through validation, domain-model construction, persistence, state refresh, and export/download. Find the format detector or version router as well as the selected parser/writer.
 4. Define compatibility explicitly. Preserve supported old formats, sheet names, headers, column types, dates, units, formulas, ordering, GUID relationships, and missing-field defaults unless the issue approves a break.

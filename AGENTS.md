@@ -1,6 +1,6 @@
 # VERIFI Agent Guide
 
-This file contains repository-wide instructions for coding agents. Keep it concise and route detailed context to the linked documents.
+This file contains repository-wide instructions for coding agents. Keep it concise and route detailed context to linked sources.
 
 ## Sources of truth
 
@@ -17,22 +17,17 @@ Do not copy volatile package versions, scripts, database versions, or implementa
 
 ## Project orientation
 
-VERIFI is an Angular and Electron application for tracking, visualizing, and analyzing industrial facility utility data. The browser and desktop builds share the Angular renderer. The Electron build adds narrowly exposed filesystem and updater capabilities through a preload bridge.
+VERIFI's Angular renderer ships for web and Electron. Use the [task context index](docs/agents/context-index.md) to choose entrypoints, minimum documentation, skill, mode, and first validation tier. Prefer established neighboring code over a new pattern.
 
-Start in these areas:
+## Context discipline
 
-| Task | First locations |
-| --- | --- |
-| Application shell and startup | `src/main.ts`, `src/app/app.module.ts`, `src/app/app.component.ts` |
-| Routes and user workflows | `src/app/routing/`, `src/app/data-management/`, `src/app/data-evaluation/` |
-| Persisted data | `src/app/models/idbModels/`, `src/app/indexedDB/` |
-| Calculations and reports | `src/app/calculations/`, `src/app/web-workers/`, report features under `src/app/data-evaluation/` |
-| Imports, exports, and backups | `src/app/data-management/data-management-import/`, `src/app/shared/helper-services/`, `src/app/core-components/import-backup-modal/` |
-| Electron-only behavior | `main.js`, `preload.js`, `src/app/electron/` |
-| Shared UI and styling | `src/app/shared/`, `src/styles/`, neighboring feature components |
-| Builds, tests, and environments | `package.json`, `angular.json`, `src/environments/`, `.github/workflows/` |
-
-Read only the sections relevant to the task. Prefer established neighboring code over introducing a new pattern.
+- This guide is supplied automatically; reopen it only to verify exact text.
+- Use targeted searches and narrow excerpts. Load only relevant linked headings, not whole documents.
+- Do not preload `README.md`, `CONTRIBUTING.md`, unrelated skills, or complete guides.
+- Stop broad exploration after identifying the affected contract, consumers, neighboring pattern, material risks, and test tier.
+- Inspect `package.json` first. Query `package-lock.json` only for a specific dependency, integrity record, upgrade, or security investigation.
+- Skip dependencies, generated output, caches, and binary assets unless relevant. `.gitignore` is not a context or security boundary.
+- Do not add `.codexignore` or hide tracked source through `.ignore`.
 
 ## Setup and commands
 
@@ -61,16 +56,7 @@ Install Chromium once with `npx playwright install chromium` when browser tests 
 
 ## Task routing
 
-Apply the relevant mode from [docs/agents/personas.md](docs/agents/personas.md). Use these discoverable skills for repeatable workflows:
-
-- `implement-angular-feature`: Angular features, UI/UX implementation, routes, components, services, templates, and styles.
-- `change-indexeddb-persistence`: persisted models, indexes, stores, services, migrations, or backup compatibility.
-- `change-calculations-and-reports`: calculations, units, Web Worker contracts, analyses, and report outputs.
-- `change-data-import-export`: spreadsheets, structured imports/exports, templates, and JSON backups.
-- `design-and-write-tests`: test strategy, regression coverage, test implementation, test-quality review, and layer selection.
-- `validate-web-and-electron`: selecting and running the correct test/build matrix across runtimes.
-
-Use the Designer mode with `implement-angular-feature` for UI implementation. A design-only request does not authorize code changes.
+Use the mode and discoverable skill selected by the [task context index](docs/agents/context-index.md). Combine skills only when the task crosses their stated boundaries. Use Designer with Implementer for UI implementation; design-only work does not authorize code changes.
 
 ## Working rules
 
@@ -88,6 +74,13 @@ Use the Designer mode with `implement-angular-feature` for UI implementation. A 
 - Do not edit `node_modules/`, `dist/`, or `output/`. Treat spreadsheets, images, and other binary assets under `src/assets/` as deliberate source artifacts.
 - Do not add secrets, credentials, private deployment details, or machine-specific paths to documentation or source.
 
+## Communication
+
+- Lead with the outcome. Send one- or two-sentence updates only when state changes.
+- Final responses give the result, validation, unresolved risks, and required next action.
+- Omit repeated summaries, unchanged status, generic reassurance, and step-by-step tool narration.
+- Never omit failures, test results, compatibility risks, destructive-action warnings, or required decisions.
+
 ## Documentation maintenance
 
 Update documentation in the same change when behavior or workflow changes:
@@ -95,6 +88,7 @@ Update documentation in the same change when behavior or workflow changes:
 - Update `ARCHITECTURE.md` for changed boundaries, data flows, or invariants.
 - Update the matching skill for a changed repeatable workflow.
 - Update this file only for durable repository-wide rules, routing, commands, or recurring mistakes.
+- Update the task context index when stable entrypoints, routing, cross-boundary triggers, or validation tiers change.
 - Update `docs/agents/personas.md` when task-mode responsibilities change.
 
 Validate every new link and command. If a fact is uncertain, verify it in source or label the uncertainty rather than presenting an assumption as current behavior.

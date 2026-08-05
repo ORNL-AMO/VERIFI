@@ -5,7 +5,7 @@ description: Design, implement, or review meaningful VERIFI tests and regression
 
 # Design and write VERIFI tests
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), [`docs/testing.md`](../../../docs/testing.md), the Test Engineer mode in [`docs/agents/personas.md`](../../../docs/agents/personas.md), and the skill for the affected subsystem.
+1. Read [Test layers](../../../docs/testing.md#test-layers), [what a change requires](../../../docs/testing.md#what-a-change-requires), and the [Test Engineer](../../../docs/agents/personas.md#test-engineer) mode. Add the affected subsystem skill.
 2. State the observable behavior, plausible regression, affected contract, and why the failure matters before selecting assertions.
 3. Choose the lowest adequate layer:
    - Use a fast `*.spec.ts` for pure logic, service decisions, forms, guards, pipes, or jsdom-supported component behavior.
