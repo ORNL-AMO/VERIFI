@@ -24,13 +24,11 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-deprecated-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { IdbPredictorEntryDeprecated, PredictorDataDeprecated } from 'src/app/models/idbModels/deprecatedPredictors';
 import JSZip from 'jszip';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
@@ -41,6 +39,7 @@ import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-
 import { normalizeAnalysisGroupModelStorage } from '../shared-analysis/calculations/regression-model-recovery';
 import { BackupFile } from '../../models/backup-file';
 import { CURRENT_DATA_VERSION } from '../../indexedDB/data-migrations/data-migration.models';
+import { PreparedBackupFile } from './backup-preparation.service';
 
 export { BackupFile } from '../../models/backup-file';
 
@@ -59,7 +58,6 @@ export class BackupDataService {
     private customGWPDbService: CustomGWPDbService,
     private predictorDataDbService: PredictorDataDbService,
     private predictorDbService: PredictorDbService,
-    private predictorsDbServiceDeprecated: PredictordbServiceDeprecated,
     private facilityReportsDbService: FacilityReportsDbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) { }
@@ -221,7 +219,8 @@ export class BackupDataService {
     this.loadingService.addLoadingMessage('Adding Account Reports');
   }
 
-  async importAccountBackupFile(backupFile: BackupFile, currIdx: number): Promise<IdbAccount> {
+  async importAccountBackupFile(preparedBackup: PreparedBackupFile, currIdx: number): Promise<IdbAccount> {
+    let backupFile = structuredClone(preparedBackup);
     this.analyticsService.sendEvent('import_backup_file');
     let accountGUIDs: { oldId: string, newId: string } = {
       oldId: backupFile.account.guid,
@@ -292,69 +291,12 @@ export class BackupDataService {
       meterData.accountId = accountGUIDs.newId;
       meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
-      if (meterData['readDate']) {
-        const [datePart] = meterData['readDate'].split('T');
-        const [year, month, day] = datePart.split('-').map(Number);
-        meterData.year = year;
-        meterData.month = month;
-        meterData.day = day;
-        meterData.migratedDates = true;
-      }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
 
-    //migrate old
     let predictorGUIDs: Array<{ oldId: string, newId: string, predictorName: string, facilityId: string }> = new Array();
-    if (backupFile.predictorData.length > 0) {
-      // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
-      for (let index = 0; index < facilityGUIDs.length; index++) {
-        let facilityGuid: { oldId: string, newId: string } = facilityGUIDs[index];
-        //IDs updated above. use old id when removing
-        let facilityEntries: Array<IdbPredictorEntryDeprecated> = predictorEntries.filter(entry => {
-          return entry.facilityId == facilityGuid.oldId;
-        });
-        if (facilityEntries.length > 0) {
-          let predictorDataDep: Array<PredictorDataDeprecated> = facilityEntries[0].predictors;
-          for (let i = 0; i < predictorDataDep.length; i++) {
-            let oldPredictor: PredictorDataDeprecated = predictorDataDep[i];
-            let newPredictor: IdbPredictor = getNewIdbPredictor(accountGUIDs.newId, facilityGuid.newId);
-            newPredictor.guid = oldPredictor.id;
-            newPredictor.name = oldPredictor.name;
-            newPredictor.description = oldPredictor.name;
-            newPredictor.production = oldPredictor.production;
-            newPredictor.predictorType = oldPredictor.predictorType;
-            newPredictor.weatherDataType = oldPredictor.weatherDataType;
-            newPredictor.weatherStationId = oldPredictor.weatherStationId;
-            newPredictor.weatherStationName = oldPredictor.weatherStationName;
-            newPredictor.heatingBaseTemperature = oldPredictor.heatingBaseTemperature;
-            newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
-            newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
-            await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-            predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid, predictorName: newPredictor.name, facilityId: facilityGuid.newId });
-            for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
-              let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
-              let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
-                return predictor.id == newPredictor.guid
-              });
-              let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-              let oldEntryDate: Date = new Date(oldEntry.date);
-              newIdbPredictorData.month = oldEntryDate.getMonth() + 1;
-              newIdbPredictorData.year = oldEntryDate.getFullYear();
-              newIdbPredictorData.amount = oldEntryPredictor.amount;
-              newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
-              newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
-              await firstValueFrom(this.predictorDataDbService.addWithObservable(newIdbPredictorData));
-            }
-          }
-        }
-      }
-    }
-
-
-
     if (backupFile.predictors) {
       for (let i = 0; i < backupFile.predictors.length; i++) {
         let predictor: IdbPredictor = backupFile.predictors[i];
@@ -386,13 +328,6 @@ export class BackupDataService {
         delete predictorData.id;
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUIDs.newId;
-        if (predictorData['date']) {
-          const [datePart] = predictorData['date'].split('T');
-          const [year, month, day] = datePart.split('-').map(Number);
-          predictorData.year = year;
-          predictorData.month = month;
-          predictorData.migratedDates = true;
-        }
         predictorData.facilityId = this.getNewId(predictorData.facilityId, facilityGUIDs);
         predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
@@ -622,7 +557,8 @@ export class BackupDataService {
     this.loadingService.addLoadingMessage('Updating Account Reports');
   }
 
-  async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string, currIdx: number): Promise<{ facility: IdbFacility, index?: number }> {
+  async importFacilityBackupFile(preparedBackup: PreparedBackupFile, accountGUID: string, currIdx: number): Promise<{ facility: IdbFacility, index?: number }> {
+    let backupFile = structuredClone(preparedBackup);
     this.analyticsService.sendEvent('import_backup_file');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
@@ -677,78 +613,11 @@ export class BackupDataService {
       meterData.accountId = accountGUID;
       meterData.facilityId = newFacilityGUID;
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
-      if (meterData['readDate']) {
-        meterData.year = new Date(meterData['readDate']).getFullYear();
-        meterData.month = new Date(meterData['readDate']).getMonth() + 1;
-        meterData.day = new Date(meterData['readDate']).getDate();
-        meterData.migratedDates = true;
-      }
       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
-    //TODO: migrate to new predictors..
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    // let predictorDataGUIDs: Array<{ oldId: string, newId: string }> = new Array();
-    // for (let i = 0; i < backupFile.predictorData.length; i++) {
-    //   let predictorEntryDeprecated: IdbPredictorEntryDeprecated = backupFile.predictorData[i];
-    //   let newGUID: string = this.getGUID();
-    //   predictorDataGUIDs.push({
-    //     newId: newGUID,
-    //     oldId: predictorEntryDeprecated.guid
-    //   });
-    //   delete predictorEntryDeprecated.id;
-    //   predictorEntryDeprecated.guid = newGUID;
-    //   predictorEntryDeprecated.accountId = accountGUID;
-    //   predictorEntryDeprecated.facilityId = newFacilityGUID;
-    //   predictorEntryDeprecated.date = this.getImportDate(predictorEntryDeprecated.date);
-    //   await firstValueFrom(this.predictorsDbServiceDeprecated.addWithObservable(predictorEntryDeprecated));
-    // }
-
     let predictorGUIDs: Array<{ oldId: string, newId: string, predictorName: string, facilityId: string }> = new Array();
-    if (backupFile.predictorData.length > 0) {
-      // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-      let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
-      // let facilityGuid: { oldId: string, newId: string } = facilityGUIDs[index];
-      //IDs updated above. use old id when removing
-      let facilityEntries: Array<IdbPredictorEntryDeprecated> = predictorEntries.filter(entry => {
-        return entry.facilityId == newFacilityGUID;
-      });
-      if (facilityEntries.length > 0) {
-        let predictorDataDep: Array<PredictorDataDeprecated> = facilityEntries[0].predictors;
-        for (let i = 0; i < predictorDataDep.length; i++) {
-          let oldPredictor: PredictorDataDeprecated = predictorDataDep[i];
-          let newPredictor: IdbPredictor = getNewIdbPredictor(accountGUID, newFacilityGUID);
-          newPredictor.guid = oldPredictor.id;
-          newPredictor.name = oldPredictor.name;
-          newPredictor.description = oldPredictor.name;
-          newPredictor.production = oldPredictor.production;
-          newPredictor.predictorType = oldPredictor.predictorType;
-          newPredictor.weatherDataType = oldPredictor.weatherDataType;
-          newPredictor.weatherStationId = oldPredictor.weatherStationId;
-          newPredictor.weatherStationName = oldPredictor.weatherStationName;
-          newPredictor.heatingBaseTemperature = oldPredictor.heatingBaseTemperature;
-          newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
-          newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
-          await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-          predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid, predictorName: newPredictor.name, facilityId: newFacilityGUID });
-          for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
-            let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
-            let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
-              return predictor.id == newPredictor.guid
-            });
-            let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-            let oldEntryDate: Date = new Date(oldEntry.date);
-            newIdbPredictorData.month = oldEntryDate.getMonth() + 1;
-            newIdbPredictorData.year = oldEntryDate.getFullYear();
-            newIdbPredictorData.amount = oldEntryPredictor.amount;
-            newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
-            newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
-            await firstValueFrom(this.predictorDataDbService.addWithObservable(newIdbPredictorData));
-          }
-        }
-      }
-    }
-
     if (backupFile.predictors) {
       for (let i = 0; i < backupFile.predictors.length; i++) {
         let predictor: IdbPredictor = backupFile.predictors[i];
@@ -777,12 +646,6 @@ export class BackupDataService {
           oldId: predictorData.guid
         });
         delete predictorData.id;
-        if (predictorData['date']) {
-          predictorData.year = new Date(predictorData['date']).getFullYear();
-          predictorData.month = new Date(predictorData['date']).getMonth() + 1;
-          predictorData.migratedDates = true;
-        }
-
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUID;
         predictorData.facilityId = newFacilityGUID;

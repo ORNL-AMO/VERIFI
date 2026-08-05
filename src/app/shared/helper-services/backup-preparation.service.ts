@@ -77,6 +77,29 @@ export class BackupPreparationService {
     return backup as PreparedBackupFile;
   }
 
+  extractFacility(backup: PreparedBackupFile, facilityGuid: string): PreparedBackupFile {
+    if (backup.backupFileType !== 'Account') {
+      throw new InvalidBackupError('Selective facility import requires an account backup.');
+    }
+    const facility = backup.facilities.find(item => item.guid === facilityGuid);
+    if (!facility) { throw new InvalidBackupError('The selected facility is not present in this backup.'); }
+    return this.prepare({
+      ...structuredClone(backup),
+      backupFileType: 'Facility', account: undefined, facilities: [], facility,
+      meters: backup.meters.filter(item => item.facilityId === facilityGuid),
+      meterData: backup.meterData.filter(item => item.facilityId === facilityGuid),
+      groups: backup.groups.filter(item => item.facilityId === facilityGuid),
+      facilityAnalysisItems: backup.facilityAnalysisItems.filter(item => item.facilityId === facilityGuid),
+      predictorData: backup.predictorData.filter(item => item.facilityId === facilityGuid),
+      predictorDataV2: backup.predictorDataV2.filter(item => item.facilityId === facilityGuid),
+      predictors: backup.predictors.filter(item => item.facilityId === facilityGuid),
+      facilityReports: backup.facilityReports.filter(item => item.facilityId === facilityGuid),
+      facilityEnergyUseGroups: backup.facilityEnergyUseGroups.filter(item => item.facilityId === facilityGuid),
+      facilityEnergyUseEquipment: backup.facilityEnergyUseEquipment.filter(item => item.facilityId === facilityGuid),
+      accountReports: [], accountAnalysisItems: []
+    });
+  }
+
   private cloneAndValidateEnvelope(input: unknown): BackupFile {
     if (!input || typeof input !== 'object') { throw new InvalidBackupError(); }
     const backup = structuredClone(input) as Record<string, unknown>;
@@ -152,22 +175,22 @@ function validateCoreRelationships(backup: BackupFile): void {
   const meterIds = new Set(backup.meters.map(item => item.guid));
   const predictorIds = new Set(backup.predictors.map(item => item.guid));
   const energyGroupIds = new Set(backup.facilityEnergyUseGroups.map(item => item.guid));
+  const rootAccountId = backup.backupFileType === 'Account' ? backup.account.guid : backup.facility.accountId;
+  const accountOwned = [
+    ...backup.meters, ...backup.meterData, ...backup.groups, ...backup.predictorData,
+    ...backup.predictors, ...backup.predictorDataV2, ...backup.facilityAnalysisItems,
+    ...backup.accountAnalysisItems, ...backup.accountReports, ...backup.facilityReports,
+    ...backup.customEmissionsItems, ...backup.customFuels, ...backup.customGWPs,
+    ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment
+  ];
 
   if (backup.backupFileType === 'Account') {
-    const accountId = backup.account.guid;
-    requireAll(backup.facilities, item => item.accountId === accountId, 'A facility does not belong to the backup account.');
-    const accountOwned = [
-      ...backup.meters, ...backup.meterData, ...backup.groups, ...backup.predictors,
-      ...backup.predictorDataV2, ...backup.facilityAnalysisItems, ...backup.accountAnalysisItems,
-      ...backup.accountReports, ...backup.facilityReports, ...backup.customEmissionsItems,
-      ...backup.customFuels, ...backup.customGWPs, ...backup.facilityEnergyUseGroups,
-      ...backup.facilityEnergyUseEquipment
-    ];
-    requireAll(accountOwned, item => item.accountId === accountId, 'A record does not belong to the backup account.');
+    requireAll(backup.facilities, item => item.accountId === rootAccountId, 'A facility does not belong to the backup account.');
   }
+  requireAll(accountOwned, item => item.accountId === rootAccountId, 'A record does not belong to the backup account.');
 
   const facilityOwned = [
-    ...backup.meters, ...backup.meterData, ...backup.groups, ...backup.predictors,
+    ...backup.meters, ...backup.meterData, ...backup.groups, ...backup.predictorData, ...backup.predictors,
     ...backup.predictorDataV2, ...backup.facilityAnalysisItems, ...backup.facilityReports,
     ...backup.facilityEnergyUseGroups, ...backup.facilityEnergyUseEquipment
   ];

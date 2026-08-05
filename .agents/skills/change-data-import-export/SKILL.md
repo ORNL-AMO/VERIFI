@@ -7,7 +7,7 @@ description: Change VERIFI spreadsheet templates, SheetJS parsers, ExcelJS write
 
 1. Read [Imports, exports, and backups](../../../ARCHITECTURE.md#imports-exports-and-backups) plus the [Implementer](../../../docs/agents/personas.md#implementer) and [Reviewer](../../../docs/agents/personas.md#reviewer) modes.
 2. Identify the format and direction before editing: current VERIFI template, older template version, general workbook mapping, supported external workbook, report export, or JSON backup.
-3. Trace the complete flow from file selection and parsing through validation, domain-model construction, persistence, state refresh, and export/download. Find the format detector or version router as well as the selected parser/writer.
+3. Trace the complete flow from file selection and parsing through validation, domain-model construction, persistence, state refresh, and export/download. JSON backups must pass through `backup-preparation.service.ts` before GUID remapping, replacement deletion, or writes. Find the format detector or version router as well as the selected parser/writer.
 4. Define compatibility explicitly. Preserve supported old formats, sheet names, headers, column types, dates, units, formulas, ordering, GUID relationships, and missing-field defaults unless the issue approves a break.
 5. Keep parsing and mapping logic testable without UI state where practical. Validate before committing records and surface row, sheet, and field errors in the established workflow.
 6. Treat files under `src/assets/csv_templates/` as binary source contracts. Change them only when required, review the workbook visually, and update the paired parser and writer in the same change.

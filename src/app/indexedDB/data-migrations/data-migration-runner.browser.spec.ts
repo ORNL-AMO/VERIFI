@@ -55,4 +55,61 @@ describe('data migration runner in Chromium', () => {
     await runner.runMigrations();
     expect(await firstValueFrom(harness.dbService.getByKey('accounts', 1))).toEqual(account);
   });
+
+  it('rolls back a failed transaction and allows a later retry', async () => {
+    await harness.seed({
+      application: [{ id: 1, guid: 'application', dataVersion: 0 }],
+      accounts: [{ id: 1, guid: 'account', name: 'Legacy' }],
+      facilities: [{ id: 2, guid: 'facility', accountId: 'account', name: 'Plant' }]
+    });
+
+    const objectStorePrototype = IDBObjectStore.prototype as any;
+    const originalPut = objectStorePrototype.put;
+    let putCount = 0;
+    objectStorePrototype.put = function (...args: unknown[]) {
+      putCount++;
+      if (putCount === 2) { throw new Error('forced migration write failure'); }
+      return originalPut.apply(this, args);
+    };
+
+    try {
+      await expect(runner.runMigrations()).rejects.toThrow('forced migration write failure');
+    } finally {
+      objectStorePrototype.put = originalPut;
+    }
+
+    expect((await harness.getAll('application'))[0].dataVersion).toBe(0);
+    expect((await harness.getAll('accounts'))[0].electricityUnit).toBeUndefined();
+    expect((await harness.getAll('facilities'))[0].electricityUnit).toBeUndefined();
+
+    await runner.runMigrations();
+    expect((await harness.getAll('application'))[0].dataVersion).toBe(1);
+    expect((await harness.getAll('accounts'))[0].electricityUnit).toBe('kWh');
+    expect((await harness.getAll('facilities'))[0].electricityUnit).toBe('kWh');
+  });
+
+  it('migrates a large meter-reading dataset without losing GUID relationships', async () => {
+    const readings = Array.from({ length: 500 }, (_, index) => ({
+      id: index + 10,
+      guid: `reading-${index}`,
+      accountId: 'account',
+      facilityId: 'facility',
+      meterId: 'meter',
+      readDate: `2024-${String((index % 12) + 1).padStart(2, '0')}-01T00:00:00.000Z`
+    }));
+    await harness.seed({
+      application: [{ id: 1, guid: 'application', dataVersion: 0 }],
+      accounts: [{ id: 1, guid: 'account', name: 'Legacy' }],
+      facilities: [{ id: 2, guid: 'facility', accountId: 'account', name: 'Plant' }],
+      utilityMeter: [{ id: 3, guid: 'meter', accountId: 'account', facilityId: 'facility', source: 'Electricity' }],
+      utilityMeterData: readings
+    });
+
+    await runner.runMigrations();
+
+    const migratedReadings = await harness.getAll('utilityMeterData');
+    expect(migratedReadings).toHaveLength(500);
+    expect(migratedReadings.every(reading => reading.meterId === 'meter' && reading.facilityId === 'facility')).toBe(true);
+    expect(migratedReadings.every(reading => reading.migratedDates === true)).toBe(true);
+  });
 });

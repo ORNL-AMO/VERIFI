@@ -46,4 +46,29 @@ describe('version zero to one migration', () => {
     expect(second.changedCollections).toEqual([]);
     expect(second.data).toEqual(first.data);
   });
+
+  it('preserves the existing defaults for legacy account-savings reports', () => {
+    const input = emptyMigrationData();
+    input.accountReports.push({
+      guid: 'report', accountId: 'account', reportType: 'accountSavings'
+    } as any);
+
+    const first = VERSION_ZERO_TO_ONE_MIGRATION.migrate(input);
+    const second = VERSION_ZERO_TO_ONE_MIGRATION.migrate(first.data);
+
+    expect(first.data.accountReports[0].accountSavingsReportSetup).toMatchObject({
+      includeAnnualResults: true,
+      includeFacilityResults: true,
+      includePerformanceResults: true,
+      numberOfTopPerformers: 5,
+      analysisTableColumns: {
+        energy: true,
+        actualEnergy: true,
+        modeledEnergy: true,
+        predictors: []
+      }
+    });
+    expect(first.changedCollections).toContain('accountReports');
+    expect(second.changedCollections).toEqual([]);
+  });
 });

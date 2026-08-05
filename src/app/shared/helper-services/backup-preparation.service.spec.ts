@@ -47,5 +47,40 @@ describe('BackupPreparationService', () => {
     const broken = accountBackup();
     broken.meterData[0].meterId = 'missing';
     expect(() => service.prepare(broken)).toThrow(BackupRelationshipError);
+    const wrongAccount = service.extractFacility(service.prepare(accountBackup()), 'facility');
+    wrongAccount.meters[0].accountId = 'other-account';
+    expect(() => service.prepare(wrongAccount)).toThrow(BackupRelationshipError);
+  });
+
+  it('extracts every facility-scoped collection without cross-facility records', () => {
+    const input = accountBackup();
+    input.facilities.push({ guid: 'other-facility', accountId: 'account', name: 'Other' } as any);
+    input.groups.push(
+      { guid: 'group', accountId: 'account', facilityId: 'facility' } as any,
+      { guid: 'other-group', accountId: 'account', facilityId: 'other-facility' } as any
+    );
+    input.facilityReports.push(
+      { guid: 'report', accountId: 'account', facilityId: 'facility' } as any,
+      { guid: 'other-report', accountId: 'account', facilityId: 'other-facility' } as any
+    );
+    input.facilityEnergyUseGroups.push(
+      { guid: 'energy-group', accountId: 'account', facilityId: 'facility' } as any,
+      { guid: 'other-energy-group', accountId: 'account', facilityId: 'other-facility' } as any
+    );
+    input.facilityEnergyUseEquipment.push(
+      { guid: 'equipment', accountId: 'account', facilityId: 'facility', energyUseGroupId: 'energy-group', utilityMeterGroupIds: ['group'] } as any,
+      { guid: 'other-equipment', accountId: 'account', facilityId: 'other-facility', energyUseGroupId: 'other-energy-group', utilityMeterGroupIds: ['other-group'] } as any
+    );
+    input.meters[0].groupId = 'group';
+
+    const prepared = service.prepare(input);
+    const facility = service.extractFacility(prepared, 'facility');
+
+    expect(facility.backupFileType).toBe('Facility');
+    expect(facility.facility.guid).toBe('facility');
+    expect(facility.groups.map(item => item.guid)).toEqual(['group']);
+    expect(facility.facilityReports.map(item => item.guid)).toEqual(['report']);
+    expect(facility.facilityEnergyUseGroups.map(item => item.guid)).toEqual(['energy-group']);
+    expect(facility.facilityEnergyUseEquipment.map(item => item.guid)).toEqual(['equipment']);
   });
 });

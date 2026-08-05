@@ -11,6 +11,7 @@ import { LoadingService } from '../loading/loading.service';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
+import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -22,7 +23,7 @@ export class ElectronBackupFileComponent {
 
 
   latestBackupFileSub: Subscription;
-  latestBackupFile: BackupFile;
+  latestBackupFile: PreparedBackupFile;
   account: IdbAccount;
   accountSub: Subscription;
   showModal: boolean = false;
@@ -41,7 +42,8 @@ export class ElectronBackupFileComponent {
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
     private cd: ChangeDetectorRef,
-    private deleteDataService: DeleteDataService) {
+    private deleteDataService: DeleteDataService,
+    private backupPreparationService: BackupPreparationService) {
 
   }
 
@@ -65,12 +67,21 @@ export class ElectronBackupFileComponent {
       });
 
       this.latestBackupFileSub = this.electronService.accountLatestBackupFile.subscribe(val => {
-        this.latestBackupFile = val;
-        if (this.latestBackupFile) {
-          if (this.archiveOption == 'always') {
-            this.createArchive();
+        if (val) {
+          try {
+            this.latestBackupFile = this.backupPreparationService.prepare(val);
+            if (this.archiveOption == 'always') {
+              this.createArchive();
+            }
+            this.checkShowModal();
+          } catch (error) {
+            this.latestBackupFile = undefined;
+            this.automaticBackupsService.initializingAccount = false;
+            const message = error instanceof Error ? error.message : 'The selected backup file is invalid.';
+            this.toastNotificationService.showToast('Backup File Error', message, 15000, false, 'alert-danger');
           }
-          this.checkShowModal();
+        } else {
+          this.latestBackupFile = undefined;
         }
       });
     }
