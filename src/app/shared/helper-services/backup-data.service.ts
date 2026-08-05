@@ -40,6 +40,7 @@ import { normalizeAnalysisGroupModelStorage } from '../shared-analysis/calculati
 import { BackupFile } from '../../models/backup-file';
 import { CURRENT_DATA_VERSION } from '../../indexedDB/data-migrations/data-migration.models';
 import { PreparedBackupFile } from './backup-preparation.service';
+import { AccountWorkspaceStore } from '../../account-workspace/account-workspace.store';
 
 export { BackupFile } from '../../models/backup-file';
 
@@ -60,7 +61,8 @@ export class BackupDataService {
     private predictorDbService: PredictorDbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) { }
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
+    private workspaceStore: AccountWorkspaceStore) { }
 
 
   backupAccount(downloadAsZip?: boolean) {
@@ -70,26 +72,28 @@ export class BackupDataService {
   }
 
   getAccountBackupFile(): BackupFile {
-    const facilities = this.facilityDbService.accountFacilities.getValue();
+    const snapshot = this.workspaceStore.snapshot();
+    if (!snapshot) { throw new Error('An account workspace must be loaded before creating a backup.'); }
+    const facilities = [...snapshot.facilities];
     let backupFile: BackupFile = {
       dataVersion: CURRENT_DATA_VERSION,
-      account: this.accountDbService.selectedAccount.getValue(),
+      account: snapshot.account,
       facilities,
-      meters: this.utilityMeterDbService.accountMeters.getValue(),
-      meterData: this.utilityMeterDataDbService.accountMeterData.getValue(),
-      accountReports: this.accountReportsDbService.accountReports.getValue(),
-      groups: this.trimGroups(this.utilityMeterGroupDbService.accountMeterGroups.getValue()),
-      accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
-      facilityAnalysisItems: this.trimAnalysisModels(this.analysisDbService.accountAnalysisItems.getValue(), facilities),
+      meters: [...snapshot.meters],
+      meterData: [...snapshot.meterData],
+      accountReports: [...snapshot.accountReports],
+      groups: this.trimGroups([...snapshot.meterGroups]),
+      accountAnalysisItems: [...snapshot.accountAnalyses],
+      facilityAnalysisItems: this.trimAnalysisModels([...snapshot.facilityAnalyses], facilities),
       predictorData: [],
-      predictorDataV2: this.predictorDataDbService.accountPredictorData.getValue(),
-      predictors: this.predictorDbService.accountPredictors.getValue(),
-      customEmissionsItems: this.customEmissionsDbService.accountEmissionsItems.getValue(),
-      customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
-      customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
-      facilityReports: this.facilityReportsDbService.accountFacilityReports.getValue(),
-      facilityEnergyUseGroups: this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue(),
-      facilityEnergyUseEquipment: this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue(),
+      predictorDataV2: [...snapshot.predictorData],
+      predictors: [...snapshot.predictors],
+      customEmissionsItems: [...snapshot.customEmissions],
+      customFuels: [...snapshot.customFuels],
+      customGWPs: [...snapshot.customGWPs],
+      facilityReports: [...snapshot.facilityReports],
+      facilityEnergyUseGroups: [...snapshot.energyUseGroups],
+      facilityEnergyUseEquipment: [...snapshot.energyUseEquipment],
       facility: undefined,
       backupFileType: "Account",
       origin: "VERIFI",
@@ -102,33 +106,37 @@ export class BackupDataService {
 
 
   backupFacility(facility: IdbFacility) {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    const snapshot = this.workspaceStore.snapshot();
+    if (!snapshot || !snapshot.facilities.some(item => item.guid === facility.guid)) {
+      throw new Error('The facility must belong to the active workspace before creating a backup.');
+    }
+    let meters: Array<IdbUtilityMeter> = [...snapshot.meters];
     let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
 
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...snapshot.meterData];
     let facilityMeterData: Array<IdbUtilityMeterData> = meterData.filter(meter => { return meter.facilityId == facility.guid });
 
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = [...snapshot.meterGroups];
     let facilityGroups: Array<IdbUtilityMeterGroup> = groups.filter(meter => { return meter.facilityId == facility.guid });
     facilityGroups = this.trimGroups(facilityGroups);
 
-    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let analysisItems: Array<IdbAnalysisItem> = [...snapshot.facilityAnalyses];
     let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(meter => { return meter.facilityId == facility.guid });
     facilityAnalysisItems = this.trimAnalysisModels(facilityAnalysisItems, [facility]);
 
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let predictorData: Array<IdbPredictorData> = [...snapshot.predictorData];
     let facilityPredictorData: Array<IdbPredictorData> = predictorData.filter(meter => { return meter.facilityId == facility.guid });
 
-    let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...snapshot.predictors];
     let facilityPredictors: Array<IdbPredictor> = predictors.filter(meter => { return meter.facilityId == facility.guid });
 
-    let accountFacilityReports: Array<IdbFacilityReport> = this.facilityReportsDbService.accountFacilityReports.getValue();
+    let accountFacilityReports: Array<IdbFacilityReport> = [...snapshot.facilityReports];
     let facilityReports: Array<IdbFacilityReport> = accountFacilityReports.filter(report => { return report.facilityId == facility.guid });
 
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue();
+    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = [...snapshot.energyUseGroups];
     let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = accountEnergyUseGroups.filter(group => { return group.facilityId == facility.guid });
 
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue();
+    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = [...snapshot.energyUseEquipment];
     let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(equipment => { return equipment.facilityId == facility.guid });
 
     let backupFile: BackupFile = {
@@ -145,9 +153,9 @@ export class BackupDataService {
       predictorData: [],
       predictorDataV2: facilityPredictorData,
       predictors: facilityPredictors,
-      customEmissionsItems: this.customEmissionsDbService.accountEmissionsItems.getValue(),
-      customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
-      customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
+      customEmissionsItems: [...snapshot.customEmissions],
+      customFuels: [...snapshot.customFuels],
+      customGWPs: [...snapshot.customGWPs],
       facilityReports: facilityReports,
       facilityEnergyUseGroups: facilityEnergyUseGroups,
       facilityEnergyUseEquipment: facilityEnergyUseEquipment,

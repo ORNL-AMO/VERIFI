@@ -153,7 +153,6 @@ export class ApplicationLifecycleService {
     this.setStep('automatic-backups', 'Starting automatic backups...');
     try {
       this.automaticBackups.subscribeData();
-      if (this.workspaceStore.account()) { this.automaticBackups.initializeAccount(); }
     } catch (error) {
       console.warn('Automatic backup observation could not be started.', error);
     }

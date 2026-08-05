@@ -1,22 +1,13 @@
-import { Injectable } from '@angular/core';
-import { AccountdbService } from '../indexedDB/account-db.service';
+import { effect, Injectable } from '@angular/core';
 import { ElectronService } from './electron.service';
 import { BackupDataService, BackupFile } from '../shared/helper-services/backup-data.service';
-import { AccountAnalysisDbService } from '../indexedDB/account-analysis-db.service';
-import { AccountReportDbService } from '../indexedDB/account-report-db.service';
-import { CustomEmissionsDbService } from '../indexedDB/custom-emissions-db.service';
-import { AnalysisDbService } from '../indexedDB/analysis-db.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
 import { BehaviorSubject } from 'rxjs';
 import { IdbAccount } from '../models/idbModels/account';
-import { PredictorDbService } from '../indexedDB/predictor-db.service';
-import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
+import { AccountWorkspaceState } from '../account-workspace/account-workspace.models';
+import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
 
 @Injectable({
   providedIn: 'root'
@@ -30,29 +21,21 @@ export class AutomaticBackupsService {
   saving: BehaviorSubject<boolean>;
   forceModal: boolean = false;
   creatingFile: boolean = false;
+  private observingRevisions = false;
+  private lastObservedRevision?: string;
   constructor(
-    private accountDbService: AccountdbService,
     private electronService: ElectronService,
     private backupDataService: BackupDataService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private accountReportDbService: AccountReportDbService,
-    private customEmissionsDbService: CustomEmissionsDbService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private predictorsDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
-    private electronBackupsDbService: ElectronBackupsDbService
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private workspaceStore: AccountWorkspaceStore
   ) {
     this.saving = new BehaviorSubject<boolean>(false);
     if (this.electronService.isElectron) {
       this.electronService.fileExists.subscribe(val => {
         this.fileExists = val;
-        if (this.initializingAccount) {
+        if (this.initializingAccount && this.account) {
           if (this.fileExists) {
             this.electronService.getDataFile(this.account.dataBackupFilePath);
           } else if (this.account) {
@@ -61,69 +44,13 @@ export class AutomaticBackupsService {
         }
       });
     }
+    effect(() => this.observeWorkspace(this.workspaceStore.state()));
   }
 
   subscribeData() {
-    if (this.electronService.isElectron) {
-      this.accountDbService.selectedAccount.subscribe(val => {
-        this.account = val;
-        this.saveBackup();
-      });
-
-      this.accountAnalysisDbService.accountAnalysisItems.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-
-      this.accountReportDbService.accountReports.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-
-      this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-
-      this.analysisDbService.accountAnalysisItems.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-      this.facilityDbService.accountFacilities.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-      this.predictorsDbService.accountPredictors.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-      this.predictorDataDbService.accountPredictorData.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-      this.utilityMeterDbService.accountMeters.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-      this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-      this.utilityMeterGroupDbService.accountMeterGroups.subscribe(val => {
-        if (val) {
-          this.saveBackup();
-        }
-      });
-    }
+    if (!this.electronService.isElectron || this.observingRevisions) { return; }
+    this.observingRevisions = true;
+    this.observeWorkspace(this.workspaceStore.state());
   }
 
   clearBackupTimer() {
@@ -185,6 +112,39 @@ export class AutomaticBackupsService {
         this.initializingAccount = false;
       }
     }
+  }
+
+  private observeWorkspace(state: AccountWorkspaceState): void {
+    if (!this.electronService.isElectron || !this.observingRevisions) { return; }
+    if (state.status === 'loading' || state.status === 'switching') {
+      this.clearBackupTimer();
+      this.saving.next(false);
+      return;
+    }
+
+    const account = state.snapshot?.account;
+    if (!account) {
+      this.clearBackupTimer();
+      this.account = undefined;
+      this.lastObservedRevision = undefined;
+      return;
+    }
+    if (this.account?.guid !== account.guid) {
+      this.clearBackupTimer();
+      this.account = account;
+      this.initializingAccount = true;
+      this.lastObservedRevision = undefined;
+      this.initializeAccount();
+      return;
+    }
+    this.account = account;
+
+    const revision = state.committedRevision;
+    if (!revision || revision.accountGuid !== account.guid) { return; }
+    const revisionKey = `${revision.accountGuid}:${revision.revision}`;
+    if (revisionKey === this.lastObservedRevision) { return; }
+    this.lastObservedRevision = revisionKey;
+    void this.saveBackup();
   }
 
   alertFileDoesNotExist() {
