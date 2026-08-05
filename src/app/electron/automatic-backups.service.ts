@@ -131,6 +131,7 @@ export class AutomaticBackupsService {
     }
     if (this.account?.guid !== account.guid) {
       this.clearBackupTimer();
+      this.electronService.accountLatestBackupFile.next(undefined);
       this.account = account;
       this.initializingAccount = true;
       this.lastObservedRevision = undefined;

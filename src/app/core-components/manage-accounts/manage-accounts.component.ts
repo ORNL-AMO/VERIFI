@@ -8,6 +8,7 @@ import { ToastNotificationsService } from '../toast-notifications/toast-notifica
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -33,7 +34,8 @@ export class ManageAccountsComponent {
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
-    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service
+    private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
+    private accountWorkspaceService: AccountWorkspaceService
   ) {
   }
 
@@ -124,16 +126,12 @@ export class ManageAccountsComponent {
   }
 
   async goToAccount(account: IdbAccount, index: number) {
-    this.loadingService.setLoadingMessage("Switching accounts...");
-    this.loadingService.setLoadingStatus(true);
     try {
-      await this.dbChangesService.selectAccount(account, false);
-      this.loadingService.setLoadingStatus(false);
+      await this.accountWorkspaceService.selectAccount(account.guid);
       this.router.navigateByUrl('/data-evaluation/account/home');
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.accountErrors[index] = err;
-      this.loadingService.setLoadingStatus(false);
     }
   }
 

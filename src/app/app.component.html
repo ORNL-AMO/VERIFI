@@ -38,12 +38,13 @@
       }
     </div>
     @if (workspaceStatus() === 'switching') {
-      <div class="windowOverlay" aria-hidden="true"></div>
-      <div class="loading-screen" role="status" aria-live="polite">
-        <div class="spinner" aria-hidden="true">
-          <div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div>
+      <div class="workspace-switch-overlay" role="status" aria-live="polite" aria-busy="true">
+        <div class="workspace-switch-status">
+          <div class="spinner" aria-hidden="true">
+            <div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div>
+          </div>
+          <h1 class="h4 mb-0">Switching accounts...</h1>
         </div>
-        <h1>Switching accounts...</h1>
       </div>
     }
     <app-loading class="hide-print"></app-loading>

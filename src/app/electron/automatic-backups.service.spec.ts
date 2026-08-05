@@ -16,6 +16,7 @@ describe('AutomaticBackupsService', () => {
   let electron: {
     isElectron: boolean;
     fileExists: BehaviorSubject<boolean>;
+    accountLatestBackupFile: BehaviorSubject<any>;
     checkFileExists: ReturnType<typeof vi.fn>;
     getDataFile: ReturnType<typeof vi.fn>;
     sendSaveData: ReturnType<typeof vi.fn>;
@@ -27,6 +28,7 @@ describe('AutomaticBackupsService', () => {
     electron = {
       isElectron: true,
       fileExists: new BehaviorSubject(false),
+      accountLatestBackupFile: new BehaviorSubject(undefined),
       checkFileExists: vi.fn(),
       getDataFile: vi.fn(),
       sendSaveData: vi.fn()

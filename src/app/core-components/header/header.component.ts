@@ -11,12 +11,12 @@ import { ImportBackupModalService } from '../import-backup-modal/import-backup-m
 import { environment } from 'src/environments/environment';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { LoadingService } from '../loading/loading.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 
 @Component({
   selector: 'app-header',
@@ -59,7 +59,7 @@ export class HeaderComponent implements OnInit {
     private importBackupModalService: ImportBackupModalService,
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService,
+    private accountWorkspaceService: AccountWorkspaceService,
     private electronService: ElectronService,
     private toastNotificationService: ToastNotificationsService,
     private cd: ChangeDetectorRef,
@@ -123,14 +123,8 @@ export class HeaderComponent implements OnInit {
   }
 
   async switchAccount(account: IdbAccount) {
-    this.loadingService.setLoadingMessage("Switching accounts...");
-    this.loadingService.setLoadingStatus(true);
     try {
-      this.automaticBackupService.initializingAccount = true;
-      this.electronService.accountLatestBackupFile.next(undefined);
-      await this.dbChangesService.selectAccount(account, false);
-      this.loadingService.setLoadingStatus(false);
-      this.automaticBackupService.initializeAccount();
+      await this.accountWorkspaceService.selectAccount(account.guid);
       if (this.inDataEvaluation) {
         this.goToDashboard(true);
       } else {
@@ -138,7 +132,6 @@ export class HeaderComponent implements OnInit {
       }
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
-      this.loadingService.setLoadingStatus(false);
       this.router.navigate(['/manage-accounts']);
     }
   }
