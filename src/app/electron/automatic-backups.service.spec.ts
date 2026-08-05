@@ -103,7 +103,7 @@ describe('AutomaticBackupsService', () => {
 });
 
 function flushEffects(): void {
-  (TestBed as any).tick();
+  TestBed.tick();
 }
 
 function snapshot(accountGuid: string, accountName = 'Account'): AccountWorkspaceSnapshot {

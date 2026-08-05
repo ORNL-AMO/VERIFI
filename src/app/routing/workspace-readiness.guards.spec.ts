@@ -19,6 +19,7 @@ describe('workspace readiness guards', () => {
   let store: AccountWorkspaceStore;
   let lifecycle: {
     initialize: ReturnType<typeof vi.fn>;
+    persistenceReady: ReturnType<typeof vi.fn>;
     usableAccounts: ReturnType<typeof vi.fn>;
   };
   let workspace: {
@@ -32,6 +33,7 @@ describe('workspace readiness guards', () => {
     store = new AccountWorkspaceStore();
     lifecycle = {
       initialize: vi.fn().mockResolvedValue({ status: 'ready' }),
+      persistenceReady: vi.fn(() => true),
       usableAccounts: vi.fn(() => [
         { id: 1, guid: 'account-a', name: 'Account A' },
         { id: 2, guid: 'account-b', name: 'Account B' }
@@ -71,6 +73,27 @@ describe('workspace readiness guards', () => {
 
     resolveStartup!({ status: 'ready' });
     await expect(result).resolves.toBe(true);
+  });
+
+  it('allows persistence-only recovery routes after a later startup step fails', async () => {
+    lifecycle.initialize.mockResolvedValue({ status: 'error', error: { step: 'workspace' } });
+    lifecycle.persistenceReady.mockReturnValue(true);
+
+    await expect(invoke(persistenceReadyGuard, route(), state('/manage-accounts')))
+      .resolves.toBe(true);
+
+    const parent = route({ id: 'account-a' }, undefined, 'data-management/:id');
+    const child = route({}, parent, 'help');
+    await expect(invoke(dataManagementChildGuard, child, state('/data-management/account-a/help')))
+      .resolves.toBe(true);
+  });
+
+  it('blocks persistence routes when startup fails before persistence is ready', async () => {
+    lifecycle.initialize.mockResolvedValue({ status: 'error', error: { step: 'migrations' } });
+    lifecycle.persistenceReady.mockReturnValue(false);
+
+    await expect(invoke(persistenceReadyGuard, route(), state('/manage-accounts')))
+      .resolves.toBe(false);
   });
 
   it('redirects account routes in the empty state and blocks on startup error', async () => {
@@ -124,6 +147,28 @@ describe('workspace readiness guards', () => {
 
     await expect(invoke(facilityReadyGuard, route({ id: 'missing' }), state('/data-evaluation/facility/missing')))
       .resolves.toEqual({ commands: ['/data-evaluation/account/home'] });
+  });
+
+  it('keeps invalid data-management facility links in the URL account workspace', async () => {
+    store.publish(createSnapshot('account-a'));
+    facilities.getStoredByGuid.mockResolvedValue({
+      id: 20,
+      guid: 'facility-b',
+      accountId: 'account-b',
+      name: 'Facility B'
+    });
+    const accountRoute = route({ id: 'account-a' }, undefined, 'data-management/:id');
+    const facilitiesRoute = route({}, accountRoute, 'facilities');
+    const facilityRoute = route({ id: 'facility-b' }, facilitiesRoute, ':id');
+
+    await expect(invoke(
+      facilityReadyGuard,
+      facilityRoute,
+      state('/data-management/account-a/facilities/facility-b')
+    )).resolves.toEqual({ commands: ['/data-management', 'account-a', 'home'] });
+
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
+    expect(store.account()?.guid).toBe('account-a');
   });
 
   it('keeps nested static pages outside account readiness', async () => {

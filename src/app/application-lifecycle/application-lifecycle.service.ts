@@ -58,8 +58,9 @@ export class ApplicationLifecycleService {
 
   initialize(): Promise<AppStartupState> {
     if (this.activeInitialization) { return this.activeInitialization; }
-    if (this.state().status === 'ready' || this.state().status === 'empty') {
-      return Promise.resolve(this.state());
+    const currentState = this.state();
+    if (currentState.status === 'ready' || currentState.status === 'empty' || currentState.status === 'error') {
+      return Promise.resolve(currentState);
     }
     const active = this.runInitialization().finally(() => {
       if (this.activeInitialization === active) { this.activeInitialization = undefined; }

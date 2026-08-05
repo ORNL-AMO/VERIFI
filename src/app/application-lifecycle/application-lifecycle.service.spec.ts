@@ -63,7 +63,11 @@ describe('ApplicationLifecycleService', () => {
     expect(lifecycle.persistenceReady()).toBe(false);
 
     dependencies.migrations.runMigrations.mockResolvedValue(undefined);
+    await expect(lifecycle.initialize()).resolves.toMatchObject({ status: 'error' });
+    expect(dependencies.migrations.runMigrations).toHaveBeenCalledTimes(1);
+
     await expect(lifecycle.retry()).resolves.toMatchObject({ status: 'ready' });
+    expect(dependencies.migrations.runMigrations).toHaveBeenCalledTimes(2);
   });
 
   it('does not block startup when optional automatic backups fail', async () => {

@@ -15,9 +15,7 @@ import { FacilitydbService } from '../indexedDB/facility-db.service';
 const PUBLIC_NESTED_PATHS = new Set(['privacy', 'about', 'acknowledgments', 'feedback', 'help']);
 
 export const persistenceReadyGuard: CanActivateFn = async () => {
-  const lifecycle = inject(ApplicationLifecycleService);
-  const state = await lifecycle.initialize();
-  return state.status === 'ready' || state.status === 'empty';
+  return ensurePersistenceReady();
 };
 
 export const accountReadyGuard: CanActivateFn = async () => {
@@ -30,9 +28,7 @@ export const accountGuidReadyGuard: CanActivateFn = async route => {
 
 export const dataManagementChildGuard: CanActivateChildFn = async (route, state) => {
   if (isPublicNestedRoute(state)) {
-    const lifecycle = inject(ApplicationLifecycleService);
-    const startup = await lifecycle.initialize();
-    return startup.status === 'ready' || startup.status === 'empty';
+    return ensurePersistenceReady();
   }
   return ensureActiveAccountWorkspace(findDataManagementAccountGuid(route));
 };
@@ -49,12 +45,17 @@ export const facilityReadyGuard: CanActivateFn = async route => {
   if (startup.status === 'empty') { return accountManagement(router); }
 
   const facilityGuid = route.paramMap.get('id');
-  if (!facilityGuid) { return activeAccountHome(router); }
+  if (!facilityGuid) { return activeAccountHome(router, route); }
   const facility = await facilities.getStoredByGuid(facilityGuid);
-  if (!facility?.accountId) { return activeAccountHome(router); }
+  if (!facility?.accountId) { return activeAccountHome(router, route); }
+
+  const dataManagementAccountGuid = findDataManagementAccountGuid(route);
+  if (dataManagementAccountGuid && facility.accountId !== dataManagementAccountGuid) {
+    return activeAccountHome(router, route);
+  }
 
   const owner = lifecycle.usableAccounts().find(account => account.guid === facility.accountId);
-  if (!owner) { return activeAccountHome(router); }
+  if (!owner) { return activeAccountHome(router, route); }
   try {
     if (store.account()?.guid !== owner.guid) {
       const result = await workspace.selectAccount(owner.guid);
@@ -62,14 +63,20 @@ export const facilityReadyGuard: CanActivateFn = async route => {
     }
     const publishedFacility = store.facilities().find(item => item.guid === facilityGuid);
     if (!publishedFacility || publishedFacility.accountId !== owner.guid) {
-      return activeAccountHome(router);
+      return activeAccountHome(router, route);
     }
     workspace.selectFacility(facilityGuid);
     return true;
   } catch {
-    return activeAccountHome(router);
+    return activeAccountHome(router, route);
   }
 };
+
+async function ensurePersistenceReady(): Promise<boolean> {
+  const lifecycle = inject(ApplicationLifecycleService);
+  await lifecycle.initialize();
+  return lifecycle.persistenceReady();
+}
 
 async function ensureActiveAccountWorkspace(accountGuid?: string): Promise<boolean | UrlTree> {
   const lifecycle = inject(ApplicationLifecycleService);
@@ -116,6 +123,10 @@ function accountManagement(router: Router): UrlTree {
   return router.createUrlTree(['/manage-accounts']);
 }
 
-function activeAccountHome(router: Router): UrlTree {
+function activeAccountHome(router: Router, route: ActivatedRouteSnapshot): UrlTree {
+  const accountGuid = findDataManagementAccountGuid(route);
+  if (accountGuid) {
+    return router.createUrlTree(['/data-management', accountGuid, 'home']);
+  }
   return router.createUrlTree(['/data-evaluation/account/home']);
 }

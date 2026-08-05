@@ -9,6 +9,7 @@ import { BackupDataService } from 'src/app/shared/helper-services/backup-data.se
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -35,7 +36,8 @@ export class ManageAccountsComponent {
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
-    private accountWorkspaceService: AccountWorkspaceService
+    private accountWorkspaceService: AccountWorkspaceService,
+    private applicationLifecycleService: ApplicationLifecycleService
   ) {
   }
 
@@ -79,11 +81,10 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingMessage("Backing up accounts...");
     this.loadingService.setLoadingStatus(true);
     try {
-      await this.dbChangesService.selectAccount(account, true);
+      await this.selectAccountWorkspace(account);
       this.backupDataService.backupAccount();
-      account.lastBackup = new Date();
-      await firstValueFrom(this.accountDbService.updateWithObservable(account));
-      this.accounts = await firstValueFrom(this.accountDbService.getAll());
+      await this.dbChangesService.updateAccount({ ...account, lastBackup: new Date() });
+      this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
       this.toastNotificationService.showToast(account.name + 'Backup Successful', undefined, undefined, false, 'alert-success');
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to backup ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
@@ -111,7 +112,7 @@ export class ManageAccountsComponent {
     this.exportToExcelTemplateV3Service.setExportFacilityDataMessages();
     this.loadingService.setCurrentLoadingIndex(0);
     try {
-      await this.dbChangesService.selectAccount(account, true);
+      await this.selectAccountWorkspace(account);
       this.exportToExcelTemplateV3Service.exportFacilityData(this.includeWeatherData);
     } catch (err) {
       this.loadingService.clearLoadingMessages();
@@ -127,8 +128,10 @@ export class ManageAccountsComponent {
 
   async goToAccount(account: IdbAccount, index: number) {
     try {
-      await this.accountWorkspaceService.selectAccount(account.guid);
-      this.router.navigateByUrl('/data-evaluation/account/home');
+      const result = await this.accountWorkspaceService.selectAccount(account.guid);
+      if (result === 'published') {
+        this.router.navigateByUrl('/data-evaluation/account/home');
+      }
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.accountErrors[index] = err;
@@ -170,9 +173,15 @@ export class ManageAccountsComponent {
   async addNewAccount() {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
-    let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(allAccounts);
-    await this.dbChangesService.selectAccount(account, false);
+    this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
+    await this.selectAccountWorkspace(account);
     this.router.navigateByUrl('/data-management/' + account.guid);
+  }
+
+  private async selectAccountWorkspace(account: IdbAccount): Promise<void> {
+    const result = await this.accountWorkspaceService.selectAccount(account.guid);
+    if (result !== 'published') {
+      throw new Error('The requested account workspace was superseded before it could be loaded.');
+    }
   }
 }
