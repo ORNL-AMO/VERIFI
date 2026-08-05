@@ -19,6 +19,7 @@ describe('ApplicationLifecycleService', () => {
       'account-catalog', 'custom-emissions', 'workspace', 'automatic-backups'
     ]);
     expect(lifecycle.persistenceReady()).toBe(true);
+    expect(lifecycle.applicationMetadata()).toMatchObject({ id: 1 });
     expect(dependencies.selectionStorage.storeAccount).toHaveBeenCalledWith(1);
   });
 
@@ -108,7 +109,10 @@ function createDependencies(order: string[]) {
     },
     migrations: { runMigrations: vi.fn(async () => { order.push('migrations'); }) },
     applicationInstance: {
-      initializeApplicationInstanceData: vi.fn(async () => { order.push('application-metadata'); })
+      initializeApplicationInstanceData: vi.fn(async () => {
+        order.push('application-metadata');
+        return { id: 1 };
+      })
     },
     eGrid: {
       parseZipCodeLongLat: vi.fn(async () => { order.push('zip-reference-data'); }),

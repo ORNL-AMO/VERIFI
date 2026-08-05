@@ -17,6 +17,7 @@ import { IndexedDbTransactionService } from '../indexedDB/indexed-db-transaction
 import { IdbAccount } from '../models/idbModels/account';
 import { EGridService } from '../shared/helper-services/e-grid.service';
 import { AppStartupState, AppStartupStep } from './application-lifecycle.models';
+import { ApplicationInstanceData } from '../models/idbModels/applicationInstanceData';
 
 const INITIAL_STATE: AppStartupState = { status: 'idle' };
 
@@ -25,11 +26,13 @@ export class ApplicationLifecycleService {
   private readonly writableState = signal<AppStartupState>(INITIAL_STATE);
   private readonly writablePersistenceReady = signal(false);
   private readonly writableAccountCatalog = signal<readonly IdbAccount[]>([]);
+  private readonly writableApplicationMetadata = signal<ApplicationInstanceData | undefined>(undefined);
   private activeInitialization?: Promise<AppStartupState>;
 
   readonly state = this.writableState.asReadonly();
   readonly persistenceReady = this.writablePersistenceReady.asReadonly();
   readonly accountCatalog = this.writableAccountCatalog.asReadonly();
+  readonly applicationMetadata = this.writableApplicationMetadata.asReadonly();
   readonly usableAccounts = computed(() => this.accountCatalog().filter(account => !account.deleteAccount));
   readonly hasAccounts = computed(() => this.usableAccounts().length > 0);
   readonly isInitializing = computed(() => this.state().status === 'initializing');
@@ -78,6 +81,18 @@ export class ApplicationLifecycleService {
     return accounts;
   }
 
+  async updateApplicationMetadata(
+    update: (current: ApplicationInstanceData) => ApplicationInstanceData
+  ): Promise<ApplicationInstanceData> {
+    const current = this.applicationMetadata();
+    if (!current) { throw new Error('Application instance metadata is not ready.'); }
+    const updated = await firstValueFrom(
+      this.applicationInstance.updateWithObservable(update({ ...current }))
+    );
+    this.writableApplicationMetadata.set(updated);
+    return updated;
+  }
+
   private async runInitialization(): Promise<AppStartupState> {
     let currentStep: AppStartupStep = 'database';
     try {
@@ -93,7 +108,9 @@ export class ApplicationLifecycleService {
 
       currentStep = 'application-metadata';
       this.setStep(currentStep, 'Initializing application metadata...');
-      await this.applicationInstance.initializeApplicationInstanceData();
+      this.writableApplicationMetadata.set(
+        await this.applicationInstance.initializeApplicationInstanceData()
+      );
 
       currentStep = 'reference-data';
       this.setStep(currentStep, 'Loading reference data...');
