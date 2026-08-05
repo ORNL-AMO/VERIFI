@@ -23,6 +23,8 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { FacilityOverviewReportAdapter } from './facility-overview-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 import { FacilitySectionReportComponent } from 'src/app/shared/data-overview/facility-section-report/facility-section-report.component';
+import { FacilityOverviewReportPptAdapter } from './facility-overview-report-ppt.adapter';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-overview-report-results',
@@ -62,7 +64,9 @@ export class FacilityOverviewReportResultsComponent {
     private dataEvaluationService: DataEvaluationService,
     private customGWPDbService: CustomGWPDbService,
     private facilityOverviewReportAdapter: FacilityOverviewReportAdapter,
-    private exportReportPdfService: ExportReportPdfService
+    private exportReportPdfService: ExportReportPdfService,
+    private pptReportService: PptReportService,
+    private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter
   ) {
 
   }
@@ -194,5 +198,17 @@ export class FacilityOverviewReportResultsComponent {
       annualBarChart: imageByType('annualBarChart'),
       monthlyUsageLineChart: imageByType('monthlyUsageLineChart')
     };
+  }
+
+  
+  async downloadPpt(): Promise<void> {
+    const document = this.facilityOverviewReportPptAdapter.buildDocument({
+      report: this.facilityReport,
+      facility: this.facility,
+      facilityOverviewData: this.facilityOverviewData,
+      utilityUseAndCost: this.utilityUseAndCost,
+      dateRange: this.dateRange
+    });
+    await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${this.facilityReport.name}.pptx`);
   }
 }

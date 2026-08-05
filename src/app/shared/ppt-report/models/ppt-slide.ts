@@ -37,6 +37,9 @@ export interface ChartSlide {
     showDataLabels?: boolean;
     lineDash?: 'solid' | 'dash' | 'dot';
     note?: string;
+    barDir?: 'col' | 'bar';
+    barColors?: string[];
+    barGapWidthPct?: number;
 }
 
 export interface PptChartSeries {
