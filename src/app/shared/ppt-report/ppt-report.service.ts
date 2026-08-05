@@ -147,13 +147,14 @@ export class PptReportService {
       const charts: any[] = [];
 
       if (barSeries.length) {
+        const comboBarColors = model.barColors?.length ? model.barColors : barSeries.map((s, i) => s.color ?? PPT_THEME.chartPalette[i % PPT_THEME.chartPalette.length]);
         charts.push({
           type: pptx.charts.BAR,
           data: barSeries.map(s => ({ name: s.name, labels: model.labels, values: s.data })),
           options: {
-            chartColors: barSeries.map((s, i) => s.color ?? PPT_THEME.chartPalette[i]),
+            chartColors: comboBarColors,
             barGrouping: 'clustered',
-            barGapWidthPct: 75
+            barGapWidthPct: model.barGapWidthPct ?? 75,
           },
         });
       }

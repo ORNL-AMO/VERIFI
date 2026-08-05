@@ -1,7 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { AnalysisTableColumns } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec, PptChartSeries } from 'src/app/shared/ppt-report/models/ppt-slide';
@@ -31,10 +29,7 @@ export class FacilityOverviewReportPptAdapter {
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
     utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
-    analysisTableColumns: AnalysisTableColumns;
-    analysisItem: IdbAnalysisItem;
     reportSettings: DataOverviewFacilityReportSettings;
-
     facility: IdbFacility;
     dateRange: { startDate: Date, endDate: Date };
     facilityOverviewData: FacilityOverviewData;
@@ -245,7 +240,7 @@ export class FacilityOverviewReportPptAdapter {
             let row: string[] = [];
             row.push(m.meter.name);
             row.push(m.meter.source);
-            row.push(this.utilityMeterGroupDbService.getGroupName(m.meter.groupId));
+            row.push(this.utilityMeterGroupDbService.getGroupName(m.meter.groupId) || '-');
             if (sectionType === 'energyUse' || sectionType === 'water') {
                 row.push(this.formatValue(m.totalUsage, false));
             }
@@ -414,7 +409,7 @@ export class FacilityOverviewReportPptAdapter {
         const allValues = series.flatMap(s => s.data).filter(v => isFinite(v) && !isNaN(v));
         const axis = getPptAxisSpec(allValues);
         const yAxisUnit = sectionType === 'water' ? `Utility Usage (${this.facility.volumeLiquidUnit})` : sectionType === 'cost' ? 'Utility Costs' : `Utility Usage (${this.facility.energyUnit})`;
-        const title = sectionType === 'cost' ? 'Annual Cost' : sectionType === 'energyUse' ? `Annual Energy Use (${yAxisUnit})` : `Annual Water Use (${yAxisUnit})`;
+        const title = sectionType === 'cost' ? 'Annual Cost' : sectionType === 'energyUse' ? `Annual Energy Use (${this.facility.energyUnit})` : `Annual Water Use (${this.facility.volumeLiquidUnit})`;
         return {
             type: 'chart',
             title,
