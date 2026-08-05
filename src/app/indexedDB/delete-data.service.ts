@@ -1,22 +1,13 @@
 import { Injectable } from '@angular/core';
-import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { IdbAccount } from '../models/idbModels/account';
-import {
-  ACCOUNT_DELETION_STORES,
-  ACCOUNT_ROOT_STORE,
-  AccountDeletionStoreDefinition
-} from './account-deletion.config';
 import { AccountdbService } from './account-db.service';
-
-interface AccountOwnedRecord {
-  id?: number;
-  accountId?: string;
-}
+import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
+import { VerifiStoreName } from './indexed-db-schema';
 
 export interface AccountDeletionError {
   accountGuid: string;
-  storeName: string;
+  storeName: VerifiStoreName;
   message: string;
   cause: unknown;
 }
@@ -33,16 +24,16 @@ export class DeleteDataService {
     message: string,
     percent: number
   }> = new BehaviorSubject(undefined);
-  pauseDelete: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   deletionError: BehaviorSubject<AccountDeletionError> = new BehaviorSubject(undefined);
 
   accountToDelete: IdbAccount;
   private activeDeletion: Promise<void>;
-  private activeStoreName: string;
+  private activeStoreName: VerifiStoreName = 'accounts';
+  private deletionSuspensionCount = 0;
 
   constructor(
     private accountDbService: AccountdbService,
-    private dbService: NgxIndexedDBService
+    private cascadeDeleteService: IndexedDbCascadeDeleteService
   ) { }
 
   setDeletingMessage(index: number, totalCount: number, message: string) {
@@ -65,7 +56,7 @@ export class DeleteDataService {
   }
 
   async gatherAndDelete(): Promise<void> {
-    if (!this.accountToDelete || this.pauseDelete.getValue()) {
+    if (!this.accountToDelete || this.deletionSuspensionCount > 0) {
       return;
     }
     if (this.activeDeletion) {
@@ -86,26 +77,20 @@ export class DeleteDataService {
       await this.activeDeletion;
     }
     this.deletionError.next(undefined);
-    this.pauseDelete.next(false);
     await this.gatherAndDelete();
   }
 
-  async cancelDelete(): Promise<void> {
-    if (!this.accountToDelete) {
-      return;
-    }
-    const account = this.accountToDelete;
-    if (this.activeDeletion) {
-      await this.activeDeletion;
-    }
-    if (this.accountToDelete !== account) {
-      return;
-    }
+  suspendQueuedDeletion(): void {
+    this.deletionSuspensionCount++;
+  }
 
-    account.deleteAccount = false;
-    await firstValueFrom(this.accountDbService.updateWithObservable(account));
-    const allAccounts = await firstValueFrom(this.accountDbService.getAll());
-    this.resetDeletionState(allAccounts);
+  async resumeQueuedDeletion(): Promise<void> {
+    if (this.deletionSuspensionCount > 0) {
+      this.deletionSuspensionCount--;
+    }
+    if (this.deletionSuspensionCount === 0) {
+      await this.gatherAndDelete();
+    }
   }
 
   private async deleteAccountData(account: IdbAccount): Promise<void> {
@@ -113,71 +98,25 @@ export class DeleteDataService {
     this.deletionError.next(undefined);
 
     try {
-      for (const storeDefinition of ACCOUNT_DELETION_STORES) {
-        if (this.pauseDelete.getValue()) {
-          return;
-        }
-        await this.deleteAccountRecords(account, storeDefinition);
-      }
-
-      if (this.pauseDelete.getValue()) {
-        return;
-      }
-
-      this.activeStoreName = ACCOUNT_ROOT_STORE;
-      this.setDeletingMessage(1, 1, 'Finishing Account Deletion');
-      if (account.id === undefined) {
-        throw new Error('The account does not have a local IndexedDB key.');
-      }
+      await this.cascadeDeleteService.deleteAccount(account, phase => {
+        this.activeStoreName = phase.storeName;
+        this.setDeletingMessage(phase.index, phase.total, phase.message);
+      });
       const allAccounts = await firstValueFrom(this.accountDbService.getAll());
-      await firstValueFrom(this.dbService.delete(ACCOUNT_ROOT_STORE, account.id));
-      this.resetDeletionState(
-        allAccounts.filter(existingAccount => existingAccount.id !== account.id)
-      );
+      this.resetDeletionState(allAccounts);
     } catch (error) {
-      this.pauseDelete.next(true);
       this.deletionError.next({
         accountGuid: account.guid,
         storeName: this.activeStoreName,
-        message: `Account deletion stopped while processing ${this.activeStoreName}. Retry to continue cleanup.`,
+        message: `Account deletion rolled back while processing ${this.activeStoreName}. Retry to try again.`,
         cause: error
       });
-    }
-  }
-
-  private async deleteAccountRecords(
-    account: IdbAccount,
-    storeDefinition: AccountDeletionStoreDefinition
-  ): Promise<void> {
-    this.activeStoreName = storeDefinition.storeName;
-    this.setDeletingMessage(1, 1, storeDefinition.message);
-    const allRecords = await firstValueFrom(
-      this.dbService.getAll<AccountOwnedRecord>(storeDefinition.storeName)
-    );
-    const accountRecords = allRecords.filter(record => record.accountId === account.guid);
-
-    if (accountRecords.length === 0) {
-      this.setDeletingMessage(1, 1, storeDefinition.message);
-      return;
-    }
-
-    for (let index = 0; index < accountRecords.length; index++) {
-      if (this.pauseDelete.getValue()) {
-        return;
-      }
-      const record = accountRecords[index];
-      if (record.id === undefined) {
-        throw new Error(`A record in ${storeDefinition.storeName} does not have a local IndexedDB key.`);
-      }
-      this.setDeletingMessage(index + 1, accountRecords.length, storeDefinition.message);
-      await firstValueFrom(this.dbService.delete(storeDefinition.storeName, record.id));
     }
   }
 
   private resetDeletionState(allAccounts: Array<IdbAccount>): void {
     this.deletingMessaging.next(undefined);
     this.deletionError.next(undefined);
-    this.pauseDelete.next(false);
     this.isDeleting.next(false);
     this.accountToDelete = undefined;
     this.accountDbService.allAccounts.next(allAccounts);

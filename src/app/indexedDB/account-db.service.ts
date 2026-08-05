@@ -4,6 +4,7 @@ import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { ElectronService } from '../electron/electron.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,9 @@ export class AccountdbService {
 
     selectedAccount: BehaviorSubject<IdbAccount>;
     allAccounts: BehaviorSubject<Array<IdbAccount>>;
-    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private electronService: ElectronService) {
+    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+        private electronService: ElectronService,
+        private indexedDbAccess: IndexedDbAccessService) {
         this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
         this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
         this.selectedAccount.subscribe(account => {
@@ -37,6 +40,10 @@ export class AccountdbService {
 
     getById(accountId: number): Observable<IdbAccount> {
         return this.dbService.getByKey('accounts', accountId);
+    }
+
+    getStoredByGuid(accountGuid: string): Promise<IdbAccount | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbAccount>('accounts', accountGuid);
     }
 
     count() {

@@ -4,6 +4,7 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbCustomFuel } from '../models/idbModels/customFuel';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ import { IdbCustomFuel } from '../models/idbModels/customFuel';
 export class CustomFuelDbService {
 
   accountCustomFuels: BehaviorSubject<Array<IdbCustomFuel>>;
-  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
+  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountCustomFuels = new BehaviorSubject<Array<IdbCustomFuel>>([]);
   }
 
@@ -20,18 +22,19 @@ export class CustomFuelDbService {
   }
 
   async getAllAccountCustomFuels(accountId: string): Promise<Array<IdbCustomFuel>> {
-    let accountCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.getAll());
-    let customFuels: Array<IdbCustomFuel> = accountCustomFuels.filter(item => { return item.accountId == accountId });
-    return customFuels;
-
+    return this.indexedDbAccess.getAllByIndex<IdbCustomFuel>('customFuels', 'accountId', accountId);
   }
 
   getById(id: number): Observable<IdbCustomFuel> {
     return this.dbService.getByKey('customFuels', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbCustomFuel> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbCustomFuel> {
     return this.dbService.getByIndex('customFuels', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbCustomFuel | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbCustomFuel>('customFuels', guid);
   }
 
   count() {

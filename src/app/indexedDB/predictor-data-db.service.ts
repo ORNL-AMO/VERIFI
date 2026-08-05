@@ -3,6 +3,7 @@ import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,8 @@ export class PredictorDataDbService {
     facilityPredictorData: BehaviorSubject<Array<IdbPredictorData>>;
     accountPredictorData: BehaviorSubject<Array<IdbPredictorData>>;
     constructor(private dbService: NgxIndexedDBService,
-        private loadingService: LoadingService) {
+        private loadingService: LoadingService,
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityPredictorData = new BehaviorSubject<Array<IdbPredictorData>>(new Array());
         this.accountPredictorData = new BehaviorSubject<Array<IdbPredictorData>>(new Array());
     }
@@ -22,17 +24,39 @@ export class PredictorDataDbService {
     }
 
     async getAllAccountPredictorData(accountId: string): Promise<Array<IdbPredictorData>> {
-        let allPredictors: Array<IdbPredictorData> = await firstValueFrom(this.getAll())
-        let accountPredictors: Array<IdbPredictorData> = allPredictors.filter(predictor => { return predictor.accountId == accountId });
-        return accountPredictors;
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorData>(
+            'predictorData',
+            'accountId',
+            accountId
+        );
     }
 
     getById(predictorDataId: number): Observable<IdbPredictorData> {
         return this.dbService.getByKey('predictorData', predictorDataId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbPredictorData> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbPredictorData> {
         return this.dbService.getByIndex('predictorData', indexName, indexValue);
+    }
+
+    getStoredByGuid(guid: string): Promise<IdbPredictorData | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbPredictorData>('predictorData', guid);
+    }
+
+    getStoredPredictorData(predictorId: string): Promise<Array<IdbPredictorData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorData>(
+            'predictorData',
+            'predictorId',
+            predictorId
+        );
+    }
+
+    getStoredFacilityPredictorData(facilityId: string): Promise<Array<IdbPredictorData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorData>(
+            'predictorData',
+            'facilityId',
+            facilityId
+        );
     }
 
     count() {
@@ -53,8 +77,8 @@ export class PredictorDataDbService {
     }
 
     async deleteAllFacilityPredictorData(facilityId: string) {
-        let facilityPredictorData: Array<IdbPredictorData> = this.getByFacilityId(facilityId);
-        await this.deletePredictorDataAsync(facilityPredictorData);
+        this.loadingService.setLoadingMessage('Deleting Facility Predictor Data...');
+        await this.indexedDbAccess.deleteAllByIndex('predictorData', 'facilityId', facilityId);
     }
 
     async deleteAllSelectedAccountPredictorData() {

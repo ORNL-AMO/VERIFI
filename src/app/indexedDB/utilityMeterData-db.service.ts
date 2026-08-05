@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import * as _ from 'lodash';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,8 @@ export class UtilityMeterDatadbService {
 
     facilityMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
     accountMeterData: BehaviorSubject<Array<IdbUtilityMeterData>>;
-    constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
+    constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+        private indexedDbAccess: IndexedDbAccessService) {
         this.facilityMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
         this.accountMeterData = new BehaviorSubject<Array<IdbUtilityMeterData>>(new Array());
     }
@@ -22,17 +24,35 @@ export class UtilityMeterDatadbService {
     }
 
     async getAllAccountMeterData(accountId: string): Promise<Array<IdbUtilityMeterData>> {
-        let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.getAll());
-        let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(data => { return data.accountId == accountId });
-        return accountMeterData;
+        return this.indexedDbAccess.getAllByIndex<IdbUtilityMeterData>(
+            'utilityMeterData',
+            'accountId',
+            accountId
+        );
     }
 
     getById(meterDataId: number): Observable<IdbUtilityMeterData> {
         return this.dbService.getByKey('utilityMeterData', meterDataId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeterData> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbUtilityMeterData> {
         return this.dbService.getByIndex('utilityMeterData', indexName, indexValue);
+    }
+
+    getStoredByGuid(guid: string): Promise<IdbUtilityMeterData | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbUtilityMeterData>('utilityMeterData', guid);
+    }
+
+    getStoredMeterData(meterId: string): Promise<Array<IdbUtilityMeterData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbUtilityMeterData>('utilityMeterData', 'meterId', meterId);
+    }
+
+    getStoredFacilityMeterData(facilityId: string): Promise<Array<IdbUtilityMeterData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbUtilityMeterData>(
+            'utilityMeterData',
+            'facilityId',
+            facilityId
+        );
     }
 
     count() {
@@ -54,8 +74,8 @@ export class UtilityMeterDatadbService {
     }
 
     async deleteAllFacilityMeterData(facilityId: string) {
-        let facilityMeterDataEntries: Array<IdbUtilityMeterData> = this.getFacilityMeterDataByFacilityGuid(facilityId);
-        await this.deleteMeterDataEntriesAsync(facilityMeterDataEntries);
+        this.loadingService.setLoadingMessage('Deleting Facility Meter Data...');
+        await this.indexedDbAccess.deleteAllByIndex('utilityMeterData', 'facilityId', facilityId);
     }
 
     async deleteAllSelectedAccountMeterData() {
