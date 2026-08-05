@@ -54,8 +54,19 @@ export class IndexedDbTransactionContext {
           resolve();
           return;
         }
-        cursor.delete();
-        cursor.continue();
+        try {
+          const deleteRequest = cursor.delete();
+          deleteRequest.onerror = () => reject(deleteRequest.error);
+          deleteRequest.onsuccess = () => {
+            try {
+              cursor.continue();
+            } catch (error) {
+              reject(error);
+            }
+          };
+        } catch (error) {
+          reject(error);
+        }
       };
     });
   }

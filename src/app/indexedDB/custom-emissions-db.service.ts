@@ -42,7 +42,7 @@ export class CustomEmissionsDbService {
   }
 
   count() {
-    return this.dbService.count('accountAnalysisItems');
+    return this.dbService.count('customEmissionsItems');
   }
 
   addWithObservable(emissionsItem: IdbCustomEmissionsItem): Observable<IdbCustomEmissionsItem> {

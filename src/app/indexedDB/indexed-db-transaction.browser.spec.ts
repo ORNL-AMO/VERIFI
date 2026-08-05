@@ -45,6 +45,23 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     });
   });
 
+  it('rejects indexed deletion from a read-only transaction with the native error', async () => {
+    await expect(transactionService.runTransaction(
+      ['facilities'],
+      'readonly',
+      transaction => transaction.deleteAllByIndex(
+        'facilities',
+        'accountId',
+        accountAFixture.account.guid as string
+      )
+    )).rejects.toMatchObject({ name: 'ReadOnlyError' });
+
+    expect(await harness.getAll('facilities')).toEqual([
+      accountAFixture.facility,
+      accountBFixture.facility
+    ]);
+  });
+
   it('commits writes to every participating store before resolving', async () => {
     const updatedAccount = { ...accountAFixture.account, name: 'Updated Account A' };
 
