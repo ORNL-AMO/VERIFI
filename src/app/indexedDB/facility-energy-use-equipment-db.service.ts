@@ -18,6 +18,7 @@ export class FacilityEnergyUseEquipmentDbService {
     private indexedDbAccess: IndexedDbAccessService) {
     this.facilityEnergyUseEquipment = new BehaviorSubject<Array<IdbFacilityEnergyUseEquipment>>(new Array());
     this.accountEnergyUseEquipment = new BehaviorSubject<Array<IdbFacilityEnergyUseEquipment>>(new Array());
+    this.selectedFacilityEnergyUseEquipment = new BehaviorSubject<IdbFacilityEnergyUseEquipment>(undefined);
   }
 
   getAll(): Observable<Array<IdbFacilityEnergyUseEquipment>> {
