@@ -11,7 +11,7 @@ description: Change VERIFI persisted models, IndexedDB stores or indexes, databa
    - A record property may require model defaults and an idempotent record migration without changing the structural schema.
    - A new or changed store or index requires `_dbConfig.ts`, an intentional database-version increment, and upgrade coverage.
 4. Preserve the difference between local IndexedDB `id` keys and GUID-based domain relationships. Audit account, facility, meter, predictor, analysis, and report references affected by the change.
-5. Implement historical record upgrades as pure, idempotent steps in `src/app/indexedDB/data-migrations/`. Keep versions contiguous, update `CURRENT_DATA_VERSION`, and use the transaction runner; do not migrate during startup collection loading or account selection.
+5. Follow the [data migration guide](../../../src/app/indexedDB/data-migrations/README.md) for historical record upgrades. Implement pure, idempotent, contiguous steps, update `CURRENT_DATA_VERSION`, and use the transaction runner; do not migrate during startup collection loading or account selection.
 6. Preserve older JSON backups and supported import formats. Default missing fields intentionally and avoid destructive rewriting unless the issue explicitly approves it.
 7. Update service state after writes using the same observable/`BehaviorSubject` pattern as neighboring services.
 

@@ -72,7 +72,7 @@ Persisted records generally have an IndexedDB `id` used as the local key and a `
 There are two independent forms of persistence evolution:
 
 - **Structural schema changes** update `_dbConfig.ts`. Adding or changing a store or index requires an intentional database-version increment and an upgrade-path test.
-- **Record-shape migrations** use `CURRENT_DATA_VERSION` and the ordered pure registry under [`data-migrations`](src/app/indexedDB/data-migrations). The local runner commits each migration and application metadata in one native transaction before startup publishes persisted records. Current-version data is not rewritten.
+- **Record-shape migrations** use `CURRENT_DATA_VERSION` and the ordered pure registry described in the [`data-migrations` guide](src/app/indexedDB/data-migrations/README.md). The local runner commits each migration and application metadata in one native transaction before startup publishes persisted records. Current-version data is not rewritten.
 
 Test both an empty database and representative older data. Consider JSON backup import/export whenever persisted shapes change.
 
