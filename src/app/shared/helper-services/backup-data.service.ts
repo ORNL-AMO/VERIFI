@@ -39,6 +39,10 @@ import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-ene
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { normalizeAnalysisGroupModelStorage } from '../shared-analysis/calculations/regression-model-recovery';
+import { BackupFile } from '../../models/backup-file';
+import { CURRENT_DATA_VERSION } from '../../indexedDB/data-migrations/data-migration.models';
+
+export { BackupFile } from '../../models/backup-file';
 
 @Injectable({
   providedIn: 'root'
@@ -70,6 +74,7 @@ export class BackupDataService {
   getAccountBackupFile(): BackupFile {
     const facilities = this.facilityDbService.accountFacilities.getValue();
     let backupFile: BackupFile = {
+      dataVersion: CURRENT_DATA_VERSION,
       account: this.accountDbService.selectedAccount.getValue(),
       facilities,
       meters: this.utilityMeterDbService.accountMeters.getValue(),
@@ -129,6 +134,7 @@ export class BackupDataService {
     let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(equipment => { return equipment.facilityId == facility.guid });
 
     let backupFile: BackupFile = {
+      dataVersion: CURRENT_DATA_VERSION,
       account: undefined,
       facilities: undefined,
       facility: facility,
@@ -1017,29 +1023,4 @@ export class BackupDataService {
       };
     });
   }
-}
-
-export interface BackupFile {
-  account: IdbAccount,
-  facilities: Array<IdbFacility>,
-  facility: IdbFacility,
-  meters: Array<IdbUtilityMeter>,
-  meterData: Array<IdbUtilityMeterData>,
-  groups: Array<IdbUtilityMeterGroup>,
-  accountReports: Array<IdbAccountReport>,
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>,
-  facilityAnalysisItems: Array<IdbAnalysisItem>,
-  predictorData: Array<IdbPredictorEntryDeprecated>,
-  predictorDataV2: Array<IdbPredictorData>,
-  predictors: Array<IdbPredictor>,
-  customEmissionsItems: Array<IdbCustomEmissionsItem>,
-  customFuels: Array<IdbCustomFuel>,
-  customGWPs: Array<IdbCustomGWP>,
-  origin: "VERIFI",
-  backupFileType: "Account" | "Facility",
-  timeStamp: Date,
-  dataBackupId: string,
-  facilityReports: Array<IdbFacilityReport>,
-  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>
-  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>
 }
