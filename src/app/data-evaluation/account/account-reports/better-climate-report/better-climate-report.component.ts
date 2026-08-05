@@ -63,7 +63,7 @@ export class BetterClimateReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     } else {
@@ -95,8 +95,8 @@ export class BetterClimateReportComponent {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()]
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { AccountAnalysisService } from '../../account-analysis.service';
 import { Subscription } from 'rxjs';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -14,6 +15,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     standalone: false
 })
 export class AccountAnalysisFacilitiesSummaryComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   monthlyFacilityAnalysisClassesSub: Subscription;
   calculating: boolean | 'error';
@@ -27,7 +29,7 @@ export class AccountAnalysisFacilitiesSummaryComponent {
   }
 
   ngOnInit() {
-    this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
     
     this.calculatingSub = this.accountAnalysisService.calculating.subscribe(val => {
       this.calculating = val;

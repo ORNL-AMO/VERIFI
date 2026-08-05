@@ -23,7 +23,7 @@ export class AccountTitlePageComponent {
 
   ngOnInit() {
     this.account = this.accountWorkspaceStore.account();
-    this.report = this.accountReportDbService.selectedReport.getValue();
+    this.report = this.accountWorkspaceStore.selectedAccountReport();
     this.dateRange = {
       startDate: new Date(this.report.startYear, this.report.startMonth, 1),
       endDate: new Date(this.report.endYear, this.report.endMonth, 1)

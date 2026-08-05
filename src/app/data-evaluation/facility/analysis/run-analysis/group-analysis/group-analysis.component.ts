@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
@@ -19,6 +20,7 @@ import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calc
   standalone: false
 })
 export class GroupAnalysisComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -27,7 +29,7 @@ export class GroupAnalysisComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   params: Signal<Params> = toSignal(this.activatedRoute.params);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
 

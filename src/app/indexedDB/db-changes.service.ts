@@ -102,7 +102,7 @@ export class DbChangesService {
         await this.updateAccount(account);
       }
     }
-    this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   async setAnalysisItems(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
@@ -116,31 +116,12 @@ export class DbChangesService {
         }
       }
     }
-    this.analysisDbService.accountAnalysisItems.next(analysisItems);
-    if (facility) {
-      this.setFacilityAnalysisItems(facility);
-    }
-  }
-
-  setFacilityAnalysisItems(facility: IdbFacility) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facility.guid });
-    this.analysisDbService.facilityAnalysisItems.next(facilityAnalysisItems);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   //facility reports
   async setAccountFacilityReports(account: IdbAccount, facility?: IdbFacility) {
-    let accountFacilityReports: Array<IdbFacilityReport> = await this.facilityReportsDbService.getAllFacilityReportsByAccountId(account.guid);
-    this.facilityReportsDbService.accountFacilityReports.next(accountFacilityReports);
-    if (facility) {
-      this.setFacilityReports(facility);
-    }
-  }
-
-  setFacilityReports(facility: IdbFacility) {
-    let accountFacilityReports: Array<IdbFacilityReport> = this.facilityReportsDbService.accountFacilityReports.getValue();
-    let facilityReports: Array<IdbFacilityReport> = accountFacilityReports.filter(item => { return item.facilityId == facility.guid });
-    this.facilityReportsDbService.facilityReports.next(facilityReports);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   //facility energy uses
@@ -182,8 +163,7 @@ export class DbChangesService {
   }
 
   async setAccountReports(account: IdbAccount) {
-    let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllAccountReports(account.guid);
-    this.accountReportDbService.accountReports.next(accountReports);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   //Predictors V2
@@ -219,17 +199,15 @@ export class DbChangesService {
         }
       }
     }
-    this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   async setCustomFuels(account: IdbAccount) {
-    let customFuels: Array<IdbCustomFuel> = await this.customFuelDbService.getAllAccountCustomFuels(account.guid);
-    this.customFuelDbService.accountCustomFuels.next(customFuels);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   async setCustomGWPS(account: IdbAccount) {
-    let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
-    this.customGWPDbService.accountCustomGWPs.next(customGWPs);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   deleteFacilityMessages() {
@@ -286,7 +264,7 @@ export class DbChangesService {
 
   async updateDataNewFacility(newFacility: IdbFacility) {
     this.loadingService.setLoadingMessage('Updating Reports...');
-    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.workspaceStore.accountReports()];
     for (let index = 0; index < accountReports.length; index++) {
       if (accountReports[index].dataOverviewReportSetup) {
         accountReports[index].dataOverviewReportSetup.includedFacilities.push({
@@ -305,7 +283,7 @@ export class DbChangesService {
       await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
     }
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.workspaceStore.accountAnalyses()];
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       if (accountAnalysisItems[index].facilityAnalysisItems) {
         accountAnalysisItems[index].facilityAnalysisItems.push({
@@ -322,7 +300,7 @@ export class DbChangesService {
 
   async updateFacilityAnalysisSelectedItems() {
     let facilities: Array<IdbFacility> = this.workspaceStore.facilities().map(facility => ({ ...facility }));
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.workspaceStore.facilityAnalyses()];
     for (let facility of facilities) {
       let updateFacility = this.analysisSelectionRepair.repairFacility(facility, facilityAnalysisItems);
       if (updateFacility.isChanged) {

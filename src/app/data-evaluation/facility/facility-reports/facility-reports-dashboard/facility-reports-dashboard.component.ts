@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
@@ -23,6 +24,7 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
   standalone: false
 })
 export class FacilityReportsDashboardComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -56,9 +58,9 @@ export class FacilityReportsDashboardComponent {
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountFacilityReports(account, selectedFacility);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
-    this.facilityReportsDbService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
-    this.facilityReportsDbService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/reports/setup');
   }
 }

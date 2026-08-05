@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
@@ -22,6 +23,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class AccountAnalysisDashboardComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedAccount: IdbAccount;
@@ -60,7 +62,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.analyticsService.sendEvent('create_account_analysis');
-    this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
+    this.accountWorkspaceService.selectAccountAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }

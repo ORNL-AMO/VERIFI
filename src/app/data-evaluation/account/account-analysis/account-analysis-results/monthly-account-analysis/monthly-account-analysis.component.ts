@@ -38,7 +38,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     private accountAnalysisService: AccountAnalysisService, private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
-    this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
 
     this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.account = val;

@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
@@ -19,15 +21,17 @@ import { AccountReportStatusCheck } from 'src/app/calculations/status-check-calc
   standalone: false
 })
 export class AccountReportsBannerComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  readonly selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport, { initialValue: null });
-  readonly reportList: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports, { initialValue: [] });
-  readonly accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
+  readonly selectedReport: Signal<IdbAccountReport> = this.accountWorkspaceStore.selectedAccountReport;
+  readonly reportList: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
+  readonly accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
   readonly accountReportStatusChecks: Signal<Array<AccountReportStatusCheck>> = toSignal(
     this.accountStatusCheckService.accountStatusCheck.pipe(map(check => check?.accountReportStatusChecks ?? [])),
     { initialValue: [] }
@@ -101,7 +105,7 @@ export class AccountReportsBannerComponent {
   }
 
   selectItem(item: IdbAccountReport) {
-    this.accountReportDbService.selectedReport.next(item);
+    this.accountWorkspaceService.selectAccountReport((item)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
     this.showDropdown.set(false);
   }

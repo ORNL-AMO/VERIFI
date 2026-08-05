@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -23,6 +24,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountReportsDashboardComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private accountDbService: AccountdbService = inject(AccountdbService);
@@ -46,7 +48,7 @@ export class AccountReportsDashboardComponent {
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountReports(account);
     this.analyticsService.sendEvent('create_report');
-    this.accountReportDbService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
 

@@ -1,6 +1,7 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -17,6 +18,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class EmissionsDataDashboardComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   customEmissionsItems: Array<IdbCustomEmissionsItem>;
@@ -32,7 +34,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
     private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.customEmissionsItemsSub = this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
+    this.customEmissionsItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customEmissions()])).subscribe(val => {
       this.customEmissionsItems = val;
     });
 
@@ -91,7 +93,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
     await firstValueFrom(this.customEmissionsDbService.deleteWithObservable(this.itemToDelete.id));
     let allEmissions: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAll());
     let accountEmissions: Array<IdbCustomEmissionsItem> = allEmissions.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
-    this.customEmissionsDbService.accountEmissionsItems.next(accountEmissions);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }
 }

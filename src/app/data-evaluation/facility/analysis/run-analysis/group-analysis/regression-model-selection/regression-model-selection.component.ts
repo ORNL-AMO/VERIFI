@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -20,6 +21,7 @@ import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
@@ -30,6 +32,7 @@ type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
   standalone: false
 })
 export class RegressionModelSelectionComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -39,12 +42,13 @@ export class RegressionModelSelectionComponent {
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private regressionModelState = inject(RegressionModelStateService);
 
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
+  generatedModelsPerGroup = this.regressionModelState.modelsByGroup;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
 
@@ -150,7 +154,7 @@ export class RegressionModelSelectionComponent {
       const selectedGroup = this.selectedGroup();
       const generatedModelsPerGroup = this.generatedModelsPerGroup();
       if (selectedGroup && selectedGroup.models && generatedModelsPerGroup && !generatedModelsPerGroup[selectedGroup.idbGroupId]) {
-        this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, selectedGroup.models);
+        this.regressionModelState.setForGroup(selectedGroup.idbGroupId, selectedGroup.models);
       }
     });
 
@@ -198,7 +202,7 @@ export class RegressionModelSelectionComponent {
       }),
     };
     await this.saveItem(updatedGroup);
-    this.analysisDbService.setGeneratedModelsForGroup(updatedGroup.idbGroupId, generatedModels);
+    this.regressionModelState.setForGroup(updatedGroup.idbGroupId, generatedModels);
   }
 
   async saveItem(selectedGroup?: AnalysisGroup) {
@@ -212,7 +216,7 @@ export class RegressionModelSelectionComponent {
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next(_group);
   }
 
@@ -263,4 +267,3 @@ export class RegressionModelSelectionComponent {
     }
   }
 }
-

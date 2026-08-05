@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -19,6 +21,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-modeling-report-setup.component.css',
 })
 export class FacilityModelingReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -42,13 +45,13 @@ export class FacilityModelingReportSetupComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.modelingReportSettings;
     });
 
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.analysisItems = items;
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
+      this.analysisItems = [...items];
     });
     this.setSelectedAnalysisItem();
 
@@ -74,7 +77,7 @@ export class FacilityModelingReportSetupComponent {
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportsDbService.selectedReport.next(this.facilityReport);
+    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }
 
   setYearOptions() {

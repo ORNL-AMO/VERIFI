@@ -113,9 +113,9 @@ export class SharedMeterCalendarizationComponent {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       this.calanderizingMeterData = true;
       let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
-      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-      let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+      let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
       if (typeof Worker !== 'undefined') {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();

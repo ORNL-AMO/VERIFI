@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
@@ -11,25 +11,11 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class AccountReportDbService {
-
-  accountReports: BehaviorSubject<Array<IdbAccountReport>>;
-  selectedReport: BehaviorSubject<IdbAccountReport>;
-  constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  constructor(private dbService: NgxIndexedDBService,
     private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
-    this.accountReports = new BehaviorSubject<Array<IdbAccountReport>>([]);
-    this.selectedReport = new BehaviorSubject<IdbAccountReport>(undefined);
     //subscribe after initialization
-    this.selectedReport.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('accountReportId', analysisItem.id);
-      }
-    });
-  }
-
-  getInitialReport(): number {
-    let reportId: number = this.localStorageService.retrieve("accountReportId");
-    return reportId;
   }
 
   getAll(): Observable<Array<IdbAccountReport>> {
@@ -71,7 +57,7 @@ export class AccountReportDbService {
   }
 
   async updateReportsRemoveFacility(facilityId: string) {
-    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
@@ -84,7 +70,7 @@ export class AccountReportDbService {
   }
 
   async updateReportsRemoveGroup(groupId: string) {
-    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       if (report.reportType == 'betterClimate' && report.betterClimateReportSetup.includedFacilityGroups) {
@@ -103,7 +89,7 @@ export class AccountReportDbService {
   }
 
   async deleteAccountReports() {
-    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     await this.deleteReports(accountReports);
   }
 
@@ -115,7 +101,7 @@ export class AccountReportDbService {
   }
 
   getHasCorrespondingReport(analysisId: string): boolean {
-    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     let hasReport: IdbAccountReport = accountReports.find(report => {
       return (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == analysisId);
     });
@@ -123,7 +109,7 @@ export class AccountReportDbService {
   }
 
   async addGroup(group: IdbUtilityMeterGroup) {
-    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       if (report.reportType == 'betterClimate') {
@@ -159,7 +145,7 @@ export class AccountReportDbService {
   }
 
   getByGuid(guid: string): IdbAccountReport {
-    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     return accountReports.find(report => {
       return report.guid == guid;
     });

@@ -54,7 +54,7 @@ export class PerformanceReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     }
@@ -71,7 +71,7 @@ export class PerformanceReportComponent {
   }
 
   setAnalysisItem() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.performanceReportSetup.analysisItemId });
   }
 
@@ -79,7 +79,7 @@ export class PerformanceReportComponent {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
-    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {

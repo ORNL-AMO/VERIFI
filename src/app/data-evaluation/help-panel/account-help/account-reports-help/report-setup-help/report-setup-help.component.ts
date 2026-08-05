@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -10,6 +12,7 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
     standalone: false
 })
 export class ReportSetupHelpComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   selectedReport: IdbAccountReport;
@@ -18,7 +21,7 @@ export class ReportSetupHelpComponent {
   }
 
   ngOnInit() {
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport).subscribe(val => {
       this.selectedReport = val;
     });
   }

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -10,6 +12,7 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
   styleUrl: './facility-report-setup-help.component.css'
 })
 export class FacilityReportSetupHelpComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbFacilityReport;
   selectedReportSub: Subscription;
@@ -17,7 +20,7 @@ export class FacilityReportSetupHelpComponent {
   }
 
   ngOnInit() {
-    this.selectedReportSub = this.facilityReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(val => {
       this.selectedReport = val;
     });
   }

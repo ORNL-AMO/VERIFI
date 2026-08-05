@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -28,6 +29,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     standalone: false
 })
 export class CreateReportModalComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   showModalSub: Subscription;
@@ -89,7 +91,7 @@ export class CreateReportModalComponent {
     }
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(this.accountReport));
     await this.dbChangesService.setAccountReports(account);
-    this.accountReportDbService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.sharedDataService.openCreateReportModal.next(false);
     this.router.navigateByUrl(navigateToStr);
@@ -170,7 +172,7 @@ export class CreateReportModalComponent {
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
       }
     } else if (this.router.url.includes('account/analysis')) {
-      let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+      let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
       newReport.name = 'Better Plants Report';
       newReport.reportType = 'betterPlants';
       newReport.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;

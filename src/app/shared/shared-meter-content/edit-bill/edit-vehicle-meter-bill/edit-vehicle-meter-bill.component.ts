@@ -86,7 +86,7 @@ export class EditVehicleMeterBillComponent {
   }
 
   setFuel() {
-    let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     let mobileTypeFuels: Array<FuelTypeOption> = getMobileFuelTypes(this.editMeter.vehicleCategory, this.editMeter.vehicleType, allFuels)
     this.meterFuel = mobileTypeFuels.find(fuel => {
       return fuel.value == this.editMeter.vehicleFuel;
@@ -141,7 +141,7 @@ export class EditVehicleMeterBillComponent {
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value && this.account && this.account.displayEmissions) {
       let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-      let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       this.emissionsValues = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,
         this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value,

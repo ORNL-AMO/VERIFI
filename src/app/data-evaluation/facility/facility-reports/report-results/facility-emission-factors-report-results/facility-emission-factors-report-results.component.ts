@@ -1,3 +1,4 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -50,8 +51,8 @@ export class FacilityEmissionFactorsReportResultsComponent {
   }
 
   ngOnInit() {
-    this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.customFuels = [...this.accountWorkspaceStore.customFuels()];
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
       this.emissionFactorsReportSettings = this.facilityReport.emissionFactorsReportSettings;

@@ -113,7 +113,7 @@ export class EditUtilityBillComponent implements OnInit {
   setTotalEmissions() {
     if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
       let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       let account: IdbAccount = this.accountWorkspaceStore.account();
       //meed to use total volume for fugitive/process emissions
       this.emissionsResults = getEmissions(this.editMeter,
@@ -151,7 +151,7 @@ export class EditUtilityBillComponent implements OnInit {
 
   setIsBiofuel() {
     if (this.editMeter.source != 'Natural Gas') {
-      let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       let fuels: Array<FuelTypeOption> = getFuelTypeOptions(this.editMeter.source, this.editMeter.phase, allFuels, this.editMeter.scope, undefined, undefined)
       let meterFuel: FuelTypeOption = fuels.find(fuel => {
         return fuel.value == this.editMeter.fuel;

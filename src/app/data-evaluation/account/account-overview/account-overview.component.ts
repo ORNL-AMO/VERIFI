@@ -86,8 +86,8 @@ export class AccountOverviewComponent implements OnInit {
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

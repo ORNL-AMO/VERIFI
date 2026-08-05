@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -17,6 +19,7 @@ import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/
   standalone: false
 })
 export class FacilityReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportType: FacilityReportType;
@@ -30,9 +33,9 @@ export class FacilityReportSetupComponent {
   ) { }
 
   ngOnInit() {
-    let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+    let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     this.facilityReportType = facilityReport.facilityReportType;
-    this.selectedReportSub = this.facilityReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(val => {
       facilityReport = val;
       if (!this.isFormChange)
         this.reportName = facilityReport.name;
@@ -50,12 +53,12 @@ export class FacilityReportSetupComponent {
 
   async saveName() {
     this.isFormChange = true;
-    let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+    let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     facilityReport.name = this.reportName;
     facilityReport = await firstValueFrom(this.facilityReportDbService.updateWithObservable(facilityReport));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportDbService.selectedReport.next(facilityReport);
+    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
   }
 }

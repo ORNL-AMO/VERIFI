@@ -1,4 +1,5 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
@@ -23,6 +24,7 @@ import { UtilitiesUsageChartComponent } from '../utilities-usage-chart/utilities
   standalone: false
 })
 export class FacilitySectionReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'cost' | 'water' | 'emissions';
   @Input()
@@ -70,10 +72,10 @@ export class FacilitySectionReportComponent {
 
   ngOnInit() {
     if (!this.inFacilityReport) {
-      let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+      let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
       this.sectionOptions = selectedReport.dataOverviewReportSetup;
     } else {
-      let selectedReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+      let selectedReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
       this.sectionOptions = selectedReport.dataOverviewReportSettings;
     }
     this.waterUnit = this.facility.volumeLiquidUnit;

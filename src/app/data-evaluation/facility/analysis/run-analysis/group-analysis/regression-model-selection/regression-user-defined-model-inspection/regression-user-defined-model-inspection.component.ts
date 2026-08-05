@@ -46,9 +46,9 @@ export class RegressionUserDefinedModelInspectionComponent {
 
 
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  accountAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
+  accountAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]);
   accountPredictorEntries: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.predictorData()]);
   facilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);

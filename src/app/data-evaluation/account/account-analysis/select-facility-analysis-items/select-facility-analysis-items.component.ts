@@ -42,11 +42,11 @@ export class SelectFacilityAnalysisItemsComponent {
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountWorkspaceService = inject(AccountWorkspaceService);
 
-  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
-  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   facilities = this.accountWorkspaceStore.facilities;
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  accountReports: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
   hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;

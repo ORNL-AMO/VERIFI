@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -23,6 +24,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './account-savings-report-setup.component.css'
 })
 export class AccountSavingsReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
@@ -34,7 +36,7 @@ export class AccountSavingsReportSetupComponent {
 
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   analysisTableColumns: Signal<AnalysisTableColumns> = toSignal(this.analysisService.analysisTableColumns);
-  selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport);
+  selectedReport: Signal<IdbAccountReport> = this.accountWorkspaceStore.selectedAccountReport;
 
   accountSavingsReportForm: WritableSignal<FormGroup> = signal(undefined);
 
@@ -103,7 +105,7 @@ export class AccountSavingsReportSetupComponent {
     selectedReport.accountSavingsReportSetup = this.accountReportsService.updateAccountSavingsReportFromForm(selectedReport.accountSavingsReportSetup, this.accountSavingsReportForm());
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account());
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
 

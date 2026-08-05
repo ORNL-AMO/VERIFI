@@ -78,7 +78,7 @@ export class AccountSectionReportComponent {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     this.waterUnit = account.volumeLiquidUnit;
     this.energyUnit = account.energyUnit;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
 
     this.printSub = this.dataEvaluationService.print.subscribe(print => {

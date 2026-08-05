@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -17,6 +18,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountWaterReductionGoalComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
@@ -62,7 +64,7 @@ export class AccountWaterReductionGoalComponent {
   });
 
   goToAnalysisItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
+    this.accountWorkspaceService.selectAccountAnalysis((this.latestAnalysisItem())?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

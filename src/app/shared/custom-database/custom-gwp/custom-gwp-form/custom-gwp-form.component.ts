@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -18,6 +19,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
     standalone: false
 })
 export class CustomGwpFormComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
@@ -40,7 +42,7 @@ export class CustomGwpFormComponent {
   }
 
   ngOnInit() {
-    this.accountCustomGWPs = this.customGWPDbService.accountCustomGWPs.getValue();
+    this.accountCustomGWPs = [...this.accountWorkspaceStore.customGWPs()];
     this.setAllGWPNames();
     this.isAdd = this.router.url.includes('add');
     this.selectedAccount = this.accountWorkspaceStore.account();
@@ -120,7 +122,7 @@ export class CustomGwpFormComponent {
     }
     let allCustomGWPs: Array<IdbCustomGWP> = await firstValueFrom(this.customGWPDbService.getAll());
     let accountCustomGWPs: Array<IdbCustomGWP> = allCustomGWPs.filter(gwp => { return gwp.accountId == this.selectedAccount.guid });
-    this.customGWPDbService.accountCustomGWPs.next(accountCustomGWPs);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 

@@ -1,3 +1,4 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -62,7 +63,7 @@ export class BankedGroupAnalysisComponent {
 
   ngOnInit() {
     this.setReportSettings();
-    this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
+    this.analysisItemSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalysis).subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
       let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
       this.bankedAnalysisItem = JSON.parse(JSON.stringify(tmpBankedAnalysisItem));
@@ -89,7 +90,7 @@ export class BankedGroupAnalysisComponent {
 
   runAnalysis() {
     this.calculating = true;
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.bankedAnalysisItem.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.bankedAnalysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.bankedAnalysisItem.facilityId);

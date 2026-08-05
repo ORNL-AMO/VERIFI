@@ -254,7 +254,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
@@ -487,7 +487,7 @@ export class EditMeterFormComponent implements OnInit {
 
   setGlobalWarmingPotentials() {
     this.globalWarmingPotentials = new Array();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     customGWPs.forEach(gwpOption => {
       this.globalWarmingPotentials.push(gwpOption);
     });

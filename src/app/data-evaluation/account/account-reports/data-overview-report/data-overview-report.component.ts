@@ -85,7 +85,7 @@ export class DataOverviewReportComponent {
       this.print = print;
     });
     this.account = this.accountWorkspaceStore.account();
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
     this.overviewReport = selectedReport.dataOverviewReportSetup;
     this.includedFacilities = new Array();
     this.includedGroups = new Array();
@@ -138,8 +138,8 @@ export class DataOverviewReportComponent {
     };
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.facilitiesWorker = new Worker(new URL('../../../../web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
@@ -209,8 +209,8 @@ export class DataOverviewReportComponent {
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
 
     if (typeof Worker !== 'undefined') {
@@ -281,7 +281,7 @@ export class DataOverviewReportComponent {
   }
 
   async onExportPdf() {
-    let selectedReport = this.accountReportDbService.selectedReport.value;
+    let selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!selectedReport || this.isExportingPdf) {
       return;
     }
@@ -370,7 +370,7 @@ export class DataOverviewReportComponent {
   }
 
   async downloadPpt(): Promise<void> {
-    const selectedReport = this.accountReportDbService.selectedReport.value;
+    const selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!selectedReport) {
       return;
     }

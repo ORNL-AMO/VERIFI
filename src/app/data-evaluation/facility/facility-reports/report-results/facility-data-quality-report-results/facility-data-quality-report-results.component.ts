@@ -1,3 +1,5 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -33,6 +35,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
   styleUrl: './facility-data-quality-report-results.component.css',
 })
 export class FacilityDataQualityReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   facilityReport: IdbFacilityReport;
@@ -67,7 +70,7 @@ export class FacilityDataQualityReportResultsComponent {
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.dataQualityReportSettings = this.facilityReport.dataQualityReportSettings;
       this.selectedMode = this.dataQualityReportSettings.selectedMode;

@@ -56,8 +56,8 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       this.itemsPerPage = val;
     });
 
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     this.group = this.analysisService.selectedGroup.getValue();
 
     this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {

@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
@@ -47,6 +48,7 @@ interface AnalysisDetailsTableRow {
 })
 
 export class AnalysisDetailsTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -66,9 +68,9 @@ export class AnalysisDetailsTableComponent {
 
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
-  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
-  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
-  facilityReports: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityReportsDbService.facilityReports);
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
+  facilityReports: Signal<Array<IdbFacilityReport>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityReports()]]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   selectedAnalysisCategory: WritableSignal<'energy' | 'water' | 'all'> = signal('all');
@@ -226,7 +228,7 @@ export class AnalysisDetailsTableComponent {
   showBulkDelete: boolean = false;
 
   selectAnalysisItem(analysisItem: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
 
@@ -294,7 +296,7 @@ export class AnalysisDetailsTableComponent {
 
   goToReport(reportGuid: string) {
     let facilityReport: IdbFacilityReport = this.facilityReportsDbService.getByGuid(reportGuid);
-    this.facilityReportsDbService.selectedReport.next(facilityReport);
+    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/reports/setup')
   }
 
@@ -315,7 +317,7 @@ export class AnalysisDetailsTableComponent {
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
-    this.analysisDbService.selectedAnalysisItem.next(addedItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
@@ -405,13 +407,13 @@ export class AnalysisDetailsTableComponent {
 
   goToAccountAnalysis(analysisGuid: string) {
     let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisGuid);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(accountAnalysisItem);
+    this.accountWorkspaceService.selectAccountAnalysis((accountAnalysisItem)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 
   goToFacilityAnalysis(analysisGuid: string) {
     let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
-    this.analysisDbService.selectedAnalysisItem.next(bankedAnalysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((bankedAnalysisItem)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
 

@@ -50,7 +50,7 @@ export class FacilityOverviewComponent implements OnInit {
     private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
-    this.customFuels = this.customFuelsDbService.accountCustomFuels.getValue();
+    this.customFuels = [...this.accountWorkspaceStore.customFuels()];
     this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       if (this.facility && this.facility.guid != val.guid) {
         this.dateRange = undefined;
@@ -92,7 +92,7 @@ export class FacilityOverviewComponent implements OnInit {
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

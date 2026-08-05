@@ -90,10 +90,10 @@ export class EditOtherEmissionsBillComponent {
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       let account: IdbAccount = this.accountWorkspaceStore.account();
       //meed to use total volume for fugitive/process emissions
-      let customGWPs: Array<IdbCustomGWP> = this.customGwpDbService.accountCustomGWPs.getValue();
+      let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
         this.editMeter.energyUnit,

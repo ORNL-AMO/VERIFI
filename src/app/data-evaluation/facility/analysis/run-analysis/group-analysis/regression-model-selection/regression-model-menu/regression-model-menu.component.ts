@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
@@ -30,6 +31,7 @@ import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
+import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 type PredictorVariableForm = FormGroup<{
   productionInAnalysis: FormControl<boolean>;
@@ -56,10 +58,12 @@ type RegressionMenuForm = FormGroup<{
   standalone: false
 })
 export class RegressionModelMenuComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // --- Services (DI) ---
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private regressionModelState = inject(RegressionModelStateService);
   private analysisService: AnalysisService = inject(AnalysisService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
   private accountDbService: AccountdbService = inject(AccountdbService);
@@ -77,11 +81,11 @@ export class RegressionModelMenuComponent {
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   facilityPredictorData: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
   facilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
-  generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
+  generatedModelsPerGroup = this.regressionModelState.modelsByGroup;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
 
@@ -337,7 +341,7 @@ export class RegressionModelMenuComponent {
     await firstValueFrom(this.analysisDbService.updateWithObservable(_analysisItem));
     const selectedAccount: IdbAccount = this.selectedAccount();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
-    this.analysisDbService.selectedAnalysisItem.next(_analysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);
     this._suppressFormPatch = suppressFormPatch;
     this.analysisService.selectedGroup.next(_group);
   }
@@ -377,7 +381,7 @@ export class RegressionModelMenuComponent {
         predictorVariables: currentGroup.predictorVariables.map(v => ({ ...v, regressionCoefficient: undefined })),
       } : {}),
     };
-    this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
+    this.regressionModelState.setForGroup(_group.idbGroupId, []);
     this.updateFieldDisabledStates(isGeneratedModel);
     await this.saveItem(_group);
   }
@@ -425,7 +429,7 @@ export class RegressionModelMenuComponent {
     if (previousSelectedModelId) {
       this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
     }
-    this.analysisDbService.setGeneratedModelsForGroup(
+    this.regressionModelState.setForGroup(
       updatedGroup.idbGroupId,
       updatedGroup.isGeneratedModel ? generatedModels : []
     );
@@ -513,7 +517,7 @@ export class RegressionModelMenuComponent {
         regressionCoefficient: undefined,
       })),
     };
-    this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
+    this.regressionModelState.setForGroup(_group.idbGroupId, []);
     await this.saveItem(_group);
     this.showConfirmPredictorChangeModel = false;
     this.toggledPredictorIndex = null;

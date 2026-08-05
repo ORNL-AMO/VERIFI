@@ -10,6 +10,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 @Component({
   selector: 'app-analysis',
@@ -24,7 +25,7 @@ export class AnalysisComponent implements OnDestroy {
   private router: Router = inject(Router);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private analysisDbService = inject(AnalysisDbService);
+  private regressionModelState = inject(RegressionModelStateService);
 
   utilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
   utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()]);
@@ -48,7 +49,7 @@ export class AnalysisComponent implements OnDestroy {
     this.analysisService.hideInUseMessage.next(false);
     this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
     this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
-    this.analysisDbService.clearGeneratedModels();
+    this.regressionModelState.clear();
   }
 
   goToMeterGroups() {

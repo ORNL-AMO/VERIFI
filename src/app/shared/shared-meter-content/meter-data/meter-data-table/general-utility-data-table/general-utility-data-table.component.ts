@@ -49,7 +49,7 @@ export class GeneralUtilityDataTableComponent {
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   selectedMeter: Signal<IdbUtilityMeter> = this.accountWorkspaceStore.selectedMeter;
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
-  customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
+  customFuels: Signal<Array<IdbCustomFuel>> = computed(() => [...this.accountWorkspaceStore.customFuels()]);
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   generalUtilityDataFilters: Signal<GeneralUtilityDataFilters> = toSignal(this.utilityMeterDataService.tableGeneralUtilityFilters);

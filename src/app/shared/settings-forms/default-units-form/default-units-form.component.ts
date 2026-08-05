@@ -155,7 +155,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   addCustomSubregions() {
-    let customSubRegions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+    let customSubRegions: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
     customSubRegions.forEach(customSubregion => {
       this.zipCodeSubRegionData.push(customSubregion.subregion)
     });

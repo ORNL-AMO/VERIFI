@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
@@ -23,6 +24,7 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
   standalone: false
 })
 export class AnalysisFooterComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -32,7 +34,7 @@ export class AnalysisFooterComponent {
   private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
@@ -204,10 +206,10 @@ export class AnalysisFooterComponent {
   }
 
   goBackToAccount() {
-    const accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    const accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     const accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItem();
     const selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == accountAnalysisItem.guid })
-    this.accountAnalysisDbService.selectedAnalysisItem.next(selectedAnalysisItem);
+    this.accountWorkspaceService.selectAccountAnalysis((selectedAnalysisItem)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
   }
 

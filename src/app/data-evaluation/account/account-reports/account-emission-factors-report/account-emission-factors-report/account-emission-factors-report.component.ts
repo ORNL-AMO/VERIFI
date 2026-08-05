@@ -35,7 +35,7 @@ export class AccountEmissionFactorsReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     } 

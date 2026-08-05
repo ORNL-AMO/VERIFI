@@ -18,7 +18,6 @@ import { emptyAccountReportErrors } from '../../calculations/status-check-calcul
     providedIn: 'root'
 })
 export class AccountStatusCheckService implements OnDestroy {
-
     accountStatusCheck: BehaviorSubject<AccountStatusCheck | undefined> = new BehaviorSubject<AccountStatusCheck | undefined>(undefined);
 
     selectedFacilityStatusCheck$: Observable<FacilityStatusCheck | undefined>;

@@ -1,5 +1,6 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -56,14 +57,14 @@ export class AnalysisReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
 
     this.account = this.accountWorkspaceStore.account();
 
-    this.analysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
+    this.analysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()])).subscribe(items => {
       this.setFacilityAnalysisItems(items);
     });
 
@@ -82,7 +83,7 @@ export class AnalysisReportComponent {
   }
 
   setFacilityAnalysisItems(allFacilityAnalysisItems: Array<IdbAnalysisItem>) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.analysisReportSetup.analysisItemId });
     this.facilityAnalysisItems = allFacilityAnalysisItems.filter(item => {
       const match = selectedAnalysisItem.facilityAnalysisItems.some(facilityItem => {

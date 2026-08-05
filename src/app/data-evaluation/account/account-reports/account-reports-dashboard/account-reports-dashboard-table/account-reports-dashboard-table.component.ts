@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -40,6 +41,7 @@ interface ReportListItem {
   styleUrl: './account-reports-dashboard-table.component.css'
 })
 export class AccountReportsDashboardTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
@@ -52,7 +54,7 @@ export class AccountReportsDashboardTableComponent {
 
   selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
-  reports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  reports: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   reportTypes: Array<ReportType> = ['betterPlants', 'dataOverview', 'performance', 'betterClimate', 'analysis', 'accountEmissionFactors', 'accountSavings'];
@@ -106,7 +108,7 @@ export class AccountReportsDashboardTableComponent {
   selectReport(report: ReportListItem) {
     const raw = this.reports().find(r => r.guid === report.guid);
     if (raw) {
-      this.accountReportDbService.selectedReport.next(raw);
+      this.accountWorkspaceService.selectAccountReport((raw)?.guid);
       this.router.navigateByUrl('/data-evaluation/account/reports/setup');
     }
   }
@@ -120,7 +122,7 @@ export class AccountReportsDashboardTableComponent {
     newReport.guid = getGUID();
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountReports(this.selectedAccount());
-    this.accountReportDbService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }

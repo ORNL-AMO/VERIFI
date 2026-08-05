@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import * as _ from 'lodash';
@@ -19,6 +20,7 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class FacilityEnergyReductionGoalComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
@@ -73,7 +75,7 @@ export class FacilityEnergyReductionGoalComponent {
   });
 
   goToAnalysisItem() {
-    this.analysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
+    this.accountWorkspaceService.selectFacilityAnalysis((this.latestAnalysisItem())?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facility().guid + '/analysis/run-analysis');
   }
 }

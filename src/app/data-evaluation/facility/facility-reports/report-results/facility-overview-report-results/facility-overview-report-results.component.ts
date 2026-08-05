@@ -1,3 +1,4 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
@@ -76,7 +77,7 @@ export class FacilityOverviewReportResultsComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.overviewReportSettings = this.facilityReport.dataOverviewReportSettings;
       this.calculateFacilitiesSummary();
@@ -98,7 +99,7 @@ export class FacilityOverviewReportResultsComponent {
     this.calculating = true;
     this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.facilityReport.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (this.overviewReportSettings.includeAllMeterData == false) {
       let includeGroupIds: Array<string> = [];
       this.overviewReportSettings.includedGroups.forEach(group => {
@@ -111,7 +112,7 @@ export class FacilityOverviewReportResultsComponent {
       });
     };
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     this.dateRange = {
       startDate: new Date(this.overviewReportSettings.startYear, this.overviewReportSettings.startMonth, 1),
       endDate: new Date(this.overviewReportSettings.endYear, this.overviewReportSettings.endMonth, 1)

@@ -74,14 +74,14 @@ export class AnalysisDetailItemCardComponent {
     }
 
     this.isBanked = false;
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.selectedFacilityAnalyses()];
     facilityAnalysisItems.forEach(item => {
       if (item.hasBanking && item.bankedAnalysisItemId == this.analysisItem?.guid) {
         this.isBanked = true;
       }
     });
 
-    let facilityReportsItems: Array<IdbFacilityReport> = this.facilityReportsDbService.facilityReports.getValue();
+    let facilityReportsItems: Array<IdbFacilityReport> = [...this.accountWorkspaceStore.selectedFacilityReports()];
     facilityReportsItems.forEach(item => {
       if (item.facilityReportType == 'analysis' && item.analysisItemId == this.analysisItem?.guid) {
         this.linkedItems.push({
@@ -92,7 +92,7 @@ export class AnalysisDetailItemCardComponent {
       }
     });
 
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
         if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.analysisItem?.guid) {

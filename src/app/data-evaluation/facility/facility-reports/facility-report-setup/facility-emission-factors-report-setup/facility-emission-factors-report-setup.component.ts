@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -19,6 +21,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-emission-factors-report-setup.component.css'
 })
 export class FacilityEmissionFactorsReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
@@ -40,7 +43,7 @@ export class FacilityEmissionFactorsReportSetupComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
         this.reportSettings = this.facilityReport.emissionFactorsReportSettings;
@@ -58,13 +61,13 @@ export class FacilityEmissionFactorsReportSetupComponent {
 
   async save() {
     this.isFormChange = true;
-    let facilityReport: IdbFacilityReport = this.facilityReportsDbService.selectedReport.getValue();
+    let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     this.facilityReport.emissionFactorsReportSettings = this.reportSettings;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(facilityReport));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportsDbService.selectedReport.next(facilityReport);
+    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
   }
 
   setYearOptions() {

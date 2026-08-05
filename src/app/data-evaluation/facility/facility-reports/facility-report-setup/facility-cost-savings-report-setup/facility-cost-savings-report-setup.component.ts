@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -29,6 +31,7 @@ import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from 'src/app/sha
   styleUrl: './facility-cost-savings-report-setup.component.css',
 })
 export class FacilityCostSavingsReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
@@ -70,7 +73,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
       if (this.reportSettings && this.reportSettings.unitCostTable) {
@@ -78,7 +81,7 @@ export class FacilityCostSavingsReportSetupComponent {
       }
     });
 
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
       this.analysisItems = items.filter(item => (item.analysisCategory == 'water') || (item.analysisCategory == 'energy' && !item.energyIsSource));
     });
 
@@ -149,7 +152,7 @@ export class FacilityCostSavingsReportSetupComponent {
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportsDbService.selectedReport.next(this.facilityReport);
+    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }
 
   setYearOptions() {

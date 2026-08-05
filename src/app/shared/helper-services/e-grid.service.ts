@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject, computed } from '@angular/core';
 import * as XLSX from 'xlsx';
 import * as _ from 'lodash';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
@@ -9,14 +10,15 @@ import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions
   providedIn: 'root'
 })
 export class EGridService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   subRegionsByZipcode: Array<SubRegionData>;
 
   excelCo2Emissions: Array<SubregionEmissions>;
   co2Emissions: Array<SubregionEmissions>;
   zipLatLong: Array<{ ZIP: string, LAT: string, LNG: string }>;
-  constructor(private customEmissionsDbService: CustomEmissionsDbService) {
-    this.customEmissionsDbService.accountEmissionsItems.subscribe(emissions => {
+  constructor() {
+    toObservable(computed(() => [...this.accountWorkspaceStore.customEmissions()])).subscribe(emissions => {
       this.combineExcelAndCustomEmissions();
     });
   }
@@ -82,7 +84,7 @@ export class EGridService {
 
   combineExcelAndCustomEmissions() {
     if (this.excelCo2Emissions) {
-      let customEmissions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+      let customEmissions: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
       this.co2Emissions = this.excelCo2Emissions.map(emissions => { return emissions });
       customEmissions.forEach(customEmission => {
         this.co2Emissions.push(customEmission);

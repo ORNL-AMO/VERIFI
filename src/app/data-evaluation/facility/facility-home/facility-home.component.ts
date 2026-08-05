@@ -112,7 +112,7 @@ export class FacilityHomeComponent implements OnDestroy {
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.annualEnergyAnalysisWorker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
@@ -167,7 +167,7 @@ export class FacilityHomeComponent implements OnDestroy {
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.annualWaterAnalysisWorker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));

@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -30,6 +31,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   standalone: false
 })
 export class GroupAnalysisOptionsComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -43,10 +45,10 @@ export class GroupAnalysisOptionsComponent {
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
 
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup, { initialValue: null });
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem, { initialValue: null });
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems, { initialValue: [] });
-  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
+  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   predictorData: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.predictorData()]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
@@ -177,7 +179,7 @@ export class GroupAnalysisOptionsComponent {
 
   //METHODS
   async saveItem() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let analysisItem: IdbAnalysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
     analysisItem.isAnalysisVisited = false;
     const _group = this.group();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == _group.idbGroupId });
@@ -186,7 +188,7 @@ export class GroupAnalysisOptionsComponent {
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const facility: IdbFacility = this.facility();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, facility);
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next({ ..._group });
   }
 

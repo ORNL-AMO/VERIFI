@@ -40,7 +40,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
 
     this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.facility = val;

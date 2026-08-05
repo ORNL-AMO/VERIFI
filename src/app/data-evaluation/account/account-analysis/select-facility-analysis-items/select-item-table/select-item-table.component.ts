@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -36,6 +37,7 @@ interface FacilityAnalysisListItem {
   standalone: false
 })
 export class SelectItemTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
@@ -50,8 +52,8 @@ export class SelectItemTableComponent {
   private facilityDbservice: FacilitydbService = inject(FacilitydbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
-  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
+  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]);
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
@@ -149,7 +151,7 @@ export class SelectItemTableComponent {
     const facility = this.selectedFacility();
     const selectedAnalysisItem = this.selectedAnalysisItem();
     this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
-    this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
+    this.accountWorkspaceService.selectFacilityAnalysis((this.itemToEdit)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis');
   }
 
@@ -180,7 +182,7 @@ export class SelectItemTableComponent {
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     await this.dbChangesService.selectAccount(account, false);
     await this.save(newIdbItem.guid);
-    this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((newIdbItem)?.guid);
     this.loadingService.setLoadingStatus(false);
     this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
     this.router.navigateByUrl("/data-evaluation/facility/" + facility.guid + "/analysis/run-analysis/analysis-setup");

@@ -119,7 +119,7 @@ export class AccountSavingsReportComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     this.analysisService.analysisTableColumns.next(this.selectedReport.accountSavingsReportSetup.analysisTableColumns);
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
@@ -127,7 +127,7 @@ export class AccountSavingsReportComponent {
       this.accountSavingsReportSetup = this.selectedReport.accountSavingsReportSetup;
     }
     this.account = this.accountWorkspaceStore.account();
-    this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.accountAnalysisItems = [...this.accountWorkspaceStore.accountAnalyses()];
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
     this.calculateSavingsReport();
     this.getSetupDetails();
@@ -162,7 +162,7 @@ export class AccountSavingsReportComponent {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
-    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {
@@ -222,7 +222,7 @@ export class AccountSavingsReportComponent {
   }
 
   async onExportPdf() {
-    let selectedReport = this.accountReportDbService.selectedReport.value;
+    let selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!selectedReport || this.isExportingPdf) {
       return;
     }
@@ -315,4 +315,3 @@ export class AccountSavingsReportComponent {
     await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.selectedReport.name}.pptx`);
   }
 }
-

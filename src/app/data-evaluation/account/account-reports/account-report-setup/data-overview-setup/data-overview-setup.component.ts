@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -17,6 +19,7 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
     standalone: false
 })
 export class DataOverviewSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // overviewForm: FormGroup;
@@ -34,7 +37,7 @@ export class DataOverviewSetupComponent {
 
   ngOnInit() {
     this.account = this.accountWorkspaceStore.account();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport).subscribe(val => {
       if (!this.isFormChange) {
         this.reportSetup = val.dataOverviewReportSetup;
       } else {
@@ -50,12 +53,12 @@ export class DataOverviewSetupComponent {
 
   async save() {
     this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport()
     // selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
     selectedReport.dataOverviewReportSetup = this.reportSetup;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
   setShowWater() {

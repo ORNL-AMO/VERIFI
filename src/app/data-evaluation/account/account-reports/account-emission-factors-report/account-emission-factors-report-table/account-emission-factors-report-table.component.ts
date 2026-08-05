@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, Input, inject } from '@angular/core';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
@@ -21,6 +22,7 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
   styleUrl: './account-emission-factors-report-table.component.css'
 })
 export class AccountEmissionFactorsReportTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   @Input()
@@ -37,7 +39,7 @@ export class AccountEmissionFactorsReportTableComponent {
   ) { }
 
   ngOnInit(): void {
-    this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
+    this.customFuels = [...this.accountWorkspaceStore.customFuels()];
     this.accountFacilities.forEach(facility => {
       let facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(facility.guid);
       this.calculateFacilitiesSummary(facility, facilityMeters);

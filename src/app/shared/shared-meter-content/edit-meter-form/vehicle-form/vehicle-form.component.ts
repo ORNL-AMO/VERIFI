@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
@@ -18,6 +19,7 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
     standalone: false
 })
 export class VehicleFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   meterForm: FormGroup;
   @Input()
@@ -78,7 +80,7 @@ export class VehicleFormComponent {
   }
 
   setFuelOptions() {
-    let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     this.fuelOptions = getMobileFuelTypes(this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value, allFuels)
     let checkFuelExists: boolean = this.fuelOptions.some(option => {
       return option.value == this.meterForm.controls.vehicleFuel.value;

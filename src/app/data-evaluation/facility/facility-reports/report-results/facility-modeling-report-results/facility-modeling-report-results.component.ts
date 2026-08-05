@@ -1,3 +1,4 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -34,7 +35,7 @@ export class FacilityModelingReportResultsComponent {
     private exportReportPdfService: ExportReportPdfService) { }
 
   ngOnInit(): void {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];

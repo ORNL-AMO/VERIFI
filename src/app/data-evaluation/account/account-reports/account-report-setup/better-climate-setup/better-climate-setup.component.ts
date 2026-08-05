@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -17,6 +19,7 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
     standalone: false
 })
 export class BetterClimateSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   account: IdbAccount;
@@ -38,7 +41,7 @@ export class BetterClimateSetupComponent {
 
   ngOnInit() {
     this.account = this.accountWorkspaceStore.account();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport).subscribe(val => {
       this.selectedReport = val;
       if (!this.isFormChange) {
         this.initiativeNotes = val.betterClimateReportSetup.initiativeNotes;
@@ -56,13 +59,13 @@ export class BetterClimateSetupComponent {
 
   async save() {
     this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport()
     // selectedReport.betterClimateReportSetup = this.reportSetup;
     selectedReport.betterClimateReportSetup = this.accountReportsService.updateBetterClimateReportFromForm(selectedReport.betterClimateReportSetup, this.reportForm);
     selectedReport.betterClimateReportSetup.initiativeNotes = this.initiativeNotes;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
   async addNote() {

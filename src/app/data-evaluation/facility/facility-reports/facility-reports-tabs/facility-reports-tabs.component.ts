@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
@@ -21,6 +22,7 @@ import { FacilityReportStatusCheck } from 'src/app/calculations/status-check-cal
   standalone: false
 })
 export class FacilityReportsTabsComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
@@ -30,11 +32,11 @@ export class FacilityReportsTabsComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
-  selectedReport: Signal<IdbFacilityReport> = toSignal(this.facilityReportsDbService.selectedReport);
-  reportList: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityReportsDbService.facilityReports);
+  selectedReport: Signal<IdbFacilityReport> = this.accountWorkspaceStore.selectedFacilityReport;
+  reportList: Signal<Array<IdbFacilityReport>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityReports()]]);
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  analysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  analysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
 
   selectedReportStatusCheck: Signal<FacilityReportStatusCheck> = computed(() => {
     const report = this.selectedReport();
@@ -82,7 +84,7 @@ export class FacilityReportsTabsComponent {
   }
 
   selectItem(item: IdbFacilityReport) {
-    this.facilityReportsDbService.selectedReport.next(item);
+    this.accountWorkspaceService.selectFacilityReport((item)?.guid);
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/reports/setup');
     this.showDropdown = false;

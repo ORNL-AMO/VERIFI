@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -10,6 +11,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
   providedIn: 'root'
 })
 export class AccountHomeService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   latestEnergyAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
   latestWaterAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
@@ -36,7 +38,7 @@ export class AccountHomeService {
   }
 
   setLatestEnergyAnalysisItem(analysisItemId: string) {
-    let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let analysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     if (analysisItemId) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
       this.latestEnergyAnalysisItem.next(selectedAnalysisItem);
@@ -52,7 +54,7 @@ export class AccountHomeService {
   }
 
   setLatestWaterAnalysisItem(analysisItemId: string) {
-    let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let analysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     if (analysisItemId) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
       this.latestWaterAnalysisItem.next(selectedAnalysisItem);

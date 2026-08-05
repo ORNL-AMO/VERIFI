@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -12,6 +13,7 @@ import { BetterClimateReportSetup } from 'src/app/models/overview-report';
     standalone: false
 })
 export class AbsoluteEmissionsTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   yearDetails: Array<BetterClimateYearDetails>;
   @Input()
@@ -50,7 +52,7 @@ export class AbsoluteEmissionsTableComponent {
       return detail.emissionsResults.otherScope2Emissions != 0;
     }) != undefined;
 
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
   }
 
 }

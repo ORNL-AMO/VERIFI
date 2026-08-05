@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
@@ -27,6 +28,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   standalone: false
 })
 export class AnalysisDashboardComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedFacility: IdbFacility;
@@ -66,8 +68,8 @@ export class AnalysisDashboardComponent implements OnInit {
       this.setHasEnergyAndWater();
     });
 
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.facilityAnalysisItems = items;
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
+      this.facilityAnalysisItems = [...items];
     });
   }
 
@@ -85,7 +87,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     await this.dbChangesService.setAnalysisItems(account, false, this.selectedFacility);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
-    this.analysisDbService.selectedAnalysisItem.next(addedItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
   }

@@ -100,7 +100,7 @@ export class PredictorTableComponent {
   selectDelete(predictor: IdbPredictor) {
     this.predictorToDelete = predictor;
     //check if predictor is used in analysis.
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.selectedFacilityAnalyses()];
     let allFacilityGroups: Array<AnalysisGroup> = facilityAnalysisItems.flatMap(item => { return item.groups });
     this.predictorUsedGroupIds = new Array();
     for (let i = 0; i < allFacilityGroups.length; i++) {

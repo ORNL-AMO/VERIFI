@@ -65,8 +65,8 @@ export class RegressionModelInspectionComponent implements OnInit {
   ngOnInit(): void {
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
+    this.accountAnalysisItems = [...this.accountWorkspaceStore.facilityAnalyses()];
     this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.accountPredictorEntries = [...this.accountWorkspaceStore.predictorData()];
     this.facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];

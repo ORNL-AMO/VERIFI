@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -23,6 +24,7 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
   standalone: false
 })
 export class EmissionsDataFormComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
@@ -49,7 +51,7 @@ export class EmissionsDataFormComponent implements OnInit {
     } else {
       this.activatedRoute.params.subscribe(params => {
         let elementId: string = params['id'];
-        let customEmissionsItems: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+        let customEmissionsItems: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
         let selectedItem: IdbCustomEmissionsItem = customEmissionsItems.find(item => { return item.guid == elementId });
         this.previousSubregion = selectedItem.subregion;
         this.editCustomEmissions = JSON.parse(JSON.stringify(selectedItem));
@@ -177,7 +179,7 @@ export class EmissionsDataFormComponent implements OnInit {
     }
 
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(this.editCustomEmissions.accountId);
-    this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'alert-success');
     this.navigateHome();

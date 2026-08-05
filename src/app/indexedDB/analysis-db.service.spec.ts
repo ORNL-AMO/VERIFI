@@ -22,7 +22,6 @@ describe('AnalysisDbService', () => {
       {} as any,
       {} as any,
       {} as any,
-      {} as any,
       new IndexedDbAccessService(dbService as any)
     );
   });

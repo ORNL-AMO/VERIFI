@@ -1,4 +1,6 @@
-import { Component, ViewChild } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -18,6 +20,7 @@ import { FacilityAnalysisReportComponent } from 'src/app/shared/shared-reports/f
   standalone: false
 })
 export class FacilityAnalysisReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -36,7 +39,7 @@ export class FacilityAnalysisReportResultsComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.analysisService.analysisTableColumns.next(this.facilityReport.analysisReportSettings.analysisTableColumns);

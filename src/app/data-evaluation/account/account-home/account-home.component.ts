@@ -120,7 +120,7 @@ export class AccountHomeComponent implements OnDestroy {
     let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
 
@@ -173,7 +173,7 @@ export class AccountHomeComponent implements OnDestroy {
     let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
 
@@ -228,8 +228,8 @@ export class AccountHomeComponent implements OnDestroy {
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let co2Emissions: Array<SubregionEmissions> = this.eGridService.co2Emissions;
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
 
     if (typeof Worker !== 'undefined') {
       this.accountOverviewWorker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));

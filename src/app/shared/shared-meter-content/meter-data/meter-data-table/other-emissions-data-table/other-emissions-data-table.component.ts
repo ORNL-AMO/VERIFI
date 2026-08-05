@@ -49,8 +49,8 @@ export class OtherEmissionsDataTableComponent {
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   selectedMeter: Signal<IdbUtilityMeter> = this.accountWorkspaceStore.selectedMeter;
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
-  customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
-  customGWPs: Signal<Array<IdbCustomGWP>> = toSignal(this.customGwpDbService.accountCustomGWPs);
+  customFuels: Signal<Array<IdbCustomFuel>> = computed(() => [...this.accountWorkspaceStore.customFuels()]);
+  customGWPs: Signal<Array<IdbCustomGWP>> = computed(() => [...this.accountWorkspaceStore.customGWPs()]);
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   vehicleDataFilters: Signal<VehicleDataFilters> = toSignal(this.utilityMeterDataService.tableVehicleDataFilters);

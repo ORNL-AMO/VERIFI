@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -29,6 +30,7 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class AnalysisSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly fb = inject(FormBuilder);
   private readonly facilityDbService = inject(FacilitydbService);
@@ -47,10 +49,10 @@ export class AnalysisSetupComponent {
 
   readonly calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
   readonly facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  readonly analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  readonly analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   readonly account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   readonly hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage);
-  readonly allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  readonly allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   readonly facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
 
@@ -258,7 +260,7 @@ export class AnalysisSetupComponent {
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(updatedItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((updatedItem)?.guid);
   }
 
   toggleHideInUseMessage(): void {
@@ -294,7 +296,7 @@ export class AnalysisSetupComponent {
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(clearedItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
 

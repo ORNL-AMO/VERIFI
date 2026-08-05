@@ -36,7 +36,7 @@ export class AccountAnalysisFooterComponent {
 
   helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
-  analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilities = this.accountWorkspaceStore.facilities;

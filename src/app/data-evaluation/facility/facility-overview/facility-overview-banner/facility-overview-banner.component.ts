@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
@@ -25,6 +26,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   standalone: false
 })
 export class FacilityOverviewBannerComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -108,7 +110,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
   async createReport() {
     this.facilityReport = await firstValueFrom(this.facilityReportDbService.addWithObservable(this.facilityReport));
     await this.dbChangesService.setAccountFacilityReports(this.account, this.selectedFacility);
-    this.facilityReportDbService.selectedReport.next(this.facilityReport);
+    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 

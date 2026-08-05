@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -18,6 +20,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
   styleUrl: './analysis-report-setup.component.css'
 })
 export class AnalysisReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   analysisReportForm: FormGroup;
   account: IdbAccount;
@@ -35,7 +38,7 @@ export class AnalysisReportSetupComponent {
 
   ngOnInit() {
     this.account = this.accountWorkspaceStore.account();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport).subscribe(val => {
       if (!this.isFormChange) {
         this.analysisReportForm = this.accountReportsService.getAnalysisFormFromReport(val.analysisReportSetup);
         this.setSelectedAnalysisItem();
@@ -65,14 +68,14 @@ export class AnalysisReportSetupComponent {
     this.isFormChange = true;
     this.setSelectedAnalysisItem();
 
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
     selectedReport.analysisReportSetup = this.accountReportsService.updateAnalysisReportFromForm(selectedReport.analysisReportSetup, this.analysisReportForm);
     if (this.selectedAnalysisItem) {
       selectedReport.baselineYear = this.selectedAnalysisItem.baselineYear;
     }
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
   setSelectedAnalysisItem() {

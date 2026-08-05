@@ -50,7 +50,7 @@ export class FacilityAnalysisComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  private readonly analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  private readonly analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   private readonly annualAnalysisSummaries: Signal<Array<AnnualAnalysisSummary>> = toSignal(
     this.analysisService.annualAnalysisSummary,
     { initialValue: [] }
@@ -85,8 +85,8 @@ export class FacilityAnalysisComponent implements OnInit {
 
   ngOnInit(): void {
     const analysisItem: IdbAnalysisItem = this.analysisItem();
-    const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
-    const customGWPs: IdbCustomGWP[] = this.customGWPDbService.accountCustomGWPs.getValue();
+    const accountAnalysisItems: IdbAnalysisItem[] = [...this.accountWorkspaceStore.facilityAnalyses()];
+    const customGWPs: IdbCustomGWP[] = [...this.accountWorkspaceStore.customGWPs()];
     const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     const facilityMeters: IdbUtilityMeter[] = [...this.accountWorkspaceStore.facilityMeters()];
     const facilityMeterData: IdbUtilityMeterData[] = [...this.accountWorkspaceStore.facilityMeterData()];

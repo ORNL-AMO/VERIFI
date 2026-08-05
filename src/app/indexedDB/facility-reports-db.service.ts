@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IndexedDbAccessService } from './indexed-db-access.service';
@@ -10,28 +10,12 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class FacilityReportsDbService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  accountFacilityReports: BehaviorSubject<Array<IdbFacilityReport>>;
-  facilityReports: BehaviorSubject<Array<IdbFacilityReport>>;
-  selectedReport: BehaviorSubject<IdbFacilityReport>;
-
-  constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+  constructor(private dbService: NgxIndexedDBService,
     private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
-    this.accountFacilityReports = new BehaviorSubject<Array<IdbFacilityReport>>([]);
-    this.facilityReports = new BehaviorSubject<Array<IdbFacilityReport>>([]);
-    this.selectedReport = new BehaviorSubject<IdbFacilityReport>(undefined);
     //subscribe after initialization
-    this.selectedReport.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('facilityReportId', analysisItem.id);
-      }
-    });
-  }
-
-  getInitialReport(): number {
-    let reportId: number = this.localStorageService.retrieve("facilityReportId");
-    return reportId;
   }
 
   getAll(): Observable<Array<IdbFacilityReport>> {
@@ -72,7 +56,7 @@ export class FacilityReportsDbService {
   }
 
   async deleteFacilityReports(facilityId: string) {
-    let accountFacilityReports: Array<IdbFacilityReport> = this.accountFacilityReports.getValue();
+    let accountFacilityReports: Array<IdbFacilityReport> = [...this.accountWorkspaceStore.facilityReports()];
     let facilityReports: Array<IdbFacilityReport> = accountFacilityReports.filter(report => {
       return report.facilityId == facilityId;
     });
@@ -87,7 +71,7 @@ export class FacilityReportsDbService {
   }
 
   getByGuid(guid: string): IdbFacilityReport {
-    let accountFacilityReports: Array<IdbFacilityReport> = this.accountFacilityReports.getValue();
+    let accountFacilityReports: Array<IdbFacilityReport> = [...this.accountWorkspaceStore.facilityReports()];
     return accountFacilityReports.find(report => {
       return report.guid == guid;
     })

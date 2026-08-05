@@ -51,7 +51,7 @@ export class CustomFuelDataFormComponent {
   }
 
   ngOnInit() {
-    this.accountCustomFuels = this.customFuelDbService.accountCustomFuels.getValue();
+    this.accountCustomFuels = [...this.accountWorkspaceStore.customFuels()];
     this.setAllFuelNames();
     this.isAdd = this.router.url.includes('add');
     this.selectedAccount = this.accountWorkspaceStore.account();
@@ -159,7 +159,7 @@ export class CustomFuelDataFormComponent {
     }
     let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
     let accountCustomFuels: Array<IdbCustomFuel> = allCustomFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
-    this.customFuelDbService.accountCustomFuels.next(accountCustomFuels);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }

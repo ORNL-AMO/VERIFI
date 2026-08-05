@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
@@ -39,6 +40,7 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
   standalone: false
 })
 export class AccountAnalysisSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountDbService = inject(AccountdbService);
   private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
@@ -57,9 +59,9 @@ export class AccountAnalysisSetupComponent {
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 
   readonly account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
-  readonly analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  readonly analysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
   readonly calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
-  readonly accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  readonly accountReports: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
   private readonly _accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   private readonly _hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
 
@@ -214,7 +216,7 @@ export class AccountAnalysisSetupComponent {
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
     const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
+    this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
   }
 
   toggleHideInUseMessage(): void {
@@ -243,7 +245,7 @@ export class AccountAnalysisSetupComponent {
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
     const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(clearedItem);
+    this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
 
@@ -301,7 +303,7 @@ export class AccountAnalysisSetupComponent {
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
     await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
+    this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');

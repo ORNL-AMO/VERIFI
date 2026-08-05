@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
@@ -46,6 +47,7 @@ interface FacilityReportTableItem {
   styleUrl: './facility-reports-dashboard-table.component.css'
 })
 export class FacilityReportsDashboardTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -61,11 +63,11 @@ export class FacilityReportsDashboardTableComponent {
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  facilityReports: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityDbReportsService.facilityReports);
+  facilityReports: Signal<Array<IdbFacilityReport>> = computed(() => [...this.accountWorkspaceStore.selectedFacilityReports()]);
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
-  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   orderDataField: WritableSignal<'name' | 'facilityReportType' | 'analysisItemName' | 'modifiedDate' | 'reportYear'> = signal('name');
@@ -121,7 +123,7 @@ export class FacilityReportsDashboardTableComponent {
   selectReport(report: FacilityReportTableItem) {
     const raw = this.facilityReports().find(r => r.guid === report.guid);
     if (raw) {
-      this.facilityDbReportsService.selectedReport.next(raw);
+      this.accountWorkspaceService.selectFacilityReport((raw)?.guid);
       this.router.navigateByUrl('/data-evaluation/facility/' + raw.facilityId + '/reports/setup');
     }
   }
@@ -136,7 +138,7 @@ export class FacilityReportsDashboardTableComponent {
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
     await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
     this.analyticsService.sendEvent('create_facility_analysis', undefined);
-    this.facilityDbReportsService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/facility/' + raw.facilityId + '/reports/setup');
   }

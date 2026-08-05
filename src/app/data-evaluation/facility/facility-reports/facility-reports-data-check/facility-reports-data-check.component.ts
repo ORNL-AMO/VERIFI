@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -19,6 +21,7 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './facility-reports-data-check.component.css',
 })
 export class FacilityReportsDataCheckComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
@@ -35,7 +38,7 @@ export class FacilityReportsDataCheckComponent {
   ) { }
 
   ngOnInit(): void {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];
@@ -90,7 +93,7 @@ export class FacilityReportsDataCheckComponent {
       let account: IdbAccount = this.accountWorkspaceStore.account();
       let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
-      this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
+      this.accountWorkspaceService.selectFacilityAnalysis((this.analysisItem)?.guid);
     }
   }
 }

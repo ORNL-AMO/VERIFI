@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -26,6 +27,7 @@ interface GroupsList {
   standalone: false
 })
 export class AnalysisBannerComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -41,9 +43,9 @@ export class AnalysisBannerComponent {
     ),
     { initialValue: this.router.url }
   );
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
-  analysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  analysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
 
@@ -95,7 +97,7 @@ export class AnalysisBannerComponent {
   }
 
   selectItem(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
+    this.accountWorkspaceService.selectFacilityAnalysis((item)?.guid);
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/analysis-setup');
     this.showDropdown = false;

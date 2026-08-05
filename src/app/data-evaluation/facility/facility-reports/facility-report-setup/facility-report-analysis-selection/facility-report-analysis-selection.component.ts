@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -24,6 +26,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrl: './facility-report-analysis-selection.component.css',
 })
 export class FacilityReportAnalysisSelectionComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @Input()
@@ -55,8 +58,8 @@ export class FacilityReportAnalysisSelectionComponent {
     private dbChangesService: DbChangesService) { }
 
   ngOnInit() {
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.analysisItems = items;
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
+      this.analysisItems = [...items];
       if (this.facilityReport.facilityReportType == 'costSavings') {
         this.analysisItems = items.filter(item => (item.analysisCategory == 'water') || (item.analysisCategory == 'energy' && !item.energyIsSource));
       }
@@ -92,7 +95,7 @@ export class FacilityReportAnalysisSelectionComponent {
   }
 
   goToAnalysis(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
+    this.accountWorkspaceService.selectFacilityAnalysis((item)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.facilityReport.facilityId + '/analysis/run-analysis');
   }
 
@@ -133,6 +136,6 @@ export class FacilityReportAnalysisSelectionComponent {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((this.selectedAnalysisItem)?.guid);
   }
 }

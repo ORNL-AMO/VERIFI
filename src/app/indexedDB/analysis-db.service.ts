@@ -1,8 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
@@ -21,66 +20,12 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 export class AnalysisDbService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  accountAnalysisItems: BehaviorSubject<Array<IdbAnalysisItem>>;
-  facilityAnalysisItems: BehaviorSubject<Array<IdbAnalysisItem>>;
-  selectedAnalysisItem: BehaviorSubject<IdbAnalysisItem>;
-
-  generatedModelsPerGroup: BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>;
-
-  constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+  constructor(private dbService: NgxIndexedDBService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private predictorDbService: PredictorDbService,
     private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
-    this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
-    this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
-    this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
-    this.selectedAnalysisItem.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('analysisItemId', analysisItem.id);
-      }
-    });
-
-    this.generatedModelsPerGroup = new BehaviorSubject<{ [groupId: string]: Array<JStatRegressionModel> }>({});
   }
-
-  setGeneratedModelsForGroup(groupId: string, models: Array<JStatRegressionModel>) {
-    let modelsGenerated = { ...this.generatedModelsPerGroup.getValue() };
-    modelsGenerated[groupId] = models;
-    this.generatedModelsPerGroup.next(modelsGenerated);
-  }
-
-  getGeneratedModelsForGroup(groupId: string): Array<JStatRegressionModel> {
-    return this.generatedModelsPerGroup.getValue()[groupId] || [];
-  }
-
-  clearGeneratedModels() {
-    this.generatedModelsPerGroup.next({});
-  }
-
-  getInitialAnalysisItem(): number {
-    let analysisItemId: number = this.localStorageService.retrieve("analysisItemId");
-    return analysisItemId;
-  }
-
-  async initializeAnalysisItems() {
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    if (selectedAccount) {
-      let accounAnalysisItems: Array<IdbAnalysisItem> = await this.getAllAccountAnalysisItems(selectedAccount.guid);
-      this.accountAnalysisItems.next(accounAnalysisItems);
-      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-      if (selectedFacility) {
-        let facilityAnalysisItems: Array<IdbAnalysisItem> = accounAnalysisItems.filter(meter => { return meter.facilityId == selectedFacility.guid });
-        this.facilityAnalysisItems.next(facilityAnalysisItems);
-        let storedAnalysisId: number = this.localStorageService.retrieve("analysisItemId");
-        if (storedAnalysisId) {
-          let selectedAnalysisItem: IdbAnalysisItem = facilityAnalysisItems.find(item => { return item.id == storedAnalysisId });
-          this.selectedAnalysisItem.next(selectedAnalysisItem);
-        }
-      }
-    }
-  }
-
 
   getAll(): Observable<Array<IdbAnalysisItem>> {
     return this.dbService.getAll('analysisItems');
@@ -145,7 +90,7 @@ export class AnalysisDbService {
 
 
   async deleteAnalysisPredictor(predictorToDelete: IdbPredictor) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
       return item.facilityId == predictorToDelete.facilityId;
     });
@@ -190,7 +135,7 @@ export class AnalysisDbService {
   }
 
   async addAnalysisPredictor(newPredictor: IdbPredictor) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
       return item.facilityId == newPredictor.facilityId;
     });
@@ -211,7 +156,7 @@ export class AnalysisDbService {
   }
 
   async updateAnalysisPredictor(predictor: IdbPredictor) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
       return item.facilityId == predictor.facilityId;
     });
@@ -243,7 +188,7 @@ export class AnalysisDbService {
 
 
   async deleteGroup(groupId: string) {
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.selectedFacilityAnalyses()];
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
       item.groups = item.groups.filter(group => { return group.idbGroupId != groupId });
@@ -263,7 +208,7 @@ export class AnalysisDbService {
         unit: predictor.unit
       }
     });
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.selectedFacilityAnalyses()];
     // add groups to analysis that are the same type..
     // water -> water, energy -> energy
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
@@ -277,14 +222,14 @@ export class AnalysisDbService {
   }
 
   async deleteAllFacilityAnalysisItems(facilityId: string) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(analysisItem => { return analysisItem.facilityId == facilityId });
     await this.deleteAnalysisItems(facilityAnalysisItems);
   }
 
 
   async deleteAccountAnalysisItems() {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     await this.deleteAnalysisItems(accountAnalysisItems);
   }
 
@@ -296,7 +241,7 @@ export class AnalysisDbService {
   }
 
   getByGuid(guid: string): IdbAnalysisItem {
-    let analysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let analysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     return analysisItems.find(item => {
       return item.guid == guid;
     });
@@ -333,7 +278,7 @@ export class AnalysisDbService {
         unit: predictor.unit
       }
     });
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.selectedFacilityAnalyses()];
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
       if (item.analysisCategory == 'energy' && newGroupType == 'Energy' || item.analysisCategory == 'water' && newGroupType == 'Water') {

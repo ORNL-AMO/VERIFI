@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -21,6 +22,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class SearchBarComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   searchModel: string;
@@ -40,9 +42,9 @@ export class SearchBarComponent implements OnInit {
   setOptions() {
     let facilityItems: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
+    let analysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     this.dropdownOptions = new Array();
     facilityItems.forEach(item => {
       this.dropdownOptions.push({
@@ -131,13 +133,13 @@ export class SearchBarComponent implements OnInit {
     } else if (item.type == 'meter') {
       this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterGuid);
     } else if (item.type == 'accountAnalysis') {
-      this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
+      this.accountWorkspaceService.selectAccountAnalysis((item.accountAnalysisItem)?.guid);
       this.router.navigateByUrl('account/analysis/setup');
     } else if (item.type == 'facilityAnalysis') {
-      this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
+      this.accountWorkspaceService.selectFacilityAnalysis((item.facilityAnalysisItem)?.guid);
       this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis');
     } else if (item.type == 'report') {
-      this.accountReportsDbService.selectedReport.next(item.idbAccountReport);
+      this.accountWorkspaceService.selectAccountReport((item.idbAccountReport)?.guid);
       this.router.navigateByUrl('account/reports/setup');
     }
   }

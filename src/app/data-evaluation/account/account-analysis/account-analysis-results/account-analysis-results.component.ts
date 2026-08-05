@@ -45,7 +45,7 @@ export class AccountAnalysisResultsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly accountStatusCheck = toSignal(this.accountStatusCheckService.accountStatusCheck);
-  private readonly accountAnalysisItem = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  private readonly accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis;
   private readonly annualAnalysisSummaries: Signal<Array<AnnualAnalysisSummary>> = toSignal(
     this.accountAnalysisService.annualAnalysisSummary,
     { initialValue: [] }
@@ -71,12 +71,12 @@ export class AccountAnalysisResultsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    const accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
     const account = this.accountWorkspaceStore.account();
     const accountFacilities: IdbFacility[] = [...this.accountWorkspaceStore.facilities()];
     const accountPredictorEntries: IdbPredictorData[] = [...this.accountWorkspaceStore.predictorData()];
     const accountPredictors: IdbPredictor[] = [...this.accountWorkspaceStore.predictors()];
-    const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
+    const accountAnalysisItems: IdbAnalysisItem[] = [...this.accountWorkspaceStore.facilityAnalyses()];
     const meters: IdbUtilityMeter[] = [...this.accountWorkspaceStore.meters()];
     const meterData: IdbUtilityMeterData[] = [...this.accountWorkspaceStore.meterData()];
 

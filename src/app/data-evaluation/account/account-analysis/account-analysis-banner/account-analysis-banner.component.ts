@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
@@ -16,14 +18,16 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
   standalone: false
 })
 export class AccountAnalysisBannerComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
-  accountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
-  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
+  accountAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   inDashboard: Signal<boolean> = computed(() => {
@@ -67,7 +71,7 @@ export class AccountAnalysisBannerComponent {
   }
 
   selectItem(item: IdbAccountAnalysisItem) {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(item);
+    this.accountWorkspaceService.selectAccountAnalysis((item)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

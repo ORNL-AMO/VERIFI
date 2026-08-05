@@ -66,7 +66,7 @@ export class BetterPlantsReportComponent implements OnInit {
         this.generateExcelReport();
       }
     })
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     }
@@ -84,7 +84,7 @@ export class BetterPlantsReportComponent implements OnInit {
   }
 
   setAnalysisItem() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
     this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
   }
@@ -93,7 +93,7 @@ export class BetterPlantsReportComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
-    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {
