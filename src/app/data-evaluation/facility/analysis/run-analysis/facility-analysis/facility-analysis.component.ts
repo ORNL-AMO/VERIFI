@@ -88,10 +88,10 @@ export class FacilityAnalysisComponent implements OnInit {
     const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
     const customGWPs: IdbCustomGWP[] = this.customGWPDbService.accountCustomGWPs.getValue();
     const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    const facilityMeters: IdbUtilityMeter[] = this.utilityMeterDbService.facilityMeters.getValue();
-    const facilityMeterData: IdbUtilityMeterData[] = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    const accountPredictorEntries: IdbPredictorData[] = this.predictorDataDbService.accountPredictorData.getValue();
-    const accountPredictors: IdbPredictor[] = this.predictorDbService.accountPredictors.getValue();
+    const facilityMeters: IdbUtilityMeter[] = [...this.accountWorkspaceStore.facilityMeters()];
+    const facilityMeterData: IdbUtilityMeterData[] = [...this.accountWorkspaceStore.facilityMeterData()];
+    const accountPredictorEntries: IdbPredictorData[] = [...this.accountWorkspaceStore.predictorData()];
+    const accountPredictors: IdbPredictor[] = [...this.accountWorkspaceStore.predictors()];
     const account: IdbAccount = this.accountWorkspaceStore.account();
     const payload = {
       analysisItem,

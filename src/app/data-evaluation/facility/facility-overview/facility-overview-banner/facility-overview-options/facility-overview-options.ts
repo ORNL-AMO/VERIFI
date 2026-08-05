@@ -104,7 +104,7 @@ export class FacilityOverviewOptions {
   }
 
   setYears() {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     let allYears: Array<number> = facilityMeterData.flatMap(meterData => { return meterData.year });
     allYears = _.uniq(allYears);
     this.years = _.orderBy(allYears, (year) => { return year }, 'desc');

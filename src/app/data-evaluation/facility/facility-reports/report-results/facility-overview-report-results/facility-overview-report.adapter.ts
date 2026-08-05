@@ -1,4 +1,5 @@
-import { inject, Injectable } from "@angular/core";
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { inject, Injectable } from '@angular/core';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, TableHeaderCell, TableSection } from "src/app/shared/pdf-report/models/report-section.model";
@@ -12,6 +13,7 @@ import { EnergySources, WaterSources } from "src/app/models/constantsAndTypes";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityOverviewReportAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
     private customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
     private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
@@ -163,7 +165,7 @@ export class FacilityOverviewReportAdapter {
             const row: string[] = [
                 overviewMeter.meter?.name || '-',
                 overviewMeter.meter?.source || '-',
-                this.utilityMeterGroupDbService.getGroupName(overviewMeter.meter?.groupId) || '-'
+                this.accountWorkspaceQuery.getMeterGroupName(overviewMeter.meter?.groupId) || '-'
             ];
             if (dataType === 'energyUse' || dataType === 'water') {
                 row.push(this.checkNumber(overviewMeter.totalUsage));

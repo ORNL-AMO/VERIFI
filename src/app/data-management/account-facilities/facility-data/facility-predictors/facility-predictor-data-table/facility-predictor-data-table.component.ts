@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,6 +19,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   standalone: false
 })
 export class FacilityPredictorDataTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
@@ -51,7 +53,7 @@ export class FacilityPredictorDataTableComponent {
   }
 
   setPredictor(predictorId: string) {
-    let predictor: IdbPredictor = this.predictorDbService.getByGuid(predictorId);
+    let predictor: IdbPredictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (predictor) {
       this.predictor = JSON.parse(JSON.stringify(predictor));
     } else {

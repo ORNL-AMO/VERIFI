@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -19,6 +21,8 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
   styleUrl: './process-predictors.component.css'
 })
 export class ProcessPredictorsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
@@ -106,7 +110,7 @@ export class ProcessPredictorsComponent {
   }
 
   setShowExisting() {
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(p => { return p.facilityId == this.editPredictor.facilityId; });
     let existingPredictorsInUse: Array<string> = this.fileReference.predictors.flatMap(predictor => {
       return predictor.guid
@@ -124,7 +128,7 @@ export class ProcessPredictorsComponent {
     this.editPredictor.importWizardName = importWizardName;
     this.editPredictorForm = this.editPredictorFormService.getFormFromPredictor(predictor);
 
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.editPredictor.guid);
+    let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.editPredictor.guid);
     this.fileReference.predictorData.forEach(pData => {
       if (pData.predictorId == previousId) {
         pData.predictorId = predictor.guid;

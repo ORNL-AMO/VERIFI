@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, Input, inject } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
@@ -15,6 +16,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     standalone: false
 })
 export class PerformanceReportGroupTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input()
   performanceReport: PerformanceReport;
   @Input()
@@ -71,7 +73,7 @@ export class PerformanceReportGroupTableComponent {
       }, this.orderByDirection);
     } else if (this.orderDataField == 'groupName') {
       this.performanceReport.annualGroupData = _.orderBy(this.performanceReport.annualGroupData, (data: { facility: IdbFacility, group: AnalysisGroup, annualData: Array<PerformanceReportAnnualData> }) => {
-        let name: string = this.utilityMeterGroupDbService.getGroupName(data.group.idbGroupId);
+        let name: string = this.accountWorkspaceQuery.getMeterGroupName(data.group.idbGroupId);
         return name;
       }, this.orderByDirection);
     } else {

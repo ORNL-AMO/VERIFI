@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -32,6 +33,7 @@ import { FacilityCostSavingsReportResults } from 'src/app/calculations/cost-savi
   styleUrl: './facility-cost-savings-report-results.component.css',
 })
 export class FacilityCostSavingsReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportSub: Subscription;
@@ -119,7 +121,7 @@ export class FacilityCostSavingsReportResultsComponent {
         if (originalUnit == this.finalUnit || cost == null || originalUnit == null)
           continue;
 
-        const groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == groupId);
+        const groupMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()].filter(meter => meter.groupId == groupId);
         if (groupMeters.length > 0) {
           this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, this.finalUnit, this.selectedAnalysisItem?.analysisCategory);
         }
@@ -139,10 +141,10 @@ export class FacilityCostSavingsReportResultsComponent {
 
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.selectedAnalysisItem?.facilityId));
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.selectedAnalysisItem?.facilityId);
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.selectedAnalysisItem?.facilityId);
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
+    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.selectedAnalysisItem?.facilityId);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.selectedAnalysisItem?.facilityId);
+    let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.selectedAnalysisItem?.facilityId);
+    let accountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(this.selectedAnalysisItem?.facilityId);
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       const worker = new Worker(new URL('../../../../../web-workers/facility-cost-savings-report.worker', import.meta.url));

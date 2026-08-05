@@ -50,7 +50,7 @@ export class AccountOverviewComponent implements OnInit {
   ngOnInit(): void {
     this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.account = val;
-      let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+      let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
       if (accountMeterData.length != 0) {
         this.noUtilityData = false;
         this.calculateFacilitiesSummary();
@@ -84,8 +84,8 @@ export class AccountOverviewComponent implements OnInit {
 
   calculateFacilitiesSummary() {
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (typeof Worker !== 'undefined') {

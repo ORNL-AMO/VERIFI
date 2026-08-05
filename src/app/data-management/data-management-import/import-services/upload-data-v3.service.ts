@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -33,6 +34,7 @@ import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions
   providedIn: 'root'
 })
 export class UploadDataV3Service {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private accountDbService: AccountdbService,
@@ -106,7 +108,7 @@ export class UploadDataV3Service {
   //======= Parsing Meters =====//
   getElectricityMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity Meters'], { range: 1 });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
       if (facilityName) {
@@ -198,7 +200,7 @@ export class UploadDataV3Service {
 
   getStationaryFuelMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Stationary Fuel Meters'], { range: 1 });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
       if (facilityName) {
@@ -260,7 +262,7 @@ export class UploadDataV3Service {
 
   getMobileMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Mobile Fuel Meters'], { range: 1 });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
       if (facilityName) {
@@ -317,7 +319,7 @@ export class UploadDataV3Service {
 
   getOtherEnergyMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Other Energy Meters'], { range: 1 });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
       if (facilityName) {
@@ -372,7 +374,7 @@ export class UploadDataV3Service {
 
   getOtherEmissionsMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Other Emission Meters'], { range: 1 });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
       if (facilityName) {
@@ -430,7 +432,7 @@ export class UploadDataV3Service {
 
   getWaterMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount, meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup>): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Water Meters'], { range: 1 });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     excelMeters.forEach(excelMeter => {
       let facilityName: string = excelMeter['Facility Name'];
       if (facilityName) {
@@ -485,7 +487,7 @@ export class UploadDataV3Service {
   //===== Parsing Utility Data ======//
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
     importMeterData = this.getElectricityData(workbook, importMeters, importMeterData, utilityMeterData);
     importMeterData = this.getStationaryFuelData(workbook, importMeters, importMeterData, utilityMeterData);
@@ -944,7 +946,7 @@ export class UploadDataV3Service {
         let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
         if (facility) {
           let predictorName: string = excelPredictor['Predictor Name'];
-          let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.getFacilityPredictorsCopy(facility.guid);
+          let facilityPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictorsCopy(facility.guid);
           let predictor: IdbPredictor = facilityPredictors.find(aMeter => { return aMeter.name == predictorName });
           if (!predictor || !facility.id || facility.guid != predictor.facilityId) {
             predictor = getNewIdbPredictor(selectedAccount.guid, facility.guid);
@@ -964,7 +966,7 @@ export class UploadDataV3Service {
   getPredictorData(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, importPredictors: Array<IdbPredictor>): Array<IdbPredictorData> {
     let excelPredictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors'], { range: 1 });
     let importPredictorData: Array<IdbPredictorData> = new Array();
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     excelPredictorsData.forEach(excelPredictorData => {
       let facilityName: string = excelPredictorData['Facility Name'];
       let readDateStr: string = excelPredictorData['Date'];

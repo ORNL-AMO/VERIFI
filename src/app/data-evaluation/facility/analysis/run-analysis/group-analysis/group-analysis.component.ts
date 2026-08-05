@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -18,6 +19,7 @@ import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calc
   standalone: false
 })
 export class GroupAnalysisComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
@@ -54,7 +56,7 @@ export class GroupAnalysisComponent {
     const url = this.url();
     const group = this.selectedGroup();
     if (!group) return '';
-    const groupName = this.utilityMeterGroupDbService.getGroupName(group.idbGroupId);
+    const groupName = this.accountWorkspaceQuery.getMeterGroupName(group.idbGroupId);
     if (url.includes('annual-analysis')) return groupName + ' Annual Analysis';
     if (url.includes('monthly-analysis')) return groupName + ' Monthly Analysis';
     if (url.includes('model-selection')) return groupName + ' Regression Model';

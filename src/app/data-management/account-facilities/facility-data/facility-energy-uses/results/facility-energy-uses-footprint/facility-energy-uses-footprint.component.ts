@@ -33,7 +33,7 @@ export class FacilityEnergyUsesFootprintComponent {
   energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
   equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
   calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
+  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.meterGroups()]);
 
 
   yearOptions: Signal<Array<number>> = computed(() => {

@@ -56,7 +56,7 @@ export class FacilityOverviewComponent implements OnInit {
         this.dateRange = undefined;
       }
       this.facility = val;
-      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue()
+      let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()]
       if (facilityMeterData.length != 0) {
         this.noUtilityData = false;
         this.calculateFacilitiesSummary();
@@ -89,8 +89,8 @@ export class FacilityOverviewComponent implements OnInit {
   }
 
   calculateFacilitiesSummary() {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (typeof Worker !== 'undefined') {

@@ -113,6 +113,30 @@ describe('AccountWorkspaceService', () => {
     await service.reloadActiveWorkspace(true);
     expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
   });
+
+  it('rejects foreign meter and predictor selections and clears them with an undefined GUID', async () => {
+    const snapshot: AccountWorkspaceSnapshot = {
+      ...createSnapshot('account-a', 1),
+      meters: [{ guid: 'meter-a', accountId: 'account-a', facilityId: 'account-a-facility' }] as any,
+      predictors: [{ guid: 'predictor-a', accountId: 'account-a', facilityId: 'account-a-facility' }] as any
+    };
+    const loader = { load: vi.fn().mockResolvedValue(snapshot) };
+    const store = new AccountWorkspaceStore();
+    const service = new AccountWorkspaceService(loader as any, store, createSelectionStorage() as any, createLegacyBridge() as any);
+    await service.selectAccount('account-a');
+    service.selectFacility('account-a-facility');
+
+    expect(() => service.selectMeter('foreign-meter')).toThrow('does not belong');
+    expect(() => service.selectPredictor('foreign-predictor')).toThrow('does not belong');
+    service.selectMeter('meter-a');
+    service.selectPredictor('predictor-a');
+    service.selectMeter(undefined);
+    service.selectPredictor(undefined);
+
+    expect(store.selectedMeter()).toBeUndefined();
+    expect(store.selectedPredictor()).toBeUndefined();
+    expect(store.revision()).toBe(0);
+  });
 });
 
 function createRepositories() {

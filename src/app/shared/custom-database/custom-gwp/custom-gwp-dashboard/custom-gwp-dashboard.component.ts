@@ -80,7 +80,7 @@ export class CustomGwpDashboardComponent {
 
   setDeleteGWPInUse() {
     if (this.itemToDelete) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let gwpMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.globalWarmingPotentialOption == this.itemToDelete.value });
       this.deleteGWPInUse = (gwpMeter != undefined);
     } else {

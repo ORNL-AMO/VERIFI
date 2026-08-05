@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, Input, inject } from '@angular/core';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
 import { EmissionElectricity, EmissionOthers } from 'src/app/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -20,6 +21,7 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
   styleUrl: './account-emission-factors-report-table.component.css'
 })
 export class AccountEmissionFactorsReportTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   @Input()
   accountFacilities: Array<IdbFacility>;
@@ -37,7 +39,7 @@ export class AccountEmissionFactorsReportTableComponent {
   ngOnInit(): void {
     this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
     this.accountFacilities.forEach(facility => {
-      let facilityMeters = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(facility.guid);
+      let facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(facility.guid);
       this.calculateFacilitiesSummary(facility, facilityMeters);
     });
   }

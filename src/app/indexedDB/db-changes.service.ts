@@ -187,75 +187,25 @@ export class DbChangesService {
   }
 
   //Predictors V2
-  async setPredictorsV2(account: IdbAccount, facility?: IdbFacility) {
-    let predictors: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
-    this.predictorDbService.accountPredictors.next(predictors);
-    if (facility) {
-      this.setFacilityPredictorsV2(facility);
-    }
-  }
-
-  setFacilityPredictorsV2(facility: IdbFacility) {
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let facilityPredictorEntries: Array<IdbPredictor> = accountPredictors.filter(item => { return item.facilityId == facility.guid });
-    this.predictorDbService.facilityPredictors.next(facilityPredictorEntries);
+  async setPredictorsV2(_account: IdbAccount, _facility?: IdbFacility) {
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   //Predictor Data V2
-  async setPredictorDataV2(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
-    let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
-    this.predictorDataDbService.accountPredictorData.next(predictorData);
-    if (facility) {
-      this.setFacilityPredictorDataV2(facility);
-    }
+  async setPredictorDataV2(_account: IdbAccount, _skipUpdates: boolean, _facility?: IdbFacility) {
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
-  setFacilityPredictorDataV2(facility: IdbFacility) {
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let facilityPredictorData: Array<IdbPredictorData> = accountPredictorData.filter(item => { return item.facilityId == facility.guid });
-    this.predictorDataDbService.facilityPredictorData.next(facilityPredictorData);
+  async setMeters(_account: IdbAccount, _facility?: IdbFacility) {
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
-  async setMeters(account: IdbAccount, facility?: IdbFacility) {
-    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
-    this.utilityMeterDbService.accountMeters.next(accountMeters);
-    if (facility) {
-      this.setFacilityMeters(facility);
-    }
+  async setMeterData(_account: IdbAccount, _skipUpdates: boolean, _facility?: IdbFacility) {
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
-  setFacilityMeters(facility: IdbFacility) {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(item => { return item.facilityId == facility.guid });
-    this.utilityMeterDbService.facilityMeters.next(facilityMeters);
-  }
-
-  async setMeterData(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
-    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
-    this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
-    if (facility) {
-      this.setFacilityMeterData(facility);
-    }
-  }
-
-  setFacilityMeterData(facility: IdbFacility) {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(item => { return item.facilityId == facility.guid });
-    this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
-  }
-
-  async setMeterGroups(account: IdbAccount, facility?: IdbFacility) {
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllAccountMeterGroups(account.guid);
-    this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
-    if (facility) {
-      this.setFacilityMeterGroups(facility);
-    }
-  }
-
-  setFacilityMeterGroups(facility: IdbFacility) {
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(item => { return item.facilityId == facility.guid });
-    this.utilityMeterGroupDbService.facilityMeterGroups.next(facilityMeterGroups);
+  async setMeterGroups(_account: IdbAccount, _facility?: IdbFacility) {
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
 

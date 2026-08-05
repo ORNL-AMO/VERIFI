@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountAnalysisService } from './account-analysis.service';
@@ -30,7 +30,7 @@ export class AccountAnalysisComponent implements OnInit {
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.utilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
+    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterData()])).subscribe(val => {
       this.utilityMeterData = val;
     });
     this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {

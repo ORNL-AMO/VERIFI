@@ -1,5 +1,6 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -29,7 +30,7 @@ export class CalanderizationComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(facilityMeters => {
       this.facilityMeters = facilityMeters;
       this.initializeSelectedMeter();
     });

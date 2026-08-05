@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,6 +25,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorDataEntryComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
@@ -69,10 +71,10 @@ export class FacilityPredictorDataEntryComponent {
 
 
   setPredictorEntry(entryGuid: string) {
-    let predictorData: IdbPredictorData = this.predictorDataDbService.getByGuid(entryGuid);
+    let predictorData: IdbPredictorData = this.accountWorkspaceQuery.getPredictorDataByGuid(entryGuid);
     if (predictorData) {
       this.predictorData = JSON.parse(JSON.stringify(predictorData));
-      this.predictor = this.predictorDbService.getByGuid(this.predictorData.predictorId);
+      this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(this.predictorData.predictorId);
     } else {
       this.goToManagePredictors();
     }
@@ -93,7 +95,7 @@ export class FacilityPredictorDataEntryComponent {
 
   async saveAndAddAnother() {
     await this.save();
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor, predictorData);
     newPredictorData = await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
     let account: IdbAccount = this.accountWorkspaceStore.account();

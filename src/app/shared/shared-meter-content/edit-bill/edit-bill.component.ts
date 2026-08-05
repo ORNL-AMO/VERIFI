@@ -67,7 +67,7 @@ export class EditBillComponent implements OnInit {
     this.setInDataManagement();
     this.isElectron = this.electronService.isElectron;
     this.paramsSub = this.activatedRoute.parent.params.subscribe(parentParams => {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let meterId: string = parentParams['id'];
       this.editMeter = accountMeters.find(meter => { return meter.guid == meterId });
       this.setDisplayHeatCapacity();
@@ -76,11 +76,11 @@ export class EditBillComponent implements OnInit {
         if (meterReadingId) {
           //existing reading
           this.addOrEdit = 'edit';
-          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+          let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
           this.editMeterData = accountMeterData.find(data => { return data.guid == meterReadingId });
         } else {
           //new Reading
-          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+          let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
           this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
           this.addOrEdit = 'add';
         }
@@ -147,7 +147,7 @@ export class EditBillComponent implements OnInit {
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
     let nextDate: Date = getDateFromMeterData(meterDataToSave);
     nextDate.setMonth(nextDate.getMonth() + 1);

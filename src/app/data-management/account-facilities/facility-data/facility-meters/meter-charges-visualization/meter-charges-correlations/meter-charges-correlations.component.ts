@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, Input, inject } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, MeterCharge } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -10,6 +11,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrl: './meter-charges-correlations.component.css'
 })
 export class MeterChargesCorrelationsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input({ required: true }) meter: IdbUtilityMeter;
   @Input({ required: true }) charge: MeterCharge;
 
@@ -20,7 +22,7 @@ export class MeterChargesCorrelationsComponent {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit() {
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);
     this.hasData = utilityMeterData.length > 2;
     if (this.hasData) {
       this.hasTotalCost = utilityMeterData.find(data => {

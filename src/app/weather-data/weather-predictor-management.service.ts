@@ -280,14 +280,14 @@ export class WeatherPredictorManagementService {
   addLoadingMessages(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>) {
     this.loadingService.clearLoadingMessages();
     for (let i = 0; i < facilityList.length; i++) {
-      let facilityWeatherPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue().filter(predictor => {
+      let facilityWeatherPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()].filter(predictor => {
         return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
       });
       let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityList[i].facilityId));
       for (let p = 0; p < facilityWeatherPredictors.length; p++) {
         let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
         this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);
-        let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue().filter(data => {
+        let predictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()].filter(data => {
           return data.predictorId == weatherPredictor.guid;
         });
         let startDate: Date = new Date(facilityList[i].startDate);
@@ -314,8 +314,8 @@ export class WeatherPredictorManagementService {
     this.loadingService.setContext('updating-weather-predictors');
     this.loadingService.setTitle('Updating Weather Predictors');
     this.addLoadingMessages(facilityList);
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     let results: "success" | "error" = "success";
     this.hasWarning = false;
     let index: number = -1;

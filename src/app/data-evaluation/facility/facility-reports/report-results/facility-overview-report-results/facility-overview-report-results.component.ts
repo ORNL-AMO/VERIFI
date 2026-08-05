@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -34,6 +35,7 @@ import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
   standalone: false
 })
 export class FacilityOverviewReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
@@ -95,7 +97,7 @@ export class FacilityOverviewReportResultsComponent {
   calculateFacilitiesSummary() {
     this.calculating = true;
     this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.facilityReport.facilityId));
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
+    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (this.overviewReportSettings.includeAllMeterData == false) {
       let includeGroupIds: Array<string> = [];
@@ -108,7 +110,7 @@ export class FacilityOverviewReportResultsComponent {
         return includeGroupIds.includes(meter.groupId);
       });
     };
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.dateRange = {
       startDate: new Date(this.overviewReportSettings.startYear, this.overviewReportSettings.startMonth, 1),

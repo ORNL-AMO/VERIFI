@@ -173,8 +173,8 @@ export class SelectItemTableComponent {
     this.showCreateItem = false;
     this.dbChangesService.selectFacility(facility);
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = selectedAnalysisItem.energyIsSource;
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));

@@ -79,8 +79,8 @@ export class AnalysisDashboardComponent implements OnInit {
 
   async createAnalysis() {
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     await this.dbChangesService.setAnalysisItems(account, false, this.selectedFacility);
@@ -114,7 +114,7 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   setHasEnergyAndWater() {
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
     this.hasEnergy = false;
     this.hasWater = false;
     let hasWater: boolean = false;

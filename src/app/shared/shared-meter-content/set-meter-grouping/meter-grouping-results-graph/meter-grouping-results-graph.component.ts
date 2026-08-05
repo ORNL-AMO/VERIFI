@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +20,7 @@ import { MeterGroupingDataService } from '../meter-grouping-data.service';
   styleUrls: ['./meter-grouping-results-graph.component.css'],
 })
 export class MeterGroupingResultsGraphComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   meterGroup: IdbUtilityMeterGroup;
 
@@ -51,7 +53,7 @@ export class MeterGroupingResultsGraphComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let meterGroupId: string = params['id'];
-      this.meterGroup = this.utilityMeterGroupDbService.getGroupById(meterGroupId);
+      this.meterGroup = this.accountWorkspaceQuery.getMeterGroupByGuid(meterGroupId);
       if (!this.meterGroup) {
         this.cancel();
       }

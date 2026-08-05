@@ -68,9 +68,9 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
     this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
-    this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
-    this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.accountPredictorEntries = [...this.accountWorkspaceStore.predictorData()];
+    this.facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
+    this.facilityMeterData = [...this.accountWorkspaceStore.facilityMeterData()];
     this.account = this.accountWorkspaceStore.account();
     this.calculateInspectedModel();
   }

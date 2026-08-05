@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
@@ -30,6 +31,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   providedIn: 'root'
 })
 export class UploadDataV1Service {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private facilityDbService: FacilitydbService,
@@ -75,7 +77,7 @@ export class UploadDataV1Service {
       }
     })
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     let importMeters: Array<IdbUtilityMeter> = new Array();
     let newGroups: Array<IdbUtilityMeterGroup> = new Array();
     metersData.forEach(meterData => {
@@ -198,7 +200,7 @@ export class UploadDataV1Service {
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
 
     electricityData.forEach(dataPoint => {
@@ -362,7 +364,7 @@ export class UploadDataV1Service {
 
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Meters') {
         let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });

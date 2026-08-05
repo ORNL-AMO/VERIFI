@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -38,6 +39,7 @@ export interface DataOverviewReportPptInput {
 
 @Injectable({ providedIn: 'root' })
 export class DataOverviewReportPptAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
     utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
     naicsDisplayPipe = inject(NaicsDisplayPipe);
@@ -893,7 +895,7 @@ export class DataOverviewReportPptAdapter {
             let row: string[] = [];
             row.push(m.meter.name);
             row.push(m.meter.source);
-            row.push(this.utilityMeterGroupDbService.getGroupName(m.meter.groupId));
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(m.meter.groupId));
             if (sectionType === 'energyUse' || sectionType === 'water') {
                 row.push(this.formatValue(m.totalUsage, false));
             }

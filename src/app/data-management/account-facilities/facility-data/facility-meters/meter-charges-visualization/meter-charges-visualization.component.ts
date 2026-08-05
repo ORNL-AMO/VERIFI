@@ -1,3 +1,5 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -16,6 +18,8 @@ import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-m
   styleUrl: './meter-charges-visualization.component.css'
 })
 export class MeterChargesVisualizationComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   
   facility: IdbFacility;
@@ -36,9 +40,9 @@ export class MeterChargesVisualizationComponent {
 
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
-      this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+      this.utilityMeter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
       if (this.utilityMeter) {
-        this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
+        this.accountWorkspaceService.selectMeter((this.utilityMeter)?.guid);
       } else {
         this.goToMeterList();
       }
@@ -47,7 +51,7 @@ export class MeterChargesVisualizationComponent {
 
   ngOnDestroy() {
     this.facilitySub.unsubscribe();
-    this.utilityMeterDbService.selectedMeter.next(undefined);
+    this.accountWorkspaceService.selectMeter(undefined);
   }
 
   goToMeterList() {

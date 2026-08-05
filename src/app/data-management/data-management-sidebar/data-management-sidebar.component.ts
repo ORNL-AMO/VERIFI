@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, computed } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -97,24 +97,24 @@ export class DataManagementSidebarComponent {
     this.fileReferencesSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
-    this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
+    this.accountMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.meters()])).subscribe(accountMeters => {
       this.accountMeters = accountMeters.map(meter => { return { ...meter, open: false } });
     });
-    this.accountPredictorsSub = this.predictorDbService.accountPredictors.subscribe(accountPredictors => {
+    this.accountPredictorsSub = toObservable(computed(() => [...this.accountWorkspaceStore.predictors()])).subscribe(accountPredictors => {
       this.accountPredictors = accountPredictors;
     });
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.selectedFacility = facility;
     });
-    this.selectedMeterSub = this.utilityMeterDbService.selectedMeter.subscribe(meter => {
+    this.selectedMeterSub = toObservable(this.accountWorkspaceStore.selectedMeter).subscribe(meter => {
       this.selectedMeter = meter;
     });
 
-    this.accountMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(accountMeterData => {
+    this.accountMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterData()])).subscribe(accountMeterData => {
       this.accountMeterData = accountMeterData;
     });
 
-    this.accountPredictorDataSub = this.predictorDataDbService.accountPredictorData.subscribe(accountPredictorData => {
+    this.accountPredictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.predictorData()])).subscribe(accountPredictorData => {
       this.accountPredictorData = accountPredictorData;
     });
 

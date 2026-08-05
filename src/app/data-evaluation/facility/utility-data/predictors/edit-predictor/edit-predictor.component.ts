@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -37,6 +38,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class EditPredictorComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   addOrEdit: 'edit' | 'add';
@@ -93,7 +95,7 @@ export class EditPredictorComponent {
   }
 
   setPredictorDataEdit(predictorId: string) {
-    let predictorData: IdbPredictor = this.predictorDbService.getByGuid(predictorId);
+    let predictorData: IdbPredictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (predictorData) {
       this.predictor = JSON.parse(JSON.stringify(predictorData));
       this.setPredictorForm();
@@ -127,7 +129,7 @@ export class EditPredictorComponent {
     }
     if (this.predictor.predictorType == 'Weather') {
       if (this.addOrEdit == 'edit' && needsWeatherDataUpdate) {
-        let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+        let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
         let predictorDates: Array<Date> = predictorData.map(pData => { return getDateFromPredictorData(pData) })
         let minDate: Date = _.min(predictorDates);
         let maxDate: Date = _.max(predictorDates);

@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -38,6 +39,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
@@ -95,7 +97,7 @@ export class FacilityPredictorComponent {
   }
 
   setPredictor(predictorId: string) {
-    let predictor: IdbPredictor = this.predictorDbService.getByGuid(predictorId);
+    let predictor: IdbPredictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (predictor) {
       this.predictor = JSON.parse(JSON.stringify(predictor));
       this.setPredictorForm();
@@ -140,7 +142,7 @@ export class FacilityPredictorComponent {
   }
 
   async updateWeatherData() {
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     if (this.latestMeterReading && this.firstMeterReading) {
       let startDate: Date = new Date(this.firstMeterReading);
       let endDate: Date = new Date(this.latestMeterReading);
@@ -223,7 +225,7 @@ export class FacilityPredictorComponent {
     //delete predictor
     await firstValueFrom(this.predictorDbService.deleteWithObservable(this.predictor.id));
     //delete predictor data
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
     let account: IdbAccount = this.accountWorkspaceStore.account();

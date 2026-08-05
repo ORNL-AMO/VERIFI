@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, SimpleChanges, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -29,6 +30,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class SharedMeterCalendarizationComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   selectedMeter: IdbUtilityMeter;
@@ -110,7 +112,7 @@ export class SharedMeterCalendarizationComponent {
   setCalanderizedMeterData() {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       this.calanderizingMeterData = true;
-      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+      let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
@@ -303,7 +305,7 @@ export class SharedMeterCalendarizationComponent {
   }
 
   setHasMeterData() {
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.selectedMeter.guid);
     if (meterData.length != 0) {
       this.hasMeterData = true;
       this.setCalanderizedMeterData();

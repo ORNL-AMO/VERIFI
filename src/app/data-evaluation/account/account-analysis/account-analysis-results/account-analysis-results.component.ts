@@ -74,11 +74,11 @@ export class AccountAnalysisResultsComponent implements OnInit {
     const accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
     const account = this.accountWorkspaceStore.account();
     const accountFacilities: IdbFacility[] = [...this.accountWorkspaceStore.facilities()];
-    const accountPredictorEntries: IdbPredictorData[] = this.predictorDataDbService.accountPredictorData.getValue();
-    const accountPredictors: IdbPredictor[] = this.predictorDbService.accountPredictors.getValue();
+    const accountPredictorEntries: IdbPredictorData[] = [...this.accountWorkspaceStore.predictorData()];
+    const accountPredictors: IdbPredictor[] = [...this.accountWorkspaceStore.predictors()];
     const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
-    const meters: IdbUtilityMeter[] = this.utilityMeterDbService.accountMeters.getValue();
-    const meterData: IdbUtilityMeterData[] = this.utilityMeterDataDbService.accountMeterData.getValue();
+    const meters: IdbUtilityMeter[] = [...this.accountWorkspaceStore.meters()];
+    const meterData: IdbUtilityMeterData[] = [...this.accountWorkspaceStore.meterData()];
 
     const payload = {
       accountAnalysisItem,

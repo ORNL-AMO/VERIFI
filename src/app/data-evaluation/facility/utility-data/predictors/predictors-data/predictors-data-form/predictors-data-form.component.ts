@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,6 +27,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class PredictorsDataFormComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   addOrEdit: 'add' | 'edit';
@@ -56,7 +58,7 @@ export class PredictorsDataFormComponent {
   ngOnInit() {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let predictorId: string = params['id'];
-      this.predictor = this.predictorDbService.getByGuid(predictorId);
+      this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     });
 
     this.activatedRoute.params.subscribe(params => {
@@ -98,12 +100,12 @@ export class PredictorsDataFormComponent {
   }
 
   setPredictorEntryEdit(predictorId: string) {
-    let predictorData: IdbPredictorData = this.predictorDataDbService.getByGuid(predictorId);
+    let predictorData: IdbPredictorData = this.accountWorkspaceQuery.getPredictorDataByGuid(predictorId);
     this.predictorData = JSON.parse(JSON.stringify(predictorData));
   }
 
   setNewPredictorEntry() {
-    let predictorDataEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+    let predictorDataEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     this.predictorData = getNewIdbPredictorData(this.predictor, predictorDataEntries);
   }
 

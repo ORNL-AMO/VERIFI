@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
@@ -15,6 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class PerformanceChartComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input()
   performanceReport: PerformanceReport;
   @Input()
@@ -194,7 +196,7 @@ export class PerformanceChartComponent {
         visible = 'legendonly';
       }
 
-      let name: string = groupData.facility.name + ' (' + this.utilityMeterGroupDbService.getGroupName(groupData.group.idbGroupId) + ')';
+      let name: string = groupData.facility.name + ' (' + this.accountWorkspaceQuery.getMeterGroupName(groupData.group.idbGroupId) + ')';
       var facilityTrace = {
         visible: visible,
         type: "scatter",

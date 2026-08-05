@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -19,6 +20,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   standalone: false
 })
 export class UtilityMeterDataFilterComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   meter: IdbUtilityMeter;
@@ -203,12 +205,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   async changeCharge() {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.meter));
-    let meters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
-    let accountMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return this.meter.accountId == meter.accountId });
-    this.utilityMeterDbService.accountMeters.next(accountMeters);
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.meter.facilityId });
-    this.utilityMeterDbService.facilityMeters.next(facilityMeters);
-    this.utilityMeterDbService.selectedMeter.next(this.meter);
+    this.accountWorkspaceService.selectMeter((this.meter)?.guid);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.save();
   }
 }

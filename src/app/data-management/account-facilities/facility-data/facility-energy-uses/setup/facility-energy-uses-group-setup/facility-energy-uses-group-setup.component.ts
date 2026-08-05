@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -26,6 +27,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-uses-group-setup.component.css'
 })
 export class FacilityEnergyUsesGroupSetupComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private loadingService: LoadingService = inject(LoadingService);
@@ -177,7 +179,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
   addGroup() {
     let newGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(this.facility.accountId, this.facility.guid);
     newGroup.name = 'Group ' + (this.energyUseGroups.length + 1);
-    let facilityMeterDataYears: { endYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.facility.guid);
+    let facilityMeterDataYears: { endYear: number } = this.accountWorkspaceQuery.getFacilityMeterDataYears(this.facility.guid);
     let equipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(newGroup, facilityMeterDataYears.endYear);
     this.energyUseGroups.push({
       ...newGroup,
@@ -192,7 +194,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
 
   addEquipmentForm() {
     let currentGroup = this.energyUseGroups[this.groupSetupIndex];
-    let facilityMeterDataYears: { endYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.facility.guid);
+    let facilityMeterDataYears: { endYear: number } = this.accountWorkspaceQuery.getFacilityMeterDataYears(this.facility.guid);
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(currentGroup, facilityMeterDataYears.endYear);
     currentGroup.equipment.push(newEquipment);
   }

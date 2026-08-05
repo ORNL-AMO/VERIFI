@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, Query, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, Query, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -11,6 +12,7 @@ import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from
   styleUrl: './annual-analysis-group-savings-graph.component.css'
 })
 export class AnnualAnalysisGroupSavingsGraphComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   @Input({ required: true })
   groupSummaries: Array<{
@@ -57,7 +59,7 @@ export class AnnualAnalysisGroupSavingsGraphComponent {
         const yearData = group.data.find(d => d.year === year);
         return yearData ? yearData.contributionPercent : 0;
       }),
-      name: this.utilityMeterGroupDbService.getGroupName(group.groupId),
+      name: this.accountWorkspaceQuery.getMeterGroupName(group.groupId),
       type: 'bar'
     }));
 

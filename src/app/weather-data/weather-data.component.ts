@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -24,6 +25,7 @@ import { WeatherPredictorManagementService } from './weather-predictor-managemen
   standalone: false
 })
 export class WeatherDataComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   applyToFacility: boolean;
@@ -263,9 +265,9 @@ export class WeatherDataComponent {
 
     // //create predictor data
     // //predictor data created to match start/end of meter data in facility
-    // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    // let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     // let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.selectedFacility.guid });
-    // let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    // let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     // let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.selectedFacility, false, undefined, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion);
     // let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     // monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
@@ -344,8 +346,8 @@ export class WeatherDataComponent {
 
   setFacilityData() {
     if (this.selectedFacility) {
-      this.facilityPredictorData = this.predictorDataDbService.getByFacilityId(this.selectedFacility.guid);
-      let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+      this.facilityPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(this.selectedFacility.guid);
+      let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
       this.facilityMeterData = accountMeterData.filter(meterData => { return meterData.facilityId == this.selectedFacility.guid });
     } else {
       this.facilityPredictorData = [];

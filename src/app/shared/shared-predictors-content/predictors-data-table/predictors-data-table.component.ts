@@ -53,8 +53,8 @@ export class PredictorsDataTableComponent {
   copyingTable: boolean = false;
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
-  private facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
-  private facilityPredictorData: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.facilityPredictorData, { initialValue: [] });
+  private facilityPredictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
+  private facilityPredictorData: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]);
   private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   private facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   private params: Signal<Params> = toSignal(this.activatedRoute.params, { initialValue: { id: undefined } });

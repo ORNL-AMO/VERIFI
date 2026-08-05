@@ -24,7 +24,7 @@ export class AccountBannerComponent {
   @ViewChild('navTabs') navTabs: ElementRef;
 
   selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
-  meterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: undefined });
+  meterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.meterData()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   disableTabs: Signal<boolean> = computed(() => {

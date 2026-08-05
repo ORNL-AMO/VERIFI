@@ -39,7 +39,7 @@ export class SearchBarComponent implements OnInit {
 
   setOptions() {
     let facilityItems: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();

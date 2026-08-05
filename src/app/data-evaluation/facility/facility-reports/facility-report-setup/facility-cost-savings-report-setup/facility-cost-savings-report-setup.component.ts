@@ -178,8 +178,8 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   setGroupMeterCalendarizedData() {
-    const facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    const facilityMeterData = [...this.accountWorkspaceStore.facilityMeterData()];
+    const facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
     const selectedFacility = this.accountWorkspaceStore.selectedFacility();
     const account = this.accountWorkspaceStore.account();
 
@@ -236,7 +236,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   checkUnit(group: AnalysisGroup): string {
-    const facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    const facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     const groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return group.idbGroupId == meter.groupId;
     });
@@ -244,7 +244,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   hasMultipleMeters(group: AnalysisGroup): boolean {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return group.idbGroupId == meter.groupId;
     });
@@ -326,7 +326,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   getMeterName(meterId: string): string {
-    const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    const facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
     const meter = facilityMeters.find(m => m.guid == meterId);
     return meter ? meter.name : '';
   }

@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -47,7 +47,7 @@ export class SetMeterGroupingComponent {
 
 
   ngOnInit() {
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(meters => {
       this.facilityMeters = meters;
     });
     this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
@@ -55,7 +55,7 @@ export class SetMeterGroupingComponent {
       this.setCalanderizedMeterData();
     });
 
-    this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(meterData => {
+    this.meterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()])).subscribe(meterData => {
       this.meterData = meterData;
       this.setCalanderizedMeterData();
     });

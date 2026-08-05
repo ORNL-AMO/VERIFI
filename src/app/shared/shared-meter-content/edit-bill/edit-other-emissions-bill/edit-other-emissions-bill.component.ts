@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -24,6 +25,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class EditOtherEmissionsBillComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
@@ -70,7 +72,7 @@ export class EditOtherEmissionsBillComponent {
   }
 
   checkDate() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
@@ -123,12 +125,12 @@ export class EditOtherEmissionsBillComponent {
   }
 
   setShowCopyLast() {
-    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
     this.showCopyLast = (allSelectedMeterData.length != 0);
   }
 
   copyLastReading() {
-    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
     allSelectedMeterData = _.orderBy(allSelectedMeterData, 'readDate');
     let lastReading: IdbUtilityMeterData = allSelectedMeterData[allSelectedMeterData.length - 1];
     this.meterDataForm.controls.totalVolume.patchValue(lastReading.totalVolume);

@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -46,6 +47,7 @@ interface AnalysisDetailsTableRow {
 })
 
 export class AnalysisDetailsTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
@@ -280,7 +282,7 @@ export class AnalysisDetailsTableComponent {
   }
 
   async confirmCreateReport(analysisItem: IdbAnalysisItem) {
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(analysisItem.facilityId);
+    let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(analysisItem.facilityId);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(analysisItem.facilityId, analysisItem.accountId, 'analysis', groups);
     newReport.analysisItemId = analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));

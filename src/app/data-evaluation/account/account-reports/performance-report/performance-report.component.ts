@@ -77,8 +77,8 @@ export class PerformanceReportComponent {
 
   setPerformanceReport() {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -86,9 +86,9 @@ export class PerformanceReportComponent {
         includedFacilityIds.push(item.facilityId);
       }
     });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../web-workers/performance-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

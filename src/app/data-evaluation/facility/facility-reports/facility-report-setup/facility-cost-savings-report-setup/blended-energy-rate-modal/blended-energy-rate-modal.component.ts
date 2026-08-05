@@ -64,7 +64,7 @@ export class BlendedEnergyRateModalComponent {
   ) { }
 
   ngOnInit() {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     this.groupMeters = facilityMeters.filter(meter => {
       return this.group.idbGroupId == meter.groupId;
     });
@@ -96,7 +96,7 @@ export class BlendedEnergyRateModalComponent {
   }
 
   calculateGroupEnergyForYear() {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     let account: IdbAccount = this.accountWorkspaceStore.account();
     this.calanderizedMeterData = getCalanderizedMeterData(this.groupMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);

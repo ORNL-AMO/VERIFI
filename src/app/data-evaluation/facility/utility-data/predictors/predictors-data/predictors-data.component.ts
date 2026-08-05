@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -10,6 +11,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
     standalone: false
 })
 export class PredictorsDataComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   predictor: IdbPredictor;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService){
@@ -19,7 +21,7 @@ export class PredictorsDataComponent {
   ngOnInit(){
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
-      this.predictor = this.predictorDbService.getByGuid(predictorId);
+      this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     });
   }
 }

@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -23,6 +24,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-data-quality-report-setup.component.css',
 })
 export class FacilityDataQualityReportSetupComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportSub: Subscription;
@@ -58,8 +60,8 @@ export class FacilityDataQualityReportSetupComponent {
     this.facilityReportSub = this.facilityReportDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.dataQualityReportSettings;
-      this.facilityMeters = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
-      this.facilityPredictors = this.predictorDbService.getByFacilityId(this.facilityReport.facilityId);
+      this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
+      this.facilityPredictors = this.accountWorkspaceQuery.getFacilityPredictors(this.facilityReport.facilityId);
       this.initializeSelections();
     });
 

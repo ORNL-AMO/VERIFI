@@ -46,8 +46,8 @@ export class VisualizationStateService {
 
   //TODO: remove
   setCalanderizedMeters(facility: IdbFacility) {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility], account.assessmentReportVersion, []);
   }
@@ -68,7 +68,7 @@ export class VisualizationStateService {
     let timeSeriesGroupYAxis2Options: Array<AxisOption> = new Array();
     let timeSeriesPredictorYAxis1Options: Array<AxisOption> = new Array();
     let timeSeriesPredictorYAxis2Options: Array<AxisOption> = new Array();
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     meters.forEach((meter, index) => {
       xAxisMeterOptions.push({
         itemId: meter.guid,
@@ -102,7 +102,7 @@ export class VisualizationStateService {
       });
     });
 
-    let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let meterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
     meterGroups.forEach(meterGroup => {
       xAxisGroupOptions.push({
         itemId: meterGroup.guid,
@@ -136,7 +136,7 @@ export class VisualizationStateService {
         selected: false
       });
     });
-    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.facilityPredictors()];
     predictors.forEach((predictor, index) => {
       xAxisPredictorOptions.push({
         itemId: predictor.guid,
@@ -213,7 +213,7 @@ export class VisualizationStateService {
         }
       })
     } else if (axisOption.type == 'meterGroup') {
-      let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+      let facilityGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
       let group: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == axisOption.itemId });
       let groupMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
         return cMeter.meter.groupId == axisOption.itemId;
@@ -239,7 +239,7 @@ export class VisualizationStateService {
 
       });
     } else if (axisOption.type == 'predictor') {
-      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+      let facilityPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.facilityPredictorData()];
       dates.forEach(date => {
         let monthPredictorEntry: IdbPredictorData = facilityPredictorEntries.find(entry => {
           return entry.predictorId == axisOption.itemId && checkSameMonthPredictorData(entry, date);

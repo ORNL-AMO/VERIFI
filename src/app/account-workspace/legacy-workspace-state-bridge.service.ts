@@ -8,12 +8,6 @@ import { CustomGWPDbService } from '../indexedDB/custom-gwp-db.service';
 import { FacilityEnergyUseEquipmentDbService } from '../indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from '../indexedDB/facility-energy-use-groups-db.service';
 import { FacilityReportsDbService } from '../indexedDB/facility-reports-db.service';
-import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
-import { PredictorDbService } from '../indexedDB/predictor-db.service';
-import { PredictordbServiceDeprecated } from '../indexedDB/predictors-deprecated-db.service';
-import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { AccountWorkspaceSnapshot, WorkspaceSelections } from './account-workspace.models';
 
 /**
@@ -23,12 +17,6 @@ import { AccountWorkspaceSnapshot, WorkspaceSelections } from './account-workspa
 @Injectable({ providedIn: 'root' })
 export class LegacyWorkspaceStateBridge {
   constructor(
-    private meters: UtilityMeterdbService,
-    private meterData: UtilityMeterDatadbService,
-    private meterGroups: UtilityMeterGroupdbService,
-    private deprecatedPredictors: PredictordbServiceDeprecated,
-    private predictors: PredictorDbService,
-    private predictorData: PredictorDataDbService,
     private facilityAnalyses: AnalysisDbService,
     private accountAnalyses: AccountAnalysisDbService,
     private accountReports: AccountReportDbService,
@@ -45,20 +33,6 @@ export class LegacyWorkspaceStateBridge {
     const byFacility = <T extends { facilityId?: string }>(items: readonly T[]) =>
       facilityGuid ? items.filter(item => item.facilityId === facilityGuid) : [];
 
-    this.meters.accountMeters.next([...snapshot.meters]);
-    this.meters.facilityMeters.next(byFacility(snapshot.meters));
-    this.meters.selectedMeter.next(selections.meter);
-    this.meterData.accountMeterData.next([...snapshot.meterData]);
-    this.meterData.facilityMeterData.next(byFacility(snapshot.meterData));
-    this.meterGroups.accountMeterGroups.next([...snapshot.meterGroups]);
-    this.meterGroups.facilityMeterGroups.next(byFacility(snapshot.meterGroups));
-    this.deprecatedPredictors.accountPredictorEntries.next([]);
-    this.deprecatedPredictors.facilityPredictorEntries.next([]);
-    this.deprecatedPredictors.facilityPredictors.next([]);
-    this.predictors.accountPredictors.next([...snapshot.predictors]);
-    this.predictors.facilityPredictors.next(byFacility(snapshot.predictors));
-    this.predictorData.accountPredictorData.next([...snapshot.predictorData]);
-    this.predictorData.facilityPredictorData.next(byFacility(snapshot.predictorData));
     this.facilityAnalyses.accountAnalysisItems.next([...snapshot.facilityAnalyses]);
     this.facilityAnalyses.facilityAnalysisItems.next(byFacility(snapshot.facilityAnalyses));
     this.facilityAnalyses.selectedAnalysisItem.next(selections.facilityAnalysis);
@@ -80,20 +54,6 @@ export class LegacyWorkspaceStateBridge {
   }
 
   clear(): void {
-    this.meters.accountMeters.next([]);
-    this.meters.facilityMeters.next([]);
-    this.meters.selectedMeter.next(undefined);
-    this.meterData.accountMeterData.next([]);
-    this.meterData.facilityMeterData.next([]);
-    this.meterGroups.accountMeterGroups.next([]);
-    this.meterGroups.facilityMeterGroups.next([]);
-    this.deprecatedPredictors.accountPredictorEntries.next([]);
-    this.deprecatedPredictors.facilityPredictorEntries.next([]);
-    this.deprecatedPredictors.facilityPredictors.next([]);
-    this.predictors.accountPredictors.next([]);
-    this.predictors.facilityPredictors.next([]);
-    this.predictorData.accountPredictorData.next([]);
-    this.predictorData.facilityPredictorData.next([]);
     this.facilityAnalyses.accountAnalysisItems.next([]);
     this.facilityAnalyses.facilityAnalysisItems.next([]);
     this.facilityAnalyses.selectedAnalysisItem.next(undefined);

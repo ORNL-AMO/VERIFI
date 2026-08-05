@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
@@ -18,6 +19,7 @@ import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredic
   styleUrl: './process-predictor-readings.component.css'
 })
 export class ProcessPredictorReadingsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference;
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
@@ -50,7 +52,7 @@ export class ProcessPredictorReadingsComponent {
 
   comparePredictorReadings() {
     this.readingDifferencesMap = {};
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     this.fileReference.predictorData.forEach(newData => {
       const key = `${newData.predictorId}_${newData.facilityId}`;
       if (!this.readingDifferencesMap[key]) {

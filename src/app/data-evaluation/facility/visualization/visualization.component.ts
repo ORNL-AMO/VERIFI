@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
@@ -41,7 +41,7 @@ export class VisualizationComponent implements OnInit {
       this.visualizationStateService.initilizeCorrelationPlotOptions();
     });
 
-    this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
+    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()])).subscribe(val => {
       this.utilityMeterData = val;
     });
   }

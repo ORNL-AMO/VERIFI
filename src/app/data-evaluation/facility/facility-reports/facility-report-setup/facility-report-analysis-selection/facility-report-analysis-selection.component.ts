@@ -100,7 +100,7 @@ export class FacilityReportAnalysisSelectionComponent {
     this.hasDataChanged = false;
     if (this.selectedAnalysisItem?.dataCheckedDate) {
       let dataCheckDate: Date = new Date(this.selectedAnalysisItem?.dataCheckedDate);
-      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+      let facilityPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.facilityPredictorData()];
 
       let hasDataChanged = facilityPredictorEntries.find(predictor => {
         return new Date(predictor.modifiedDate) > dataCheckDate
@@ -109,8 +109,8 @@ export class FacilityReportAnalysisSelectionComponent {
         this.hasDataChanged = true;
         this.saveAnalysisVisitedData();
       } else {
-        let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-        let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+        let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
+        let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
 
         let groupMeters: Array<IdbUtilityMeter> = this.selectedAnalysisItem.groups.flatMap(group => {
           return facilityMeters.filter(meter => meter.groupId == group.idbGroupId);

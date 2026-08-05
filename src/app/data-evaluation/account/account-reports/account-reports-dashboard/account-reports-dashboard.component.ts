@@ -40,7 +40,7 @@ export class AccountReportsDashboardComponent {
   async createNewReport() {
     const account: IdbAccount = this.selectedAccount();
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     newReport.reportType = this.newReportType;
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));

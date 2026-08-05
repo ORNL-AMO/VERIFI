@@ -101,7 +101,7 @@ export class CustomGwpFormComponent {
     } else {
       if (this.isGWPInUse) {
         // //update meters
-        // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+        // let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
         // let needsUpdate: boolean = false;
         // for (let i = 0; i < accountMeters.length; i++) {
         //   if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
@@ -152,7 +152,7 @@ export class CustomGwpFormComponent {
   }
 
   setIsGWPInUse() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let gwpMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.globalWarmingPotentialOption == this.editCustomGWP.value });
     this.isGWPInUse = (gwpMeter != undefined);
   }

@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -20,6 +21,7 @@ import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterD
   styleUrl: './update-weather-predictors-modal.component.css'
 })
 export class UpdateWeatherPredictorsModalComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitClose') emitClose = new EventEmitter<void>();
   @Input() fileReference: FileReference;
@@ -79,7 +81,7 @@ export class UpdateWeatherPredictorsModalComponent {
       facilities = this.fileReference.importFacilities;
     }
     facilities.forEach(facility => {
-      let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(facility.guid);
+      let facilityPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(facility.guid);
       let weatherPredictors: Array<IdbPredictor> = facilityPredictors.filter(predictor => {
         return predictor.predictorType == 'Weather';
       });
@@ -87,7 +89,7 @@ export class UpdateWeatherPredictorsModalComponent {
         let startDate: Date;
         let endDate: Date;
         weatherPredictors.forEach(predictor => {
-          let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
+          let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
           if (predictorData.length > 0) {
             let tmpStartDate: Date = getEarliestPredictorDataDate(predictorData);
             let tmpEndDate: Date = getLatestPredictorDataDate(predictorData);
@@ -101,7 +103,7 @@ export class UpdateWeatherPredictorsModalComponent {
         });
         if (!startDate || !endDate) {
           // Handle case where no valid dates were found
-          let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
+          let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(facility.guid);
           if (facilityMeterData.length > 0) {
             let tmpStartDate: Date = getEarliestMeterDataDate(facilityMeterData);
             let tmpEndDate: Date = getLatestMeterDataDate(facilityMeterData);

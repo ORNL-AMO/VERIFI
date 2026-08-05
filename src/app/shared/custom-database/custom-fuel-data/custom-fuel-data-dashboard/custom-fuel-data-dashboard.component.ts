@@ -80,7 +80,7 @@ export class CustomFuelDataDashboardComponent {
 
   setDeleteFuelInUse() {
     if (this.itemToDelete) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => {
         if (meter.scope != 2) {
           return meter.fuel == this.itemToDelete.value

@@ -261,8 +261,8 @@ export class AccountAnalysisSetupComponent {
     this.loadingService.setLoadingStatus(true);
     const account = this.account();
     const analysisItem = this.analysisItem();
-    const accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
-    const accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    const accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
+    const accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     const facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     const analysisType = this.analysisTypeControl.value;
     let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));

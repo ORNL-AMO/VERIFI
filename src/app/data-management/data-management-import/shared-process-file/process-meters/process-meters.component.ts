@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -21,6 +22,7 @@ import { UploadDataService } from 'src/app/data-management/data-management-impor
   styleUrl: './process-meters.component.css'
 })
 export class ProcessMetersComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   editMeterForm: FormGroup;
@@ -137,7 +139,7 @@ export class ProcessMetersComponent {
   }
 
   setFacilityMeterGroups() {
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let facilityGroups: Array<{
       facilityId: string,
       groupOptions: Array<IdbUtilityMeterGroup>
@@ -271,7 +273,7 @@ export class ProcessMetersComponent {
   }
 
   setShowExisting() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(aMeter => {
       return aMeter.facilityId == this.editMeter.facilityId;
     });

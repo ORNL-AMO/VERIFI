@@ -1,4 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,6 +28,7 @@ import { convertHeatCapacity } from 'src/app/shared/sharedHelperFunctions';
 })
 export class CustomFuelDataFormComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   isAdd: boolean;
   editCustomFuel: IdbCustomFuel;
@@ -142,7 +144,7 @@ export class CustomFuelDataFormComponent {
     } else {
       if (this.isFuelInUse && this.editCustomFuel.value != this.previousValue) {
         //update meters
-        let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+        let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
         let needsUpdate: boolean = false;
         for (let i = 0; i < accountMeters.length; i++) {
           if (accountMeters[i].fuel == this.previousValue) {
@@ -152,17 +154,13 @@ export class CustomFuelDataFormComponent {
             await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
           }
         }
-        let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
-        let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
-          return meter.accountId == this.selectedAccount.guid;
-        });
-        this.utilityMeterDbService.accountMeters.next(accountMetersUpdates);
       }
       await firstValueFrom(this.customFuelDbService.updateWithObservable(this.editCustomFuel));
     }
     let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
     let accountCustomFuels: Array<IdbCustomFuel> = allCustomFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
     this.customFuelDbService.accountCustomFuels.next(accountCustomFuels);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 
@@ -256,7 +254,7 @@ export class CustomFuelDataFormComponent {
   }
 
   setIsFuelInUse() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => {
       if (meter.scope != 2) {
         return meter.fuel == this.editCustomFuel.value

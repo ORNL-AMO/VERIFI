@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, Input, inject } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
@@ -13,6 +14,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class TopPerformersTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input()
   performanceReport: PerformanceReport;
   @Input()
@@ -128,7 +130,7 @@ export class TopPerformersTableComponent {
       let topValue: number;
       if (topItem) {
         let yearSummary: PerformanceReportAnnualData = topItem.annualData.find(data => { return data.year == this.performanceReport.reportYear });
-        let groupName: string = this.utilityMeterGroupDbService.getGroupName(topItem.group.idbGroupId);
+        let groupName: string = this.accountWorkspaceQuery.getMeterGroupName(topItem.group.idbGroupId);
         highValueName = topItem.facility.name + ' (' + groupName + ')';
         topValue = yearSummary[this.chartDataOption];
       }
@@ -139,7 +141,7 @@ export class TopPerformersTableComponent {
       let lowValue: number;
       if (lowItem) {
         let yearSummary: PerformanceReportAnnualData = lowItem.annualData.find(data => { return data.year == this.performanceReport.reportYear });
-        let groupName: string = this.utilityMeterGroupDbService.getGroupName(lowItem.group.idbGroupId);
+        let groupName: string = this.accountWorkspaceQuery.getMeterGroupName(lowItem.group.idbGroupId);
         lowFacilityName = lowItem.facility.name + ' (' + groupName + ')';
         lowValue = yearSummary[this.chartDataOption];
       }

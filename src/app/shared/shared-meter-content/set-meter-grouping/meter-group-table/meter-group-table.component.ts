@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -71,7 +71,7 @@ export class MeterGroupTableComponent {
     this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
     });
-    this.metersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
+    this.metersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(meters => {
       this.meters = meters.filter(m => {
         if (this.meterGroup == undefined) {
           return m.groupId == undefined;
@@ -81,7 +81,7 @@ export class MeterGroupTableComponent {
       });
       this.setMeterList();
     });
-    this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(meterData => {
+    this.meterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()])).subscribe(meterData => {
       this.meterData = meterData;
       this.setMeterList();
     });

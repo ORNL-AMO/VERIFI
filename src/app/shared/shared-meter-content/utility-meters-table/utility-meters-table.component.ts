@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, input, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -40,6 +41,7 @@ type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit'
   standalone: false
 })
 export class UtilityMetersTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterdbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private copyTableService: CopyTableService = inject(CopyTableService);
@@ -58,7 +60,7 @@ export class UtilityMetersTableComponent {
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  meters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterdbService.facilityMeters, { initialValue: [] });
+  meters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   metersList: Signal<Array<MetersListItem>> = computed(() => {
@@ -142,7 +144,7 @@ export class UtilityMetersTableComponent {
     //delete meter
     await firstValueFrom(this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId));
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDatadbService.getMeterDataFromMeterId(deleteMeterGuid);
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(deleteMeterGuid);
     for (let index = 0; index < meterData.length; index++) {
       await firstValueFrom(this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id));
     }

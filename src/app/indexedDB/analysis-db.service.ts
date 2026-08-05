@@ -252,7 +252,7 @@ export class AnalysisDbService {
   }
 
   async addGroup(groupId: string, groupType: 'Energy' | 'Water' | 'Other') {
-    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.facilityPredictors()];
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = predictors.map(predictor => {
       return {
         id: predictor.guid,
@@ -322,7 +322,7 @@ export class AnalysisDbService {
   // }
 
   async changeGroupType(groupId: string, newGroupType: 'Energy' | 'Water' | 'Other', oldGroupType: 'Energy' | 'Water' | 'Other') {
-    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.facilityPredictors()];
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = predictors.map(predictor => {
       return {
         id: predictor.guid,

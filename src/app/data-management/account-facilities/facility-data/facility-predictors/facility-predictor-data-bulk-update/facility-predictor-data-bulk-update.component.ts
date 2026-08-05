@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,6 +15,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   standalone: false
 })
 export class FacilityPredictorDataBulkUpdateComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
@@ -38,7 +40,7 @@ export class FacilityPredictorDataBulkUpdateComponent {
   }
 
   setPredictor(predictorId: string) {
-    this.predictor = this.predictorDbService.getByGuid(predictorId);
+    this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (!this.predictor) {
       this.toastNotificationService.showToast('Predictor Not Found', undefined, 2000, false, 'alert-danger');
       this.goToManagePredictors();

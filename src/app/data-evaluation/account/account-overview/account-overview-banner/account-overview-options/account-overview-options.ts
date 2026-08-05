@@ -95,7 +95,7 @@ export class AccountOverviewOptions {
   }
 
   setYears() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let allYears: Array<number> = accountMeterData.flatMap(meterData => { return meterData.year });
     allYears = _.uniq(allYears);
     this.years = _.orderBy(allYears, (year) => { return year }, 'desc');

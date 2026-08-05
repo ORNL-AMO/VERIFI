@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,6 +16,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   styleUrl: './facility-predictor-data-quality-report.component.css'
 })
 export class FacilityPredictorDataQualityReportComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
@@ -32,9 +34,9 @@ export class FacilityPredictorDataQualityReportComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
-      this.predictor = this.predictorDbService.getByGuid(meterId);
+      this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(meterId);
       if (this.predictor) {
-        this.predictorData = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+        this.predictorData = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
       } else {
         this.goToPredictorList();
       }

@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -24,6 +25,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   styleUrl: './facility-emission-factors-report-results.component.css'
 })
 export class FacilityEmissionFactorsReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
@@ -51,7 +53,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
     this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
-      this.facilityMeters = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
+      this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
       this.emissionFactorsReportSettings = this.facilityReport.emissionFactorsReportSettings;
       this.calculateFacilitiesSummary();
     });

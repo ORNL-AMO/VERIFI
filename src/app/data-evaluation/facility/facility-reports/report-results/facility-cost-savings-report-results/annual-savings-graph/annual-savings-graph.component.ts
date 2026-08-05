@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -10,6 +11,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   styleUrl: './annual-savings-graph.component.css',
 })
 export class AnnualSavingsGraphComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   @Input()
   years: Array<number>;
@@ -70,7 +72,7 @@ export class AnnualSavingsGraphComponent {
 
         return {
           type: "bar",
-          name: this.utilityMeterGroupDbService.getGroupName(group.idbGroupId),
+          name: this.accountWorkspaceQuery.getMeterGroupName(group.idbGroupId),
           x: xVals,
           y: yVals,
           width: innerBarWidth,

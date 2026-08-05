@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -37,6 +38,7 @@ interface PredictorListItem {
   standalone: false
 })
 export class PredictorTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private predictorDbService: PredictorDbService = inject(PredictorDbService);
   private router: Router = inject(Router);
@@ -50,7 +52,7 @@ export class PredictorTableComponent {
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
+  facilityPredictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
@@ -134,7 +136,7 @@ export class PredictorTableComponent {
     //delete predictor
     await firstValueFrom(this.predictorDbService.deleteWithObservable(this.predictorToDelete.id));
     //delete predictor data
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictorToDelete.guid);
+    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictorToDelete.guid);
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
     const selectedFacility = this.selectedFacility();

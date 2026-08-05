@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -31,6 +32,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class MeterGroupFormComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   groupForm: FormGroup;
@@ -77,7 +79,7 @@ export class MeterGroupFormComponent {
     this.setHasMetersBools();
     this.activatedRoute.params.subscribe(params => {
       let meterGroupId: string = params['id'];
-      this.meterGroup = this.utilityMeterGroupDbService.getGroupById(meterGroupId);
+      this.meterGroup = this.accountWorkspaceQuery.getMeterGroupByGuid(meterGroupId);
       if (!this.meterGroup) {
         this.cancel();
       } else {
@@ -105,7 +107,7 @@ export class MeterGroupFormComponent {
   }
 
   setHasMetersBools() {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     this.hasEnergyMeters = meters.find(meter => { return meter.includeInEnergy }) != undefined;
     this.hasWaterMeters = meters.find(meter => { return meter.source == 'Water Discharge' || meter.source == 'Water Intake' }) != undefined;
   }
@@ -123,7 +125,7 @@ export class MeterGroupFormComponent {
     this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
     this.meterGroup.description = this.groupForm.controls['description'].value;
     await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.meterGroup));
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     for (let i = 0; i < this.meterGroupOptions.length; i++) {
       let groupOption: MeterGroupOption = this.meterGroupOptions[i];
       let meter: IdbUtilityMeter = meters.find(m => { return m.guid == groupOption.guid });
@@ -146,7 +148,7 @@ export class MeterGroupFormComponent {
   }
 
   setGroupOptions() {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     if (this.groupForm.controls['groupType'].value == 'Energy') {
       let energyMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
         return getIsEnergyMeter(meter.source)
@@ -238,7 +240,7 @@ export class MeterGroupFormComponent {
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setMeterGroups(selectedAccount, facility);
 
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.groupId == this.meterGroup.guid });
 
     for (let i = 0; i < groupMeters.length; i++) {

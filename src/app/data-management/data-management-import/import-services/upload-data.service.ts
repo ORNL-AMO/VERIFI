@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -47,6 +48,7 @@ import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions
   providedIn: 'root'
 })
 export class UploadDataService {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileReferences: Array<FileReference>;
@@ -256,7 +258,7 @@ export class UploadDataService {
 
 
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
-    let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();
+    let accountGroups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getAccountMeterGroupsCopy();
     let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
     let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.name == groupName || group.guid == groupName });
     if (dbGroup) {
@@ -345,7 +347,7 @@ export class UploadDataService {
 
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Meters') {
         let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });
@@ -434,7 +436,7 @@ export class UploadDataService {
   parseExcelMeterData(fileReference: FileReference): Array<IdbUtilityMeterData> {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let accountUtilityData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
@@ -485,8 +487,8 @@ export class UploadDataService {
     let predictorData: Array<IdbPredictorData> = new Array();
     let predictors: Array<IdbPredictor> = new Array();
 
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
 
     fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {

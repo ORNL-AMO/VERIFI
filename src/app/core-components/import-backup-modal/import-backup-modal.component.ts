@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
@@ -32,6 +33,7 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
   standalone: false
 })
 export class ImportBackupModalComponent implements OnInit {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
@@ -87,7 +89,7 @@ export class ImportBackupModalComponent implements OnInit {
         this.selectedAccount = this.accountWorkspaceStore.account();
         this.accountFacilities = [...this.accountWorkspaceStore.facilities()];
         this.accountFacilityNames = this.accountFacilities.map(facility => facility.name);
-        this.accountGroups = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+        this.accountGroups = [...this.accountWorkspaceStore.meterGroups()];
         this.duplicateFacilityError = false;
         if (!this.selectedAccount) {
           this.overwriteData = false;
@@ -406,7 +408,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in meters
         let facilityBackupMeters: Array<IdbUtilityMeter> = backupData.meters?.filter(m => m.facilityId === f.backupFacility.guid);
-        let facilityAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(f.accountFacility.guid);
+        let facilityAccountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(f.accountFacility.guid);
         const meterDifferenceFound =
           facilityBackupMeters.some(bm => !facilityAccountMeters.some(am => am.name === bm.name && am.meterNumber === bm.meterNumber)) ||
           facilityAccountMeters.some(am => !facilityBackupMeters.some(bm => bm.name === am.name && bm.meterNumber === am.meterNumber));
@@ -417,7 +419,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in meter data
         let facilityBackupMeterData: Array<IdbUtilityMeterData> = backupData.meterData?.filter(md => md.facilityId === f.backupFacility.guid);
-        let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(f.accountFacility.guid);
+        let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(f.accountFacility.guid);
 
         const meterDataDifferenceFound =
           facilityBackupMeterData.some(bmd => !facilityAccountMeterData.some(amd => {
@@ -444,7 +446,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in predictors
         let facilityBackupPredictors: Array<IdbPredictor> = backupData.predictors?.filter(p => p.facilityId === f.backupFacility.guid);
-        let facilityAccountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(f.accountFacility.guid);
+        let facilityAccountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(f.accountFacility.guid);
         const predictorDifferenceFound =
           facilityBackupPredictors.some(bp => !facilityAccountPredictors.some(ap => ap.name === bp.name)) ||
           facilityAccountPredictors.some(ap => !facilityBackupPredictors.some(bp => bp.name === ap.name));
@@ -454,7 +456,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in predictor data
         let facilityBackupPredictorData: Array<IdbPredictorData> = backupData.predictorDataV2?.filter(pd => pd.facilityId === f.backupFacility.guid);
-        let facilityAccountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(f.accountFacility.guid);
+        let facilityAccountPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(f.accountFacility.guid);
 
         const predictorDataDifferenceFound =
           facilityBackupPredictorData.some(bpd => !facilityAccountPredictorData.some(apd => {

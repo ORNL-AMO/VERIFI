@@ -90,7 +90,7 @@ export class SubmitImportDataComponent {
   }
 
   checkAccountWeatherPredictors(): boolean {
-    let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let weatherPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
       return predictor.predictorType == 'Weather';
     });

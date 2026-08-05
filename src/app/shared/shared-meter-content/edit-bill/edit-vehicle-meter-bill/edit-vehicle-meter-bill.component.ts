@@ -122,7 +122,7 @@ export class EditVehicleMeterBillComponent {
   }
 
   checkDate() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;

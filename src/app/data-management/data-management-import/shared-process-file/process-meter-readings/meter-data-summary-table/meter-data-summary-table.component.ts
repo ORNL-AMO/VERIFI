@@ -46,7 +46,7 @@ export class MeterDataSummaryTableComponent {
 
   ngOnInit() {
     this.facilities = [...this.accountWorkspaceStore.facilities()];
-    this.meters = this.utilityMeterDbService.accountMeters.getValue();
+    this.meters = [...this.accountWorkspaceStore.meters()];
     this.computeReadingChanges();
   }
 
@@ -85,7 +85,7 @@ export class MeterDataSummaryTableComponent {
 
     const facility = this.facilities.find(facility => facility.guid === inspectedFacility);
     const meter = this.meters.find(meter => meter.guid === inspectedMeterId);
-    const existingMeterReadings = this.utilityMeterDataDbService.accountMeterData.getValue().filter(data => (data.meterId === meter?.guid && data.facilityId === facility?.guid));
+    const existingMeterReadings = [...this.accountWorkspaceStore.meterData()].filter(data => (data.meterId === meter?.guid && data.facilityId === facility?.guid));
 
     return this.checkDifferences(existingMeterReadings, summary);
   }

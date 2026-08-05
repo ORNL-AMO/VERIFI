@@ -169,7 +169,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
       return;
     }
     const utilityDataForms = this.utilityDataForms();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return equipmentDetailsForm.controls['utilityMeterGroupIds'].value.includes(meter.groupId); });
     let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
     sources = _.uniq(sources);

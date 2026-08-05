@@ -41,10 +41,10 @@ export class MeterDataTableComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private utilityMeterDataService: UtilityMeterDataService = inject(UtilityMeterDataService);
 
-  private facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
+  private facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
   private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
-  selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
+  selectedMeter: Signal<IdbUtilityMeter> = this.accountWorkspaceStore.selectedMeter;
   meterData: Signal<Array<IdbUtilityMeterData>> = computed(() => {
     const meterData = this.facilityMeterData();
     const selectedMeter = this.selectedMeter();
@@ -203,7 +203,7 @@ export class MeterDataTableComponent {
     const selectedFacility = this.accountWorkspaceStore.selectedFacility();
     const selectedAccount = this.accountWorkspaceStore.account();
     try {
-      const accountMeterData = this.utilityMeterDataDbService.accountMeterData.getValue();
+      const accountMeterData = [...this.accountWorkspaceStore.meterData()];
       for (const missingMonth of missingMonths) {
         const newMeterData = getNewIdbUtilityMeterData(selectedMeter, accountMeterData);
         delete newMeterData.id;

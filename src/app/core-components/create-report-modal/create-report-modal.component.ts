@@ -98,7 +98,7 @@ export class CreateReportModalComponent {
   getNewReport(): IdbAccountReport {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     if (this.router.url.includes('account/overview')) {
       newReport.reportType = 'dataOverview';
@@ -188,11 +188,11 @@ export class CreateReportModalComponent {
 
   setShowWater() {
     if (this.router.url.includes('account')) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
       this.showWater = waterMeter != undefined;
     } else if (this.router.url.includes('facility')) {
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
       let waterMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
       this.showWater = waterMeter != undefined;
     }

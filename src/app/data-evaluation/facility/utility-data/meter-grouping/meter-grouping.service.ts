@@ -27,7 +27,7 @@ export class MeterGroupingService {
   }
 
   getMeterGroupTypes(calanderizedMeters: Array<CalanderizedMeter>): Array<MeterGroupType> {
-    let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let meterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
     //group meters by group type and set summaries
     let meterGroupTypes: Array<MeterGroupType> = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
       let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value, calanderizedMeters)

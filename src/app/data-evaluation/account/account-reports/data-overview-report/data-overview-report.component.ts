@@ -109,7 +109,7 @@ export class DataOverviewReportComponent {
       this.facilitiesData = new Array();
       if (this.includedFacilities.length > 0) {
         let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-        let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+        let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
         let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
         let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
         this.calculateFacilitiesSummary(0, accountFacilities, accountMeterGroups, startDate, endDate);
@@ -129,14 +129,14 @@ export class DataOverviewReportComponent {
   calculateFacilitiesSummary(facilityIndex: number, accountFacilities: Array<IdbFacility>, accountMeterGroups: Array<IdbUtilityMeterGroup>, startDate: Date, endDate: Date) {
     let facilityId: string = this.includedFacilities[facilityIndex];
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
     if (this.overviewReport.includeAllMeterData == false) {
       facilityMeters = facilityMeters.filter(meter => {
         return this.includedGroups.includes(meter.groupId);
       });
     };
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
@@ -195,7 +195,7 @@ export class DataOverviewReportComponent {
       return this.includedFacilities.includes(facility.guid);
     });
 
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
 
     let includedMeters: Array<IdbUtilityMeter>;
     if (this.overviewReport.includeAllMeterData) {
@@ -206,7 +206,7 @@ export class DataOverviewReportComponent {
       });
     }
 
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();

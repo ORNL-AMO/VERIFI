@@ -31,8 +31,8 @@ export class FacilityHomeSummaryComponent {
 
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
-  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: [] });
-  facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: [] });
+  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
+  facilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
 
   lastBill: Signal<IdbUtilityMeterData> = computed(() => {
     let facilityMeterData = this.facilityMeterData();

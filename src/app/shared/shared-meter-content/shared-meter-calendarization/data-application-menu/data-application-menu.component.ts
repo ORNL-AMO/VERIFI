@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -20,6 +21,7 @@ import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFu
   standalone: false
 })
 export class DataApplicationMenuComponent implements OnInit {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   meter: IdbUtilityMeter;
@@ -38,7 +40,7 @@ export class DataApplicationMenuComponent implements OnInit {
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);
     this.utilityMeterData = _.orderBy(meterData, (data: IdbUtilityMeterData) => { return getDateFromMeterData(data) }, 'asc');
     if (this.utilityMeterData.length > 2) {
       if (!this.meter.meterReadingDataApplication) {

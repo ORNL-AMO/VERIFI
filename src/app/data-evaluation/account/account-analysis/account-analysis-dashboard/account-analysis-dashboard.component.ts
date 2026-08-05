@@ -90,7 +90,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   }
 
   setHasEnergyAndWater() {
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let hasWater: boolean = false;
     let hasEnergy: boolean = false;
     groups.forEach(group => {

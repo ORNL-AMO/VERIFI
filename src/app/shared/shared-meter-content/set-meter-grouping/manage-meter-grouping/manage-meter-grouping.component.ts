@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -57,7 +57,7 @@ export class ManageMeterGroupingComponent {
 
 
   ngOnInit() {
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(meters => {
       this.facilityMeters = meters;
       this.hasEnergyMeters = this.facilityMeters.find(meter => { return meter.includeInEnergy }) != undefined;
       this.hasWaterMeters = this.facilityMeters.find(meter => { return meter.source == 'Water Discharge' || meter.source == 'Water Intake' }) != undefined;
@@ -68,7 +68,7 @@ export class ManageMeterGroupingComponent {
       this.ungroupedMeterGroup = getNewIdbUtilityMeterGroup('Other', "Ungrouped Meters", facility.guid, facility.accountId);
       this.ungroupedMeterGroup.guid = undefined;
     });
-    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(facilityMeterGroups => {
+    this.facilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()])).subscribe(facilityMeterGroups => {
       this.otherGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Other' });
       this.waterGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Water' });
       this.energyGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Energy' });

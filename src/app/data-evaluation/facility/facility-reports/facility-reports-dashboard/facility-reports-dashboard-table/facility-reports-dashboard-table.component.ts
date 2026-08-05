@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -45,6 +46,7 @@ interface FacilityReportTableItem {
   styleUrl: './facility-reports-dashboard-table.component.css'
 })
 export class FacilityReportsDashboardTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityDbReportsService: FacilityReportsDbService = inject(FacilityReportsDbService);
@@ -127,7 +129,7 @@ export class FacilityReportsDashboardTableComponent {
   async createCopy(report: FacilityReportTableItem) {
     const raw = this.facilityReports().find(r => r.guid === report.guid);
     if (!raw) return;
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(raw.facilityId);
+    let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(raw.facilityId);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(raw.facilityId, raw.accountId, raw.facilityReportType, groups);
     newReport.name = raw.name + ' (Copy)';
     newReport.analysisItemId = raw.analysisItemId;

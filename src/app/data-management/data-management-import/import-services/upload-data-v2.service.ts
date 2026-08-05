@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
@@ -30,6 +31,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   providedIn: 'root'
 })
 export class UploadDataV2Service {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private accountDbService: AccountdbService,
@@ -96,7 +98,7 @@ export class UploadDataV2Service {
 
   getImportMeters(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, selectedAccount: IdbAccount): { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } {
     let excelMeters = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     let importMeters: Array<IdbUtilityMeter> = new Array();
     let newGroups: Array<IdbUtilityMeterGroup> = new Array();
     excelMeters.forEach(excelMeter => {
@@ -258,7 +260,7 @@ export class UploadDataV2Service {
 
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
     importMeterData = this.getElectricityData(workbook, importMeters, importMeterData, utilityMeterData);
     importMeterData = this.getStationaryOtherEnergyData(workbook, importMeters, importMeterData, utilityMeterData);

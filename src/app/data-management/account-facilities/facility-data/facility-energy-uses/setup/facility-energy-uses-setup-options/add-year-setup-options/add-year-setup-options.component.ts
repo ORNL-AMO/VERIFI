@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -16,6 +17,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
   styleUrl: './add-year-setup-options.component.css',
 })
 export class AddYearSetupOptionsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -74,7 +76,7 @@ export class AddYearSetupOptionsComponent {
 
   setYearOptions() {
     this.yearOptions = new Array();
-    let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.facility.guid);
+    let facilityMeterDataYears: { endYear: number, startYear: number } = this.accountWorkspaceQuery.getFacilityMeterDataYears(this.facility.guid);
     for (let year = facilityMeterDataYears.startYear; year <= facilityMeterDataYears.endYear; year++) {
       this.yearOptions.push(year);
     }

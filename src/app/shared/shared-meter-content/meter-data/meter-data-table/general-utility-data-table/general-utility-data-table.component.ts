@@ -47,8 +47,8 @@ export class GeneralUtilityDataTableComponent {
   readonly setDelete = output<IdbUtilityMeterData>();
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
-  selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
-  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
+  selectedMeter: Signal<IdbUtilityMeter> = this.accountWorkspaceStore.selectedMeter;
+  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
   customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;

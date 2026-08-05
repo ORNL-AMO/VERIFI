@@ -1,4 +1,5 @@
-import { Component, QueryList, ViewChildren } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
@@ -32,6 +33,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
   styleUrl: './facility-data-quality-report-results.component.css',
 })
 export class FacilityDataQualityReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -93,7 +95,7 @@ export class FacilityDataQualityReportResultsComponent {
             return;
           }
 
-          const groupMeters = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
+          const groupMeters = this.accountWorkspaceQuery.getGroupMetersByGroupId(group.idbGroupId);
           groupMeters.forEach(meter => {
             if (meter.guid) {
               meterIds.add(meter.guid);
@@ -140,8 +142,8 @@ export class FacilityDataQualityReportResultsComponent {
 
   createMetersandPredictorsList() {
     this.meterDataStatsList = this.selectedMeterIds.map(meterId => {
-      let data = this.utilityMeterDataDbService.getMeterDataFromMeterId(meterId);
-      let meter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+      let data = this.accountWorkspaceQuery.getMeterData(meterId);
+      let meter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
       let { energyStats, costStats } = getStatistics(data, meter);
       let energyOutlierCount = energyStats.outliers;
       let costOutlierCount = costStats.outliers;
@@ -152,8 +154,8 @@ export class FacilityDataQualityReportResultsComponent {
     });
 
     this.predictorDataStatsList = this.selectedPredictorIds.map(predictorId => {
-      let data = this.predictorDataDbService.getByPredictorId(predictorId);
-      let predictor = this.predictorDbService.getByGuid(predictorId);
+      let data = this.accountWorkspaceQuery.getPredictorData(predictorId);
+      let predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
       let stats = getPredictorStatistics(data.map(d => d.amount));
       let statusCheck = new PredictorStatusCheck(predictor, data, undefined);
       let missingMonthsList = statusCheck.missingEntryMonths.map(({ month, year }) => {

@@ -1,5 +1,6 @@
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, computed } from '@angular/core';
 import * as _ from 'lodash';
 import { CalanderizationFilters, CalanderizedMeter } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
@@ -48,7 +49,7 @@ export class CalanderizationService {
 
     this.calanderizedMeters = new BehaviorSubject([]);
 
-    this.utilityMeterDataDbService.accountMeterData.subscribe(meterData => {
+    toObservable(computed(() => [...this.accountWorkspaceStore.meterData()])).subscribe(meterData => {
       if (meterData) {
         this.setCalanderizedMeterData(meterData);
       }
@@ -56,7 +57,7 @@ export class CalanderizationService {
   }
 
   setCalanderizedMeterData(accountMeterData: Array<IdbUtilityMeterData>) {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
 
@@ -117,7 +118,7 @@ export class CalanderizationService {
 
 
   getYearOptions(meterCategory: 'water' | 'energy' | 'all', onlyFullYears: boolean, facilityId?: string): Array<number> {
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let facilityOrAccount: IdbFacility | IdbAccount;
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilityId) {

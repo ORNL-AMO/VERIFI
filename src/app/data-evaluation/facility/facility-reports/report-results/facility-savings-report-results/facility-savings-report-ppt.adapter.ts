@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -26,6 +27,7 @@ export interface FacilitySavingsReportPptInput {
 
 @Injectable({ providedIn: 'root' })
 export class FacilitySavingsReportPptAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
     utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
@@ -114,7 +116,7 @@ export class FacilitySavingsReportPptAdapter {
 
         if (this.reportSettings.groupReports && ((this.reportSettings.groupAnnualResultsTable) || (this.reportSettings.groupMonthlyResults && (this.reportSettings.groupMonthlyResultsTable || this.reportSettings.groupMonthlyResultsGraphs || this.reportSettings.groupTrailingTwelveMonthsConsumption || this.reportSettings.groupTrailingTwelveMonthsSavings)))) {
             data.groupSummaries.forEach(groupSummary => {
-                const groupName = this.utilityMeterGroupDbService.getGroupName(groupSummary.group.idbGroupId);
+                const groupName = this.accountWorkspaceQuery.getMeterGroupName(groupSummary.group.idbGroupId);
                 slides.push({
                     type: 'title',
                     title: `${groupName}\nGroup Analysis`,
