@@ -1,7 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
-import { ElectronService } from '../electron/electron.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -11,7 +10,6 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 export class AccountdbService {
 
     constructor(private dbService: NgxIndexedDBService,
-        private electronService: ElectronService,
         private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbAccount>> {
@@ -67,7 +65,6 @@ export class AccountdbService {
     async deleteDatabase(): Promise<boolean> {
         try {
             await firstValueFrom(this.dbService.deleteDatabase());
-            this.finishDelete();
             return true
         } catch (err) {
             console.log(err);
@@ -75,11 +72,4 @@ export class AccountdbService {
         }
     }
 
-    finishDelete() {
-        if (this.electronService.isElectron) {
-            this.electronService.sendAppRelaunch();
-        } else {
-            location.reload()
-        }
-    }
 }

@@ -40,7 +40,7 @@ export class EnergyUseGroupCardComponent {
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
 
 
-    facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+    facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
 
     groupEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => {
         const equipment = this.facilityEnergyUseEquipment();

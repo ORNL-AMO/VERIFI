@@ -26,12 +26,12 @@ export class FacilityEnergyUsesSummaryComponent {
     return this.facility$();
   }
 
-  facilityEnergyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+  facilityEnergyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]);
   get facilityEnergyUseGroups(): Array<IdbFacilityEnergyUseGroup> {
     return this.facilityEnergyUseGroups$();
   }
 
-  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
   get facilityEnergyUseEquipment(): Array<IdbFacilityEnergyUseEquipment> {
     return this.facilityEnergyUseEquipment$();
   }

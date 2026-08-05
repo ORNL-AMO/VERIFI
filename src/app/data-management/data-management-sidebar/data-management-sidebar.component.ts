@@ -118,11 +118,11 @@ export class DataManagementSidebarComponent {
       this.accountPredictorData = accountPredictorData;
     });
 
-    this.accountEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.subscribe(groups => {
+    this.accountEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.energyUseGroups()])).subscribe(groups => {
       this.accountEnergyUseGroups = groups;
     });
 
-    this.accountEnergyUseEquipmentSub = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.subscribe(equipment => {
+    this.accountEnergyUseEquipmentSub = toObservable(computed(() => [...this.accountWorkspaceStore.energyUseEquipment()])).subscribe(equipment => {
       this.accountEnergyUseEquipment = equipment;
     });
 

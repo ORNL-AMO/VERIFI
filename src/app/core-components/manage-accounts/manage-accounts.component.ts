@@ -11,6 +11,7 @@ import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { DatabaseResetService } from 'src/app/application-lifecycle/database-reset.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -37,7 +38,8 @@ export class ManageAccountsComponent {
     private backupDataService: BackupDataService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
     private accountWorkspaceService: AccountWorkspaceService,
-    private applicationLifecycleService: ApplicationLifecycleService
+    private applicationLifecycleService: ApplicationLifecycleService,
+    private databaseResetService: DatabaseResetService
   ) {
   }
 
@@ -149,7 +151,7 @@ export class ManageAccountsComponent {
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    let success: boolean = await this.accountDbService.deleteDatabase();
+    let success: boolean = await this.databaseResetService.resetAndRestart();
     if (!success) {
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('An error occured', 'There was an error when trying to reset the database follow the instructions delete database manually.', undefined, false, 'alert-danger')

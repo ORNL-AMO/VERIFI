@@ -182,9 +182,7 @@ function createLifecycle(dependencies: ReturnType<typeof createDependencies>): A
     dependencies.workspace as any,
     dependencies.workspaceStore,
     dependencies.selectionStorage as any,
-    dependencies.legacyBridge as any,
     dependencies.electron as any,
-    dependencies.electronBackups as any,
     dependencies.automaticBackups as any
   );
 }

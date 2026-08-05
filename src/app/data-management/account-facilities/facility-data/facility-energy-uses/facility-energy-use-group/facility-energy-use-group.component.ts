@@ -1,5 +1,6 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, Signal } from '@angular/core';
+import { Component, inject, Signal, computed } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
@@ -31,6 +32,7 @@ import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculation
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -47,8 +49,8 @@ export class FacilityEnergyUseGroupComponent {
   private routerGuardService: RouterGuardService = inject(RouterGuardService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
 
-  facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
-  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+  facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
+  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]);
 
   get hasSelectedEquipment(): boolean {
     return this.facilityEnergyUseEquipment().some(equip => equip.selected);
@@ -75,7 +77,7 @@ export class FacilityEnergyUseGroupComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let groupId: string = params['id'];
-      this.energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
+      this.energyUseGroup = this.accountWorkspaceQuery.getEnergyUseGroupByGuid(groupId);
       if (this.energyUseGroup) {
         this.form = this.facilityEnergyUseGroupFormService.getFormFromEnergyUseGroup(this.energyUseGroup);
       } else {

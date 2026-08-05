@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -17,6 +18,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './facility-energy-uses-group-summary.component.css'
 })
 export class FacilityEnergyUsesGroupSummaryComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -24,7 +26,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
 
-  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
 
   energyUseGroup$: WritableSignal<IdbFacilityEnergyUseGroup> = signal<IdbFacilityEnergyUseGroup>(null);
   get energyUseGroup(): IdbFacilityEnergyUseGroup {
@@ -54,7 +56,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let groupId: string = params['id'];
-      let energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
+      let energyUseGroup = this.accountWorkspaceQuery.getEnergyUseGroupByGuid(groupId);
       if (energyUseGroup) {
         this.energyUseGroup$.set(energyUseGroup);
       } else {

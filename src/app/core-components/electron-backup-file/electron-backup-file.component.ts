@@ -5,7 +5,6 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -41,7 +40,6 @@ export class ElectronBackupFileComponent {
   constructor(private electronService: ElectronService,
     private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
-    private electronBackupsDbService: ElectronBackupsDbService,
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private backupDataService: BackupDataService,
@@ -61,7 +59,7 @@ export class ElectronBackupFileComponent {
           if (!this.account || (this.account.guid != val.guid)) {
             this.account = val;
             if (this.account) {
-              this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
+              this.electronBackup = this.automaticBackupsService.accountBackups.find(backup => {
                 return backup.accountId == this.account.guid
               });
               this.archiveOption = this.account.archiveOption;

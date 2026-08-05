@@ -8,7 +8,6 @@ import {
 } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceSelectionHints, WorkspaceSelectionStorageService } from './workspace-selection-storage.service';
-import { LegacyWorkspaceStateBridge } from './legacy-workspace-state-bridge.service';
 import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
@@ -25,8 +24,7 @@ export class AccountWorkspaceService {
   constructor(
     private loader: AccountWorkspaceLoaderService,
     private store: AccountWorkspaceStore,
-    private selectionStorage: WorkspaceSelectionStorageService,
-    private legacyBridge: LegacyWorkspaceStateBridge
+    private selectionStorage: WorkspaceSelectionStorageService
   ) { }
 
   async selectAccount(accountGuid: string): Promise<WorkspaceLoadResult> {
@@ -40,7 +38,6 @@ export class AccountWorkspaceService {
 
       const selections = restoreSelections(snapshot, this.selectionStorage.read());
       this.store.publish(snapshot, selections);
-      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
       this.syncPersistedHints(snapshot, selections);
       return 'published';
     } catch (error) {
@@ -78,7 +75,6 @@ export class AccountWorkspaceService {
       } else {
         this.store.publish(snapshot, selections);
       }
-      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
       this.syncPersistedHints(snapshot, selections);
       return 'published';
     } catch (error) {
@@ -99,7 +95,6 @@ export class AccountWorkspaceService {
   selectFacility(facilityGuid?: string): void {
     if (!facilityGuid) {
       this.store.selectFacility(undefined);
-      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
       this.syncPersistedSelectionHints(this.store.selections());
       return;
     }
@@ -108,7 +103,6 @@ export class AccountWorkspaceService {
       throw new WorkspaceSelectionError('The requested facility does not belong to the active account.');
     }
     this.store.selectFacility(facility);
-    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
     this.syncPersistedSelectionHints(this.store.selections());
   }
 
@@ -161,7 +155,6 @@ export class AccountWorkspaceService {
   clear(): void {
     ++this.latestRequestToken;
     this.store.clear();
-    this.legacyBridge.clear();
     this.selectionStorage.clearAccount();
     this.selectionStorage.clearFacility();
     this.selectionStorage.clearFacilityAnalysis();
@@ -182,7 +175,6 @@ export class AccountWorkspaceService {
       throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active facility.`);
     }
     this.store.setSelections({ ...this.store.selections(), [key]: selected });
-    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
   }
 
   private selectAccountEntity<K extends keyof WorkspaceSelections, T extends { guid?: string }>(
@@ -196,7 +188,6 @@ export class AccountWorkspaceService {
       throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active account.`);
     }
     this.store.setSelections({ ...this.store.selections(), [key]: selected });
-    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
   }
 
   private syncPersistedHints(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {

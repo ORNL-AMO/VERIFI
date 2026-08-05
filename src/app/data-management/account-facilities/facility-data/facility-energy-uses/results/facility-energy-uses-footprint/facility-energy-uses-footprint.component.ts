@@ -30,8 +30,8 @@ export class FacilityEnergyUsesFootprintComponent {
   private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
   selectedFacility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
-  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
+  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.energyUseGroups()]);
+  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.energyUseEquipment()]);
   calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.meterGroups()]);
 

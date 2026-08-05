@@ -37,7 +37,7 @@ export class FacilityEnergyUsesSetupOptionsComponent {
     this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
     });
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
+    this.facilityEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()])).subscribe(groups => {
       if (groups && groups.length == 0 && !this.hasChildRoute) {
         this.setupNewGroups();
       }

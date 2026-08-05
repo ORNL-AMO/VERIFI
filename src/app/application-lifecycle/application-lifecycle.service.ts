@@ -2,7 +2,6 @@ import { computed, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AccountWorkspaceService } from '../account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
-import { LegacyWorkspaceStateBridge } from '../account-workspace/legacy-workspace-state-bridge.service';
 import { WorkspaceSelectionStorageService } from '../account-workspace/workspace-selection-storage.service';
 import { AutomaticBackupsService } from '../electron/automatic-backups.service';
 import { ElectronService } from '../electron/electron.service';
@@ -11,7 +10,6 @@ import { AnalysisSelectionRepairService } from '../indexedDB/analysis-selection-
 import { ApplicationInstanceDbService } from '../indexedDB/application-instance-db.service';
 import { CustomEmissionsDbService } from '../indexedDB/custom-emissions-db.service';
 import { DataMigrationRunnerService } from '../indexedDB/data-migrations/data-migration-runner.service';
-import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IndexedDbTransactionService } from '../indexedDB/indexed-db-transaction.service';
 import { IdbAccount } from '../models/idbModels/account';
@@ -50,9 +48,7 @@ export class ApplicationLifecycleService {
     private workspace: AccountWorkspaceService,
     private workspaceStore: AccountWorkspaceStore,
     private selectionStorage: WorkspaceSelectionStorageService,
-    private legacyBridge: LegacyWorkspaceStateBridge,
     private electron: ElectronService,
-    private electronBackups: ElectronBackupsDbService,
     private automaticBackups: AutomaticBackupsService
   ) { }
 
@@ -160,7 +156,7 @@ export class ApplicationLifecycleService {
     if (this.electron.isElectron) {
       this.setStep('electron-metadata', 'Loading automatic backup metadata...');
       try {
-        this.electronBackups.accountBackups = await firstValueFrom(this.electronBackups.getAll());
+        await this.automaticBackups.initializeMetadata();
       } catch (error) {
         console.warn('Automatic backup metadata could not be loaded.', error);
       }

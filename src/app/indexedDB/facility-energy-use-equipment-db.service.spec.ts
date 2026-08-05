@@ -1,14 +1,15 @@
 import { FacilityEnergyUseEquipmentDbService } from './facility-energy-use-equipment-db.service';
+import { vi } from 'vitest';
 
 describe('FacilityEnergyUseEquipmentDbService', () => {
-  it('provides an empty equipment selection for workspace publication', () => {
+  it('keeps equipment persistence access stateless', () => {
+    const dbService = { getAll: vi.fn() };
     const service = new FacilityEnergyUseEquipmentDbService(
-      {} as any,
-      {} as any,
+      dbService as any,
       {} as any
     );
 
-    expect(service.selectedFacilityEnergyUseEquipment.getValue()).toBeUndefined();
-    expect(() => service.selectedFacilityEnergyUseEquipment.next(undefined)).not.toThrow();
+    service.getAll();
+    expect(dbService.getAll).toHaveBeenCalledWith('facilityEnergyUseEquipment');
   });
 });

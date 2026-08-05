@@ -1,5 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, Signal } from '@angular/core';
+import { Component, inject, Signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -26,7 +26,7 @@ export class FacilityEnergyUseGroupManagementComponent {
   private router: Router = inject(Router);
 
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
-  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]);
 
   async addGroup() {
     let facility: IdbFacility = this.facility();

@@ -102,8 +102,8 @@ export class FacilityEnergyUsesGroupSetupComponent {
       }
     } else {
       if (this.facilityEnergyUsesSetupService.existingGroupsToEdit) {
-        let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.getByFacilityId(this.facility.guid);
-        let equipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(this.facility.guid);
+        let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountWorkspaceQuery.getFacilityEnergyUseGroups(this.facility.guid);
+        let equipment: Array<IdbFacilityEnergyUseEquipment> = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(this.facility.guid);
         this.facilityEnergyUsesSetupService.existingGroupsToEdit.forEach(groupId => {
           let group: IdbFacilityEnergyUseGroup = facilityEnergyUseGroups.find(group => group.guid == groupId);
           if (group) {

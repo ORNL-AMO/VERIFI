@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,6 +27,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-use-equipment.component.css'
 })
 export class FacilityEnergyUseEquipmentComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -69,7 +71,7 @@ export class FacilityEnergyUseEquipmentComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let equipmentId: string = params['equipmentId'];
-      let energyUseEquipment: IdbFacilityEnergyUseEquipment = this.facilityEnergyUseEquipmentDbService.getByGuid(equipmentId);
+      let energyUseEquipment: IdbFacilityEnergyUseEquipment = this.accountWorkspaceQuery.getEnergyUseEquipmentByGuid(equipmentId);
       if (energyUseEquipment) {
         //create copy
         this.energyUseEquipment = _.cloneDeep(energyUseEquipment);

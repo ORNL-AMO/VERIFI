@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -25,6 +26,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-uses-modify-annual-data.component.css',
 })
 export class FacilityEnergyUsesModifyAnnualDataComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
@@ -64,8 +66,8 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
     this.groupSetupIndex = 0;
     this.energyUseGroups = new Array();
     if (this.facilityEnergyUsesSetupService.existingGroupsToEdit) {
-      let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.getByFacilityId(this.facility.guid);
-      let equipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(this.facility.guid);
+      let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountWorkspaceQuery.getFacilityEnergyUseGroups(this.facility.guid);
+      let equipment: Array<IdbFacilityEnergyUseEquipment> = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(this.facility.guid);
       this.facilityEnergyUsesSetupService.existingGroupsToEdit.forEach(groupId => {
         let group: IdbFacilityEnergyUseGroup = facilityEnergyUseGroups.find(group => group.guid == groupId);
         if (group) {

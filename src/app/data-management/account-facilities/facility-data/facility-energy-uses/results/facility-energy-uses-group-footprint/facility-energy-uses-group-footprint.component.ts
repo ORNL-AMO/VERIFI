@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -20,6 +21,7 @@ import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/c
   styleUrl: './facility-energy-uses-group-footprint.component.css',
 })
 export class FacilityEnergyUsesGroupFootprintComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -29,7 +31,7 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private calanderizationService = inject(CalanderizationService);
 
-  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
   selectedFacility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
 
@@ -65,7 +67,7 @@ export class FacilityEnergyUsesGroupFootprintComponent {
       this.activatedRoute.paramMap.subscribe(params => {
         // handle params
         let groupId: string = params.get('id');
-        let energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
+        let energyUseGroup = this.accountWorkspaceQuery.getEnergyUseGroupByGuid(groupId);
         if (energyUseGroup) {
           this.energyUseGroup.set(energyUseGroup);
         } else {

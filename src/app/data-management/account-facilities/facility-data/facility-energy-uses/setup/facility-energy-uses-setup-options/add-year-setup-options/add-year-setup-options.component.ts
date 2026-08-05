@@ -1,7 +1,7 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -45,7 +45,7 @@ export class AddYearSetupOptionsComponent {
       this.setYearOptions();
     });
 
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
+    this.facilityEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()])).subscribe(groups => {
       this.facilityEnergyUseGroups = groups.map(group => {
         return {
           guid: group.guid,

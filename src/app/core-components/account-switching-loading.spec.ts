@@ -47,7 +47,10 @@ describe('account switching loading ownership', () => {
       electron as any,
       { showToast: vi.fn() } as any,
       { detectChanges: vi.fn() } as any,
-      automaticBackups as any
+      automaticBackups as any,
+      { resetAndRestart: vi.fn() } as any,
+      { accountCatalog: () => [] } as any,
+      { account: () => undefined, selectedFacility: () => undefined } as any
     );
     header.inDataEvaluation = true;
 
@@ -76,7 +79,8 @@ describe('account switching loading ownership', () => {
       {} as any,
       {} as any,
       workspace as any,
-      {} as any
+      {} as any,
+      { resetAndRestart: vi.fn() } as any
     );
     manageAccounts.accountErrors = [undefined];
 
@@ -186,6 +190,7 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
       exportFacilityData: vi.fn()
     }) as any,
     (overrides.workspace ?? { selectAccount: vi.fn().mockResolvedValue('published') }) as any,
-    (overrides.lifecycle ?? { refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any
+    (overrides.lifecycle ?? { refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any,
+    (overrides.databaseReset ?? { resetAndRestart: vi.fn() }) as any
   );
 }

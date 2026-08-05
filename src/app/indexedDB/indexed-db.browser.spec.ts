@@ -22,7 +22,6 @@ describe('IndexedDB in Chromium', () => {
       {} as any,
       {} as any,
       {} as any,
-      {} as any,
       new IndexedDbAccessService(harness.dbService)
     );
   });

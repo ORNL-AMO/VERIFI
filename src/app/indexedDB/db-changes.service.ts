@@ -126,32 +126,12 @@ export class DbChangesService {
 
   //facility energy uses
   async setAccountFacilityEnergyUseGroups(account: IdbAccount, facility?: IdbFacility) {
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = await this.facilityEnergyUseGroupsDbService.getAllAccountEnergyUseGroups(account.guid);
-    this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.next(facilityEnergyUseGroups);
-    if (facility) {
-      this.setFacilityEnergyUseGroups(facility);
-    }
-  }
-
-  setFacilityEnergyUseGroups(facility: IdbFacility) {
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups.getValue();
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = accountEnergyUseGroups.filter(item => { return item.facilityId == facility.guid });
-    this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.next(facilityEnergyUseGroups);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   //facility energy uses
   async setAccountFacilityEnergyUseEquipment(account: IdbAccount, facility?: IdbFacility) {
-    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = await this.facilityEnergyUseEquipmentDbService.getAllAccountEnergyUseEquipment(account.guid);
-    this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.next(facilityEnergyUseEquipment);
-    if (facility) {
-      this.setFacilityEnergyUseEquipment(facility);
-    }
-  }
-
-  setFacilityEnergyUseEquipment(facility: IdbFacility) {
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment.getValue();
-    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(item => { return item.facilityId == facility.guid });
-    this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.next(facilityEnergyUseEquipment);
+    await this.workspaceService.reloadActiveWorkspace(true);
   }
 
   async updateFacility(facility: IdbFacility): Promise<IdbFacility> {

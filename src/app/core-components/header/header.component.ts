@@ -1,7 +1,8 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { DatabaseResetService } from 'src/app/application-lifecycle/database-reset.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
@@ -28,8 +29,6 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
   standalone: false
 })
 export class HeaderComponent implements OnInit {
-  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataInitialized: boolean;
 
@@ -68,7 +67,10 @@ export class HeaderComponent implements OnInit {
     private electronService: ElectronService,
     private toastNotificationService: ToastNotificationsService,
     private cd: ChangeDetectorRef,
-    private automaticBackupService: AutomaticBackupsService
+    private automaticBackupService: AutomaticBackupsService,
+    private databaseResetService: DatabaseResetService,
+    private applicationLifecycleService: ApplicationLifecycleService,
+    private accountWorkspaceStore: AccountWorkspaceStore
   ) {
   }
 
@@ -160,7 +162,7 @@ export class HeaderComponent implements OnInit {
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountdbService.deleteDatabase();
+    await this.databaseResetService.resetAndRestart();
   }
 
   toggleResetDatabase() {

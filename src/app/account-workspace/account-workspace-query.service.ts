@@ -6,6 +6,8 @@ import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { AccountWorkspaceStore } from './account-workspace.store';
+import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceQueryService {
@@ -89,5 +91,27 @@ export class AccountWorkspaceQueryService {
 
   getFacilityPredictorData(facilityGuid: string): IdbPredictorData[] {
     return this.store.predictorData().filter(item => item.facilityId === facilityGuid).map(item => ({ ...item }));
+  }
+
+  getEnergyUseGroupByGuid(guid: string): IdbFacilityEnergyUseGroup | undefined {
+    const group = this.store.energyUseGroups().find(item => item.guid === guid);
+    return group ? { ...group } : undefined;
+  }
+
+  getFacilityEnergyUseGroups(facilityGuid: string): IdbFacilityEnergyUseGroup[] {
+    return this.store.energyUseGroups().filter(item => item.facilityId === facilityGuid).map(item => ({ ...item }));
+  }
+
+  getEnergyUseEquipmentByGuid(guid: string): IdbFacilityEnergyUseEquipment | undefined {
+    const equipment = this.store.energyUseEquipment().find(item => item.guid === guid);
+    return equipment ? { ...equipment } : undefined;
+  }
+
+  getFacilityEnergyUseEquipment(facilityGuid: string): IdbFacilityEnergyUseEquipment[] {
+    return this.store.energyUseEquipment().filter(item => item.facilityId === facilityGuid).map(item => ({ ...item }));
+  }
+
+  getEnergyUseEquipmentForGroup(groupGuid: string): IdbFacilityEnergyUseEquipment[] {
+    return this.store.energyUseEquipment().filter(item => item.energyUseGroupId === groupGuid).map(item => ({ ...item }));
   }
 }
