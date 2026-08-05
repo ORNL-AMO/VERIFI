@@ -14,9 +14,10 @@ import {
 } from './data-migration.models';
 
 const AFFECTED_STORES = [
-  'accounts', 'facilities', 'utilityMeter', 'utilityMeterData', 'predictors',
+  'accounts', 'facilities', 'utilityMeter', 'utilityMeterData', 'utilityMeterGroups', 'predictors',
   'analysisItems', 'accountAnalysisItems', 'accountReports', 'customFuels',
-  'customGWP', 'predictor', 'predictorData'
+  'customGWP', 'predictor', 'predictorData', 'facilityReports',
+  'customEmissionsItems', 'facilityEnergyUseGroups', 'facilityEnergyUseEquipment'
 ] as const;
 
 export const VERSION_ZERO_TO_ONE_MIGRATION: DataMigration = {
