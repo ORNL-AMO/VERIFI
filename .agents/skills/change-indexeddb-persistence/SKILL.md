@@ -5,7 +5,7 @@ description: Change VERIFI persisted models, IndexedDB stores or indexes, databa
 
 # Change IndexedDB persistence
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), the persistence section of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Implementer and Reviewer modes in [`docs/agents/personas.md`](../../../docs/agents/personas.md).
+1. Read [Domain and persistence](../../../ARCHITECTURE.md#domain-and-persistence) plus the [Implementer](../../../docs/agents/personas.md#implementer) and [Reviewer](../../../docs/agents/personas.md#reviewer) modes.
 2. Trace the record through its interface/factory in `src/app/models/idbModels/`, object-store service in `src/app/indexedDB/`, `_dbConfig.ts`, application initialization, selection state, import, export, backup, and delete paths.
 3. Distinguish the change type:
    - A record property may require model defaults and an idempotent record migration without changing the structural schema.

@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbFacility } from '../models/idbModels/facility';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,9 @@ export class FacilitydbService {
 
     accountFacilities: BehaviorSubject<Array<IdbFacility>>;
     selectedFacility: BehaviorSubject<IdbFacility>;
-    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private loadingService: LoadingService) {
+    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+        private loadingService: LoadingService,
+        private indexedDbAccess: IndexedDbAccessService) {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
         //subscribe after initialization
@@ -28,22 +31,28 @@ export class FacilitydbService {
         return localStorageFacilityId;
     }
 
+    clearInitialFacility(): void {
+        this.localStorageService.clear('facilityId');
+    }
+
     getAll(): Observable<Array<IdbFacility>> {
         return this.dbService.getAll('facilities');
     }
 
     async getAllAccountFacilities(accountId: string): Promise<Array<IdbFacility>> {
-        let allFacilities: Array<IdbFacility> = await firstValueFrom(this.getAll());
-        let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == accountId });
-        return accountFacilites;
+        return this.indexedDbAccess.getAllByIndex<IdbFacility>('facilities', 'accountId', accountId);
     }
 
     getById(facilityId: number): Observable<IdbFacility> {
         return this.dbService.getByKey('facilities', facilityId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbFacility> {
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbFacility> {
         return this.dbService.getByIndex('facilities', indexName, indexValue);
+    }
+
+    getStoredByGuid(facilityGuid: string): Promise<IdbFacility | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbFacility>('facilities', facilityGuid);
     }
 
     count() {

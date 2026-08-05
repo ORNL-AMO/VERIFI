@@ -1,9 +1,13 @@
 import { DBConfig } from "ngx-indexed-db";
+import {
+  mergeRequiredIndexes,
+  VerifiStoreName,
+  VERIFI_DB_NAME,
+  VERIFI_DB_VERSION,
+  verifiMigrationFactory
+} from './indexed-db-schema';
 
-export const dbConfig: DBConfig = {
-  name: 'verifi',
-  version: 19,
-  objectStoresMeta: [{
+const objectStoresMeta: DBConfig['objectStoresMeta'] = [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: [
@@ -196,5 +200,17 @@ export const dbConfig: DBConfig = {
       { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
     ]
   }
-  ]
+  ];
+
+export const dbConfig: DBConfig = {
+  name: VERIFI_DB_NAME,
+  version: VERIFI_DB_VERSION,
+  objectStoresMeta: objectStoresMeta.map(storeMeta => ({
+    ...storeMeta,
+    storeSchema: mergeRequiredIndexes(
+      storeMeta.store as VerifiStoreName,
+      storeMeta.storeSchema
+    ) as typeof storeMeta.storeSchema
+  })),
+  migrationFactory: verifiMigrationFactory
 };

@@ -12,6 +12,7 @@ import { IdbFacility } from '../models/idbModels/facility';
 import { PredictorDbService } from './predictor-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { getNewAnalysisGroup, IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,8 @@ export class AnalysisDbService {
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private predictorDbService: PredictorDbService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
@@ -62,8 +64,7 @@ export class AnalysisDbService {
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let allAnalysisItesm: Array<IdbAnalysisItem> = await firstValueFrom(this.getAll())
-      let accounAnalysisItems: Array<IdbAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == selectedAccount.guid });
+      let accounAnalysisItems: Array<IdbAnalysisItem> = await this.getAllAccountAnalysisItems(selectedAccount.guid);
       this.accountAnalysisItems.next(accounAnalysisItems);
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       if (selectedFacility) {
@@ -84,17 +85,19 @@ export class AnalysisDbService {
   }
 
   async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAnalysisItem>> {
-    let allAnalysisItesm: Array<IdbAnalysisItem> = await firstValueFrom(this.getAll())
-    let analysisItems: Array<IdbAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
-    return analysisItems;
+    return this.indexedDbAccess.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountId);
   }
 
   getById(id: number): Observable<IdbAnalysisItem> {
     return this.dbService.getByKey('analysisItems', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbAnalysisItem> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbAnalysisItem> {
     return this.dbService.getByIndex('analysisItems', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbAnalysisItem | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbAnalysisItem>('analysisItems', guid);
   }
 
   count() {

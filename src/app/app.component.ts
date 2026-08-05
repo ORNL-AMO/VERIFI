@@ -46,6 +46,7 @@ import { FacilityEnergyUseGroupsDbService } from './indexedDB/facility-energy-us
 import { IdbFacilityEnergyUseGroup } from './models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseEquipmentDbService } from './indexedDB/facility-energy-use-equipment-db.service';
 import { IdbFacilityEnergyUseEquipment } from './models/idbModels/facilityEnergyUseEquipment';
+import { resolveInitialAccount, resolveInitialFacility } from './indexedDB/selection-resolvers';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -120,12 +121,7 @@ export class AppComponent {
       let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(accounts);
       let localStorageAccountId: number = this.accountDbService.getInitialAccount();
-      let account: IdbAccount;
-      if (localStorageAccountId) {
-        account = accounts.find(account => { return account.id == localStorageAccountId });
-      } else if (accounts.length != 0) {
-        account = accounts[0];
-      }
+      let account: IdbAccount = resolveInitialAccount(accounts, localStorageAccountId);
 
       await this.eGridService.parseZipCodeLongLat();
       await this.applicationInstanceDbService.initializeApplicationInstanceData();
@@ -161,9 +157,18 @@ export class AppComponent {
         }
         await this.updateAccountAnalysisSelectedItems(account);
         await this.updateFacilityAnalysisSelectedItems();
+        let selectedFacility = this.facilityDbService.selectedFacility.getValue();
+        if (selectedFacility) {
+          this.dbChangesService.setFacilitySelection(selectedFacility);
+        } else {
+          this.dbChangesService.clearFacilitySelection();
+        }
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
       } else {
+        this.accountDbService.clearInitialAccount();
+        this.facilityDbService.selectedFacility.next(undefined);
+        this.facilityDbService.clearInitialFacility();
         await this.eGridService.parseEGridData();
         await this.initializeElectronBackups();
 
@@ -189,9 +194,10 @@ export class AppComponent {
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
     this.facilityDbService.accountFacilities.next(accountFacilites);
     let localStorageFacilityId: number = this.facilityDbService.getInitialFacility();
-    if (localStorageFacilityId) {
-      let facility: IdbFacility = accountFacilites.find(facility => { return facility.id == localStorageFacilityId });
-      this.facilityDbService.selectedFacility.next(facility);
+    let facility: IdbFacility = resolveInitialFacility(account, accountFacilites, localStorageFacilityId);
+    this.facilityDbService.selectedFacility.next(facility);
+    if (!facility && localStorageFacilityId !== undefined && localStorageFacilityId !== null) {
+      this.facilityDbService.clearInitialFacility();
     }
   }
 
@@ -415,16 +421,11 @@ export class AppComponent {
   async updateFacilityAnalysisSelectedItems() {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     for (let facility of facilities) {
       let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
       if (updateFacility.isChanged) {
         facility = updateFacility.facility;
-        let onSelect: boolean = false;
-        if (selectedFacility && selectedFacility.id === facility.id) {
-          onSelect = true;
-        }
-        await this.dbChangesService.updateFacilities(facility, onSelect);
+        await this.dbChangesService.updateFacility(facility);
       }
     }
   }

@@ -46,6 +46,19 @@ Use this mode for code review, risk assessment, or final verification.
 
 Deliver prioritized findings with precise evidence. State explicitly when there are no actionable findings and identify any validation that could not be performed.
 
+## Test Engineer
+
+Use this SDET-style mode when the primary task is test strategy, test implementation, coverage-gap analysis, flaky-test analysis, or test-quality review. Combine it with Implementer when changing files, Investigator when diagnosing nondeterminism, and Reviewer when assessing a pull request.
+
+- Identify the behavior, plausible failures, affected contracts, and highest-cost regressions before choosing a test.
+- Select the lowest test layer that represents the real dependency or runtime boundary.
+- Separate automated coverage from visual, exploratory, accessibility, and operating-system checks.
+- Prefer deterministic inputs, minimal fixtures, observable outcomes, and failures that identify the broken contract.
+- Challenge mocks, snapshots, retries, coverage percentages, and implementation-detail assertions that create confidence without protecting behavior.
+- Check isolation, cleanup, asynchronous completion, and suite execution cost.
+
+Deliver a test decision or matrix, implemented coverage when authorized, focused and parent-gate results, intentional gaps, and any follow-up needed for missing infrastructure.
+
 ## Designer
 
 Use this mode for UI/UX planning, design review, or user-facing implementation.

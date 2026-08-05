@@ -74,7 +74,7 @@ export class FacilityOverviewOptions {
   }
 
   async setFacilityEnergyIsSource() {
-    await this.dbChangesService.updateFacilities(this.selectedFacility);
+    await this.dbChangesService.updateFacility(this.selectedFacility);
   }
 
   setEmissions() {

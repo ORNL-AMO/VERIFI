@@ -4,6 +4,7 @@ import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class FacilityReportsDbService {
   selectedReport: BehaviorSubject<IdbFacilityReport>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountFacilityReports = new BehaviorSubject<Array<IdbFacilityReport>>([]);
     this.facilityReports = new BehaviorSubject<Array<IdbFacilityReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbFacilityReport>(undefined);
@@ -37,17 +39,19 @@ export class FacilityReportsDbService {
   }
 
   async getAllFacilityReportsByAccountId(accountId: string): Promise<Array<IdbFacilityReport>> {
-    let allReports: Array<IdbFacilityReport> = await firstValueFrom(this.getAll())
-    let accountFacilityReports: Array<IdbFacilityReport> = allReports.filter(report => { return report.accountId == accountId });
-    return accountFacilityReports;
+    return this.indexedDbAccess.getAllByIndex<IdbFacilityReport>('facilityReports', 'accountId', accountId);
   }
 
   getById(id: number): Observable<IdbFacilityReport> {
     return this.dbService.getByKey('facilityReports', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbFacilityReport> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbFacilityReport> {
     return this.dbService.getByIndex('facilityReports', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbFacilityReport | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbFacilityReport>('facilityReports', guid);
   }
 
   count() {

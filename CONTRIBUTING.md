@@ -54,8 +54,8 @@ Pull requests must be made for all changes. Most pull requests should be made ag
 branch unless patching a bug that needs to be addressed immediately, and only core developers should
 make pull requests to the main branch.
 
-All pull requests, regardless of the base branch, must include updated documentation and pass all
-tests. In addition, code coverage should not be negatively affected.
+All pull requests, regardless of the base branch, must include relevant documentation and pass all
+required tests.
 
 When your branch is ready, make a pull request to the develop branch of ORNL-AMO/VERIFI through the
 [GitHub web interface](https://github.com/ORNL-AMO/VERIFI/pulls). Pull requests must reference an issue number. If an issue does not yet exist, please create one.
@@ -77,17 +77,19 @@ base. Be sure to write a complete description of these changes in the pull reque
 All tests must pass. Pull requests will be rejected or have changes requested if tests do not pass,
 or cannot pass with changes. Run the relevant checks locally before submission.
 
-VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs. Run `npm run test:all:ci` before opening a pull request. Install the local browser dependency once with `npx playwright install chromium`. Additional commands and test-suite conventions are documented in the [Readme](README.md).
+VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs. Run `npm run test:all:ci` before opening a pull request. Install the local browser dependency once with `npx playwright install chromium`.
 
-All code changes should be paired with a meaningful unit or integration test when behavior changes. Angular CLI-generated creation-only tests must be replaced with behavioral coverage or removed before merge; a passing `should create` assertion alone is not considered sufficient coverage.
+Every behavior-changing pull request must record its testing decision. Add or update the lowest-cost automated test that protects the changed behavior, or explain why useful automation is disproportionate and provide focused manual evidence. Bug fixes require a regression test when the failure can be reproduced at an existing tier; exceptions require a linked follow-up issue. Creation-only tests such as `should create` are not sufficient coverage.
+
+The [testing guide](docs/testing.md) defines the test layers, change decision table, deterministic design standards, executable examples, and exceptions for documentation, styling, and other non-behavioral changes.
 
 ### Test Automation
 
-The current GitHub Actions workflow runs on pushes to `master` and `develop`, plus manual dispatch. Its test job gates the downstream QA, web, and desktop release jobs. Pull request branches do not currently trigger this workflow, so contributors must run `npm run test:all:ci` locally before requesting review.
+The current GitHub Actions workflow runs for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. Its test job gates the downstream QA, web, and desktop release jobs. Contributors should still run the relevant tests locally before requesting review.
 
 ### Test Coverage
 
-At this time, our primary requirement is that all existing and new tests pass when a pull request is opened. We do not currently enforce a specific code coverage threshold. Coverage gates can be introduced once the test suite is representative of the application.
+`npm run test:coverage` produces an informational report for calculations, IndexedDB, and Web Workers. Coverage is not a pull-request gate, and no percentage threshold is enforced. Module-level baselines and ratchets may be introduced only after the associated tests are representative; a global threshold is not planned.
 
 ## Documentation
 

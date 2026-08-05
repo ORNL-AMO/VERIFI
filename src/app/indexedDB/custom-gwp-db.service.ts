@@ -4,6 +4,7 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
+import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ import { IdbCustomGWP } from '../models/idbModels/customGWP';
 export class CustomGWPDbService {
 
   accountCustomGWPs: BehaviorSubject<Array<IdbCustomGWP>>;
-  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
+  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+    private indexedDbAccess: IndexedDbAccessService) {
     this.accountCustomGWPs = new BehaviorSubject<Array<IdbCustomGWP>>([]);
   }
 
@@ -20,18 +22,19 @@ export class CustomGWPDbService {
   }
 
   async getAllAccountCustomGWP(accountId: string): Promise<Array<IdbCustomGWP>> {
-    let accountCustomGWP: Array<IdbCustomGWP> = await firstValueFrom(this.getAll());
-    let customFuels: Array<IdbCustomGWP> = accountCustomGWP.filter(item => { return item.accountId == accountId });
-    return customFuels;
-
+    return this.indexedDbAccess.getAllByIndex<IdbCustomGWP>('customGWP', 'accountId', accountId);
   }
 
   getById(id: number): Observable<IdbCustomGWP> {
     return this.dbService.getByKey('customGWP', id);
   }
 
-  getByIndex(indexName: string, indexValue: number): Observable<IdbCustomGWP> {
+  getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbCustomGWP> {
     return this.dbService.getByIndex('customGWP', indexName, indexValue);
+  }
+
+  getStoredByGuid(guid: string): Promise<IdbCustomGWP | undefined> {
+    return this.indexedDbAccess.getByGuid<IdbCustomGWP>('customGWP', guid);
   }
 
   count() {

@@ -236,6 +236,8 @@ export class DataOverviewReportPptAdapter {
             if (tableSlide) {
                 slides.push(tableSlide);
             }
+        }
+        if (this.reportSettings.includeFacilityDonut) {
             const chartSlide: ChartSlide = this.buildUtilityUsageChart(sectionType);
             if (chartSlide) {
                 slides.push(chartSlide);

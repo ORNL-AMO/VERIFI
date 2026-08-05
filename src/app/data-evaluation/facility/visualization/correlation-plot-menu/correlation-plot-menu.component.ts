@@ -75,7 +75,7 @@ export class CorrelationPlotMenuComponent {
   }
 
   async saveSiteOrSource() {
-    await this.dbChangesService.updateFacilities(this.facility);
+    await this.dbChangesService.updateFacility(this.facility);
   }
 
   setTimeSeriesLeftAxis() {

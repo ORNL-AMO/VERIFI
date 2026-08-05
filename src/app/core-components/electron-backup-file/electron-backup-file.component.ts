@@ -129,7 +129,7 @@ export class ElectronBackupFileComponent {
         this.showModal = false;
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
-        this.deleteDataService.pauseDelete.next(true);
+        this.deleteDataService.suspendQueuedDeletion();
         this.account.deleteAccount = true;
         await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
         let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
@@ -146,8 +146,7 @@ export class ElectronBackupFileComponent {
 
         await this.dbChangesService.updateAccount(newAccount);
         await this.dbChangesService.selectAccount(newAccount, false);
-        this.deleteDataService.pauseDelete.next(false);
-        this.deleteDataService.gatherAndDelete();
+        await this.deleteDataService.resumeQueuedDeletion();
         needUpdate = false;
 
         this.loadingService.isLoadingComplete.next(true);
