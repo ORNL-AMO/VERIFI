@@ -264,22 +264,28 @@ export class PptReportService {
   }
 
   private addImageSlide(pptx: pptxgen, model: ImageSlide): void {
-    if (!model.imageUrl?.trim()) {
+    if (!model.imageData?.trim()) {
       return;
     }
     const slide = pptx.addSlide({ masterName: SLIDE_MASTERS.TITLE_ONLY });
     slide.addText(model.title, { placeholder: 'title' });
     const { fullContent } = PPT_THEME.regions;
+    const noteText = model.note?.trim();
+    const noteHeight = noteText ? 0.3 : 0;
+    const imageHeight = fullContent.h - noteHeight;
     slide.addImage({
-      data: model.imageUrl,
+      data: model.imageData,
       x: fullContent.x,
       y: fullContent.y,
       w: fullContent.w,
-      h: fullContent.h,
+      h: imageHeight,
     });
-    if (model.note) {
-      slide.addText(model.note, {
-        x: fullContent.x, y: 5.3, w: fullContent.w, h: 0.25,
+    if (noteText) {
+      slide.addText(noteText, {
+        x: fullContent.x, 
+        y: fullContent.y + imageHeight + 0.05, 
+        w: fullContent.w, 
+        h: 0.25,
         fontSize: PPT_THEME.sizes.caption,
         color: PPT_THEME.colors.textLight,
         italic: true,

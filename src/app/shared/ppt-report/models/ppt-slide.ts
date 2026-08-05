@@ -57,7 +57,7 @@ export interface PptChartSeries {
 export interface ImageSlide {
     type: 'image';
     title: string;
-    imageUrl: string;
+    imageData: string;
     note?: string;
 }
 

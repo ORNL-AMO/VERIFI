@@ -343,7 +343,7 @@ export class DataOverviewReportPptAdapter {
         return {
             type: 'image',
             title: 'Map Overview',
-            imageUrl: imageUrl
+            imageData: imageUrl
         };
     }
 
@@ -406,7 +406,7 @@ export class DataOverviewReportPptAdapter {
         return {
             type: 'image',
             title: title,
-            imageUrl: imageUrl
+            imageData: imageUrl
         };
     }
 
@@ -1153,10 +1153,10 @@ export class DataOverviewReportPptAdapter {
         };
     }
 
-    private formatValue(value: number, isCurrrency: boolean): string {
+    private formatValue(value: number, isCurrency: boolean): string {
         if (value === null || isNaN(value) || value === 0 || value === undefined)
             return '—';
-        return this.customNumberPipe.transform(value, isCurrrency);
+        return this.customNumberPipe.transform(value, isCurrency);
     }
 
     private formatAddress(address?: string, city?: string, state?: string, zip?: string, country?: string): string {

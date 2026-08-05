@@ -369,6 +369,9 @@ export class DataOverviewReportComponent {
 
   async downloadPpt(): Promise<void> {
     const selectedReport = this.accountReportDbService.selectedReport.value;
+    if (!selectedReport) {
+      return;
+    }
     await new Promise(resolve => setTimeout(resolve, 100));
     const usageDonutImages = {
       energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
@@ -389,7 +392,7 @@ export class DataOverviewReportComponent {
       usageDonutImages: usageDonutImages,
       mapImages: mapImages,
     });
-    await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${selectedReport.name}.pptx`);
+    await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${selectedReport?.name}.pptx`);
   }
 }
 
