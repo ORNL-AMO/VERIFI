@@ -5,13 +5,12 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 
 # Implement an Angular feature
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), the relevant section of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Implementer mode in [`docs/agents/personas.md`](../../../docs/agents/personas.md). Add the Designer mode for user-facing work.
+1. Read [UI architecture](../../../ARCHITECTURE.md#ui-architecture) and the [Implementer](../../../docs/agents/personas.md#implementer) mode. Add the [Designer](../../../docs/agents/personas.md#designer) mode for user-facing work and [startup and application shell](../../../ARCHITECTURE.md#startup-and-application-shell) for routing or initialization.
 2. Trace the current workflow through `src/app/routing/`, its feature module, component, services, and shared dependencies. Inspect at least one neighboring screen that solves a similar problem.
 3. Define the behavior and state transitions before editing. For UI work, cover loading, empty, validation, error, disabled, and success states plus responsive and accessible behavior.
-4. Preserve the repository's NgModule-based, non-standalone component pattern unless the surrounding feature has deliberately migrated. Register declarations, imports, providers, and routes in the nearest existing module.
-5. Keep orchestration in components and reusable behavior in services, helpers, pipes, or shared components according to local precedent. Avoid moving domain calculations into templates or presentation components.
-6. Reuse Bootstrap, ng-bootstrap, Font Awesome, shared components, and existing style layers. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
-7. Add meaningful behavior tests. Replace or remove creation-only tests that do not verify the changed behavior.
+4. Keep orchestration in components and reusable behavior in services, helpers, pipes, or shared components according to local precedent. Avoid moving domain calculations into templates or presentation components.
+5. Reuse Bootstrap, ng-bootstrap, Font Awesome, shared components, and existing style layers. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
+6. Add meaningful behavior tests. Replace or remove creation-only tests that do not verify the changed behavior.
 
 ## Validate
 

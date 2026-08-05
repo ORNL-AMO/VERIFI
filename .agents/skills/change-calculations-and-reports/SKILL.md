@@ -5,7 +5,7 @@ description: Change VERIFI calculations, conversions, validation/status checks, 
 
 # Change calculations and reports
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), the calculation/Worker section of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Implementer and Reviewer modes in [`docs/agents/personas.md`](../../../docs/agents/personas.md).
+1. Read [Calculations, Workers, and reports](../../../ARCHITECTURE.md#calculations-workers-and-reports) plus the [Implementer](../../../docs/agents/personas.md#implementer) and [Reviewer](../../../docs/agents/personas.md#reviewer) modes.
 2. Locate the pure calculation under `src/app/calculations/` or `src/app/shared/shared-analysis/calculations/`. Trace every caller, relevant model, Worker, dashboard, report component, and file writer before editing.
 3. State the formula, units, aggregation level, date boundaries, missing-data behavior, and rounding policy. Preserve full precision until the existing presentation boundary unless the domain rule says otherwise.
 4. Keep calculation code deterministic. Avoid DOM, Angular service, IndexedDB, or Electron dependencies in code shared with Workers.

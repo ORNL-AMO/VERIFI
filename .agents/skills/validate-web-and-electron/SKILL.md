@@ -5,7 +5,7 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 
 # Validate web and Electron behavior
 
-1. Read [`AGENTS.md`](../../../AGENTS.md), [`docs/testing.md`](../../../docs/testing.md), the delivery and runtime sections of [`ARCHITECTURE.md`](../../../ARCHITECTURE.md), and the Reviewer and Test Engineer modes in [`docs/agents/personas.md`](../../../docs/agents/personas.md).
+1. Read [what a change requires](../../../docs/testing.md#what-a-change-requires), [commands and CI](../../../docs/testing.md#commands-and-ci), [Web and Electron boundary](../../../ARCHITECTURE.md#web-and-electron-boundary), [tests, builds, and delivery](../../../ARCHITECTURE.md#tests-builds-and-delivery), and the [Reviewer](../../../docs/agents/personas.md#reviewer) and [Test Engineer](../../../docs/agents/personas.md#test-engineer) modes.
 2. Inspect the diff and classify every changed behavior:
    - Pure TypeScript, Angular service/component, pipe, or ordinary utility.
    - IndexedDB, Web Worker, File API, or another native browser dependency.
