@@ -1,4 +1,4 @@
-export type PptSlide = TitleSlide | TableSlide | ChartSlide;
+export type PptSlide = TitleSlide | TableSlide | ChartSlide | ImageSlide;
 
 export interface TableHeaderCell {
     content: string;
@@ -11,6 +11,8 @@ export interface TitleSlide {
     subtitle?: string;
     date?: string;
     layout?: 'title' | 'titleOnly' | 'section';
+    titleFontSize?: number;
+    subtitleFontSize?: number;
 }
 
 export interface TableSlide {
@@ -37,6 +39,10 @@ export interface ChartSlide {
     showDataLabels?: boolean;
     lineDash?: 'solid' | 'dash' | 'dot';
     note?: string;
+    barDir?: 'col' | 'bar';
+    barColors?: string[];
+    barGapWidthPct?: number;
+    barGrouping?: 'clustered' | 'stacked' | 'percentStacked';
 }
 
 export interface PptChartSeries {
@@ -46,6 +52,13 @@ export interface PptChartSeries {
     color?: string;
     lineDash?: 'solid' | 'dash' | 'dot' | 'dashDot';
     lineSize?: number;
+}
+
+export interface ImageSlide {
+    type: 'image';
+    title: string;
+    imageUrl: string;
+    note?: string;
 }
 
 export interface PptAxisSpec {

@@ -28,6 +28,8 @@ import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/expor
 import { DataOverviewReportAdapter } from './data-overview-report.adapter';
 import { DataOverviewAccountReportComponent } from './data-overview-account-report/data-overview-account-report.component';
 import { DataOverviewFacilityReportComponent } from './data-overview-facility-report/data-overview-facility-report.component';
+import { DataOverviewReportPptAdapter } from './data-overview-report-ppt.adapter';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -70,7 +72,9 @@ export class DataOverviewReportComponent {
     private dataEvaluationService: DataEvaluationService,
     private customGWPDbService: CustomGWPDbService,
     private exportReportPdfService: ExportReportPdfService,
-    private dataOverviewReportAdapter: DataOverviewReportAdapter) {
+    private dataOverviewReportAdapter: DataOverviewReportAdapter,
+    private dataOverviewReportPptAdapter: DataOverviewReportPptAdapter,
+    private pptReportService: PptReportService) {
 
   }
 
@@ -361,6 +365,31 @@ export class DataOverviewReportComponent {
     });
 
     return map;
+  }
+
+  async downloadPpt(): Promise<void> {
+    const selectedReport = this.accountReportDbService.selectedReport.value;
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const usageDonutImages = {
+      energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
+      cost: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'cost') ?? '',
+      water: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'water') ?? '',
+    }
+    const mapImages = {
+      energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'energyUse') ?? '',
+      cost: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'cost') ?? '',
+      water: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'water') ?? '',
+    }
+    const document = this.dataOverviewReportPptAdapter.buildDocument({
+      account: this.account,
+      report: selectedReport,
+      reportSettings: this.overviewReport,
+      accountData: this.accountData,
+      facilitiesData: this.facilitiesData,
+      usageDonutImages: usageDonutImages,
+      mapImages: mapImages,
+    });
+    await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${selectedReport.name}.pptx`);
   }
 }
 
