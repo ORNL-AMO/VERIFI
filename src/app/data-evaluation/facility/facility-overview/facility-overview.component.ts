@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
@@ -28,6 +30,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class FacilityOverviewComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilitySub: Subscription;
   worker: Worker;
@@ -48,7 +51,7 @@ export class FacilityOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.customFuels = this.customFuelsDbService.accountCustomFuels.getValue();
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       if (this.facility && this.facility.guid != val.guid) {
         this.dateRange = undefined;
       }
@@ -88,7 +91,7 @@ export class FacilityOverviewComponent implements OnInit {
   calculateFacilitiesSummary() {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/facility-overview.worker', import.meta.url));
@@ -153,7 +156,7 @@ export class FacilityOverviewComponent implements OnInit {
   }
 
   addUtilityData() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility');
   }
 }

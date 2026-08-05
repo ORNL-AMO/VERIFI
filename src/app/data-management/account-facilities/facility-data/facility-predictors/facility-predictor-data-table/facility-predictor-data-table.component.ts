@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -17,6 +18,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   standalone: false
 })
 export class FacilityPredictorDataTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   predictor: IdbPredictor;
@@ -37,7 +39,7 @@ export class FacilityPredictorDataTableComponent {
   }
 
   ngOnInit() {
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {

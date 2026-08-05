@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { AssessmentReportVersion } from 'src/app/models/idbModels/account';
@@ -10,6 +11,7 @@ import { AssessmentReportVersion } from 'src/app/models/idbModels/account';
     standalone: false
 })
 export class ExistingGwpsModalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitClose')
   emitClose: EventEmitter<GlobalWarmingPotential> = new EventEmitter();
 
@@ -22,7 +24,7 @@ export class ExistingGwpsModalComponent {
   }
 
   ngOnInit() {
-    this.assessmentReportVersion = this.accountDbService.selectedAccount.getValue().assessmentReportVersion;
+    this.assessmentReportVersion = this.accountWorkspaceStore.account().assessmentReportVersion;
     setTimeout(() => {
       this.displayModal = true;
     }, 100);

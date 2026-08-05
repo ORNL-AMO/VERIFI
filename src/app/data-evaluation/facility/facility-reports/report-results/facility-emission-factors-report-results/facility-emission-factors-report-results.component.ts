@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
@@ -23,6 +24,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   styleUrl: './facility-emission-factors-report-results.component.css'
 })
 export class FacilityEmissionFactorsReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   emissionFactorsReportSettings: EmissionFactorsReportSettings;
@@ -64,7 +66,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
   }
 
   calculateFacilitiesSummary() {
-    this.facility = this.facilityDbService.getFacilityById(this.facilityReport.facilityId);
+    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.facilityReport.facilityId));
     let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
 
     this.facilityMeters.forEach(meter => {

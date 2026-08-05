@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
@@ -19,6 +20,7 @@ import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterD
   styleUrl: './update-weather-predictors-modal.component.css'
 })
 export class UpdateWeatherPredictorsModalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitClose') emitClose = new EventEmitter<void>();
   @Input() fileReference: FileReference;
 
@@ -72,7 +74,7 @@ export class UpdateWeatherPredictorsModalComponent {
 
   setFacilityList() {
     this.facilityList = new Array();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if(this.fileReference){
       facilities = this.fileReference.importFacilities;
     }

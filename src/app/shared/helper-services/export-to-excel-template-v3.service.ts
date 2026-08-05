@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -29,6 +30,7 @@ import { getDateFromMeterData } from '../dateHelperFunctions';
   providedIn: 'root'
 })
 export class ExportToExcelTemplateV3Service {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   alphabet: Array<string>;
   exportBlob: Blob;
@@ -58,7 +60,7 @@ export class ExportToExcelTemplateV3Service {
           let month: string = (date.getMonth() + 1).toString().padStart(2, '0');
           let day: string = date.getDate().toString().padStart(2, '0');
           let formatedDate: string = month + '-' + day + '-' + date.getFullYear();
-          let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+          let account: IdbAccount = this.accountWorkspaceStore.account();
           let accountName: string = account.name;
           accountName = accountName.replaceAll(' ', '-');
           accountName = accountName.replaceAll('.', '_');
@@ -180,7 +182,7 @@ export class ExportToExcelTemplateV3Service {
   //===== Facility Worksheet =====//
   setFacilityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Facilities');
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilityId) {
       accountFacilities = accountFacilities.filter(facility => { return facility.guid == facilityId });
     }
@@ -239,7 +241,7 @@ export class ExportToExcelTemplateV3Service {
     if (facilityId) {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Electricity' });
     let index: number = 3;
     electricityMeters.forEach(meter => {
@@ -322,7 +324,7 @@ export class ExportToExcelTemplateV3Service {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
     }
     let stationaryMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Natural Gas' || (meter.source == 'Other Fuels' && meter.scope != 2) });
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let index: number = 3;
     stationaryMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
@@ -414,7 +416,7 @@ export class ExportToExcelTemplateV3Service {
     }
     worksheet.state = 'visible';
 
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let index: number = 3;
     mobileMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
@@ -547,7 +549,7 @@ export class ExportToExcelTemplateV3Service {
     }
     worksheet.state = 'visible';
 
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let index: number = 3;
     otherEnergyMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
@@ -632,7 +634,7 @@ export class ExportToExcelTemplateV3Service {
       return worksheet;
     }
     worksheet.state = 'visible';
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let index: number = 3;
     otherMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
@@ -717,7 +719,7 @@ export class ExportToExcelTemplateV3Service {
       return worksheet;
     }
     worksheet.state = 'visible';
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let index: number = 3;
     waterMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
@@ -838,7 +840,7 @@ export class ExportToExcelTemplateV3Service {
   //===== Predictors =====//
   setPredictorsWorksheet(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictor Setup');
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilityId) {
       facilities = facilities.filter(facility => { return facility.guid == facilityId });
     }
@@ -849,7 +851,7 @@ export class ExportToExcelTemplateV3Service {
     if (!includeWeatherData) {
       predictors = predictors.filter(predictor => { return predictor.predictorType != 'Weather' });
     }
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
 
     let index: number = 3;
     predictors.forEach(predictor => {
@@ -873,7 +875,7 @@ export class ExportToExcelTemplateV3Service {
 
   setPredictorDataWorksheet(workbook: ExcelJS.Workbook, includeWeatherData: boolean, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Predictors');
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilityId) {
       facilities = facilities.filter(facility => { return facility.guid == facilityId });
     }

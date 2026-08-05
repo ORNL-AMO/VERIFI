@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../../../indexedDB/facility-db.service';
@@ -46,6 +47,7 @@ import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions
   providedIn: 'root'
 })
 export class UploadDataService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileReferences: Array<FileReference>;
   allFilesSet: BehaviorSubject<boolean>;
@@ -80,7 +82,7 @@ export class UploadDataService {
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
     let isTemplate: TemplateVersion = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
-      let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+      let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
       return {
         name: file.name,
         file: file,
@@ -145,7 +147,7 @@ export class UploadDataService {
       };
     } else if (isTemplate == 'Footprint-tool') {
       console.log('parsing footprint tool template');
-      // let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+      // let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
       let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
       return {
         name: file.name,
@@ -265,7 +267,7 @@ export class UploadDataService {
       if (dbGroup) {
         return { group: dbGroup, newGroups: newGroups }
       } else if (groupName) {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         dbGroup = getNewIdbUtilityMeterGroup("Energy", groupName, facilityId, account.guid);
         newGroups.push(dbGroup);
         return { group: dbGroup, newGroups: newGroups }
@@ -478,7 +480,7 @@ export class UploadDataService {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
 
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
 
     let predictorData: Array<IdbPredictorData> = new Array();
     let predictors: Array<IdbPredictor> = new Array();
@@ -702,7 +704,7 @@ export class UploadDataService {
       }
     }
 
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.loadingService.setCurrentLoadingIndex(6);
     await this.dbChangesService.selectAccount(selectedAccount, false);
     fileReference.dataSubmitted = true;

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
@@ -24,6 +25,7 @@ import { getEarliestMeterData, getEarliestMeterDataDate, getEarliestPredictorDat
   styleUrl: './submit-import-data.component.css'
 })
 export class SubmitImportDataComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference;
   paramsSub: Subscription;
   navSub: Subscription;
@@ -61,7 +63,7 @@ export class SubmitImportDataComponent {
     this.navSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'submit-file-data') {
         this.uploadDataService.navigate();
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
         this.loadingService.navigationAfterLoading.next(undefined);
       }

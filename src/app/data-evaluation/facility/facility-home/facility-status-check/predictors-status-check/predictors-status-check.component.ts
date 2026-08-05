@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
@@ -12,6 +13,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   styleUrl: './predictors-status-check.component.css'
 })
 export class PredictorsStatusCheckComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true }) predictorsStatusChecks: Array<PredictorStatusCheck>;
   @Input({ required: true }) predictorsStatus: STATUS_CHECK_OPTIONS;
   @Input({ required: true }) hasNoPredictors: boolean;
@@ -21,7 +23,7 @@ export class PredictorsStatusCheckComponent {
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
 
   goToPredictor(predictorId: string) {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl(`/data-evaluation/facility/${facility.guid}/utility/predictors/predictor/${predictorId}/entries-table`);
   }
 }

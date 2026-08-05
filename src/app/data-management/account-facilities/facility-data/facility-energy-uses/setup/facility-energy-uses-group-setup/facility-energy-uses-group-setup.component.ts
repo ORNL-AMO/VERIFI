@@ -1,3 +1,5 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -24,6 +26,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-uses-group-setup.component.css'
 })
 export class FacilityEnergyUsesGroupSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private loadingService: LoadingService = inject(LoadingService);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
@@ -58,7 +61,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
       }
     });
     this.isNew = this.router.url.includes('new-setup');
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
     });
     this.initEnergyUseGroups();
@@ -162,7 +165,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
       //delete equipment associated with group
       await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(group.guid);
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, this.facility);
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
     this.loadingService.setLoadingStatus(false);

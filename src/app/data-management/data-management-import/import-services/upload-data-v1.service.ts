@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -29,6 +30,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   providedIn: 'root'
 })
 export class UploadDataV1Service {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
@@ -41,8 +43,8 @@ export class UploadDataV1Service {
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];
       if (facilityName) {

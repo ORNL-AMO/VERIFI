@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -22,6 +23,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountReportsDashboardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
@@ -31,13 +33,13 @@ export class AccountReportsDashboardComponent {
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
 
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   newReportType: ReportType = 'betterPlants';
   displayNewReport: boolean = false;
 
   async createNewReport() {
     const account: IdbAccount = this.selectedAccount();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     newReport.reportType = this.newReportType;

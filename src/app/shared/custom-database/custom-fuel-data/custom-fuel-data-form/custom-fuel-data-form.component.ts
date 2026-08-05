@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -25,6 +26,7 @@ import { convertHeatCapacity } from 'src/app/shared/sharedHelperFunctions';
   standalone: false
 })
 export class CustomFuelDataFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
   editCustomFuel: IdbCustomFuel;
@@ -50,7 +52,7 @@ export class CustomFuelDataFormComponent {
     this.accountCustomFuels = this.customFuelDbService.accountCustomFuels.getValue();
     this.setAllFuelNames();
     this.isAdd = this.router.url.includes('add');
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     if (this.isAdd) {
       this.editCustomFuel = getNewAccountCustomFuel(this.selectedAccount);
       this.setForm(this.editCustomFuel);

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -17,6 +19,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
     standalone: false
 })
 export class FacilityOverviewReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   reportSettings: DataOverviewFacilityReportSettings;
@@ -38,7 +41,7 @@ export class FacilityOverviewReportSetupComponent {
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.account = account;
     });
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
@@ -63,7 +66,7 @@ export class FacilityOverviewReportSetupComponent {
     let facilityReport: IdbFacilityReport = this.facilityReportsDbService.selectedReport.getValue();
     this.facilityReport.dataOverviewReportSettings = this.reportSettings;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(facilityReport));
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(this.account, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(facilityReport);
   }

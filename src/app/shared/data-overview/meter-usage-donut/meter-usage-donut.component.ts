@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
@@ -15,6 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   standalone: false
 })
 export class MeterUsageDonutComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
@@ -36,7 +38,7 @@ export class MeterUsageDonutComponent {
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
 

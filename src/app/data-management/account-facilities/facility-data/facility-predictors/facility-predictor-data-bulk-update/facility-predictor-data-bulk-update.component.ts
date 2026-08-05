@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -13,6 +14,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   standalone: false
 })
 export class FacilityPredictorDataBulkUpdateComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
   constructor(private activatedRoute: ActivatedRoute,
@@ -44,7 +46,7 @@ export class FacilityPredictorDataBulkUpdateComponent {
   }
 
   goToManagePredictors() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors')
   }
 }

@@ -1,4 +1,5 @@
-import { Component, QueryList, ViewChildren } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -33,6 +34,7 @@ import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
   standalone: false
 })
 export class FacilityOverviewReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   overviewReportSettings: DataOverviewFacilityReportSettings;
@@ -92,7 +94,7 @@ export class FacilityOverviewReportResultsComponent {
 
   calculateFacilitiesSummary() {
     this.calculating = true;
-    this.facility = this.facilityDbService.getFacilityById(this.facilityReport.facilityId);
+    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.facilityReport.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
     if (this.overviewReportSettings.includeAllMeterData == false) {
@@ -112,7 +114,7 @@ export class FacilityOverviewReportResultsComponent {
       startDate: new Date(this.overviewReportSettings.startYear, this.overviewReportSettings.startMonth, 1),
       endDate: new Date(this.overviewReportSettings.endYear, this.overviewReportSettings.endMonth, 1)
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

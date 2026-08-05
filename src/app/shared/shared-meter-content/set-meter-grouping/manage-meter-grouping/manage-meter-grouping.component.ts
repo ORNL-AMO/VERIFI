@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -22,6 +24,7 @@ import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models
   styleUrl: './manage-meter-grouping.component.css',
 })
 export class ManageMeterGroupingComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
 
@@ -60,7 +63,7 @@ export class ManageMeterGroupingComponent {
       this.hasWaterMeters = this.facilityMeters.find(meter => { return meter.source == 'Water Discharge' || meter.source == 'Water Intake' }) != undefined;
       this.ungroupedMeters = this.facilityMeters.filter(meter => { return meter.groupId == undefined })
     });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
       this.ungroupedMeterGroup = getNewIdbUtilityMeterGroup('Other', "Ungrouped Meters", facility.guid, facility.accountId);
       this.ungroupedMeterGroup.guid = undefined;
@@ -86,7 +89,7 @@ export class ManageMeterGroupingComponent {
     let newGroupType: 'Energy' | 'Water' | 'Other' = this.hasEnergyMeters ? 'Energy' : this.hasWaterMeters ? 'Water' : 'Other';
     let newGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(newGroupType, "New Group", this.facility.guid, this.facility.accountId);
     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.analysisDbService.addGroup(newGroup.guid, newGroup.groupType);
     await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     await this.dbChangesService.setMeterGroups(account, this.facility);
@@ -110,7 +113,7 @@ export class ManageMeterGroupingComponent {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id));
     await this.dbChangesService.setMeterGroups(selectedAccount, this.facility);
     let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == this.groupToDelete.guid });

@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -19,6 +20,7 @@ import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/c
   styleUrl: './facility-energy-uses-group-footprint.component.css',
 })
 export class FacilityEnergyUsesGroupFootprintComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -28,7 +30,7 @@ export class FacilityEnergyUsesGroupFootprintComponent {
   private calanderizationService = inject(CalanderizationService);
 
   facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
-  selectedFacility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  selectedFacility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
 
 

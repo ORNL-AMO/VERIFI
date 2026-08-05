@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -29,6 +30,7 @@ type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
   standalone: false
 })
 export class RegressionModelSelectionComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -38,7 +40,7 @@ export class RegressionModelSelectionComponent {
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
@@ -208,7 +210,7 @@ export class RegressionModelSelectionComponent {
     updatedGroups[groupIndex] = _group;
     const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(_group);

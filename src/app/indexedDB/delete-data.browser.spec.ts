@@ -2,11 +2,9 @@ import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 import { IdbAccount } from '../models/idbModels/account';
 import { dbConfig } from './_dbConfig';
-import { AccountdbService } from './account-db.service';
 import { ACCOUNT_DELETION_STORES, GLOBAL_PERSISTENCE_STORES } from './account-deletion.config';
 import { DeleteDataService } from './delete-data.service';
 import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
-import { IndexedDbAccessService } from './indexed-db-access.service';
 import {
   IndexedDbTransactionContext,
   IndexedDbTransactionService
@@ -76,20 +74,6 @@ describe('account deletion in Chromium', () => {
   }
 
   function createDeleteDataService(): DeleteDataService {
-    const accountDbService = new AccountdbService(
-      harness.dbService,
-      {
-        retrieve: vi.fn(),
-        store: vi.fn(),
-        clear: vi.fn()
-      } as any,
-      { isElectron: false } as any,
-      new IndexedDbAccessService(harness.dbService)
-    );
-    accountDbService.allAccounts.next([
-      accountAFixture.account as unknown as IdbAccount,
-      accountBFixture.account as unknown as IdbAccount
-    ]);
     const transactionService = new IndexedDbTransactionService(indexedDB, {
       [harness.databaseName]: {
         ...dbConfig,
@@ -97,7 +81,12 @@ describe('account deletion in Chromium', () => {
       }
     });
     const cascadeDeleteService = new IndexedDbCascadeDeleteService(transactionService);
-    return new DeleteDataService(accountDbService, cascadeDeleteService);
+    return new DeleteDataService(
+      cascadeDeleteService,
+      { refreshAccountCatalog: vi.fn().mockResolvedValue([accountBFixture.account]) } as any,
+      { clear: vi.fn() } as any,
+      { account: vi.fn().mockReturnValue(accountAFixture.account) } as any
+    );
   }
 
   async function expectAccountBAndGlobalsOnly(): Promise<void> {

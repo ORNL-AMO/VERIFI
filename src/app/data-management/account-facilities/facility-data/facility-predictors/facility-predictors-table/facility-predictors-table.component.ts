@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -10,6 +12,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   standalone: false
 })
 export class FacilityPredictorsTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription
@@ -18,7 +21,7 @@ export class FacilityPredictorsTableComponent {
   }
 
   ngOnInit() {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.selectedFacility = facility;
     });
   }

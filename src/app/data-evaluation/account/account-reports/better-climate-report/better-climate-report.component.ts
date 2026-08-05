@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
@@ -30,6 +31,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class BetterClimateReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -67,7 +69,7 @@ export class BetterClimateReportComponent {
     } else {
       this.betterClimateReportSetup = this.selectedReport.betterClimateReportSetup;
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.calculateCarbonReport();
     this.setCellWidth();
 
@@ -90,7 +92,7 @@ export class BetterClimateReportComponent {
 
 
   calculateCarbonReport() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()

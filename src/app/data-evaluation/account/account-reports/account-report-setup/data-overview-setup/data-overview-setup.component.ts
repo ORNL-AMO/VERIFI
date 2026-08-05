@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -16,6 +17,7 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
     standalone: false
 })
 export class DataOverviewSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // overviewForm: FormGroup;
   account: IdbAccount;
@@ -31,7 +33,7 @@ export class DataOverviewSetupComponent {
 
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.reportSetup = val.dataOverviewReportSetup;

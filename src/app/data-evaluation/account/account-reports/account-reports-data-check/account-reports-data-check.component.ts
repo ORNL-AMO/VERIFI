@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -21,6 +22,7 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './account-reports-data-check.component.css',
 })
 export class AccountReportsDataCheckComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   account: IdbAccount;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -42,7 +44,7 @@ export class AccountReportsDataCheckComponent {
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
 
     this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
       this.setFacilityItems(items);
@@ -59,7 +61,7 @@ export class AccountReportsDataCheckComponent {
     if (this.selectedAnalysisItem) {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       await this.dbChangesService.setAccountAnalysisItems(account, true);
       this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
     }
@@ -93,7 +95,7 @@ export class AccountReportsDataCheckComponent {
   initializeGroups() {
     this.executiveSummaryItems = [];
     this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityAnalysisItem.facilityId);
+      let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityAnalysisItem.facilityId));
       facilityAnalysisItem.groups.forEach(group => {
         if (group.analysisType == 'regression') {
           let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);

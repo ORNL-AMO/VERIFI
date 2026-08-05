@@ -1,3 +1,5 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -12,6 +14,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   styleUrl: './facility-energy-uses-setup-options.component.css',
 })
 export class FacilityEnergyUsesSetupOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -31,7 +34,7 @@ export class FacilityEnergyUsesSetupOptionsComponent {
     });
     this.setHasChildRoute();
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
     });
     this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {

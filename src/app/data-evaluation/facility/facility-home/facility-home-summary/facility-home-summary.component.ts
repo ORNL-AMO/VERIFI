@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -20,6 +21,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class FacilityHomeSummaryComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private router: Router = inject(Router);
@@ -27,7 +29,7 @@ export class FacilityHomeSummaryComponent {
   private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private loadingService: LoadingService = inject(LoadingService);
 
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData, { initialValue: [] });
   facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: [] });
@@ -75,7 +77,7 @@ export class FacilityHomeSummaryComponent {
 
   exportData() {
     this.showExportModal = false;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.loadingService.setContext('export-facilities-to-excel');
     this.loadingService.setTitle('Exporting Facility');
     this.exportToExcelTemplateV3Service.setExportFacilityDataMessages();

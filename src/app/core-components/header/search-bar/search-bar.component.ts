@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, OperatorFunction } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -20,6 +21,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class SearchBarComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   searchModel: string;
   facilityList: Array<{ name: string, guid: string, id: number }>;
@@ -36,7 +38,7 @@ export class SearchBarComponent implements OnInit {
   }
 
   setOptions() {
-    let facilityItems: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityItems: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
@@ -146,7 +148,7 @@ export class SearchBarComponent implements OnInit {
   }
 
   getFacility(guid: string): IdbFacility {
-    let facilityItems: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityItems: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     return facilityItems.find(facilityItem => { return facilityItem.guid == guid });
   }
 }

@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -30,6 +31,7 @@ import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculation
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -88,8 +90,8 @@ export class FacilityEnergyUseGroupComponent {
     this.form.markAsPristine();
     this.energyUseGroup = this.facilityEnergyUseGroupFormService.updateEnergyUseGroupFromForm(this.energyUseGroup, this.form);
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(this.energyUseGroup));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
   }
@@ -114,8 +116,8 @@ export class FacilityEnergyUseGroupComponent {
     //delete equipment associated with group
     await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(this.energyUseGroup.guid);
     //set groups
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
     //set equipment
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
@@ -126,7 +128,7 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   goToGroupList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses')
   }
 
@@ -149,11 +151,11 @@ export class FacilityEnergyUseGroupComponent {
 
   async addEquipment() {
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let latestYear: number = getLatestYearWithData(calanderizedMeters, [facility]);
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, latestYear);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);
   }
@@ -173,8 +175,8 @@ export class FacilityEnergyUseGroupComponent {
       equipment.selected = false;
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(equipment));
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
     this.showBulkTransfer = false;
     this.loadingService.setLoadingStatus(false);
@@ -199,8 +201,8 @@ export class FacilityEnergyUseGroupComponent {
     for (let i = 0; i < this.selectedEquipment.length; i++) {
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.deleteWithObservable(this.selectedEquipment[i].id));
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
     this.showBulkDelete = false;
     this.loadingService.setLoadingStatus(false);

@@ -1,11 +1,11 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -35,8 +35,7 @@ export class AccountStatusCheckService implements OnDestroy {
     private sub: Subscription;
 
     constructor(
-        private accountDbService: AccountdbService,
-        private facilityDbService: FacilitydbService,
+        private accountWorkspaceStore: AccountWorkspaceStore,
         private utilityMeterDbService: UtilityMeterdbService,
         private utilityMeterDataDbService: UtilityMeterDatadbService,
         private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -50,7 +49,7 @@ export class AccountStatusCheckService implements OnDestroy {
     ) {
         this.selectedFacilityStatusCheck$ = combineLatest([
             this.accountStatusCheck,
-            this.facilityDbService.selectedFacility
+            toObservable(this.accountWorkspaceStore.selectedFacility)
         ]).pipe(
             map(([accountCheck, facility]) =>
                 accountCheck?.facilityStatusChecks.find(fc => fc.facility.guid === facility?.guid)
@@ -58,8 +57,8 @@ export class AccountStatusCheckService implements OnDestroy {
         );
 
         this.sub = combineLatest([
-            this.accountDbService.selectedAccount,
-            this.facilityDbService.accountFacilities,
+            toObservable(this.accountWorkspaceStore.account),
+            toObservable(this.accountWorkspaceStore.facilities),
             this.utilityMeterDbService.accountMeters,
             this.utilityMeterDataDbService.accountMeterData,
             this.utilityMeterGroupDbService.accountMeterGroups,
@@ -90,9 +89,10 @@ export class AccountStatusCheckService implements OnDestroy {
                 return;
             }
             const facilityReportsForAccount = (facilityReports ?? []).filter(report => report.accountId === account.guid);
+            const facilitiesForAccount = [...facilities];
             const accountAnalysisItemsForAccount = (accountAnalysisItems ?? []).filter(item => item.accountId === account.guid);
             const accountReportsForAccount = (accountReports ?? []).filter(report => report.accountId === account.guid);
-            const isConsistentSnapshot = this.isCollectionForAccount(facilities, account.guid, facility => facility.accountId) &&
+            const isConsistentSnapshot = this.isCollectionForAccount(facilitiesForAccount, account.guid, facility => facility.accountId) &&
                 this.isCollectionForAccount(meters, account.guid, meter => meter.accountId) &&
                 this.isCollectionForAccount(meterData, account.guid, data => data.accountId) &&
                 this.isCollectionForAccount(meterGroups, account.guid, group => group.accountId) &&
@@ -109,7 +109,7 @@ export class AccountStatusCheckService implements OnDestroy {
             }
             const statusCheck = new AccountStatusCheck(
                 account,
-                facilities,
+                facilitiesForAccount,
                 meters,
                 meterData,
                 meterGroups,

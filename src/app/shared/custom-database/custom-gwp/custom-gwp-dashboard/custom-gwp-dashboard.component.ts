@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -15,6 +17,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class CustomGwpDashboardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   customGWPs: Array<IdbCustomGWP>;
   customGWPsSub: Subscription;
@@ -32,7 +35,7 @@ export class CustomGwpDashboardComponent {
       this.customGWPs = val;
     });
 
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.selectedAccount = val;
     });
   }

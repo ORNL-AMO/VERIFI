@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -17,6 +18,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
   standalone: false
 })
 export class PerformanceSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   performanceReportForm: FormGroup;
   account: IdbAccount;
@@ -34,7 +36,7 @@ export class PerformanceSetupComponent {
   }
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.performanceReportForm = this.accountReportsService.getPerformanceFormFromReport(val.performanceReportSetup);

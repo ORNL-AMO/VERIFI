@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
@@ -17,6 +18,7 @@ import { ImportBackupModalService } from 'src/app/core-components/import-backup-
   standalone: false
 })
 export class UploadFilesComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileUploadError: boolean;
   dragOver: boolean = false;
@@ -99,7 +101,7 @@ export class UploadFilesComponent {
   }
 
   goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + account.guid + '/account-setup');
   }
 
@@ -107,13 +109,13 @@ export class UploadFilesComponent {
     if (this.fileReferences.length > 0) {
       this.goToFile(this.fileReferences[0]);
     } else {
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       this.router.navigateByUrl('/data-management/' + account.guid + '/facilities');
     }
   }
 
   goToFile(fileReference: FileReference) {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (fileReference.isTemplate) {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/process-template-file/' + fileReference.id)
     } else if (fileReference.isFootprintToolTemplate) {

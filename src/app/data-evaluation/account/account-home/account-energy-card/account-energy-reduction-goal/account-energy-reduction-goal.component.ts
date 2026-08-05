@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -19,6 +20,7 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
   standalone: false
 })
 export class AccountEnergyReductionGoalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
@@ -27,7 +29,7 @@ export class AccountEnergyReductionGoalComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   latestAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyEnergyAnalysisData, { initialValue: [] });
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: null });
 

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -9,6 +10,7 @@ import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calcul
   providedIn: 'root',
 })
 export class ModelingExecutiveSummaryExcelWriter {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   workbook: ExcelJS.Workbook;
   maxPredictorCount: number;
@@ -101,7 +103,7 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (regressionGroupItems?.length > 0) {
       regressionGroupItems.forEach(item => {
         let row = [
-          this.facilityDbService.getFacilityNameById(item.facilityId),
+          (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? ''),
           this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
           item.baselineYear,
           item.group.regressionModelYear,
@@ -127,7 +129,7 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (classicIntensityGroupItems?.length > 0) {
       classicIntensityGroupItems.forEach(item => {
         let row = [
-          this.facilityDbService.getFacilityNameById(item.facilityId),
+          (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? ''),
           this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
           item.baselineYear,
           '—',
@@ -150,7 +152,7 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (absoluteGroupItems?.length > 0) {
       absoluteGroupItems.forEach(item => {
         let row = [
-          this.facilityDbService.getFacilityNameById(item.facilityId),
+          (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? ''),
           this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
           item.baselineYear,
           '—',

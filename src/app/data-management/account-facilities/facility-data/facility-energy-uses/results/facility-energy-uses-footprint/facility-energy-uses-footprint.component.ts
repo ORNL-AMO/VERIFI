@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
@@ -20,6 +21,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-energy-uses-footprint.component.css',
 })
 export class FacilityEnergyUsesFootprintComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private facilityDbService = inject(FacilitydbService);
   private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
@@ -27,7 +29,7 @@ export class FacilityEnergyUsesFootprintComponent {
   private calanderizationService = inject(CalanderizationService);
   private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
-  selectedFacility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  selectedFacility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
   equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
   calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });

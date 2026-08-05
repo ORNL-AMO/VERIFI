@@ -9,6 +9,14 @@ import {
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceSelectionHints, WorkspaceSelectionStorageService } from './workspace-selection-storage.service';
 import { LegacyWorkspaceStateBridge } from './legacy-workspace-state-bridge.service';
+import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { IdbPredictor } from '../models/idbModels/predictor';
+import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
+import { IdbAccountReport } from '../models/idbModels/accountReport';
+import { IdbFacilityReport } from '../models/idbModels/facilityReport';
+import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceService {
@@ -33,7 +41,7 @@ export class AccountWorkspaceService {
       const selections = restoreSelections(snapshot, this.selectionStorage.read());
       this.store.publish(snapshot, selections);
       this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-      this.persistPublishedHints(snapshot, selections);
+      this.syncPersistedHints(snapshot, selections);
       return 'published';
     } catch (error) {
       if (token !== this.latestRequestToken) { return 'superseded'; }
@@ -71,7 +79,7 @@ export class AccountWorkspaceService {
         this.store.publish(snapshot, selections);
       }
       this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-      this.persistPublishedHints(snapshot, selections);
+      this.syncPersistedHints(snapshot, selections);
       return 'published';
     } catch (error) {
       if (token !== this.latestRequestToken) { return 'superseded'; }
@@ -92,7 +100,7 @@ export class AccountWorkspaceService {
     if (!facilityGuid) {
       this.store.selectFacility(undefined);
       this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-      this.selectionStorage.clearFacility();
+      this.syncPersistedSelectionHints(this.store.selections());
       return;
     }
     const facility = this.store.facilities().find(item => item.guid === facilityGuid);
@@ -101,7 +109,53 @@ export class AccountWorkspaceService {
     }
     this.store.selectFacility(facility);
     this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-    if (facility.id !== undefined) { this.selectionStorage.storeFacility(facility.id); }
+    this.syncPersistedSelectionHints(this.store.selections());
+  }
+
+  selectMeter(meterGuid?: string): void {
+    this.selectFacilityEntity('meter', this.store.meters(), meterGuid, 'meter');
+  }
+
+  selectPredictor(predictorGuid?: string): void {
+    this.selectFacilityEntity('predictor', this.store.predictors(), predictorGuid, 'predictor');
+  }
+
+  selectFacilityAnalysis(analysisGuid?: string): void {
+    this.selectFacilityEntity(
+      'facilityAnalysis',
+      this.store.facilityAnalyses(),
+      analysisGuid,
+      'facility analysis'
+    );
+    this.syncPersistedSelectionHints(this.store.selections());
+  }
+
+  selectAccountAnalysis(analysisGuid?: string): void {
+    this.selectAccountEntity('accountAnalysis', this.store.accountAnalyses(), analysisGuid, 'account analysis');
+    this.syncPersistedSelectionHints(this.store.selections());
+  }
+
+  selectAccountReport(reportGuid?: string): void {
+    this.selectAccountEntity('accountReport', this.store.accountReports(), reportGuid, 'account report');
+    this.syncPersistedSelectionHints(this.store.selections());
+  }
+
+  selectFacilityReport(reportGuid?: string): void {
+    this.selectFacilityEntity('facilityReport', this.store.facilityReports(), reportGuid, 'facility report');
+    this.syncPersistedSelectionHints(this.store.selections());
+  }
+
+  selectEnergyUseGroup(groupGuid?: string): void {
+    this.selectFacilityEntity('energyUseGroup', this.store.energyUseGroups(), groupGuid, 'energy-use group');
+  }
+
+  selectEnergyUseEquipment(equipmentGuid?: string): void {
+    this.selectFacilityEntity(
+      'energyUseEquipment',
+      this.store.energyUseEquipment(),
+      equipmentGuid,
+      'energy-use equipment'
+    );
   }
 
   clear(): void {
@@ -110,17 +164,74 @@ export class AccountWorkspaceService {
     this.legacyBridge.clear();
     this.selectionStorage.clearAccount();
     this.selectionStorage.clearFacility();
+    this.selectionStorage.clearFacilityAnalysis();
+    this.selectionStorage.clearAccountAnalysis();
+    this.selectionStorage.clearAccountReport();
+    this.selectionStorage.clearFacilityReport();
   }
 
-  private persistPublishedHints(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {
+  private selectFacilityEntity<K extends keyof WorkspaceSelections, T extends { guid?: string; facilityId?: string }>(
+    key: K,
+    items: readonly T[],
+    guid: string | undefined,
+    label: string
+  ): void {
+    const selected = guid === undefined ? undefined : items.find(item => item.guid === guid);
+    const facilityGuid = this.store.selectedFacility()?.guid;
+    if (guid !== undefined && (!selected || !facilityGuid || selected.facilityId !== facilityGuid)) {
+      throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active facility.`);
+    }
+    this.store.setSelections({ ...this.store.selections(), [key]: selected });
+    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
+  }
+
+  private selectAccountEntity<K extends keyof WorkspaceSelections, T extends { guid?: string }>(
+    key: K,
+    items: readonly T[],
+    guid: string | undefined,
+    label: string
+  ): void {
+    const selected = guid === undefined ? undefined : items.find(item => item.guid === guid);
+    if (guid !== undefined && !selected) {
+      throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active account.`);
+    }
+    this.store.setSelections({ ...this.store.selections(), [key]: selected });
+    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
+  }
+
+  private syncPersistedHints(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {
     if (snapshot.account.id !== undefined) {
       this.selectionStorage.storeAccount(snapshot.account.id);
     }
+    this.syncPersistedSelectionHints(selections);
+  }
+
+  private syncPersistedSelectionHints(selections: WorkspaceSelections): void {
     if (selections.facility?.id !== undefined) {
       this.selectionStorage.storeFacility(selections.facility.id);
     } else {
       this.selectionStorage.clearFacility();
     }
+    syncHint(selections.facilityAnalysis?.id, id => this.selectionStorage.storeFacilityAnalysis(id), () => {
+      this.selectionStorage.clearFacilityAnalysis();
+    });
+    syncHint(selections.accountAnalysis?.id, id => this.selectionStorage.storeAccountAnalysis(id), () => {
+      this.selectionStorage.clearAccountAnalysis();
+    });
+    syncHint(selections.accountReport?.id, id => this.selectionStorage.storeAccountReport(id), () => {
+      this.selectionStorage.clearAccountReport();
+    });
+    syncHint(selections.facilityReport?.id, id => this.selectionStorage.storeFacilityReport(id), () => {
+      this.selectionStorage.clearFacilityReport();
+    });
+  }
+}
+
+function syncHint(id: number | undefined, store: (id: number) => void, clear: () => void): void {
+  if (id === undefined) {
+    clear();
+  } else {
+    store(id);
   }
 }
 

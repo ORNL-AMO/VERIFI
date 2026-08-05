@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -14,6 +16,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
   styleUrl: './add-year-setup-options.component.css',
 })
 export class AddYearSetupOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facility: IdbFacility;
   facilitySub: Subscription;
 
@@ -35,7 +38,7 @@ export class AddYearSetupOptionsComponent {
   ) { }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
       this.setYearOptions();
     });

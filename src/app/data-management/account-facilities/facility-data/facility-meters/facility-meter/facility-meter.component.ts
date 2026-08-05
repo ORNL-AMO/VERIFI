@@ -1,4 +1,6 @@
-import { Component, HostListener } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, HostListener, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
@@ -27,6 +29,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityMeterComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -64,7 +67,7 @@ export class FacilityMeterComponent {
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
     });
 
@@ -116,8 +119,8 @@ export class FacilityMeterComponent {
     this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.utilityMeter));
     await this.updateMeterData(this.utilityMeter);
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
   }
@@ -163,8 +166,8 @@ export class FacilityMeterComponent {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterData[index].id));
     }
 
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     //set meters
     await this.dbChangesService.setMeters(account, selectedFacility);
     //set meter data
@@ -176,7 +179,7 @@ export class FacilityMeterComponent {
   }
 
   goToMeterList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
   }
 

@@ -1,3 +1,5 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
@@ -23,6 +25,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-uses-modify-annual-data.component.css',
 })
 export class FacilityEnergyUsesModifyAnnualDataComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
@@ -47,7 +50,7 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
     this.activatedRoute.params.subscribe(params => {
       this.selectedYear = parseInt(params['year']);
     });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
     });
     this.initEnergyUseGroups();
@@ -145,7 +148,7 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
         }
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, this.facility);
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
     this.loadingService.setLoadingStatus(false);

@@ -51,14 +51,11 @@ describe('DbChangesService account switching in Chromium', () => {
     const indexedDbAccess = new IndexedDbAccessService(harness.dbService);
     const accountDbService = new AccountdbService(
       harness.dbService,
-      localStorageService as any,
       { isElectron: false } as any,
       indexedDbAccess
     );
     const facilityDbService = new FacilitydbService(
       harness.dbService,
-      localStorageService as any,
-      loadingService as any,
       indexedDbAccess
     );
     const predictorDbService = new PredictorDbService(

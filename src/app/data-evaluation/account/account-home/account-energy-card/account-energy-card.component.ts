@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '../account-home.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -15,6 +16,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountEnergyCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
@@ -24,7 +26,7 @@ export class AccountEnergyCardComponent {
   calculatingOverview: Signal<boolean | 'error'> = toSignal(this.accountHomeService.calculatingOverview, { initialValue: false });
   annualEnergyAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.accountHomeService.annualEnergyAnalysisSummary, { initialValue: [] });
   latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: null });
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   carouselIndex: Signal<number> = toSignal(this.sharedDataService.energyHomeCarouselIndex, { initialValue: 0 });
   accountOverviewData: Signal<AccountOverviewData> = toSignal(this.accountHomeService.accountOverviewData, { initialValue: null });
 

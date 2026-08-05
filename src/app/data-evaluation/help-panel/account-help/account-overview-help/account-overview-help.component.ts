@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
@@ -11,6 +13,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
     standalone: false
 })
 export class AccountOverviewHelpComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
@@ -21,7 +24,7 @@ export class AccountOverviewHelpComponent {
     private router: Router) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(selectedAccount => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(selectedAccount => {
       this.selectedAccount = selectedAccount;
     });
     this.routerSub = this.router.events.subscribe((event) => {

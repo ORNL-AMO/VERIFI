@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
@@ -14,6 +15,7 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class AccountBannerComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -21,7 +23,7 @@ export class AccountBannerComponent {
 
   @ViewChild('navTabs') navTabs: ElementRef;
 
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   meterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: undefined });
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 

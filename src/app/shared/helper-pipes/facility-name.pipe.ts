@@ -1,4 +1,5 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -8,6 +9,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class FacilityNamePipe implements PipeTransform {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private facilityDbService: FacilitydbService) {
   }
@@ -17,7 +19,7 @@ export class FacilityNamePipe implements PipeTransform {
       let facility: IdbFacility = facilities.find(f => { return f.guid == facilityId });
       return facility?.name;
     } else {
-      return this.facilityDbService.getFacilityNameById(facilityId);
+      return (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityId))?.name ?? '');
     }
   }
 

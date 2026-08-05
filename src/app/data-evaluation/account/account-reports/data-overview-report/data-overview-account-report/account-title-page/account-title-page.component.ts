@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -11,6 +12,7 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
     standalone: false
 })
 export class AccountTitlePageComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   account: IdbAccount;
   report: IdbAccountReport;
   dateRange: {startDate: Date, endDate: Date};
@@ -20,7 +22,7 @@ export class AccountTitlePageComponent {
   }
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.report = this.accountReportDbService.selectedReport.getValue();
     this.dateRange = {
       startDate: new Date(this.report.startYear, this.report.startMonth, 1),

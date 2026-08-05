@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -29,6 +30,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   standalone: false
 })
 export class GroupAnalysisOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private accountDbService: AccountdbService = inject(AccountdbService);
@@ -42,7 +44,7 @@ export class GroupAnalysisOptionsComponent {
 
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup, { initialValue: null });
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem, { initialValue: null });
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems, { initialValue: [] });
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
@@ -181,7 +183,7 @@ export class GroupAnalysisOptionsComponent {
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == _group.idbGroupId });
     analysisItem.groups[groupIndex] = _group;
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const facility: IdbFacility = this.facility();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, facility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);

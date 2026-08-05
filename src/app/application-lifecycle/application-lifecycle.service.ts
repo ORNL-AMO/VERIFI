@@ -78,7 +78,6 @@ export class ApplicationLifecycleService {
   async refreshAccountCatalog(): Promise<readonly IdbAccount[]> {
     const accounts = sortAccounts(await firstValueFrom(this.accounts.getAll()));
     this.writableAccountCatalog.set(accounts);
-    this.legacyBridge.publishAccountCatalog(accounts);
     return accounts;
   }
 
@@ -126,7 +125,6 @@ export class ApplicationLifecycleService {
       const account = resolveInitialAccount(this.usableAccounts(), this.selectionStorage.read().accountId);
       if (!account) {
         this.workspace.clear();
-        this.legacyBridge.clear();
         this.selectionStorage.clearAccount();
         await this.initializeOptionalIntegrations();
         return this.finish({ status: 'empty', message: 'No accounts are available.' });

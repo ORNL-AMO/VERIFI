@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -28,6 +30,7 @@ import { Subscription } from 'rxjs';
     standalone: false
 })
 export class AnnualAnalysisSummaryComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
@@ -52,7 +55,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.facility = val;
       this.key = 'annual-' + this.facility?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();
@@ -62,7 +65,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../../web-workers/annual-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

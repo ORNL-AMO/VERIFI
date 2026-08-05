@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -26,6 +27,7 @@ import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/expor
   styleUrl: './analysis-report.component.css'
 })
 export class AnalysisReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -59,7 +61,7 @@ export class AnalysisReportComponent {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
 
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
 
     this.analysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
       this.setFacilityAnalysisItems(items);
@@ -95,7 +97,7 @@ export class AnalysisReportComponent {
   initializeGroups() {
     this.executiveSummaryItems = [];
     this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityAnalysisItem.facilityId);
+      let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityAnalysisItem.facilityId));
       facilityAnalysisItem.groups.forEach(group => {
         if (group.analysisType == 'regression') {
           let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);

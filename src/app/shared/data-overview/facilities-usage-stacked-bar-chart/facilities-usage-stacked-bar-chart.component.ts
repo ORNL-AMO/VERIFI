@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -15,6 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   standalone: false
 })
 export class FacilitiesUsageStackedBarChartComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'cost';
   @Input()
@@ -220,7 +222,7 @@ export class FacilitiesUsageStackedBarChartComponent {
   setBarChartData() {
     this.barChartData = new Array();
 
-    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilites: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let includedFacilityIds: Array<string> = new Array();
     if (this.reportOptions) {
       this.reportOptions.includedFacilities.forEach(facility => {

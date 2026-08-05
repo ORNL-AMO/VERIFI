@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from '../indexedDB/account-analysis-db.service';
-import { AccountdbService } from '../indexedDB/account-db.service';
 import { AccountReportDbService } from '../indexedDB/account-report-db.service';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from '../indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from '../indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from '../indexedDB/custom-gwp-db.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from '../indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from '../indexedDB/facility-energy-use-groups-db.service';
 import { FacilityReportsDbService } from '../indexedDB/facility-reports-db.service';
@@ -16,7 +14,6 @@ import { PredictordbServiceDeprecated } from '../indexedDB/predictors-deprecated
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount } from '../models/idbModels/account';
 import { AccountWorkspaceSnapshot, WorkspaceSelections } from './account-workspace.models';
 
 /**
@@ -26,8 +23,6 @@ import { AccountWorkspaceSnapshot, WorkspaceSelections } from './account-workspa
 @Injectable({ providedIn: 'root' })
 export class LegacyWorkspaceStateBridge {
   constructor(
-    private accounts: AccountdbService,
-    private facilities: FacilitydbService,
     private meters: UtilityMeterdbService,
     private meterData: UtilityMeterDatadbService,
     private meterGroups: UtilityMeterGroupdbService,
@@ -45,17 +40,11 @@ export class LegacyWorkspaceStateBridge {
     private energyUseEquipment: FacilityEnergyUseEquipmentDbService
   ) { }
 
-  publishAccountCatalog(accounts: readonly IdbAccount[]): void {
-    this.accounts.allAccounts.next([...accounts]);
-  }
-
   publish(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {
     const facilityGuid = selections.facility?.guid;
     const byFacility = <T extends { facilityId?: string }>(items: readonly T[]) =>
       facilityGuid ? items.filter(item => item.facilityId === facilityGuid) : [];
 
-    this.facilities.accountFacilities.next([...snapshot.facilities]);
-    this.facilities.selectedFacility.next(selections.facility);
     this.meters.accountMeters.next([...snapshot.meters]);
     this.meters.facilityMeters.next(byFacility(snapshot.meters));
     this.meters.selectedMeter.next(selections.meter);
@@ -88,13 +77,9 @@ export class LegacyWorkspaceStateBridge {
     this.energyUseEquipment.accountEnergyUseEquipment.next([...snapshot.energyUseEquipment]);
     this.energyUseEquipment.facilityEnergyUseEquipment.next(byFacility(snapshot.energyUseEquipment));
     this.energyUseEquipment.selectedFacilityEnergyUseEquipment.next(selections.energyUseEquipment);
-    this.accounts.selectedAccount.next(snapshot.account);
   }
 
   clear(): void {
-    this.accounts.selectedAccount.next(undefined);
-    this.facilities.accountFacilities.next([]);
-    this.facilities.selectedFacility.next(undefined);
     this.meters.accountMeters.next([]);
     this.meters.facilityMeters.next([]);
     this.meters.selectedMeter.next(undefined);

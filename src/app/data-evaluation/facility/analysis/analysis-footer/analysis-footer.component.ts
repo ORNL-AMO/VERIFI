@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
@@ -22,6 +23,7 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
   standalone: false
 })
 export class AnalysisFooterComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisService: AnalysisService = inject(AnalysisService);
@@ -36,7 +38,7 @@ export class AnalysisFooterComponent {
   sidebarWidth: Signal<number> = toSignal(this.dataEvaluationService.sidebarWidthBs);
   accountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.analysisService.accountAnalysisItem);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
 
   url = toSignal(
     this.router.events.pipe(
@@ -210,7 +212,7 @@ export class AnalysisFooterComponent {
   }
 
   returnToDashboard() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/analysis-dashboard');
   }
 }

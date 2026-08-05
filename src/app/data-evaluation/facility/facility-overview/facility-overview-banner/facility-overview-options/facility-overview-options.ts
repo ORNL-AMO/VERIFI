@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewService } from '../../facility-overview.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -18,6 +20,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   styleUrl: './facility-overview-options.css',
 })
 export class FacilityOverviewOptions {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
@@ -43,7 +46,7 @@ export class FacilityOverviewOptions {
     private accountDbService: AccountdbService) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.selectedFacility = val;
       this.setYears();
     });
@@ -61,7 +64,7 @@ export class FacilityOverviewOptions {
       }
     });
 
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.account = account;
     });
   }

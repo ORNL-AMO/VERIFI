@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -23,6 +24,7 @@ import { AccountReportStatusCheck } from 'src/app/calculations/status-check-calc
   standalone: false
 })
 export class AccountReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
@@ -31,7 +33,7 @@ export class AccountReportSetupComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 

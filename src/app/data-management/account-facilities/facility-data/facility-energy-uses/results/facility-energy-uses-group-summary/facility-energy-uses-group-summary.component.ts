@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -16,6 +17,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './facility-energy-uses-group-summary.component.css'
 })
 export class FacilityEnergyUsesGroupSummaryComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private router: Router = inject(Router);
@@ -29,7 +31,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
     return this.energyUseGroup$();
   }
 
-  facility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  facility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   get facility(): IdbFacility {
     return this.facility$();
   }
@@ -62,12 +64,12 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   }
 
   goToGroupList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses');
   }
 
   goToEquipment(equipmentGuid: string) {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + equipmentGuid);
   }
 }

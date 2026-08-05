@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -32,6 +33,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   standalone: false
 })
 export class BetterPlantsReportComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -68,7 +70,7 @@ export class BetterPlantsReportComponent implements OnInit {
     if (!this.selectedReport) {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.setAnalysisItem();
     this.setBetterPlantsSummary();
   }
@@ -88,7 +90,7 @@ export class BetterPlantsReportComponent implements OnInit {
   }
 
   setBetterPlantsSummary() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();

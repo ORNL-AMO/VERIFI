@@ -1,4 +1,5 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
@@ -27,6 +28,7 @@ import { getSelectedRegressionModel } from 'src/app/shared/shared-analysis/calcu
     standalone: false
 })
 export class RegressionModelInspectionComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   model: JStatRegressionModel;
   @Output('emitClose')
@@ -65,11 +67,11 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.calculateInspectedModel();
   }
 

@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
@@ -18,6 +19,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   standalone: false
 })
 export class UtilityMeterDataFilterComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   meter: IdbUtilityMeter;
 
@@ -39,7 +41,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
   }
 
   ngOnChanges() {
@@ -76,7 +78,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   async save() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     if (this.meter.source == 'Electricity') {
       this.checkShowSection();
       let electricityDataFilters: ElectricityDataFilters = {

@@ -1,7 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { LocalStorageService } from 'ngx-webstorage';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ElectronService } from '../electron/electron.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IndexedDbAccessService } from './indexed-db-access.service';
@@ -11,28 +10,9 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 })
 export class AccountdbService {
 
-    selectedAccount: BehaviorSubject<IdbAccount>;
-    allAccounts: BehaviorSubject<Array<IdbAccount>>;
-    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+    constructor(private dbService: NgxIndexedDBService,
         private electronService: ElectronService,
-        private indexedDbAccess: IndexedDbAccessService) {
-        this.selectedAccount = new BehaviorSubject<IdbAccount>(undefined);
-        this.allAccounts = new BehaviorSubject<Array<IdbAccount>>(new Array());
-        this.selectedAccount.subscribe(account => {
-            if (account) {
-                this.localStorageService.store("accountId", account.id);
-            }
-        });
-    }
-
-    getInitialAccount(): number {
-        let localStorageAccountId: number = this.localStorageService.retrieve("accountId");
-        return localStorageAccountId;
-    }
-
-    clearInitialAccount(): void {
-        this.localStorageService.clear('accountId');
-    }
+        private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbAccount>> {
         return this.dbService.getAll('accounts');

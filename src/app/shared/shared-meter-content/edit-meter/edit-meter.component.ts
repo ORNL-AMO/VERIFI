@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -26,6 +27,7 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   }
 })
 export class EditMeterComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   meterForm: FormGroup;
   meterDataExists: boolean;
@@ -51,7 +53,7 @@ export class EditMeterComponent implements OnInit {
     private routerGuardService: RouterGuardService) { }
 
   ngOnInit(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
@@ -102,8 +104,8 @@ export class EditMeterComponent implements OnInit {
       meterToSave = await firstValueFrom(this.utilityMeterDbService.addWithObservable(meterToSave));
     }
     await this.utilityMeterDbService.updateWithObservable(meterToSave);
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
     this.meterForm.markAsPristine();
     this.cancel();
@@ -112,7 +114,7 @@ export class EditMeterComponent implements OnInit {
   }
 
   cancel() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/energy-source/meters')
   }
 

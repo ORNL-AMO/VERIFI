@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
@@ -18,6 +19,7 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class EditPredictorFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   predictorForm: FormGroup;
   @Input({ required: true })
@@ -42,7 +44,7 @@ export class EditPredictorFormComponent {
 
   ngOnInit() {
     if (!this.facility) {
-      this.facility = this.facilityDbService.getFacilityById(this.predictor.facilityId);
+      this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.predictor.facilityId));
     }
   }
 

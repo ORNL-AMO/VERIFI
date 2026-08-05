@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -25,6 +27,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   standalone: false
 })
 export class AnalysisDashboardComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
@@ -58,7 +61,7 @@ export class AnalysisDashboardComponent implements OnInit {
     //navigationsEnd isn't fired on init. Call here.
     this.setAnalysisType(this.router.url);
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.selectedFacility = val;
       this.setHasEnergyAndWater();
     });
@@ -75,7 +78,7 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);

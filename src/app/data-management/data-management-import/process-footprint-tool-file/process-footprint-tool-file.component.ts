@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -13,6 +14,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './process-footprint-tool-file.component.css',
 })
 export class ProcessFootprintToolFileComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileReferences: Array<FileReference>;
   fileReferenceSub: Subscription;
@@ -35,7 +37,7 @@ export class ProcessFootprintToolFileComponent {
         return file.id == referenceId;
       });
       if (!this.selectedFile) {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
       }
     });

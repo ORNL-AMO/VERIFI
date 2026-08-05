@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -25,6 +26,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class EditUtilityBillComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -74,7 +76,7 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setShowEmissions() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (account.displayEmissions) {
       this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
       this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
@@ -110,9 +112,9 @@ export class EditUtilityBillComponent implements OnInit {
 
   setTotalEmissions() {
     if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       //meed to use total volume for fugitive/process emissions
       this.emissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,

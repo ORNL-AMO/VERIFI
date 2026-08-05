@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -17,6 +18,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   styleUrl: './account-emission-factors-report.component.css'
 })
 export class AccountEmissionFactorsReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   printSub: Subscription;
   print: boolean;
@@ -37,7 +39,7 @@ export class AccountEmissionFactorsReportComponent {
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     } 
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.facilityDbService.getAllAccountFacilities(this.account.guid).then(facilities => {
       this.accountFacilities = facilities;
     });

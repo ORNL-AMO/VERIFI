@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, signal, inject, Signal, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -21,6 +22,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './energy-footprint-side-panel.component.css',
 })
 export class EnergyFootprintSidePanelComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private facilityDbService = inject(FacilitydbService);
   private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
@@ -29,12 +31,12 @@ export class EnergyFootprintSidePanelComponent {
   private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
   private router: Router = inject(Router);
 
-  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
+  facilities = this.accountWorkspaceStore.facilities;
   energyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
   equipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
 
   yearOptions: Signal<Array<number>> = computed(() => {
     const calanderizedMeters = this.calanderizedMeters();
@@ -161,7 +163,7 @@ export class EnergyFootprintSidePanelComponent {
 
   goToFacilityFootprint() {
     const selectedFacilityId = this.selectedFacilityId();
-    const selectedFacility = this.facilityDbService.getFacilityById(selectedFacilityId);
+    const selectedFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (selectedFacilityId));
     if (selectedFacility) {
       this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacilityId + '/energy-uses/footprint');
     }

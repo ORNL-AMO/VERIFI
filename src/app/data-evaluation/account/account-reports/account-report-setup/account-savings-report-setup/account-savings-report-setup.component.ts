@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EMPTY, firstValueFrom, map, startWith, switchMap, tap } from 'rxjs';
@@ -22,6 +23,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './account-savings-report-setup.component.css'
 })
 export class AccountSavingsReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
@@ -30,7 +32,7 @@ export class AccountSavingsReportSetupComponent {
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
 
 
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   analysisTableColumns: Signal<AnalysisTableColumns> = toSignal(this.analysisService.analysisTableColumns);
   selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport);
 

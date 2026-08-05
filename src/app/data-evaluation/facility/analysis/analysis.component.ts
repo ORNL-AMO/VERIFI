@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, effect, inject, OnDestroy, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -17,6 +18,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
   standalone: false
 })
 export class AnalysisComponent implements OnDestroy {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private router: Router = inject(Router);
@@ -26,7 +28,7 @@ export class AnalysisComponent implements OnDestroy {
 
   utilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.facilityMeterGroups);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   annualKey: string;
   monthlyKey: string;
 

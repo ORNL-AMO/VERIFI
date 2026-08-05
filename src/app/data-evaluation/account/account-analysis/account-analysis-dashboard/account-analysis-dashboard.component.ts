@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -21,6 +22,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class AccountAnalysisDashboardComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedAccount: IdbAccount;
   routerSub: Subscription;
@@ -44,7 +46,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     });
     //navigationsEnd isn't fired on init. Call here.
     this.setAnalysisType(this.router.url);
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     this.setHasEnergyAndWater();
   }
 
@@ -53,7 +55,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let newItem: IdbAccountAnalysisItem = getNewIdbAccountAnalysisItem(this.newAnalysisCategory, this.selectedAccount, accountFacilities);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);

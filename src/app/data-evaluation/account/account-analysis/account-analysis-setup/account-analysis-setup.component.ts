@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -38,6 +39,7 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
   standalone: false
 })
 export class AccountAnalysisSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountDbService = inject(AccountdbService);
   private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly router = inject(Router);
@@ -54,7 +56,7 @@ export class AccountAnalysisSetupComponent {
   private readonly fb = inject(FormBuilder);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 
-  readonly account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  readonly account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   readonly analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   readonly calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
   readonly accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
@@ -210,7 +212,7 @@ export class AccountAnalysisSetupComponent {
       baselineYear: raw.baselineYear ?? item.baselineYear,
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
     this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
   }
@@ -239,7 +241,7 @@ export class AccountAnalysisSetupComponent {
       })),
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
     this.accountAnalysisDbService.selectedAnalysisItem.next(clearedItem);
     this.displayEnableForm = false;
@@ -261,7 +263,7 @@ export class AccountAnalysisSetupComponent {
     const analysisItem = this.analysisItem();
     const accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
     const accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    const facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    const facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     const analysisType = this.analysisTypeControl.value;
     let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
     for (let i = 0; i < facilities.length; i++) {

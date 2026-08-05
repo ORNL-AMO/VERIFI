@@ -1,4 +1,5 @@
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -43,6 +44,7 @@ import { AccountSavingsReportPptAdapter } from './account-savings-report-ppt.ada
   styleUrl: './account-savings-report.component.css'
 })
 export class AccountSavingsReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   account: IdbAccount;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -124,7 +126,7 @@ export class AccountSavingsReportComponent {
     } else {
       this.accountSavingsReportSetup = this.selectedReport.accountSavingsReportSetup;
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
     this.calculateSavingsReport();
@@ -157,7 +159,7 @@ export class AccountSavingsReportComponent {
   }
 
   calculateSavingsReport() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();

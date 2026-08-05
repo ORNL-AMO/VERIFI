@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -18,6 +19,7 @@ import { MeterGroupingDataService } from '../meter-grouping-data.service';
   styleUrl: './meter-grouping-results-table.component.css',
 })
 export class MeterGroupingResultsTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
@@ -99,7 +101,7 @@ export class MeterGroupingResultsTableComponent {
     this.calanderizedMeters = calanderizedMeters.filter(cMeter => {
       return cMeter.meter.groupId == this.meterGroup.guid;
     });
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.energyUnit = this.selectedFacility.energyUnit;
     this.consumptionUnit = this.selectedFacility.volumeLiquidUnit;
     this.groupMonthlyData = this.calanderizedMeters.flatMap(meter => { return meter.monthlyData });

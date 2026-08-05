@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -17,6 +18,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
     standalone: false
 })
 export class CustomGwpFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
   editCustomGWP: IdbCustomGWP;
@@ -41,7 +43,7 @@ export class CustomGwpFormComponent {
     this.accountCustomGWPs = this.customGWPDbService.accountCustomGWPs.getValue();
     this.setAllGWPNames();
     this.isAdd = this.router.url.includes('add');
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     if (this.isAdd) {
       this.editCustomGWP = getNewAccountCustomGWP(this.selectedAccount);
       this.setForm(this.editCustomGWP);

@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
@@ -12,6 +13,7 @@ import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/faci
   styleUrl: './analysis-status-check.component.css'
 })
 export class AnalysisStatusCheckComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true }) analysisStatusCheck: AnalysisStatusCheck;
   @Input({ required: true }) type: 'energy' | 'water';
 
@@ -29,7 +31,7 @@ export class AnalysisStatusCheckComponent {
 
   goToAnalysis(): void {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisStatusCheck.analysisItem);
-    const facilityGuid = this.facilityDbService.selectedFacility.getValue().guid;
+    const facilityGuid = this.accountWorkspaceStore.selectedFacility().guid;
     this.router.navigateByUrl(`/data-evaluation/facility/${facilityGuid}/analysis/run-analysis/analysis-setup`);
   }
 }

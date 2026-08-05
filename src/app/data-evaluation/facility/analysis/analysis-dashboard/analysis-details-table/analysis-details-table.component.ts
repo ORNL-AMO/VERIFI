@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -45,6 +46,7 @@ interface AnalysisDetailsTableRow {
 })
 
 export class AnalysisDetailsTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
   private dbChangesService: DbChangesService = inject(DbChangesService);
@@ -60,7 +62,7 @@ export class AnalysisDetailsTableComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
@@ -227,7 +229,7 @@ export class AnalysisDetailsTableComponent {
   }
 
   async setUseItem(analysisItem: IdbAnalysisItem) {
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const selectedFacility: IdbFacility = this.selectedFacility();
     const canSelectItem: boolean = this.getCanSelectItem(selectedAccount, selectedFacility, analysisItem);
     if (canSelectItem) {
@@ -282,7 +284,7 @@ export class AnalysisDetailsTableComponent {
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(analysisItem.facilityId, analysisItem.accountId, 'analysis', groups);
     newReport.analysisItemId = analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, this.selectedFacility());
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
     this.goToReport(newReport.guid);
@@ -309,7 +311,7 @@ export class AnalysisDetailsTableComponent {
     newItem.name = newItem.name + " (Copy)";
     newItem.guid = Math.random().toString(36).substr(2, 9);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
@@ -345,7 +347,7 @@ export class AnalysisDetailsTableComponent {
       selectedFacility.selectedWaterAnalysisId = undefined;
       await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
     }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false)
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     if (!isBulkDelete) {

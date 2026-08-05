@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -18,6 +19,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-emission-factors-report-setup.component.css'
 })
 export class FacilityEmissionFactorsReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   reportSettings: EmissionFactorsReportSettings;
@@ -59,8 +61,8 @@ export class FacilityEmissionFactorsReportSetupComponent {
     let facilityReport: IdbFacilityReport = this.facilityReportsDbService.selectedReport.getValue();
     this.facilityReport.emissionFactorsReportSettings = this.reportSettings;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(facilityReport);
   }

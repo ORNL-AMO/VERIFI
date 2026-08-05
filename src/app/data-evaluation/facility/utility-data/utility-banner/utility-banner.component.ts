@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
@@ -15,6 +16,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
   standalone: false
 })
 export class UtilityBannerComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -22,7 +24,7 @@ export class UtilityBannerComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen, { initialValue: false });
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   navigationAfterLoading: Signal<string> = toSignal(this.loadingService.navigationAfterLoading, { initialValue: undefined });
 
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);

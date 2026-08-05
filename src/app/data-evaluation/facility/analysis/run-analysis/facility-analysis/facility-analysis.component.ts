@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
@@ -35,6 +36,7 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
   standalone: false
 })
 export class FacilityAnalysisComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly analysisDbService = inject(AnalysisDbService);
   private readonly facilityDbService = inject(FacilitydbService);
   private readonly analysisService = inject(AnalysisService);
@@ -85,12 +87,12 @@ export class FacilityAnalysisComponent implements OnInit {
     const analysisItem: IdbAnalysisItem = this.analysisItem();
     const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
     const customGWPs: IdbCustomGWP[] = this.customGWPDbService.accountCustomGWPs.getValue();
-    const facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     const facilityMeters: IdbUtilityMeter[] = this.utilityMeterDbService.facilityMeters.getValue();
     const facilityMeterData: IdbUtilityMeterData[] = this.utilityMeterDataDbService.facilityMeterData.getValue();
     const accountPredictorEntries: IdbPredictorData[] = this.predictorDataDbService.accountPredictorData.getValue();
     const accountPredictors: IdbPredictor[] = this.predictorDbService.accountPredictors.getValue();
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const account: IdbAccount = this.accountWorkspaceStore.account();
     const payload = {
       analysisItem,
       facility,

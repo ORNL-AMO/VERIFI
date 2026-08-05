@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -39,6 +40,7 @@ interface ReportListItem {
   styleUrl: './account-reports-dashboard-table.component.css'
 })
 export class AccountReportsDashboardTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private router: Router = inject(Router);
@@ -48,7 +50,7 @@ export class AccountReportsDashboardTableComponent {
   private loadingService: LoadingService = inject(LoadingService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   reports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);

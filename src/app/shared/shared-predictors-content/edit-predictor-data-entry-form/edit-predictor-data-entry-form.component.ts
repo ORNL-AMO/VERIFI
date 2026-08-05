@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, SimpleChanges, inject } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
@@ -17,6 +18,7 @@ import { getDateFromPredictorData } from '../../dateHelperFunctions';
   standalone: false
 })
 export class EditPredictorDataEntryFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   predictor: IdbPredictor;
   @Input({ required: true })
@@ -81,7 +83,7 @@ export class EditPredictorDataEntryFormComponent {
   }
 
   async goToWeatherData() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.weatherDataService.selectedFacility = facility;
     this.weatherDataService.selectedMonth = getDateFromPredictorData(this.predictorData);
     this.weatherDataService.selectedYear = this.predictorData.year

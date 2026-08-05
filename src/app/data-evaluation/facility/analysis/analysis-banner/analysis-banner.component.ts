@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
@@ -25,6 +26,7 @@ interface GroupsList {
   standalone: false
 })
 export class AnalysisBannerComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
@@ -94,7 +96,7 @@ export class AnalysisBannerComponent {
 
   selectItem(item: IdbAnalysisItem) {
     this.analysisDbService.selectedAnalysisItem.next(item);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/analysis-setup');
     this.showDropdown = false;
   }

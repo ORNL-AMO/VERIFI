@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -17,6 +18,7 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
   styleUrl: './analysis-detail-item-card.component.css'
 })
 export class AnalysisDetailItemCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({required: true})
   analysisItem: IdbAnalysisItem;
 
@@ -48,7 +50,7 @@ export class AnalysisDetailItemCardComponent {
   ) { }
 
   ngOnChanges(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.initializeGroups();
     this.setLinkedItems();
   }

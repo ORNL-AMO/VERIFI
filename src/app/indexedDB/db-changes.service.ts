@@ -47,7 +47,6 @@ import { AccountWorkspaceStore } from '../account-workspace/account-workspace.st
   providedIn: 'root'
 })
 export class DbChangesService {
-
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService, private analysisDbService: AnalysisDbService,
     private predictorsDbServiceDeprecated: PredictordbServiceDeprecated, private utilityMeterDbService: UtilityMeterdbService,
@@ -70,112 +69,28 @@ export class DbChangesService {
     private workspaceStore: AccountWorkspaceStore) { }
 
   async updateAccount(account: IdbAccount) {
-    let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
-    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(accounts);
-    this.accountDbService.selectedAccount.next(updatedAccount);
+    const updatedAccount = await firstValueFrom(this.accountDbService.updateWithObservable({ ...account }));
     if (this.workspaceStore.account()?.guid === updatedAccount.guid) {
       await this.workspaceService.reloadActiveWorkspace(true);
     }
+    return updatedAccount;
   }
 
 
-  async selectAccount(account: IdbAccount, skipUpdates: boolean) {
-    const storedFacilityId = this.facilityDbService.getInitialFacility();
-    this.clearFacilitySelection();
-
-    //set account facilities
-    let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
-    this.facilityDbService.accountFacilities.next(accountFacilites);
-    //set reports
-    await this.setAccountReports(account);
-    //set predictors
-    //TODO: deprecated, remove...?
-    this.predictorsDbServiceDeprecated.accountPredictorEntries.next([]);
-    await this.setPredictorsV2(account);
-    await this.setPredictorDataV2(account, skipUpdates);
-    //set meters
-    await this.setMeters(account);
-    //set meter data
-    await this.setMeterData(account, skipUpdates);
-    //set meter groups
-    await this.setMeterGroups(account);
-    //set custom emissions
-    await this.setCustomEmissions(account);
-    //set custom fuels
-    await this.setCustomFuels(account);
-    //set custom GWPs
-    await this.setCustomGWPS(account);
-    //set analysis
-    await this.setAnalysisItems(account, skipUpdates);
-    //set facility reports
-    await this.setAccountFacilityReports(account);
-    //set account analysis
-    await this.setAccountAnalysisItems(account, skipUpdates);
-    //set facility energy use groups
-    await this.setAccountFacilityEnergyUseGroups(account);
-    //set facility energy use equipment
-    await this.setAccountFacilityEnergyUseEquipment(account);
-
-    //set account 
-    this.accountDbService.selectedAccount.next(account);
-    await this.updateFacilityAnalysisSelectedItems();
-
-    const selectedFacility = resolveInitialFacility(
-      account,
-      this.facilityDbService.accountFacilities.getValue(),
-      storedFacilityId
-    );
-    if (selectedFacility) {
-      this.selectFacility(selectedFacility);
-    } else if (storedFacilityId !== undefined && storedFacilityId !== null) {
-      this.facilityDbService.clearInitialFacility();
-    }
+  async selectAccount(account: IdbAccount, _skipUpdates: boolean) {
+    await this.workspaceService.selectAccount(account.guid);
   }
 
   selectFacility(facility: IdbFacility) {
-    this.setFacilitySelection(facility);
+    this.workspaceService.selectFacility(facility?.guid);
   }
 
   clearFacilitySelection() {
-    this.facilityDbService.selectedFacility.next(undefined);
-    this.predictorsDbServiceDeprecated.facilityPredictorEntries.next([]);
-    this.predictorsDbServiceDeprecated.facilityPredictors.next([]);
-    this.predictorDbService.facilityPredictors.next([]);
-    this.predictorDataDbService.facilityPredictorData.next([]);
-    this.utilityMeterDbService.facilityMeters.next([]);
-    this.utilityMeterDbService.selectedMeter.next(undefined);
-    this.utilityMeterDataDbService.facilityMeterData.next([]);
-    this.utilityMeterGroupDbService.facilityMeterGroups.next([]);
-    this.analysisDbService.facilityAnalysisItems.next([]);
-    this.analysisDbService.selectedAnalysisItem.next(undefined);
-    this.analysisDbService.clearGeneratedModels();
-    this.facilityReportsDbService.facilityReports.next([]);
-    this.facilityReportsDbService.selectedReport.next(undefined);
-    this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.next([]);
-    this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment.next([]);
+    this.workspaceService.selectFacility(undefined);
   }
 
   setFacilitySelection(facility: IdbFacility) {
-    this.clearFacilitySelection();
-
-    const deprecatedPredictorEntries = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue()
-      .filter(item => item.facilityId == facility.guid);
-    const deprecatedPredictors = deprecatedPredictorEntries
-      .flatMap(entry => entry.predictors ?? []);
-    this.predictorsDbServiceDeprecated.facilityPredictorEntries.next(deprecatedPredictorEntries);
-    this.predictorsDbServiceDeprecated.facilityPredictors.next(deprecatedPredictors);
-
-    this.setFacilityPredictorsV2(facility);
-    this.setFacilityPredictorDataV2(facility);
-    this.setFacilityMeters(facility);
-    this.setFacilityMeterData(facility);
-    this.setFacilityMeterGroups(facility);
-    this.setFacilityAnalysisItems(facility);
-    this.setFacilityReports(facility);
-    this.setFacilityEnergyUseGroups(facility);
-    this.setFacilityEnergyUseEquipment(facility);
-    this.facilityDbService.selectedFacility.next(facility);
+    this.workspaceService.selectFacility(facility?.guid);
   }
 
   async setAccountAnalysisItems(account: IdbAccount, skipUpdates: boolean) {
@@ -259,13 +174,7 @@ export class DbChangesService {
   }
 
   async updateFacility(facility: IdbFacility): Promise<IdbFacility> {
-    const selectedFacilityGuid = this.facilityDbService.selectedFacility.getValue()?.guid;
-    let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
-    let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(facility.accountId);
-    this.facilityDbService.accountFacilities.next(accountFacilites);
-    if (selectedFacilityGuid === updatedFacility.guid) {
-      this.facilityDbService.selectedFacility.next(updatedFacility);
-    }
+    const updatedFacility = await firstValueFrom(this.facilityDbService.updateWithObservable({ ...facility }));
     if (this.workspaceStore.account()?.guid === updatedFacility.accountId) {
       await this.workspaceService.reloadActiveWorkspace(true);
     }
@@ -405,7 +314,6 @@ export class DbChangesService {
     }
 
     try {
-      await this.selectAccount(selectedAccount, false);
       if (this.workspaceStore.account()?.guid === selectedAccount.guid) {
         await this.workspaceService.reloadActiveWorkspace(true);
       }
@@ -463,7 +371,7 @@ export class DbChangesService {
   }
 
   async updateFacilityAnalysisSelectedItems() {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = this.workspaceStore.facilities().map(facility => ({ ...facility }));
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     for (let facility of facilities) {
       let updateFacility = this.analysisSelectionRepair.repairFacility(facility, facilityAnalysisItems);

@@ -1,4 +1,5 @@
-import { Component, HostListener } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, HostListener, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -30,6 +31,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class MeterGroupFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   groupForm: FormGroup;
   meterGroupOptions: Array<MeterGroupOption>;
@@ -109,8 +111,8 @@ export class MeterGroupFormComponent {
   }
 
   async saveChanges() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
 
     this.meterGroup.name = this.groupForm.controls['name'].value;
     if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
@@ -231,9 +233,9 @@ export class MeterGroupFormComponent {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.meterGroup.id));
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setMeterGroups(selectedAccount, facility);
 
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();

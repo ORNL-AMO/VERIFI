@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import * as _ from 'lodash';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -18,6 +19,7 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class FacilityEnergyReductionGoalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
   private router: Router = inject(Router);
@@ -25,7 +27,7 @@ export class FacilityEnergyReductionGoalComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   latestAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   monthlyFacilityEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityEnergyAnalysisData, { initialValue: undefined });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 

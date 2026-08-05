@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -15,6 +16,7 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 
 interface FacilityListItem {
   facility: IdbFacility;
@@ -29,6 +31,7 @@ interface FacilityListItem {
   standalone: false
 })
 export class SelectFacilityAnalysisItemsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
@@ -37,15 +40,16 @@ export class SelectFacilityAnalysisItemsComponent {
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private accountDbService: AccountdbService = inject(AccountdbService);
+  private accountWorkspaceService = inject(AccountWorkspaceService);
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
-  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  facilities = this.accountWorkspaceStore.facilities;
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
   hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
 
   facilityList: Signal<Array<FacilityListItem>> = computed(() => {
     const facilities = this.facilities();
@@ -113,7 +117,7 @@ export class SelectFacilityAnalysisItemsComponent {
       const selectedFacility = this.selectedFacility();
       const facilities = this.facilities();
       if (!selectedFacility && facilities && facilities.length > 0) {
-        this.facilityDbService.selectedFacility.next(facilities[0]);
+        this.accountWorkspaceService.selectFacility(facilities[0].guid);
       }
     });
   }
@@ -121,7 +125,7 @@ export class SelectFacilityAnalysisItemsComponent {
   selectFacility(facilityId: string) {
     const facilities = this.facilities();
     let selectedFacility: IdbFacility = facilities.find(facility => facility.guid === facilityId);
-    this.facilityDbService.selectedFacility.next(selectedFacility);
+    this.accountWorkspaceService.selectFacility(selectedFacility.guid);
   }
 
   toggleHideInUseMessage() {

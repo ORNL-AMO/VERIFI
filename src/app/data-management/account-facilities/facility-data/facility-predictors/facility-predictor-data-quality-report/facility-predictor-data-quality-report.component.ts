@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
@@ -14,6 +15,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   styleUrl: './facility-predictor-data-quality-report.component.css'
 })
 export class FacilityPredictorDataQualityReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
   predictorData: Array<IdbPredictorData>;
@@ -40,7 +42,7 @@ export class FacilityPredictorDataQualityReportComponent {
   }
   
   goToPredictorList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/predictors')
   }
 }

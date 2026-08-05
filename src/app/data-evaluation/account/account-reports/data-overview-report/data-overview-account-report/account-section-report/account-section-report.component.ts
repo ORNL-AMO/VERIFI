@@ -1,4 +1,5 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
@@ -26,6 +27,7 @@ import { MonthlyUtilityUsageLineChartComponent } from 'src/app/shared/data-overv
     standalone: false
 })
 export class AccountSectionReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'cost' | 'water' | 'emissions';
   @Input()
@@ -73,7 +75,7 @@ export class AccountSectionReportComponent {
   }
 
   ngOnInit() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.waterUnit = account.volumeLiquidUnit;
     this.energyUnit = account.energyUnit;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();

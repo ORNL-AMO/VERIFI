@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -44,6 +45,7 @@ interface FacilityReportTableItem {
   styleUrl: './facility-reports-dashboard-table.component.css'
 })
 export class FacilityReportsDashboardTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityDbReportsService: FacilityReportsDbService = inject(FacilityReportsDbService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
@@ -58,8 +60,8 @@ export class FacilityReportsDashboardTableComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   facilityReports: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityDbReportsService.facilityReports);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
@@ -23,6 +24,7 @@ import { checkSameMonthPredictorData } from 'src/app/data-management/data-manage
   providedIn: 'root'
 })
 export class VisualizationStateService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
@@ -46,7 +48,7 @@ export class VisualizationStateService {
   setCalanderizedMeters(facility: IdbFacility) {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility], account.assessmentReportVersion, []);
   }
 

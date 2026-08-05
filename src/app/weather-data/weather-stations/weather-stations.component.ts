@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { NominatimLocation, WeatherDataService } from '../weather-data.service';
@@ -14,6 +16,7 @@ import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctio
     standalone: false
 })
 export class WeatherStationsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   furthestDistance: number = 75;
   stations: Array<WeatherStation> = [];
@@ -56,8 +59,8 @@ export class WeatherStationsComponent {
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.accountFacilities.subscribe(val => {
-      this.facilities = val;
+    this.facilitySub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+      this.facilities = val.map(facility => ({ ...facility }));
     });
     this.addressString = this.weatherDataService.addressSearchStr
     if(this.addressString){

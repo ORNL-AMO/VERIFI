@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -22,6 +24,7 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
   styleUrl: './set-meter-grouping.component.css'
 })
 export class SetMeterGroupingComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
 
@@ -47,7 +50,7 @@ export class SetMeterGroupingComponent {
     this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
       this.facilityMeters = meters;
     });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
       this.setCalanderizedMeterData();
     });
@@ -75,7 +78,7 @@ export class SetMeterGroupingComponent {
   async addMeter() {
     let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(this.facility.guid, this.facility.accountId, true, this.facility.energyUnit);
     newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setMeters(account, this.facility);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + newMeter.guid);
   }
@@ -84,7 +87,7 @@ export class SetMeterGroupingComponent {
   setCalanderizedMeterData() {
     if (this.facility && this.facilityMeters && this.meterData) {
       this.meterGroupingDataService.calanderizingMeterData.next(true);
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       if (typeof Worker !== 'undefined') {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();

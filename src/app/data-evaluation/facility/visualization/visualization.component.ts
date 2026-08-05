@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
@@ -16,6 +18,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
     standalone: false
 })
 export class VisualizationComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   utilityMeterDataSub: Subscription;
@@ -31,7 +34,7 @@ export class VisualizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.analyticsService.sendEvent('use_data_visualization');
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.selectedFacility = val;
       this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
       this.initializeDate();

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
@@ -37,6 +38,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
   predictorForm: FormGroup;
@@ -75,7 +77,7 @@ export class FacilityPredictorComponent {
   }
 
   ngOnInit() {
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -124,7 +126,7 @@ export class FacilityPredictorComponent {
     }
 
     await this.analysisDbService.updateAnalysisPredictor(this.predictor);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
     await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
     await this.dbChangesService.setAnalysisItems(account, true, this.facility);
@@ -224,7 +226,7 @@ export class FacilityPredictorComponent {
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
     await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
     //update analysis items

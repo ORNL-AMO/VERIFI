@@ -1,4 +1,5 @@
-import { Component, HostListener } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, HostListener, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -23,6 +24,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorDataEntryComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   predictor: IdbPredictor;
@@ -54,7 +56,7 @@ export class FacilityPredictorDataEntryComponent {
   }
 
   ngOnInit() {
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -79,7 +81,7 @@ export class FacilityPredictorDataEntryComponent {
   async save() {
     this.isSaved = true;
     await firstValueFrom(this.predictorDataDbService.updateWithObservable(this.predictorData));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
   }
 
@@ -94,8 +96,8 @@ export class FacilityPredictorDataEntryComponent {
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor, predictorData);
     newPredictorData = await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
     this.router.navigateByUrl('data-management/' + newPredictorData.accountId + '/facilities/' + newPredictorData.facilityId + '/predictors/' + newPredictorData.predictorId + '/predictor-data/edit-entry/' + newPredictorData.guid);
     this.toastNotificationService.showToast('Predictor entry added!', undefined, undefined, undefined, 'alert-success');

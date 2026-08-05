@@ -166,7 +166,15 @@ function createSelectionStorage() {
     storeAccount: vi.fn(),
     clearAccount: vi.fn(),
     storeFacility: vi.fn(),
-    clearFacility: vi.fn()
+    clearFacility: vi.fn(),
+    storeFacilityAnalysis: vi.fn(),
+    clearFacilityAnalysis: vi.fn(),
+    storeAccountAnalysis: vi.fn(),
+    clearAccountAnalysis: vi.fn(),
+    storeAccountReport: vi.fn(),
+    clearAccountReport: vi.fn(),
+    storeFacilityReport: vi.fn(),
+    clearFacilityReport: vi.fn()
   };
 }
 

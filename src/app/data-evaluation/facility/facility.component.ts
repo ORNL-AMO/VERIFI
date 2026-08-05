@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -13,6 +15,7 @@ import { DataEvaluationService } from '../data-evaluation.service';
   standalone: false
 })
 export class FacilityComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
@@ -24,12 +27,12 @@ export class FacilityComponent implements OnInit {
     private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.selectedFacility = val;
     });
     this.activatedRoute.params.subscribe(params => {
       let facilityId: string = params['id'];
-      let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
       let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == facilityId });
       if (selectedFacility) {
         this.dbChangesService.selectFacility(selectedFacility);

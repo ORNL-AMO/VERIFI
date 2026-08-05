@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
@@ -14,6 +15,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   providedIn: 'root'
 })
 export class MeterGroupingService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   dataDisplay: "grouping" | "table" | "graph" = "grouping";
   displayGraphEnergy: "bar" | "scatter" = "bar";
@@ -152,7 +154,7 @@ export class MeterGroupingService {
     }
     let startDate: Date = new Date(dateRange.minDate);
     let endDate: Date = new Date(dateRange.maxDate);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     while (startDate <= endDate) {
       let filteredData: Array<MonthlyData> = allMonthlyData.filter(monthlyData => {
         let dataDate: Date = new Date(monthlyData.date);

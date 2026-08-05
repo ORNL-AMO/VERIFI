@@ -1,4 +1,6 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -17,6 +19,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
   styleUrl: './account-overview-options.css',
 })
 export class AccountOverviewOptions {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   emissionsDisplay: 'market' | 'location';
@@ -39,7 +42,7 @@ export class AccountOverviewOptions {
     private dbChangesService: DbChangesService) { }
 
   ngOnInit() {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.selectedAccount = val;
       this.setYears();
     });

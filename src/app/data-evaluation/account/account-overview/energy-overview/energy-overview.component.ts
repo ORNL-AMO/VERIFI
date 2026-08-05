@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -12,6 +14,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class EnergyOverviewComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   calculatingSub: Subscription;
   calculating: boolean | 'error';
@@ -27,7 +30,7 @@ export class EnergyOverviewComponent implements OnInit {
   constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.selectedAccount = val;
     });
     this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {

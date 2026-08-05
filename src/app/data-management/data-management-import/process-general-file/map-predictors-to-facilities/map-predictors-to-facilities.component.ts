@@ -1,5 +1,6 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
@@ -19,6 +20,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   styleUrl: './map-predictors-to-facilities.component.css'
 })
 export class MapPredictorsToFacilitiesComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReferences: Array<FileReference>;
   fileReferenceSub: Subscription;
   facilityGroupIds: Array<string>;
@@ -174,7 +176,7 @@ export class MapPredictorsToFacilitiesComponent {
   }
 
   addFacility() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let newFacility: IdbFacility = getNewIdbFacility(account);
     newFacility.name = this.addFacilityName;
     this.fileReference.importFacilities.push(newFacility);

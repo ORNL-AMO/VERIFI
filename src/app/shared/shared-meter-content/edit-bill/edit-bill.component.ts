@@ -1,4 +1,5 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -29,6 +30,7 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   }
 })
 export class EditBillComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   editMeterData: IdbUtilityMeterData;
   addOrEdit: 'add' | 'edit';
@@ -98,7 +100,7 @@ export class EditBillComponent implements OnInit {
   }
 
   cancel() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/' + this.editMeter.guid + '/meter-data');
     } else {
@@ -121,8 +123,8 @@ export class EditBillComponent implements OnInit {
       delete meterDataToSave.id;
       meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     }
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.meterDataForm.markAsPristine();
     this.cancel();
@@ -142,8 +144,8 @@ export class EditBillComponent implements OnInit {
 
     delete meterDataToSave.id;
     meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);

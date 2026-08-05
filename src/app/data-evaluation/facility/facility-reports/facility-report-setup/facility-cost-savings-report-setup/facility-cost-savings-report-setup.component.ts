@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
@@ -28,6 +29,7 @@ import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from 'src/app/sha
   styleUrl: './facility-cost-savings-report-setup.component.css',
 })
 export class FacilityCostSavingsReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -144,8 +146,8 @@ export class FacilityCostSavingsReportSetupComponent {
 
   async save() {
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(this.facilityReport);
   }
@@ -178,8 +180,8 @@ export class FacilityCostSavingsReportSetupComponent {
   setGroupMeterCalendarizedData() {
     const facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
     const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-    const selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    const account = this.accountDbService.selectedAccount.getValue();
+    const selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    const account = this.accountWorkspaceStore.account();
 
     this.groupMeterCalendarizedData = {};
     if (!this.selectedAnalysisItem) return;

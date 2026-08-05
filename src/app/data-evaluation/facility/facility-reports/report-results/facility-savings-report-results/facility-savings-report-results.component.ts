@@ -1,4 +1,5 @@
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { FacilitySavingsReport } from 'src/app/calculations/savings-report-calculations/facilitySavingsReport';
@@ -41,6 +42,7 @@ import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
   styleUrl: './facility-savings-report-results.component.css'
 })
 export class FacilitySavingsReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -114,12 +116,12 @@ export class FacilitySavingsReportResultsComponent {
 
   getAnnualAnalysisSummary() {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.analysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.analysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.analysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../web-workers/facility-savings-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

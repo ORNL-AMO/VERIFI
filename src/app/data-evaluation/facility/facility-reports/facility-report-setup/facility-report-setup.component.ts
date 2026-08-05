@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,6 +17,7 @@ import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/
   standalone: false
 })
 export class FacilityReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportType: FacilityReportType;
   reportName: string;
@@ -51,8 +53,8 @@ export class FacilityReportSetupComponent {
     let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
     facilityReport.name = this.reportName;
     facilityReport = await firstValueFrom(this.facilityReportDbService.updateWithObservable(facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
     this.facilityReportDbService.selectedReport.next(facilityReport);
   }

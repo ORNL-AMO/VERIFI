@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
@@ -23,6 +24,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class EditOtherEmissionsBillComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -85,9 +87,9 @@ export class EditOtherEmissionsBillComponent {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       //meed to use total volume for fugitive/process emissions
       let customGWPs: Array<IdbCustomGWP> = this.customGwpDbService.accountCustomGWPs.getValue();
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter,

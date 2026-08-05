@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +20,7 @@ import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFu
   standalone: false
 })
 export class DataApplicationMenuComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   meter: IdbUtilityMeter;
 
@@ -57,7 +59,7 @@ export class DataApplicationMenuComponent implements OnInit {
 
   calanderizeMeter() {
     if (this.utilityMeterData.length > 2) {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let calanderizedData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
       this.monthlyData = calanderizedData[0].monthlyData;
       if (this.meter.meterReadingDataApplication == 'backward') {

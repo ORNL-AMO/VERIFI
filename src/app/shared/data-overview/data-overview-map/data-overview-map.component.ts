@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, ViewChild, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, Input, ViewChild, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
@@ -16,6 +17,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   standalone: false
 })
 export class DataOverviewMapComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
@@ -162,14 +164,14 @@ export class DataOverviewMapComponent {
 
   getHoverData() {
     if (this.dataType == 'energyUse') {
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       return this.mapData.map(item => { return item.facility.name + ': ' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.energyUnit });
     } else if (this.dataType == 'cost') {
       return this.mapData.map(item => { return item.facility.name + ': $' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) });
     } else if (this.dataType == 'emissions') {
       return this.mapData.map(item => { return item.facility.name + ': ' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' tonne CO<sub>2</sub>e' });
     } else if (this.dataType == 'water') {
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       return this.mapData.map(item => { return item.facility.name + ': ' + (item.dataTypeAmount).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 }) + ' ' + selectedAccount.volumeLiquidUnit });
     }
   }

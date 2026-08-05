@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -14,6 +16,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   standalone: false
 })
 export class AnnualFacilityAnalysisComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
@@ -39,7 +42,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.facility = val;
       this.key = 'annual-' + this.facility?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();

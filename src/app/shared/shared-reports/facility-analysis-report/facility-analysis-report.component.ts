@@ -1,4 +1,5 @@
-import { Component, Input, output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, output, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
@@ -32,6 +33,7 @@ import { GroupAnalysisReportComponent } from './group-analysis-report/group-anal
   standalone: false
 })
 export class FacilityAnalysisReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   analysisItem: IdbAnalysisItem;
   @Input({ required: true })
@@ -80,12 +82,12 @@ export class FacilityAnalysisReportComponent {
 
   ngOnInit(): void {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.analysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.analysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.analysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.reportYear = this.analysisReportSettings.reportYear;
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));

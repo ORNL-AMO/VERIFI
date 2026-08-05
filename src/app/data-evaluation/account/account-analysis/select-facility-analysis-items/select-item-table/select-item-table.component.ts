@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -35,6 +36,7 @@ interface FacilityAnalysisListItem {
   standalone: false
 })
 export class SelectItemTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -50,7 +52,7 @@ export class SelectItemTableComponent {
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
   allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbservice.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   accountAnalysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
@@ -127,7 +129,7 @@ export class SelectItemTableComponent {
     const facility = this.selectedFacility();
     selectedAnalysisItem.isAnalysisVisited = false;
     await this.accountAnalysisDbService.updateFacilityItemSelection(selectedAnalysisItem, analysisItemId, facility.guid);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountAnalysisItems(account, true);
   }
 
@@ -170,7 +172,7 @@ export class SelectItemTableComponent {
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
     this.dbChangesService.selectFacility(facility);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);

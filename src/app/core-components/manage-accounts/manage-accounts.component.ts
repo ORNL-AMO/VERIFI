@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from '../loading/loading.service';
@@ -18,7 +19,6 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
   standalone: false
 })
 export class ManageAccountsComponent {
-
   accounts: Array<IdbAccount>;
   accountErrors: Array<string>;
 
@@ -42,9 +42,8 @@ export class ManageAccountsComponent {
   }
 
   ngOnInit() {
-    this.accountDbService.selectedAccount.next(undefined);
-    this.allAccountsSub = this.accountDbService.allAccounts.subscribe(accounts => {
-      this.accounts = accounts;
+    this.allAccountsSub = toObservable(this.applicationLifecycleService.accountCatalog).subscribe(accounts => {
+      this.accounts = [...accounts];
       this.accountErrors = this.accounts.map(account => { return undefined });
     });
 
@@ -140,11 +139,11 @@ export class ManageAccountsComponent {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    this.selectedAccount.deleteAccount = true;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-    this.accounts = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(this.accounts);
-    this.accountDbService.selectedAccount.next(undefined);
+    await firstValueFrom(this.accountDbService.updateWithObservable({
+      ...this.selectedAccount,
+      deleteAccount: true
+    }));
+    this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
   }
 
   async deleteDatabase() {

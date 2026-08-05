@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FileReference } from '../../import-services/upload-data-models';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,6 +16,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   styleUrl: './confirm-energy-uses-upload.component.css',
 })
 export class ConfirmEnergyUsesUploadComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference;
   paramsSub: Subscription;
   navSub: Subscription;
@@ -39,7 +41,7 @@ export class ConfirmEnergyUsesUploadComponent {
     this.navSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'submit-file-data') {
         this.uploadDataService.navigate();
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
       }
     });

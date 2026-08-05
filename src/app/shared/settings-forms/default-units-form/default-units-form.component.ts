@@ -1,4 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -14,6 +16,8 @@ import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-default-units-form',
@@ -22,6 +26,9 @@ import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions
   standalone: false
 })
 export class DefaultUnitsFormComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly dbChangesService = inject(DbChangesService);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
   @Input()
   inAccount: boolean;
 
@@ -50,7 +57,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
         if (this.isFormChange == false) {
@@ -64,7 +71,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       }
     });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
         this.checkUnitsDontMatch();
@@ -95,18 +102,12 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
       this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
       this.selectedAccount.displayEmissions = this.form.controls.displayEmissions.value;
-      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-      this.accountDbService.selectedAccount.next(updatedAccount);
-      this.accountDbService.allAccounts.next(allAccounts);
+      await this.dbChangesService.updateAccount({ ...this.selectedAccount });
+      await this.applicationLifecycleService.refreshAccountCatalog();
     }
     if (!this.inAccount) {
       this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
-      let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-      let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
-      this.facilityDbService.selectedFacility.next(updatedFacility);
-      let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
-      this.facilityDbService.accountFacilities.next(accountFacilities);
+      await this.dbChangesService.updateFacility({ ...this.selectedFacility });
     }
   }
 

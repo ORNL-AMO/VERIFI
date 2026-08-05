@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,6 +17,7 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
     standalone: false
 })
 export class BetterClimateSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   account: IdbAccount;
   selectedReportSub: Subscription;
@@ -35,7 +37,7 @@ export class BetterClimateSetupComponent {
 
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
       if (!this.isFormChange) {

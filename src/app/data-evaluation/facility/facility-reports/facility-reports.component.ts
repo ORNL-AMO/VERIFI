@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -13,6 +14,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
     standalone: false
 })
 export class FacilityReportsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   utilityMeterDataSub: Subscription;
@@ -33,7 +35,7 @@ export class FacilityReportsComponent {
   }
 
   goToUtilityData() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility')
   }
 }

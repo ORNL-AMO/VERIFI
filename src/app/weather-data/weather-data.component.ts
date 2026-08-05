@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WeatherDataService } from './weather-data.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -23,6 +24,7 @@ import { WeatherPredictorManagementService } from './weather-predictor-managemen
   standalone: false
 })
 export class WeatherDataComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   applyToFacility: boolean;
   applyToFacilitySub: Subscription;
@@ -64,7 +66,7 @@ export class WeatherDataComponent {
       this.applyToFacility = val;
       if (this.applyToFacility) {
         this.weatherDataSelection = this.weatherDataService.weatherDataSelection;
-        this.facilities = this.facilityDbService.accountFacilities.getValue();
+        this.facilities = [...this.accountWorkspaceStore.facilities()];
         this.setWeatherDataSelection();
         if (this.weatherDataService.selectedFacility) {
           let facilityExists: IdbFacility = this.facilities.find(facility => { return facility.guid == this.weatherDataService.selectedFacility.guid });
@@ -198,7 +200,7 @@ export class WeatherDataComponent {
     this.loadingService.setCurrentLoadingIndex(0);
     let results: "success" | "error" = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(this.selectedFacility, this.selectedValues);
 
-    // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    // let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     // let hddPredictor: IdbPredictor;
     // let cddPredictor: IdbPredictor;
     // let relativeHumidityPredictor: IdbPredictor;

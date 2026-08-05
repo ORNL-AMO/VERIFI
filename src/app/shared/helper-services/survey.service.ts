@@ -1,5 +1,6 @@
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -13,6 +14,7 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
   providedIn: 'root'
 })
 export class SurveyService {
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
   completedStatus: BehaviorSubject<'sending' | 'success' | 'error'>;
   userSurvey: BehaviorSubject<UserSurvey>;
 
@@ -28,7 +30,7 @@ export class SurveyService {
    */
   checkIsExistingUser(): boolean {
     let currentDate = new Date();
-    let accounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
+    let accounts: Array<IdbAccount> = [...this.applicationLifecycleService.accountCatalog()];
     let accountDates: Array<Date> = accounts.map(acc => {
       return new Date(acc.createdDate);
     });

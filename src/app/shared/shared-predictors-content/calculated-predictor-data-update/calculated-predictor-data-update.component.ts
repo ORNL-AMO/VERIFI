@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -29,6 +30,7 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   predictor: IdbPredictor;
 
@@ -112,7 +114,7 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   setLastMeterReading() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.latestMeterReading = this.predictorDataHelperService.getLastMeterDate(facility);
     this.firstMeterReading = this.predictorDataHelperService.getFirstMeterDate(facility);
   }
@@ -304,7 +306,7 @@ export class CalculatedPredictorDataUpdateComponent {
     if (this.router.url.includes('data-management')) {
       this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
     } else {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
     }
   }
@@ -329,8 +331,8 @@ export class CalculatedPredictorDataUpdateComponent {
         await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(pData.id));
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility)
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');

@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from 'src/app/shared/sharedHelperFunctions';
@@ -27,6 +28,7 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class EditMeterFormComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   meterForm: FormGroup;
   @Input()
@@ -78,7 +80,7 @@ export class EditMeterFormComponent implements OnInit {
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.assessmentReportOption = account.assessmentReportVersion;
     this.setGlobalWarmingPotentials();
   }

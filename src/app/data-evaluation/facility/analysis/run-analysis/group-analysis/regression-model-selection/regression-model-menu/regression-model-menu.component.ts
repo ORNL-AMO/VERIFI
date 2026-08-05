@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -55,6 +56,7 @@ type RegressionMenuForm = FormGroup<{
   standalone: false
 })
 export class RegressionModelMenuComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // --- Services (DI) ---
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
@@ -74,14 +76,14 @@ export class RegressionModelMenuComponent {
   // --- Signals ---
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
   facilityPredictorData: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.facilityPredictorData);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters);
   generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
 
   // --- Computed Signals ---
   yearOptions: Signal<Array<number>> = computed(() => {

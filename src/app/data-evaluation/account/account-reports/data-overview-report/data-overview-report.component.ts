@@ -1,4 +1,5 @@
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -38,6 +39,7 @@ import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
   standalone: false
 })
 export class DataOverviewReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   overviewReport: DataOverviewReportSetup;
   print: boolean = false;
@@ -82,7 +84,7 @@ export class DataOverviewReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.overviewReport = selectedReport.dataOverviewReportSetup;
     this.includedFacilities = new Array();
@@ -106,7 +108,7 @@ export class DataOverviewReportComponent {
     if (this.overviewReport.includeFacilityReports) {
       this.facilitiesData = new Array();
       if (this.includedFacilities.length > 0) {
-        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
         let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
         let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
         let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
@@ -188,7 +190,7 @@ export class DataOverviewReportComponent {
   }
 
   calculateAccountSummary(selectedReport: IdbAccountReport) {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let includedFacilities: Array<IdbFacility> = facilities.filter(facility => {
       return this.includedFacilities.includes(facility.guid);
     });

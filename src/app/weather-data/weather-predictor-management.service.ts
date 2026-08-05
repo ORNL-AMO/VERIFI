@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
@@ -26,6 +27,7 @@ import { CalanderizationService } from '../shared/helper-services/calanderizatio
   providedIn: 'root'
 })
 export class WeatherPredictorManagementService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   hasWarning: boolean = false;
   heatingTemp: number;
@@ -69,7 +71,7 @@ export class WeatherPredictorManagementService {
 
   async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
     let idx: number = 0;
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;
@@ -281,7 +283,7 @@ export class WeatherPredictorManagementService {
       let facilityWeatherPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue().filter(predictor => {
         return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
       });
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityList[i].facilityId);
+      let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityList[i].facilityId));
       for (let p = 0; p < facilityWeatherPredictors.length; p++) {
         let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
         this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);

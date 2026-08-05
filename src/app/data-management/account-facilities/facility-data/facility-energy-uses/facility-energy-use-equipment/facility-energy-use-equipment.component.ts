@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
@@ -25,6 +26,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-use-equipment.component.css'
 })
 export class FacilityEnergyUseEquipmentComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -46,7 +48,7 @@ export class FacilityEnergyUseEquipmentComponent {
     this.energyUseEquipmentSignal.set(value);
   }
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
 
   showDeleteEquipment: boolean = false;
@@ -82,8 +84,8 @@ export class FacilityEnergyUseEquipmentComponent {
     this.loadingService.setLoadingMessage('Saving Meter...');
     this.loadingService.setLoadingStatus(true);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(this.energyUseEquipment));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(selectedAccount, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.dataChanged = false;
@@ -107,8 +109,8 @@ export class FacilityEnergyUseEquipmentComponent {
     //delete equipment
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.deleteWithObservable(this.energyUseEquipment.id));
     //set equipment
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
@@ -117,7 +119,7 @@ export class FacilityEnergyUseEquipmentComponent {
   }
 
   goToGroupList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses/' + this.energyUseEquipment.energyUseGroupId);
   }
 

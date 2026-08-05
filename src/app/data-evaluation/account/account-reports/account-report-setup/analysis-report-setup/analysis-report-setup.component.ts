@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -17,6 +18,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
   styleUrl: './analysis-report-setup.component.css'
 })
 export class AnalysisReportSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   analysisReportForm: FormGroup;
   account: IdbAccount;
   selectedReportSub: Subscription;
@@ -32,7 +34,7 @@ export class AnalysisReportSetupComponent {
   }
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {
         this.analysisReportForm = this.accountReportsService.getAnalysisFormFromReport(val.analysisReportSetup);

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -19,6 +20,7 @@ import { BackupPreparationService } from 'src/app/shared/helper-services/backup-
   standalone: false
 })
 export class HomePageComponent {
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
   backupFile: any;
   showTestDataModal: boolean = false;
   accounts: Array<IdbAccount>;
@@ -38,7 +40,7 @@ export class HomePageComponent {
     this.metaService.updateTag({ name: 'description', content: 'VERIFI is a free tool for tracking and analyzing industrial utility consumption data at corporate and facility levels, enabling energy performance analysis and DOE Better Plants reporting.' });
     this.metaService.updateTag({ property: 'og:title', content: 'VERIFI | Industrial Utility & Energy Analytics' });
     this.metaService.updateTag({ property: 'og:url', content: 'https://verifi.ornl.gov/welcome' });
-    this.accounts = this.accountDbService.allAccounts.getValue().filter(account => {
+    this.accounts = [...this.applicationLifecycleService.accountCatalog()].filter(account => {
       return !account.deleteAccount;
     });
     this.accounts = _.orderBy(this.accounts, (account: IdbAccount) => {
@@ -104,8 +106,7 @@ export class HomePageComponent {
   async createNewAccount() {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
-    let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(allAccounts);
+    await this.applicationLifecycleService.refreshAccountCatalog();
     await this.dbChangesService.selectAccount(account, false);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }

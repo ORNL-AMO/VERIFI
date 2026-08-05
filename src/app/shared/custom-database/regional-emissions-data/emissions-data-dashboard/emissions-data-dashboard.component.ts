@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -15,6 +17,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class EmissionsDataDashboardComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   customEmissionsItems: Array<IdbCustomEmissionsItem>;
   customEmissionsItemsSub: Subscription;
@@ -33,7 +36,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
       this.customEmissionsItems = val;
     });
 
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.selectedAccount = val;
     });
   }
@@ -68,7 +71,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
     if (this.itemToDelete) {
       this.deleteItemInUse = (this.itemToDelete.subregion == this.selectedAccount.eGridSubregion);
       if (!this.deleteItemInUse) {
-        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
         facilities.forEach(facility => {
           if (this.itemToDelete.subregion == facility.eGridSubregion) {
             this.deleteItemInUse = true;

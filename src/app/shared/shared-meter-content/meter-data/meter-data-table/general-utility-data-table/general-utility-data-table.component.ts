@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import * as _ from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -29,6 +30,7 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   standalone: false
 })
 export class GeneralUtilityDataTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataService = inject(UtilityMeterDataService);
   private copyTableService = inject(CopyTableService);
   private eGridService = inject(EGridService);
@@ -48,8 +50,8 @@ export class GeneralUtilityDataTableComponent {
   selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   generalUtilityDataFilters: Signal<GeneralUtilityDataFilters> = toSignal(this.utilityMeterDataService.tableGeneralUtilityFilters);
 
   selectedMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => {

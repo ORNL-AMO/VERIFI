@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -14,6 +15,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrl: './facility-meter-data-quality-report.component.css'
 })
 export class FacilityMeterDataQualityReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   utilityMeter: IdbUtilityMeter;
   utilityMeterData: Array<IdbUtilityMeterData>;
@@ -46,7 +48,7 @@ export class FacilityMeterDataQualityReportComponent {
  
 
   goToMeterList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
   }
 }

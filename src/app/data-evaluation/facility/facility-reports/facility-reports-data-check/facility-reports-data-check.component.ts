@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -18,6 +19,7 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './facility-reports-data-check.component.css',
 })
 export class FacilityReportsDataCheckComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityReport: IdbFacilityReport;
@@ -51,7 +53,7 @@ export class FacilityReportsDataCheckComponent {
   }
 
   initializeFacilityGroups() {
-    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
     let reportYear: number;
     if (this.facilityReport.facilityReportType == 'analysis') {
       reportYear = this.facilityReport.analysisReportSettings.reportYear;
@@ -85,8 +87,8 @@ export class FacilityReportsDataCheckComponent {
       this.analysisItem.isAnalysisVisited = true;
       this.analysisItem.dataCheckedDate = new Date();
       await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let account: IdbAccount = this.accountWorkspaceStore.account();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
       this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
     }

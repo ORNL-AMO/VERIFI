@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -15,6 +17,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class CorrelationPlotMenuComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   years: Array<number>;
@@ -38,7 +41,7 @@ export class CorrelationPlotMenuComponent {
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.facility = val;
       this.setYears();
     });

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
@@ -18,6 +19,7 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class AnalysisDbService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   accountAnalysisItems: BehaviorSubject<Array<IdbAnalysisItem>>;
   facilityAnalysisItems: BehaviorSubject<Array<IdbAnalysisItem>>;
@@ -62,11 +64,11 @@ export class AnalysisDbService {
   }
 
   async initializeAnalysisItems() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     if (selectedAccount) {
       let accounAnalysisItems: Array<IdbAnalysisItem> = await this.getAllAccountAnalysisItems(selectedAccount.guid);
       this.accountAnalysisItems.next(accounAnalysisItems);
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       if (selectedFacility) {
         let facilityAnalysisItems: Array<IdbAnalysisItem> = accounAnalysisItems.filter(meter => { return meter.facilityId == selectedFacility.guid });
         this.facilityAnalysisItems.next(facilityAnalysisItems);

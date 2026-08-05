@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as _ from 'lodash';
 import { CalanderizationFilters, CalanderizedMeter } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
@@ -18,6 +19,7 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
   providedIn: 'root'
 })
 export class CalanderizationService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>;
@@ -55,8 +57,8 @@ export class CalanderizationService {
 
   setCalanderizedMeterData(accountMeterData: Array<IdbUtilityMeterData>) {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
 
     if (typeof Worker !== 'undefined') {
       if(this.calanderizationWorker){
@@ -117,15 +119,15 @@ export class CalanderizationService {
   getYearOptions(meterCategory: 'water' | 'energy' | 'all', onlyFullYears: boolean, facilityId?: string): Array<number> {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityOrAccount: IdbFacility | IdbAccount;
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilityId) {
-      facilityOrAccount = this.facilityDbService.getFacilityById(facilityId);
+      facilityOrAccount = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityId));
       meters = meters.filter(meter => {
         return meter.facilityId == facilityId
       });
       accountFacilities = accountFacilities.filter(fac => fac.guid == facilityId);
     } else {
-      facilityOrAccount = this.accountDbService.selectedAccount.getValue();
+      facilityOrAccount = this.accountWorkspaceStore.account();
     }
     let categoryMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
     let categoryMeterIds: Array<string> = categoryMeters.map(meter => { return meter.guid });

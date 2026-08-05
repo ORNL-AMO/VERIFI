@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
@@ -17,11 +18,12 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   providedIn: 'root'
 })
 export class EnergyUnitsHelperService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,) { }
 
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     if (selectedAccount) {
       let isEnergyMeter: boolean;
       if (meter.source == 'Other') {
@@ -41,7 +43,7 @@ export class EnergyUnitsHelperService {
   }
 
   getMeterConsumptionUnitInFacility(meter: IdbUtilityMeter): string {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let selectedFacility: IdbFacility = accountFacilities.find(facility => { return meter.facilityId == facility.guid });
     if (selectedFacility) {
       let isEnergyMeter: boolean;
@@ -62,7 +64,7 @@ export class EnergyUnitsHelperService {
   }
 
   getEnergyIsSourceInFacility(): boolean {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     if (selectedFacility) {
       return selectedFacility.energyIsSource;
     }
@@ -70,7 +72,7 @@ export class EnergyUnitsHelperService {
   }
 
   getEnergyIsSourceInAccount(): boolean {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     if (selectedAccount) {
       return selectedAccount.energyIsSource;
     }
@@ -78,7 +80,7 @@ export class EnergyUnitsHelperService {
   }
 
   getFacilityUnitFromMeter(facilityMeter: IdbUtilityMeter): string {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == facilityMeter.facilityId });
     if (facilityMeter.source == 'Electricity' || getIsEnergyUnit(facilityMeter.startingUnit)) {
       return selectedFacility.energyUnit;
@@ -109,7 +111,7 @@ export class EnergyUnitsHelperService {
   }
 
   getAccountUnitFromMeter(accountMeter: IdbUtilityMeter): string {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     if (accountMeter.source == 'Electricity' || getIsEnergyUnit(accountMeter.startingUnit)) {
       return selectedAccount.energyUnit;
     } else if (accountMeter.source == 'Natural Gas') {

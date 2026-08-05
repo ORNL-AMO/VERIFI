@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -17,26 +18,27 @@ import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/
   styleUrl: './facility-energy-use-group-management.component.css'
 })
 export class FacilityEnergyUseGroupManagementComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
   private router: Router = inject(Router);
 
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
 
   async addGroup() {
     let facility: IdbFacility = this.facility();
     let newEnergyUseGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(facility.accountId, facility.guid);
     newEnergyUseGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newEnergyUseGroup));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
     this.selectEditGroup(newEnergyUseGroup);
   }
 
   async selectEditGroup(energyUseGroup: IdbFacilityEnergyUseGroup) {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let facility: IdbFacility = this.facility();
     energyUseGroup.sidebarOpen = true;
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));

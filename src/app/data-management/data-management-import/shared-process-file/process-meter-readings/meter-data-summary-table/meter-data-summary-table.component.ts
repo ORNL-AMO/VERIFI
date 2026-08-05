@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { MeterDataSummary } from '../process-meter-readings.component';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -15,6 +16,7 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   standalone: false
 })
 export class MeterDataSummaryTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   meterDataSummaries: Array<MeterDataSummary>;
 
@@ -43,7 +45,7 @@ export class MeterDataSummaryTableComponent {
   }
 
   ngOnInit() {
-    this.facilities = this.facilityDbService.accountFacilities.getValue();
+    this.facilities = [...this.accountWorkspaceStore.facilities()];
     this.meters = this.utilityMeterDbService.accountMeters.getValue();
     this.computeReadingChanges();
   }

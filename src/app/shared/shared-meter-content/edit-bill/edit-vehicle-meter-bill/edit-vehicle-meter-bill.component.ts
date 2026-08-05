@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -22,6 +23,7 @@ import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptio
     standalone: false
 })
 export class EditVehicleMeterBillComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -55,7 +57,7 @@ export class EditVehicleMeterBillComponent {
     this.setFuel();
     this.setTotalEmissions();
     this.setUsingMeterFuelEfficiency();
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
   }
 
   ngOnChanges() {
@@ -138,7 +140,7 @@ export class EditVehicleMeterBillComponent {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value && this.account && this.account.displayEmissions) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       this.emissionsValues = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,

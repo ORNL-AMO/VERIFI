@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
@@ -20,6 +21,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class EditElectricityBillComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -43,7 +45,7 @@ export class EditElectricityBillComponent implements OnInit {
 
   ngOnInit(): void {
     this.setTotalEmissions();
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
   }
 
   ngOnChanges() {
@@ -70,7 +72,7 @@ export class EditElectricityBillComponent implements OnInit {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalEnergyUse.value && this.account && this.account.displayEmissions) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, this.account.assessmentReportVersion, []);
       this.totalLocationEmissions = emissionsValues.locationElectricityEmissions;

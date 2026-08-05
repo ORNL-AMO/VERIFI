@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -23,6 +24,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrl: './facility-report-analysis-selection.component.css',
 })
 export class FacilityReportAnalysisSelectionComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @Input()
   facilityReport: IdbFacilityReport;
@@ -128,8 +130,8 @@ export class FacilityReportAnalysisSelectionComponent {
   async saveAnalysisVisitedData() {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.selectedAnalysisItem));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
   }

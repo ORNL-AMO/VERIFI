@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
@@ -21,6 +22,7 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
   standalone: false
 })
 export class FacilityReportsDashboardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityReportsDbService: FacilityReportsDbService = inject(FacilityReportsDbService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
@@ -30,9 +32,9 @@ export class FacilityReportsDashboardComponent {
   private router: Router = inject(Router);
   private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
 
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   newReportType: FacilityReportType = 'analysis';
   displayNewReport: boolean = false;
 

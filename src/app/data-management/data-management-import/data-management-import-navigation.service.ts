@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
@@ -8,6 +9,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   providedIn: 'root'
 })
 export class DataManagementImportNavigationService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private router: Router, private accountDbService: AccountdbService
   ) { }
@@ -78,7 +80,7 @@ export class DataManagementImportNavigationService {
   }
 
   goToPage(goToOption: GoToOptionValue, fileReference: FileReference) {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (goToOption == 'upload-files') {
       this.router.navigateByUrl('/data-management/' + account.guid + '/import-data/upload-files');
     } else if (fileReference.isTemplate) {

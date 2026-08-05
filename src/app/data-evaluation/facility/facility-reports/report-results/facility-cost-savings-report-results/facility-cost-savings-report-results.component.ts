@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
@@ -31,6 +32,7 @@ import { FacilityCostSavingsReportResults } from 'src/app/calculations/cost-savi
   styleUrl: './facility-cost-savings-report-results.component.css',
 })
 export class FacilityCostSavingsReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportSub: Subscription;
   facilityReport: IdbFacilityReport;
@@ -136,12 +138,12 @@ export class FacilityCostSavingsReportResultsComponent {
     }
 
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.selectedAnalysisItem?.facilityId);
+    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.selectedAnalysisItem?.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.selectedAnalysisItem?.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.selectedAnalysisItem?.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       const worker = new Worker(new URL('../../../../../web-workers/facility-cost-savings-report.worker', import.meta.url));
       this.worker = worker;

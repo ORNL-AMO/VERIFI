@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
@@ -12,13 +13,14 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class FacilityBannerComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   @ViewChild('navTabs') navTabs: ElementRef;
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   disableTabs: Signal<boolean> = computed(() => {

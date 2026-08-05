@@ -1,4 +1,6 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -22,6 +24,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   standalone: false
 })
 export class FacilityOverviewBannerComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @ViewChild('navTabs') navTabs: ElementRef;
   modalOpenSub: Subscription;
@@ -52,11 +55,11 @@ export class FacilityOverviewBannerComponent implements OnInit {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.selectedFacility = val;
       this.setShowWater();
     });
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.account = account;
     });
   }

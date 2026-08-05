@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -30,6 +31,7 @@ type OrderByFields = 'readDate' | 'totalEnergyUse' | 'totalCost' | 'totalRealDem
   standalone: false
 })
 export class ElectricityDataTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataService: UtilityMeterDataService = inject(UtilityMeterDataService);
   private copyTableService: CopyTableService = inject(CopyTableService);
   private eGridService: EGridService = inject(EGridService);
@@ -49,8 +51,8 @@ export class ElectricityDataTableComponent {
   selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   electricityDataFilters: Signal<ElectricityDataFilters> = toSignal(this.utilityMeterDataService.tableElectricityFilters);
 
   selectedMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => {

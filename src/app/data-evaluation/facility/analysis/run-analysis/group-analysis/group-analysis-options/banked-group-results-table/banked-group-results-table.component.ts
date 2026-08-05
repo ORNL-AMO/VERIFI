@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
@@ -28,6 +29,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   standalone: false
 })
 export class BankedGroupResultsTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedGroupSub: Subscription;
   selectedGroup: AnalysisGroup;
@@ -83,12 +85,12 @@ export class BankedGroupResultsTableComponent {
   runAnalysis() {
     this.calculating = true;
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.bankedAnalysisItem.facilityId);
+    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.bankedAnalysisItem.facilityId));
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.bankedAnalysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.bankedAnalysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.bankedAnalysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.bankedAnalysisItem.facilityId);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     // this.bankedAnalysisItem.reportYear = this.selectedGroup.bankedAnalysisYear;
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../../../web-workers/annual-facility-analysis.worker', import.meta.url));

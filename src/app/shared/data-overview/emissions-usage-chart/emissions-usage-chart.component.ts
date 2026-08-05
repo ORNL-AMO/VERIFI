@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -15,6 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class EmissionsUsageChartComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   facilityId: string;
   @Input()
@@ -29,7 +31,7 @@ export class EmissionsUsageChartComponent {
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {

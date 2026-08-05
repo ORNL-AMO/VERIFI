@@ -1,4 +1,5 @@
-import { Component, HostListener } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, HostListener, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -25,6 +26,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class PredictorsDataFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   addOrEdit: 'add' | 'edit';
   predictor: IdbPredictor;
@@ -75,7 +77,7 @@ export class PredictorsDataFormComponent {
 
   cancel() {
     this.isSaved = true;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
   }
 
@@ -87,8 +89,8 @@ export class PredictorsDataFormComponent {
     } else {
       await firstValueFrom(this.predictorDataDbService.addWithObservable(this.predictorData));
     }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setPredictorDataV2(selectedAccount, true, selectedFacility);
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);

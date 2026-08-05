@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
@@ -18,6 +20,7 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
     standalone: false
 })
 export class FacilitySettingsComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   showDeleteFacility: boolean = false;
   selectedFacilitySub: Subscription;
@@ -35,7 +38,7 @@ export class FacilitySettingsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.selectedFacility = facility;
     });
 
@@ -58,7 +61,7 @@ export class FacilitySettingsComponent implements OnInit {
   }
 
   async facilityDelete() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
   }

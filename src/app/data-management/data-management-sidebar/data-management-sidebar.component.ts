@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -28,6 +30,7 @@ import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-
   standalone: false
 })
 export class DataManagementSidebarComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
 
@@ -85,11 +88,11 @@ export class DataManagementSidebarComponent {
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.account = account;
     });
-    this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
-      this.facilities = facilities;
+    this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(facilities => {
+      this.facilities = facilities.map(facility => ({ ...facility }));
     });
     this.fileReferencesSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
@@ -100,7 +103,7 @@ export class DataManagementSidebarComponent {
     this.accountPredictorsSub = this.predictorDbService.accountPredictors.subscribe(accountPredictors => {
       this.accountPredictors = accountPredictors;
     });
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.selectedFacility = facility;
     });
     this.selectedMeterSub = this.utilityMeterDbService.selectedMeter.subscribe(meter => {
@@ -154,9 +157,10 @@ export class DataManagementSidebarComponent {
   }
 
   async toggleFacilitiesOpen() {
-    this.account.sidebarFacilitiesOpen = !this.account.sidebarFacilitiesOpen;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
-    await this.accountDbService.selectedAccount.next(this.account);
+    await this.dbChangesService.updateAccount({
+      ...this.account,
+      sidebarFacilitiesOpen: !this.account.sidebarFacilitiesOpen
+    });
   }
 
   async toggleFacilityOpen(facility: IdbFacility) {
@@ -167,8 +171,8 @@ export class DataManagementSidebarComponent {
   async toggleMeterOpen(meter: IdbUtilityMeter) {
     meter.sidebarOpen = !meter.sidebarOpen;
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
   }
 
@@ -178,9 +182,7 @@ export class DataManagementSidebarComponent {
   }
 
   async saveFacility(facility: IdbFacility) {
-    await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(selectedAccount, true)
+    await this.dbChangesService.updateFacility({ ...facility });
   }
 
   async toggleFacilityPredictorsOpen(facility: IdbFacility) {
@@ -191,15 +193,16 @@ export class DataManagementSidebarComponent {
   async togglePredictorOpen(predictor: IdbPredictor) {
     predictor.sidebarOpen = !predictor.sidebarOpen;
     await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setPredictorsV2(selectedAccount, selectedFacility);
   }
 
   async toggleCustomDataOpen() {
-    this.account.sidebarCustomDataOpen = !this.account.sidebarCustomDataOpen;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
-    await this.accountDbService.selectedAccount.next(this.account);
+    await this.dbChangesService.updateAccount({
+      ...this.account,
+      sidebarCustomDataOpen: !this.account.sidebarCustomDataOpen
+    });
   }
 
   async toggleFacilityEnergyUsesOpen(facility: IdbFacility) {
@@ -210,8 +213,8 @@ export class DataManagementSidebarComponent {
   async toggleEnergyUseGroupOpen(energyUseGroup: IdbFacilityEnergyUseGroup) {
     energyUseGroup.sidebarOpen = !energyUseGroup.sidebarOpen;
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
   }
 

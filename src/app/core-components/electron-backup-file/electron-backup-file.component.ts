@@ -1,4 +1,6 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
@@ -12,6 +14,7 @@ import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
 import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -20,6 +23,8 @@ import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/hel
   standalone: false
 })
 export class ElectronBackupFileComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
 
   latestBackupFileSub: Subscription;
@@ -50,7 +55,7 @@ export class ElectronBackupFileComponent {
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
     if (this.electronService.isElectron) {
-      this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
         //initialize account or account change
         if (val) {
           if (!this.account || (this.account.guid != val.guid)) {
@@ -141,10 +146,11 @@ export class ElectronBackupFileComponent {
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.suspendQueuedDeletion();
-        this.account.deleteAccount = true;
-        await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
-        let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-        this.accountDbService.allAccounts.next(accounts);
+        await firstValueFrom(this.accountDbService.updateWithObservable({
+          ...this.account,
+          deleteAccount: true
+        }));
+        await this.applicationLifecycleService.refreshAccountCatalog();
 
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;

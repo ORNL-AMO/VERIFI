@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -14,6 +15,7 @@ import { UploadDataFootprintToolService } from '../../import-services/upload-dat
   styleUrl: './footprint-upload-select-facility.component.css',
 })
 export class FootprintUploadSelectFacilityComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilities: Array<IdbFacility>;
   fileReferences: Array<FileReference>;
@@ -32,7 +34,7 @@ export class FootprintUploadSelectFacilityComponent {
       let id: string = param['id'];
       this.fileReference = this.fileReferences.find(ref => { return ref.id == id });
     });
-    this.facilities = this.facilityDbService.accountFacilities.getValue();
+    this.facilities = [...this.accountWorkspaceStore.facilities()];
     if(this.facilities.length == 1 && !this.fileReference.selectedFacilityId){
       this.fileReference.selectedFacilityId = this.facilities[0].guid;
       this.setSelectedFacility();

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { FileReference, ParsedTemplate } from './upload-data-models';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,6 +17,7 @@ import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-ene
   providedIn: 'root',
 })
 export class UploadDataFootprintToolService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -24,7 +26,7 @@ export class UploadDataFootprintToolService {
   ) { }
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let mainWorksheet: XLSX.WorkSheet = workbook.Sheets['Main'];
     let currentYearCell: number = parseInt(mainWorksheet['K13']?.v);
     let numYearsCell: number = parseInt(mainWorksheet['K14']?.v);
@@ -181,7 +183,7 @@ export class UploadDataFootprintToolService {
   }
 
   setSelectedFacility(fileReference: FileReference): FileReference {
-    let selectedFacility: IdbFacility = this.facilityDbService.getFacilityById(fileReference.selectedFacilityId);
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (fileReference.selectedFacilityId));
     let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupDbService.getByFacilityId(selectedFacility.guid);
     let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(selectedFacility.guid);
     fileReference.facilityEnergyUseGroups.forEach(group => {

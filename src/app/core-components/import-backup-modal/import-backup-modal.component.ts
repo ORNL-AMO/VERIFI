@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -22,6 +23,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -30,6 +32,8 @@ import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile 
   standalone: false
 })
 export class ImportBackupModalComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   inFacility: boolean;
   backupFile: PreparedBackupFile;
@@ -80,8 +84,8 @@ export class ImportBackupModalComponent implements OnInit {
         } else {
           this.overwriteData = false;
         }
-        this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-        this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
+        this.selectedAccount = this.accountWorkspaceStore.account();
+        this.accountFacilities = [...this.accountWorkspaceStore.facilities()];
         this.accountFacilityNames = this.accountFacilities.map(facility => facility.name);
         this.accountGroups = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
         this.duplicateFacilityError = false;
@@ -256,10 +260,11 @@ export class ImportBackupModalComponent implements OnInit {
   async importExistingAccount(backupFile: PreparedBackupFile) {
     //delete existing account and data
     this.deleteDataService.suspendQueuedDeletion();
-    this.selectedAccount.deleteAccount = true;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(accounts);
+    await firstValueFrom(this.accountDbService.updateWithObservable({
+      ...this.selectedAccount,
+      deleteAccount: true
+    }));
+    await this.applicationLifecycleService.refreshAccountCatalog();
     await this.importNewAccount(backupFile);
     await this.deleteDataService.resumeQueuedDeletion();
   }
@@ -267,7 +272,7 @@ export class ImportBackupModalComponent implements OnInit {
   async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {
     let idx = currIdx !== undefined ? currIdx : 0;
     let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
-    let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let currentAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.selectAccount(currentAccount, false);
     this.dbChangesService.selectFacility(newFacility);
   }
@@ -368,7 +373,7 @@ export class ImportBackupModalComponent implements OnInit {
       idx = index + 1;
     }
 
-    let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let currentAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.selectAccount(currentAccount, false);
   }
 

@@ -1,5 +1,6 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
@@ -17,6 +18,7 @@ import { UploadDataService } from 'src/app/data-management/data-management-impor
   styleUrl: './map-meters-to-facilities.component.css'
 })
 export class MapMetersToFacilitiesComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReferences: Array<FileReference>;
   fileReferenceSub: Subscription;
   facilityGroupIds: Array<string>;
@@ -79,7 +81,7 @@ export class MapMetersToFacilitiesComponent {
       facilityName: 'Unmapped Meters',
       color: ''
     })
-    // let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    // let idbFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     this.fileReference.importFacilities.forEach(facility => {
       let groupItems: Array<ColumnItem> = new Array();
       if (facility.guid == this.fileReference.selectedFacilityId) {
@@ -136,7 +138,7 @@ export class MapMetersToFacilitiesComponent {
       facilityName: 'Unmapped Meters',
       color: ''
     })
-    // let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    // let idbFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     this.fileReference.importFacilities.forEach(facility => {
       if (facility.guid == facilityId) {
         facilityGroups.push({
@@ -179,7 +181,7 @@ export class MapMetersToFacilitiesComponent {
   }
 
   addFacility() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let newFacility: IdbFacility = getNewIdbFacility(account);
     newFacility.name = this.addFacilityName;
     this.fileReference.importFacilities.push(newFacility);

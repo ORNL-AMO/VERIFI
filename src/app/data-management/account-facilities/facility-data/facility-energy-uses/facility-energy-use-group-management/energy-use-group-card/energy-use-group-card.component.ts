@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Input, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -24,6 +25,7 @@ import { getGUID } from 'src/app/shared/sharedHelperFunctions';
     styleUrl: './energy-use-group-card.component.css'
 })
 export class EnergyUseGroupCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
     @Input({ required: true })
     group: IdbFacilityEnergyUseGroup;
 
@@ -76,8 +78,8 @@ export class EnergyUseGroupCardComponent {
     });
 
     async editGroup(energyUseGroup: IdbFacilityEnergyUseGroup) {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
+        let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         energyUseGroup.sidebarOpen = true;
         await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
         await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
@@ -90,8 +92,8 @@ export class EnergyUseGroupCardComponent {
         copyGroup.guid = getGUID();
         copyGroup.name = copyGroup.name + ' (copy)';
         copyGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(copyGroup));
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
+        let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
         this.editGroup(copyGroup);
     }
@@ -117,8 +119,8 @@ export class EnergyUseGroupCardComponent {
         //delete equipment associated with group
         await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(deleteGroupGuid);
         //set groups
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
         //set equipment
         await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);

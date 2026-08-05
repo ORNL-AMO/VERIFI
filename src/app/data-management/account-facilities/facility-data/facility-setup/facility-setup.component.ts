@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
@@ -16,6 +18,7 @@ import { BackupDataService } from 'src/app/shared/helper-services/backup-data.se
   standalone: false
 })
 export class FacilitySetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   showDeleteFacility: boolean = false;
@@ -31,7 +34,7 @@ export class FacilitySetupComponent {
   ) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.selectedFacility = facility;
     });
   }
@@ -42,7 +45,7 @@ export class FacilitySetupComponent {
 
 
   async facilityDelete() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/facilities');

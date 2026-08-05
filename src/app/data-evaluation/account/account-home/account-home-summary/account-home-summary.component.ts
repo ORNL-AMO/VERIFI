@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountHomeService } from '../account-home.service';
@@ -18,6 +19,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountHomeSummaryComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountDbService: AccountdbService = inject(AccountdbService);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
   private router: Router = inject(Router);
@@ -25,7 +27,7 @@ export class AccountHomeSummaryComponent {
   private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private loadingService: LoadingService = inject(LoadingService);
 
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   accountMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: [] });
 
   latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });

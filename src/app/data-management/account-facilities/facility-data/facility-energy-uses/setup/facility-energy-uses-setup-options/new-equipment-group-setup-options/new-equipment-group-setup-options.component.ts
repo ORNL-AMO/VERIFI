@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
@@ -15,6 +17,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './new-equipment-group-setup-options.component.css',
 })
 export class NewEquipmentGroupSetupOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facility: IdbFacility;
   facilitySub: Subscription;
 
@@ -49,7 +52,7 @@ export class NewEquipmentGroupSetupOptionsComponent {
   ) { }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
       this.facility = facility;
       this.setYearOptions();
     });

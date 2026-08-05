@@ -1,4 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom, skip, take } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
@@ -12,6 +14,7 @@ import { ElectronService } from 'src/app/electron/electron.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -20,6 +23,8 @@ import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facilit
   standalone: false
 })
 export class AccountSettingsComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   facilityList: Array<IdbFacility> = [];
   facilityMenuOpen: number;
@@ -66,12 +71,12 @@ export class AccountSettingsComponent implements OnInit {
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
       this.selectedAccount = val;
     });
 
-    this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
-      this.facilityList = val;
+    this.accountFacilitiesSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+      this.facilityList = val.map(facility => ({ ...facility }));
       this.setOrderOptions();
     });
     if (this.isElectron) {
@@ -97,14 +102,14 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   switchFacility(facility: IdbFacility) {
-    this.facilityDbService.selectedFacility.next(facility);
+    this.dbChangesService.selectFacility(facility);
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/settings');
   }
 
   async addNewFacility() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Creating Facility...');
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
     let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
     await this.dbChangesService.updateDataNewFacility(newFacility);
@@ -122,18 +127,17 @@ export class AccountSettingsComponent implements OnInit {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    this.selectedAccount.deleteAccount = true;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(accounts);
+    await firstValueFrom(this.accountDbService.updateWithObservable({
+      ...this.selectedAccount,
+      deleteAccount: true
+    }));
+    const accounts = await this.applicationLifecycleService.refreshAccountCatalog();
     let nonDeleteAccounts: Array<IdbAccount> = accounts.filter(acc => {
       return acc.deleteAccount == false;
     })
     if (nonDeleteAccounts.length != 0) {
-      this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/manage-accounts');
     } else {
-      this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/welcome');
     }
   }

@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
@@ -20,6 +21,7 @@ import { FacilityReportStatusCheck } from 'src/app/calculations/status-check-cal
   standalone: false
 })
 export class FacilityReportsTabsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private facilityReportsDbService: FacilityReportsDbService = inject(FacilityReportsDbService);
@@ -30,7 +32,7 @@ export class FacilityReportsTabsComponent {
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
   selectedReport: Signal<IdbFacilityReport> = toSignal(this.facilityReportsDbService.selectedReport);
   reportList: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityReportsDbService.facilityReports);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   analysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
 
@@ -81,7 +83,7 @@ export class FacilityReportsTabsComponent {
 
   selectItem(item: IdbFacilityReport) {
     this.facilityReportsDbService.selectedReport.next(item);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/reports/setup');
     this.showDropdown = false;
   }

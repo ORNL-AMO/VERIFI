@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
@@ -26,6 +28,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     standalone: false
 })
 export class CreateReportModalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   showModalSub: Subscription;
   showModal: boolean;
@@ -50,7 +53,7 @@ export class CreateReportModalComponent {
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.account = account;
     });
     this.showModalSub = this.sharedDataService.openCreateReportModal.subscribe(val => {
@@ -75,7 +78,7 @@ export class CreateReportModalComponent {
   }
 
   async createReport() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     let navigateToStr: string;
     if (this.router.url.includes('account/overview')) {
       navigateToStr = '/data-evaluation/account/reports/data-overview-report';
@@ -93,8 +96,8 @@ export class CreateReportModalComponent {
   }
 
   getNewReport(): IdbAccountReport {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     if (this.router.url.includes('account/overview')) {
@@ -128,7 +131,7 @@ export class CreateReportModalComponent {
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
       }
     } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       newReport.reportType = 'dataOverview';
       let dateRange: { startDate: Date, endDate: Date } = this.facilityOverviewService.dateRange.getValue();
       newReport.startMonth = dateRange.startDate.getMonth();

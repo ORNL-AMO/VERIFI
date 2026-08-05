@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
@@ -13,6 +14,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class ProcessTemplateFileComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileReferences: Array<FileReference>;
   fileReferenceSub: Subscription;
@@ -36,7 +38,7 @@ export class ProcessTemplateFileComponent {
         return file.id == referenceId;
       });
       if (!this.selectedFile) {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
       }
     });

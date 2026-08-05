@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -17,6 +18,7 @@ import { FacilityModelingReportAdapter } from './facility-modeling-report.adapte
   styleUrl: './facility-modeling-report-results.component.css',
 })
 export class FacilityModelingReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityReport: IdbFacilityReport;
@@ -49,7 +51,7 @@ export class FacilityModelingReportResultsComponent {
   }
 
   initializeFacilityGroups() {
-    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
     let reportYear: number;
     if (this.facilityReport.facilityReportType == 'analysis') {
       reportYear = this.facilityReport.analysisReportSettings.reportYear;

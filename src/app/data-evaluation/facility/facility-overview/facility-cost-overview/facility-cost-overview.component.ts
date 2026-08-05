@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
@@ -13,6 +15,7 @@ import { FacilityOverviewService } from '../facility-overview.service';
     standalone: false
 })
 export class FacilityCostOverviewComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   calculatingSub: Subscription;
   calculating: boolean | 'error';
@@ -29,7 +32,7 @@ export class FacilityCostOverviewComponent implements OnInit {
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.facilityId = val.guid;
     })
 

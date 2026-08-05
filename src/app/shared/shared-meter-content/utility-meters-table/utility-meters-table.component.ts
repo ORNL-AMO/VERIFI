@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, input, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -39,6 +40,7 @@ type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit'
   standalone: false
 })
 export class UtilityMetersTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterdbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private copyTableService: CopyTableService = inject(CopyTableService);
   private router: Router = inject(Router);
@@ -55,7 +57,7 @@ export class UtilityMetersTableComponent {
   context = input<MeterTableContext>('data-evaluation');
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilitydbService.selectedFacility, { initialValue: undefined });
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   meters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterdbService.facilityMeters, { initialValue: [] });
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
@@ -65,7 +67,7 @@ export class UtilityMetersTableComponent {
     const facility = this.selectedFacility();
     const ctx = this.context();
     if (!utilityMeters || !facilityStatusCheck || !facility) return [];
-    const account = this.accountDbService.selectedAccount.getValue();
+    const account = this.accountWorkspaceStore.account();
     return utilityMeters.map(meter => ({
       meter,
       meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid),
@@ -96,16 +98,16 @@ export class UtilityMetersTableComponent {
   currentPageNumber: number = 1;
 
   uploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
   async addMeter() {
     if (this.context() === 'data-management') {
-      const facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+      const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
       newMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(newMeter));
-      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      const account: IdbAccount = this.accountWorkspaceStore.account();
       await this.dbChangesService.setMeters(account, facility);
       await this.selectEditMeter(newMeter);
     } else {
@@ -146,7 +148,7 @@ export class UtilityMetersTableComponent {
     }
     //set meters
     const selectedFacility = this.selectedFacility();
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
     await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
     this.cancelDelete();
@@ -174,7 +176,7 @@ export class UtilityMetersTableComponent {
 
   async selectEditMeter(meter: IdbUtilityMeter) {
     if (this.context() === 'data-management') {
-      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      const account: IdbAccount = this.accountWorkspaceStore.account();
       const facility: IdbFacility = this.selectedFacility();
       meter.sidebarOpen = true;
       await firstValueFrom(this.utilityMeterdbService.updateWithObservable(meter));
@@ -188,7 +190,7 @@ export class UtilityMetersTableComponent {
   navigateToMeterData(meter: IdbUtilityMeter) {
     const facility = this.selectedFacility();
     if (this.context() === 'data-management') {
-      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      const account: IdbAccount = this.accountWorkspaceStore.account();
       this.router.navigateByUrl(`data-management/${account.guid}/facilities/${facility.guid}/meters/${meter.guid}/meter-data`);
     } else {
       this.router.navigateByUrl(`/data-evaluation/facility/${facility.guid}/utility/energy-consumption/utility-meter/${meter.guid}/data-table`);
@@ -206,7 +208,7 @@ export class UtilityMetersTableComponent {
     copyMeter.guid = Math.random().toString(36).substr(2, 9);
     copyMeter.name = copyMeter.name + ' (copy)';
     copyMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(copyMeter));
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const account: IdbAccount = this.accountWorkspaceStore.account();
     const facility: IdbFacility = this.selectedFacility();
     await this.dbChangesService.setMeters(account, facility);
     this.selectEditMeter(copyMeter);

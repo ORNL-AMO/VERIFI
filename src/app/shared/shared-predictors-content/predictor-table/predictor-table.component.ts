@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -36,6 +37,7 @@ interface PredictorListItem {
   standalone: false
 })
 export class PredictorTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private predictorDbService: PredictorDbService = inject(PredictorDbService);
   private router: Router = inject(Router);
   private facilitydbService: FacilitydbService = inject(FacilitydbService);
@@ -49,7 +51,7 @@ export class PredictorTableComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilitydbService.selectedFacility, { initialValue: undefined });
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   predictorToDelete: IdbPredictor;
@@ -136,7 +138,7 @@ export class PredictorTableComponent {
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
     const selectedFacility = this.selectedFacility();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setPredictorsV2(account, selectedFacility);
     await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
     //update analysis items
@@ -158,7 +160,7 @@ export class PredictorTableComponent {
     if (this.router.url.includes('data-management')) {
       predictor.sidebarOpen = true;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      const account: IdbAccount = this.accountWorkspaceStore.account();
       await this.dbChangesService.setPredictorsV2(account, facility);
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
@@ -172,7 +174,7 @@ export class PredictorTableComponent {
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
       newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
       await this.analysisDbService.addAnalysisPredictor(newPredictor);
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       await this.dbChangesService.setPredictorsV2(account, facility);
       await this.dbChangesService.setPredictorDataV2(account, true, facility);
       await this.dbChangesService.setAnalysisItems(account, true, facility);
@@ -185,7 +187,7 @@ export class PredictorTableComponent {
   }
 
   uploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
@@ -277,7 +279,7 @@ export class PredictorTableComponent {
       predictor.ignoreWeatherDataWarning = ignoreWarning;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
     }
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.dbChangesService.setPredictorsV2(account, this.selectedFacility());
     this.toastNotificationService.showToast(
       ignoreWarning ? 'Weather gap warnings dismissed' : 'Weather gap warnings re-enabled',

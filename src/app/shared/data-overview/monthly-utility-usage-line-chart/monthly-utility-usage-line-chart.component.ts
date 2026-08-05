@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
@@ -18,6 +19,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class MonthlyUtilityUsageLineChartComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
@@ -73,9 +75,9 @@ export class MonthlyUtilityUsageLineChartComponent {
 
       let accountOrFacility: IdbFacility | IdbAccount;
       if (!this.facilityId) {
-        accountOrFacility = this.accountDbService.selectedAccount.getValue();
+        accountOrFacility = this.accountWorkspaceStore.account();
       } else {
-        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
         accountOrFacility = facilities.find(facility => { return facility.guid == this.facilityId });
       }
       let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });

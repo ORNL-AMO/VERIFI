@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
@@ -22,6 +23,7 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
   standalone: false
 })
 export class EmissionsDataFormComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
   editCustomEmissions: IdbCustomEmissionsItem;
@@ -39,7 +41,7 @@ export class EmissionsDataFormComponent implements OnInit {
   ngOnInit(): void {
     this.setYears();
     this.isAdd = this.router.url.includes('add');
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     if (this.isAdd) {
       this.editCustomEmissions = getNewAccountEmissionsItem(this.selectedAccount.guid);
       this.addLocationEmissionRate();
@@ -152,14 +154,16 @@ export class EmissionsDataFormComponent implements OnInit {
       let hasUpdatedValues: boolean = false;
       //update account and facilities previously referencing this subregion
       if (this.selectedAccount.eGridSubregion == this.previousSubregion) {
-        this.selectedAccount.eGridSubregion = this.editCustomEmissions.subregion;
+        this.selectedAccount = {
+          ...this.selectedAccount,
+          eGridSubregion: this.editCustomEmissions.subregion
+        };
         await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-        this.accountDbService.selectedAccount.next(this.selectedAccount);
         hasUpdatedValues = true;
       }
-      let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      let accountFacilites: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
       for (let i = 0; i < accountFacilites.length; i++) {
-        let facility: IdbFacility = accountFacilites[i];
+        let facility: IdbFacility = { ...accountFacilites[i] };
         if (facility.eGridSubregion == this.previousSubregion) {
           facility.eGridSubregion = this.editCustomEmissions.subregion;
           await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
@@ -167,7 +171,7 @@ export class EmissionsDataFormComponent implements OnInit {
         }
       }
       if (hasUpdatedValues) {
-        this.dbChangesService.selectAccount(this.selectedAccount, false);
+        await this.dbChangesService.selectAccount(this.selectedAccount, false);
       }
       successMessage = 'Custom Emissions Updated!'
     }

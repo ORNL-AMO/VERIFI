@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
@@ -27,6 +28,7 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   standalone: false
 })
 export class VehicleDataTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataService = inject(UtilityMeterDataService);
   private copyTableService = inject(CopyTableService);
   private customFuelDbService = inject(CustomFuelDbService);
@@ -45,8 +47,8 @@ export class VehicleDataTableComponent {
   selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
   customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   vehicleDataFilters: Signal<VehicleDataFilters> = toSignal(this.utilityMeterDataService.tableVehicleDataFilters);
 
   selectedMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => {

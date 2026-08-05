@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, Signal, ViewChild, effect, signal, WritableSignal, untracked, afterRenderEffect } from '@angular/core';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../../analysis.service';
@@ -31,6 +32,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './regression-user-defined-model-inspection.component.css'
 })
 export class RegressionUserDefinedModelInspectionComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -45,12 +47,12 @@ export class RegressionUserDefinedModelInspectionComponent {
 
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   accountAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
   accountPredictorEntries: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.accountPredictorData);
   facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters);
   facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
 
   private worker: Worker;

@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -28,6 +29,7 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class AnalysisSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly fb = inject(FormBuilder);
   private readonly facilityDbService = inject(FacilitydbService);
   private readonly analysisDbService = inject(AnalysisDbService);
@@ -44,9 +46,9 @@ export class AnalysisSetupComponent {
   readonly waterUnitOptions: Array<UnitOption> = VolumeLiquidOptions;
 
   readonly calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
-  readonly facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  readonly facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   readonly analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
-  readonly account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  readonly account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   readonly hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage);
   readonly allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
   readonly facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
@@ -253,8 +255,8 @@ export class AnalysisSetupComponent {
       bankedAnalysisItemId: raw.hasBanking ? (raw.bankedAnalysisItemId ?? undefined) : undefined,
     };
     await firstValueFrom(this.analysisDbService.updateWithObservable(updatedItem));
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    const selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(updatedItem);
   }
@@ -289,8 +291,8 @@ export class AnalysisSetupComponent {
       })),
     };
     await firstValueFrom(this.analysisDbService.updateWithObservable(clearedItem));
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    const selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(clearedItem);
     this.displayEnableForm = false;

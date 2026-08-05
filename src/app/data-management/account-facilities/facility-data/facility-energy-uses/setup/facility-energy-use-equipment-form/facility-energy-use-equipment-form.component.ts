@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, EventEmitter, inject, Injector, input, Output, Signal, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -21,6 +22,7 @@ import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/ca
   styleUrl: './facility-energy-use-equipment-form.component.css'
 })
 export class FacilityEnergyUseEquipmentFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   energyUseEquipment = input.required<IdbFacilityEnergyUseEquipment>();
   @Output('emitChanged')
   emitChanged: EventEmitter<IdbFacilityEnergyUseEquipment> = new EventEmitter<IdbFacilityEnergyUseEquipment>();
@@ -35,7 +37,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
   private energyUseEquipmentSignal = signal<IdbFacilityEnergyUseEquipment | null>(null);
   calanderizedMeterData: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: new Array<CalanderizedMeter>() });
-  private facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  private facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
 
   hasElectricityUtility: Signal<boolean> = computed(() => {
     const utilityDataFroms = this.utilityDataForms();
@@ -127,7 +129,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
     let newForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getOperatingConditionsYearForm(newOperatingConditionsData);
     this.annualOperatingConditionsDataForms.update(forms => [...forms, newForm]);
     utilityDataForms.forEach(udf => {
-      let energyUseUnit: string = this.facilityDbService.selectedFacility.getValue()?.energyUnit;
+      let energyUseUnit: string = this.accountWorkspaceStore.selectedFacility()?.energyUnit;
       let energyUseForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getEnergyUseForm({ year: year, energyUse: 0, overrideEnergyUse: false, energyUseUnit: energyUseUnit });
       udf.energyUseForms.push(energyUseForm);
     });
@@ -193,7 +195,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
           year: year,
           energyUse: 0,
           overrideEnergyUse: false,
-          energyUseUnit: this.facilityDbService.selectedFacility.getValue()?.energyUnit
+          energyUseUnit: this.accountWorkspaceStore.selectedFacility()?.energyUnit
         };
       })
     };

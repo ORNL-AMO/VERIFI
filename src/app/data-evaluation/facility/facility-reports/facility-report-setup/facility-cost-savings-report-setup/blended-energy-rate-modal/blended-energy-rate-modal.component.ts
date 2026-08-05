@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -22,6 +23,7 @@ import { convertConsumptionRate, getMeterCollectionUnit } from 'src/app/shared/s
   styleUrl: './blended-energy-rate-modal.component.css',
 })
 export class BlendedEnergyRateModalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @Input()
   showModal: boolean;
@@ -95,8 +97,8 @@ export class BlendedEnergyRateModalComponent {
 
   calculateGroupEnergyForYear() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.calanderizedMeterData = getCalanderizedMeterData(this.groupMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.selectedFacility], account.assessmentReportVersion, []);
     this.groupMonthlyData = this.calanderizedMeterData.flatMap(meter => { return meter.monthlyData });
     this.groupMonthlyData = this.groupMonthlyData.reduce((acc, monthlyData) => {

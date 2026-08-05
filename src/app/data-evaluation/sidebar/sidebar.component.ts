@@ -1,4 +1,6 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { LocalStorageService } from 'ngx-webstorage';
 import { Subscription } from 'rxjs';
@@ -18,6 +20,7 @@ import { DataEvaluationService } from '../data-evaluation.service';
   standalone: false
 })
 export class SidebarComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
 
@@ -47,15 +50,15 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit() {
     this.isDev = !environment.production;
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
       this.account = account;
     });
 
-    this.facilityListSub = this.facilityDbService.accountFacilities.subscribe(val => {
-      this.setFacilityList(val);
+    this.facilityListSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+      this.setFacilityList(val.map(facility => ({ ...facility })));
     });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
       this.selectedFacility = val;
     })
     this.sidebarOpenSub = this.dataEvaluationService.sidebarOpen.subscribe(val => {

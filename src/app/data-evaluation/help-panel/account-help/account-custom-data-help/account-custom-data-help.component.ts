@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -9,12 +10,13 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
     standalone: false
 })
 export class AccountCustomDataHelpComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
     account: IdbAccount;
 
     constructor(private accountDbService: AccountdbService) { }
 
     ngOnInit(): void {
-        this.account = this.accountDbService.selectedAccount.getValue();
+        this.account = this.accountWorkspaceStore.account();
     }
 }
