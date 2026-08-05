@@ -61,10 +61,12 @@ import { FacilityModelingReportResultsComponent } from "../data-evaluation/facil
 import { FacilityReportsDataCheckComponent } from "../data-evaluation/facility/facility-reports/facility-reports-data-check/facility-reports-data-check.component";
 import { FacilityCostSavingsReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/facility-cost-savings-report-results.component";
 import { FacilityDataQualityReportResultsComponent } from "../data-evaluation/facility/facility-reports/report-results/facility-data-quality-report-results/facility-data-quality-report-results.component";
+import { facilityReadyGuard } from "./workspace-readiness.guards";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
     component: FacilityComponent,
+    canActivate: [facilityReadyGuard],
     children: [
         {
             path: '',
