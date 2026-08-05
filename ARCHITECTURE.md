@@ -69,10 +69,10 @@ flowchart TD
 
 Persisted records generally have an IndexedDB `id` used as the local key and a `guid` used for domain relationships. Account and facility GUIDs connect records across stores. Preserve that distinction in queries, imports, migrations, and deletes.
 
-There are two related forms of persistence evolution:
+There are two independent forms of persistence evolution:
 
 - **Structural schema changes** update `_dbConfig.ts`. Adding or changing a store or index requires an intentional database-version increment and an upgrade-path test.
-- **Record-shape migrations and defaults** are implemented through model factories and services such as [`update-db-entry.service.ts`](src/app/indexedDB/update-db-entry.service.ts), [`db-changes.service.ts`](src/app/indexedDB/db-changes.service.ts), or a focused migration service. These migrations must be idempotent because they may run when accounts are loaded or selected.
+- **Record-shape migrations** use `CURRENT_DATA_VERSION` and the ordered pure registry described in the [`data-migrations` guide](src/app/indexedDB/data-migrations/README.md). The local runner commits each migration and application metadata in one native transaction before startup publishes persisted records. Current-version data is not rewritten.
 
 Test both an empty database and representative older data. Consider JSON backup import/export whenever persisted shapes change.
 
@@ -99,6 +99,8 @@ Spreadsheet upload begins in [`data-management-import`](src/app/data-management/
 Excel exports primarily use ExcelJS. [`export-to-excel-template-v3.service.ts`](src/app/shared/helper-services/export-to-excel-template-v3.service.ts) writes the current VERIFI data template, while report-specific writers produce program and analysis workbooks. Template spreadsheets under `src/assets/csv_templates/` are binary source artifacts whose sheet names, headers, types, formulas, and ordering may be part of the import contract.
 
 JSON backup assembly is centered in [`backup-data.service.ts`](src/app/shared/helper-services/backup-data.service.ts). Browser flows download or upload files with Web APIs; Electron flows use the preload bridge, dialogs, and filesystem operations. A persisted-model change must consider both current IndexedDB data and backups created by older application versions.
+
+Every JSON restore path first clones and prepares the file through [`backup-preparation.service.ts`](src/app/shared/helper-services/backup-preparation.service.ts): validate the envelope and data version, run the same ordered migrations as local data, validate core GUID relationships, then remap GUIDs and persist. Missing version metadata means version `0`; future versions are rejected before replacement or import mutation.
 
 For import/export changes, define compatibility before editing, keep parsers pure where possible, and verify a representative round trip from import through persistence to export.
 

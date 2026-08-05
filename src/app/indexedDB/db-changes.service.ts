@@ -8,7 +8,6 @@ import { AnalysisDbService } from './analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
-import { UpdateDbEntryService } from './update-db-entry.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
@@ -27,11 +26,9 @@ import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
-import { MigratePredictorsService } from './migrate-predictors.service';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
-import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './facility-reports-db.service';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 import { EGridService } from '../shared/helper-services/e-grid.service';
@@ -42,6 +39,7 @@ import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnerg
 import { resolveInitialFacility } from './selection-resolvers';
 import { FACILITY_DELETION_MESSAGES } from './facility-deletion.config';
 import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
+import { AnalysisSelectionRepairService } from './analysis-selection-repair.service';
 
 @Injectable({
   providedIn: 'root'
@@ -53,7 +51,7 @@ export class DbChangesService {
     private predictorsDbServiceDeprecated: PredictordbServiceDeprecated, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private updateDbEntryService: UpdateDbEntryService,
+    private analysisSelectionRepair: AnalysisSelectionRepairService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
@@ -62,7 +60,6 @@ export class DbChangesService {
     private customGWPDbService: CustomGWPDbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
-    private migratePredictorsService: MigratePredictorsService,
     private facilityReportsDbService: FacilityReportsDbService,
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
@@ -80,31 +77,14 @@ export class DbChangesService {
     const storedFacilityId = this.facilityDbService.getInitialFacility();
     this.clearFacilitySelection();
 
-    if (!skipUpdates) {
-      let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      account = updateAccount.account;
-      await this.updateAccount(account)
-    }
-
-
     //set account facilities
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
-    if (!skipUpdates) {
-      for (let i = 0; i < accountFacilites.length; i++) {
-        let facility: IdbFacility = accountFacilites[i];
-        let updatedFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
-        if (updatedFacility.isChanged) {
-          accountFacilites[i] = updatedFacility.facility;
-          await firstValueFrom(this.facilityDbService.updateWithObservable(updatedFacility.facility));
-        }
-      }
-    }
     this.facilityDbService.accountFacilities.next(accountFacilites);
     //set reports
     await this.setAccountReports(account);
     //set predictors
     //TODO: deprecated, remove...?
-    let needsMigration = await this.setPredictorsDeprecated(account);
+    this.predictorsDbServiceDeprecated.accountPredictorEntries.next([]);
     await this.setPredictorsV2(account);
     await this.setPredictorDataV2(account, skipUpdates);
     //set meters
@@ -132,11 +112,6 @@ export class DbChangesService {
 
     //set account 
     this.accountDbService.selectedAccount.next(account);
-    if (needsMigration) {
-      await this.migratePredictorsService.migrateAccountPredictors();
-      await this.setPredictorsV2(account);
-      await this.setPredictorDataV2(account, skipUpdates);
-    }
     await this.updateFacilityAnalysisSelectedItems();
 
     const selectedFacility = resolveInitialFacility(
@@ -152,11 +127,6 @@ export class DbChangesService {
   }
 
   selectFacility(facility: IdbFacility) {
-    let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
-    if (updateFacility.isChanged) {
-      facility = updateFacility.facility;
-      void this.updateFacility(facility);
-    }
     this.setFacilitySelection(facility);
   }
 
@@ -204,14 +174,7 @@ export class DbChangesService {
   async setAccountAnalysisItems(account: IdbAccount, skipUpdates: boolean) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     if (!skipUpdates) {
-      for (let i = 0; i < accountAnalysisItems.length; i++) {
-        let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
-        if (updateAnalysis.isChanged) {
-          accountAnalysisItems[i] = updateAnalysis.analysisItem;
-          await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
-        };
-      }
-      let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
+      let updateAccount = this.analysisSelectionRepair.repairAccount(account, accountAnalysisItems);
       if (updateAccount.isChanged) {
         account = updateAccount.account;
         await this.updateAccount(account);
@@ -223,15 +186,8 @@ export class DbChangesService {
   async setAnalysisItems(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllAccountAnalysisItems(account.guid);
     if (!skipUpdates) {
-      for (let i = 0; i < analysisItems.length; i++) {
-        let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
-        if (updateAnalysis.isChanged) {
-          analysisItems[i] = updateAnalysis.analysisItem;
-          await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
-        };
-      }
       if (facility) {
-        let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, analysisItems);
+        let updateFacility = this.analysisSelectionRepair.repairFacility(facility, analysisItems);
         if (updateFacility.isChanged) {
           facility = updateFacility.facility;
           await this.updateFacility(facility);
@@ -311,29 +267,6 @@ export class DbChangesService {
     this.accountReportDbService.accountReports.next(accountReports);
   }
 
-  //Deprecated Predictor data
-  async setPredictorsDeprecated(account: IdbAccount, facility?: IdbFacility): Promise<boolean> {
-    let needsMigration: boolean = false;
-
-    let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
-    this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
-    if (predictors.length > 0) {
-      needsMigration = true;
-    }
-    return needsMigration;
-  }
-
-  // setFacilityPredictorsDeprecated(facility: IdbFacility) {
-  //   let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue();
-  //   let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(item => { return item.facilityId == facility.guid });
-  //   this.predictorsDbServiceDeprecated.facilityPredictorEntries.next(facilityPredictorEntries);
-  //   if (facilityPredictorEntries.length != 0) {
-  //     this.predictorsDbServiceDeprecated.facilityPredictors.next(facilityPredictorEntries[0].predictors);
-  //   } else {
-  //     this.predictorsDbServiceDeprecated.facilityPredictors.next([]);
-  //   }
-  // }
-
   //Predictors V2
   async setPredictorsV2(account: IdbAccount, facility?: IdbFacility) {
     let predictors: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
@@ -352,20 +285,6 @@ export class DbChangesService {
   //Predictor Data V2
   async setPredictorDataV2(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
-    if (!skipUpdates) {
-      let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
-      if (needsMigration) {
-        this.loadingService.setLoadingMessage('Updating predictor data dates for a consistent experience across timezones. This may take a moment...');
-        for (let i = 0; i < predictorData.length; i++) {
-          if (!predictorData[i].migratedDates) {
-            predictorData[i].month = predictorData[i]['date'].getMonth() + 1;
-            predictorData[i].year = predictorData[i]['date'].getFullYear();
-            predictorData[i].migratedDates = true;
-            await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
-          }
-        }
-      }
-    }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
     if (facility) {
       this.setFacilityPredictorDataV2(facility);
@@ -380,19 +299,6 @@ export class DbChangesService {
 
   async setMeters(account: IdbAccount, facility?: IdbFacility) {
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
-    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
-    for (let i = 0; i < accountMeters.length; i++) {
-      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean, utilityMeterData: Array<IdbUtilityMeterData>, meterDataChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i], accountMeterData);
-      if (updateMeter.isChanged) {
-        accountMeters[i] = updateMeter.utilityMeter;
-        await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
-      };
-      if (updateMeter.meterDataChanged) {
-        for (let i = 0; i < updateMeter.utilityMeterData.length; i++) {
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(updateMeter.utilityMeterData[i]));
-        }
-      }
-    }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
     if (facility) {
       this.setFacilityMeters(facility);
@@ -407,21 +313,6 @@ export class DbChangesService {
 
   async setMeterData(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
-    if (!skipUpdates) {
-      let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
-      if (needsMigration) {
-        this.loadingService.setLoadingMessage('Updating meter data dates for a consistent experience across timezones. This may take a moment...');
-        for (let meterData of accountMeterData) {
-          if (meterData['readDate'] && !meterData.migratedDates) {
-            meterData.month = meterData['readDate'].getMonth() + 1;
-            meterData.year = meterData['readDate'].getFullYear();
-            meterData.day = meterData['readDate'].getDate();
-            meterData.migratedDates = true;
-            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
-          }
-        }
-      }
-    }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
     if (facility) {
       this.setFacilityMeterData(facility);
@@ -559,7 +450,7 @@ export class DbChangesService {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     for (let facility of facilities) {
-      let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
+      let updateFacility = this.analysisSelectionRepair.repairFacility(facility, facilityAnalysisItems);
       if (updateFacility.isChanged) {
         facility = updateFacility.facility;
         await this.updateFacility(facility);

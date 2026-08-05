@@ -63,7 +63,7 @@ describe('DbChangesService facility updates', () => {
       {} as any, // utilityMeterDbService
       {} as any, // utilityMeterDataDbService
       {} as any, // utilityMeterGroupDbService
-      {} as any, // updateDbEntryService
+      {} as any, // analysisSelectionRepair
       {} as any, // customEmissionsDbService
       loadingService as any,
       toastNotificationService as any,
@@ -72,7 +72,6 @@ describe('DbChangesService facility updates', () => {
       {} as any, // customGWPDbService
       {} as any, // predictorDbService
       {} as any, // predictorDataDbService
-      {} as any, // migratePredictorsService
       {} as any, // facilityReportsDbService
       {} as any, // facilityEnergyUseGroupsDbService
       {} as any, // facilityEnergyUseEquipmentDbService

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from '../loading/loading.service';
@@ -21,6 +21,7 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -31,7 +32,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 export class ImportBackupModalComponent implements OnInit {
 
   inFacility: boolean;
-  backupFile: any;
+  backupFile: PreparedBackupFile;
   backupFileError: string;
   importIsAccount: boolean;
   overwriteData: boolean | 'selective_import' = false;
@@ -63,7 +64,8 @@ export class ImportBackupModalComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private predictorDataDbService: PredictorDataDbService,
+    private backupPreparationService: BackupPreparationService) { }
 
   ngOnInit(): void {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
@@ -129,8 +131,8 @@ export class ImportBackupModalComponent implements OnInit {
         fr.readAsText(files[0]);
         fr.onloadend = (e) => {
           try {
-            this.backupFile = JSON.parse(JSON.stringify(fr.result));
-            let testBackup = JSON.parse(this.backupFile);
+            let testBackup = this.backupPreparationService.prepare(JSON.parse(String(fr.result)));
+            this.backupFile = testBackup;
             this.backupFacilities = testBackup.facilities;
             this.facilityImportSelections = {};
             this.backupFacilities?.forEach(facility => {
@@ -177,6 +179,10 @@ export class ImportBackupModalComponent implements OnInit {
             }
           } catch (err) {
             console.log(err);
+            this.backupFile = undefined;
+            this.backupFileError = err instanceof FutureBackupVersionError
+              ? err.message
+              : err instanceof Error ? err.message : 'Selected file is not a valid VERIFI backup.';
           }
         };
       }
@@ -206,7 +212,7 @@ export class ImportBackupModalComponent implements OnInit {
       this.backupDataService.facilityBackupMessages();
     }
     try {
-      let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
+      let tmpBackupFile: PreparedBackupFile = structuredClone(this.backupFile);
       if (this.importIsAccount) {
         if (this.overwriteData === 'selective_import') {
           await this.importSelectedFacilities(tmpBackupFile);
@@ -239,7 +245,7 @@ export class ImportBackupModalComponent implements OnInit {
     this.router.navigateByUrl('/data-evaluation/account');
   }
 
-  async importNewAccount(backupFile: BackupFile) {
+  async importNewAccount(backupFile: PreparedBackupFile) {
     this.deleteDataService.suspendQueuedDeletion();
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
     await this.dbChangesService.updateAccount(newAccount);
@@ -247,7 +253,7 @@ export class ImportBackupModalComponent implements OnInit {
     await this.deleteDataService.resumeQueuedDeletion();
   }
 
-  async importExistingAccount(backupFile: BackupFile) {
+  async importExistingAccount(backupFile: PreparedBackupFile) {
     //delete existing account and data
     this.deleteDataService.suspendQueuedDeletion();
     this.selectedAccount.deleteAccount = true;
@@ -258,7 +264,7 @@ export class ImportBackupModalComponent implements OnInit {
     await this.deleteDataService.resumeQueuedDeletion();
   }
 
-  async importNewFacility(backupFile: BackupFile, currIdx?: number) {
+  async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {
     let idx = currIdx !== undefined ? currIdx : 0;
     let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
     let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -266,7 +272,7 @@ export class ImportBackupModalComponent implements OnInit {
     this.dbChangesService.selectFacility(newFacility);
   }
 
-  async importExistingFacility(backupFile: BackupFile) {
+  async importExistingFacility(backupFile: PreparedBackupFile) {
     //delete selected facility and data
     let currIdx = await this.dbChangesService.deleteFacility(this.overwriteFacility, this.selectedAccount);
     await this.importNewFacility(backupFile, currIdx);
@@ -332,11 +338,17 @@ export class ImportBackupModalComponent implements OnInit {
     }
   }
 
-  async importSelectedFacilities(backupFile: BackupFile) {
+  async importSelectedFacilities(backupFile: PreparedBackupFile) {
     let idx = 1;
+    const preparedFacilities = this.selectedFacilitiesToImport.map(facility => {
+      return {
+        selectedFacility: facility,
+        backup: this.backupPreparationService.extractFacility(backupFile, facility.guid)
+      };
+    });
 
     // delete facilities to be replaced
-    for (let facility of this.selectedFacilitiesToImport) {
+    for (let { selectedFacility: facility } of preparedFacilities) {
       let importSelection = this.facilityImportSelections[facility.name];
 
       if (importSelection.importAs === 'replace' && importSelection.replacedFacility) {
@@ -348,20 +360,7 @@ export class ImportBackupModalComponent implements OnInit {
     }
 
     // import selected facilities
-    for (let facility of this.selectedFacilitiesToImport) {
-      const facilityBackup = backupFile.facilities.find(f => f.name === facility.name);
-      const facilityBackupFile: BackupFile = {
-        ...backupFile,
-        facility: facilityBackup,
-        meters: backupFile.meters.filter(m => m.facilityId === facilityBackup?.guid),
-        meterData: backupFile.meterData.filter(md => md.facilityId === facilityBackup?.guid),
-        groups: backupFile.groups.filter(g => g.facilityId === facilityBackup?.guid),
-        facilityAnalysisItems: backupFile.facilityAnalysisItems.filter(fa => fa.facilityId === facilityBackup?.guid),
-        predictorData: backupFile.predictorData.filter(pd => pd.facilityId === facilityBackup?.guid),
-        predictorDataV2: backupFile.predictorDataV2.filter(pd => pd.facilityId === facilityBackup?.guid),
-        predictors: backupFile.predictors.filter(p => p.facilityId === facilityBackup?.guid)
-      };
-
+    for (let { backup: facilityBackupFile } of preparedFacilities) {
       //import all selected facilities as new
       this.loadingService.setCurrentLoadingIndex(idx);
       //this.loadingService.addLoadingMessage("Adding facility: " + facilityBackupFile.facility.name);
@@ -375,7 +374,7 @@ export class ImportBackupModalComponent implements OnInit {
 
   checkDifferences() {
     this.differencesList = [];
-    let backupData = JSON.parse(this.backupFile);
+    let backupData = this.backupFile;
     let facilityMapping = new Map<string, { backupFacility: IdbFacility, accountFacility: IdbFacility }>();
     for (let facility of backupData.facilities) {
       let accountFacility = this.accountFacilities.find(f => f.name === facility.name);

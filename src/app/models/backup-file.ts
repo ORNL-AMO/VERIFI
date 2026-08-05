@@ -1,0 +1,43 @@
+import { IdbAccount } from './idbModels/account';
+import { IdbAccountAnalysisItem } from './idbModels/accountAnalysisItem';
+import { IdbAccountReport } from './idbModels/accountReport';
+import { IdbAnalysisItem } from './idbModels/analysisItem';
+import { IdbCustomEmissionsItem } from './idbModels/customEmissions';
+import { IdbCustomFuel } from './idbModels/customFuel';
+import { IdbCustomGWP } from './idbModels/customGWP';
+import { IdbPredictorEntryDeprecated } from './idbModels/deprecatedPredictors';
+import { IdbFacility } from './idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from './idbModels/facilityEnergyUseEquipment';
+import { IdbFacilityEnergyUseGroup } from './idbModels/facilityEnergyUseGroups';
+import { IdbFacilityReport } from './idbModels/facilityReport';
+import { IdbPredictor } from './idbModels/predictor';
+import { IdbPredictorData } from './idbModels/predictorData';
+import { IdbUtilityMeter } from './idbModels/utilityMeter';
+import { IdbUtilityMeterData } from './idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from './idbModels/utilityMeterGroup';
+
+export interface BackupFile {
+  dataVersion?: number;
+  account: IdbAccount;
+  facilities: Array<IdbFacility>;
+  facility: IdbFacility;
+  meters: Array<IdbUtilityMeter>;
+  meterData: Array<IdbUtilityMeterData>;
+  groups: Array<IdbUtilityMeterGroup>;
+  accountReports: Array<IdbAccountReport>;
+  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
+  facilityAnalysisItems: Array<IdbAnalysisItem>;
+  predictorData: Array<IdbPredictorEntryDeprecated>;
+  predictorDataV2: Array<IdbPredictorData>;
+  predictors: Array<IdbPredictor>;
+  customEmissionsItems: Array<IdbCustomEmissionsItem>;
+  customFuels: Array<IdbCustomFuel>;
+  customGWPs: Array<IdbCustomGWP>;
+  origin: 'VERIFI';
+  backupFileType: 'Account' | 'Facility';
+  timeStamp: Date;
+  dataBackupId: string;
+  facilityReports: Array<IdbFacilityReport>;
+  facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup>;
+  facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
+}

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
@@ -10,6 +10,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { BackupPreparationService } from 'src/app/shared/helper-services/backup-preparation.service';
 
 @Component({
   selector: 'app-home-page',
@@ -25,6 +26,7 @@ export class HomePageComponent {
   loadingSub: Subscription;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
+    private backupPreparationService: BackupPreparationService,
     private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
     private dbChangesService: DbChangesService,
@@ -68,7 +70,7 @@ export class HomePageComponent {
       reader.onloadend = async (e) => {
         try {
           let test = JSON.parse(JSON.stringify(reader.result));
-          let tmpBackupFile: BackupFile = JSON.parse(test);
+          let tmpBackupFile = this.backupPreparationService.prepare(JSON.parse(test));
           this.backupDataService.accountBackupMessages();
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);

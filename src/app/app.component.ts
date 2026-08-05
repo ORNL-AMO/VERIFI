@@ -7,7 +7,6 @@ import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
 import { PredictordbServiceDeprecated } from './indexedDB/predictors-deprecated-db.service';
-import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
@@ -33,12 +32,10 @@ import { PredictorDbService } from './indexedDB/predictor-db.service';
 import { PredictorDataDbService } from './indexedDB/predictor-data-db.service';
 import { IdbPredictor } from './models/idbModels/predictor';
 import { IdbPredictorData } from './models/idbModels/predictorData';
-import { MigratePredictorsService } from './indexedDB/migrate-predictors.service';
 import { DbChangesService } from './indexedDB/db-changes.service';
 import { IdbAccountReport } from './models/idbModels/accountReport';
 import { IdbAnalysisItem } from './models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
-import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from './models/idbModels/facilityReport';
 import { ApplicationInstanceDbService } from './indexedDB/application-instance-db.service';
@@ -47,6 +44,8 @@ import { IdbFacilityEnergyUseGroup } from './models/idbModels/facilityEnergyUseG
 import { FacilityEnergyUseEquipmentDbService } from './indexedDB/facility-energy-use-equipment-db.service';
 import { IdbFacilityEnergyUseEquipment } from './models/idbModels/facilityEnergyUseEquipment';
 import { resolveInitialAccount, resolveInitialFacility } from './indexedDB/selection-resolvers';
+import { DataMigrationRunnerService } from './indexedDB/data-migrations/data-migration-runner.service';
+import { AnalysisSelectionRepairService } from './indexedDB/analysis-selection-repair.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -76,7 +75,6 @@ export class AppComponent {
     private eGridService: EGridService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private updateDbEntryService: UpdateDbEntryService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNotificationService: ToastNotificationsService,
@@ -88,7 +86,8 @@ export class AppComponent {
     private customGWPDbService: CustomGWPDbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
-    private migratePredictorsService: MigratePredictorsService,
+    private migrationRunner: DataMigrationRunnerService,
+    private analysisSelectionRepair: AnalysisSelectionRepairService,
     private dbChangesService: DbChangesService,
     private facilityReportsDbService: FacilityReportsDbService,
     private applicationInstanceDbService: ApplicationInstanceDbService,
@@ -118,6 +117,7 @@ export class AppComponent {
 
   async initializeData() {
     try {
+      await this.migrationRunner.runMigrations();
       let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(accounts);
       let localStorageAccountId: number = this.accountDbService.getInitialAccount();
@@ -129,7 +129,7 @@ export class AppComponent {
         await this.initializeFacilities(account);
         await this.initilizeMeterGroups(account);
         await this.initializeAccountReports(account);
-        let needsMigration: boolean = await this.initializePredictors(account);
+        await this.initializePredictors(account);
         await this.initializePredictorData(account);
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
@@ -142,19 +142,7 @@ export class AppComponent {
         await this.initializeCustomGWPs(account);
         await this.initializeFacilityEnergyGroups(account);
         await this.initializeFacilityEnergyEquipment(account);
-        let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-        if (updatedAccount.isChanged) {
-          await firstValueFrom(this.accountDbService.updateWithObservable(updatedAccount.account));
-          this.accountDbService.selectedAccount.next(updatedAccount.account);
-        } else {
-          this.accountDbService.selectedAccount.next(account);
-        }
-        if (needsMigration) {
-          this.loadingMessage = 'Migrating Predictors for V2..'
-          await this.migratePredictorsService.migrateAccountPredictors();
-          await this.dbChangesService.setPredictorsV2(account);
-          await this.dbChangesService.setPredictorDataV2(account, false);
-        }
+        this.accountDbService.selectedAccount.next(account);
         await this.updateAccountAnalysisSelectedItems(account);
         await this.updateFacilityAnalysisSelectedItems();
         let selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -205,13 +193,6 @@ export class AppComponent {
     //set account analysis
     this.loadingMessage = "Loading Analysis Items..";
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
-      if (updateAnalysis.isChanged) {
-        accountAnalysisItems[i] = updateAnalysis.analysisItem;
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
-      };
-    }
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
     let localStorageAccountAnalysisId: number = this.accountAnalysisDbService.getInitialAnalysisItem();
     if (localStorageAccountAnalysisId) {
@@ -223,13 +204,6 @@ export class AppComponent {
   async initializeFacilityAnalysisItems(account: IdbAccount) {
     //set analysis
     let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllAccountAnalysisItems(account.guid);
-    for (let i = 0; i < analysisItems.length; i++) {
-      let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
-      if (updateAnalysis.isChanged) {
-        analysisItems[i] = updateAnalysis.analysisItem;
-        await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
-      };
-    }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
     let localStorageAnalysisId: number = this.analysisDbService.getInitialAnalysisItem();
     if (localStorageAnalysisId) {
@@ -241,15 +215,6 @@ export class AppComponent {
   async initializeAccountReports(account: IdbAccount) {
     this.loadingMessage = "Loading Reports..."
     let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllAccountReports(account.guid);
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    for (let i = 0; i < accountReports.length; i++) {
-      let updateReport: { report: IdbAccountReport, isChanged: boolean } = this.updateDbEntryService.updateReport(accountReports[i], facilities, groups);
-      if (updateReport.isChanged) {
-        accountReports[i] = updateReport.report;
-        await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
-      };
-    }
     this.accountReportDbService.accountReports.next(accountReports);
     let accountReportId: number = this.accountReportDbService.getInitialReport();
     if (accountReportId) {
@@ -258,38 +223,20 @@ export class AppComponent {
     }
   }
 
-  async initializePredictors(account: IdbAccount): Promise<boolean> {
+  async initializePredictors(account: IdbAccount): Promise<void> {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
-    let needsMigration: boolean = false;
-    //TODO: OLD PREDICTORS METHOD
-    let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
-    if (predictors.length > 0) {
-      this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
-      needsMigration = true;
-    }
+    this.predictorsDbServiceDeprecated.accountPredictorEntries.next([]);
 
     //NEW PREDICTORS V2
     let predictorsV2: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
     this.predictorDbService.accountPredictors.next(predictorsV2);
-    return needsMigration;
   }
 
   async initializePredictorData(account: IdbAccount) {
     this.loadingMessage = "Loading Predictor Data..";
     //set predictor data (V2)
     let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
-    let needsMigration: boolean = predictorData.some(item => { return !item.migratedDates });
-    if (needsMigration) {
-      for (let i = 0; i < predictorData.length; i++) {
-        if (!predictorData[i].migratedDates) {
-          predictorData[i].month = new Date(predictorData[i]['date']).getMonth() + 1;
-          predictorData[i].year = new Date(predictorData[i]['date']).getFullYear();
-          predictorData[i].migratedDates = true;
-          await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
-        }
-      }
-    }
     this.predictorDataDbService.accountPredictorData.next(predictorData);
   }
 
@@ -297,19 +244,6 @@ export class AppComponent {
     //set meters
     this.loadingMessage = "Loading Meters..";
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
-    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
-    for (let i = 0; i < accountMeters.length; i++) {
-      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean, utilityMeterData: Array<IdbUtilityMeterData>, meterDataChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i], accountMeterData);
-      if (updateMeter.isChanged) {
-        accountMeters[i] = updateMeter.utilityMeter;
-        await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
-      };
-      if (updateMeter.meterDataChanged) {
-        for (let i = 0; i < updateMeter.utilityMeterData.length; i++) {
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(updateMeter.utilityMeterData[i]));
-        }
-      }
-    }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
   }
 
@@ -317,18 +251,6 @@ export class AppComponent {
     //set meter data
     this.loadingMessage = "Loading Meter Data..";
     let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
-    let needsMigration: boolean = accountMeterData.some(item => { return !item.migratedDates });
-    if (needsMigration) {
-      for (let meterData of accountMeterData) {
-        if (!meterData.migratedDates) {
-          meterData.month = new Date(meterData['readDate']).getMonth() + 1;
-          meterData.year = new Date(meterData['readDate']).getFullYear();
-          meterData.day = new Date(meterData['readDate']).getDate();
-          meterData.migratedDates = true;
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
-        }
-      }
-    }
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData)
   }
 
@@ -364,25 +286,12 @@ export class AppComponent {
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
-    for (let i = 0; i < customFuels.length; i++) {
-      if (isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined) {
-        customFuels[i].directEmissionsRate = true;
-        await firstValueFrom(this.customFuelDbservice.updateWithObservable(customFuels[i]));
-      }
-    }
     this.customFuelDbservice.accountCustomFuels.next(customFuels);
   }
 
   async initializeCustomGWPs(account: IdbAccount) {
     // this.loadingMessage = 'Loading Custom GWPs...';
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
-    for (let i = 0; i < customGWPs.length; i++) {
-      let updateGWP = this.updateDbEntryService.updateCustomGWP(customGWPs[i]);
-      if (updateGWP.isChanged) {
-        customGWPs[i] = updateGWP.customGWP;
-        await firstValueFrom(this.customGWPDbService.updateWithObservable(customGWPs[i]));
-      }
-    }
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 
@@ -411,7 +320,7 @@ export class AppComponent {
 
   async updateAccountAnalysisSelectedItems(account: IdbAccount) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
-    let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateSelectedAccountAnalysis(account, accountAnalysisItems);
+    let updateAccount = this.analysisSelectionRepair.repairAccount(account, accountAnalysisItems);
     if (updateAccount.isChanged) {
       account = updateAccount.account;
       await this.dbChangesService.updateAccount(account);
@@ -422,7 +331,7 @@ export class AppComponent {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     for (let facility of facilities) {
-      let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateSelectedFacilityAnalysis(facility, facilityAnalysisItems);
+      let updateFacility = this.analysisSelectionRepair.repairFacility(facility, facilityAnalysisItems);
       if (updateFacility.isChanged) {
         facility = updateFacility.facility;
         await this.dbChangesService.updateFacility(facility);
