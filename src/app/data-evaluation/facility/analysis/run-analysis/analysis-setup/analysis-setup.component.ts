@@ -1,4 +1,5 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -9,7 +10,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, firstValueFrom } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -28,13 +28,13 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
 })
 export class AnalysisSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly fb = inject(FormBuilder);
   private readonly analysisDbService = inject(AnalysisDbService);
   private readonly analysisService = inject(AnalysisService);
   private readonly router = inject(Router);
   private readonly calanderizationService = inject(CalanderizationService);
-  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 
@@ -105,7 +105,7 @@ export class AnalysisSetupComponent {
   showInUseMessage: Signal<boolean> = computed(() => {
     const analysisItem = this.analysisItem();
     if (analysisItem && this.hideInUseMessage() == false) {
-      const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+      const accountAnalysisItems = this.accountWorkspaceQuery.getAccountAnalysesForFacilityAnalysis(analysisItem.guid);
       if (accountAnalysisItems.length != 0) {
         return true;
       }

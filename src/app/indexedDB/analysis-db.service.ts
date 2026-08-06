@@ -235,21 +235,6 @@ export class AnalysisDbService {
     }
   }
 
-  getByGuid(guid: string): IdbAnalysisItem {
-    let analysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    return analysisItems.find(item => {
-      return item.guid == guid;
-    });
-  }
-
-  getAnalysisName(guid: string): string {
-    let analysisItem: IdbAnalysisItem = this.getByGuid(guid);
-    if (analysisItem) {
-      return analysisItem.name
-    }
-    return '';
-  }
-
   // getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {
   //   let values: Array<{ monthNum: number, percent: number }> = new Array();
   //   for (let i = 0; i < 12; i++) {

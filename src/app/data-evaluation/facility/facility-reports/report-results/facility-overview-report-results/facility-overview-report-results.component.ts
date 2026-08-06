@@ -86,7 +86,7 @@ export class FacilityOverviewReportResultsComponent {
 
   calculateFacilitiesSummary() {
     this.calculating = true;
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.facilityReport.facilityId));
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
     let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (this.overviewReportSettings.includeAllMeterData == false) {

@@ -1,5 +1,4 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { inject, Injectable } from '@angular/core';
 import { IdbFacilityReport, ModelingReportSettings } from "src/app/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
@@ -13,7 +12,6 @@ import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe
 @Injectable({ providedIn: 'root' })
 export class FacilityModelingReportAdapter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
     private regressionNumberPipe = inject(RegressionNumberPipe);
     private userDefineModelDateRangePipe = inject(UserDefineModelDateRangePipe);
@@ -187,7 +185,7 @@ export class FacilityModelingReportAdapter {
                 const regressionSummarySection = this.buildRegressionSection('', [item]);
                 if (regressionSummarySection) {
                     regressionSummarySection.tocInclude = true;
-                    regressionSummarySection.tocLabel = (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? '') + ' - ' + this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
+                    regressionSummarySection.tocLabel = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '') + ' - ' + this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
                     regressionSummarySection.bookmarkLevel = 1;
                     sections.push(regressionSummarySection);
                 }
@@ -206,7 +204,7 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         items.forEach(item => {
-            const facilityName = (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? '');
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
             const groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             let notes = '';
             if (title === 'Critical Issues') {
@@ -241,7 +239,7 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         items.forEach(item => {
-            const facilityName = (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? '');
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
             let groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             groupName = item.selectedModel?.isUserDefinedModel ? '* ' + groupName : groupName;
 
@@ -330,7 +328,7 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         classicIntensityGroupItems.forEach(item => {
-            const facilityName = (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? '');
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
             let groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             let predictorVariables: string = '';
             item.group.predictorVariables.forEach(p => {
@@ -360,7 +358,7 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         absoluteGroupItems.forEach(item => {
-            const facilityName = (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? '');
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
             let groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             rows.push([
                 facilityName,

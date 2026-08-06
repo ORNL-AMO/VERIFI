@@ -1,4 +1,5 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -11,7 +12,6 @@ import { AccountReportsService } from '../../account-reports.service';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -23,11 +23,11 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 })
 export class AccountSavingsReportSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
 
 
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
@@ -45,7 +45,7 @@ export class AccountSavingsReportSetupComponent {
           )
         : EMPTY
       ),
-      map(id => this.accountAnalysisDbService.getByGuid(id))
+      map(id => this.accountWorkspaceQuery.getAccountAnalysisByGuid(id))
     )
   );
 
@@ -207,5 +207,4 @@ export class AccountSavingsReportSetupComponent {
     )
   }
 }
-
 

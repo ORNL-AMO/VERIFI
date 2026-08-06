@@ -12,10 +12,48 @@ import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
 import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
+import { IdbFacility } from '../models/idbModels/facility';
+import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
+import { IdbFacilityReport } from '../models/idbModels/facilityReport';
+import { IdbAccountReport } from '../models/idbModels/accountReport';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceQueryService {
   constructor(private store: AccountWorkspaceStore) { }
+
+  getFacilityByGuid(guid: string): IdbFacility | undefined {
+    const facility = this.store.facilities().find(item => item.guid === guid);
+    return facility ? structuredClone(facility) : undefined;
+  }
+
+  getFacilityAnalysisByGuid(guid: string): IdbAnalysisItem | undefined {
+    const analysis = this.store.facilityAnalyses().find(item => item.guid === guid);
+    return analysis ? structuredClone(analysis) : undefined;
+  }
+
+  getAccountAnalysisByGuid(guid: string): IdbAccountAnalysisItem | undefined {
+    const analysis = this.store.accountAnalyses().find(item => item.guid === guid);
+    return analysis ? structuredClone(analysis) : undefined;
+  }
+
+  getFacilityReportByGuid(guid: string): IdbFacilityReport | undefined {
+    const report = this.store.facilityReports().find(item => item.guid === guid);
+    return report ? structuredClone(report) : undefined;
+  }
+
+  getAccountReportByGuid(guid: string): IdbAccountReport | undefined {
+    const report = this.store.accountReports().find(item => item.guid === guid);
+    return report ? structuredClone(report) : undefined;
+  }
+
+  getAccountAnalysesForFacilityAnalysis(facilityAnalysisGuid: string): IdbAccountAnalysisItem[] {
+    return this.store.accountAnalyses()
+      .filter(accountAnalysis => accountAnalysis.facilityAnalysisItems.some(
+        facilityAnalysis => facilityAnalysis.analysisItemId === facilityAnalysisGuid
+      ))
+      .map(accountAnalysis => structuredClone(accountAnalysis));
+  }
 
   getGroupMetersByGroupId(groupId: string): IdbUtilityMeter[] {
     return this.store.meters().filter(meter => meter.groupId === groupId).map(meter => ({ ...meter }));

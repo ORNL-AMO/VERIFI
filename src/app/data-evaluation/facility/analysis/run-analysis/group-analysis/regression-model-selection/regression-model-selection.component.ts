@@ -1,11 +1,11 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -29,10 +29,10 @@ type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 })
 export class RegressionModelSelectionComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private regressionModelState = inject(RegressionModelStateService);
@@ -95,7 +95,7 @@ export class RegressionModelSelectionComponent {
   showInUseMessage: Signal<boolean> = computed(() => {
     const analysisItem = this.analysisItem();
     if (analysisItem && this.hideInUseMessage() == false) {
-      const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+      const accountAnalysisItems = this.accountWorkspaceQuery.getAccountAnalysesForFacilityAnalysis(analysisItem.guid);
       if (accountAnalysisItems.length != 0) {
         return true;
       }

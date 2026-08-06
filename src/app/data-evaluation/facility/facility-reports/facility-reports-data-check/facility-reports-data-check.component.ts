@@ -1,4 +1,5 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
@@ -16,6 +17,7 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './facility-reports-data-check.component.css',
 })
 export class FacilityReportsDataCheckComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -34,7 +36,7 @@ export class FacilityReportsDataCheckComponent {
   ngOnInit(): void {
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];
       if (this.analysisItem) {
         this.initializeFacilityGroups();
@@ -50,7 +52,7 @@ export class FacilityReportsDataCheckComponent {
   }
 
   initializeFacilityGroups() {
-    let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let reportYear: number;
     if (this.facilityReport.facilityReportType == 'analysis') {
       reportYear = this.facilityReport.analysisReportSettings.reportYear;

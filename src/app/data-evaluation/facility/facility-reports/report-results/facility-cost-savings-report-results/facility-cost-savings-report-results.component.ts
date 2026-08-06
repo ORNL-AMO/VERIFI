@@ -3,7 +3,6 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CostSavingsReportSettings, IdbFacilityReport, MonthlyGroupData, YearGroupData } from 'src/app/models/idbModels/facilityReport';
@@ -69,7 +68,6 @@ export class FacilityCostSavingsReportResultsComponent {
   monthlyEnergySavingsTable: MonthlyGroupData = {};
 
   constructor(
-    private analysisDbService: AnalysisDbService,
     private injector: Injector
 
   ) { }
@@ -77,7 +75,7 @@ export class FacilityCostSavingsReportResultsComponent {
   ngOnInit() {
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.selectedAnalysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.baselineYear = this.selectedAnalysisItem?.baselineYear;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
       this.groupUnits = this.reportSettings.groupUnits;
@@ -129,7 +127,7 @@ export class FacilityCostSavingsReportResultsComponent {
     }
 
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.selectedAnalysisItem?.facilityId));
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.selectedAnalysisItem?.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.selectedAnalysisItem?.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.selectedAnalysisItem?.facilityId);

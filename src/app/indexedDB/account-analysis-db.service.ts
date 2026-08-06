@@ -86,30 +86,4 @@ export class AccountAnalysisDbService {
     await firstValueFrom(this.updateWithObservable(analysiItem));
   }
 
-  getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {
-    let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
-    let correspondingItems: Array<IdbAccountAnalysisItem> = new Array();
-    allAccountAnalysisItems.forEach(accountItem => {
-      accountItem.facilityAnalysisItems.forEach(facilityItem => {
-        if (facilityItem.analysisItemId == facilityAnalysisItemId) {
-          correspondingItems.push(accountItem);
-        }
-      });
-    });
-    return correspondingItems;
-  }
-
-  getByGuid(itemId: string): IdbAccountAnalysisItem {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
-    let item: IdbAccountAnalysisItem = accountAnalysisItems.find(accItem => { return accItem.guid == itemId });
-    return item;
-  }
-
-  getAccountAnalysisName(itemId: string): string {
-    let item: IdbAccountAnalysisItem = this.getByGuid(itemId);
-    if(item){
-      return item.name
-    };
-    return '';
-  }
 }

@@ -1,5 +1,4 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
@@ -10,7 +9,6 @@ import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calcul
 })
 export class ModelingExecutiveSummaryExcelWriter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   workbook: ExcelJS.Workbook;
   maxPredictorCount: number;
@@ -99,7 +97,7 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (regressionGroupItems?.length > 0) {
       regressionGroupItems.forEach(item => {
         let row = [
-          (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? ''),
+          (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? ''),
           this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId),
           item.baselineYear,
           item.group.regressionModelYear,
@@ -125,7 +123,7 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (classicIntensityGroupItems?.length > 0) {
       classicIntensityGroupItems.forEach(item => {
         let row = [
-          (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? ''),
+          (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? ''),
           this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId),
           item.baselineYear,
           '—',
@@ -148,7 +146,7 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (absoluteGroupItems?.length > 0) {
       absoluteGroupItems.forEach(item => {
         let row = [
-          (this.accountWorkspaceStore.facilities().find(facility => facility.guid === (item.facilityId))?.name ?? ''),
+          (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? ''),
           this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId),
           item.baselineYear,
           '—',

@@ -1,4 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -23,6 +24,7 @@ import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/expor
   styleUrl: './analysis-report.component.css'
 })
 export class AnalysisReportComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbAccountReport;
@@ -76,8 +78,7 @@ export class AnalysisReportComponent {
   }
 
   setFacilityAnalysisItems(allFacilityAnalysisItems: Array<IdbAnalysisItem>) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.analysisReportSetup.analysisItemId });
+    let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.analysisReportSetup.analysisItemId);
     this.facilityAnalysisItems = allFacilityAnalysisItems.filter(item => {
       const match = selectedAnalysisItem.facilityAnalysisItems.some(facilityItem => {
         return facilityItem.analysisItemId == item.guid;
@@ -91,7 +92,7 @@ export class AnalysisReportComponent {
   initializeGroups() {
     this.executiveSummaryItems = [];
     this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
-      let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityAnalysisItem.facilityId));
+      let facility: IdbFacility = this.accountWorkspaceQuery.getFacilityByGuid(facilityAnalysisItem.facilityId);
       facilityAnalysisItem.groups.forEach(group => {
         if (group.analysisType == 'regression') {
           let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);

@@ -1,8 +1,8 @@
 import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -17,6 +17,7 @@ import { FacilityModelingReportAdapter } from './facility-modeling-report.adapte
   styleUrl: './facility-modeling-report-results.component.css',
 })
 export class FacilityModelingReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
@@ -26,7 +27,6 @@ export class FacilityModelingReportResultsComponent {
   isExportingPdf: boolean = false;
 
   constructor(
-    private analysisDbService: AnalysisDbService,
     private regressionModelsService: RegressionModelsService,
     private facilityModelingReportAdapter: FacilityModelingReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
@@ -36,7 +36,7 @@ export class FacilityModelingReportResultsComponent {
   ngOnInit(): void {
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];
       if (this.analysisItem) {
         this.initializeFacilityGroups();
@@ -51,7 +51,7 @@ export class FacilityModelingReportResultsComponent {
   }
 
   initializeFacilityGroups() {
-    let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let reportYear: number;
     if (this.facilityReport.facilityReportType == 'analysis') {
       reportYear = this.facilityReport.analysisReportSettings.reportYear;

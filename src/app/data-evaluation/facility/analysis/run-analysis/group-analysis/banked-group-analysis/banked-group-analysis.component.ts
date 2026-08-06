@@ -6,7 +6,6 @@ import { Subscription } from 'rxjs';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -45,7 +44,6 @@ export class BankedGroupAnalysisComponent {
   analysisReportSettings: AnalysisReportSettings;
   constructor(
     private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
     private injector: Injector
 
   ) {
@@ -56,8 +54,7 @@ export class BankedGroupAnalysisComponent {
     this.setReportSettings();
     this.analysisItemSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalysis, { injector: this.injector }).subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
-      let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
-      this.bankedAnalysisItem = JSON.parse(JSON.stringify(tmpBankedAnalysisItem));
+      this.bankedAnalysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(analysisItem.bankedAnalysisItemId);
     })
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
@@ -82,7 +79,7 @@ export class BankedGroupAnalysisComponent {
   runAnalysis() {
     this.calculating = true;
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.bankedAnalysisItem.facilityId));
+    this.facility = this.accountWorkspaceQuery.getFacilityByGuid(this.bankedAnalysisItem.facilityId);
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.bankedAnalysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.bankedAnalysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.bankedAnalysisItem.facilityId);

@@ -7,7 +7,6 @@ import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysi
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -44,7 +43,6 @@ export class BankedGroupResultsTableComponent {
   bankedSavings: number;
   constructor(
     private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
     private injector: Injector
 
   ) {
@@ -54,8 +52,7 @@ export class BankedGroupResultsTableComponent {
   ngOnInit() {
     this.analysisItemSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalysis, { injector: this.injector }).subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
-      let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
-      this.bankedAnalysisItem = JSON.parse(JSON.stringify(tmpBankedAnalysisItem));
+      this.bankedAnalysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(analysisItem.bankedAnalysisItemId);
     })
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
@@ -79,7 +76,7 @@ export class BankedGroupResultsTableComponent {
   runAnalysis() {
     this.calculating = true;
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.bankedAnalysisItem.facilityId));
+    this.facility = this.accountWorkspaceQuery.getFacilityByGuid(this.bankedAnalysisItem.facilityId);
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.bankedAnalysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.bankedAnalysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.bankedAnalysisItem.facilityId);

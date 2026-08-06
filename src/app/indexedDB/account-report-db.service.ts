@@ -100,14 +100,6 @@ export class AccountReportDbService {
     }
   }
 
-  getHasCorrespondingReport(analysisId: string): boolean {
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    let hasReport: IdbAccountReport = accountReports.find(report => {
-      return (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == analysisId);
-    });
-    return (hasReport != undefined);
-  }
-
   async addGroup(group: IdbUtilityMeterGroup) {
     let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     for (let i = 0; i < accountReports.length; i++) {
@@ -136,18 +128,4 @@ export class AccountReportDbService {
     }
   }
 
-  getReportName(reportId: string): string {
-    let report: IdbAccountReport = this.getByGuid(reportId);
-    if (report) {
-      return report.name;
-    }
-    return '';
-  }
-
-  getByGuid(guid: string): IdbAccountReport {
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    return accountReports.find(report => {
-      return report.guid == guid;
-    });
-  }
 }

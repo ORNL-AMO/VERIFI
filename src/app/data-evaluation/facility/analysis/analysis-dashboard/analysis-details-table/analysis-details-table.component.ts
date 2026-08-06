@@ -290,8 +290,7 @@ export class AnalysisDetailsTableComponent {
   }
 
   goToReport(reportGuid: string) {
-    let facilityReport: IdbFacilityReport = this.facilityReportsDbService.getByGuid(reportGuid);
-    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
+    this.accountWorkspaceService.selectFacilityReport(reportGuid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/reports/setup')
   }
 
@@ -398,14 +397,12 @@ export class AnalysisDetailsTableComponent {
   }
 
   goToAccountAnalysis(analysisGuid: string) {
-    let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisGuid);
-    this.accountWorkspaceService.selectAccountAnalysis((accountAnalysisItem)?.guid);
+    this.accountWorkspaceService.selectAccountAnalysis(analysisGuid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 
   goToFacilityAnalysis(analysisGuid: string) {
-    let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
-    this.accountWorkspaceService.selectFacilityAnalysis((bankedAnalysisItem)?.guid);
+    this.accountWorkspaceService.selectFacilityAnalysis(analysisGuid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
 

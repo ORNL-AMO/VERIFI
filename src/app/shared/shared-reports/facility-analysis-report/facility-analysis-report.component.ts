@@ -66,7 +66,7 @@ export class FacilityAnalysisReportComponent {
 
   ngOnInit(): void {
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
+    this.facility = this.accountWorkspaceQuery.getFacilityByGuid(this.analysisItem.facilityId);
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.analysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.analysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.analysisItem.facilityId);

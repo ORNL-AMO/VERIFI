@@ -1,4 +1,5 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
@@ -9,7 +10,6 @@ import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-better-plants-setup',
@@ -18,6 +18,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
   standalone: false
 })
 export class BetterPlantsSetupComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -35,7 +36,6 @@ export class BetterPlantsSetupComponent {
   constructor(
     private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private injector: Injector
   ) {
   }
@@ -82,7 +82,7 @@ export class BetterPlantsSetupComponent {
   }
 
   setSelectedAnalysisItem() {
-    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.betterPlantsReportForm.controls.analysisItemId.value);
+    this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.betterPlantsReportForm.controls.analysisItemId.value);
     if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'water') {
       this.methodsUndertakenLabel = 'If a baseline adjustment was made, please indicate the reason for making the adjustment';
       this.modificationNotesLabel = 'Please briefly describe major technologies, strategies, and practices employed during the previous year to decrease water intensity. Please identify: systems/processes impacted, approximate water savings from projects, and implementation cost';

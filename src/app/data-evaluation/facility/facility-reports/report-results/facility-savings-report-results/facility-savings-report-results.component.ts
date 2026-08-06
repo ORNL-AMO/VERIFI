@@ -7,7 +7,6 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { FacilitySavingsReport } from 'src/app/calculations/savings-report-calculations/facilitySavingsReport';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -73,7 +72,6 @@ export class FacilitySavingsReportResultsComponent {
   @ViewChildren('groupTrailing12MonthSavingsGraph') groupTrailing12MonthSavingsGraphs?: QueryList<RollingEnergySavingsGraphComponent>;
 
   constructor(
-    private analysisDbService: AnalysisDbService,
     private sharedDataService: SharedDataService,
     private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService,
@@ -91,7 +89,7 @@ export class FacilitySavingsReportResultsComponent {
       if (!this.facilityReport) {
         return;
       }
-      this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.analysisService.analysisTableColumns.next(this.facilityReport.savingsReportSettings.analysisTableColumns);
       this.endDate = new Date(this.facilityReport.savingsReportSettings.endYear, this.facilityReport.savingsReportSettings.endMonth, 1);
       this.getAnnualAnalysisSummary();
@@ -108,7 +106,7 @@ export class FacilitySavingsReportResultsComponent {
 
   getAnnualAnalysisSummary() {
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.analysisItem.facilityId));
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.analysisItem.facilityId);
     let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.analysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.analysisItem.facilityId);

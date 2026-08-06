@@ -324,8 +324,7 @@ export class AccountAnalysisDetailsTableComponent {
   }
 
   confirmViewLinkedItem(itemGuid: string) {
-    let report: IdbAccountReport = this.accountReportDbService.getByGuid(itemGuid);
-    this.accountWorkspaceService.selectAccountReport((report)?.guid);
+    this.accountWorkspaceService.selectAccountReport(itemGuid);
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
 

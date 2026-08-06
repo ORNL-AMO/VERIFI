@@ -64,7 +64,7 @@ export class FacilityEmissionFactorsReportResultsComponent {
   }
 
   calculateFacilitiesSummary() {
-    this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.facilityReport.facilityId));
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
 
     this.facilityMeters.forEach(meter => {

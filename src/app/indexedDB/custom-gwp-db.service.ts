@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -59,22 +58,6 @@ export class CustomGWPDbService {
   updateWithObservable(values: IdbCustomGWP): Observable<IdbCustomGWP> {
     values.date = new Date();
     return this.dbService.update('customGWP', values);
-  }
-
-  getUniqValue(){
-    let accountCustomGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
-    let existingValues: Array<number> = accountCustomGWPs.map(cGWP => {
-      return cGWP.value;
-    });
-    GlobalWarmingPotentials.forEach(gwpOption => {
-      existingValues.push(gwpOption.value);
-    })
-    let uniqVal: number = Math.floor(Math.random() * 50000)
-    while(existingValues.includes(uniqVal)){
-      uniqVal = Math.floor(Math.random() * 50000);
-      console.log(uniqVal);
-    }
-    return uniqVal;
   }
 
 }

@@ -1,4 +1,5 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
@@ -19,6 +20,7 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './account-reports-data-check.component.css',
 })
 export class AccountReportsDataCheckComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
@@ -63,17 +65,16 @@ export class AccountReportsDataCheckComponent {
   }
 
   setFacilityItems(allFacilityAnalysisItems: Array<IdbAnalysisItem>) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     this.executiveSummaryItems = [];
 
     if (this.selectedReport.reportType == 'betterPlants') {
-      this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.betterPlantsReportSetup.analysisItemId);
     }
     else if (this.selectedReport.reportType == 'performance') {
-      this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.performanceReportSetup.analysisItemId });
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.performanceReportSetup.analysisItemId);
     }
     else if (this.selectedReport.reportType == 'accountSavings') {
-      this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.accountSavingsReportSetup.analysisItemId);
     }
 
     this.facilityAnalysisItems = allFacilityAnalysisItems.filter(item => {
@@ -90,7 +91,7 @@ export class AccountReportsDataCheckComponent {
   initializeGroups() {
     this.executiveSummaryItems = [];
     this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
-      let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityAnalysisItem.facilityId));
+      let facility: IdbFacility = this.accountWorkspaceQuery.getFacilityByGuid(facilityAnalysisItem.facilityId);
       facilityAnalysisItem.groups.forEach(group => {
         if (group.analysisType == 'regression') {
           let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);

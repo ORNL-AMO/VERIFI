@@ -21,7 +21,6 @@ import { MeterEnergyHistogramComponent } from 'src/app/shared/shared-data-qualit
 import { MeterCostHistogramComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
 import { PredictorTimeseriesGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
 import { PredictorHistogramGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-facility-data-quality-report-results',
@@ -56,7 +55,6 @@ export class FacilityDataQualityReportResultsComponent {
   constructor(
     private facilityDataQualityReportAdapter: FacilityDataQualityReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
-    private analysisDbService: AnalysisDbService,
     private injector: Injector
 
   ) { }
@@ -80,7 +78,7 @@ export class FacilityDataQualityReportResultsComponent {
 
     if (this.selectedMode === 'analysis') {
       this.selectedAnalysisItemId = this.dataQualityReportSettings.selectedAnalysisItemId;
-      this.analysisItem = this.analysisDbService.getByGuid(this.selectedAnalysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.selectedAnalysisItemId);
       if (this.analysisItem) {
         const meterIds = new Set<string>();
         const predictorIds = new Set<string>();

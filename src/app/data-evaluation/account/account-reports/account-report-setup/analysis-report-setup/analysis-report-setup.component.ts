@@ -1,4 +1,5 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
@@ -9,7 +10,6 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-analysis-report-setup',
@@ -18,6 +18,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
   styleUrl: './analysis-report-setup.component.css'
 })
 export class AnalysisReportSetupComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   analysisReportForm: FormGroup;
@@ -30,7 +31,6 @@ export class AnalysisReportSetupComponent {
   constructor(
     private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private injector: Injector
   ) {
   }
@@ -78,9 +78,8 @@ export class AnalysisReportSetupComponent {
   }
 
   setSelectedAnalysisItem() {
-    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.analysisReportForm.controls.analysisItemId.value);
+    this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.analysisReportForm.controls.analysisItemId.value);
   }
 
 }
-
 

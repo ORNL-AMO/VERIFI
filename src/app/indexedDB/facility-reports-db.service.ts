@@ -70,18 +70,4 @@ export class FacilityReportsDbService {
     }
   }
 
-  getByGuid(guid: string): IdbFacilityReport {
-    let accountFacilityReports: Array<IdbFacilityReport> = [...this.accountWorkspaceStore.facilityReports()];
-    return accountFacilityReports.find(report => {
-      return report.guid == guid;
-    })
-  }
-
-  getReportName(reportId: string): string {
-    let report: IdbFacilityReport = this.getByGuid(reportId);
-    if(report){
-      return report.name;
-    }
-    return '';
-  }
 }
