@@ -2,10 +2,9 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { LoadingService } from '../loading/loading.service';
@@ -41,7 +40,6 @@ export class ElectronBackupFileComponent {
   electronBackup: IdbElectronBackup;
   forceModal: boolean = false;
   constructor(private electronService: ElectronService,
-    private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
@@ -149,10 +147,7 @@ export class ElectronBackupFileComponent {
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.suspendQueuedDeletion();
-        await firstValueFrom(this.accountDbService.updateWithObservable({
-          ...this.account,
-          deleteAccount: true
-        }));
+        await this.accountHandler.update({ ...this.account, deleteAccount: true }, this.account.guid);
         await this.applicationLifecycleService.refreshAccountCatalog();
 
         let backupPath: string = this.account.dataBackupFilePath;
