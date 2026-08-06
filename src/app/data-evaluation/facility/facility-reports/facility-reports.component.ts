@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -19,11 +19,12 @@ export class FacilityReportsComponent {
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
   constructor(
-    private router: Router
+    private router: Router,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()])).subscribe(val => {
+    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()]), { injector: this.injector }).subscribe(val => {
       this.utilityMeterData = val;
     });
   }

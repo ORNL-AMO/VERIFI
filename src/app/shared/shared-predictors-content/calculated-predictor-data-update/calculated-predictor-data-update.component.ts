@@ -2,7 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, inject, computed } from '@angular/core';
+import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -79,7 +79,8 @@ export class CalculatedPredictorDataUpdateComponent {
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private injector: Injector
 
   ) {
 
@@ -87,7 +88,7 @@ export class CalculatedPredictorDataUpdateComponent {
 
   ngOnInit() {
     this.setLastMeterReading();
-    this.predictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityPredictorData()])).subscribe(() => {
+    this.predictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]), { injector: this.injector }).subscribe(() => {
       this.setPredictorData();
     });
 

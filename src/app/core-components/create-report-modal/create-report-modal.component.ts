@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
@@ -40,13 +40,14 @@ export class CreateReportModalComponent {
     private accountReportDbService: AccountReportDbService,
     private accountOverviewService: AccountOverviewService,
     private toastNotificationService: ToastNotificationsService,
-    private facilityOverviewService: FacilityOverviewService
+    private facilityOverviewService: FacilityOverviewService,
+    private injector: Injector
   ) {
 
   }
 
   ngOnInit() {
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
     this.showModalSub = this.sharedDataService.openCreateReportModal.subscribe(val => {

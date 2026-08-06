@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -27,10 +27,10 @@ export class FinancialReportingFormComponent implements OnInit {
   selectedAccountSub: Subscription;
   selectedAccount: IdbAccount;
   isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService, private injector: Injector) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.selectedAccount = account;
       if (account) {
         if (this.isFormChange == false) {

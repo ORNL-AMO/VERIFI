@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -26,14 +26,15 @@ export class DataOverviewSetupComponent {
   reportSetup: DataOverviewReportSetup;
   showWater: boolean;
   constructor(
-    private accountReportDbService: AccountReportDbService
+    private accountReportDbService: AccountReportDbService,
+    private injector: Injector
   ) {
   }
 
 
   ngOnInit() {
     this.account = this.accountWorkspaceStore.account();
-    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport).subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport, { injector: this.injector }).subscribe(val => {
       if (!this.isFormChange) {
         this.reportSetup = val.dataOverviewReportSetup;
       } else {

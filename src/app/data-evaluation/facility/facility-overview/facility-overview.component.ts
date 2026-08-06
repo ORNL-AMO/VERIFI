@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
@@ -36,12 +36,13 @@ export class FacilityOverviewComponent implements OnInit {
   constructor(
     private facilityOverviewService: FacilityOverviewService,
     private router: Router,
-    private eGridService: EGridService
+    private eGridService: EGridService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
     this.customFuels = [...this.accountWorkspaceStore.customFuels()];
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       if (this.facility && this.facility.guid != val.guid) {
         this.dateRange = undefined;
       }

@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -34,12 +34,13 @@ export class FacilityAnalysisReportResultsComponent {
     private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService,
     private facilityAnalysisReportAdapter: FacilityAnalysisReportAdapter,
-    private exportReportPdfService: ExportReportPdfService
+    private exportReportPdfService: ExportReportPdfService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.analysisService.analysisTableColumns.next(this.facilityReport.analysisReportSettings.analysisTableColumns);

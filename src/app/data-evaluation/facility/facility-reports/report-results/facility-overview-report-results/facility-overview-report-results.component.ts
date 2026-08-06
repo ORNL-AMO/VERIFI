@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, QueryList, ViewChildren, inject } from '@angular/core';
+import { Component, QueryList, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -58,14 +58,15 @@ export class FacilityOverviewReportResultsComponent {
     private facilityOverviewReportAdapter: FacilityOverviewReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private pptReportService: PptReportService,
-    private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter
+    private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter,
+    private injector: Injector
 
   ) {
 
   }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.overviewReportSettings = this.facilityReport.dataOverviewReportSettings;
       this.calculateFacilitiesSummary();

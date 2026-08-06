@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
@@ -45,7 +45,8 @@ export class BankedGroupAnalysisComponent {
   analysisReportSettings: AnalysisReportSettings;
   constructor(
     private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService
+    private analysisDbService: AnalysisDbService,
+    private injector: Injector
 
   ) {
 
@@ -53,7 +54,7 @@ export class BankedGroupAnalysisComponent {
 
   ngOnInit() {
     this.setReportSettings();
-    this.analysisItemSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalysis).subscribe(val => {
+    this.analysisItemSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalysis, { injector: this.injector }).subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
       let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
       this.bankedAnalysisItem = JSON.parse(JSON.stringify(tmpBankedAnalysisItem));

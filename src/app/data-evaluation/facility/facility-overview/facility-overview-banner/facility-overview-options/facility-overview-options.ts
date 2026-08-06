@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { FacilityOverviewService } from '../../facility-overview.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Subscription } from 'rxjs';
@@ -38,11 +38,12 @@ export class FacilityOverviewOptions {
   accountSub: Subscription;
   constructor(
     private facilityOverviewService: FacilityOverviewService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private injector: Injector
   ) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.setYears();
     });
@@ -60,7 +61,7 @@ export class FacilityOverviewOptions {
       }
     });
 
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
   }

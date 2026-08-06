@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
+import { Component, QueryList, ViewChild, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { FacilitySavingsReport } from 'src/app/calculations/savings-report-calculations/facilitySavingsReport';
@@ -80,12 +80,13 @@ export class FacilitySavingsReportResultsComponent {
     private exportReportPdfService: ExportReportPdfService,
     private facilitySavingsReportAdapter: FacilitySavingsReportAdapter,
     private facilitySavingsReportPptAdapter: FacilitySavingsReportPptAdapter,
-    private pptReportService: PptReportService
+    private pptReportService: PptReportService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit(): void {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.analysisService.analysisTableColumns.next(this.facilityReport.savingsReportSettings.analysisTableColumns);

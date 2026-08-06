@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, Injector } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -50,11 +50,12 @@ export class DefaultUnitsFormComponent implements OnInit {
     private settingsFormsService: SettingsFormsService,
     private eGridService: EGridService,
     private router: Router,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
         if (this.isFormChange == false) {
@@ -68,7 +69,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       }
     });
 
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
         this.checkUnitsDontMatch();

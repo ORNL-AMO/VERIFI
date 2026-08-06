@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -28,15 +28,16 @@ export class CustomFuelDataDashboardComponent {
   constructor(
     private customFuelDbService: CustomFuelDbService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.customFuelsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customFuels()])).subscribe(val => {
+    this.customFuelsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customFuels()]), { injector: this.injector }).subscribe(val => {
       this.customFuels = val;
     });
 
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
   }

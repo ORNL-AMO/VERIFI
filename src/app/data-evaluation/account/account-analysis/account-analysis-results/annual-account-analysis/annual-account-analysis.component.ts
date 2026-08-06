@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -29,13 +29,14 @@ export class AnnualAccountAnalysisComponent implements OnInit {
 
   constructor(
     private analysisService: AnalysisService,
-    private accountAnalysisService: AccountAnalysisService
+    private accountAnalysisService: AccountAnalysisService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
     this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
 
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;
       this.key = 'annual-' + this.account?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();

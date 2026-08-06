@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
@@ -37,13 +37,14 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
 
   constructor(
     private analysisService: AnalysisService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
 
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.facility = val;
       this.key = 'monthly-' + this.facility?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();

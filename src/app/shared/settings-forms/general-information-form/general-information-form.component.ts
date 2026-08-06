@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, Injector } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
@@ -51,12 +51,13 @@ export class GeneralInformationFormComponent implements OnInit {
 
   constructor(
     private settingsFormsService: SettingsFormsService,
-    private generalInformationService: GeneralInformationService
+    private generalInformationService: GeneralInformationService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
     if (this.inAccount) {
-      this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+      this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
         this.selectedAccount = account;
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
@@ -69,7 +70,7 @@ export class GeneralInformationFormComponent implements OnInit {
       });
     } else if (!this.inAccount) {
       this.formNameLabel = "Facility";
-      this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+      this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
         this.selectedFacility = facility;
         if (facility) {
           if (this.isFormChange == false) {

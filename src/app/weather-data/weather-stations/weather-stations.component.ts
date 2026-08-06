@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { NominatimLocation, WeatherDataService } from '../weather-data.service';
 import { Subscription } from 'rxjs';
@@ -52,12 +52,13 @@ export class WeatherStationsComponent {
     showlegend: false
   };
   constructor(
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
-    this.facilitySub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
       this.facilities = val.map(facility => ({ ...facility }));
     });
     this.addressString = this.weatherDataService.addressSearchStr

@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -19,11 +19,12 @@ export class PredictorsDataHelpComponent implements OnInit {
   routerSub: Subscription;
   helpURL: 'manage' | 'entries' | 'predictor-form' | 'predictor-entry-form';
   constructor(
-    private router: Router
+    private router: Router,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(selectedFacility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
     });
     this.routerSub = this.router.events.subscribe((event) => {

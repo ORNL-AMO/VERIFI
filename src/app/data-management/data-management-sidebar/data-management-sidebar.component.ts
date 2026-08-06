@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, EventEmitter, Output, inject, computed } from '@angular/core';
+import { Component, EventEmitter, Output, inject, computed, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '../data-management.service';
@@ -77,47 +77,48 @@ export class DataManagementSidebarComponent {
     private predictorDbService: PredictorDbService,
     private dbChangesService: DbChangesService,
     private router: Router,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+    private injector: Injector
 
   ) {
   }
 
   ngOnInit() {
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
-    this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(facilities => {
+    this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(facilities => {
       this.facilities = facilities.map(facility => ({ ...facility }));
     });
     this.fileReferencesSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
-    this.accountMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.meters()])).subscribe(accountMeters => {
+    this.accountMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.meters()]), { injector: this.injector }).subscribe(accountMeters => {
       this.accountMeters = accountMeters.map(meter => { return { ...meter, open: false } });
     });
-    this.accountPredictorsSub = toObservable(computed(() => [...this.accountWorkspaceStore.predictors()])).subscribe(accountPredictors => {
+    this.accountPredictorsSub = toObservable(computed(() => [...this.accountWorkspaceStore.predictors()]), { injector: this.injector }).subscribe(accountPredictors => {
       this.accountPredictors = accountPredictors;
     });
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.selectedFacility = facility;
     });
-    this.selectedMeterSub = toObservable(this.accountWorkspaceStore.selectedMeter).subscribe(meter => {
+    this.selectedMeterSub = toObservable(this.accountWorkspaceStore.selectedMeter, { injector: this.injector }).subscribe(meter => {
       this.selectedMeter = meter;
     });
 
-    this.accountMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterData()])).subscribe(accountMeterData => {
+    this.accountMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterData()]), { injector: this.injector }).subscribe(accountMeterData => {
       this.accountMeterData = accountMeterData;
     });
 
-    this.accountPredictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.predictorData()])).subscribe(accountPredictorData => {
+    this.accountPredictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.predictorData()]), { injector: this.injector }).subscribe(accountPredictorData => {
       this.accountPredictorData = accountPredictorData;
     });
 
-    this.accountEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.energyUseGroups()])).subscribe(groups => {
+    this.accountEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.energyUseGroups()]), { injector: this.injector }).subscribe(groups => {
       this.accountEnergyUseGroups = groups;
     });
 
-    this.accountEnergyUseEquipmentSub = toObservable(computed(() => [...this.accountWorkspaceStore.energyUseEquipment()])).subscribe(equipment => {
+    this.accountEnergyUseEquipmentSub = toObservable(computed(() => [...this.accountWorkspaceStore.energyUseEquipment()]), { injector: this.injector }).subscribe(equipment => {
       this.accountEnergyUseEquipment = equipment;
     });
 

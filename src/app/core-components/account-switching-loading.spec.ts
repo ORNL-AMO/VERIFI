@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Injector, NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
@@ -21,6 +22,7 @@ describe('account switching loading ownership', () => {
   it('switches from the header through workspace state without opening legacy loading', async () => {
     const router = {
       url: '/data-evaluation/account',
+      events: of(),
       navigate: vi.fn(),
       navigateByUrl: vi.fn()
     };
@@ -30,6 +32,7 @@ describe('account switching loading ownership', () => {
     };
     const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
     const electron = {
+      isElectron: false,
       accountLatestBackupFile: { next: vi.fn() }
     };
     const automaticBackups = {};
@@ -48,9 +51,12 @@ describe('account switching loading ownership', () => {
       { detectChanges: vi.fn() } as any,
       automaticBackups as any,
       { resetAndRestart: vi.fn() } as any,
-      { accountCatalog: () => [] } as any,
-      { account: () => undefined, selectedFacility: () => undefined } as any
+      { accountCatalog: signal([account]) } as any,
+      { account: signal(account), selectedFacility: signal(undefined) } as any,
+      TestBed.inject(Injector)
     );
+    header.ngOnInit();
+    TestBed.tick();
     header.inDataEvaluation = true;
 
     await header.switchAccount(account);
@@ -59,6 +65,9 @@ describe('account switching loading ownership', () => {
     expect(loading.setLoadingMessage).not.toHaveBeenCalled();
     expect(loading.setLoadingStatus).not.toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account');
+    expect(header.accountList).toEqual([account]);
+    expect(header.activeAccount).toEqual(account);
+    header.ngOnDestroy();
   });
 
   it('switches from account management without opening legacy loading', async () => {
@@ -79,7 +88,8 @@ describe('account switching loading ownership', () => {
       {} as any,
       workspace as any,
       {} as any,
-      { resetAndRestart: vi.fn() } as any
+      { resetAndRestart: vi.fn() } as any,
+      {} as any
     );
     manageAccounts.accountErrors = [undefined];
 
@@ -190,6 +200,7 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
     }) as any,
     (overrides.workspace ?? { selectAccount: vi.fn().mockResolvedValue('published') }) as any,
     (overrides.lifecycle ?? { refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any,
-    (overrides.databaseReset ?? { resetAndRestart: vi.fn() }) as any
+    (overrides.databaseReset ?? { resetAndRestart: vi.fn() }) as any,
+    {} as any
   );
 }

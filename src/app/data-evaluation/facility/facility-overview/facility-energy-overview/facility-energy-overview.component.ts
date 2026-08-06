@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
@@ -29,10 +29,10 @@ export class FacilityEnergyOverviewComponent implements OnInit {
   facilityOverviewData: FacilityOverviewData;
   facilityOverviewDataSub: Subscription;
   energyIsSource: boolean;
-  constructor(private facilityOverviewService: FacilityOverviewService) { }
+  constructor(private facilityOverviewService: FacilityOverviewService, private injector: Injector) { }
 
   ngOnInit(): void {
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.facilityId = val.guid;
       this.energyUnit = val.energyUnit;
       this.energyIsSource = val.energyIsSource;

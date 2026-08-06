@@ -2,7 +2,7 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -24,14 +24,15 @@ export class MeterChargesVisualizationComponent {
   utilityMeter: IdbUtilityMeter;
   constructor(
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private injector: Injector
 
   ) {
 
   }
 
   ngOnInit() {
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
 

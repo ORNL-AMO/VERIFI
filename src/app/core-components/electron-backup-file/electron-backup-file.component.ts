@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
@@ -48,14 +48,14 @@ export class ElectronBackupFileComponent {
     private loadingService: LoadingService,
     private cd: ChangeDetectorRef,
     private deleteDataService: DeleteDataService,
-    private backupPreparationService: BackupPreparationService) {
+    private backupPreparationService: BackupPreparationService, private injector: Injector) {
 
   }
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
     if (this.electronService.isElectron) {
-      this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+      this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
         //initialize account or account change
         if (val) {
           if (!this.account || (this.account.guid != val.guid)) {

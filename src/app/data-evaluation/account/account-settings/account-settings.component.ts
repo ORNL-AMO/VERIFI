@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom, skip, take } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
@@ -69,15 +69,16 @@ export class AccountSettingsComponent implements OnInit {
     private electronService: ElectronService,
     private cd: ChangeDetectorRef,
     private automaticBackupsService: AutomaticBackupsService,
+    private injector: Injector
   ) { }
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
 
-    this.accountFacilitiesSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+    this.accountFacilitiesSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
       this.facilityList = val.map(facility => ({ ...facility }));
       this.setOrderOptions();
     });

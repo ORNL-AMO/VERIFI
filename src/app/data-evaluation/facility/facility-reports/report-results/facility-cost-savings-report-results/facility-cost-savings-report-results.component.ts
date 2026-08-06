@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -69,12 +69,13 @@ export class FacilityCostSavingsReportResultsComponent {
   monthlyEnergySavingsTable: MonthlyGroupData = {};
 
   constructor(
-    private analysisDbService: AnalysisDbService
+    private analysisDbService: AnalysisDbService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.selectedAnalysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.baselineYear = this.selectedAnalysisItem?.baselineYear;

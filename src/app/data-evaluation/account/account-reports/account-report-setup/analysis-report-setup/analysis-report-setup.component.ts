@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -30,13 +30,14 @@ export class AnalysisReportSetupComponent {
   constructor(
     private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private accountAnalysisDbService: AccountAnalysisDbService
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
     this.account = this.accountWorkspaceStore.account();
-    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport).subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport, { injector: this.injector }).subscribe(val => {
       if (!this.isFormChange) {
         this.analysisReportForm = this.accountReportsService.getAnalysisFormFromReport(val.analysisReportSetup);
         this.setSelectedAnalysisItem();

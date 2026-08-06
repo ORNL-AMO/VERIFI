@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
@@ -30,12 +30,13 @@ export class FacilitySettingsComponent implements OnInit {
     private importBackupModalService: ImportBackupModalService,
     private dbChangesService: DbChangesService,
     private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.selectedFacility = facility;
     });
 

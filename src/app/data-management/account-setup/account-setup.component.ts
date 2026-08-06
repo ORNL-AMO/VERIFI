@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
@@ -39,13 +39,13 @@ export class AccountSetupComponent {
     private dbChangesService: DbChangesService,
     private automaticBackupsService: AutomaticBackupsService,
     private cd: ChangeDetectorRef,
-    private importBackupModalService: ImportBackupModalService) {
+    private importBackupModalService: ImportBackupModalService, private injector: Injector) {
 
   }
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
 

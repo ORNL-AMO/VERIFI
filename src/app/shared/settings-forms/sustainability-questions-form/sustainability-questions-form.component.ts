@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, Injector } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { SettingsFormsService } from '../settings-forms.service';
@@ -31,10 +31,10 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   years: Array<number> = new Array();
   isFormChange: boolean = false;
   fiscalYearOption: "calendarYear" | "nonCalendarYear";
-  constructor(private settingsFormsService: SettingsFormsService) { }
+  constructor(private settingsFormsService: SettingsFormsService, private injector: Injector) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.selectedAccount = account;
       if (account && this.inAccount) {
         this.fiscalYearOption = account.fiscalYear;
@@ -47,7 +47,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       }
     });
 
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.selectedFacility = facility;
       if (facility && !this.inAccount) {
         this.fiscalYearOption = facility.fiscalYear;

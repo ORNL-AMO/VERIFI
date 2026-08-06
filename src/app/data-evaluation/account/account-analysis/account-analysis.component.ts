@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisService } from './account-analysis.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -24,14 +24,15 @@ export class AccountAnalysisComponent implements OnInit {
   accountSub: Subscription;
   constructor(
     private accountAnalysisService: AccountAnalysisService,
-    private analysisService: AnalysisService
+    private analysisService: AnalysisService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterData()])).subscribe(val => {
+    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterData()]), { injector: this.injector }).subscribe(val => {
       this.utilityMeterData = val;
     });
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;
       this.annualKey = 'annual-' + this.account?.id;
       this.monthlyKey = 'monthly-' + this.account?.id;

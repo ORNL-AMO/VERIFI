@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -43,7 +43,8 @@ export class AnalysisDashboardComponent implements OnInit {
     private router: Router,
     private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
@@ -55,12 +56,12 @@ export class AnalysisDashboardComponent implements OnInit {
     //navigationsEnd isn't fired on init. Call here.
     this.setAnalysisType(this.router.url);
 
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.setHasEnergyAndWater();
     });
 
-    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector }).subscribe(items => {
       this.facilityAnalysisItems = [...items];
     });
   }

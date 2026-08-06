@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject, Injector } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -33,12 +33,13 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
 
     constructor(
       private formBuilder: FormBuilder,
-      private dbChangesService: DbChangesService
+      private dbChangesService: DbChangesService,
+      private injector: Injector
 
     ) { }
 
     ngOnInit(): void {
-        this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+        this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
             this.selectedAccount = account;
             if (this.inAccount && account) {
                 if (!this.isFormChange) {
@@ -50,7 +51,7 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
         });
 
         if (!this.inAccount) {
-            this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+            this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
                 this.selectedFacility = facility;
                 if (facility) {
                     if (!this.isFormChange) {

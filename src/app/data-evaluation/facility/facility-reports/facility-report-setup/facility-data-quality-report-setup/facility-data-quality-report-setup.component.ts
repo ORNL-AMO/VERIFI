@@ -2,7 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -41,12 +41,13 @@ export class FacilityDataQualityReportSetupComponent {
 
   constructor(
     private calanderizationService: CalanderizationService,
-    private facilityReportsDbService: FacilityReportsDbService
+    private facilityReportsDbService: FacilityReportsDbService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.dataQualityReportSettings;
       this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
@@ -54,7 +55,7 @@ export class FacilityDataQualityReportSetupComponent {
       this.initializeSelections();
     });
 
-    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector }).subscribe(items => {
       this.analysisItems = [...items];
       this.initializeSelections();
       this.validateDataQualityReport();

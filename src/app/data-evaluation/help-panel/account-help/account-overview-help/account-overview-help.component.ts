@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -20,11 +20,12 @@ export class AccountOverviewHelpComponent {
   overviewType: 'an energy consumption' | 'a utility cost' | 'a water consumption' | 'an emissions';
   tableType: 'Utility Costs' | 'Utility Use and Cost' | 'Utility Emissions';
   constructor(
-    private router: Router
+    private router: Router,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(selectedAccount => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(selectedAccount => {
       this.selectedAccount = selectedAccount;
     });
     this.routerSub = this.router.events.subscribe((event) => {

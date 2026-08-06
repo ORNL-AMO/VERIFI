@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -48,25 +48,26 @@ export class ManageMeterGroupingComponent {
     private analysisDbService: AnalysisDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNoticationService: ToastNotificationsService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private injector: Injector
 
   ) {
   }
 
 
   ngOnInit() {
-    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(meters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.facilityMeters = meters;
       this.hasEnergyMeters = this.facilityMeters.find(meter => { return meter.includeInEnergy }) != undefined;
       this.hasWaterMeters = this.facilityMeters.find(meter => { return meter.source == 'Water Discharge' || meter.source == 'Water Intake' }) != undefined;
       this.ungroupedMeters = this.facilityMeters.filter(meter => { return meter.groupId == undefined })
     });
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
       this.ungroupedMeterGroup = getNewIdbUtilityMeterGroup('Other', "Ungrouped Meters", facility.guid, facility.accountId);
       this.ungroupedMeterGroup.guid = undefined;
     });
-    this.facilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()])).subscribe(facilityMeterGroups => {
+    this.facilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()]), { injector: this.injector }).subscribe(facilityMeterGroups => {
       this.otherGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Other' });
       this.waterGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Water' });
       this.energyGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Energy' });

@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, input, inject, computed } from '@angular/core';
+import { Component, input, inject, computed, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EquipmentTypes } from './equipmentTypes';
 import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -18,6 +18,8 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
   styleUrl: './equipment-details-form.component.css',
 })
 export class EquipmentDetailsFormComponent {
+  constructor(private injector: Injector) { }
+
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   equipmentDetailsForm = input.required<FormGroup>();
   utilityDataForms = input.required<Array<UtilityDataForm>>();
@@ -38,10 +40,10 @@ export class EquipmentDetailsFormComponent {
 
   ngOnInit() {
     this.linkedMeterGroupIds = this.equipmentDetailsForm().controls['utilityMeterGroupIds'].value.map(id => id);
-    this.utilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(meters => {
+    this.utilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.utilityMeters = meters;
     });
-    this.utilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()])).subscribe(groups => {
+    this.utilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()]), { injector: this.injector }).subscribe(groups => {
       this.utilityMeterGroups = groups.filter(group => { return group.groupType == 'Energy' });
       this.setLinkedMeterGroupSources();
       this.setLinkedMeterGroup();

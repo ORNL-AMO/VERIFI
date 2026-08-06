@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, EmissionFactorsReportSettings } from 'src/app/models/idbModels/facilityReport';
@@ -40,13 +40,14 @@ export class FacilityEmissionFactorsReportResultsComponent {
 
   constructor(
     private dataEvaluationService: DataEvaluationService,
-    private eGridService: EGridService
+    private eGridService: EGridService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
     this.customFuels = [...this.accountWorkspaceStore.customFuels()];
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
       this.emissionFactorsReportSettings = this.facilityReport.emissionFactorsReportSettings;

@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -42,7 +42,8 @@ export class AnalysisReportComponent {
     private modelingExecutiveSummaryExcelWriter: ModelingExecutiveSummaryExcelWriter,
     private regressionModelsService: RegressionModelsService,
     private analysisReportAdapter: AnalysisReportAdapter,
-    private exportReportPdfService: ExportReportPdfService
+    private exportReportPdfService: ExportReportPdfService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
@@ -56,7 +57,7 @@ export class AnalysisReportComponent {
 
     this.account = this.accountWorkspaceStore.account();
 
-    this.analysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()])).subscribe(items => {
+    this.analysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]), { injector: this.injector }).subscribe(items => {
       this.setFacilityAnalysisItems(items);
     });
 

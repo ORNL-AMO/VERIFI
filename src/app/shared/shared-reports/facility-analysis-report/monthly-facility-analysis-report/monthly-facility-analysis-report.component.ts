@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, ViewChild, inject } from '@angular/core';
+import { Component, Input, ViewChild, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -45,12 +45,13 @@ export class MonthlyFacilityAnalysisReportComponent {
   @ViewChild('monthlyAnalysisSavingsGraph') monthlyAnalysisSavingsGraph ?: MonthlyAnalysisSummarySavingsGraphComponent;
 
   constructor(
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
     });
     this.printSub = this.dataEvaluationService.print.subscribe(print => {

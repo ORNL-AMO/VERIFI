@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, ViewChild, inject } from '@angular/core';
+import { Component, Input, ViewChild, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
@@ -49,7 +49,8 @@ export class GroupAnalysisReportComponent {
 
   constructor(
     private analysisService: AnalysisService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private injector: Injector
 
   ) {
   }
@@ -59,7 +60,7 @@ export class GroupAnalysisReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     })
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
     });
   }

@@ -2,7 +2,7 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
@@ -59,14 +59,15 @@ export class FacilityMeterComponent {
     private loadingService: LoadingService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private toastNotificationService: ToastNotificationsService,
-    private routerGuardService: RouterGuardService
+    private routerGuardService: RouterGuardService,
+    private injector: Injector
 
   ) {
 
   }
 
   ngOnInit() {
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
 

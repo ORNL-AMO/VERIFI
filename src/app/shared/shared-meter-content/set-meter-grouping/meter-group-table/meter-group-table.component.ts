@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, inject, computed } from '@angular/core';
+import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
@@ -55,7 +55,8 @@ export class MeterGroupTableComponent {
   calculatingMeterGroups: boolean | 'error' = false ;
   calculatingMeterGroupsSub: Subscription;
   constructor(
-    private meterGroupingDataService: MeterGroupingDataService
+    private meterGroupingDataService: MeterGroupingDataService,
+    private injector: Injector
 
   ) { }
 
@@ -64,10 +65,10 @@ export class MeterGroupTableComponent {
         this.calculatingMeterGroups = calculating;
     });
 
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
-    this.metersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()])).subscribe(meters => {
+    this.metersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.meters = meters.filter(m => {
         if (this.meterGroup == undefined) {
           return m.groupId == undefined;
@@ -77,7 +78,7 @@ export class MeterGroupTableComponent {
       });
       this.setMeterList();
     });
-    this.meterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()])).subscribe(meterData => {
+    this.meterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()]), { injector: this.injector }).subscribe(meterData => {
       this.meterData = meterData;
       this.setMeterList();
     });

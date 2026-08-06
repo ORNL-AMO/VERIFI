@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
@@ -26,12 +26,13 @@ export class FacilitySetupComponent {
     private router: Router,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.selectedFacility = facility;
     });
   }

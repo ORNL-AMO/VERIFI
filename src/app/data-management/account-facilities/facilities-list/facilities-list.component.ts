@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -37,11 +37,12 @@ export class FacilitiesListComponent {
     private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+    this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
       this.facilities = val.map(facility => ({ ...facility }));
       this.setOrderOptions();
     });

@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -36,12 +36,13 @@ export class CorrelationPlotMenuComponent {
   disableY2SelectedTotal: boolean;
   constructor(
     private visualizationStateService: VisualizationStateService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.facility = val;
       this.setYears();
     });

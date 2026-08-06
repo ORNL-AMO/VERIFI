@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -37,11 +37,12 @@ export class AccountOverviewComponent implements OnInit {
   constructor(
     private accountOverviewService: AccountOverviewService,
     private router: Router,
-    private eGridService: EGridService
+    private eGridService: EGridService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;
       let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
       if (accountMeterData.length != 0) {

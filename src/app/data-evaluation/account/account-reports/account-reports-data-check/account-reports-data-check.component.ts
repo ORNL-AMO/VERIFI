@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -31,7 +31,8 @@ export class AccountReportsDataCheckComponent {
   constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
-    private regressionModelsService: RegressionModelsService
+    private regressionModelsService: RegressionModelsService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
@@ -41,7 +42,7 @@ export class AccountReportsDataCheckComponent {
     }
     this.account = this.accountWorkspaceStore.account();
 
-    this.facilityAnalysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()])).subscribe(items => {
+    this.facilityAnalysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]), { injector: this.injector }).subscribe(items => {
       this.setFacilityItems(items);
     });
   }

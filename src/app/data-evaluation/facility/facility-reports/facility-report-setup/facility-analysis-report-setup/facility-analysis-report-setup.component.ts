@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
@@ -38,19 +38,20 @@ export class FacilityAnalysisReportSetupComponent {
 
   constructor(
     private facilityReportsDbService: FacilityReportsDbService,
-    private calanderizationService: CalanderizationService
+    private calanderizationService: CalanderizationService,
+    private injector: Injector
   ) {
 
   }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.analysisReportSettings;
       this.analysisTableColumns = this.facilityReport.analysisReportSettings.analysisTableColumns;
     });
 
-    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector }).subscribe(items => {
       this.analysisItems = [...items];
     });
 

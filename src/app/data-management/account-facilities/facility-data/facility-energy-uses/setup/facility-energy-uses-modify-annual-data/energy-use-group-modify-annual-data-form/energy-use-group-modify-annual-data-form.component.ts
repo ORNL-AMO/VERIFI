@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, Injector } from '@angular/core';
 import { EnergyEquipmentOperatingConditionsData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 import { FormGroup } from '@angular/forms';
@@ -28,13 +28,14 @@ export class EnergyUseGroupModifyAnnualDataFormComponent {
   formSubscriptions: Subscription = new Subscription();
 
   constructor(
-    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService
+    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
     this.setForm();
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facilityUnits = facility?.energyUnit;
     });
   }

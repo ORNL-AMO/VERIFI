@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { AccountDeletionError, DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -33,14 +33,15 @@ export class DeletingAccountDataComponent {
   deletionError: AccountDeletionError;
   allDeleteAccounts: Array<IdbAccount>;
   constructor(
-    private deleteDataService: DeleteDataService
+    private deleteDataService: DeleteDataService,
+    private injector: Injector
 
   ) {
   }
 
 
   ngOnInit() {
-    toObservable(this.applicationLifecycleService.accountCatalog).subscribe(accounts => {
+    toObservable(this.applicationLifecycleService.accountCatalog, { injector: this.injector }).subscribe(accounts => {
       this.allDeleteAccounts = accounts.filter(account => {
         return account.deleteAccount;
       });

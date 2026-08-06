@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { Component, QueryList, ViewChildren, inject } from '@angular/core';
+import { Component, QueryList, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -56,12 +56,13 @@ export class FacilityDataQualityReportResultsComponent {
   constructor(
     private facilityDataQualityReportAdapter: FacilityDataQualityReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
-    private analysisDbService: AnalysisDbService
+    private analysisDbService: AnalysisDbService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.dataQualityReportSettings = this.facilityReport.dataQualityReportSettings;
       this.selectedMode = this.dataQualityReportSettings.selectedMode;

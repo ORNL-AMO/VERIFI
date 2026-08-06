@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -27,14 +27,15 @@ export class AccountOverviewBannerComponent implements OnInit {
   hideAllText: boolean = false;
   constructor(
     private sharedDataService: SharedDataService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
       this.setShowWater();
     });

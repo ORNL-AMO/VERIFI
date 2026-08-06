@@ -2,7 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -45,18 +45,19 @@ export class FacilityOverviewBannerComponent implements OnInit {
     private router: Router,
     private facilityReportDbService: FacilityReportsDbService,
     private cd: ChangeDetectorRef,
-    private facilityOverviewService: FacilityOverviewService
+    private facilityOverviewService: FacilityOverviewService,
+    private injector: Injector
   ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.setShowWater();
     });
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
   }

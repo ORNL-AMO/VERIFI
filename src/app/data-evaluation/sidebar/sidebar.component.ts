@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject, Injector } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -41,21 +41,22 @@ export class SidebarComponent implements OnInit {
   routerSub: Subscription;
   constructor(
     private router: Router,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
     this.isDev = !environment.production;
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
 
-    this.facilityListSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {
+    this.facilityListSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
       this.setFacilityList(val.map(facility => ({ ...facility })));
     });
 
-    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
     })
     this.sidebarOpenSub = this.dataEvaluationService.sidebarOpen.subscribe(val => {

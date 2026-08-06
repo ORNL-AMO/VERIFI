@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -20,7 +20,8 @@ export class CustomDatabaseComponent implements OnInit {
   account: IdbAccount;
   accountSub: Subscription;
   constructor(
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private injector: Injector
 
   ) { }
 
@@ -28,7 +29,7 @@ export class CustomDatabaseComponent implements OnInit {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
   }

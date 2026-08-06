@@ -1,5 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Component } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from '../loading/loading.service';
@@ -39,12 +39,13 @@ export class ManageAccountsComponent {
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
     private accountWorkspaceService: AccountWorkspaceService,
     private applicationLifecycleService: ApplicationLifecycleService,
-    private databaseResetService: DatabaseResetService
+    private databaseResetService: DatabaseResetService,
+    private injector: Injector
   ) {
   }
 
   ngOnInit() {
-    this.allAccountsSub = toObservable(this.applicationLifecycleService.accountCatalog).subscribe(accounts => {
+    this.allAccountsSub = toObservable(this.applicationLifecycleService.accountCatalog, { injector: this.injector }).subscribe(accounts => {
       this.accounts = [...accounts];
       this.accountErrors = this.accounts.map(account => { return undefined });
     });

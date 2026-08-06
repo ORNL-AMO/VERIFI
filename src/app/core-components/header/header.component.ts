@@ -2,7 +2,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { DatabaseResetService } from 'src/app/application-lifecycle/database-reset.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -67,17 +67,18 @@ export class HeaderComponent implements OnInit {
     private automaticBackupService: AutomaticBackupsService,
     private databaseResetService: DatabaseResetService,
     private applicationLifecycleService: ApplicationLifecycleService,
-    private accountWorkspaceStore: AccountWorkspaceStore
+    private accountWorkspaceStore: AccountWorkspaceStore,
+    private injector: Injector
 
   ) {
   }
 
   ngOnInit() {
-    this.allAccountsSub = toObservable(this.applicationLifecycleService.accountCatalog).subscribe(allAccounts => {
+    this.allAccountsSub = toObservable(this.applicationLifecycleService.accountCatalog, { injector: this.injector }).subscribe(allAccounts => {
       this.accountList = allAccounts.filter(account => { return !account.deleteAccount });
     });
 
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(selectedAccount => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(selectedAccount => {
       this.resetDatabase = false;
       this.activeAccount = selectedAccount;
       this.cd.detectChanges();

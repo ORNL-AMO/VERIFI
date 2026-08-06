@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -26,12 +26,13 @@ export class FacilityReportsDataCheckComponent {
 
   constructor(
     private analysisDbService: AnalysisDbService,
-    private regressionModelsService: RegressionModelsService
+    private regressionModelsService: RegressionModelsService,
+    private injector: Injector
 
   ) { }
 
   ngOnInit(): void {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];

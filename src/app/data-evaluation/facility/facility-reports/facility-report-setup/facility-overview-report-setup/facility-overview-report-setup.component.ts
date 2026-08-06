@@ -1,7 +1,7 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -31,17 +31,18 @@ export class FacilityOverviewReportSetupComponent {
   invalidDateRange: boolean = false;
   constructor(
     private facilityReportsDbService: FacilityReportsDbService,
-    private calanderizationService: CalanderizationService
+    private calanderizationService: CalanderizationService,
+    private injector: Injector
 
   ) {
 
   }
 
   ngOnInit() {
-    this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
         this.reportSettings = this.facilityReport.dataOverviewReportSettings;

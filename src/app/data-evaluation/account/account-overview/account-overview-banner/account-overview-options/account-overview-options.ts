@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -35,11 +35,12 @@ export class AccountOverviewOptions {
   displayMenu: boolean = true;
   constructor(
     private accountOverviewService: AccountOverviewService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private injector: Injector
   ) { }
 
   ngOnInit() {
-    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
       this.setYears();
     });
