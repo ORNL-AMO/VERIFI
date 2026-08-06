@@ -9,6 +9,8 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { FacilityModelingReportAdapter } from './facility-modeling-report.adapter';
+import { FacilityModelingReportPptAdapter } from './facility-modeling-report-ppt.adapter';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-modeling-report-results',
@@ -30,6 +32,8 @@ export class FacilityModelingReportResultsComponent {
     private regressionModelsService: RegressionModelsService,
     private facilityModelingReportAdapter: FacilityModelingReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
+    private facilityModelingReportPptAdapter: FacilityModelingReportPptAdapter,
+    private pptReportService: PptReportService,
     private injector: Injector
   ) { }
 
@@ -80,7 +84,7 @@ export class FacilityModelingReportResultsComponent {
     });
   }
 
-   async onExportPdf() {
+  async onExportPdf() {
     if (!this.facilityReport || this.isExportingPdf) {
       return;
     }
@@ -97,5 +101,13 @@ export class FacilityModelingReportResultsComponent {
     } finally {
       this.isExportingPdf = false;
     }
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.facilityModelingReportPptAdapter.buildDocument({
+      report: this.facilityReport,
+      executiveSummaryItems: this.executiveSummaryItems,
+    });
+    await this.pptReportService.buildPowerpoint(document, `Modeling Report - ${this.facilityReport.name}.pptx`);
   }
 }
