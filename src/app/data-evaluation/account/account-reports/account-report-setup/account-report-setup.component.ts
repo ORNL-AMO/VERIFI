@@ -4,8 +4,6 @@ import { Component, computed, effect, inject, signal, Signal, WritableSignal } f
 import { FormGroup } from '@angular/forms';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -29,8 +27,6 @@ export class AccountReportSetupComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

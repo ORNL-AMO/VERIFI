@@ -3,25 +3,18 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { FacilityOverviewReportAdapter } from './facility-overview-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
@@ -59,19 +52,14 @@ export class FacilityOverviewReportResultsComponent {
 
   @ViewChildren(FacilitySectionReportComponent) sectionReports !: QueryList<FacilitySectionReportComponent>;
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private customFuelDbService: CustomFuelDbService,
+  constructor(
     private eGridService: EGridService,
-    private accountDbService: AccountdbService,
     private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService,
     private facilityOverviewReportAdapter: FacilityOverviewReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private pptReportService: PptReportService,
     private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter
+
   ) {
 
   }
@@ -205,7 +193,7 @@ export class FacilityOverviewReportResultsComponent {
     };
   }
 
-  
+
   async downloadPpt(): Promise<void> {
     const document = this.facilityOverviewReportPptAdapter.buildDocument({
       report: this.facilityReport,

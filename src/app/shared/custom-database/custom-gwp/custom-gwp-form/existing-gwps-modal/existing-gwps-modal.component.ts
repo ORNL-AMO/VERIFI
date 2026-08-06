@@ -1,6 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { AssessmentReportVersion } from 'src/app/models/idbModels/account';
 
@@ -19,9 +18,6 @@ export class ExistingGwpsModalComponent {
   displayModal: boolean = false;
 
   assessmentReportVersion: AssessmentReportVersion = 'AR6';
-  constructor(private accountDbService: AccountdbService) {
-
-  }
 
   ngOnInit() {
     this.assessmentReportVersion = this.accountWorkspaceStore.account().assessmentReportVersion;

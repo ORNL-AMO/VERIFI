@@ -5,15 +5,11 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getNewIdbAccountAnalysisItem, IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -33,12 +29,12 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   hasWater: boolean;
   hasEnergy: boolean;
   analysisType: 'Energy' | 'Water';
-  constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private accountDbService: AccountdbService,
-    private analyticsService: AnalyticsService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private router: Router,
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private toastNotificationService: ToastNotificationsService,
+    private analyticsService: AnalyticsService
+  ) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {

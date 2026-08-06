@@ -1,7 +1,6 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
@@ -25,8 +24,8 @@ export class AnnualSavingsGraphComponent {
   @ViewChild('savingsGraph', { static: false }) savingsGraph: ElementRef;
 
   constructor(
-    private plotlyService: PlotlyService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
+    private plotlyService: PlotlyService
+
   ) { }
 
   ngAfterViewInit() {

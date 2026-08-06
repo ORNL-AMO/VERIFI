@@ -4,15 +4,11 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CostSavingsReportSettings, IdbFacilityReport, MonthlyGroupData, YearGroupData } from 'src/app/models/idbModels/facilityReport';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
@@ -20,9 +16,6 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { convertConsumptionRate, getYearsArray } from 'src/app/shared/sharedHelperFunctions';
 import { FacilityCostSavingsReportResults } from 'src/app/calculations/cost-savings-report-calculations/facilityCostSavingsReportResults';
@@ -76,14 +69,8 @@ export class FacilityCostSavingsReportResultsComponent {
   monthlyEnergySavingsTable: MonthlyGroupData = {};
 
   constructor(
-    private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private accountDbService: AccountdbService
+    private analysisDbService: AnalysisDbService
+
   ) { }
 
   ngOnInit() {
@@ -180,7 +167,7 @@ export class FacilityCostSavingsReportResultsComponent {
       };
       worker.postMessage(workerMessage);
     } else {
-      // Web Workers are not supported in this environment.  
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.selectedAnalysisItem?.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.selectedAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, true);
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;

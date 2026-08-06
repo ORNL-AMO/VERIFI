@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AccountAnalysisService } from '../../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -29,9 +27,10 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   key: string;
   accountSub: Subscription;
 
-  constructor(private analysisService: AnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
-    private accountAnalysisService: AccountAnalysisService) { }
+  constructor(
+    private analysisService: AnalysisService,
+    private accountAnalysisService: AccountAnalysisService
+  ) { }
 
   ngOnInit(): void {
     this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();

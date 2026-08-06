@@ -7,8 +7,6 @@ import { filter, map, startWith } from 'rxjs';
 import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -30,9 +28,7 @@ export class AnalysisBannerComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   url: Signal<string> = toSignal(

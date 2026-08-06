@@ -4,7 +4,6 @@ import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -29,9 +28,10 @@ export class AccountReportAnalysisSelectionComponent {
   filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
   calanderizedMeterSub: Subscription;
 
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService,
+  constructor(
     private router: Router,
-    private calanderizationService: CalanderizationService) {
+    private calanderizationService: CalanderizationService
+  ) {
   }
 
   ngOnInit() {

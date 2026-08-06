@@ -1,4 +1,5 @@
 import { firstValueFrom, of } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { AnalysisDbService } from './analysis-db.service';
@@ -16,14 +17,11 @@ describe('AnalysisDbService', () => {
       add: vi.fn((_storeName: string, item: IdbAnalysisItem) => of(item)),
       update: vi.fn((_storeName: string, item: IdbAnalysisItem) => of(item))
     };
-    service = new AnalysisDbService(
+    service = TestBed.runInInjectionContext(() => new AnalysisDbService(
       dbService as any,
       {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
       new IndexedDbAccessService(dbService as any)
-    );
+    ));
   });
 
   it('omits a legacy calculated report year when adding or updating an analysis item', async () => {

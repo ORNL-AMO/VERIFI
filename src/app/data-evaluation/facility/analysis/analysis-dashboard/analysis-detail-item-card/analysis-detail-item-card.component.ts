@@ -1,14 +1,10 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisGroupItem, AnalysisService } from '../../analysis.service';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 
 @Component({
   selector: 'app-analysis-detail-item-card',
@@ -42,11 +38,9 @@ export class AnalysisDetailItemCardComponent {
   displayCreateReportModal: boolean = false;
   isBanked: boolean;
 
-  constructor(private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, 
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService,
+  constructor(
+    private analysisService: AnalysisService
+
   ) { }
 
   ngOnChanges(): void {

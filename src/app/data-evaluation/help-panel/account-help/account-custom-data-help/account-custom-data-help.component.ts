@@ -1,6 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -14,7 +13,6 @@ export class AccountCustomDataHelpComponent {
 
     account: IdbAccount;
 
-    constructor(private accountDbService: AccountdbService) { }
 
     ngOnInit(): void {
         this.account = this.accountWorkspaceStore.account();

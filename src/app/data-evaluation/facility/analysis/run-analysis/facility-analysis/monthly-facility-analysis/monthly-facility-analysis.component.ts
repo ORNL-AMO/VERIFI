@@ -2,8 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -37,9 +35,10 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   key: string;
   facilitySub: Subscription;
 
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private sharedDataService: SharedDataService) { }
+  constructor(
+    private analysisService: AnalysisService,
+    private sharedDataService: SharedDataService
+  ) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();

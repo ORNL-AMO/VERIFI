@@ -2,26 +2,18 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnalysisService } from '../../analysis.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
@@ -37,15 +29,7 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
 })
 export class FacilityAnalysisComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly analysisDbService = inject(AnalysisDbService);
-  private readonly facilityDbService = inject(FacilitydbService);
   private readonly analysisService = inject(AnalysisService);
-  private readonly predictorDbService = inject(PredictorDbService);
-  private readonly predictorDataDbService = inject(PredictorDataDbService);
-  private readonly utilityMeterDbService = inject(UtilityMeterdbService);
-  private readonly utilityMeterDataDbService = inject(UtilityMeterDatadbService);
-  private readonly accountDbService = inject(AccountdbService);
-  private readonly customGWPDbService = inject(CustomGWPDbService);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
   private readonly destroyRef = inject(DestroyRef);
 

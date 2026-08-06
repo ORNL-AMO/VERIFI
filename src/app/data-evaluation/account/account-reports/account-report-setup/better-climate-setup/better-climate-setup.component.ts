@@ -4,9 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -31,11 +29,11 @@ export class BetterClimateSetupComponent {
   reportYears: Array<number>;
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   initiativeNotes: Array<{year: number, note: string}>;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
+  constructor(
+    private accountReportDbService: AccountReportDbService,
     private calanderizationService: CalanderizationService,
-    private accountReportsService: AccountReportsService) {
+    private accountReportsService: AccountReportsService
+  ) {
   }
 
 

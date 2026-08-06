@@ -7,14 +7,7 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { FacilitySavingsReport } from 'src/app/calculations/savings-report-calculations/facilitySavingsReport';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -80,21 +73,15 @@ export class FacilitySavingsReportResultsComponent {
   @ViewChildren('groupTrailing12MonthSavingsGraph') groupTrailing12MonthSavingsGraphs?: QueryList<RollingEnergySavingsGraphComponent>;
 
   constructor(
-    private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
     private sharedDataService: SharedDataService,
-    private facilityReportsDbService: FacilityReportsDbService,
     private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService,
     private exportReportPdfService: ExportReportPdfService,
     private facilitySavingsReportAdapter: FacilitySavingsReportAdapter,
     private facilitySavingsReportPptAdapter: FacilitySavingsReportPptAdapter,
     private pptReportService: PptReportService
+
   ) { }
 
   ngOnInit(): void {
@@ -155,7 +142,7 @@ export class FacilitySavingsReportResultsComponent {
       };
       this.worker.postMessage(workerMessage);
     } else {
-      // Web Workers are not supported in this environment.  
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let facilitySavingsReport: FacilitySavingsReport = new FacilitySavingsReport(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, accountPredictors, this.facilityReport);
       this.annualAnalysisSummaries = facilitySavingsReport.annualAnalysisSummaries;

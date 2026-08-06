@@ -6,19 +6,13 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
@@ -40,17 +34,14 @@ export class CreateReportModalComponent {
   inAccount: boolean;
   account: IdbAccount;
   accountSub: Subscription;
-  constructor(private sharedDataService: SharedDataService, private router: Router,
+  constructor(
+    private sharedDataService: SharedDataService,
+    private router: Router,
     private accountReportDbService: AccountReportDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
     private accountOverviewService: AccountOverviewService,
     private toastNotificationService: ToastNotificationsService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private facilityOverviewService: FacilityOverviewService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
+    private facilityOverviewService: FacilityOverviewService
+  ) {
 
   }
 

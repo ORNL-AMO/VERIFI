@@ -4,9 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -34,11 +32,11 @@ export class BetterPlantsSetupComponent {
   baselineYearWarning: string;
   analysisItemIdSub: Subscription;
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
+    private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService
+  ) {
   }
 
   ngOnInit() {
@@ -63,7 +61,7 @@ export class BetterPlantsSetupComponent {
     if (this.analysisItemIdSub) {
       this.analysisItemIdSub.unsubscribe();
     }
-    
+
     this.analysisItemIdSub = this.betterPlantsReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
       await this.save();
     })

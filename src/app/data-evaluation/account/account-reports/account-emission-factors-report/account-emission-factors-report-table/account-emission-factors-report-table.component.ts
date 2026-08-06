@@ -3,9 +3,7 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { Component, Input, inject } from '@angular/core';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
 import { EmissionElectricity, EmissionOthers } from 'src/app/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
+import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -33,9 +31,9 @@ export class AccountEmissionFactorsReportTableComponent {
   customFuels: Array<IdbCustomFuel>;
   emissionReportData: Array<EmissionFactorsReportData> = [];
 
-  constructor(private customFuelDbService: CustomFuelDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
+  constructor(
     private eGridService: EGridService
+
   ) { }
 
   ngOnInit(): void {

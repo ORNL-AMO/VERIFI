@@ -7,7 +7,6 @@ import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 export interface FacilitySavingsReportPptInput {
     facility: IdbFacility;
@@ -29,7 +28,6 @@ export interface FacilitySavingsReportPptInput {
 export class FacilitySavingsReportPptAdapter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     analysisTableColumns: AnalysisTableColumns;
     analysisItem: IdbAnalysisItem;

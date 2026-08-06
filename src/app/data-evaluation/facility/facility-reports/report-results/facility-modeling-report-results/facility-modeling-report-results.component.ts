@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -27,12 +25,12 @@ export class FacilityModelingReportResultsComponent {
   analysisItem: IdbAnalysisItem;
   isExportingPdf: boolean = false;
 
-  constructor(private analysisDbService: AnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService,
+  constructor(
+    private analysisDbService: AnalysisDbService,
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService,
     private facilityModelingReportAdapter: FacilityModelingReportAdapter,
-    private exportReportPdfService: ExportReportPdfService) { }
+    private exportReportPdfService: ExportReportPdfService
+  ) { }
 
   ngOnInit(): void {
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(report => {

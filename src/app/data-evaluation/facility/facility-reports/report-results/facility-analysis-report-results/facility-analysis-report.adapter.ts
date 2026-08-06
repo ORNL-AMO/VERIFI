@@ -9,7 +9,6 @@ import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnal
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { AnalysisGroupItem, AnalysisService } from "../../../analysis/analysis.service";
 import { RegressionNumberPipe } from "src/app/shared/helper-pipes/regression-number.pipe";
-import { UtilityMeterGroupdbService } from "src/app/indexedDB/utilityMeterGroup-db.service";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityAnalysisReportAdapter {
@@ -18,7 +17,6 @@ export class FacilityAnalysisReportAdapter {
     private customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
     private analysisService = inject(AnalysisService);
     private regressionNumberPipe = inject(RegressionNumberPipe);
-    private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     report: IdbFacilityReport;
     reportSettings: AnalysisReportSettings;

@@ -4,13 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -48,14 +42,10 @@ export class FacilityReportAnalysisSelectionComponent {
   @Output()
   filteredItemsChange: EventEmitter<Array<IdbAnalysisItem>> = new EventEmitter<Array<IdbAnalysisItem>>();
 
-  constructor(private analysisDbService: AnalysisDbService,
-    private router: Router,
-    private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService) { }
+  constructor(
+    private analysisDbService: AnalysisDbService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
@@ -65,7 +55,7 @@ export class FacilityReportAnalysisSelectionComponent {
       }
       this.applyFilters();
     });
-    
+
     if (this.selectedAnalysisItem) {
       this.checkModelData();
     }

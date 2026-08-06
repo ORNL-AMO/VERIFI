@@ -6,13 +6,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { MonthlyData } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -62,14 +56,10 @@ export class FacilityCostSavingsReportSetupComponent {
   groupMeterCalendarizedData: GroupMeterCalendarizedMap = {};
   missingCostData: { [meterId: string]: Date[] } = {};
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) {
+  constructor(
+    private facilityReportsDbService: FacilityReportsDbService,
+    private calanderizationService: CalanderizationService
+  ) {
   }
 
   ngOnInit() {

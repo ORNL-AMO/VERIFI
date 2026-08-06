@@ -5,13 +5,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { filter, map, startWith } from 'rxjs';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountReportErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { emptyAccountReportErrors } from 'src/app/calculations/status-check-calculations/validation/accountReportValidation';
 import { AccountReportStatusCheck } from 'src/app/calculations/status-check-calculations/accountReportStatusCheck';
 
 @Component({
@@ -25,8 +21,6 @@ export class AccountReportsBannerComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   readonly selectedReport: Signal<IdbAccountReport> = this.accountWorkspaceStore.selectedAccountReport;

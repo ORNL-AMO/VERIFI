@@ -2,14 +2,9 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Observable, firstValueFrom } from 'rxjs';
-import { AccountdbService } from './account-db.service';
-import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '../models/analysis';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { IdbAccount } from '../models/idbModels/account';
-import { IdbFacility } from '../models/idbModels/facility';
-import { PredictorDbService } from './predictor-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { getNewAnalysisGroup, IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IndexedDbAccessService } from './indexed-db-access.service';
@@ -20,11 +15,11 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 export class AnalysisDbService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private dbService: NgxIndexedDBService,
-    private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private predictorDbService: PredictorDbService,
+  constructor(
+    private dbService: NgxIndexedDBService,
     private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService) {
+    private indexedDbAccess: IndexedDbAccessService
+  ) {
   }
 
   getAll(): Observable<Array<IdbAnalysisItem>> {
@@ -118,7 +113,7 @@ export class AnalysisDbService {
                 group.regressionConstant = undefined;
                 group.dateModelsGenerated = undefined;
               } else {
-                //if not used in selected model. 
+                //if not used in selected model.
                 //Remove models using predictor and keep selection.
                 group.models = group.models.filter(model => {
                   return model.predictorVariables.find(modelVariable => {

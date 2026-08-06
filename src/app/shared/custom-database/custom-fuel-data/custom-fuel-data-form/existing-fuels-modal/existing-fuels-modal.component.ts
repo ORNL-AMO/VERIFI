@@ -1,6 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
@@ -35,9 +34,6 @@ export class ExistingFuelsModalComponent {
   selectedFuelTypeOptions: Array<FuelTypeOption>;
   displayModal: boolean = false;
   selectedAccount: IdbAccount;
-  constructor(private accountDbService: AccountdbService) {
-
-  }
 
   ngOnInit() {
     if (this.isMobile) {

@@ -2,7 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -20,8 +19,9 @@ export class CustomDatabaseComponent implements OnInit {
 
   account: IdbAccount;
   accountSub: Subscription;
-  constructor(private sharedDataService: SharedDataService,
-    private accountDbService: AccountdbService
+  constructor(
+    private sharedDataService: SharedDataService
+
   ) { }
 
   ngOnInit(): void {

@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../../account-analysis.service';
@@ -33,9 +31,11 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   key: string;
   accountSub: Subscription;
 
-  constructor(private analysisService: AnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
-    private accountAnalysisService: AccountAnalysisService, private sharedDataService: SharedDataService) { }
+  constructor(
+    private analysisService: AnalysisService,
+    private accountAnalysisService: AccountAnalysisService,
+    private sharedDataService: SharedDataService
+  ) { }
 
   ngOnInit(): void {
     this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
@@ -65,7 +65,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
     this.itemsPerPageSub.unsubscribe();
     this.accountSub.unsubscribe();
   }
-  
+
   setDataDisplay(display: 'table' | 'graph') {
     this.analysisDisplay = display;
     this.analysisService.getDisplaySubject(this.key, 'graph').next(this.analysisDisplay);

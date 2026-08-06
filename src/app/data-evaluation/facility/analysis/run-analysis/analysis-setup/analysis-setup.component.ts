@@ -3,12 +3,9 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { AnalysisService } from '../../analysis.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { debounceTime, firstValueFrom } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -33,12 +30,9 @@ export class AnalysisSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly fb = inject(FormBuilder);
-  private readonly facilityDbService = inject(FacilitydbService);
   private readonly analysisDbService = inject(AnalysisDbService);
   private readonly analysisService = inject(AnalysisService);
   private readonly router = inject(Router);
-  private readonly dbChangesService = inject(DbChangesService);
-  private readonly accountDbService = inject(AccountdbService);
   private readonly calanderizationService = inject(CalanderizationService);
   private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly activatedRoute = inject(ActivatedRoute);

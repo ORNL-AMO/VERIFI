@@ -4,7 +4,6 @@ import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -48,8 +47,10 @@ export class GroupAnalysisReportComponent {
   @ViewChild(GroupAnnualAnalysisReportComponent) groupAnnualAnalysisReportComponent?: GroupAnnualAnalysisReportComponent;
   @ViewChild(GroupMonthlyAnalysisReportComponent) groupMonthlyAnalysisReportComponent?: GroupMonthlyAnalysisReportComponent;
 
-  constructor(private analysisService: AnalysisService, private dataEvaluationService: DataEvaluationService,
-    private facilityReportsDbService: FacilityReportsDbService
+  constructor(
+    private analysisService: AnalysisService,
+    private dataEvaluationService: DataEvaluationService
+
   ) {
   }
 

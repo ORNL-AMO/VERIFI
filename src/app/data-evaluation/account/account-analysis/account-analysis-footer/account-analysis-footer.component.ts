@@ -1,20 +1,15 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, computed, inject, OnInit, Signal } from '@angular/core';
-import { filter, map, startWith, Subscription } from 'rxjs';
+import { Component, computed, inject, Signal } from '@angular/core';
+import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 
 @Component({
@@ -27,11 +22,8 @@ export class AccountAnalysisFooterComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   private router: Router = inject(Router);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountWorkspaceService = inject(AccountWorkspaceService);
 
   helpWidth: Signal<number> = toSignal(this.dataEvaluationService.helpWidthBs);

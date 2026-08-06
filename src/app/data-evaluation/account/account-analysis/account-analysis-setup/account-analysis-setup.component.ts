@@ -3,26 +3,20 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { debounceTime, firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisType } from 'src/app/models/analysis';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -42,19 +36,13 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
 export class AccountAnalysisSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly accountDbService = inject(AccountdbService);
   private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly router = inject(Router);
-  private readonly dbChangesService = inject(DbChangesService);
   private readonly analysisDbService = inject(AnalysisDbService);
   private readonly calendarizationService = inject(CalanderizationService);
-  private readonly accountReportDbService = inject(AccountReportDbService);
   private readonly accountAnalysisService = inject(AccountAnalysisService);
-  private readonly facilityDbService = inject(FacilitydbService);
   private readonly loadingService = inject(LoadingService);
   private readonly toastNotificationService = inject(ToastNotificationsService);
-  private readonly utiltiyMeterGroupDbService = inject(UtilityMeterGroupdbService);
-  private readonly predictorDbService = inject(PredictorDbService);
   private readonly fb = inject(FormBuilder);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 

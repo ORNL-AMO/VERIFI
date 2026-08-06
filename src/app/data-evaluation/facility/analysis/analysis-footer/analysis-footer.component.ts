@@ -3,10 +3,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, inject, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -27,10 +24,7 @@ export class AnalysisFooterComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private dataEvaluationService: DataEvaluationService = inject(DataEvaluationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

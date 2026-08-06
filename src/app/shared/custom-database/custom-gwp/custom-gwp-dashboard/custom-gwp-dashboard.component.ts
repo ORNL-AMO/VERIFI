@@ -4,9 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -27,10 +25,11 @@ export class CustomGwpDashboardComponent {
   selectedAccountSub: Subscription;
   itemToDelete: IdbCustomGWP;
   deleteGWPInUse: boolean = false;
-  constructor(private customGWPDbService: CustomGWPDbService, private router: Router,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private activatedRoute: ActivatedRoute) { }
+  constructor(
+    private customGWPDbService: CustomGWPDbService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
     this.customGWPsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customGWPs()])).subscribe(val => {

@@ -5,12 +5,8 @@ import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -21,7 +17,6 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
@@ -35,14 +30,9 @@ export class GroupAnalysisOptionsComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private router: Router = inject(Router);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
 
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup, { initialValue: null });
   analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;

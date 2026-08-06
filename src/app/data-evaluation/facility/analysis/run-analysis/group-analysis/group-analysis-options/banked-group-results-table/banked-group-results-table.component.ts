@@ -7,13 +7,7 @@ import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysi
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -48,14 +42,10 @@ export class BankedGroupResultsTableComponent {
   };
   modelYear: number;
   bankedSavings: number;
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private predictorDbService: PredictorDbService,
-    private accountDbService: AccountdbService
+  constructor(
+    private analysisService: AnalysisService,
+    private analysisDbService: AnalysisDbService
+
   ) {
 
   }
@@ -124,7 +114,7 @@ export class BankedGroupResultsTableComponent {
         reportYear: this.selectedGroup.bankedAnalysisYear
       });
     } else {
-      // Web Workers are not supported in this environment.     
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.bankedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.bankedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
         this.bankedAnalysisItem,

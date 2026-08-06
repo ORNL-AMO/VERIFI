@@ -4,13 +4,7 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -48,15 +42,9 @@ export class FacilityDataQualityReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
 
   constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictorDbService,
-    private facilityReportDbService: FacilityReportsDbService,
     private calanderizationService: CalanderizationService,
-    private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService,
     private facilityReportsDbService: FacilityReportsDbService
+
   ) { }
 
   ngOnInit() {
@@ -189,7 +177,7 @@ export class FacilityDataQualityReportSetupComponent {
     this.reportSettings.includeMeter = (this.reportSettings.includeMeterStatisticsTable && this.reportSettings.includeMeterConsumptionTimeseriesGraph && this.reportSettings.includeMeterCostTimeseriesGraph && this.reportSettings.includeMeterConsumptionHistogram && this.reportSettings.includeMeterCostHistogram);
     this.save();
   }
-  
+
   onIncludePredictorChange() {
     const checked = this.reportSettings.includePredictors;
     this.reportSettings.includePredictorStatisticsTable = checked;

@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 
 @Component({
@@ -20,8 +18,6 @@ export class AnalysisStatusCheckComponent {
   @Input({ required: true }) type: 'energy' | 'water';
 
   private analysisService = inject(AnalysisService);
-  private analysisDbService = inject(AnalysisDbService);
-  private facilityDbService = inject(FacilitydbService);
   private router = inject(Router);
 
   get groupItems(): Array<AnalysisGroupItem> {

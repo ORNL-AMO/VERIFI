@@ -3,10 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -28,10 +25,9 @@ export class DataOverviewSetupComponent {
   isFormChange: boolean = false;
   reportSetup: DataOverviewReportSetup;
   showWater: boolean;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+  constructor(
+    private accountReportDbService: AccountReportDbService
+  ) {
   }
 
 

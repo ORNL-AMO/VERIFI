@@ -1,7 +1,6 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { Component, ElementRef, Input, Query, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
 
 @Component({
@@ -28,8 +27,9 @@ export class AnnualAnalysisGroupSavingsGraphComponent {
 
   @ViewChild('groupContributionsGraph', { static: false }) groupContributionsGraph: ElementRef;
 
-  constructor(private plotlyService: PlotlyService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
+  constructor(
+    private plotlyService: PlotlyService
+
   ) { }
 
   ngOnInit(): void {

@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
@@ -21,7 +20,6 @@ export class PortfolioInformationTableComponent {
   account: IdbAccount;
   selectedReport: IdbAccountReport;
 
-  constructor(private accountReportDbService: AccountReportDbService) {}
 
   ngOnInit(): void {
     this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();

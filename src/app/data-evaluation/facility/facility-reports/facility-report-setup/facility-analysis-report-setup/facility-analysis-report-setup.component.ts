@@ -3,10 +3,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -42,12 +38,10 @@ export class FacilityAnalysisReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   calanderizedMetersSub: Subscription;
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService) {
+  constructor(
+    private facilityReportsDbService: FacilityReportsDbService,
+    private calanderizationService: CalanderizationService
+  ) {
 
   }
 
@@ -61,7 +55,7 @@ export class FacilityAnalysisReportSetupComponent {
     this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses).subscribe(items => {
       this.analysisItems = [...items];
     });
-    
+
     this.setSelectedAnalysisItem();
 
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
@@ -270,5 +264,5 @@ export class FacilityAnalysisReportSetupComponent {
 
   onFilteredItemsChange(items: Array<IdbAnalysisItem>) {
     this.filteredAnalysisItems = items;
-  } 
+  }
 }

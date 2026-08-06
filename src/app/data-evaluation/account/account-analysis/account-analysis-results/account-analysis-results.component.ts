@@ -2,20 +2,12 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../account-analysis.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -32,15 +24,7 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
 export class AccountAnalysisResultsComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountAnalysisService = inject(AccountAnalysisService);
-  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
-  private readonly accountDbService = inject(AccountdbService);
-  private readonly facilityDbService = inject(FacilitydbService);
-  private readonly predictorDbService = inject(PredictorDbService);
-  private readonly predictorDataDbService = inject(PredictorDataDbService);
-  private readonly analysisDbService = inject(AnalysisDbService);
   private readonly sharedDataService = inject(SharedDataService);
-  private readonly utilityMeterDbService = inject(UtilityMeterdbService);
-  private readonly utilityMeterDataDbService = inject(UtilityMeterDatadbService);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
   private readonly destroyRef = inject(DestroyRef);
 

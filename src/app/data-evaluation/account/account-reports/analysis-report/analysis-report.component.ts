@@ -2,14 +2,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { Router } from '@angular/router';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AccountReportsService } from '../account-reports.service';
@@ -17,7 +13,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ModelingExecutiveSummaryExcelWriter } from '../excel-writer-services/modeling-executive-summary-excel-writer';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisReportAdapter } from './analysis-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 
@@ -39,19 +34,16 @@ export class AnalysisReportComponent {
   generateExcelSub: Subscription;
   analysisItemsSub: Subscription;
   isExportingPdf: boolean = false;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
+  constructor(
     private router: Router,
-    private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
     private dataEvaluationService: DataEvaluationService,
     private accountReportsService: AccountReportsService,
     private loadingService: LoadingService,
     private modelingExecutiveSummaryExcelWriter: ModelingExecutiveSummaryExcelWriter,
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService,
     private analysisReportAdapter: AnalysisReportAdapter,
-    private exportReportPdfService: ExportReportPdfService) { }
+    private exportReportPdfService: ExportReportPdfService
+  ) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {

@@ -3,9 +3,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EMPTY, firstValueFrom, map, startWith, switchMap, tap } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -28,8 +26,6 @@ export class AccountSavingsReportSetupComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private analysisService: AnalysisService = inject(AnalysisService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
 

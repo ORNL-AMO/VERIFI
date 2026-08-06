@@ -3,14 +3,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -42,12 +38,10 @@ export class FacilitySavingsReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
 
   calanderizedMetersSub: Subscription;
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService) {
+  constructor(
+    private facilityReportsDbService: FacilityReportsDbService,
+    private calanderizationService: CalanderizationService
+  ) {
 
   }
 

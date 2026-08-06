@@ -4,11 +4,6 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { DataQualityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -59,14 +54,10 @@ export class FacilityDataQualityReportResultsComponent {
   @ViewChildren('predictorHistogram') predictorHistogram !: QueryList<PredictorHistogramGraphComponent>;
 
   constructor(
-    private facilityReportsDbService: FacilityReportsDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
     private facilityDataQualityReportAdapter: FacilityDataQualityReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private analysisDbService: AnalysisDbService
+
   ) { }
 
   ngOnInit() {

@@ -3,7 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -45,8 +44,9 @@ export class MonthlyFacilityAnalysisReportComponent {
   @ViewChild('monthlyAnalysisGraph') monthlyAnalysisGraph ?: MonthlyAnalysisSummaryGraphComponent;
   @ViewChild('monthlyAnalysisSavingsGraph') monthlyAnalysisSavingsGraph ?: MonthlyAnalysisSummarySavingsGraphComponent;
 
-  constructor(private dataEvaluationService: DataEvaluationService,
-    private facilityReportsDbService: FacilityReportsDbService
+  constructor(
+    private dataEvaluationService: DataEvaluationService
+
   ) { }
 
   ngOnInit() {

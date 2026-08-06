@@ -1,10 +1,9 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { IdbAccount } from '../models/idbModels/account';
-import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
+import { IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({

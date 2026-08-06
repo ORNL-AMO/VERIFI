@@ -8,7 +8,6 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 

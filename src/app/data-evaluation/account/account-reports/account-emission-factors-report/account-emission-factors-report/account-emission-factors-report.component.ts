@@ -2,8 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -25,11 +23,11 @@ export class AccountEmissionFactorsReportComponent {
   account: IdbAccount;
   accountFacilities: Array<IdbFacility> = [];
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
     private dataEvaluationService: DataEvaluationService,
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService
+  ) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -38,7 +36,7 @@ export class AccountEmissionFactorsReportComponent {
     this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
-    } 
+    }
     this.account = this.accountWorkspaceStore.account();
     this.facilityDbService.getAllAccountFacilities(this.account.guid).then(facilities => {
       this.accountFacilities = facilities;

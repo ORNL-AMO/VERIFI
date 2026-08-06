@@ -5,9 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -43,10 +41,8 @@ interface ReportListItem {
 export class AccountReportsDashboardTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private router: Router = inject(Router);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private loadingService: LoadingService = inject(LoadingService);

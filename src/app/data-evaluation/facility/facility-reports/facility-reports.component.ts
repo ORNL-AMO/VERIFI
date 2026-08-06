@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
@@ -20,9 +18,9 @@ export class FacilityReportsComponent {
 
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private router: Router,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()])).subscribe(val => {

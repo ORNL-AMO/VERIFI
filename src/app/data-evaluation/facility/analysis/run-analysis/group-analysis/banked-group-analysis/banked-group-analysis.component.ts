@@ -8,11 +8,6 @@ import { AnalysisService } from '../../../analysis.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -22,7 +17,6 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -49,14 +43,10 @@ export class BankedGroupAnalysisComponent {
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
   };
   analysisReportSettings: AnalysisReportSettings;
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private predictorDbService: PredictorDbService,
-    private accountDbService: AccountdbService
+  constructor(
+    private analysisService: AnalysisService,
+    private analysisDbService: AnalysisDbService
+
   ) {
 
   }
@@ -126,7 +116,7 @@ export class BankedGroupAnalysisComponent {
         reportYear: this.selectedGroup.bankedAnalysisYear
       });
     } else {
-      // Web Workers are not supported in this environment.     
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.bankedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.bankedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
         this.bankedAnalysisItem,

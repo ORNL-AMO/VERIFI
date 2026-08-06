@@ -9,8 +9,6 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
@@ -29,11 +27,11 @@ export class AnalysisReportSetupComponent {
   selectedAnalysisItem: IdbAccountAnalysisItem;
   analysisItemIdSub: Subscription;
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
+    private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService
+  ) {
   }
 
   ngOnInit() {
@@ -58,7 +56,7 @@ export class AnalysisReportSetupComponent {
     if (this.analysisItemIdSub) {
       this.analysisItemIdSub.unsubscribe();
     }
-    
+
     this.analysisItemIdSub = this.analysisReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
       await this.save();
     })

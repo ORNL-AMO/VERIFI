@@ -4,9 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -27,10 +25,11 @@ export class CustomFuelDataDashboardComponent {
   selectedAccountSub: Subscription;
   itemToDelete: IdbCustomFuel;
   deleteFuelInUse: boolean = false;
-  constructor(private customFuelDbService: CustomFuelDbService, private router: Router,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private activatedRoute: ActivatedRoute) { }
+  constructor(
+    private customFuelDbService: CustomFuelDbService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
     this.customFuelsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customFuels()])).subscribe(val => {

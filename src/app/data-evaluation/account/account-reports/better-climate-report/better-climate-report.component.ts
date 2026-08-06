@@ -1,18 +1,12 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { Router } from '@angular/router';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { BetterClimateExcelWriterService } from '../excel-writer-services/better-climate-excel-writer.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -22,7 +16,6 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 @Component({
   selector: 'app-better-climate-report',
@@ -46,18 +39,14 @@ export class BetterClimateReportComponent {
   generateExcelSub: Subscription;
   showTitleForStationary: boolean;
   showTitleForTotal: boolean;
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
     private accountReportsService: AccountReportsService,
-    private router: Router, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private router: Router,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
     private betterClimateExcelWriterService: BetterClimateExcelWriterService,
     private loadingService: LoadingService,
-    private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService) { }
+    private dataEvaluationService: DataEvaluationService
+  ) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {

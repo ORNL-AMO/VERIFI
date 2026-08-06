@@ -4,9 +4,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewAccountCustomGWP, IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
@@ -34,11 +32,12 @@ export class CustomGwpFormComponent {
   displayGWPModal: boolean = false;
   isGWPInUse: boolean = false;
 
-  constructor(private router: Router, private customGWPDbService: CustomGWPDbService,
+  constructor(
+    private router: Router,
+    private customGWPDbService: CustomGWPDbService,
     private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService,
-    private formBuilder: FormBuilder,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private formBuilder: FormBuilder
+  ) {
   }
 
   ngOnInit() {

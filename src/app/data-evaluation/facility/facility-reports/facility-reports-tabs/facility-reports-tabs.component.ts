@@ -3,13 +3,10 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, inject, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -26,9 +23,6 @@ export class FacilityReportsTabsComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private facilityReportsDbService: FacilityReportsDbService = inject(FacilityReportsDbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);

@@ -9,7 +9,6 @@ import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { firstValueFrom } from 'rxjs';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -36,9 +35,16 @@ export class EmissionsDataFormComponent implements OnInit {
   subregionInvalid: string;
   previousSubregion: string;
   selectedAccount: IdbAccount;
-  constructor(private router: Router, private customEmissionsDbService: CustomEmissionsDbService, private accountDbService: AccountdbService,
-    private eGridService: EGridService, private loadingService: LoadingService, private toastNotificationService: ToastNotificationsService,
-    private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService) { }
+  constructor(
+    private router: Router,
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private accountDbService: AccountdbService,
+    private eGridService: EGridService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private activatedRoute: ActivatedRoute,
+    private facilityDbService: FacilitydbService
+  ) { }
 
   ngOnInit(): void {
     this.setYears();
@@ -192,7 +198,7 @@ export class EmissionsDataFormComponent implements OnInit {
       this.router.navigate(['../../'], { relativeTo: this.activatedRoute });
     }
   }
-  
+
   deleteLocationEmissions(index: number) {
     this.editCustomEmissions.locationEmissionRates.splice(index, 1);
   }

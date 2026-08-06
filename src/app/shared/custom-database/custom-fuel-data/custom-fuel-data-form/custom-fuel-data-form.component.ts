@@ -5,7 +5,6 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
@@ -42,11 +41,13 @@ export class CustomFuelDataFormComponent {
   displayFuelModal: boolean = false;
   isFuelInUse: boolean = false;
 
-  constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
+  constructor(
+    private router: Router,
+    private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService,
     private formBuilder: FormBuilder,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService
+  ) {
 
   }
 

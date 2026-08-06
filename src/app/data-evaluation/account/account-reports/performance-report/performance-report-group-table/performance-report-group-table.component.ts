@@ -3,7 +3,6 @@ import { Component, Input, inject } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -32,9 +31,6 @@ export class PerformanceReportGroupTableComponent {
   orderByDirection: 'asc' | 'desc' = 'asc';
   units: string;
   numberOfData: number = 0;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
-
-  }
 
   ngOnInit() {
     if (this.selectedAnalysisItem.analysisCategory == 'energy') {
@@ -84,7 +80,7 @@ export class PerformanceReportGroupTableComponent {
     }
   }
 
-  
+
   setNumberOfData() {
     this.numberOfData = 0;
     if (this.performanceReportSetup.includeActual) {

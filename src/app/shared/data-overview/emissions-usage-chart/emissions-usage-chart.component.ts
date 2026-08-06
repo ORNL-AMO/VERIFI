@@ -2,7 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import * as _ from 'lodash';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData, AnnualSourceDataItem } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
@@ -27,8 +26,10 @@ export class EmissionsUsageChartComponent {
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
   selectedFacility: IdbFacility;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private plotlyService: PlotlyService,
+    private facilityOverviewService: FacilityOverviewService
+  ) { }
 
   ngOnInit(): void {
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];

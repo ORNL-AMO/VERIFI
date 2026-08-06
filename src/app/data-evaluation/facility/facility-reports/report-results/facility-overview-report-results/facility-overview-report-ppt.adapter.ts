@@ -6,7 +6,6 @@ import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec, PptChartSeries } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IUseAndCost, UseAndCost, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityColors } from 'src/app/shared/utilityColors';
@@ -29,7 +28,6 @@ export interface FacilityOverviewReportPptInput {
 export class FacilityOverviewReportPptAdapter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     reportSettings: DataOverviewFacilityReportSettings;
     facility: IdbFacility;

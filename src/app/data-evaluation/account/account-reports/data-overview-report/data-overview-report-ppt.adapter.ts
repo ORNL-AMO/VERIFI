@@ -5,7 +5,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { ChartSlide, getPptAxisSpec, ImageSlide, PptChartSeries, PptSlide, TableHeaderCell, TableSlide, TitleSlide } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { DataOverviewAccount, DataOverviewFacility } from './data-overview-report.component';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -41,7 +40,6 @@ export interface DataOverviewReportPptInput {
 export class DataOverviewReportPptAdapter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
     naicsDisplayPipe = inject(NaicsDisplayPipe);
 
     account: IdbAccount;

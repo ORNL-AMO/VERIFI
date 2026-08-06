@@ -6,20 +6,13 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -46,13 +39,12 @@ export class AnalysisDashboardComponent implements OnInit {
   showComparisonDetails: boolean = false;
   analysisItemsSub: Subscription;
 
-  constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private analyticsService: AnalyticsService,
-    private predictorDbService: PredictorDbService) { }
+  constructor(
+    private router: Router,
+    private analysisDbService: AnalysisDbService,
+    private toastNotificationService: ToastNotificationsService,
+    private analyticsService: AnalyticsService
+  ) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {

@@ -6,8 +6,6 @@ import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../../account-reports.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -31,11 +29,11 @@ export class PerformanceSetupComponent {
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   analysisItemIdSub: Subscription;
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
+    private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private accountAnalysisDbService: AccountAnalysisDbService
+  ) {
   }
 
   ngOnInit() {
@@ -60,7 +58,7 @@ export class PerformanceSetupComponent {
     if (this.analysisItemIdSub) {
       this.analysisItemIdSub.unsubscribe();
     }
-    
+
     this.analysisItemIdSub = this.performanceReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
       await this.save();
     })

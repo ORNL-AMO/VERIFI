@@ -9,7 +9,6 @@ import { getYearsWithFullDataAccount } from 'src/app/calculations/shared-calcula
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -40,7 +39,6 @@ export class AccountAnalysisDetailsTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private router: Router = inject(Router);

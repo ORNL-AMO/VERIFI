@@ -3,7 +3,6 @@ import { Component, Input, inject } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -34,9 +33,6 @@ export class TopPerformersTableComponent {
   valueLabel: 'Savings' | 'Contribution' | 'Production';
   orderDataField: string = 'order';
   orderByDirection: 'asc' | 'desc' = 'asc';
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
-
-  }
 
   ngOnInit() {
     if (this.chartDataOption == 'contribution' || this.chartDataOption == 'changeInContribution') {

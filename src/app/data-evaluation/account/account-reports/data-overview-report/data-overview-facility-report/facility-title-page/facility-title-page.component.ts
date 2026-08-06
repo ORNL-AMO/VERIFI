@@ -1,6 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -17,9 +16,6 @@ export class FacilityTitlePageComponent {
 
   dateRange: { startDate: Date, endDate: Date };
   currentDate: Date = new Date();
-  constructor(private accountReportDbService: AccountReportDbService) {
-
-  }
 
   ngOnInit() {
     let report: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();

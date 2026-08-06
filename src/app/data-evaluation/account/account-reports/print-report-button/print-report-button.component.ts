@@ -2,7 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
@@ -31,9 +30,10 @@ export class PrintReportButtonComponent {
   @Output()
   exportPdf: EventEmitter<void> = new EventEmitter<void>();
 
-  constructor(private accountReportsService: AccountReportsService,
-    private accountReportDbService: AccountReportDbService,
-    private dataEvaluationService: DataEvaluationService) {
+  constructor(
+    private accountReportsService: AccountReportsService,
+    private dataEvaluationService: DataEvaluationService
+  ) {
 
   }
 

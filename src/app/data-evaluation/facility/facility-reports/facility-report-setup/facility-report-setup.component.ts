@@ -2,11 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -26,10 +22,9 @@ export class FacilityReportSetupComponent {
   reportName: string;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
-  constructor(private facilityReportDbService: FacilityReportsDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService
+  constructor(
+    private facilityReportDbService: FacilityReportsDbService
+
   ) { }
 
   ngOnInit() {

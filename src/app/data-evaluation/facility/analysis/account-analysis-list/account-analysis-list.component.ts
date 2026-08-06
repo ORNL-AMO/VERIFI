@@ -1,11 +1,8 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisService } from '../analysis.service';
-import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -20,8 +17,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class AccountAnalysisListComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private analysisService: AnalysisService = inject(AnalysisService);
@@ -43,12 +38,12 @@ export class AccountAnalysisListComponent {
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
-  
+
   canReturnToAccount: Signal<boolean> = computed(() => {
     const analysisItem = this.selectedAccountAnalysisItem();
     return analysisItem !== undefined;
   })
-  
+
   setOrderDataField(str: string) {
     this.orderDataField = str;
   }

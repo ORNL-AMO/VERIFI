@@ -5,11 +5,6 @@ import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -33,14 +28,11 @@ export class AccountReportsDataCheckComponent {
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityAnalysisItemsSub: Subscription;
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
-    private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
-    private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService) { }
+    private regressionModelsService: RegressionModelsService
+  ) { }
 
   ngOnInit(): void {
     this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();

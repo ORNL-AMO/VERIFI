@@ -3,17 +3,13 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, EmissionFactorsReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
@@ -42,12 +38,10 @@ export class FacilityEmissionFactorsReportResultsComponent {
   emissionDataElectricity: Array<EmissionElectricity> = [];
   emissionData: Array<EmissionOthers> = [];
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
+  constructor(
     private dataEvaluationService: DataEvaluationService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService,
-    private eGridService: EGridService) {
+    private eGridService: EGridService
+  ) {
   }
 
   ngOnInit() {

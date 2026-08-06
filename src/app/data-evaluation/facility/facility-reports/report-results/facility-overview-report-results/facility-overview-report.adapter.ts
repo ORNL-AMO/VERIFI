@@ -6,7 +6,6 @@ import { BaseSection, ChartSection, HeadingSection, TableHeaderCell, TableSectio
 import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { FacilityOverviewData, FacilityOverviewMeter } from "src/app/calculations/dashboard-calculations/facilityOverviewClass";
-import { UtilityMeterGroupdbService } from "src/app/indexedDB/utilityMeterGroup-db.service";
 import { UtilityUseAndCost } from "src/app/calculations/dashboard-calculations/useAndCostClass";
 import { formatDate } from "@angular/common";
 import { EnergySources, WaterSources } from "src/app/models/constantsAndTypes";
@@ -16,7 +15,6 @@ export class FacilityOverviewReportAdapter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
     private customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     report: IdbFacilityReport;
     reportSettings: DataOverviewFacilityReportSettings;

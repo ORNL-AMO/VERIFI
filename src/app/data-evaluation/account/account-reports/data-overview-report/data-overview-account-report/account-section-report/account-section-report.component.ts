@@ -3,8 +3,6 @@ import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
@@ -67,11 +65,11 @@ export class AccountSectionReportComponent {
   @ViewChild(FacilitiesUsageStackedBarChartComponent) usageStackedBarChart: FacilitiesUsageStackedBarChartComponent;
   @ViewChild(AccountWaterStackedBarChartComponent) accountWaterStackedBarChart: AccountWaterStackedBarChartComponent;
   @ViewChild(MonthlyUtilityUsageLineChartComponent) monthlyUsageLineChart: MonthlyUtilityUsageLineChartComponent;
-  
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountDbService: AccountdbService,
+
+  constructor(
     private accountReportsService: AccountReportsService,
-    private dataEvaluationService: DataEvaluationService) {
+    private dataEvaluationService: DataEvaluationService
+  ) {
   }
 
   ngOnInit() {

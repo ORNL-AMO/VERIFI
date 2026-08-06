@@ -1,11 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -14,7 +10,6 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 
@@ -32,14 +27,9 @@ interface FacilityListItem {
 })
 export class SelectFacilityAnalysisItemsComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
   private accountAnalysisService: AccountAnalysisService = inject(AccountAnalysisService);
-  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountWorkspaceService = inject(AccountWorkspaceService);
 
   selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
@@ -64,7 +54,7 @@ export class SelectFacilityAnalysisItemsComponent {
     if(account && account.guid != analysisItem.accountId){
       return [];
     }
-    
+
     return analysisItem.facilityAnalysisItems.map(facilityItem => {
       const facility = facilities.find(fac => fac.guid === facilityItem.facilityId);
       const facilityStatusCheck = accountStatusCheck.getFacilityStatusCheckByFacilityId(facilityItem.facilityId);

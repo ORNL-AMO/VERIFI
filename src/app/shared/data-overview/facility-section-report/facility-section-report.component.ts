@@ -3,13 +3,11 @@ import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { MetersOverviewStackedLineChartComponent } from '../meters-overview-stacked-line-chart/meters-overview-stacked-line-chart.component';
@@ -65,9 +63,9 @@ export class FacilitySectionReportComponent {
   @ViewChild('annualBarChart') annualBarChart !: UtilitiesUsageChartComponent;
   @ViewChild('monthlyUsageLineChart') monthlyUsageLineChart !: MonthlyUtilityUsageLineChartComponent;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private dataEvaluationService: DataEvaluationService,
-    private facilityReportDbService: FacilityReportsDbService) {
+  constructor(
+    private dataEvaluationService: DataEvaluationService
+  ) {
   }
 
   ngOnInit() {

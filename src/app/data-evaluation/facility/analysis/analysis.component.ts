@@ -1,15 +1,10 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, effect, inject, OnDestroy, Signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisService } from './analysis.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 @Component({
@@ -20,10 +15,7 @@ import { RegressionModelStateService } from 'src/app/account-workspace/regressio
 })
 export class AnalysisComponent implements OnDestroy {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private router: Router = inject(Router);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisService: AnalysisService = inject(AnalysisService);
   private regressionModelState = inject(RegressionModelStateService);
 

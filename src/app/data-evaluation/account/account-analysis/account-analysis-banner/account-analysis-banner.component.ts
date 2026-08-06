@@ -6,7 +6,6 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -22,7 +21,6 @@ export class AccountAnalysisBannerComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
@@ -34,7 +32,7 @@ export class AccountAnalysisBannerComponent {
     const url = this.url();
     return url.includes('dashboard') || (url == '/data-evaluation/account/analysis');
   });
-  
+
   url: Signal<string> = toSignal(
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),

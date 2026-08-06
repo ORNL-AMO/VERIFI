@@ -2,10 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -56,12 +52,6 @@ export class BlendedEnergyRateModalComponent {
   @Output()
   calculatedBlendedRate = new EventEmitter<number>();
 
-  constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService
-  ) { }
 
   ngOnInit() {
     let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];

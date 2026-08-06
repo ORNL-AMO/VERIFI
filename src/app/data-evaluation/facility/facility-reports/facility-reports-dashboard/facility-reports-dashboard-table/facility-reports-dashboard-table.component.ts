@@ -8,18 +8,13 @@ import { firstValueFrom } from 'rxjs';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import * as _ from 'lodash';
 import { FacilityReportStatusCheck } from 'src/app/calculations/status-check-calculations/facilityReportStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -50,17 +45,12 @@ export class FacilityReportsDashboardTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityDbReportsService: FacilityReportsDbService = inject(FacilityReportsDbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private analyticsService: AnalyticsService = inject(AnalyticsService);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private loadingService: LoadingService = inject(LoadingService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   facilityReports: Signal<Array<IdbFacilityReport>> = computed(() => [...this.accountWorkspaceStore.selectedFacilityReports()]);
@@ -88,7 +78,7 @@ export class FacilityReportsDashboardTableComponent {
     const orderByDirection = this.orderByDirection();
     const orderDataField = this.orderDataField();
     const facilityStatusCheck = this.facilityStatusCheck();
-    
+
     let filtered: Array<FacilityReportTableItem> = facilityReports.map(report => {
       const analysisItem = analysisItems.find(item => item.guid === report.analysisItemId);
       return {

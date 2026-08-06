@@ -3,8 +3,6 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -23,9 +21,7 @@ export class GroupAnalysisComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
 

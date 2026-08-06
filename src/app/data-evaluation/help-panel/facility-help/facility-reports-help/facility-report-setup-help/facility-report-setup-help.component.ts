@@ -2,7 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
@@ -16,8 +15,6 @@ export class FacilityReportSetupHelpComponent {
 
   selectedReport: IdbFacilityReport;
   selectedReportSub: Subscription;
-  constructor(private facilityReportDbService: FacilityReportsDbService) {
-  }
 
   ngOnInit() {
     this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport).subscribe(val => {

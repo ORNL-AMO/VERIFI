@@ -3,16 +3,10 @@ import { Component, computed, ElementRef, inject, Signal, ViewChild, effect, sig
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../../analysis.service';
 import { PlotlyService } from 'angular-plotly.js';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -34,13 +28,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class RegressionUserDefinedModelInspectionComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private plotlyService: PlotlyService = inject(PlotlyService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private regressionsModelsService: RegressionModelsService = inject(RegressionModelsService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
 

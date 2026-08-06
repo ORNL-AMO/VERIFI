@@ -3,7 +3,6 @@ import { Component, inject } from '@angular/core';
 import { AccountAnalysisService } from '../../account-analysis.service';
 import { Subscription } from 'rxjs';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -23,14 +22,15 @@ export class AccountAnalysisFacilitiesSummaryComponent {
 
   facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>;
   analysisItem: IdbAccountAnalysisItem;
-  constructor(private accountAnalysisService: AccountAnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+  constructor(
+    private accountAnalysisService: AccountAnalysisService
+  ) {
 
   }
 
   ngOnInit() {
     this.analysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
-    
+
     this.calculatingSub = this.accountAnalysisService.calculating.subscribe(val => {
       this.calculating = val;
     })

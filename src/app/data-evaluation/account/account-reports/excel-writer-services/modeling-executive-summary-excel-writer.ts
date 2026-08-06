@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Injectable, inject } from '@angular/core';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Injectable({
@@ -17,10 +15,6 @@ export class ModelingExecutiveSummaryExcelWriter {
   workbook: ExcelJS.Workbook;
   maxPredictorCount: number;
 
-  constructor(
-    private facilityDbService: FacilitydbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
-  ) { }
 
   exportToExcel(selectedReport: IdbAccountReport, executiveSummaryItems: Array<FacilityGroupAnalysisItem>) {
     this.workbook = new ExcelJS.Workbook();

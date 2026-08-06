@@ -2,9 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -16,12 +13,6 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AccountSavingsReport } from 'src/app/calculations/savings-report-calculations/accountSavingsReport';
@@ -93,23 +84,16 @@ export class AccountSavingsReportComponent {
   @ViewChildren('facilityMonthlySavingsGraph') facilityMonthlySavingsGraphs!: QueryList<MonthlyAnalysisSummarySavingsGraphComponent>;
   @ViewChild('performanceChart') performanceChartComponent?: PerformanceChartComponent;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
+  constructor(
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private analysisDbService: AnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private sharedDataService: SharedDataService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService,
     private accountSavingsReportAdapter: AccountSavingsReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private pptReportService: PptReportService,
     private accountSavingsReportPPTAdapter: AccountSavingsReportPptAdapter
+
   ) { }
 
   ngOnInit(): void {

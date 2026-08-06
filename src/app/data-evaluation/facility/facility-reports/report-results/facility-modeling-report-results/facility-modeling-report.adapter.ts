@@ -6,9 +6,7 @@ import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models
 import { BaseSection, TableSection, TextSection } from "src/app/shared/pdf-report/models/report-section.model";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { RegressionNumberPipe } from "src/app/shared/helper-pipes/regression-number.pipe";
-import { UtilityMeterGroupdbService } from "src/app/indexedDB/utilityMeterGroup-db.service";
 import { FacilityGroupAnalysisItem } from "src/app/shared/shared-analysis/calculations/regression-models.service";
-import { FacilitydbService } from "src/app/indexedDB/facility-db.service";
 import { UserDefineModelDateRangePipe } from "src/app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe";
 import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe";
 
@@ -17,9 +15,7 @@ export class FacilityModelingReportAdapter {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-    private facilityDbService = inject(FacilitydbService);
     private regressionNumberPipe = inject(RegressionNumberPipe);
-    private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
     private userDefineModelDateRangePipe = inject(UserDefineModelDateRangePipe);
     private customNumberPipe = inject(CustomNumberPipe);
 

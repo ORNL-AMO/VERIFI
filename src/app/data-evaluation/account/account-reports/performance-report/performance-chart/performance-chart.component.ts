@@ -2,7 +2,6 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import * as _ from 'lodash';
@@ -29,7 +28,7 @@ export class PerformanceChartComponent {
   @ViewChild('performanceChart', { static: false }) performanceChart: ElementRef;
 
 
-  constructor(private plotlyService: PlotlyService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+  constructor(private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
   }

@@ -4,7 +4,6 @@ import { Component, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { FacilityAnalysisReportAdapter } from './facility-analysis-report.adapter';
@@ -31,11 +30,12 @@ export class FacilityAnalysisReportResultsComponent {
 
   @ViewChild(FacilityAnalysisReportComponent) facilityAnalysisReportComponent?: FacilityAnalysisReportComponent;
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
+  constructor(
     private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService,
     private facilityAnalysisReportAdapter: FacilityAnalysisReportAdapter,
-    private exportReportPdfService: ExportReportPdfService) {
+    private exportReportPdfService: ExportReportPdfService
+  ) {
   }
 
   ngOnInit() {

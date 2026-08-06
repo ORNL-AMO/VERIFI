@@ -2,10 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -36,9 +33,6 @@ export class RegressionModelSelectionComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);

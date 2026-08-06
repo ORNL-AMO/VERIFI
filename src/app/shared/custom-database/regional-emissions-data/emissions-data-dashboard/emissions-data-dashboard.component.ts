@@ -4,9 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -27,11 +25,11 @@ export class EmissionsDataDashboardComponent implements OnInit {
   deleteItemInUse: boolean = false;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
-  constructor(private customEmissionsDbService: CustomEmissionsDbService,
+  constructor(
+    private customEmissionsDbService: CustomEmissionsDbService,
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private activatedRoute: ActivatedRoute) { }
+    private activatedRoute: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
     this.customEmissionsItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customEmissions()])).subscribe(val => {
