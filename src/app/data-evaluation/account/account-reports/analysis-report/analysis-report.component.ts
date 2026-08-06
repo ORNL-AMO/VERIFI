@@ -18,6 +18,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisReportAdapter } from './analysis-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
+import { AnalysisReportPptAdapter } from './analysis-report-ppt.adapter';
 
 @Component({
   selector: 'app-analysis-report',
@@ -48,7 +50,9 @@ export class AnalysisReportComponent {
     private regressionModelsService: RegressionModelsService,
     private facilityDbService: FacilitydbService,
     private analysisReportAdapter: AnalysisReportAdapter,
-    private exportReportPdfService: ExportReportPdfService) { }
+    private exportReportPdfService: ExportReportPdfService,
+    private pptReportService: PptReportService,
+    private analysisReportPptAdapter: AnalysisReportPptAdapter) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -139,5 +143,15 @@ export class AnalysisReportComponent {
     } finally {
       this.isExportingPdf = false;
     }
+  }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.analysisReportPptAdapter.buildDocument({
+      account: this.account,
+      report: this.selectedReport,
+      executiveSummaryItems: this.executiveSummaryItems,
+      facilityAnalysisItems: this.facilityAnalysisItems
+    });
+    await this.pptReportService.buildPowerpoint(document, `Modeling Report - ${this.selectedReport?.name}.pptx`);
   }
 }
