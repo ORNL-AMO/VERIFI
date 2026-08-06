@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -15,6 +16,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class EmissionsDataDashboardComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   customEmissionsItems: Array<IdbCustomEmissionsItem>;
   customEmissionsItemsSub: Subscription;
@@ -22,18 +25,19 @@ export class EmissionsDataDashboardComponent implements OnInit {
   deleteItemInUse: boolean = false;
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
-  constructor(private customEmissionsDbService: CustomEmissionsDbService,
+  constructor(
+    private customEmissionsDbService: CustomEmissionsDbService,
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private activatedRoute: ActivatedRoute) { }
+    private activatedRoute: ActivatedRoute,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.customEmissionsItemsSub = this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
+    this.customEmissionsItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customEmissions()]), { injector: this.injector }).subscribe(val => {
       this.customEmissionsItems = val;
     });
 
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
   }
@@ -68,7 +72,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
     if (this.itemToDelete) {
       this.deleteItemInUse = (this.itemToDelete.subregion == this.selectedAccount.eGridSubregion);
       if (!this.deleteItemInUse) {
-        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
         facilities.forEach(facility => {
           if (this.itemToDelete.subregion == facility.eGridSubregion) {
             this.deleteItemInUse = true;
@@ -86,9 +90,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
 
   async confirmDelete() {
     await firstValueFrom(this.customEmissionsDbService.deleteWithObservable(this.itemToDelete.id));
-    let allEmissions: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAll());
-    let accountEmissions: Array<IdbCustomEmissionsItem> = allEmissions.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
-    this.customEmissionsDbService.accountEmissionsItems.next(accountEmissions);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }
 }

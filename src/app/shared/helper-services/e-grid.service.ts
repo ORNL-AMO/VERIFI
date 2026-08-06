@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject, computed } from '@angular/core';
 import * as XLSX from 'xlsx';
-import * as _ from 'lodash';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
@@ -9,14 +9,15 @@ import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions
   providedIn: 'root'
 })
 export class EGridService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   subRegionsByZipcode: Array<SubRegionData>;
 
   excelCo2Emissions: Array<SubregionEmissions>;
   co2Emissions: Array<SubregionEmissions>;
   zipLatLong: Array<{ ZIP: string, LAT: string, LNG: string }>;
-  constructor(private customEmissionsDbService: CustomEmissionsDbService) {
-    this.customEmissionsDbService.accountEmissionsItems.subscribe(emissions => {
+  constructor() {
+    toObservable(computed(() => [...this.accountWorkspaceStore.customEmissions()])).subscribe(emissions => {
       this.combineExcelAndCustomEmissions();
     });
   }
@@ -67,9 +68,9 @@ export class EGridService {
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
       if (subregion) {
-        let CO2: number = Number(result['CO2']); 
-        let CH4: number = Number(result['CH4']); 
-        let N2O: number = Number(result['N2O']); 
+        let CO2: number = Number(result['CO2']);
+        let CH4: number = Number(result['CH4']);
+        let N2O: number = Number(result['N2O']);
         let year: number = Number(result['Year']);
         let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
         subregionEmissions = this.addEmissionRate(subregion, CO2, CH4, N2O, year, category, subregionEmissions);
@@ -82,7 +83,7 @@ export class EGridService {
 
   combineExcelAndCustomEmissions() {
     if (this.excelCo2Emissions) {
-      let customEmissions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+      let customEmissions: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
       this.co2Emissions = this.excelCo2Emissions.map(emissions => { return emissions });
       customEmissions.forEach(customEmission => {
         this.co2Emissions.push(customEmission);
@@ -97,15 +98,15 @@ export class EGridService {
       if (category == 'LocationMix') {
         subregionEmissions[subregionIndex].locationEmissionRates.push({
           year: year,
-          CO2: CO2, 
-          CH4: CH4, 
+          CO2: CO2,
+          CH4: CH4,
           N2O: N2O,
         })
       } else {
         subregionEmissions[subregionIndex].residualEmissionRates.push({
           year: year,
-          CO2: CO2, 
-          CH4: CH4, 
+          CO2: CO2,
+          CH4: CH4,
           N2O: N2O,
         })
       }
@@ -116,8 +117,8 @@ export class EGridService {
           subregion: subregion,
           locationEmissionRates: [{
             year: year,
-            CO2: CO2, 
-            CH4: CH4, 
+            CO2: CO2,
+            CH4: CH4,
             N2O: N2O,
           }],
           residualEmissionRates: new Array()
@@ -128,8 +129,8 @@ export class EGridService {
           locationEmissionRates: new Array(),
           residualEmissionRates: [{
             year: year,
-            CO2: CO2, 
-            CH4: CH4, 
+            CO2: CO2,
+            CH4: CH4,
             N2O: N2O,
           }]
         })

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 import { MonthlyData } from 'src/app/models/calanderization';
@@ -15,6 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class CorrelationPlotMenuComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   years: Array<number>;
@@ -32,13 +34,15 @@ export class CorrelationPlotMenuComponent {
   facilitySub: Subscription;
   disableY1SelectedTotal: boolean;
   disableY2SelectedTotal: boolean;
-  constructor(private visualizationStateService: VisualizationStateService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService) {
+  constructor(
+    private visualizationStateService: VisualizationStateService,
+    private dbChangesService: DbChangesService,
+    private injector: Injector
+  ) {
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.facility = val;
       this.setYears();
     });

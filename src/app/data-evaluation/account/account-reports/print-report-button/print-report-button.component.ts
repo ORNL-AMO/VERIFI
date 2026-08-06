@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
@@ -12,6 +12,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   standalone: false
 })
 export class PrintReportButtonComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @Input()
   isNewReport: boolean = false;
@@ -29,14 +30,15 @@ export class PrintReportButtonComponent {
   @Output()
   exportPdf: EventEmitter<void> = new EventEmitter<void>();
 
-  constructor(private accountReportsService: AccountReportsService,
-    private accountReportDbService: AccountReportDbService,
-    private dataEvaluationService: DataEvaluationService) {
+  constructor(
+    private accountReportsService: AccountReportsService,
+    private dataEvaluationService: DataEvaluationService
+  ) {
 
   }
 
   ngOnInit() {
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
       if (this.print) {

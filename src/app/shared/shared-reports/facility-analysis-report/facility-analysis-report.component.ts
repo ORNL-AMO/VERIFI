@@ -1,14 +1,9 @@
-import { Component, Input, output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, output, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -19,8 +14,6 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { CalanderizationService } from '../../helper-services/calanderization.service';
-import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { AnnualFacilityAnalysisReportComponent } from './annual-facility-analysis-report/annual-facility-analysis-report.component';
 import { MonthlyFacilityAnalysisReportComponent } from './monthly-facility-analysis-report/monthly-facility-analysis-report.component';
 import { GroupAnalysisReportComponent } from './group-analysis-report/group-analysis-report.component';
@@ -32,6 +25,8 @@ import { GroupAnalysisReportComponent } from './group-analysis-report/group-anal
   standalone: false
 })
 export class FacilityAnalysisReportComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   analysisItem: IdbAnalysisItem;
   @Input({ required: true })
@@ -68,24 +63,15 @@ export class FacilityAnalysisReportComponent {
   @ViewChild(GroupAnalysisReportComponent) groupAnalysisReportComponent?: GroupAnalysisReportComponent;
   @ViewChildren(GroupAnalysisReportComponent) groupAnalysisReportComponents !: QueryList<GroupAnalysisReportComponent>;
 
-  constructor(
-    private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService
-  ) { }
 
   ngOnInit(): void {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.analysisItem.facilityId);
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.analysisItem.facilityId);
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.analysisItem.facilityId);
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.analysisItem.facilityId);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
+    this.facility = this.accountWorkspaceQuery.getFacilityByGuid(this.analysisItem.facilityId);
+    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.analysisItem.facilityId);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.analysisItem.facilityId);
+    let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.analysisItem.facilityId);
+    let accountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(this.analysisItem.facilityId);
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.reportYear = this.analysisReportSettings.reportYear;
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
@@ -125,7 +111,7 @@ export class FacilityAnalysisReportComponent {
         reportYear: this.reportYear
       });
     } else {
-      // Web Workers are not supported in this environment.     
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(
         this.analysisItem,

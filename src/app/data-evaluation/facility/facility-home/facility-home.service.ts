@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import * as _ from 'lodash';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -11,6 +11,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   providedIn: 'root'
 })
 export class FacilityHomeService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   latestEnergyAnalysisItem: BehaviorSubject<IdbAnalysisItem>;
@@ -23,7 +24,7 @@ export class FacilityHomeService {
   calculatingWater: BehaviorSubject<boolean | 'error'>;
   calculatingOverview: BehaviorSubject<boolean | 'error'>;
   facilityOverviewData: BehaviorSubject<FacilityOverviewData>;
-  constructor(private analysisDbService: AnalysisDbService) {
+  constructor() {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyFacilityEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
 
@@ -39,7 +40,7 @@ export class FacilityHomeService {
   }
 
   setLatestEnergyAnalysisItem(selectedFacility: IdbFacility) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     if (selectedFacility.selectedEnergyAnalysisId) {
       let selectedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == selectedFacility.selectedEnergyAnalysisId });
       this.latestEnergyAnalysisItem.next(selectedAnalysisItem);
@@ -55,7 +56,7 @@ export class FacilityHomeService {
   }
 
   setLatestWaterAnalysisItem(selectedFacility: IdbFacility) {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     if (selectedFacility.selectedWaterAnalysisId) {
       let selectedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == selectedFacility.selectedWaterAnalysisId });
       this.latestWaterAnalysisItem.next(selectedAnalysisItem);

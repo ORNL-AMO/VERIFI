@@ -42,7 +42,7 @@ export const facilityReadyGuard: CanActivateFn = async route => {
 
   const startup = await lifecycle.initialize();
   if (startup.status === 'error') { return false; }
-  if (startup.status === 'empty') { return accountManagement(router); }
+  if (startup.status === 'empty' && !store.isReady()) { return accountManagement(router); }
 
   const facilityGuid = route.paramMap.get('id');
   if (!facilityGuid) { return activeAccountHome(router, route); }
@@ -52,6 +52,16 @@ export const facilityReadyGuard: CanActivateFn = async route => {
   const dataManagementAccountGuid = findDataManagementAccountGuid(route);
   if (dataManagementAccountGuid && facility.accountId !== dataManagementAccountGuid) {
     return activeAccountHome(router, route);
+  }
+
+  const activeFacility = store.facilities().find(item => item.guid === facilityGuid);
+  if (
+    store.isReady()
+    && store.account()?.guid === facility.accountId
+    && activeFacility?.accountId === facility.accountId
+  ) {
+    workspace.selectFacility(facilityGuid);
+    return true;
   }
 
   const owner = lifecycle.usableAccounts().find(account => account.guid === facility.accountId);
@@ -86,14 +96,14 @@ async function ensureActiveAccountWorkspace(accountGuid?: string): Promise<boole
 
   const startup = await lifecycle.initialize();
   if (startup.status === 'error') { return false; }
-  if (startup.status === 'empty') { return accountManagement(router); }
+  if (startup.status === 'empty' && !store.isReady()) { return accountManagement(router); }
 
   if (!accountGuid) {
     return store.isReady() ? true : accountManagement(router);
   }
+  if (store.account()?.guid === accountGuid && store.isReady()) { return true; }
   const account = lifecycle.usableAccounts().find(item => item.guid === accountGuid);
   if (!account) { return accountManagement(router); }
-  if (store.account()?.guid === accountGuid && store.isReady()) { return true; }
 
   try {
     const result = await workspace.selectAccount(accountGuid);

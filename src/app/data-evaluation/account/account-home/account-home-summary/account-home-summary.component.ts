@@ -1,9 +1,7 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountHomeService } from '../account-home.service';
-import * as _ from 'lodash';
 import { Router } from '@angular/router';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -18,15 +16,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountHomeSummaryComponent {
-  private accountDbService: AccountdbService = inject(AccountdbService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
   private router: Router = inject(Router);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private loadingService: LoadingService = inject(LoadingService);
 
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
-  accountMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: [] });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
+  accountMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.meterData()]);
 
   latestEnergyAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
   latestWaterAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });

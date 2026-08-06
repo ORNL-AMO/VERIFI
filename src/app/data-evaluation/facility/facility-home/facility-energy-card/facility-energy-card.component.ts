@@ -1,6 +1,6 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { FacilityHomeService } from '../facility-home.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
@@ -15,8 +15,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class FacilityEnergyCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
-  private facilityDbService: FacilitydbService= inject(FacilitydbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
 
   monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityEnergyAnalysisData, { initialValue: undefined });
@@ -26,7 +26,7 @@ export class FacilityEnergyCardComponent {
   annualEnergyAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.facilityHomeService.annualEnergyAnalysisSummary, { initialValue: undefined });
 
   latestEnergyAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   carouselIndex: Signal<number> = toSignal(this.sharedDataService.energyHomeCarouselIndex, { initialValue: 0 });
   facilityOverviewData: Signal<FacilityOverviewData> = toSignal(this.facilityHomeService.facilityOverviewData, { initialValue: undefined });
 

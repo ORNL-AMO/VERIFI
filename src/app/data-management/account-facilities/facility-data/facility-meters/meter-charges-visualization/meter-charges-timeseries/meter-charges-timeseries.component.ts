@@ -1,9 +1,9 @@
-import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 @Component({
   selector: 'app-meter-charges-timeseries',
@@ -12,12 +12,14 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   styleUrl: './meter-charges-timeseries.component.css'
 })
 export class MeterChargesTimeseriesComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input({ required: true }) meter: IdbUtilityMeter;
 
   @ViewChild('chargesTimeseries', { static: false }) chargesTimeseries: ElementRef;
 
-  constructor(private plotlyService: PlotlyService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+  constructor(
+    private plotlyService: PlotlyService
+
   ) { }
 
 
@@ -32,7 +34,7 @@ export class MeterChargesTimeseriesComponent {
   drawChart() {
     if (this.chargesTimeseries) {
 
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
+      let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);
       meterData = _.sortBy(meterData, (data: IdbUtilityMeterData) => getDateFromMeterData(data).getTime(), 'desc');
 
       var data = [

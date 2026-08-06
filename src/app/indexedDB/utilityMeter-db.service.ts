@@ -1,6 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IndexedDbAccessService } from './indexed-db-access.service';
@@ -10,16 +10,9 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 })
 export class UtilityMeterdbService {
 
-    facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-    accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-    selectedMeter: BehaviorSubject<IdbUtilityMeter>;
     constructor(private dbService: NgxIndexedDBService,
         private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService) {
-        this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
-        this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
-        this.selectedMeter = new BehaviorSubject<IdbUtilityMeter>(undefined);
-    }
+        private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbUtilityMeter>> {
         return this.dbService.getAll('utilityMeter');
@@ -65,50 +58,6 @@ export class UtilityMeterdbService {
     async deleteAllFacilityMeters(facilityId: string) {
         this.loadingService.setLoadingMessage('Deleting Facility Meters...');
         await this.indexedDbAccess.deleteAllByIndex('utilityMeter', 'facilityId', facilityId);
-    }
-
-    async deleteAllSelectedAccountMeters() {
-        let accountMeterEntries: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        await this.deleteMeterEntriesAsync(accountMeterEntries);
-    }
-
-
-    async deleteMeterEntriesAsync(meterEntries: Array<IdbUtilityMeter>) {
-        for (let i = 0; i < meterEntries.length; i++) {
-            this.loadingService.setLoadingMessage('Deleting Meters (' + i + '/' + meterEntries.length + ')...');
-            await firstValueFrom(this.deleteIndexWithObservable(meterEntries[i].id));
-        }
-    }
-
-    getGroupMetersByGroupId(groupId: string): Array<IdbUtilityMeter> {
-        let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        return facilityMeters.filter(meter => { return meter.groupId == groupId });
-    }
-
-    getFacilityMeterById(meterGuid: string): IdbUtilityMeter {
-        let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        return facilityMeters.find(meter => { return meter.guid == meterGuid });
-    }
-
-    getAccountMetersCopy() {
-        let accountMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        let metersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
-        return metersCopy;
-    }
-
-    setTemporaryMeterNumbersForExport() {
-        let accountMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        accountMeters.forEach(meter => {
-            if (meter.meterNumber == undefined) {
-                let noSpaceSource: string = meter.source.replace(' ', '_');
-                meter.meterNumber = noSpaceSource + '_' + meter.guid;
-            }
-        });
-    }
-
-    getFacilityMetersByFacilityGuid(facilityGuid: string): Array<IdbUtilityMeter> {
-        let accountMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
-        return accountMeters.filter(meter => { return meter.facilityId == facilityGuid });
     }
 
 }

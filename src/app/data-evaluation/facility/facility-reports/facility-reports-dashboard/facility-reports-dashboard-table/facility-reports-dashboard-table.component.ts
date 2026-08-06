@@ -1,3 +1,6 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -5,18 +8,13 @@ import { firstValueFrom } from 'rxjs';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import * as _ from 'lodash';
 import { FacilityReportStatusCheck } from 'src/app/calculations/status-check-calculations/facilityReportStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -44,24 +42,22 @@ interface FacilityReportTableItem {
   styleUrl: './facility-reports-dashboard-table.component.css'
 })
 export class FacilityReportsDashboardTableComponent {
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbReportsService: FacilityReportsDbService = inject(FacilityReportsDbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private analyticsService: AnalyticsService = inject(AnalyticsService);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private loadingService: LoadingService = inject(LoadingService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  facilityReports: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityDbReportsService.facilityReports);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  facilityReports: Signal<Array<IdbFacilityReport>> = computed(() => [...this.accountWorkspaceStore.selectedFacilityReports()]);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
-  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   orderDataField: WritableSignal<'name' | 'facilityReportType' | 'analysisItemName' | 'modifiedDate' | 'reportYear'> = signal('name');
@@ -82,7 +78,7 @@ export class FacilityReportsDashboardTableComponent {
     const orderByDirection = this.orderByDirection();
     const orderDataField = this.orderDataField();
     const facilityStatusCheck = this.facilityStatusCheck();
-    
+
     let filtered: Array<FacilityReportTableItem> = facilityReports.map(report => {
       const analysisItem = analysisItems.find(item => item.guid === report.analysisItemId);
       return {
@@ -117,7 +113,7 @@ export class FacilityReportsDashboardTableComponent {
   selectReport(report: FacilityReportTableItem) {
     const raw = this.facilityReports().find(r => r.guid === report.guid);
     if (raw) {
-      this.facilityDbReportsService.selectedReport.next(raw);
+      this.accountWorkspaceService.selectFacilityReport((raw)?.guid);
       this.router.navigateByUrl('/data-evaluation/facility/' + raw.facilityId + '/reports/setup');
     }
   }
@@ -125,14 +121,14 @@ export class FacilityReportsDashboardTableComponent {
   async createCopy(report: FacilityReportTableItem) {
     const raw = this.facilityReports().find(r => r.guid === report.guid);
     if (!raw) return;
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(raw.facilityId);
+    let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(raw.facilityId);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(raw.facilityId, raw.accountId, raw.facilityReportType, groups);
     newReport.name = raw.name + ' (Copy)';
     newReport.analysisItemId = raw.analysisItemId;
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
-    await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_facility_analysis', undefined);
-    this.facilityDbReportsService.selectedReport.next(addedReport);
+    this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/facility/' + raw.facilityId + '/reports/setup');
   }
@@ -154,7 +150,7 @@ export class FacilityReportsDashboardTableComponent {
     const report = this.deletedReport();
     if (!report) return;
     await firstValueFrom(this.facilityDbReportsService.deleteWithObservable(report.id));
-    await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.displayDeleteModal.set(false);
     this.deletedReport.set(undefined);
     this.toastNotificationService.showToast('Report Item Deleted', undefined, undefined, false, 'alert-success');
@@ -211,7 +207,7 @@ export class FacilityReportsDashboardTableComponent {
     for (const item of itemsToDelete) {
       await firstValueFrom(this.facilityDbReportsService.deleteWithObservable(item.id));
     }
-    await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
     this.selectedReportType.set('');

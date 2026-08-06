@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -7,7 +9,6 @@ import { getYearsWithFullDataAccount } from 'src/app/calculations/shared-calcula
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -35,8 +36,9 @@ interface AnalysisDetailsTableRow {
   styleUrl: './account-analysis-details-table.component.css'
 })
 export class AccountAnalysisDetailsTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private dbChangesService: DbChangesService = inject(DbChangesService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private router: Router = inject(Router);
@@ -46,10 +48,10 @@ export class AccountAnalysisDetailsTableComponent {
   private loadingService: LoadingService = inject(LoadingService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
-  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
-  accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
+  accountReports: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
 
@@ -223,7 +225,7 @@ export class AccountAnalysisDetailsTableComponent {
   }
 
   selectAnalysisItem(analysisItem: IdbAccountAnalysisItem, accountAnalysisStatusCheck: AccountAnalysisStatusCheck | undefined) {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.accountWorkspaceService.selectAccountAnalysis((analysisItem)?.guid);
     const setupErrors = accountAnalysisStatusCheck?.accountAnalysisSetupErrors;
     if (setupErrors?.hasError || setupErrors?.facilitiesSelectionsInvalid) {
       this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
@@ -245,13 +247,11 @@ export class AccountAnalysisDetailsTableComponent {
     const deletedItem = item ? item : this.itemToDelete;
     let selectedAccount = this.selectedAccount();
     await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(deletedItem.id));
-    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
-    let updateReportOptions: boolean = false;
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     for (let i = 0; i < accountReports.length; i++) {
       if (accountReports[i].betterPlantsReportSetup.analysisItemId == deletedItem.guid) {
         accountReports[i].betterPlantsReportSetup.analysisItemId = undefined;
         await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
-        updateReportOptions = true;
       }
     }
     if (deletedItem.guid == selectedAccount.selectedEnergyAnalysisId) {
@@ -261,7 +261,7 @@ export class AccountAnalysisDetailsTableComponent {
       selectedAccount.selectedWaterAnalysisId = undefined;
       await this.dbChangesService.updateAccount(selectedAccount);
     }
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     if (!isBulkDelete) {
       this.displayDeleteModal = false;
       this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
@@ -324,8 +324,7 @@ export class AccountAnalysisDetailsTableComponent {
   }
 
   confirmViewLinkedItem(itemGuid: string) {
-    let report: IdbAccountReport = this.accountReportDbService.getByGuid(itemGuid);
-    this.accountReportDbService.selectedReport.next(report);
+    this.accountWorkspaceService.selectAccountReport(itemGuid);
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
 

@@ -1,11 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { MeterDataSummary } from '../process-meter-readings.component';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
@@ -15,6 +13,7 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   standalone: false
 })
 export class MeterDataSummaryTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   meterDataSummaries: Array<MeterDataSummary>;
 
@@ -30,11 +29,6 @@ export class MeterDataSummaryTableComponent {
 
   readingDifferencesMap: { [meterId: string]: MeterReadingComparison[] } = {};
 
-  constructor(
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService
-  ) { }
 
   setSkipAll() {
     this.meterDataSummaries.forEach(summary => {
@@ -43,8 +37,8 @@ export class MeterDataSummaryTableComponent {
   }
 
   ngOnInit() {
-    this.facilities = this.facilityDbService.accountFacilities.getValue();
-    this.meters = this.utilityMeterDbService.accountMeters.getValue();
+    this.facilities = [...this.accountWorkspaceStore.facilities()];
+    this.meters = [...this.accountWorkspaceStore.meters()];
     this.computeReadingChanges();
   }
 
@@ -83,7 +77,7 @@ export class MeterDataSummaryTableComponent {
 
     const facility = this.facilities.find(facility => facility.guid === inspectedFacility);
     const meter = this.meters.find(meter => meter.guid === inspectedMeterId);
-    const existingMeterReadings = this.utilityMeterDataDbService.accountMeterData.getValue().filter(data => (data.meterId === meter?.guid && data.facilityId === facility?.guid));
+    const existingMeterReadings = [...this.accountWorkspaceStore.meterData()].filter(data => (data.meterId === meter?.guid && data.facilityId === facility?.guid));
 
     return this.checkDifferences(existingMeterReadings, summary);
   }

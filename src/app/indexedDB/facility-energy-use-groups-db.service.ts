@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
+import { Observable } from 'rxjs';
 import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -11,14 +10,8 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 export class FacilityEnergyUseGroupsDbService {
 
 
-  facilityEnergyUseGroups: BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>;
-  accountEnergyUseGroups: BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>;
   constructor(private dbService: NgxIndexedDBService,
-    private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService) {
-    this.facilityEnergyUseGroups = new BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>(new Array());
-    this.accountEnergyUseGroups = new BehaviorSubject<Array<IdbFacilityEnergyUseGroup>>(new Array());
-  }
+    private indexedDbAccess: IndexedDbAccessService) { }
 
   getAll(): Observable<Array<IdbFacilityEnergyUseGroup>> {
     return this.dbService.getAll('facilityEnergyUseGroups');
@@ -62,41 +55,6 @@ export class FacilityEnergyUseGroupsDbService {
   }
 
   async deleteAllFacilityEnergyUseGroups(facilityId: string) {
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountEnergyUseGroups.getValue();
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = accountEnergyUseGroups.filter(energyUseGroup => { return energyUseGroup.facilityId == facilityId });
-    await this.deleteEnergyUseGroupsAsync(facilityEnergyUseGroups);
-  }
-
-  async deleteAllSelectedAccountEnergyUseGroups() {
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountEnergyUseGroups.getValue();
-    await this.deleteEnergyUseGroupsAsync(accountEnergyUseGroups);
-  }
-
-
-  async deleteEnergyUseGroupsAsync(energyUseGroups: Array<IdbFacilityEnergyUseGroup>) {
-    for (let i = 0; i < energyUseGroups.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Energy UseGroups (' + i + '/' + energyUseGroups.length + ')...');
-      await firstValueFrom(this.deleteWithObservable(energyUseGroups[i].id));
-    }
-  }
-
-  getByGuid(guid: string): IdbFacilityEnergyUseGroup {
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountEnergyUseGroups.getValue();
-    return accountEnergyUseGroups.find(energyUseGroup => {
-      return energyUseGroup.guid == guid;
-    })
-  }
-
-  getByFacilityId(facilityId: string): Array<IdbFacilityEnergyUseGroup> {
-    let accountEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountEnergyUseGroups.getValue();
-    return accountEnergyUseGroups.filter(energyUseGroup => {
-      return energyUseGroup.facilityId == facilityId;
-    })
-  }
-
-  getFacilityEnergyUseGroupsCopy(facilityId: string): Array<IdbFacilityEnergyUseGroup> {
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.getByFacilityId(facilityId);
-    let facilityEnergyUseGroupsCopy: Array<IdbFacilityEnergyUseGroup> = JSON.parse(JSON.stringify(facilityEnergyUseGroups));
-    return facilityEnergyUseGroupsCopy;
+    await this.indexedDbAccess.deleteAllByIndex('facilityEnergyUseGroups', 'facilityId', facilityId);
   }
 }

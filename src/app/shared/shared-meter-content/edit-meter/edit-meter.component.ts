@@ -1,16 +1,15 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
@@ -26,6 +25,9 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   }
 })
 export class EditMeterComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   meterForm: FormGroup;
   meterDataExists: boolean;
@@ -42,24 +44,27 @@ export class EditMeterComponent implements OnInit {
     }
   }
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService, private activatedRoute: ActivatedRoute,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private activatedRoute: ActivatedRoute,
     private router: Router,
-    private routerGuardService: RouterGuardService) { }
+    private routerGuardService: RouterGuardService
+  ) { }
 
   ngOnInit(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
       if (meterId) {
         this.addOrEdit = 'edit';
         this.editMeter = facilityMeters.find(meter => { return meter.guid == meterId });
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
-        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+        let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
         if (meterData.length != 0 && this.meterForm.valid) {
           this.meterDataExists = true;
           this.meterForm.controls.source.disable();
@@ -102,9 +107,7 @@ export class EditMeterComponent implements OnInit {
       meterToSave = await firstValueFrom(this.utilityMeterDbService.addWithObservable(meterToSave));
     }
     await this.utilityMeterDbService.updateWithObservable(meterToSave);
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.meterForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
@@ -112,7 +115,7 @@ export class EditMeterComponent implements OnInit {
   }
 
   cancel() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/energy-source/meters')
   }
 
@@ -123,16 +126,12 @@ export class EditMeterComponent implements OnInit {
   async updateMeterData(meter: IdbUtilityMeter) {
     this.loadingService.setLoadingMessage('Updating Meter Data...')
     this.loadingService.setLoadingStatus(true);
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
     let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData)
     if (dataNeedsUpdate.length > 0) {
       for (let i = 0; i < dataNeedsUpdate.length; i++) {
         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]));
       }
-      let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(this.selectedFacility.accountId);
-      this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
-      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == this.selectedFacility.guid });
-      this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
       this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
     }
   }

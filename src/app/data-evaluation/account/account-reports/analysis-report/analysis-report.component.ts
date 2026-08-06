@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { Router } from '@angular/router';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AccountReportsService } from '../account-reports.service';
@@ -15,7 +14,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ModelingExecutiveSummaryExcelWriter } from '../excel-writer-services/modeling-executive-summary-excel-writer';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisReportAdapter } from './analysis-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
@@ -28,6 +26,8 @@ import { AnalysisReportPptAdapter } from './analysis-report-ppt.adapter';
   styleUrl: './analysis-report.component.css'
 })
 export class AnalysisReportComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -38,19 +38,16 @@ export class AnalysisReportComponent {
   generateExcelSub: Subscription;
   analysisItemsSub: Subscription;
   isExportingPdf: boolean = false;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
+  constructor(
     private router: Router,
-    private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
     private dataEvaluationService: DataEvaluationService,
     private accountReportsService: AccountReportsService,
     private loadingService: LoadingService,
     private modelingExecutiveSummaryExcelWriter: ModelingExecutiveSummaryExcelWriter,
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService,
     private analysisReportAdapter: AnalysisReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
+    private injector: Injector,
     private pptReportService: PptReportService,
     private analysisReportPptAdapter: AnalysisReportPptAdapter) { }
 
@@ -58,14 +55,14 @@ export class AnalysisReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
 
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
 
-    this.analysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
+    this.analysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]), { injector: this.injector }).subscribe(items => {
       this.setFacilityAnalysisItems(items);
     });
 
@@ -84,8 +81,7 @@ export class AnalysisReportComponent {
   }
 
   setFacilityAnalysisItems(allFacilityAnalysisItems: Array<IdbAnalysisItem>) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.analysisReportSetup.analysisItemId });
+    let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.analysisReportSetup.analysisItemId);
     this.facilityAnalysisItems = allFacilityAnalysisItems.filter(item => {
       const match = selectedAnalysisItem.facilityAnalysisItems.some(facilityItem => {
         return facilityItem.analysisItemId == item.guid;
@@ -99,7 +95,7 @@ export class AnalysisReportComponent {
   initializeGroups() {
     this.executiveSummaryItems = [];
     this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityAnalysisItem.facilityId);
+      let facility: IdbFacility = this.accountWorkspaceQuery.getFacilityByGuid(facilityAnalysisItem.facilityId);
       facilityAnalysisItem.groups.forEach(group => {
         if (group.analysisType == 'regression') {
           let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);
@@ -155,3 +151,4 @@ export class AnalysisReportComponent {
     await this.pptReportService.buildPowerpoint(document, `Modeling Report - ${this.selectedReport?.name}.pptx`);
   }
 }
+

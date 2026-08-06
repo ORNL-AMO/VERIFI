@@ -1,19 +1,16 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
@@ -23,6 +20,8 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class EditOtherEmissionsBillComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -41,12 +40,9 @@ export class EditOtherEmissionsBillComponent {
   totalLabel: 'Total Refrigerant Lost' | 'Total Process Emissions';
   displayFugitiveTableModal: boolean = false;
   showCopyLast: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService,
-    private customGwpDbService: CustomGWPDbService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
   ngOnInit(): void {
     this.setTotalEmissions();
@@ -68,7 +64,7 @@ export class EditOtherEmissionsBillComponent {
   }
 
   checkDate() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
@@ -85,11 +81,11 @@ export class EditOtherEmissionsBillComponent {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       //meed to use total volume for fugitive/process emissions
-      let customGWPs: Array<IdbCustomGWP> = this.customGwpDbService.accountCustomGWPs.getValue();
+      let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
         this.editMeter.energyUnit,
@@ -121,12 +117,12 @@ export class EditOtherEmissionsBillComponent {
   }
 
   setShowCopyLast() {
-    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
     this.showCopyLast = (allSelectedMeterData.length != 0);
   }
 
   copyLastReading() {
-    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
     allSelectedMeterData = _.orderBy(allSelectedMeterData, 'readDate');
     let lastReading: IdbUtilityMeterData = allSelectedMeterData[allSelectedMeterData.length - 1];
     this.meterDataForm.controls.totalVolume.patchValue(lastReading.totalVolume);

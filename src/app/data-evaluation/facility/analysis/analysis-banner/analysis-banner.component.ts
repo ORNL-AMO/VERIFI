@@ -1,3 +1,5 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
@@ -5,8 +7,6 @@ import { filter, map, startWith } from 'rxjs';
 import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -25,10 +25,10 @@ interface GroupsList {
   standalone: false
 })
 export class AnalysisBannerComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   url: Signal<string> = toSignal(
@@ -39,9 +39,9 @@ export class AnalysisBannerComponent {
     ),
     { initialValue: this.router.url }
   );
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
-  analysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
+  analysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
 
@@ -79,7 +79,6 @@ export class AnalysisBannerComponent {
 
   constructor() {
     effect(() => {
-      const url = this.url();
       this.showDropdown = false;
     });
   }
@@ -93,8 +92,8 @@ export class AnalysisBannerComponent {
   }
 
   selectItem(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.accountWorkspaceService.selectFacilityAnalysis((item)?.guid);
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis/analysis-setup');
     this.showDropdown = false;
   }

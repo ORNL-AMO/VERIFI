@@ -1,3 +1,4 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
@@ -5,19 +6,14 @@ import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
@@ -27,26 +23,22 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   standalone: false
 })
 export class VehicleDataTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataService = inject(UtilityMeterDataService);
   private copyTableService = inject(CopyTableService);
-  private customFuelDbService = inject(CustomFuelDbService);
-  private facilityDbService = inject(FacilitydbService);
-  private accountDbService = inject(AccountdbService);
   private electronService = inject(ElectronService);
-  private utilityMeterDbService = inject(UtilityMeterdbService);
   private sharedDataService = inject(SharedDataService);
-  private utilityMeterDataDbService = inject(UtilityMeterDatadbService);
 
   readonly setChecked = output<Set<string>>();
   readonly setEdit = output<IdbUtilityMeterData>();
   readonly setDelete = output<IdbUtilityMeterData>();
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
-  selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
-  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
-  customFuels: Signal<Array<IdbCustomFuel>> = toSignal(this.customFuelDbService.accountCustomFuels);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedMeter: Signal<IdbUtilityMeter> = this.accountWorkspaceStore.selectedMeter;
+  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
+  customFuels: Signal<Array<IdbCustomFuel>> = computed(() => [...this.accountWorkspaceStore.customFuels()]);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   vehicleDataFilters: Signal<VehicleDataFilters> = toSignal(this.utilityMeterDataService.tableVehicleDataFilters);
 
   selectedMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => {

@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -15,6 +15,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   standalone: false
 })
 export class MonthlyFacilityAnalysisComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   analysisItem: IdbAnalysisItem;
@@ -34,14 +35,16 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   key: string;
   facilitySub: Subscription;
 
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private sharedDataService: SharedDataService) { }
+  constructor(
+    private analysisService: AnalysisService,
+    private sharedDataService: SharedDataService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.facility = val;
       this.key = 'monthly-' + this.facility?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();

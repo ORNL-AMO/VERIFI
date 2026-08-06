@@ -1,4 +1,5 @@
-import { inject, Injectable } from "@angular/core";
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { inject, Injectable } from '@angular/core';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from "src/app/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "src/app/shared/pdf-report/models/report-section.model";
@@ -6,13 +7,12 @@ import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { UtilityMeterGroupdbService } from "src/app/indexedDB/utilityMeterGroup-db.service";
 
 @Injectable({ providedIn: 'root' })
 export class FacilitySavingsReportAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
     private customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     report: IdbFacilityReport;
     reportSettings: SavingsFacilityReportSettings;
@@ -498,7 +498,7 @@ export class FacilitySavingsReportAdapter {
         let sections: BaseSection[] = [];
 
         groupSummaries.forEach(groupSummary => {
-            const groupName = this.utilityMeterGroupDbService.getGroupName(groupSummary.group.idbGroupId);
+            const groupName = this.accountWorkspaceQuery.getMeterGroupName(groupSummary.group.idbGroupId);
             let groupDividerSection: StyledTextSection = {
                 type: 'styledText',
                 verticalCenter: true,

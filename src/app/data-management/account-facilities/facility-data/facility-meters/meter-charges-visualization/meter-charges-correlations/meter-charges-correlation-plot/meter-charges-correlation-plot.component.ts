@@ -1,12 +1,11 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { VisualizationStateService } from 'src/app/data-evaluation/facility/visualization/visualization-state.service';
 import { IdbUtilityMeter, MeterCharge } from 'src/app/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
 import * as jStat from 'jstat';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
@@ -17,6 +16,7 @@ import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
   styleUrl: './meter-charges-correlation-plot.component.css'
 })
 export class MeterChargesCorrelationPlotComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input({ required: true }) meter: IdbUtilityMeter;
   @Input({ required: true }) charge: MeterCharge;
   @Input({ required: true }) compareTo: 'totalCost' | 'energyUse' | 'demand';
@@ -37,7 +37,7 @@ export class MeterChargesCorrelationPlotComponent {
   yLabel: string;
   jstatModel: JStatRegressionModel;
   isBilledDemand: boolean = false;
-  constructor(private plotlyService: PlotlyService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  constructor(private plotlyService: PlotlyService) { }
 
   ngOnChanges(): void {
     this.setData();
@@ -122,7 +122,7 @@ export class MeterChargesCorrelationPlotComponent {
 
 
   setData() {
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);
     meterData = _.sortBy(meterData, (data: IdbUtilityMeterData) => getDateFromMeterData(data).getTime(), 'desc');
     this.dates = new Array();
     this.xValues = new Array();

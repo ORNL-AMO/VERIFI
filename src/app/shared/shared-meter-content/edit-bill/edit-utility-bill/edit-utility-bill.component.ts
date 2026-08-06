@@ -1,13 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import * as _ from 'lodash';
 import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFunctions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
@@ -15,7 +12,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -25,6 +21,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class EditUtilityBillComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -51,11 +48,9 @@ export class EditUtilityBillComponent implements OnInit {
   showScope2OtherEmissions: boolean;
   usingMeterHeatCapacity: boolean;
   isBiofuel: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
   ngOnInit(): void {
     this.setIsBiofuel();
@@ -74,7 +69,7 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setShowEmissions() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (account.displayEmissions) {
       this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
       this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
@@ -93,7 +88,7 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   checkDate() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
@@ -110,9 +105,9 @@ export class EditUtilityBillComponent implements OnInit {
 
   setTotalEmissions() {
     if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let account: IdbAccount = this.accountWorkspaceStore.account();
       //meed to use total volume for fugitive/process emissions
       this.emissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
@@ -149,7 +144,7 @@ export class EditUtilityBillComponent implements OnInit {
 
   setIsBiofuel() {
     if (this.editMeter.source != 'Natural Gas') {
-      let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       let fuels: Array<FuelTypeOption> = getFuelTypeOptions(this.editMeter.source, this.editMeter.phase, allFuels, this.editMeter.scope, undefined, undefined)
       let meterFuel: FuelTypeOption = fuels.find(fuel => {
         return fuel.value == this.editMeter.fuel;

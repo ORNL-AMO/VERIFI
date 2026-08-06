@@ -51,6 +51,23 @@ describe('ApplicationLifecycleService', () => {
     expect(dependencies.selectionStorage.clearAccount).toHaveBeenCalled();
   });
 
+  it('transitions from empty to ready after a newly persisted account is activated', async () => {
+    const dependencies = createDependencies([]);
+    dependencies.accounts.getAll.mockReturnValueOnce(of([]));
+    const lifecycle = createLifecycle(dependencies);
+
+    await expect(lifecycle.initialize()).resolves.toMatchObject({ status: 'empty' });
+
+    dependencies.accounts.getAll.mockReturnValue(of([
+      { id: 2, guid: 'imported-account', name: 'Imported Account' }
+    ]));
+    await lifecycle.activatePersistedAccount('imported-account');
+
+    expect(lifecycle.state()).toEqual({ status: 'ready' });
+    expect(lifecycle.accountCatalog().map(account => account.guid)).toEqual(['imported-account']);
+    expect(dependencies.workspace.selectAccount).toHaveBeenLastCalledWith('imported-account');
+  });
+
   it('reports a blocking step error and retries successfully', async () => {
     const dependencies = createDependencies([]);
     dependencies.migrations.runMigrations.mockRejectedValueOnce(new Error('migration failed'));
@@ -182,9 +199,7 @@ function createLifecycle(dependencies: ReturnType<typeof createDependencies>): A
     dependencies.workspace as any,
     dependencies.workspaceStore,
     dependencies.selectionStorage as any,
-    dependencies.legacyBridge as any,
     dependencies.electron as any,
-    dependencies.electronBackups as any,
     dependencies.automaticBackups as any
   );
 }

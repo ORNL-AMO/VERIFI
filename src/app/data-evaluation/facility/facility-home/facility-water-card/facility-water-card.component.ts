@@ -1,6 +1,6 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { FacilityHomeService } from '../facility-home.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
@@ -15,8 +15,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     standalone: false
 })
 export class FacilityWaterCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
 
   monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityWaterAnalysisData, { initialValue: undefined });
@@ -24,7 +24,7 @@ export class FacilityWaterCardComponent {
   calculatingOverview: Signal<boolean | 'error'> = toSignal(this.facilityHomeService.calculatingOverview, { initialValue: true });
   annualWaterAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.facilityHomeService.annualWaterAnalysisSummary, { initialValue: undefined });
   latestWaterAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.facilityHomeService.latestWaterAnalysisItem, { initialValue: undefined });
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   carouselIndex: Signal<number> = toSignal(this.sharedDataService.waterHomeCarouselIndex, { initialValue: 0 });
   facilityOverviewData: Signal<FacilityOverviewData> = toSignal(this.facilityHomeService.facilityOverviewData, { initialValue: undefined });
 

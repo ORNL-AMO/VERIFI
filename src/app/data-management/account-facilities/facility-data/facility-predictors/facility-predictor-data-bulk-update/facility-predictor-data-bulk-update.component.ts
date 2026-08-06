@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
@@ -13,13 +13,15 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   standalone: false
 })
 export class FacilityPredictorDataBulkUpdateComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
-  constructor(private activatedRoute: ActivatedRoute,
-    private predictorDbService: PredictorDbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
     private router: Router
+
   ) {
   }
 
@@ -36,7 +38,7 @@ export class FacilityPredictorDataBulkUpdateComponent {
   }
 
   setPredictor(predictorId: string) {
-    this.predictor = this.predictorDbService.getByGuid(predictorId);
+    this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (!this.predictor) {
       this.toastNotificationService.showToast('Predictor Not Found', undefined, 2000, false, 'alert-danger');
       this.goToManagePredictors();
@@ -44,7 +46,7 @@ export class FacilityPredictorDataBulkUpdateComponent {
   }
 
   goToManagePredictors() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors')
   }
 }

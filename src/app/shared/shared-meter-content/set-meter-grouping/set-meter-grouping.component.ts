@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -22,6 +21,8 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
   styleUrl: './set-meter-grouping.component.css'
 })
 export class SetMeterGroupingComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
 
@@ -33,26 +34,26 @@ export class SetMeterGroupingComponent {
 
   calanderizationWorker: Worker;
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private meterGroupingDataService: MeterGroupingDataService
+    private meterGroupingDataService: MeterGroupingDataService,
+    private injector: Injector
+
   ) {
   }
 
 
   ngOnInit() {
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.facilityMeters = meters;
     });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
       this.setCalanderizedMeterData();
     });
 
-    this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(meterData => {
+    this.meterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()]), { injector: this.injector }).subscribe(meterData => {
       this.meterData = meterData;
       this.setCalanderizedMeterData();
     });
@@ -75,8 +76,8 @@ export class SetMeterGroupingComponent {
   async addMeter() {
     let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(this.facility.guid, this.facility.accountId, true, this.facility.energyUnit);
     newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeters(account, this.facility);
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + newMeter.guid);
   }
 
@@ -84,7 +85,7 @@ export class SetMeterGroupingComponent {
   setCalanderizedMeterData() {
     if (this.facility && this.facilityMeters && this.meterData) {
       this.meterGroupingDataService.calanderizingMeterData.next(true);
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       if (typeof Worker !== 'undefined') {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();

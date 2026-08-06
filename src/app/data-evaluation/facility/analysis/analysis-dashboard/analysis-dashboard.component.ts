@@ -1,22 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -25,6 +21,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   standalone: false
 })
 export class AnalysisDashboardComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
@@ -41,13 +39,13 @@ export class AnalysisDashboardComponent implements OnInit {
   showComparisonDetails: boolean = false;
   analysisItemsSub: Subscription;
 
-  constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(
+    private router: Router,
+    private analysisDbService: AnalysisDbService,
+    private toastNotificationService: ToastNotificationsService,
     private analyticsService: AnalyticsService,
-    private predictorDbService: PredictorDbService) { }
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {
@@ -58,13 +56,13 @@ export class AnalysisDashboardComponent implements OnInit {
     //navigationsEnd isn't fired on init. Call here.
     this.setAnalysisType(this.router.url);
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.setHasEnergyAndWater();
     });
 
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.facilityAnalysisItems = items;
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector }).subscribe(items => {
+      this.facilityAnalysisItems = [...items];
     });
   }
 
@@ -75,14 +73,14 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-    await this.dbChangesService.setAnalysisItems(account, false, this.selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
-    this.analysisDbService.selectedAnalysisItem.next(addedItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/analysis/run-analysis');
   }
@@ -111,7 +109,7 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   setHasEnergyAndWater() {
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
     this.hasEnergy = false;
     this.hasWater = false;
     let hasWater: boolean = false;

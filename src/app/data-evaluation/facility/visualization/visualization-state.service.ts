@@ -1,21 +1,16 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 
@@ -23,6 +18,7 @@ import { checkSameMonthPredictorData } from 'src/app/data-management/data-manage
   providedIn: 'root'
 })
 export class VisualizationStateService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
@@ -31,11 +27,7 @@ export class VisualizationStateService {
 
   correlationPlotOptions: BehaviorSubject<CorrelationPlotOptions>;
 
-  constructor(private predictorDbService: PredictorDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private accountDbService: AccountdbService) {
+  constructor() {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>(undefined);
 
     this.menuOpen = new BehaviorSubject<boolean>(true);
@@ -44,9 +36,9 @@ export class VisualizationStateService {
 
   //TODO: remove
   setCalanderizedMeters(facility: IdbFacility) {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility], account.assessmentReportVersion, []);
   }
 
@@ -66,7 +58,7 @@ export class VisualizationStateService {
     let timeSeriesGroupYAxis2Options: Array<AxisOption> = new Array();
     let timeSeriesPredictorYAxis1Options: Array<AxisOption> = new Array();
     let timeSeriesPredictorYAxis2Options: Array<AxisOption> = new Array();
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     meters.forEach((meter, index) => {
       xAxisMeterOptions.push({
         itemId: meter.guid,
@@ -100,7 +92,7 @@ export class VisualizationStateService {
       });
     });
 
-    let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let meterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
     meterGroups.forEach(meterGroup => {
       xAxisGroupOptions.push({
         itemId: meterGroup.guid,
@@ -134,7 +126,7 @@ export class VisualizationStateService {
         selected: false
       });
     });
-    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.facilityPredictors()];
     predictors.forEach((predictor, index) => {
       xAxisPredictorOptions.push({
         itemId: predictor.guid,
@@ -211,7 +203,7 @@ export class VisualizationStateService {
         }
       })
     } else if (axisOption.type == 'meterGroup') {
-      let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+      let facilityGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
       let group: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == axisOption.itemId });
       let groupMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
         return cMeter.meter.groupId == axisOption.itemId;
@@ -237,7 +229,7 @@ export class VisualizationStateService {
 
       });
     } else if (axisOption.type == 'predictor') {
-      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
+      let facilityPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.facilityPredictorData()];
       dates.forEach(date => {
         let monthPredictorEntry: IdbPredictorData = facilityPredictorEntries.find(entry => {
           return entry.predictorId == axisOption.itemId && checkSameMonthPredictorData(entry, date);

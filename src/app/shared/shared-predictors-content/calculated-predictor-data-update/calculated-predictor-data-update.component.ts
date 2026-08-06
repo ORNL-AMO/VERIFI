@@ -1,13 +1,13 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -15,7 +15,6 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -29,6 +28,9 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   predictor: IdbPredictor;
 
@@ -69,32 +71,31 @@ export class CalculatedPredictorDataUpdateComponent {
     { length: new Date().getFullYear() - 1999 },
     (_, i) => new Date().getFullYear() - i
   );
-  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
     private router: Router,
-    private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    // private degreeDaysService: DegreeDaysService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private injector: Injector
+
   ) {
 
   }
 
   ngOnInit() {
     this.setLastMeterReading();
-    this.predictorDataSub = this.predictorDataDbService.facilityPredictorData.subscribe(() => {
+    this.predictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]), { injector: this.injector }).subscribe(() => {
       this.setPredictorData();
     });
 
     if (!this.predictor) {
       this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
         let predictorId: string = params['id'];
-        this.predictor = this.predictorDbService.getByGuid(predictorId);
+        this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
         this.setPredictorData();
       });
     }
@@ -112,7 +113,7 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   setLastMeterReading() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.latestMeterReading = this.predictorDataHelperService.getLastMeterDate(facility);
     this.firstMeterReading = this.predictorDataHelperService.getFirstMeterDate(facility);
   }
@@ -120,7 +121,7 @@ export class CalculatedPredictorDataUpdateComponent {
 
   setPredictorData() {
     if (this.predictor) {
-      let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+      let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
       this.predictorData = predictorData.map(pData => {
         return {
           ...pData,
@@ -304,7 +305,7 @@ export class CalculatedPredictorDataUpdateComponent {
     if (this.router.url.includes('data-management')) {
       this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
     } else {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
     }
   }
@@ -329,10 +330,7 @@ export class CalculatedPredictorDataUpdateComponent {
         await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(pData.id));
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility)
-    this.loadingService.setLoadingStatus(false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
   }

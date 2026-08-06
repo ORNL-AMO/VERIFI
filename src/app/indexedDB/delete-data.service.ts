@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IdbAccount } from '../models/idbModels/account';
-import { AccountdbService } from './account-db.service';
 import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
 import { VerifiStoreName } from './indexed-db-schema';
+import { ApplicationLifecycleService } from '../application-lifecycle/application-lifecycle.service';
+import { AccountWorkspaceService } from '../account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
 
 export interface AccountDeletionError {
   accountGuid: string;
@@ -32,8 +34,10 @@ export class DeleteDataService {
   private deletionSuspensionCount = 0;
 
   constructor(
-    private accountDbService: AccountdbService,
-    private cascadeDeleteService: IndexedDbCascadeDeleteService
+    private cascadeDeleteService: IndexedDbCascadeDeleteService,
+    private applicationLifecycle: ApplicationLifecycleService,
+    private workspaceService: AccountWorkspaceService,
+    private workspaceStore: AccountWorkspaceStore
   ) { }
 
   setDeletingMessage(index: number, totalCount: number, message: string) {
@@ -102,8 +106,11 @@ export class DeleteDataService {
         this.activeStoreName = phase.storeName;
         this.setDeletingMessage(phase.index, phase.total, phase.message);
       });
-      const allAccounts = await firstValueFrom(this.accountDbService.getAll());
-      this.resetDeletionState(allAccounts);
+      await this.applicationLifecycle.refreshAccountCatalog();
+      if (this.workspaceStore.account()?.guid === account.guid) {
+        this.workspaceService.clear();
+      }
+      this.resetDeletionState();
     } catch (error) {
       this.deletionError.next({
         accountGuid: account.guid,
@@ -114,11 +121,10 @@ export class DeleteDataService {
     }
   }
 
-  private resetDeletionState(allAccounts: Array<IdbAccount>): void {
+  private resetDeletionState(): void {
     this.deletingMessaging.next(undefined);
     this.deletionError.next(undefined);
     this.isDeleting.next(false);
     this.accountToDelete = undefined;
-    this.accountDbService.allAccounts.next(allAccounts);
   }
 }

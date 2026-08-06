@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -11,17 +12,20 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class FacilityOverviewHelpComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   routerSub: Subscription;
   overviewType: 'an energy consumption' | 'a utility cost' | 'a water consumption' | 'an emissions';
   tableType: 'Utility Costs' | 'Utility Use and Cost' | 'Utility Emissions';
-  constructor(private facilityDbService: FacilitydbService,
-    private router: Router) { }
+  constructor(
+    private router: Router,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
     });
     this.routerSub = this.router.events.subscribe((event) => {

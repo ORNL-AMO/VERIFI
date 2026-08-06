@@ -1,9 +1,7 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -15,7 +13,7 @@ import { getMeterDataCopy } from 'src/app/calculations/conversions/convertMeterD
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
@@ -29,20 +27,21 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   providedIn: 'root'
 })
 export class UploadDataV1Service {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
+  constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService) { }
+    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService
+  ) { }
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];
       if (facilityName) {
@@ -73,7 +72,7 @@ export class UploadDataV1Service {
       }
     })
     let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     let importMeters: Array<IdbUtilityMeter> = new Array();
     let newGroups: Array<IdbUtilityMeterGroup> = new Array();
     metersData.forEach(meterData => {
@@ -196,7 +195,7 @@ export class UploadDataV1Service {
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
 
     electricityData.forEach(dataPoint => {
@@ -360,7 +359,7 @@ export class UploadDataV1Service {
 
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Meters') {
         let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });
@@ -432,7 +431,7 @@ export class UploadDataV1Service {
       }
     }
     newMeter.name = groupItem.value;
-    //use import wizard name so that the name of the meter can be changed but 
+    //use import wizard name so that the name of the meter can be changed but
     //we can still access the data using this value
     newMeter.importWizardName = groupItem.value;
     //start with random meter number

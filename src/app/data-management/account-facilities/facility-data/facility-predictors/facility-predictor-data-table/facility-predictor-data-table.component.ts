@@ -1,12 +1,8 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
@@ -17,6 +13,8 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
   standalone: false
 })
 export class FacilityPredictorDataTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   predictor: IdbPredictor;
@@ -24,20 +22,16 @@ export class FacilityPredictorDataTableComponent {
   showDeletePredictorEntry: boolean = false;
   isSaved: boolean = true;
   calculatingDegreeDays: boolean;
-  constructor(private activatedRoute: ActivatedRoute,
-    private predictorDbService: PredictorDbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
-    private router: Router,
-    private loadingService: LoadingService,
-    private predictorDataDbService: PredictorDataDbService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService
+    private router: Router
+
   ) {
   }
 
   ngOnInit() {
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -49,7 +43,7 @@ export class FacilityPredictorDataTableComponent {
   }
 
   setPredictor(predictorId: string) {
-    let predictor: IdbPredictor = this.predictorDbService.getByGuid(predictorId);
+    let predictor: IdbPredictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (predictor) {
       this.predictor = JSON.parse(JSON.stringify(predictor));
     } else {

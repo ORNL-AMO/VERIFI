@@ -1,14 +1,13 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { MetersOverviewStackedLineChartComponent } from '../meters-overview-stacked-line-chart/meters-overview-stacked-line-chart.component';
@@ -23,6 +22,7 @@ import { UtilitiesUsageChartComponent } from '../utilities-usage-chart/utilities
   standalone: false
 })
 export class FacilitySectionReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'cost' | 'water' | 'emissions';
   @Input()
@@ -63,17 +63,17 @@ export class FacilitySectionReportComponent {
   @ViewChild('annualBarChart') annualBarChart !: UtilitiesUsageChartComponent;
   @ViewChild('monthlyUsageLineChart') monthlyUsageLineChart !: MonthlyUtilityUsageLineChartComponent;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private dataEvaluationService: DataEvaluationService,
-    private facilityReportDbService: FacilityReportsDbService) {
+  constructor(
+    private dataEvaluationService: DataEvaluationService
+  ) {
   }
 
   ngOnInit() {
     if (!this.inFacilityReport) {
-      let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+      let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
       this.sectionOptions = selectedReport.dataOverviewReportSetup;
     } else {
-      let selectedReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+      let selectedReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
       this.sectionOptions = selectedReport.dataOverviewReportSettings;
     }
     this.waterUnit = this.facility.volumeLiquidUnit;

@@ -1,13 +1,12 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, EventEmitter, inject, Injector, input, Output, Signal, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { auditTime, distinctUntilChanged, merge } from 'rxjs';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -21,6 +20,7 @@ import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/ca
   styleUrl: './facility-energy-use-equipment-form.component.css'
 })
 export class FacilityEnergyUseEquipmentFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   energyUseEquipment = input.required<IdbFacilityEnergyUseEquipment>();
   @Output('emitChanged')
   emitChanged: EventEmitter<IdbFacilityEnergyUseEquipment> = new EventEmitter<IdbFacilityEnergyUseEquipment>();
@@ -28,14 +28,12 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
 
   private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService = inject(FacilityEnergyUseEquipmentFormService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private injector: Injector = inject(Injector);
 
   private energyUseEquipmentSignal = signal<IdbFacilityEnergyUseEquipment | null>(null);
   calanderizedMeterData: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: new Array<CalanderizedMeter>() });
-  private facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  private facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
 
   hasElectricityUtility: Signal<boolean> = computed(() => {
     const utilityDataFroms = this.utilityDataForms();
@@ -127,7 +125,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
     let newForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getOperatingConditionsYearForm(newOperatingConditionsData);
     this.annualOperatingConditionsDataForms.update(forms => [...forms, newForm]);
     utilityDataForms.forEach(udf => {
-      let energyUseUnit: string = this.facilityDbService.selectedFacility.getValue()?.energyUnit;
+      let energyUseUnit: string = this.accountWorkspaceStore.selectedFacility()?.energyUnit;
       let energyUseForm: FormGroup = this.facilityEnergyUseEquipmentFormService.getEnergyUseForm({ year: year, energyUse: 0, overrideEnergyUse: false, energyUseUnit: energyUseUnit });
       udf.energyUseForms.push(energyUseForm);
     });
@@ -167,7 +165,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
       return;
     }
     const utilityDataForms = this.utilityDataForms();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return equipmentDetailsForm.controls['utilityMeterGroupIds'].value.includes(meter.groupId); });
     let sources: Array<MeterSource> = groupMeters.map(meter => { return meter.source; });
     sources = _.uniq(sources);
@@ -193,7 +191,7 @@ export class FacilityEnergyUseEquipmentFormComponent {
           year: year,
           energyUse: 0,
           overrideEnergyUse: false,
-          energyUseUnit: this.facilityDbService.selectedFacility.getValue()?.energyUnit
+          energyUseUnit: this.accountWorkspaceStore.selectedFacility()?.energyUnit
         };
       })
     };

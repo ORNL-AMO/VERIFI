@@ -1,15 +1,13 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CostSavingsReportSettings, IdbFacilityReport, MonthlyGroupData, YearGroupData } from 'src/app/models/idbModels/facilityReport';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
@@ -17,9 +15,6 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { convertConsumptionRate, getYearsArray } from 'src/app/shared/sharedHelperFunctions';
 import { FacilityCostSavingsReportResults } from 'src/app/calculations/cost-savings-report-calculations/facilityCostSavingsReportResults';
@@ -31,6 +26,8 @@ import { FacilityCostSavingsReportResults } from 'src/app/calculations/cost-savi
   styleUrl: './facility-cost-savings-report-results.component.css',
 })
 export class FacilityCostSavingsReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportSub: Subscription;
   facilityReport: IdbFacilityReport;
@@ -71,20 +68,14 @@ export class FacilityCostSavingsReportResultsComponent {
   monthlyEnergySavingsTable: MonthlyGroupData = {};
 
   constructor(
-    private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private accountDbService: AccountdbService
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.selectedAnalysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.baselineYear = this.selectedAnalysisItem?.baselineYear;
       this.reportSettings = this.facilityReport.costSavingsReportSettings;
       this.groupUnits = this.reportSettings.groupUnits;
@@ -117,7 +108,7 @@ export class FacilityCostSavingsReportResultsComponent {
         if (originalUnit == this.finalUnit || cost == null || originalUnit == null)
           continue;
 
-        const groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue().filter(meter => meter.groupId == groupId);
+        const groupMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()].filter(meter => meter.groupId == groupId);
         if (groupMeters.length > 0) {
           this.convertedCostDataTable[year][groupId] = convertConsumptionRate(groupMeters[0], cost, this.finalUnit, this.selectedAnalysisItem?.analysisCategory);
         }
@@ -135,13 +126,13 @@ export class FacilityCostSavingsReportResultsComponent {
       this.worker = null;
     }
 
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facility = this.facilityDbService.getFacilityById(this.selectedAnalysisItem?.facilityId);
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.selectedAnalysisItem?.facilityId);
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.selectedAnalysisItem?.facilityId);
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.selectedAnalysisItem?.facilityId);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
+    this.facility = this.accountWorkspaceStore.selectedFacility();
+    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.selectedAnalysisItem?.facilityId);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(this.selectedAnalysisItem?.facilityId);
+    let accountPredictorEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(this.selectedAnalysisItem?.facilityId);
+    let accountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(this.selectedAnalysisItem?.facilityId);
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       const worker = new Worker(new URL('../../../../../web-workers/facility-cost-savings-report.worker', import.meta.url));
       this.worker = worker;
@@ -175,7 +166,7 @@ export class FacilityCostSavingsReportResultsComponent {
       };
       worker.postMessage(workerMessage);
     } else {
-      // Web Workers are not supported in this environment.  
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.selectedAnalysisItem?.energyIsSource, neededUnits: getNeededUnits(this.selectedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.selectedAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, true);
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;

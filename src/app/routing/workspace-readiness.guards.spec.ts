@@ -121,6 +121,20 @@ describe('workspace readiness guards', () => {
       .resolves.toEqual({ commands: ['/manage-accounts'] });
   });
 
+  it('allows the active workspace while a newly imported account catalog refresh is pending', async () => {
+    store.publish(createSnapshot('imported-account'));
+    lifecycle.initialize.mockResolvedValue({ status: 'empty' });
+    lifecycle.usableAccounts.mockReturnValue([]);
+
+    await expect(invoke(
+      accountGuidReadyGuard,
+      route({ id: 'imported-account' }),
+      state('/data-management/imported-account/home')
+    )).resolves.toBe(true);
+
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
+  });
+
   it('loads a facility owner workspace and selects the facility deep link', async () => {
     store.publish(createSnapshot('account-a'));
     facilities.getStoredByGuid.mockResolvedValue({
@@ -139,6 +153,27 @@ describe('workspace readiness guards', () => {
 
     expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
     expect(workspace.selectFacility).toHaveBeenCalledWith('facility-b');
+  });
+
+  it('selects an active-workspace facility while a newly imported account catalog refresh is pending', async () => {
+    store.publish(createSnapshot('imported-account', 'imported-facility'));
+    lifecycle.initialize.mockResolvedValue({ status: 'empty' });
+    lifecycle.usableAccounts.mockReturnValue([]);
+    facilities.getStoredByGuid.mockResolvedValue({
+      id: 30,
+      guid: 'imported-facility',
+      accountId: 'imported-account',
+      name: 'Imported Facility'
+    });
+
+    await expect(invoke(
+      facilityReadyGuard,
+      route({ id: 'imported-facility' }),
+      state('/data-evaluation/facility/imported-facility')
+    )).resolves.toBe(true);
+
+    expect(workspace.selectAccount).not.toHaveBeenCalled();
+    expect(workspace.selectFacility).toHaveBeenCalledWith('imported-facility');
   });
 
   it('redirects a missing or mismatched facility to the active account home', async () => {

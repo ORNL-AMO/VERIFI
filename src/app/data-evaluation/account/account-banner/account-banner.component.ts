@@ -1,8 +1,7 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -14,15 +13,14 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
   standalone: false
 })
 export class AccountBannerComponent {
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   @ViewChild('navTabs') navTabs: ElementRef;
 
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
-  meterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.accountMeterData, { initialValue: undefined });
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
+  meterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.meterData()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   disableTabs: Signal<boolean> = computed(() => {

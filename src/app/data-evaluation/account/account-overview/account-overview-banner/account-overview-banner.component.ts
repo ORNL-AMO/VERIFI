@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
@@ -13,6 +13,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class AccountOverviewBannerComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @ViewChild('navTabs') navTabs: ElementRef;
   modalOpenSub: Subscription;
@@ -24,15 +25,17 @@ export class AccountOverviewBannerComponent implements OnInit {
 
   hideTabText: boolean = false;
   hideAllText: boolean = false;
-  constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private cd: ChangeDetectorRef) { }
+  constructor(
+    private sharedDataService: SharedDataService,
+    private cd: ChangeDetectorRef,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
       this.setShowWater();
     });
@@ -49,7 +52,7 @@ export class AccountOverviewBannerComponent implements OnInit {
   }
 
   setShowWater() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
   }

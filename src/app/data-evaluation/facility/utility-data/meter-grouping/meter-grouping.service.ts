@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -14,18 +13,18 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   providedIn: 'root'
 })
 export class MeterGroupingService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   dataDisplay: "grouping" | "table" | "graph" = "grouping";
   displayGraphEnergy: "bar" | "scatter" = "bar";
   displayGraphCost: "bar" | "scatter" = "bar";
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private facilityDbService: FacilitydbService) {
+  constructor() {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>({ minDate: undefined, maxDate: undefined });
   }
 
   getMeterGroupTypes(calanderizedMeters: Array<CalanderizedMeter>): Array<MeterGroupType> {
-    let meterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let meterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.facilityMeterGroups()];
     //group meters by group type and set summaries
     let meterGroupTypes: Array<MeterGroupType> = _.chain(meterGroups).groupBy('groupType').map((value: Array<IdbUtilityMeterGroup>, key: string) => {
       let meterGroups: Array<IdbUtilityMeterGroup> = this.setGroupDataSummary(value, calanderizedMeters)
@@ -152,7 +151,7 @@ export class MeterGroupingService {
     }
     let startDate: Date = new Date(dateRange.minDate);
     let endDate: Date = new Date(dateRange.maxDate);
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     while (startDate <= endDate) {
       let filteredData: Array<MonthlyData> = allMonthlyData.filter(monthlyData => {
         let dataDate: Date = new Date(monthlyData.date);

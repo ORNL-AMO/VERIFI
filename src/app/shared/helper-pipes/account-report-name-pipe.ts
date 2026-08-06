@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 
 @Pipe({
   name: 'accountReportName',
@@ -7,11 +7,11 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 })
 export class AccountReportNamePipe implements PipeTransform {
 
-  constructor(private accountReportDbService: AccountReportDbService) {
+  constructor(private accountWorkspaceQuery: AccountWorkspaceQueryService) {
   }
 
   transform(reportId: string): string {
-    return this.accountReportDbService.getReportName(reportId);
+    return this.accountWorkspaceQuery.getAccountReportByGuid(reportId)?.name ?? '';
   }
 
 }

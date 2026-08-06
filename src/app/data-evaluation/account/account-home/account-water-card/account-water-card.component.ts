@@ -1,7 +1,7 @@
-import { Component, computed, inject, Signal } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '../account-home.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -15,8 +15,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     standalone: false
 })
 export class AccountWaterCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
 
   monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyWaterAnalysisData, { initialValue: [] });
@@ -24,7 +24,7 @@ export class AccountWaterCardComponent {
   calculatingOverview: Signal<boolean | 'error'> = toSignal(this.accountHomeService.calculatingOverview, { initialValue: false });
   annualWaterAnalysisSummary: Signal<Array<AnnualAnalysisSummary>> = toSignal(this.accountHomeService.annualWaterAnalysisSummary, { initialValue: [] });
   latestWaterAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: null });
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: null });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   carouselIndex: Signal<number> = toSignal(this.sharedDataService.waterHomeCarouselIndex, { initialValue: 0 });
   accountOverviewData: Signal<AccountOverviewData> = toSignal(this.accountHomeService.accountOverviewData, { initialValue: null });
 

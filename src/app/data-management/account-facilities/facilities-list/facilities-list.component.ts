@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -17,6 +19,8 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class FacilitiesListComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   facilitiesSub: Subscription;
   facilities: Array<IdbFacility>;
   modalOpen: boolean;
@@ -27,17 +31,19 @@ export class FacilitiesListComponent {
   facilityToDelete: IdbFacility;
   displayAddFacilityModal: boolean = false;
   loadingSub: Subscription;
-  constructor(private sharedDataService: SharedDataService,
+  constructor(
+    private sharedDataService: SharedDataService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
-      this.facilities = val;
+    this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
+      this.facilities = val.map(facility => ({ ...facility }));
       this.setOrderOptions();
     });
 
@@ -67,12 +73,12 @@ export class FacilitiesListComponent {
     this.loadingService.setLoadingStatus(true);
     for (let i = 0; i < this.numberOfFacilities; i++) {
       this.loadingService.setLoadingMessage('Creating Facility ' + (i + 1) + '...');
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
       let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
-      await this.dbChangesService.updateDataNewFacility(newFacility);
-      await this.dbChangesService.selectAccount(selectedAccount, false);
+      await this.dbChangesService.updateDataNewFacility(newFacility, false);
     }
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     if (this.numberOfFacilities > 1) {
       this.toastNotificationService.showToast(this.numberOfFacilities + ' Facilities Added!', undefined, undefined, false, 'alert-success');
@@ -109,7 +115,7 @@ export class FacilitiesListComponent {
   async confirmDeleteFacility() {
     let facilityToDelete: IdbFacility = this.facilityToDelete;
     this.cancelFacilityDelete();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.dbChangesService.deleteFacilityMessages();
     await this.dbChangesService.deleteFacility(facilityToDelete, selectedAccount);
   }
@@ -121,7 +127,7 @@ export class FacilitiesListComponent {
   setOrderOptions() {
     let orderOptions: Array<number> = new Array();
     let index: number = 1;
-    this.facilities.forEach(item => {
+    this.facilities.forEach(() => {
       orderOptions.push(index);
       index++;
     })
@@ -141,7 +147,7 @@ export class FacilitiesListComponent {
   }
 
   goToUploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data/upload-files');
   }
 }

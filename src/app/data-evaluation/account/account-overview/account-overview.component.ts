@@ -1,14 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
@@ -18,7 +15,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
@@ -28,6 +24,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
     standalone: false
 })
 export class AccountOverviewComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   accountSub: Subscription;
   worker: Worker;
@@ -37,17 +34,17 @@ export class AccountOverviewComponent implements OnInit {
   dateRangeSub: Subscription;
   dateRange: { startDate: Date, endDate: Date };
   customFuels: Array<IdbCustomFuel>;
-  constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService,
-    private facilityDbService: FacilitydbService, private router: Router, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
+  constructor(
+    private accountOverviewService: AccountOverviewService,
+    private router: Router,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService) { }
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;
-      let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+      let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
       if (accountMeterData.length != 0) {
         this.noUtilityData = false;
         this.calculateFacilitiesSummary();
@@ -80,11 +77,11 @@ export class AccountOverviewComponent implements OnInit {
   }
 
   calculateFacilitiesSummary() {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -148,7 +145,7 @@ export class AccountOverviewComponent implements OnInit {
 
   addUtilityData() {
     //TODO: Update select facility call
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilities.length > 0) {
       this.router.navigateByUrl('/data-evaluation/facility/' + facilities[0].guid + '/utility');
     }

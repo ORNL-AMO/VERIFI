@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -6,7 +7,6 @@ import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 export interface FacilitySavingsReportPptInput {
     facility: IdbFacility;
@@ -26,8 +26,8 @@ export interface FacilitySavingsReportPptInput {
 
 @Injectable({ providedIn: 'root' })
 export class FacilitySavingsReportPptAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     analysisTableColumns: AnalysisTableColumns;
     analysisItem: IdbAnalysisItem;
@@ -114,7 +114,7 @@ export class FacilitySavingsReportPptAdapter {
 
         if (this.reportSettings.groupReports && ((this.reportSettings.groupAnnualResultsTable) || (this.reportSettings.groupMonthlyResults && (this.reportSettings.groupMonthlyResultsTable || this.reportSettings.groupMonthlyResultsGraphs || this.reportSettings.groupTrailingTwelveMonthsConsumption || this.reportSettings.groupTrailingTwelveMonthsSavings)))) {
             data.groupSummaries.forEach(groupSummary => {
-                const groupName = this.utilityMeterGroupDbService.getGroupName(groupSummary.group.idbGroupId);
+                const groupName = this.accountWorkspaceQuery.getMeterGroupName(groupSummary.group.idbGroupId);
                 slides.push({
                     type: 'title',
                     title: `${groupName}\nGroup Analysis`,
