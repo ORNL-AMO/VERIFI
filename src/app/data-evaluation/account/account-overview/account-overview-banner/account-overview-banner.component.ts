@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
@@ -27,9 +25,10 @@ export class AccountOverviewBannerComponent implements OnInit {
 
   hideTabText: boolean = false;
   hideAllText: boolean = false;
-  constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private cd: ChangeDetectorRef) { }
+  constructor(
+    private sharedDataService: SharedDataService,
+    private cd: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {

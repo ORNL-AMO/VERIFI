@@ -1,21 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceLoaderService, AccountWorkspaceLoadError } from './account-workspace-loader.service';
-import {
-  AccountWorkspaceSnapshot,
-  WorkspaceLoadResult,
-  WorkspaceSelections,
-  WorkspaceSelectionError
-} from './account-workspace.models';
+import { AccountWorkspaceSnapshot, WorkspaceLoadResult, WorkspaceSelections, WorkspaceSelectionError } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceSelectionHints, WorkspaceSelectionStorageService } from './workspace-selection-storage.service';
-import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
-import { IdbPredictor } from '../models/idbModels/predictor';
-import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
-import { IdbAccountReport } from '../models/idbModels/accountReport';
-import { IdbFacilityReport } from '../models/idbModels/facilityReport';
-import { IdbFacilityEnergyUseGroup } from '../models/idbModels/facilityEnergyUseGroups';
-import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceService {

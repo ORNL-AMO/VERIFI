@@ -3,7 +3,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import * as XLSX from 'xlsx';
@@ -27,8 +26,10 @@ export class SelectWorksheetComponent implements OnInit {
   worksheetNames: Array<string>;
   hasHiddenTabs: boolean;
   showHiddenTabs: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService
+  ) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {

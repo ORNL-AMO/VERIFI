@@ -1,7 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -20,8 +19,9 @@ export class AccountOverviewHelpComponent {
   routerSub: Subscription;
   overviewType: 'an energy consumption' | 'a utility cost' | 'a water consumption' | 'an emissions';
   tableType: 'Utility Costs' | 'Utility Use and Cost' | 'Utility Emissions';
-  constructor(private accountDbService: AccountdbService,
-    private router: Router) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(selectedAccount => {

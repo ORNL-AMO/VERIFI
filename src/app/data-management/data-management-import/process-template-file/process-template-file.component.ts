@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '../../data-management.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -20,9 +19,11 @@ export class ProcessTemplateFileComponent {
   fileReferenceSub: Subscription;
 
   selectedFile: FileReference;
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private router: Router,
-    private accountDbService: AccountdbService
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService,
+    private router: Router
+
   ) {
 
   }

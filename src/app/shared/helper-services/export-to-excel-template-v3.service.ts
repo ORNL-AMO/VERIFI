@@ -2,15 +2,10 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as ExcelJS from 'exceljs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { getIsEnergyUnit } from '../sharedHelperFunctions';
 import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { VehicleTypes } from '../vehicle-data/vehicleType';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -19,8 +14,6 @@ import { IdbUtilityMeter, MeterCharge, MeterReadingDataApplication } from 'src/a
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '../form-data/naics-data';
@@ -38,14 +31,9 @@ export class ExportToExcelTemplateV3Service {
   exportBlob: Blob;
   exportFileName: string;
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService,
-    private loadingService: LoadingService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+  constructor(
+    private loadingService: LoadingService
+  ) { }
 
   exportFacilityData(includeWeatherData: boolean, facilityId?: string) {
     this.setAlphabet();

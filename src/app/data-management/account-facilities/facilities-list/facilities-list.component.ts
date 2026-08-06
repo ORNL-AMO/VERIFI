@@ -8,7 +8,6 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -32,13 +31,14 @@ export class FacilitiesListComponent {
   facilityToDelete: IdbFacility;
   displayAddFacilityModal: boolean = false;
   loadingSub: Subscription;
-  constructor(private sharedDataService: SharedDataService,
+  constructor(
+    private sharedDataService: SharedDataService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService
+  ) { }
 
   ngOnInit(): void {
     this.facilitiesSub = toObservable(this.accountWorkspaceStore.facilities).subscribe(val => {

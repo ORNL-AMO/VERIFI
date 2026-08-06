@@ -4,7 +4,6 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataEvaluationService } from '../data-evaluation.service';
 
@@ -23,8 +22,11 @@ export class FacilityComponent implements OnInit {
 
   print: boolean;
   printSub: Subscription;
-  constructor(private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private router: Router,
-    private dataEvaluationService: DataEvaluationService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
+    private dataEvaluationService: DataEvaluationService
+  ) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {

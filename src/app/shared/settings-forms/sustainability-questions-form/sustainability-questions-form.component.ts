@@ -2,9 +2,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Subscription } from 'rxjs';
 import { SettingsFormsService } from '../settings-forms.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -33,7 +31,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   years: Array<number> = new Array();
   isFormChange: boolean = false;
   fiscalYearOption: "calendarYear" | "nonCalendarYear";
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
+  constructor(private settingsFormsService: SettingsFormsService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {

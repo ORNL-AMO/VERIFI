@@ -1,7 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -16,7 +15,6 @@ export class FacilityHomeHelpComponent {
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  constructor(private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(selectedFacility => {

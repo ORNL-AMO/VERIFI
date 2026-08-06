@@ -6,13 +6,11 @@ import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculati
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { CalanderizationService } from './calanderization.service';
-import { AnalysisSetupErrors, FacilityReportErrors, AccountReportErrors, GroupAnalysisErrors } from 'src/app/models/validation';
+import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { emptyAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/analysisValidation';
 import { emptyGroupAnalysisErrors } from '../../calculations/status-check-calculations/validation/groupAnalysisValidation';
-import { emptyFacilityReportErrors } from '../../calculations/status-check-calculations/validation/facilityReportValidation';
 import { emptyAccountAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/accountAnalysisValidation';
-import { emptyAccountReportErrors } from '../../calculations/status-check-calculations/validation/accountReportValidation';
 
 @Injectable({
     providedIn: 'root'

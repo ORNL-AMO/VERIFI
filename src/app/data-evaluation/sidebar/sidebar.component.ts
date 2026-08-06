@@ -2,11 +2,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { LocalStorageService } from 'ngx-webstorage';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -43,9 +39,10 @@ export class SidebarComponent implements OnInit {
   sidebarOpenSub: Subscription;
   url: string;
   routerSub: Subscription;
-  constructor(private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService, private router: Router,
-    private dataEvaluationService: DataEvaluationService) {
+  constructor(
+    private router: Router,
+    private dataEvaluationService: DataEvaluationService
+  ) {
   }
 
   ngOnInit() {

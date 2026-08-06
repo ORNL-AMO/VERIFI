@@ -2,8 +2,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
@@ -55,13 +54,13 @@ export class DataManagementHomeComponent {
   loadingSub: Subscription;
 
   constructor(
-    private accountDbService: AccountdbService,
     private accountStatusCheckService: AccountStatusCheckService,
     private weatherPredictorManagementService: WeatherPredictorManagementService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService
+
   ) {
 
   }

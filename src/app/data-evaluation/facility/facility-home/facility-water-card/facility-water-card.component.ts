@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { FacilityHomeService } from '../facility-home.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
@@ -18,7 +17,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class FacilityWaterCardComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
 
   monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.facilityHomeService.monthlyFacilityWaterAnalysisData, { initialValue: undefined });

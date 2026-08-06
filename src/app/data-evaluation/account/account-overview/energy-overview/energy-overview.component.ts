@@ -3,7 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -27,7 +26,7 @@ export class EnergyOverviewComponent implements OnInit {
   utilityUseAndCost: UtilityUseAndCost;
   dateRangeSub: Subscription;
   dateRange: { startDate: Date, endDate: Date };
-  constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService) { }
+  constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {

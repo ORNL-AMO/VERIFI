@@ -2,7 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject, computed } from '@angular/core';
 import * as XLSX from 'xlsx';
-import * as _ from 'lodash';
 import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
@@ -69,9 +68,9 @@ export class EGridService {
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
       if (subregion) {
-        let CO2: number = Number(result['CO2']); 
-        let CH4: number = Number(result['CH4']); 
-        let N2O: number = Number(result['N2O']); 
+        let CO2: number = Number(result['CO2']);
+        let CH4: number = Number(result['CH4']);
+        let N2O: number = Number(result['N2O']);
         let year: number = Number(result['Year']);
         let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
         subregionEmissions = this.addEmissionRate(subregion, CO2, CH4, N2O, year, category, subregionEmissions);
@@ -99,15 +98,15 @@ export class EGridService {
       if (category == 'LocationMix') {
         subregionEmissions[subregionIndex].locationEmissionRates.push({
           year: year,
-          CO2: CO2, 
-          CH4: CH4, 
+          CO2: CO2,
+          CH4: CH4,
           N2O: N2O,
         })
       } else {
         subregionEmissions[subregionIndex].residualEmissionRates.push({
           year: year,
-          CO2: CO2, 
-          CH4: CH4, 
+          CO2: CO2,
+          CH4: CH4,
           N2O: N2O,
         })
       }
@@ -118,8 +117,8 @@ export class EGridService {
           subregion: subregion,
           locationEmissionRates: [{
             year: year,
-            CO2: CO2, 
-            CH4: CH4, 
+            CO2: CO2,
+            CH4: CH4,
             N2O: N2O,
           }],
           residualEmissionRates: new Array()
@@ -130,8 +129,8 @@ export class EGridService {
           locationEmissionRates: new Array(),
           residualEmissionRates: [{
             year: year,
-            CO2: CO2, 
-            CH4: CH4, 
+            CO2: CO2,
+            CH4: CH4,
             N2O: N2O,
           }]
         })

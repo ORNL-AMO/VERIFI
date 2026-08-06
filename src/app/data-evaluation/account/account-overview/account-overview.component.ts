@@ -1,16 +1,11 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
@@ -20,7 +15,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
@@ -40,12 +34,11 @@ export class AccountOverviewComponent implements OnInit {
   dateRangeSub: Subscription;
   dateRange: { startDate: Date, endDate: Date };
   customFuels: Array<IdbCustomFuel>;
-  constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService,
-    private facilityDbService: FacilitydbService, private router: Router, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService) { }
+  constructor(
+    private accountOverviewService: AccountOverviewService,
+    private router: Router,
+    private eGridService: EGridService
+  ) { }
 
   ngOnInit(): void {
     this.accountSub = toObservable(this.accountWorkspaceStore.account).subscribe(val => {

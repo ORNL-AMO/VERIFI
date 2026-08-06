@@ -2,14 +2,11 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Subscription } from 'rxjs';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { SettingsFormsService } from '../settings-forms.service';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { Router } from '@angular/router';
 import { SharedDataService } from '../../helper-services/shared-data.service';
 import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
@@ -49,12 +46,12 @@ export class DefaultUnitsFormComponent implements OnInit {
   currentZip: string;
   selectedSubregionEmissions: SubregionEmissions;
   openEmissionsRates: boolean = false;
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService,
-    private facilityDbService: FacilitydbService,
+  constructor(
+    private settingsFormsService: SettingsFormsService,
     private eGridService: EGridService,
-    private customEmissionsDbService: CustomEmissionsDbService,
     private router: Router,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService
+  ) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(account => {

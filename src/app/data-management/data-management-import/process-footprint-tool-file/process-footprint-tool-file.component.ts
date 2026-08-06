@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataManagementService } from '../../data-management.service';
 import { FileReference } from '../import-services/upload-data-models';
@@ -20,9 +19,11 @@ export class ProcessFootprintToolFileComponent {
   fileReferenceSub: Subscription;
 
   selectedFile: FileReference;
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private router: Router,
-    private accountDbService: AccountdbService
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService,
+    private router: Router
+
   ) {
   }
 

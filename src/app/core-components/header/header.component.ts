@@ -5,12 +5,10 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { Subscription, firstValueFrom } from 'rxjs';
-import * as _ from 'lodash';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { environment } from 'src/environments/environment';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
@@ -56,7 +54,6 @@ export class HeaderComponent implements OnInit {
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
-    public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
@@ -71,6 +68,7 @@ export class HeaderComponent implements OnInit {
     private databaseResetService: DatabaseResetService,
     private applicationLifecycleService: ApplicationLifecycleService,
     private accountWorkspaceStore: AccountWorkspaceStore
+
   ) {
   }
 

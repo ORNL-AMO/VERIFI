@@ -5,7 +5,6 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../../../indexedDB/facility-db.service';
-import { AccountdbService } from '../../../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../../../shared/helper-services/energy-units-helper.service';
@@ -19,7 +18,6 @@ import { FuelTypeOption } from '../../../shared/fuel-options/fuelTypeOption';;
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate, TemplateVersion } from './upload-data-models';
 import { UploadDataV1Service } from './upload-data-v1.service';
 import { UploadDataV2Service } from './upload-data-v2.service';
-import * as _ from 'lodash';
 import { IdbAccount } from '../../../models/idbModels/account';
 import { IdbFacility } from '../../../models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '../../../models/idbModels/utilityMeterGroup';
@@ -29,13 +27,12 @@ import { PredictorDbService } from '../../../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../../../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../../../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../../../models/idbModels/predictorData';
-import { checkSameDay, checkSameMonthPredictorData } from './upload-helper-functions';
+import { checkSameMonthPredictorData } from './upload-helper-functions';
 import { LoadingService } from '../../../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../../../core-components/toast-notifications/toast-notifications.service';
 import { SharedDataService } from '../../../shared/helper-services/shared-data.service';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '../../../shared/shared-meter-content/utility-meter-data.service';
-import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
 import { UploadDataFootprintToolService } from './upload-data-footprint-tool.service';
@@ -58,8 +55,9 @@ export class UploadDataService {
   uploadMeters: Array<IdbUtilityMeter>;
 
   importFileReference: FileReference;
-  constructor(private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
+  constructor(
+    private facilityDbService: FacilitydbService,
+    private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -72,12 +70,12 @@ export class UploadDataService {
     private toastNotificationService: ToastNotificationsService,
     private sharedDataService: SharedDataService,
     private utilityMeterDataService: UtilityMeterDataService,
-    private dbChangesService: DbChangesService,
     private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
     private uploadDataV3Service: UploadDataV3Service,
     private uploadDataFootprintToolService: UploadDataFootprintToolService,
     private facilityEnergyUseGroupDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
+  ) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -423,7 +421,7 @@ export class UploadDataService {
       }
     }
     newMeter.name = groupItem.value;
-    //use import wizard name so that the name of the meter can be changed but 
+    //use import wizard name so that the name of the meter can be changed but
     //we can still access the data using this value
     newMeter.importWizardName = groupItem.value;
     //start with random meter number
@@ -576,7 +574,7 @@ export class UploadDataService {
     this.loadingService.addLoadingMessage('Creating Meter Groups');
     this.loadingService.addLoadingMessage('Uploading Meter Data');
     this.loadingService.addLoadingMessage('Uploading Predictors');
-    this.loadingService.addLoadingMessage('Uploading Predictor Data');    
+    this.loadingService.addLoadingMessage('Uploading Predictor Data');
     this.loadingService.addLoadingMessage('Finishing Up');
   }
 

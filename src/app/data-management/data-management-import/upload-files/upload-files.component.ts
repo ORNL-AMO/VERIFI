@@ -6,7 +6,6 @@ import * as XLSX from 'xlsx';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '../../data-management.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
@@ -25,12 +24,13 @@ export class UploadFilesComponent {
   filesUploaded: boolean = false;
   fileReferences: Array<FileReference>;
   fileReferencesSub: Subscription;
-  constructor(private router: Router,
+  constructor(
+    private router: Router,
     private uploadDataService: UploadDataService,
     private dataManagementService: DataManagementService,
-    private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private importBackupModalService: ImportBackupModalService
+
   ) {
 
   }

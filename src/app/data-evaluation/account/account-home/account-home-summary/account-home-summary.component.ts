@@ -1,10 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountHomeService } from '../account-home.service';
-import * as _ from 'lodash';
 import { Router } from '@angular/router';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -20,10 +17,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class AccountHomeSummaryComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
   private router: Router = inject(Router);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private exportToExcelV3TemplateService: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private loadingService: LoadingService = inject(LoadingService);
 

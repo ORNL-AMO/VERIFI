@@ -4,7 +4,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { FacilityOverviewService } from '../facility-overview.service';
 
@@ -29,7 +28,7 @@ export class FacilityCostOverviewComponent implements OnInit {
   utilityUseAndCostSub: Subscription;
   facilityOverviewData: FacilityOverviewData;
   facilityOverviewDataSub: Subscription;
-  constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
+  constructor(private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(val => {

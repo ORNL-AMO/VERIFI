@@ -3,7 +3,6 @@ import { Component, ElementRef, Input, ViewChild, SimpleChanges, inject } from '
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { EGridService } from '../../helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
@@ -35,9 +34,11 @@ export class DataOverviewMapComponent {
 
   emissionsDisplaySub: Subscription;
   emissionsDisplay: "market" | "location";
-  constructor(private plotlyService: PlotlyService,
-    private eGridService: EGridService, private accountDbService: AccountdbService,
-    private accountOverviewService: AccountOverviewService) { }
+  constructor(
+    private plotlyService: PlotlyService,
+    private eGridService: EGridService,
+    private accountOverviewService: AccountOverviewService
+  ) { }
 
   ngOnInit(): void {
     this.setMapData();

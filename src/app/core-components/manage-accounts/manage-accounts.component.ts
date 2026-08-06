@@ -1,5 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from '../loading/loading.service';

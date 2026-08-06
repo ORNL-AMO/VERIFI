@@ -3,7 +3,6 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 
@@ -21,8 +20,10 @@ export class ProcessTemplateFacilitiesComponent {
 
   account: IdbAccount;
 
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService
+  ) { }
 
   ngOnInit(): void {
     this.account = this.accountWorkspaceStore.account();

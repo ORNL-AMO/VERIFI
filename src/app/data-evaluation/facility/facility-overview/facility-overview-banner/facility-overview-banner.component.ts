@@ -7,17 +7,12 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { firstValueFrom, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-facility-overview-banner',
@@ -45,15 +40,13 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   account: IdbAccount;
   accountSub: Subscription
-  constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
+  constructor(
+    private sharedDataService: SharedDataService,
     private router: Router,
-    private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterGroupIdbService: UtilityMeterGroupdbService,
     private facilityReportDbService: FacilityReportsDbService,
-    private accountDbService: AccountdbService,
     private cd: ChangeDetectorRef,
-    private facilityOverviewService: FacilityOverviewService) { }
+    private facilityOverviewService: FacilityOverviewService
+  ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {

@@ -2,7 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '../account-home.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -18,7 +17,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class AccountEnergyCardComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
 
   monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyEnergyAnalysisData, { initialValue: [] });

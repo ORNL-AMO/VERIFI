@@ -3,7 +3,6 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 import { Component, inject } from '@angular/core';
 import { AccountDeletionError, DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -33,8 +32,9 @@ export class DeletingAccountDataComponent {
   destroyToast: boolean = true;
   deletionError: AccountDeletionError;
   allDeleteAccounts: Array<IdbAccount>;
-  constructor(private deleteDataService: DeleteDataService,
-    private accountDbService: AccountdbService
+  constructor(
+    private deleteDataService: DeleteDataService
+
   ) {
   }
 

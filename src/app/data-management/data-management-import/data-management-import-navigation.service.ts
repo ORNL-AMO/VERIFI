@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -11,7 +10,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 export class DataManagementImportNavigationService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private router: Router, private accountDbService: AccountdbService
+  constructor(private router: Router
   ) { }
 
 

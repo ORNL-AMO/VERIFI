@@ -1,7 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -20,8 +19,9 @@ export class FacilityOverviewHelpComponent {
   routerSub: Subscription;
   overviewType: 'an energy consumption' | 'a utility cost' | 'a water consumption' | 'an emissions';
   tableType: 'Utility Costs' | 'Utility Use and Cost' | 'Utility Emissions';
-  constructor(private facilityDbService: FacilitydbService,
-    private router: Router) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(selectedFacility => {

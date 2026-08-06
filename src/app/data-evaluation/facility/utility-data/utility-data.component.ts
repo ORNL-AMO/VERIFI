@@ -2,8 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -21,11 +19,6 @@ export class UtilityDataComponent implements OnInit {
 
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
-  constructor(
-    private accountdbService: AccountdbService,
-    private facilityDbService: FacilitydbService
-  ) {
-  }
 
   ngOnInit() {
     this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account).subscribe(selectedAccount => {

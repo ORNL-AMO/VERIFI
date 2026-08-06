@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import * as _ from 'lodash';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -25,7 +24,7 @@ export class FacilityHomeService {
   calculatingWater: BehaviorSubject<boolean | 'error'>;
   calculatingOverview: BehaviorSubject<boolean | 'error'>;
   facilityOverviewData: BehaviorSubject<FacilityOverviewData>;
-  constructor(private analysisDbService: AnalysisDbService) {
+  constructor() {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyFacilityEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
 

@@ -1,7 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFunctions';
 import { AllSources, MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
@@ -20,7 +18,6 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 export class EnergyUnitsHelperService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,) { }
 
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
@@ -31,7 +28,7 @@ export class EnergyUnitsHelperService {
       } else {
         isEnergyMeter = getIsEnergyMeter(meter.source);
       }
-      //use meter unit 
+      //use meter unit
       if (isEnergyMeter) {
         return selectedAccount.energyUnit;
       } else {
@@ -52,7 +49,7 @@ export class EnergyUnitsHelperService {
       } else {
         isEnergyMeter = getIsEnergyMeter(meter.source);
       }
-      //use meter unit 
+      //use meter unit
       if (isEnergyMeter) {
         return selectedFacility.energyUnit;
       } else {

@@ -5,16 +5,8 @@ import { dbConfig } from './_dbConfig';
 import { ACCOUNT_DELETION_STORES, GLOBAL_PERSISTENCE_STORES } from './account-deletion.config';
 import { DeleteDataService } from './delete-data.service';
 import { IndexedDbCascadeDeleteService } from './indexed-db-cascade-delete.service';
-import {
-  IndexedDbTransactionContext,
-  IndexedDbTransactionService
-} from './indexed-db-transaction.service';
-import {
-  accountAFixture,
-  accountBFixture,
-  globalPersistenceSeed,
-  twoAccountPersistenceSeed
-} from './testing/indexed-db-test-fixtures';
+import { IndexedDbTransactionContext, IndexedDbTransactionService } from './indexed-db-transaction.service';
+import { accountAFixture, accountBFixture, globalPersistenceSeed, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
 import { IndexedDbTestHarness } from './testing/indexed-db-test-harness';
 
 describe('account deletion in Chromium', () => {

@@ -2,12 +2,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { State, States } from 'src/app/shared/form-data/states';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -51,8 +49,10 @@ export class GeneralInformationFormComponent implements OnInit {
   modalAddress = new FormControl('');
   selectedCountry: string;
 
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private generalInformationService: GeneralInformationService) { }
+  constructor(
+    private settingsFormsService: SettingsFormsService,
+    private generalInformationService: GeneralInformationService
+  ) { }
 
   ngOnInit(): void {
     if (this.inAccount) {

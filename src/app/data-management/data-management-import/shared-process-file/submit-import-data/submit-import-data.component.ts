@@ -10,12 +10,9 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
-import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { getEarliestMeterData, getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterData, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-submit-import-data',
@@ -47,9 +44,8 @@ export class SubmitImportDataComponent {
     private dataManagementService: DataManagementService,
     private uploadDataService: UploadDataService,
     private router: Router,
-    private accountDbService: AccountdbService,
-    private predictorDbService: PredictorDbService,
     private loadingService: LoadingService
+
   ) { }
 
 

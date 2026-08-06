@@ -3,7 +3,6 @@ import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
@@ -19,7 +18,6 @@ export class UtilityBannerComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private loadingService: LoadingService = inject(LoadingService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

@@ -1,33 +1,24 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountHomeService } from './account-home.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -38,17 +29,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class AccountHomeComponent implements OnDestroy {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private eGridService: EGridService = inject(EGridService);
-  private customFuelDbService: CustomFuelDbService = inject(CustomFuelDbService);
-  private customGWPDbService: CustomGWPDbService = inject(CustomGWPDbService);
 
   account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   accountFacilities = this.accountWorkspaceStore.facilities;

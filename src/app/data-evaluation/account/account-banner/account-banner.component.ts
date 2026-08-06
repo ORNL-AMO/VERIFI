@@ -2,8 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -16,8 +14,6 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
 })
 export class AccountBannerComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

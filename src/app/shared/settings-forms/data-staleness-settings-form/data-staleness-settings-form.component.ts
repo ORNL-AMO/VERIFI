@@ -2,17 +2,11 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
-import {
-    DATA_STALENESS_OPTIONS,
-    DataStalenessMonths,
-    DEFAULT_DATA_STALENESS_MONTHS
-} from 'src/app/calculations/status-check-calculations/statusCheckModels';
+import { DATA_STALENESS_OPTIONS, DataStalenessMonths, DEFAULT_DATA_STALENESS_MONTHS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
@@ -38,10 +32,9 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
     isFormChange: boolean = false;
 
     constructor(
-        private accountDbService: AccountdbService,
-        private facilityDbService: FacilitydbService,
-        private formBuilder: FormBuilder,
-        private dbChangesService: DbChangesService
+      private formBuilder: FormBuilder,
+      private dbChangesService: DbChangesService
+
     ) { }
 
     ngOnInit(): void {

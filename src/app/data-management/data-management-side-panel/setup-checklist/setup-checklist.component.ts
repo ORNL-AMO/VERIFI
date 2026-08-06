@@ -2,7 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -41,8 +40,8 @@ export class SetupChecklistComponent {
   statusCheckSub: Subscription;
 
   constructor(
-    private accountDbService: AccountdbService,
     private accountStatusCheckService: AccountStatusCheckService
+
   ) {
 
   }

@@ -2,7 +2,6 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { UserSurvey } from 'src/app/models/userSurvey';
 import { environment } from 'src/environments/environment';
@@ -18,15 +17,16 @@ export class SurveyService {
   completedStatus: BehaviorSubject<'sending' | 'success' | 'error'>;
   userSurvey: BehaviorSubject<UserSurvey>;
 
-  constructor(private httpClient: HttpClient,
-    private accountDbService: AccountdbService
+  constructor(
+    private httpClient: HttpClient
+
   ) {
     this.completedStatus = new BehaviorSubject<'sending' | 'success' | 'error'>(undefined);
     this.userSurvey = new BehaviorSubject<UserSurvey>(undefined);
   }
 
   /**
-   * Check if is legacy user and has used app for 30 days 
+   * Check if is legacy user and has used app for 30 days
    */
   checkIsExistingUser(): boolean {
     let currentDate = new Date();

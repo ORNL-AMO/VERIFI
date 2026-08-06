@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference } from '../../import-services/upload-data-models';
 import { Subscription } from 'rxjs';
@@ -22,9 +21,11 @@ export class FootprintUploadSelectFacilityComponent {
   fileReferenceSub: Subscription;
   fileReference: FileReference;
   paramsSub: Subscription;
-  constructor(private facilityDbService: FacilitydbService,
-    private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private uploadDataFootprintToolService: UploadDataFootprintToolService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService,
+    private uploadDataFootprintToolService: UploadDataFootprintToolService
+  ) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {

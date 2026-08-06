@@ -36,7 +36,6 @@ describe('account switching loading ownership', () => {
     const header = new HeaderComponent(
       router as any,
       {} as any,
-      { selectedFacility: { getValue: vi.fn() } } as any,
       {} as any,
       {} as any,
       {} as any,

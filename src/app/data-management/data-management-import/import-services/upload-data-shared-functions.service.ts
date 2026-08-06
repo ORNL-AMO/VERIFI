@@ -1,15 +1,12 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import * as XLSX from 'xlsx';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { checkSameMonthPredictorData } from './upload-helper-functions';
 
@@ -20,9 +17,6 @@ export class UploadDataSharedFunctionsService {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService
-  ) { }
 
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>, account: IdbAccount, meterSource: MeterSource): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
     let accountGroups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getAccountMeterGroupsCopy();

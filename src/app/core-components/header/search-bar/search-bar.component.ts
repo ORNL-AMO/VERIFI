@@ -4,11 +4,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, OperatorFunction } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -31,10 +26,9 @@ export class SearchBarComponent implements OnInit {
 
   dropdownOptions: Array<DropdownOption>;
 
-  constructor(private facilityDbService: FacilitydbService, private router: Router,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private analysisDbService: AnalysisDbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private accountReportsDbService: AccountReportDbService) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
   }

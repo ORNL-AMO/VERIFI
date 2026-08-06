@@ -3,7 +3,6 @@ import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -20,7 +19,6 @@ interface MetersListItem {
 })
 export class EnergyConsumptionComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   utilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);

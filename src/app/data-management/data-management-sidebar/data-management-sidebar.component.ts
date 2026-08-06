@@ -3,8 +3,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject, computed } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '../data-management.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
@@ -16,13 +14,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 
 @Component({
   selector: 'app-data-management-sidebar',
@@ -76,16 +71,14 @@ export class DataManagementSidebarComponent {
   accountEnergyUseEquipmentSub: Subscription;
   accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment>;
 
-  constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
+  constructor(
     private dataManagementService: DataManagementService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private dbChangesService: DbChangesService,
     private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
+    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService
+
   ) {
   }
 

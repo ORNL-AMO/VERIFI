@@ -1,7 +1,6 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -11,24 +10,19 @@ import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDat
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from 'src/app/shared/sharedHelperFunctions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { MeterChargeType } from 'src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getMeterDataCopy } from 'src/app/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { WaterDischargeTypes, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
@@ -37,15 +31,11 @@ export class UploadDataV3Service {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
+  constructor(
     private eGridService: EGridService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService
+    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService
+
   ) { }
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {

@@ -5,8 +5,6 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -28,13 +26,12 @@ export class FacilitySettingsComponent implements OnInit {
   loadingSub: Subscription;
   constructor(
     private router: Router,
-    private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
     private dbChangesService: DbChangesService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService
+
   ) { }
 
   ngOnInit() {

@@ -2,25 +2,18 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { FacilityHomeService } from './facility-home.service';
 import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -32,15 +25,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class FacilityHomeComponent implements OnDestroy {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityHomeService: FacilityHomeService = inject(FacilityHomeService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private router: Router = inject(Router);
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
 
   facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   facilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);

@@ -2,7 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -16,9 +15,10 @@ export class FacilityDataComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
 
-  constructor(private activatedRoute: ActivatedRoute,
-    private facilityDbService: FacilitydbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private router: Router
+
   ) {
 
   }

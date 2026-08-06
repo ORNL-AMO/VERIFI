@@ -2,8 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
@@ -22,9 +20,9 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 export class UploadDataEnergyTreasureHuntService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private eGridService: EGridService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {

@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
 import { UtilityColors } from '../../utilityColors';
@@ -32,7 +31,8 @@ export class FacilitiesUsageStackedBarChartComponent {
   @ViewChild('stackedBarChart', { static: false }) stackedBarChart: ElementRef;
   barChartData: Array<StackedBarChartData>;
   constructor(
-    private plotlyService: PlotlyService, private facilityDbService: FacilitydbService) { }
+    private plotlyService: PlotlyService
+  ) { }
 
   ngOnInit(): void {
     this.setBarChartData();

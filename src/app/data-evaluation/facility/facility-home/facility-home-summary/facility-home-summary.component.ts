@@ -1,10 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -22,10 +19,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class FacilityHomeSummaryComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private router: Router = inject(Router);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service = inject(ExportToExcelTemplateV3Service);
   private loadingService: LoadingService = inject(LoadingService);
 

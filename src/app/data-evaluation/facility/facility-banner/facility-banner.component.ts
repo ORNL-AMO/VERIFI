@@ -2,7 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -14,7 +13,6 @@ import { AccountStatusCheckService } from 'src/app/shared/helper-services/accoun
 })
 export class FacilityBannerComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

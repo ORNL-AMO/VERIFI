@@ -1,6 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { BehaviorSubject } from 'rxjs';
@@ -24,7 +23,7 @@ export class AccountHomeService {
   calculatingOverview: BehaviorSubject<boolean | 'error'>;
   accountOverviewData: BehaviorSubject<AccountOverviewData>;
 
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService) {
+  constructor() {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
     this.annualWaterAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
