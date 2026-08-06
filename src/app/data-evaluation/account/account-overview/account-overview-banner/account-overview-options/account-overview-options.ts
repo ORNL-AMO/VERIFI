@@ -7,7 +7,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AccountOverviewService } from '../../account-overview.service';
 import * as _ from 'lodash';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 
 @Component({
   selector: 'app-account-overview-options',
@@ -35,7 +36,8 @@ export class AccountOverviewOptions {
   displayMenu: boolean = true;
   constructor(
     private accountOverviewService: AccountOverviewService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
     private injector: Injector
   ) { }
 
@@ -66,7 +68,10 @@ export class AccountOverviewOptions {
   }
 
   async setAccountEnergyIsSource() {
-    await this.dbChangesService.updateAccount(this.selectedAccount);
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Updating account' },
+      () => this.accountHandler.update({ ...this.selectedAccount }, this.selectedAccount.guid)
+    );
   }
 
   setEmissions() {

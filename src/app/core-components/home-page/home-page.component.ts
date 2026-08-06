@@ -6,7 +6,8 @@ import { LoadingService } from '../loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { Router } from '@angular/router';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
@@ -33,7 +34,8 @@ export class HomePageComponent {
     private backupPreparationService: BackupPreparationService,
     private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
     private titleService: Title,
     private metaService: Meta) { }
 
@@ -77,8 +79,11 @@ export class HomePageComponent {
           let tmpBackupFile = this.backupPreparationService.prepare(JSON.parse(test));
           this.backupDataService.accountBackupMessages();
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
-          await this.dbChangesService.updateAccount(newAccount);
           await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
+          await this.commandBoundary.execute(
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
+            () => this.accountHandler.update(newAccount, newAccount.guid)
+          );
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);

@@ -2,7 +2,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { FacilityOverviewService } from '../../facility-overview.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -38,7 +39,8 @@ export class FacilityOverviewOptions {
   accountSub: Subscription;
   constructor(
     private facilityOverviewService: FacilityOverviewService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private facilityHandler: FacilityCommandHandler,
     private injector: Injector
   ) { }
 
@@ -74,7 +76,10 @@ export class FacilityOverviewOptions {
   }
 
   async setFacilityEnergyIsSource() {
-    await this.dbChangesService.updateFacility(this.selectedFacility);
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Updating facility' },
+      () => this.facilityHandler.update({ ...this.selectedFacility }, this.account?.guid)
+    );
   }
 
   setEmissions() {

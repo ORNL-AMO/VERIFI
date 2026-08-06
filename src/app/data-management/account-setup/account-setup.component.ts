@@ -7,7 +7,8 @@ import { ImportBackupModalService } from 'src/app/core-components/import-backup-
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
@@ -36,7 +37,8 @@ export class AccountSetupComponent {
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
     private backupDataService: BackupDataService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
     private automaticBackupsService: AutomaticBackupsService,
     private cd: ChangeDetectorRef,
     private importBackupModalService: ImportBackupModalService, private injector: Injector) {
@@ -101,12 +103,18 @@ export class AccountSetupComponent {
     this.selectedAccount.dataBackupFilePath = savedFilePath;
     this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
     this.updatingFilePath = false;
-    await this.dbChangesService.updateAccount(this.selectedAccount);
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Updating account' },
+      () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
+    );
     this.cd.detectChanges();
   }
 
   async saveChanges() {
-    await this.dbChangesService.updateAccount(this.selectedAccount);
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+      () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
+    );
   }
 
   async changeIsShared() {

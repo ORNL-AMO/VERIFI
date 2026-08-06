@@ -7,7 +7,9 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
 import { DATA_STALENESS_OPTIONS, DataStalenessMonths, DEFAULT_DATA_STALENESS_MONTHS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
@@ -33,7 +35,9 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
 
     constructor(
       private formBuilder: FormBuilder,
-      private dbChangesService: DbChangesService,
+      private commandBoundary: WorkspaceCommandBoundary,
+      private accountHandler: AccountCommandHandler,
+      private facilityHandler: FacilityCommandHandler,
       private injector: Injector
 
     ) { }
@@ -95,16 +99,16 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
         };
 
         if (this.inAccount) {
-            await this.dbChangesService.updateAccount({
-                ...this.selectedAccount,
-                dataStalenessSettings: settings
-            });
+            await this.commandBoundary.execute(
+              { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+              () => this.accountHandler.update({ ...this.selectedAccount, dataStalenessSettings: settings }, this.selectedAccount.guid)
+            );
             await this.applicationLifecycleService.refreshAccountCatalog();
         } else {
-            await this.dbChangesService.updateFacility({
-                ...this.selectedFacility,
-                dataStalenessSettings: settings
-            });
+            await this.commandBoundary.execute(
+              { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' },
+              () => this.facilityHandler.update({ ...this.selectedFacility, dataStalenessSettings: settings }, this.accountWorkspaceStore.account()?.guid)
+            );
         }
     }
 

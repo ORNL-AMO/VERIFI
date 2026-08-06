@@ -81,7 +81,8 @@ describe('account switching loading ownership', () => {
     const manageAccounts = new ManageAccountsComponent(
       {} as any,
       loading as any,
-      {} as any,
+      {} as any,  // commandBoundary
+      {} as any,  // accountHandler
       router as any,
       { showToast: vi.fn() } as any,
       {} as any,
@@ -114,8 +115,12 @@ describe('account switching loading ownership', () => {
       setExportFacilityDataMessages: vi.fn(),
       exportFacilityData: vi.fn(() => events.push('export'))
     };
-    const dbChanges = {
-      updateAccount: vi.fn(async () => events.push('account-update'))
+    const commandBoundary = {
+      execute: vi.fn(async (_opts: any, persist: () => Promise<any>) => {
+        events.push('account-update');
+        await persist();
+        return { value: {}, change: {} };
+      })
     };
     const lifecycle = {
       refreshAccountCatalog: vi.fn().mockResolvedValue([account])
@@ -124,16 +129,16 @@ describe('account switching loading ownership', () => {
       workspace,
       backupData,
       exportService,
-      dbChanges,
+      commandBoundary,
       lifecycle
     });
 
     await manageAccounts.backupAccount(account);
     expect(events).toEqual(['workspace', 'backup', 'account-update']);
-    expect(dbChanges.updateAccount).toHaveBeenCalledWith(expect.objectContaining({
-      guid: 'account-b',
-      lastBackup: expect.any(Date)
-    }));
+    expect(commandBoundary.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ entityKind: 'account', changeKind: 'update' }),
+      expect.any(Function)
+    );
 
     events.length = 0;
     await manageAccounts.exportToExcel(account);
@@ -190,7 +195,8 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
   return new ManageAccountsComponent(
     accountDb as any,
     loading as any,
-    (overrides.dbChanges ?? { updateAccount: vi.fn() }) as any,
+    (overrides.commandBoundary ?? { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) }) as any,
+    (overrides.accountHandler ?? { update: vi.fn() }) as any,
     (overrides.router ?? { navigateByUrl: vi.fn() }) as any,
     (overrides.toasts ?? { showToast: vi.fn() }) as any,
     (overrides.backupData ?? { backupAccount: vi.fn() }) as any,

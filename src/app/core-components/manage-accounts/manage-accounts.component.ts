@@ -3,7 +3,8 @@ import { Component, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from '../loading/loading.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
@@ -33,7 +34,9 @@ export class ManageAccountsComponent {
   showExportModal: boolean = false;
   includeWeatherData: boolean = false;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
-    private dbChangesService: DbChangesService, private router: Router,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
+    private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
@@ -85,7 +88,10 @@ export class ManageAccountsComponent {
     try {
       await this.selectAccountWorkspace(account);
       this.backupDataService.backupAccount();
-      await this.dbChangesService.updateAccount({ ...account, lastBackup: new Date() });
+      await this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Recording backup date' },
+        () => this.accountHandler.update({ ...account, lastBackup: new Date() }, account.guid)
+      );
       this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
       this.toastNotificationService.showToast(account.name + 'Backup Successful', undefined, undefined, false, 'alert-success');
     } catch (err) {
