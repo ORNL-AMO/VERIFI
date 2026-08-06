@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { AccountWorkspaceSnapshot } from '../account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { DbChangesService } from '../indexedDB/db-changes.service';
+import { AccountCommandHandler } from '../account-workspace/handlers/account-command-handler.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
 import { BackupDataService } from '../shared/helper-services/backup-data.service';
 import { AutomaticBackupsService } from './automatic-backups.service';
@@ -42,7 +42,7 @@ describe('AutomaticBackupsService', () => {
           useValue: { getAccountBackupFile: vi.fn(() => ({ dataBackupId: 'backup-id' })) }
         },
         { provide: ToastNotificationsService, useValue: { showToast: vi.fn() } },
-        { provide: DbChangesService, useValue: { updateAccount: vi.fn() } },
+        { provide: AccountCommandHandler, useValue: { update: vi.fn().mockResolvedValue({}) } },
         {
           provide: ElectronBackupsDbService,
           useValue: {
