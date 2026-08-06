@@ -3,18 +3,14 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WeatherDataService } from './weather-data.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { WeatherDataSelection } from '../models/degreeDays';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import * as _ from 'lodash';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
-import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { WeatherPredictorManagementService } from './weather-predictor-management.service';
 // import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
@@ -50,15 +46,12 @@ export class WeatherDataComponent {
 
   constructor(
     private weatherDataService: WeatherDataService,
-    private facilityDbService: FacilitydbService,
-    private predictorDataDbService: PredictorDataDbService,
     private loadingService: LoadingService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analyticsService: AnalyticsService,
-    // private degreeDaysService: DegreeDaysService
     private weatherPredictorManagementService: WeatherPredictorManagementService
+
   ) {
 
   }

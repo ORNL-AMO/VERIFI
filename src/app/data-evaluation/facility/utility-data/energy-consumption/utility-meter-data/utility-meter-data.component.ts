@@ -1,7 +1,6 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -17,7 +16,6 @@ export class UtilityMeterDataComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private router: Router = inject(Router);
 

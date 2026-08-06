@@ -4,7 +4,6 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { ColumnItem, FacilityGroup, FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
@@ -27,10 +26,11 @@ export class MapMetersToFacilitiesComponent {
   importMetersFound: boolean;
   displayAddFacilityModal: boolean = false;
   addFacilityName: string = 'New Facility';
-  constructor(private dataManagementService: DataManagementService,
+  constructor(
+    private dataManagementService: DataManagementService,
     private activatedRoute: ActivatedRoute,
-    private uploadDataService: UploadDataService,
-    private accountDbService: AccountdbService) { }
+    private uploadDataService: UploadDataService
+  ) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {

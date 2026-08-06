@@ -3,7 +3,6 @@ import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -20,7 +19,6 @@ interface PredictorListItem {
 })
 export class PredictorsComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   private predictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);

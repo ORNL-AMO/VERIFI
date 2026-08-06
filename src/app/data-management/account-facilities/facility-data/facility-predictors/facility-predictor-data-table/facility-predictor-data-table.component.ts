@@ -6,9 +6,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
@@ -28,15 +26,15 @@ export class FacilityPredictorDataTableComponent {
   showDeletePredictorEntry: boolean = false;
   isSaved: boolean = true;
   calculatingDegreeDays: boolean;
-  constructor(private activatedRoute: ActivatedRoute,
-    private predictorDbService: PredictorDbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
     private router: Router,
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService
+
   ) {
   }
 

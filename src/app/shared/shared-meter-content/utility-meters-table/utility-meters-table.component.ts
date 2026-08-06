@@ -7,9 +7,6 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -48,13 +45,10 @@ export class UtilityMetersTableComponent {
   private utilityMeterdbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private copyTableService: CopyTableService = inject(CopyTableService);
   private router: Router = inject(Router);
-  private facilitydbService: FacilitydbService = inject(FacilitydbService);
   private loadingService: LoadingService = inject(LoadingService);
   private utilityMeterDatadbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private editMeterFormService: EditMeterFormService = inject(EditMeterFormService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

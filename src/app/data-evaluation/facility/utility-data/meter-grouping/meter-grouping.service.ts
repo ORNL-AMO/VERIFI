@@ -1,11 +1,9 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -21,8 +19,7 @@ export class MeterGroupingService {
   displayGraphEnergy: "bar" | "scatter" = "bar";
   displayGraphCost: "bar" | "scatter" = "bar";
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private facilityDbService: FacilitydbService) {
+  constructor() {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>({ minDate: undefined, maxDate: undefined });
   }
 

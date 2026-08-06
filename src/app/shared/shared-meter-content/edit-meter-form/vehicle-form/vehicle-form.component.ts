@@ -7,7 +7,6 @@ import { VehicleCategories, VehicleCategory, VehicleCollectionType, VehicleColle
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { getHeatingCapacity } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
@@ -33,7 +32,7 @@ export class VehicleFormComponent {
   fuelOptions: Array<FuelTypeOption> = [];
   hasDifferentEnergyUnits: boolean = false;
   selectedFuelTypeOption: FuelTypeOption;
-  constructor(private editMeterFormService: EditMeterFormService, private customFuelDbService: CustomFuelDbService) {
+  constructor(private editMeterFormService: EditMeterFormService) {
   }
 
   ngOnInit() {

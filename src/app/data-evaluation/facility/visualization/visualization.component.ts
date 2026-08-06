@@ -4,8 +4,6 @@ import { Component, OnInit, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -27,10 +25,10 @@ export class VisualizationComponent implements OnInit {
 
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
-  constructor(private visualizationStateService: VisualizationStateService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private analyticsService: AnalyticsService) { }
+  constructor(
+    private visualizationStateService: VisualizationStateService,
+    private analyticsService: AnalyticsService
+  ) { }
 
   ngOnInit(): void {
     this.analyticsService.sendEvent('use_data_visualization');

@@ -4,11 +4,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -38,12 +34,11 @@ export class SetMeterGroupingComponent {
 
   calanderizationWorker: Worker;
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDbService: UtilityMeterdbService,
     private router: Router,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private meterGroupingDataService: MeterGroupingDataService
+
   ) {
   }
 

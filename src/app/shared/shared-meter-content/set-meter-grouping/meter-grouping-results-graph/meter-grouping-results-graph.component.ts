@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -41,13 +39,13 @@ export class MeterGroupingResultsGraphComponent {
 
   calculatingMeterGroups: boolean | 'error' = false;
   calculatingMeterGroupsSub: Subscription;
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private router: Router,
-    private facilityDbService: FacilitydbService,
     private plotlyService: PlotlyService,
     private dbChangesService: DbChangesService,
     private meterGroupingDataService: MeterGroupingDataService
+
   ) { }
 
   ngOnInit() {

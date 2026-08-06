@@ -7,11 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -76,18 +72,16 @@ export class CalculatedPredictorDataUpdateComponent {
     { length: new Date().getFullYear() - 1999 },
     (_, i) => new Date().getFullYear() - i
   );
-  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
     private router: Router,
-    private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    // private degreeDaysService: DegreeDaysService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService
+
   ) {
 
   }

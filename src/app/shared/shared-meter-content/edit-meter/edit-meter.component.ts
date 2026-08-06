@@ -1,16 +1,13 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, HostListener, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -48,13 +45,16 @@ export class EditMeterComponent implements OnInit {
     }
   }
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService, private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService, private activatedRoute: ActivatedRoute,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private activatedRoute: ActivatedRoute,
     private router: Router,
-    private routerGuardService: RouterGuardService) { }
+    private routerGuardService: RouterGuardService
+  ) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.accountWorkspaceStore.selectedFacility();

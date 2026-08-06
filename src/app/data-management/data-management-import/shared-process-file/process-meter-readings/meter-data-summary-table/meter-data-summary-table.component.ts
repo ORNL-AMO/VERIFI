@@ -1,12 +1,9 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { MeterDataSummary } from '../process-meter-readings.component';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
@@ -32,11 +29,6 @@ export class MeterDataSummaryTableComponent {
 
   readingDifferencesMap: { [meterId: string]: MeterReadingComparison[] } = {};
 
-  constructor(
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService
-  ) { }
 
   setSkipAll() {
     this.meterDataSummaries.forEach(summary => {

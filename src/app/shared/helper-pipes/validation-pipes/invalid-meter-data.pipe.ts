@@ -1,6 +1,5 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
 
@@ -12,7 +11,6 @@ import * as _ from 'lodash';
 export class InvalidMeterDataPipe implements PipeTransform {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   transform(meterId: string): boolean {
     let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(meterId);

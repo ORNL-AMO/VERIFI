@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
@@ -19,11 +17,11 @@ export class FacilityPredictorDataBulkUpdateComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
-  constructor(private activatedRoute: ActivatedRoute,
-    private predictorDbService: PredictorDbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
     private router: Router
+
   ) {
   }
 

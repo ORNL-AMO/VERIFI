@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Injectable, inject } from '@angular/core';
-import { AccountdbService } from '../indexedDB/account-db.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { DetailDegreeDay, WeatherDataSelection } from '../models/degreeDays';
@@ -17,7 +16,6 @@ import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/pr
 import { getDegreeDayAmount } from '../shared/sharedHelperFunctions';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { checkSameMonthPredictorData } from '../data-management/data-management-import/import-services/upload-helper-functions';
 import { Month, Months } from '../shared/form-data/months';
 import { CalanderizationService } from '../shared/helper-services/calanderization.service';
@@ -34,14 +32,14 @@ export class WeatherPredictorManagementService {
   heatingTemp: number;
   coolingTemp: number;
 
-  constructor(private accountDbService: AccountdbService,
+  constructor(
     private weatherDataService: WeatherDataService,
     private predictorDbService: PredictorDbService,
     private analysisDbService: AnalysisDbService,
     private predictorDataDbService: PredictorDataDbService,
     private loadingService: LoadingService,
-    private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService
+
   ) {
   }
 
@@ -161,7 +159,7 @@ export class WeatherPredictorManagementService {
       dewPointTempPredictor.weatherDataType = 'dewPointTemp';
       dewPointTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       dewPointTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await firstValueFrom(this.predictorDbService.addWithObservable(dewPointTempPredictor)); 
+      await firstValueFrom(this.predictorDbService.addWithObservable(dewPointTempPredictor));
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(dewPointTempPredictor);
     }
@@ -300,7 +298,7 @@ export class WeatherPredictorManagementService {
           if (!monthPredictorEntry) {
             let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
             let formatedDate: string = month.abbreviation + ', ' + entryDate.getFullYear();
-          
+
             this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
             this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
           }
@@ -324,13 +322,13 @@ export class WeatherPredictorManagementService {
       let facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
         return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
       });
-   
+
       //iterate weather predictors for facility
       for (let p = 0; p < facilityWeatherPredictors.length; p++) {
         let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
         ++index;
         this.loadingService.setCurrentLoadingIndex(index);
-        
+
         //existing predictor data for this predictor
         let predictorData: Array<IdbPredictorData> = accountPredictorData.filter(data => {
           return data.predictorId == weatherPredictor.guid;
@@ -349,13 +347,13 @@ export class WeatherPredictorManagementService {
             //add predictor data
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            
+
             let nextMonthsDate: Date = new Date(startDate)
             nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
             let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(weatherPredictor.weatherStationId, startDate, nextMonthsDate, []);
             index++;
             this.loadingService.setCurrentLoadingIndex(index);
-            
+
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
               let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {

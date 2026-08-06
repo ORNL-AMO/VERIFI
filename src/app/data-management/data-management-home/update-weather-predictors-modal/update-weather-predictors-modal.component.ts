@@ -1,18 +1,13 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
-import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FileReference } from '../../data-management-import/import-services/upload-data-models';
-import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterData, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-update-weather-predictors-modal',
@@ -36,12 +31,10 @@ export class UpdateWeatherPredictorsModalComponent {
   }>
   invalidForm: boolean;
 
-  constructor(private weatherPredictorManagementService: WeatherPredictorManagementService,
-    private cd: ChangeDetectorRef,
-    private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService
+  constructor(
+    private weatherPredictorManagementService: WeatherPredictorManagementService,
+    private cd: ChangeDetectorRef
+
   ) { }
 
   ngOnInit() {

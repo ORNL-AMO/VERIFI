@@ -1,17 +1,13 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -38,10 +34,9 @@ export class EditElectricityBillComponent implements OnInit {
   totalMarketEmissions: number = 0;
   RECs: number = 0;
   account: IdbAccount;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService, private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
   ngOnInit(): void {
     this.setTotalEmissions();

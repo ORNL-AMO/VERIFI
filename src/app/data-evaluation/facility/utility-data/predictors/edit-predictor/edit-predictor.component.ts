@@ -1,16 +1,13 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
@@ -60,21 +57,19 @@ export class EditPredictorComponent {
     }
   }
 
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private predictorDbService: PredictorDbService,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
     private router: Router,
     private editPredictorFormService: EditPredictorFormService,
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
-    // private degreeDaysService: DegreeDaysService,
     private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private routerGuardService: RouterGuardService
+
   ) {
   }
 

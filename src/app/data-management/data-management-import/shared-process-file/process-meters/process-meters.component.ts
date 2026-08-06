@@ -5,8 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -41,11 +39,12 @@ export class ProcessMetersComponent {
   showExisting: boolean = false;
   existingMeterOptions: Array<IdbUtilityMeter> = [];
 
-  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private dataManagementService: DataManagementService) { }
+    private dataManagementService: DataManagementService
+  ) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {

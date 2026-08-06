@@ -3,9 +3,6 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -23,12 +20,11 @@ export class FacilityMeterDataQualityReportComponent {
 
   utilityMeter: IdbUtilityMeter;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router
+
   ) {
 
   }
@@ -49,7 +45,7 @@ export class FacilityMeterDataQualityReportComponent {
   ngOnDestroy() {
     this.accountWorkspaceService.selectMeter(undefined);
   }
- 
+
 
   goToMeterList() {
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();

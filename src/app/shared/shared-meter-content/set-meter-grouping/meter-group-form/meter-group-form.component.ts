@@ -1,12 +1,9 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -60,11 +57,10 @@ export class MeterGroupFormComponent {
     }
   }
 
-  constructor(private facilityDbService: FacilitydbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private loadingService: LoadingService,
@@ -72,6 +68,7 @@ export class MeterGroupFormComponent {
     private accountReportDbService: AccountReportDbService,
     private analysisDbService: AnalysisDbService,
     private routerGuardService: RouterGuardService
+
   ) {
 
   }

@@ -1,6 +1,5 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, Input, inject } from '@angular/core';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, MeterCharge } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
@@ -19,7 +18,6 @@ export class MeterChargesCorrelationsComponent {
   hasDemand: boolean;
   hasData: boolean;
 
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit() {
     let utilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);

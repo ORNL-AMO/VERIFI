@@ -1,10 +1,9 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { Component, ElementRef, Input, SimpleChanges, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 @Component({
   selector: 'app-meter-charges-timeseries',
@@ -18,8 +17,9 @@ export class MeterChargesTimeseriesComponent {
 
   @ViewChild('chargesTimeseries', { static: false }) chargesTimeseries: ElementRef;
 
-  constructor(private plotlyService: PlotlyService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+  constructor(
+    private plotlyService: PlotlyService
+
   ) { }
 
 

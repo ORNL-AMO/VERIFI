@@ -1,27 +1,22 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, Input, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, SimpleChanges, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { Router } from '@angular/router';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
@@ -59,15 +54,14 @@ export class SharedMeterCalendarizationComponent {
 
   calanderizationWorker: Worker;
   calanderizingMeterData: boolean | 'error' = false;
-  constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
+  constructor(
+    private calanderizationService: CalanderizationService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private dbChangesService: DbChangesService,
     private sharedDataService: SharedDataService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private router: Router,
-    private customGWPDbService: CustomGWPDbService) { }
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;

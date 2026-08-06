@@ -2,10 +2,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, Input, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -48,10 +44,6 @@ export class EditVehicleMeterBillComponent {
   totalVolumeLabel: 'Total Fuel Consumption' | 'Total Distance';
   usingMeterFuelEfficiency: boolean;
   account: IdbAccount;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) {
-  }
 
   ngOnInit(): void {
     this.setFuel();

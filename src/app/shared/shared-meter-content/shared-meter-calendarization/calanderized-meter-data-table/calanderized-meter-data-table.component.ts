@@ -1,6 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -28,8 +27,9 @@ export class CalanderizedMeterDataTableComponent implements OnInit {
   currentPageNumber: number = 1;
   copyingTable: boolean = false
   account: IdbAccount;
-  constructor(private copyTableService: CopyTableService,
-    private accountDbService: AccountdbService
+  constructor(
+    private copyTableService: CopyTableService
+
   ) { }
 
   ngOnInit(): void {

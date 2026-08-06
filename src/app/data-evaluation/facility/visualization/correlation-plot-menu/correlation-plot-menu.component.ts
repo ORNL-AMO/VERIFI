@@ -3,7 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 import { MonthlyData } from 'src/app/models/calanderization';
@@ -35,9 +34,10 @@ export class CorrelationPlotMenuComponent {
   facilitySub: Subscription;
   disableY1SelectedTotal: boolean;
   disableY2SelectedTotal: boolean;
-  constructor(private visualizationStateService: VisualizationStateService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService) {
+  constructor(
+    private visualizationStateService: VisualizationStateService,
+    private dbChangesService: DbChangesService
+  ) {
   }
 
   ngOnInit() {

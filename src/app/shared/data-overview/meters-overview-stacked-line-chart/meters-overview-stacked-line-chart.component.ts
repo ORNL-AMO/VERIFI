@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
@@ -29,8 +28,9 @@ export class MetersOverviewStackedLineChartComponent {
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
   selectedFacility: IdbFacility;
-  constructor(private plotlyService: PlotlyService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private plotlyService: PlotlyService
+  ) { }
 
   ngOnInit(): void {
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];

@@ -5,7 +5,6 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
 import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -30,10 +29,9 @@ export class EditPredictorDataEntryFormComponent {
   isSaved = new EventEmitter<boolean>();
 
   constructor(
-    // private degreeDaysService: DegreeDaysService,
-    private facilityDbService: FacilitydbService,
     private weatherDataService: WeatherDataService,
-    private router: Router,
+    private router: Router
+
   ) {
   }
 

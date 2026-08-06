@@ -5,11 +5,8 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 
 @Component({
   selector: 'app-meter-charges-visualization',
@@ -21,14 +18,14 @@ export class MeterChargesVisualizationComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  
+
   facility: IdbFacility;
   facilitySub: Subscription;
   utilityMeter: IdbUtilityMeter;
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private router: Router
+
   ) {
 
   }

@@ -2,7 +2,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -16,9 +15,6 @@ export class FacilityPredictorsTableComponent {
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription
-  constructor(private facilityDbService: FacilitydbService) {
-
-  }
 
   ngOnInit() {
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(facility => {

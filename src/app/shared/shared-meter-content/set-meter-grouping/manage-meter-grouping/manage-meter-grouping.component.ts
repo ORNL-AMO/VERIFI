@@ -6,11 +6,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -44,16 +41,16 @@ export class ManageMeterGroupingComponent {
   ungroupedMeters: Array<IdbUtilityMeter>;
   groupToDelete: IdbUtilityMeterGroup;
   ungroupedMeterGroup: IdbUtilityMeterGroup;
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private analysisDbService: AnalysisDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNoticationService: ToastNotificationsService,
     private activatedRoute: ActivatedRoute
+
   ) {
   }
 

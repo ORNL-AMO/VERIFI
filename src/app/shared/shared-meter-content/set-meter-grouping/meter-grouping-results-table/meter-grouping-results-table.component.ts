@@ -4,8 +4,6 @@ import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -48,14 +46,14 @@ export class MeterGroupingResultsTableComponent {
   calculatingMeterGroups: boolean | 'error' = false;
   calculatingMeterGroupsSub: Subscription;
 
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private router: Router,
-    private facilityDbService: FacilitydbService,
     private copyTableService: CopyTableService,
     private sharedDataService: SharedDataService,
     private dbChangesService: DbChangesService,
     private meterGroupingDataService: MeterGroupingDataService
+
   ) { }
 
   ngOnInit() {
@@ -73,7 +71,7 @@ export class MeterGroupingResultsTableComponent {
     this.calculatingMeterGroupsSub = this.meterGroupingDataService.calanderizingMeterData.subscribe(calculating => {
         this.calculatingMeterGroups = calculating;
     });
-    
+
     this.calanderizedMetersSub = this.meterGroupingDataService.calanderizedMeters.subscribe(calanderizedMeters => {
        if (calanderizedMeters.length > 0) {
          this.setCalanderizedMeterData(calanderizedMeters);

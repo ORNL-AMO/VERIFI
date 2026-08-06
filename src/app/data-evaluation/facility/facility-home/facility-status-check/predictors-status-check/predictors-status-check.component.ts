@@ -3,7 +3,6 @@ import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
 import { STATUS_CHECK_OPTIONS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -20,7 +19,6 @@ export class PredictorsStatusCheckComponent {
   @Input({ required: true }) facilityPredictorActionUrl: string;
 
   private router: Router = inject(Router);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
 
   goToPredictor(predictorId: string) {
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();

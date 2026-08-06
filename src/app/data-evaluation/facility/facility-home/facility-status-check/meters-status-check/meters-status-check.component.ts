@@ -3,7 +3,6 @@ import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { STATUS_CHECK_OPTIONS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -21,7 +20,6 @@ export class MetersStatusCheckComponent {
     @Input({ required: true }) facilityMeterActionUrl: string;
 
     private router: Router = inject(Router);
-    private facilityDbService: FacilitydbService = inject(FacilitydbService);
 
     goToMeter(meterId: string) {
         let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();

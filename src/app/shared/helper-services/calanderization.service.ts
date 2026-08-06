@@ -4,15 +4,11 @@ import { Injectable, inject, computed } from '@angular/core';
 import * as _ from 'lodash';
 import { CalanderizationFilters, CalanderizedMeter } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { getIsEnergyMeter } from '../sharedHelperFunctions';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getAllYearsWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
@@ -28,17 +24,13 @@ export class CalanderizationService {
   displayGraphCost: "bar" | "scatter" | null = "bar";
   dataDisplay: "table" | "graph" = 'table';
 
-  //calanderizedMeters in this service should be used for finding date ranges 
+  //calanderizedMeters in this service should be used for finding date ranges
   //NOT for displaying results for energy use. The units and site/source
   //is not considered in this calanderizedMeters object.
   //when needing energy use, calculate at the place using the results
   calanderizedMeters: BehaviorSubject<Array<CalanderizedMeter>>;
   calanderizationWorker: Worker;
-  constructor(
-    private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) {
+  constructor() {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],
       showAllSources: true,

@@ -2,7 +2,6 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -11,7 +10,6 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
 import { firstValueFrom } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -37,10 +35,11 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   showFuelEfficiency: boolean;
   private lastMeterId: string;
 
-  constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDataService: UtilityMeterDataService,
     private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService
+  ) { }
 
   ngOnInit(): void {
     this.account = this.accountWorkspaceStore.account();

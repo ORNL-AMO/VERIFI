@@ -10,7 +10,6 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-map-predictors-to-facilities',
@@ -29,9 +28,11 @@ export class MapPredictorsToFacilitiesComponent {
   predictorsIncluded: boolean;
   displayAddFacilityModal: boolean = false;
   addFacilityName: string = 'New Facility';
-  constructor(private dataManagementService: DataManagementService,
-    private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private dataManagementService: DataManagementService,
+    private activatedRoute: ActivatedRoute,
+    private uploadDataService: UploadDataService
+  ) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {

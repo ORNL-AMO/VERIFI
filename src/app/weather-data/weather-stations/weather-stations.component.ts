@@ -1,10 +1,8 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { NominatimLocation, WeatherDataService } from '../weather-data.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
@@ -54,8 +52,8 @@ export class WeatherStationsComponent {
     showlegend: false
   };
   constructor(
-    private weatherDataService: WeatherDataService,
-    private facilityDbService: FacilitydbService) {
+    private weatherDataService: WeatherDataService
+  ) {
   }
 
   ngOnInit() {

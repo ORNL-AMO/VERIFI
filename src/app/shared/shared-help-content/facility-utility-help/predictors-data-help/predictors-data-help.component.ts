@@ -3,7 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -19,9 +18,10 @@ export class PredictorsDataHelpComponent implements OnInit {
   selectedFacilitySub: Subscription;
   routerSub: Subscription;
   helpURL: 'manage' | 'entries' | 'predictor-form' | 'predictor-entry-form';
-  constructor(private facilityDbService: FacilitydbService,
+  constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute) { }
+    private activatedRoute: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(selectedFacility => {

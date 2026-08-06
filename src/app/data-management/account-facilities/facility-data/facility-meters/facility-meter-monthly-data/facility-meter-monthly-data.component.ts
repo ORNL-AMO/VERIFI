@@ -2,7 +2,6 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
@@ -16,8 +15,9 @@ export class FacilityMeterMonthlyDataComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   utilityMeter: IdbUtilityMeter;
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterDbService: UtilityMeterdbService
+  constructor(
+    private activatedRoute: ActivatedRoute
+
   ) { }
 
   ngOnInit() {

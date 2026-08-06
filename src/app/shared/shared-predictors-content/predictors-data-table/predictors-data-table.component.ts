@@ -4,7 +4,6 @@ import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, Wri
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -13,8 +12,6 @@ import { CopyTableService } from 'src/app/shared/helper-services/copy-table.serv
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -43,11 +40,8 @@ export class PredictorsDataTableComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private router: Router = inject(Router);
   private copyTableService: CopyTableService = inject(CopyTableService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private loadingService: LoadingService = inject(LoadingService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private weatherDataService: WeatherDataService = inject(WeatherDataService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 

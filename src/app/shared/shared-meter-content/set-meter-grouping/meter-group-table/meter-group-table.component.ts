@@ -3,9 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, Input, inject, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -57,10 +54,9 @@ export class MeterGroupTableComponent {
 
   calculatingMeterGroups: boolean | 'error' = false ;
   calculatingMeterGroupsSub: Subscription;
-  constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
+  constructor(
     private meterGroupingDataService: MeterGroupingDataService
+
   ) { }
 
   ngOnInit() {

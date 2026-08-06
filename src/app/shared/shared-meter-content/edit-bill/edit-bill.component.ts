@@ -1,14 +1,10 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, HostListener, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
@@ -57,13 +53,16 @@ export class EditBillComponent implements OnInit {
     }
   }
 
-  constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
-    private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private loadingService: LoadingService,
+    private utilityMeterDataService: UtilityMeterDataService,
+    private toastNotificationService: ToastNotificationsService,
     private router: Router,
     private electronService: ElectronService,
-    private routerGuardService: RouterGuardService) { }
+    private routerGuardService: RouterGuardService
+  ) { }
 
   ngOnInit(): void {
     this.setInDataManagement();

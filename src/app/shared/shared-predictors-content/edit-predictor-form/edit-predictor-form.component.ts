@@ -4,11 +4,9 @@ import { FormGroup } from '@angular/forms';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
-import * as _ from 'lodash';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { Month, Months } from '../../form-data/months';
 
@@ -37,9 +35,10 @@ export class EditPredictorFormComponent {
   displaySationModal: boolean = false;
   months: Array<Month> = Months;
   constructor(
-    private router: Router, private facilityDbService: FacilitydbService,
+    private router: Router,
     private weatherDataService: WeatherDataService,
-    private editPredictorFormService: EditPredictorFormService) {
+    private editPredictorFormService: EditPredictorFormService
+  ) {
   }
 
   ngOnInit() {

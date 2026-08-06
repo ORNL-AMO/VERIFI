@@ -2,20 +2,15 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
@@ -45,12 +40,9 @@ export class EditOtherEmissionsBillComponent {
   totalLabel: 'Total Refrigerant Lost' | 'Total Process Emissions';
   displayFugitiveTableModal: boolean = false;
   showCopyLast: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService,
-    private customGwpDbService: CustomGWPDbService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
   ngOnInit(): void {
     this.setTotalEmissions();

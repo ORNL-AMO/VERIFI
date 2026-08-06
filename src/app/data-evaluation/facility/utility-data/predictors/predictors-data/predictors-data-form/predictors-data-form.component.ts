@@ -1,19 +1,14 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
@@ -48,13 +43,14 @@ export class PredictorsDataFormComponent {
     }
   }
 
-  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
-    private router: Router, private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private predictorDataDbService: PredictorDataDbService,
-    private routerGuardService: RouterGuardService) {
+    private routerGuardService: RouterGuardService
+  ) {
   }
 
   ngOnInit() {

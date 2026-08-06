@@ -3,9 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -23,10 +20,9 @@ export class CalanderizationComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
 
   selectedMeter: IdbUtilityMeter;
-  constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
+  constructor(
     private router: Router
+
   ) { }
 
   ngOnInit(): void {

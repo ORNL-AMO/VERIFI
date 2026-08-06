@@ -9,9 +9,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-process-predictors',
@@ -37,11 +35,11 @@ export class ProcessPredictorsComponent {
   skipAll: boolean = false;
   showExisting: boolean = false;
   existingPredictorOptions: Array<IdbPredictor> = [];
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private dataManagementService: DataManagementService,
-    private editPredictorFormService: EditPredictorFormService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private editPredictorFormService: EditPredictorFormService
+  ) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {

@@ -5,11 +5,9 @@ import { FileReference } from '../../import-services/upload-data-models';
 import { ActivatedRoute } from '@angular/router';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { Subscription } from 'rxjs';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
@@ -43,9 +41,8 @@ export class MapMeterGroupsToEquipmentComponent {
   linkedMeterGroupOptions: Array<IdbUtilityMeterGroup> = [];
   constructor(
     private activatedRoute: ActivatedRoute,
-    private dataManagementService: DataManagementService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService
+    private dataManagementService: DataManagementService
+
   ) { }
 
 

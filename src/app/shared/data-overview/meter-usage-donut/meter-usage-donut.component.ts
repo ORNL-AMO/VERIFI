@@ -5,7 +5,6 @@ import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -34,8 +33,10 @@ export class MeterUsageDonutComponent {
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
 
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private plotlyService: PlotlyService,
+    private facilityOverviewService: FacilityOverviewService
+  ) { }
 
   ngOnInit(): void {
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
@@ -163,7 +164,7 @@ export class MeterUsageDonutComponent {
       return '%{x:,.0f} ' + this.energyUnit;
     }
   }
-  
+
   getValues(): Array<number> {
     if (this.dataType == 'energyUse' || this.dataType == 'water') {
       return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalUsage });

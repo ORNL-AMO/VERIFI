@@ -2,16 +2,13 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -53,12 +50,10 @@ export class FacilityMeterComponent {
     }
   }
 
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService,
     private editMeterFormService: EditMeterFormService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
     private router: Router,
     private sharedDataService: SharedDataService,
     private toastNotificationsService: ToastNotificationsService,
@@ -66,6 +61,7 @@ export class FacilityMeterComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private toastNotificationService: ToastNotificationsService,
     private routerGuardService: RouterGuardService
+
   ) {
 
   }

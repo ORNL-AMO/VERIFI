@@ -6,20 +6,15 @@ import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters } f
 import { EmissionsResults, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 
 type OrderByFields = 'readDate' | 'totalEnergyUse' | 'totalCost' | 'totalRealDemand' | 'totalBilledDemand' | 'totalMarketEmissions' | 'totalLocationEmissions' | 'RECs' | 'excessRECs' | 'excessRECsEmissions' | 'powerFactor';
@@ -35,13 +30,8 @@ export class ElectricityDataTableComponent {
   private utilityMeterDataService: UtilityMeterDataService = inject(UtilityMeterDataService);
   private copyTableService: CopyTableService = inject(CopyTableService);
   private eGridService: EGridService = inject(EGridService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private customFuelDbService: CustomFuelDbService = inject(CustomFuelDbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private electronService: ElectronService = inject(ElectronService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
 
   readonly setChecked = output<Set<string>>();
   readonly setEdit = output<IdbUtilityMeterData>();

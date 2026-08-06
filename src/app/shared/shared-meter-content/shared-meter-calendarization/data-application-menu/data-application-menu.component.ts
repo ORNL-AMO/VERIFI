@@ -1,12 +1,10 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { CalanderizationService, CalendarizationSummaryItem } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -36,8 +34,9 @@ export class DataApplicationMenuComponent implements OnInit {
   calanderizationSummary: Array<CalendarizationSummaryItem>;
   displayMonths: number = 4;
   hoverDataDate: Date;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private calanderizationService: CalanderizationService
+  ) { }
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);

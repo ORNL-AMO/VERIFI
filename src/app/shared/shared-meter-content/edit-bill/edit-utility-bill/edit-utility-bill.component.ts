@@ -1,14 +1,10 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import * as _ from 'lodash';
 import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFunctions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
@@ -16,7 +12,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -53,11 +48,9 @@ export class EditUtilityBillComponent implements OnInit {
   showScope2OtherEmissions: boolean;
   usingMeterHeatCapacity: boolean;
   isBiofuel: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
   ngOnInit(): void {
     this.setIsBiofuel();
