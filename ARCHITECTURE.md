@@ -50,6 +50,8 @@ Persistence is configured with `ngx-indexed-db` in [`src/app/indexedDB/_dbConfig
 
 Feature code reads account-scoped state only through workspace signals and changes selections through `AccountWorkspaceService`. `DbChangesService` remains a deprecated persistence/orchestration facade while the future typed write boundary remains assigned to #2577; it must not reintroduce repository-held application state.
 
+See [Working with application data](docs/data-access-and-workspace.md) for developer-facing decision guidance and examples for reading, editing, selecting, persisting, refreshing, and testing account-scoped data.
+
 Ordinary single-store access uses `ngx-indexed-db`. Atomic operations spanning multiple stores use the internal native transaction adapter in [`indexed-db-transaction.service.ts`](src/app/indexedDB/indexed-db-transaction.service.ts). Transaction operations must use only the adapter's transaction-bound request context; calling an object-store service from inside the operation would open an unrelated transaction.
 
 Account and facility removal are infrastructure-owned cascades in [`indexed-db-cascade-delete.service.ts`](src/app/indexedDB/indexed-db-cascade-delete.service.ts). Every participating store and retained-reference update must remain inside its declared native transaction; the account catalog and active workspace are refreshed only after that transaction commits.

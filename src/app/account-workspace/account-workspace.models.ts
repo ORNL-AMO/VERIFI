@@ -1,3 +1,7 @@
+/**
+ * Defines the readonly snapshot, selection, lifecycle, revision, and error contracts
+ * shared by the account workspace store, loader, service, and consumers.
+ */
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from '../models/idbModels/accountReport';

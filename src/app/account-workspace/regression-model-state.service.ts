@@ -1,3 +1,7 @@
+/**
+ * Holds generated regression models as transient UI state, separate from persisted workspace data.
+ * Models are cleared when the active account or facility scope changes.
+ */
 import { effect, Injectable, signal } from '@angular/core';
 import { JStatRegressionModel } from '../models/analysis';
 import { AccountWorkspaceStore } from './account-workspace.store';

@@ -1,3 +1,7 @@
+/**
+ * Owns the active account workspace as one private signal and exposes readonly, derived signals.
+ * Snapshot publication and selection validation occur atomically through this store.
+ */
 import { computed, Injectable, signal } from '@angular/core';
 import {
   AccountWorkspaceSnapshot,

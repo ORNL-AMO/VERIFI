@@ -1,3 +1,7 @@
+/**
+ * Reads and writes local-storage selection hints. Hints are non-authoritative and are
+ * restored only after AccountWorkspaceService validates them against a loaded snapshot.
+ */
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 

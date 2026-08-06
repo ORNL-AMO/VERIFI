@@ -1,3 +1,7 @@
+/**
+ * Provides reusable lookups and editable copies derived from the active workspace.
+ * This service does not persist records or own a second copy of application state.
+ */
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { IdbPredictor } from '../models/idbModels/predictor';

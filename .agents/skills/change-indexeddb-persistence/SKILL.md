@@ -6,14 +6,14 @@ description: Change VERIFI persisted models, IndexedDB stores or indexes, databa
 # Change IndexedDB persistence
 
 1. Read [Domain and persistence](../../../ARCHITECTURE.md#domain-and-persistence) plus the [Implementer](../../../docs/agents/personas.md#implementer) and [Reviewer](../../../docs/agents/personas.md#reviewer) modes.
-2. Trace the record through its interface/factory in `src/app/models/idbModels/`, object-store service in `src/app/indexedDB/`, `_dbConfig.ts`, application initialization, selection state, import, export, backup, and delete paths.
+2. Follow the [data workflow guide](../../../docs/data-access-and-workspace.md), then trace the record through its interface/factory in `src/app/models/idbModels/`, object-store service in `src/app/indexedDB/`, `_dbConfig.ts`, application initialization, workspace state, import, export, backup, and delete paths.
 3. Distinguish the change type:
    - A record property may require model defaults and an idempotent record migration without changing the structural schema.
    - A new or changed store or index requires `_dbConfig.ts`, an intentional database-version increment, and upgrade coverage.
 4. Preserve the difference between local IndexedDB `id` keys and GUID-based domain relationships. Audit account, facility, meter, predictor, analysis, and report references affected by the change.
 5. Follow the [data migration guide](../../../src/app/indexedDB/data-migrations/README.md) for historical record upgrades. Implement pure, idempotent, contiguous steps, update `CURRENT_DATA_VERSION`, and use the transaction runner; do not migrate during startup collection loading or account selection.
 6. Preserve older JSON backups and supported import formats. Default missing fields intentionally and avoid destructive rewriting unless the issue explicitly approves it.
-7. Update service state after writes using the same observable/`BehaviorSubject` pattern as neighboring services.
+7. Keep repositories persistence-only. Read active account data from workspace signals, edit copies, await persistence, and request one committed workspace refresh after the complete logical write. Use a non-committed refresh only for hydration or repair, and never call an ordinary repository from inside a native transaction.
 
 ## Validate
 

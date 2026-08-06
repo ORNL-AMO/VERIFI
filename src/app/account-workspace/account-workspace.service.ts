@@ -1,3 +1,7 @@
+/**
+ * Orchestrates latest-request-wins account loading, validated entity selection, selection hints,
+ * and hydration or committed workspace refreshes.
+ */
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceLoaderService, AccountWorkspaceLoadError } from './account-workspace-loader.service';
 import { AccountWorkspaceSnapshot, WorkspaceLoadResult, WorkspaceSelections, WorkspaceSelectionError } from './account-workspace.models';
