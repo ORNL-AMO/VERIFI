@@ -59,7 +59,7 @@ export class PerformanceSetupComponent {
       this.analysisItemIdSub.unsubscribe();
     }
 
-    this.analysisItemIdSub = this.performanceReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+    this.analysisItemIdSub = this.performanceReportForm.controls.analysisItemId.valueChanges.subscribe(async () => {
       await this.save();
     })
   }

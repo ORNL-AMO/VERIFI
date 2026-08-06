@@ -205,7 +205,7 @@ export class FacilityOverviewReportPptAdapter {
             };
         });
 
-        const stackedTotals = sortedKeys.map((k, i) => series.reduce((sum, s) => sum + (s.data[i] ?? 0), 0));
+        const stackedTotals = sortedKeys.map((i) => series.reduce((sum, s) => sum + (s.data[i] ?? 0), 0));
         const axis = getPptAxisSpec(stackedTotals.filter(v => isFinite(v) && !isNaN(v)));
         const yAxisUnit = sectionType === 'water' ? this.facility.volumeLiquidUnit : sectionType === 'cost' ? 'Cost ($)' : this.facility.energyUnit;
 

@@ -56,7 +56,6 @@ export class AccountReportsDataCheckComponent {
     if (this.selectedAnalysisItem) {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-      let account: IdbAccount = this.accountWorkspaceStore.account();
       await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.accountWorkspaceService.selectAccountAnalysis((this.selectedAnalysisItem)?.guid);
     }

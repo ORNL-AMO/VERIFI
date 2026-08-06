@@ -284,7 +284,6 @@ export class AnalysisDetailsTableComponent {
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(analysisItem.facilityId, analysisItem.accountId, 'analysis', groups);
     newReport.analysisItemId = analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
     this.goToReport(newReport.guid);
@@ -311,7 +310,6 @@ export class AnalysisDetailsTableComponent {
     newItem.name = newItem.name + " (Copy)";
     newItem.guid = Math.random().toString(36).substr(2, 9);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
@@ -347,7 +345,6 @@ export class AnalysisDetailsTableComponent {
       selectedFacility.selectedWaterAnalysisId = undefined;
       await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
     }
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     if (!isBulkDelete) {
       this.displayDeleteModal = false;

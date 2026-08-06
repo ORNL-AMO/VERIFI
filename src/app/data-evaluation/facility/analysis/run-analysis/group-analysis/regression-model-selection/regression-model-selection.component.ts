@@ -6,7 +6,6 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -202,13 +201,11 @@ export class RegressionModelSelectionComponent {
   async saveItem(selectedGroup?: AnalysisGroup) {
     const _group: AnalysisGroup = selectedGroup ?? this.selectedGroup();
     const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
-    const selectedFacility: IdbFacility = this.selectedFacility();
     const groupIndex: number = _analysisItemCurrent.groups.findIndex(group => group.idbGroupId === _group.idbGroupId);
     const updatedGroups = [..._analysisItemCurrent.groups];
     updatedGroups[groupIndex] = _group;
     const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next(_group);

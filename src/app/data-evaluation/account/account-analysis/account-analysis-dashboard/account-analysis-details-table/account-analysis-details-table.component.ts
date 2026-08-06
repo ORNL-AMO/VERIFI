@@ -248,12 +248,10 @@ export class AccountAnalysisDetailsTableComponent {
     let selectedAccount = this.selectedAccount();
     await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(deletedItem.id));
     let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    let updateReportOptions: boolean = false;
     for (let i = 0; i < accountReports.length; i++) {
       if (accountReports[i].betterPlantsReportSetup.analysisItemId == deletedItem.guid) {
         accountReports[i].betterPlantsReportSetup.analysisItemId = undefined;
         await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
-        updateReportOptions = true;
       }
     }
     if (deletedItem.guid == selectedAccount.selectedEnergyAnalysisId) {

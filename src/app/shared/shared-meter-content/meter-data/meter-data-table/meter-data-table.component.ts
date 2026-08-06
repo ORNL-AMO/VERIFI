@@ -7,7 +7,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -116,8 +115,6 @@ export class MeterDataTableComponent {
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id));
     }
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
@@ -141,8 +138,6 @@ export class MeterDataTableComponent {
     this.showIndividualDelete = false;
     await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id));
     this.loadingService.setLoadingMessage("Meter Data Deleted...");
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.loadingService.setLoadingMessage("Setting Meter Data...");
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingMessage("Meter Data Set...");
@@ -193,8 +188,6 @@ export class MeterDataTableComponent {
 
     this.loadingService.setLoadingMessage("Filling Missing Meter Data...");
     this.loadingService.setLoadingStatus(true);
-    const selectedFacility = this.accountWorkspaceStore.selectedFacility();
-    const selectedAccount = this.accountWorkspaceStore.account();
     try {
       const accountMeterData = [...this.accountWorkspaceStore.meterData()];
       for (const missingMonth of missingMonths) {

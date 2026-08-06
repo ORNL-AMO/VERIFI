@@ -156,7 +156,6 @@ export class PredictorsDataTableComponent {
     if (this.inDataManagement) {
       let newEntry: IdbPredictorData = getNewIdbPredictorData(predictor, predictorData);
       newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
-      const account: IdbAccount = this.accountWorkspaceStore.account();
       await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(newEntry);
@@ -230,8 +229,6 @@ export class PredictorsDataTableComponent {
   }
 
   async finishDelete() {
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
@@ -324,7 +321,6 @@ export class PredictorsDataTableComponent {
     const predictor = this.predictor();
     predictor.ignoreWeatherDataWarning = !predictor.ignoreWeatherDataWarning;
     await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 

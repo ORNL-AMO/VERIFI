@@ -5,9 +5,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataQualityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -62,7 +60,7 @@ export class FacilityDataQualityReportSetupComponent {
       this.validateDataQualityReport();
     });
 
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
     });
   }
@@ -110,8 +108,6 @@ export class FacilityDataQualityReportSetupComponent {
   async save() {
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
     this.facilityReport.analysisItemId = this.selectedAnalysisItem ? this.selectedAnalysisItem.guid : undefined;
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }

@@ -180,7 +180,7 @@ export class AccountSettingsComponent implements OnInit {
   setOrderOptions() {
     let orderOptions: Array<number> = new Array();
     let index: number = 1;
-    this.facilityList.forEach(item => {
+    this.facilityList.forEach(() => {
       orderOptions.push(index);
       index++;
     })

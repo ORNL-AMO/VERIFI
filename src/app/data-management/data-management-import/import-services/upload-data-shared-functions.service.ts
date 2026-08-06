@@ -107,7 +107,6 @@ export class UploadDataSharedFunctionsService {
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     let importPredictors: Array<IdbPredictor> = new Array();
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
-    let hasNewData: boolean = false;
     importFacilities.forEach(facility => {
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
       let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
@@ -120,7 +119,6 @@ export class UploadDataSharedFunctionsService {
           if (key != 'Facility Name' && key != 'Date') {
             let predictor: IdbPredictor = facilityPredictors.find(predictor => { return predictor.name == key });
             if (predictor == undefined) {
-              hasNewData = true;
               let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
               let nameTest: string = key.toLocaleLowerCase();
               if (!nameTest.includes('cdd') && !nameTest.includes('hdd')) {

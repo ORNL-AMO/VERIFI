@@ -9,9 +9,7 @@ import { getNeededUnits } from 'src/app/calculations/shared-calculations/calande
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, CostSavingsReportSettings, YearGroupData } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -139,8 +137,6 @@ export class FacilityCostSavingsReportSetupComponent {
 
   async save() {
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }

@@ -4,8 +4,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
@@ -51,8 +49,6 @@ export class FacilityReportSetupComponent {
     let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     facilityReport.name = this.reportName;
     facilityReport = await firstValueFrom(this.facilityReportDbService.updateWithObservable(facilityReport));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
   }

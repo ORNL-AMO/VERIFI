@@ -73,8 +73,6 @@ export class CustomGwpDashboardComponent {
 
   async confirmDelete() {
     await firstValueFrom(this.customGWPDbService.deleteWithObservable(this.itemToDelete.id));
-    let allFuels: Array<IdbCustomGWP> = await firstValueFrom(this.customGWPDbService.getAll());
-    let accountCustomGWPs: Array<IdbCustomGWP> = allFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }

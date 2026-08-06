@@ -202,7 +202,6 @@ export class AccountAnalysisSetupComponent {
       baselineYear: raw.baselineYear ?? item.baselineYear,
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
   }
@@ -231,7 +230,6 @@ export class AccountAnalysisSetupComponent {
       })),
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
-    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;

@@ -11,7 +11,6 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
@@ -119,8 +118,6 @@ export class FacilityMeterComponent {
     this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.utilityMeter));
     await this.updateMeterData(this.utilityMeter);
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
   }
@@ -162,8 +159,6 @@ export class FacilityMeterComponent {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterData[index].id));
     }
 
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     //set meters
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //set meter data

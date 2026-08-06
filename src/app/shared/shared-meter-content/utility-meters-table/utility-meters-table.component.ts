@@ -105,7 +105,6 @@ export class UtilityMetersTableComponent {
       const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
       newMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(newMeter));
-      const account: IdbAccount = this.accountWorkspaceStore.account();
       await this.accountWorkspaceService.reloadActiveWorkspace(true);
       await this.selectEditMeter(newMeter);
     } else {
@@ -145,8 +144,6 @@ export class UtilityMetersTableComponent {
       await firstValueFrom(this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id));
     }
     //set meters
-    const selectedFacility = this.selectedFacility();
-    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
@@ -205,8 +202,6 @@ export class UtilityMetersTableComponent {
     copyMeter.guid = Math.random().toString(36).substr(2, 9);
     copyMeter.name = copyMeter.name + ' (copy)';
     copyMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(copyMeter));
-    const account: IdbAccount = this.accountWorkspaceStore.account();
-    const facility: IdbFacility = this.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.selectEditMeter(copyMeter);
   }

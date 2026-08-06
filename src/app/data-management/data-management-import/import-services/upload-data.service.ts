@@ -706,7 +706,6 @@ export class UploadDataService {
       }
     }
 
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.loadingService.setCurrentLoadingIndex(6);
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     fileReference.dataSubmitted = true;

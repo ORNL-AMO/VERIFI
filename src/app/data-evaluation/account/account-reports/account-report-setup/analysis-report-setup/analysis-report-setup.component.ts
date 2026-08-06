@@ -57,7 +57,7 @@ export class AnalysisReportSetupComponent {
       this.analysisItemIdSub.unsubscribe();
     }
 
-    this.analysisItemIdSub = this.analysisReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+    this.analysisItemIdSub = this.analysisReportForm.controls.analysisItemId.valueChanges.subscribe(async () => {
       await this.save();
     })
   }

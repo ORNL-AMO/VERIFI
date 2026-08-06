@@ -87,8 +87,6 @@ export class EnergyUseGroupCardComponent {
         copyGroup.guid = getGUID();
         copyGroup.name = copyGroup.name + ' (copy)';
         copyGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(copyGroup));
-        let account: IdbAccount = this.accountWorkspaceStore.account();
-        let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         await this.accountWorkspaceService.reloadActiveWorkspace(true);
         this.editGroup(copyGroup);
     }
@@ -114,8 +112,6 @@ export class EnergyUseGroupCardComponent {
         //delete equipment associated with group
         await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(deleteGroupGuid);
         //set groups
-        let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-        let account: IdbAccount = this.accountWorkspaceStore.account();
         await this.accountWorkspaceService.reloadActiveWorkspace(true);
         //set equipment
         await this.accountWorkspaceService.reloadActiveWorkspace(true);

@@ -11,7 +11,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { FacilityEnergyUsesSetupService } from '../facility-energy-uses-setup.service';
@@ -161,7 +160,6 @@ export class FacilityEnergyUsesGroupSetupComponent {
       //delete equipment associated with group
       await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(group.guid);
     }
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Added", undefined, undefined, false, "alert-success");

@@ -7,7 +7,6 @@ import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analy
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -175,8 +174,6 @@ export class GroupAnalysisOptionsComponent {
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == _group.idbGroupId });
     analysisItem.groups[groupIndex] = _group;
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    const facility: IdbFacility = this.facility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next({ ..._group });

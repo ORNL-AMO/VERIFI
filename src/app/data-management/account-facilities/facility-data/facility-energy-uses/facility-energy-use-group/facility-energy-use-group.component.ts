@@ -16,7 +16,6 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -40,7 +39,6 @@ export class FacilityEnergyUseGroupComponent {
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private loadingService: LoadingService = inject(LoadingService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private routerGuardService: RouterGuardService = inject(RouterGuardService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
 
@@ -87,8 +85,6 @@ export class FacilityEnergyUseGroupComponent {
     this.form.markAsPristine();
     this.energyUseGroup = this.facilityEnergyUseGroupFormService.updateEnergyUseGroupFromForm(this.energyUseGroup, this.form);
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(this.energyUseGroup));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
   }
@@ -113,8 +109,6 @@ export class FacilityEnergyUseGroupComponent {
     //delete equipment associated with group
     await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(this.energyUseGroup.guid);
     //set groups
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //set equipment
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
@@ -172,8 +166,6 @@ export class FacilityEnergyUseGroupComponent {
       equipment.selected = false;
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(equipment));
     }
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.showBulkTransfer = false;
     this.loadingService.setLoadingStatus(false);
@@ -198,8 +190,6 @@ export class FacilityEnergyUseGroupComponent {
     for (let i = 0; i < this.selectedEquipment.length; i++) {
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.deleteWithObservable(this.selectedEquipment[i].id));
     }
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.showBulkDelete = false;
     this.loadingService.setLoadingStatus(false);

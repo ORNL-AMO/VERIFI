@@ -126,7 +126,7 @@ export class FacilitiesListComponent {
   setOrderOptions() {
     let orderOptions: Array<number> = new Array();
     let index: number = 1;
-    this.facilities.forEach(item => {
+    this.facilities.forEach(() => {
       orderOptions.push(index);
       index++;
     })

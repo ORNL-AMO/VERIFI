@@ -78,7 +78,7 @@ export class MetersOverviewStackedLineChartComponent {
             x: x,
             y: y,
             name: cMeter.meter.name,
-            text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
+            text: monthlyDataInRange.map(() => { return cMeter.meter.name }),
             stackgroup: 'one',
             marker: {
               color: UtilityColors[cMeter.meter.source].color,

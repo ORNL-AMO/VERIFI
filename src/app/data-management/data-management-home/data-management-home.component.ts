@@ -128,7 +128,6 @@ export class DataManagementHomeComponent {
   }
 
   async showToast() {
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let hasWarning = this.weatherPredictorManagementService.hasWarning;
     if (hasWarning) {

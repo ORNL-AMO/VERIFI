@@ -280,7 +280,6 @@ export class SharedMeterCalendarizationComponent {
   async setDataApplication() {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter));
     this.selectedMeter = this.dataApplicationMeter;
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.setCalanderizedMeterData();
   }

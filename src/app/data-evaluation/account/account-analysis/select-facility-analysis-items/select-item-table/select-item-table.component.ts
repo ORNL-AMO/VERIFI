@@ -121,7 +121,6 @@ export class SelectItemTableComponent {
     const facility = this.selectedFacility();
     selectedAnalysisItem.isAnalysisVisited = false;
     await this.accountAnalysisDbService.updateFacilityItemSelection(selectedAnalysisItem, analysisItemId, facility.guid);
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 

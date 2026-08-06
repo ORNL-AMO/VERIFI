@@ -6,7 +6,6 @@ import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculat
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { AccountReportsService } from '../../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
@@ -67,7 +66,6 @@ export class AccountSectionReportComponent {
   @ViewChild(MonthlyUtilityUsageLineChartComponent) monthlyUsageLineChart: MonthlyUtilityUsageLineChartComponent;
 
   constructor(
-    private accountReportsService: AccountReportsService,
     private dataEvaluationService: DataEvaluationService
   ) {
   }

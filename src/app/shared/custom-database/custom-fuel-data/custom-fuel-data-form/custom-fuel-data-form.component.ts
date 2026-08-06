@@ -146,10 +146,8 @@ export class CustomFuelDataFormComponent {
       if (this.isFuelInUse && this.editCustomFuel.value != this.previousValue) {
         //update meters
         let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
-        let needsUpdate: boolean = false;
         for (let i = 0; i < accountMeters.length; i++) {
           if (accountMeters[i].fuel == this.previousValue) {
-            needsUpdate = true;
             accountMeters[i].fuel = this.editCustomFuel.value;
             //TODO: Update heat capacity and corresponding energy use in meter data....
             await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
@@ -158,8 +156,6 @@ export class CustomFuelDataFormComponent {
       }
       await firstValueFrom(this.customFuelDbService.updateWithObservable(this.editCustomFuel));
     }
-    let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
-    let accountCustomFuels: Array<IdbCustomFuel> = allCustomFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }

@@ -14,7 +14,6 @@ import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEner
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
@@ -146,7 +145,6 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
         }
       }
     }
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Updated", undefined, undefined, false, "alert-success");

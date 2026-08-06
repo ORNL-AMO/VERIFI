@@ -62,7 +62,7 @@ export class BetterPlantsSetupComponent {
       this.analysisItemIdSub.unsubscribe();
     }
 
-    this.analysisItemIdSub = this.betterPlantsReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+    this.analysisItemIdSub = this.betterPlantsReportForm.controls.analysisItemId.valueChanges.subscribe(async () => {
       await this.save();
     })
   }

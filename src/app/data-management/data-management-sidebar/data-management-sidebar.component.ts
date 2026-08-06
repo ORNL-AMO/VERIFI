@@ -166,8 +166,6 @@ export class DataManagementSidebarComponent {
   async toggleMeterOpen(meter: IdbUtilityMeter) {
     meter.sidebarOpen = !meter.sidebarOpen;
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
@@ -188,8 +186,6 @@ export class DataManagementSidebarComponent {
   async togglePredictorOpen(predictor: IdbPredictor) {
     predictor.sidebarOpen = !predictor.sidebarOpen;
     await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
@@ -208,8 +204,6 @@ export class DataManagementSidebarComponent {
   async toggleEnergyUseGroupOpen(energyUseGroup: IdbFacilityEnergyUseGroup) {
     energyUseGroup.sidebarOpen = !energyUseGroup.sidebarOpen;
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 

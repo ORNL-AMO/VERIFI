@@ -27,7 +27,6 @@ export class FacilityEnergyUseGroupManagementComponent {
     let facility: IdbFacility = this.facility();
     let newEnergyUseGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(facility.accountId, facility.guid);
     newEnergyUseGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newEnergyUseGroup));
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.selectEditGroup(newEnergyUseGroup);
   }

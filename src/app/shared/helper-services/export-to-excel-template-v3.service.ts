@@ -811,7 +811,7 @@ export class ExportToExcelTemplateV3Service {
   }
 
   setAlphabet() {
-    let alpha = Array.from(Array(26)).map((e, i) => i + 65);
+    let alpha = Array.from(Array(26)).map((i) => i + 65);
     this.alphabet = alpha.map(x => { return String.fromCharCode(x) });
     let additionalAlphabet: Array<string> = alpha.map(x => { return 'A' + String.fromCharCode(x) });
     this.alphabet = this.alphabet.concat(additionalAlphabet);

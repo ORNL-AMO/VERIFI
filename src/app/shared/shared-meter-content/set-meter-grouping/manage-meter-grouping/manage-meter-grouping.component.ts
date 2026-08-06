@@ -10,7 +10,6 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -88,7 +87,6 @@ export class ManageMeterGroupingComponent {
     let newGroupType: 'Energy' | 'Water' | 'Other' = this.hasEnergyMeters ? 'Energy' : this.hasWaterMeters ? 'Water' : 'Other';
     let newGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(newGroupType, "New Group", this.facility.guid, this.facility.accountId);
     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.analysisDbService.addGroup(newGroup.guid, newGroup.groupType);
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNoticationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
@@ -111,7 +109,6 @@ export class ManageMeterGroupingComponent {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id));
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == this.groupToDelete.guid });

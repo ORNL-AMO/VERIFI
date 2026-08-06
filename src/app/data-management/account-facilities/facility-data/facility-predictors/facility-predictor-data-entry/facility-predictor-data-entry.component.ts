@@ -6,7 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -79,7 +78,6 @@ export class FacilityPredictorDataEntryComponent {
   async save() {
     this.isSaved = true;
     await firstValueFrom(this.predictorDataDbService.updateWithObservable(this.predictorData));
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
@@ -94,8 +92,6 @@ export class FacilityPredictorDataEntryComponent {
     let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor, predictorData);
     newPredictorData = await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.router.navigateByUrl('data-management/' + newPredictorData.accountId + '/facilities/' + newPredictorData.facilityId + '/predictors/' + newPredictorData.predictorId + '/predictor-data/edit-entry/' + newPredictorData.guid);
     this.toastNotificationService.showToast('Predictor entry added!', undefined, undefined, undefined, 'alert-success');

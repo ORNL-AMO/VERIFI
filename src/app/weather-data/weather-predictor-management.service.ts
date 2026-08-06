@@ -1,7 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Injectable, inject } from '@angular/core';
-import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { DetailDegreeDay, WeatherDataSelection } from '../models/degreeDays';
 import { IdbFacility } from '../models/idbModels/facility';
@@ -69,7 +68,6 @@ export class WeatherPredictorManagementService {
 
   async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
     let idx: number = 0;
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;

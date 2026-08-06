@@ -79,7 +79,6 @@ export class AnalysisBannerComponent {
 
   constructor() {
     effect(() => {
-      const url = this.url();
       this.showDropdown = false;
     });
   }

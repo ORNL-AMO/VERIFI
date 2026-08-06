@@ -15,7 +15,6 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -330,8 +329,6 @@ export class CalculatedPredictorDataUpdateComponent {
         await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(pData.id));
       }
     }
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();

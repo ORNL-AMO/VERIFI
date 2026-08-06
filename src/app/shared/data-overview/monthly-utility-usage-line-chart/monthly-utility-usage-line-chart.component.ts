@@ -106,7 +106,7 @@ export class MonthlyUtilityUsageLineChartComponent {
           x: x,
           y: y,
           name: name,
-          text: x.map(item => {
+          text: x.map(() => {
             if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
               return 'FY - ' + year
             } else {

@@ -2,11 +2,7 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
@@ -29,11 +25,7 @@ export class FacilityPredictorDataTableComponent {
   constructor(
     private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
-    private router: Router,
-    private loadingService: LoadingService,
-    private predictorDataDbService: PredictorDataDbService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService
+    private router: Router
 
   ) {
   }

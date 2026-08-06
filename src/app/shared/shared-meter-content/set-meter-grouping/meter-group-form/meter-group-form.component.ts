@@ -7,8 +7,6 @@ import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
@@ -112,8 +110,6 @@ export class MeterGroupFormComponent {
   }
 
   async saveChanges() {
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
 
     this.meterGroup.name = this.groupForm.controls['name'].value;
     if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
@@ -231,9 +227,7 @@ export class MeterGroupFormComponent {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.meterGroup.id));
-    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
 
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];

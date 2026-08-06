@@ -325,7 +325,6 @@ export class RegressionModelMenuComponent {
     updatedGroups[groupIndex] = _group;
     const _analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(_analysisItem));
-    const selectedAccount: IdbAccount = this.selectedAccount();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);
     this._suppressFormPatch = suppressFormPatch;

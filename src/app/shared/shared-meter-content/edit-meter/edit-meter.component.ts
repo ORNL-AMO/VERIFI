@@ -10,7 +10,6 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
@@ -108,8 +107,6 @@ export class EditMeterComponent implements OnInit {
       meterToSave = await firstValueFrom(this.utilityMeterDbService.addWithObservable(meterToSave));
     }
     await this.utilityMeterDbService.updateWithObservable(meterToSave);
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.meterForm.markAsPristine();
     this.cancel();

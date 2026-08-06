@@ -127,7 +127,7 @@ export class ImportBackupModalComponent implements OnInit {
       if (files.length !== 0) {
         let fr: FileReader = new FileReader();
         fr.readAsText(files[0]);
-        fr.onloadend = (e) => {
+        fr.onloadend = () => {
           try {
             let testBackup = this.backupPreparationService.prepare(JSON.parse(String(fr.result)));
             this.backupFile = testBackup;
@@ -266,7 +266,6 @@ export class ImportBackupModalComponent implements OnInit {
   async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {
     let idx = currIdx !== undefined ? currIdx : 0;
     let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
-    let currentAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacility(newFacility.guid);
   }
@@ -367,7 +366,6 @@ export class ImportBackupModalComponent implements OnInit {
       idx = index + 1;
     }
 
-    let currentAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 

@@ -55,7 +55,6 @@ export class AccountAnalysisBannerComponent {
 
   constructor() {
     effect(() => {
-      const url = this.url();
       this.showDropdown = false;
     })
   }

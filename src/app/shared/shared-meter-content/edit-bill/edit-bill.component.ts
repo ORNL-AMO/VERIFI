@@ -8,7 +8,6 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -124,8 +123,6 @@ export class EditBillComponent implements OnInit {
       delete meterDataToSave.id;
       meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     }
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.meterDataForm.markAsPristine();
     this.cancel();
@@ -145,8 +142,6 @@ export class EditBillComponent implements OnInit {
 
     delete meterDataToSave.id;
     meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);

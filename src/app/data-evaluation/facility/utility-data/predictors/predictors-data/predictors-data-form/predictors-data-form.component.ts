@@ -9,7 +9,6 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
@@ -89,8 +88,6 @@ export class PredictorsDataFormComponent {
     } else {
       await firstValueFrom(this.predictorDataDbService.addWithObservable(this.predictorData));
     }
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);

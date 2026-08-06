@@ -73,8 +73,6 @@ export class CustomFuelDataDashboardComponent {
 
   async confirmDelete() {
     await firstValueFrom(this.customFuelDbService.deleteWithObservable(this.itemToDelete.id));
-    let allFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
-    let accountFuels: Array<IdbCustomFuel> = allFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }

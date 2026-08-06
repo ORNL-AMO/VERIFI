@@ -71,7 +71,7 @@ export class HomePageComponent {
     request.onload = () => {
       var reader = new FileReader();
       reader.readAsText(request.response);
-      reader.onloadend = async (e) => {
+      reader.onloadend = async () => {
         try {
           let test = JSON.parse(JSON.stringify(reader.result));
           let tmpBackupFile = this.backupPreparationService.prepare(JSON.parse(test));

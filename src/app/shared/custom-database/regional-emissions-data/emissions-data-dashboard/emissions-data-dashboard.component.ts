@@ -89,8 +89,6 @@ export class EmissionsDataDashboardComponent implements OnInit {
 
   async confirmDelete() {
     await firstValueFrom(this.customEmissionsDbService.deleteWithObservable(this.itemToDelete.id));
-    let allEmissions: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAll());
-    let accountEmissions: Array<IdbCustomEmissionsItem> = allEmissions.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }

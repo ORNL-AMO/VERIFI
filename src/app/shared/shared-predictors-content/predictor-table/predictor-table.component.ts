@@ -135,8 +135,6 @@ export class PredictorTableComponent {
     let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictorToDelete.guid);
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
-    const selectedFacility = this.selectedFacility();
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
@@ -157,7 +155,6 @@ export class PredictorTableComponent {
     if (this.router.url.includes('data-management')) {
       predictor.sidebarOpen = true;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-      const account: IdbAccount = this.accountWorkspaceStore.account();
       await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
@@ -171,7 +168,6 @@ export class PredictorTableComponent {
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
       newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
       await this.analysisDbService.addAnalysisPredictor(newPredictor);
-      let account: IdbAccount = this.accountWorkspaceStore.account();
       await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
@@ -274,7 +270,6 @@ export class PredictorTableComponent {
       predictor.ignoreWeatherDataWarning = ignoreWarning;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
     }
-    const account: IdbAccount = this.accountWorkspaceStore.account();
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast(
       ignoreWarning ? 'Weather gap warnings dismissed' : 'Weather gap warnings re-enabled',

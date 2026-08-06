@@ -858,7 +858,7 @@ export class DataOverviewReportPptAdapter {
             };
         });
 
-        const stackedTotals = sortedKeys.map((k, i) => series.reduce((sum, s) => sum + (s.data[i] ?? 0), 0));
+        const stackedTotals = sortedKeys.map((i) => series.reduce((sum, s) => sum + (s.data[i] ?? 0), 0));
         const axis = getPptAxisSpec(stackedTotals.filter(v => isFinite(v) && !isNaN(v)));
         const yAxisUnit = sectionType === 'water' ? facilityData.facility.volumeLiquidUnit : sectionType === 'cost' ? 'Cost ($)' : facilityData.facility.energyUnit;
 

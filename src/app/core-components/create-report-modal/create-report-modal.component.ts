@@ -71,7 +71,6 @@ export class CreateReportModalComponent {
   }
 
   async createReport() {
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     let navigateToStr: string;
     if (this.router.url.includes('account/overview')) {
       navigateToStr = '/data-evaluation/account/reports/data-overview-report';

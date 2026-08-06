@@ -111,16 +111,12 @@ export class CalanderizationService {
 
   getYearOptions(meterCategory: 'water' | 'energy' | 'all', onlyFullYears: boolean, facilityId?: string): Array<number> {
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
-    let facilityOrAccount: IdbFacility | IdbAccount;
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     if (facilityId) {
-      facilityOrAccount = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityId));
       meters = meters.filter(meter => {
         return meter.facilityId == facilityId
       });
       accountFacilities = accountFacilities.filter(fac => fac.guid == facilityId);
-    } else {
-      facilityOrAccount = this.accountWorkspaceStore.account();
     }
     let categoryMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
     let categoryMeterIds: Array<string> = categoryMeters.map(meter => { return meter.guid });

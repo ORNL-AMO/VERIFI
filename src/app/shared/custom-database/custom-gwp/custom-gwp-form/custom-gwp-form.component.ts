@@ -119,8 +119,6 @@ export class CustomGwpFormComponent {
       }
       await firstValueFrom(this.customGWPDbService.updateWithObservable(this.editCustomGWP));
     }
-    let allCustomGWPs: Array<IdbCustomGWP> = await firstValueFrom(this.customGWPDbService.getAll());
-    let accountCustomGWPs: Array<IdbCustomGWP> = allCustomGWPs.filter(gwp => { return gwp.accountId == this.selectedAccount.guid });
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
