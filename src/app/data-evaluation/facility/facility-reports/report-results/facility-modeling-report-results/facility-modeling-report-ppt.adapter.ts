@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, TitleSlide } from 'src/app/shared/ppt-report/models/ppt-slide';
@@ -40,7 +39,7 @@ export class FacilityModelingReportPptAdapter {
         slides.push({
             type: 'title',
             title: data.report.name,
-            subtitle: this.facility.name,
+            subtitle: this.facility?.name ?? '',
             date: new Date().toISOString(),
         });
 
