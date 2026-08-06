@@ -3,13 +3,12 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
@@ -29,7 +28,7 @@ export class HomePageComponent {
   accounts: Array<IdbAccount>;
   currentPageNumber: number = 1;
   loadingSub: Subscription;
-  constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
+  constructor(private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private backupPreparationService: BackupPreparationService,
     private toastNotificationService: ToastNotificationsService,
@@ -108,8 +107,7 @@ export class HomePageComponent {
   }
 
   async createNewAccount() {
-    let account: IdbAccount = getNewIdbAccount();
-    account = await firstValueFrom(this.accountDbService.addWithObservable(account));
+    const account = await this.accountHandler.add(getNewIdbAccount());
     await this.applicationLifecycleService.activatePersistedAccount(account.guid);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }

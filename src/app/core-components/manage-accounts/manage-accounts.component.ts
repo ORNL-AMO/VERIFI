@@ -148,10 +148,7 @@ export class ManageAccountsComponent {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    await firstValueFrom(this.accountDbService.updateWithObservable({
-      ...this.selectedAccount,
-      deleteAccount: true
-    }));
+    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
     this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
   }
 
@@ -179,8 +176,7 @@ export class ManageAccountsComponent {
   }
 
   async addNewAccount() {
-    let account: IdbAccount = getNewIdbAccount();
-    account = await firstValueFrom(this.accountDbService.addWithObservable(account));
+    const account = await this.accountHandler.add(getNewIdbAccount());
     await this.applicationLifecycleService.activatePersistedAccount(account.guid);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }

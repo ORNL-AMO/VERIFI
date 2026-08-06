@@ -2,11 +2,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -34,7 +33,6 @@ export class AccountSetupComponent {
   selectedAccountSub: Subscription;
   downloadAsZip: boolean = false;
   constructor(private router: Router,
-    private accountDbService: AccountdbService,
     private electronService: ElectronService,
     private backupDataService: BackupDataService,
     private commandBoundary: WorkspaceCommandBoundary,
@@ -74,10 +72,7 @@ export class AccountSetupComponent {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    await firstValueFrom(this.accountDbService.updateWithObservable({
-      ...this.selectedAccount,
-      deleteAccount: true
-    }));
+    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
     await this.applicationLifecycleService.refreshAccountCatalog();
     this.router.navigateByUrl('/welcome');
   }

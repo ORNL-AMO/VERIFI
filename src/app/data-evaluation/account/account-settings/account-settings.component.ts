@@ -3,12 +3,11 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom, skip, take } from 'rxjs';
+import { Subscription, skip, take } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
@@ -61,7 +60,6 @@ export class AccountSettingsComponent implements OnInit {
   downloadAsZip: boolean = false;
   constructor(
     private router: Router,
-    private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
@@ -150,10 +148,7 @@ export class AccountSettingsComponent implements OnInit {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    await firstValueFrom(this.accountDbService.updateWithObservable({
-      ...this.selectedAccount,
-      deleteAccount: true
-    }));
+    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
     const accounts = await this.applicationLifecycleService.refreshAccountCatalog();
     let nonDeleteAccounts: Array<IdbAccount> = accounts.filter(acc => {
       return acc.deleteAccount == false;

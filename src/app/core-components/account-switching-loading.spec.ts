@@ -163,19 +163,24 @@ describe('account switching loading ownership', () => {
         await workspace.selectAccount(guid);
       })
     };
+    const accountHandler = {
+      update: vi.fn(),
+      add: vi.fn().mockResolvedValue(createdAccount)
+    };
     const manageAccounts = createManageAccounts({
       accountDb: {
-        addWithObservable: vi.fn(() => of(createdAccount)),
         allAccounts: new BehaviorSubject<IdbAccount[]>([])
       },
       router,
       workspace,
-      lifecycle
+      lifecycle,
+      accountHandler
     });
 
     await manageAccounts.addNewAccount();
 
     expect(events).toEqual(['catalog', 'workspace', 'navigate']);
+    expect(accountHandler.add).toHaveBeenCalled();
     expect(workspace.selectAccount).toHaveBeenCalledWith('account-c');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-management/account-c');
   });
@@ -198,7 +203,7 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
     accountDb as any,
     loading as any,
     (overrides.commandBoundary ?? { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) }) as any,
-    (overrides.accountHandler ?? { update: vi.fn() }) as any,
+    (overrides.accountHandler ?? { update: vi.fn(), add: vi.fn().mockImplementation(a => Promise.resolve({ ...a, id: 99, guid: 'new-guid' })) }) as any,
     (overrides.router ?? { navigateByUrl: vi.fn() }) as any,
     (overrides.toasts ?? { showToast: vi.fn() }) as any,
     (overrides.backupData ?? { backupAccount: vi.fn() }) as any,

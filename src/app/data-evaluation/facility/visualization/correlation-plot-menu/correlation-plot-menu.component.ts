@@ -2,7 +2,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 import { MonthlyData } from 'src/app/models/calanderization';
@@ -17,6 +18,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class CorrelationPlotMenuComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly facilityHandler = inject(FacilityCommandHandler);
 
 
   years: Array<number>;
@@ -36,7 +39,6 @@ export class CorrelationPlotMenuComponent {
   disableY2SelectedTotal: boolean;
   constructor(
     private visualizationStateService: VisualizationStateService,
-    private dbChangesService: DbChangesService,
     private injector: Injector
   ) {
   }
@@ -79,7 +81,10 @@ export class CorrelationPlotMenuComponent {
   }
 
   async saveSiteOrSource() {
-    await this.dbChangesService.updateFacility(this.facility);
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'update', entityGuid: this.facility.guid, label: 'Updating facility' },
+      () => this.facilityHandler.update({ ...this.facility }, this.accountWorkspaceStore.account()?.guid)
+    );
   }
 
   setTimeSeriesLeftAxis() {
