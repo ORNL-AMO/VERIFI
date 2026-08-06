@@ -1,8 +1,8 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -18,10 +18,10 @@ interface MetersListItem {
   standalone: false
 })
 export class EnergyConsumptionComponent {
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  utilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters, { initialValue: undefined });
+  utilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$)
 
   metersList: Signal<Array<MetersListItem>> = computed(() => {

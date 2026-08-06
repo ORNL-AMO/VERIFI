@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, Input, inject } from '@angular/core';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from 'src/app/calculations/emissions-calculations/emissions';
 import { EmissionElectricity, EmissionOthers } from 'src/app/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
+import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -20,6 +20,8 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
   styleUrl: './account-emission-factors-report-table.component.css'
 })
 export class AccountEmissionFactorsReportTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   @Input()
   accountFacilities: Array<IdbFacility>;
@@ -29,15 +31,15 @@ export class AccountEmissionFactorsReportTableComponent {
   customFuels: Array<IdbCustomFuel>;
   emissionReportData: Array<EmissionFactorsReportData> = [];
 
-  constructor(private customFuelDbService: CustomFuelDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
+  constructor(
     private eGridService: EGridService
+
   ) { }
 
   ngOnInit(): void {
-    this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
+    this.customFuels = [...this.accountWorkspaceStore.customFuels()];
     this.accountFacilities.forEach(facility => {
-      let facilityMeters = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(facility.guid);
+      let facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(facility.guid);
       this.calculateFacilitiesSummary(facility, facilityMeters);
     });
   }

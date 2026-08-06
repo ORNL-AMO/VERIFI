@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -6,7 +8,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-financial-reporting-form',
@@ -15,16 +18,19 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   standalone: false
 })
 export class FinancialReportingFormComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   form: FormGroup;
   months: Array<Month> = Months;
   selectedAccountSub: Subscription;
   selectedAccount: IdbAccount;
   isFormChange: boolean = false;
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService, private injector: Injector) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.selectedAccount = account;
       if (account) {
         if (this.isFormChange == false) {
@@ -43,11 +49,8 @@ export class FinancialReportingFormComponent implements OnInit {
   async saveChanges() {
     this.isFormChange = true;
     this.selectedAccount = this.settingsFormsService.updateAccountFromFiscalForm(this.form, this.selectedAccount);
-    let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-    let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.selectedAccount.next(updatedAccount);
-    this.accountDbService.allAccounts.next(allAccounts);
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    const updatedAccount = await firstValueFrom(this.accountDbService.updateWithObservable({ ...this.selectedAccount }));
+    const accountFacilities = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
     if (accountFacilities && accountFacilities.length > 0) {
       for (let i = 0; i < accountFacilities.length; i++) {
         accountFacilities[i].fiscalYear = updatedAccount.fiscalYear;
@@ -56,6 +59,7 @@ export class FinancialReportingFormComponent implements OnInit {
         await firstValueFrom(this.facilityDbService.updateWithObservable(accountFacilities[i]));
       }
     }
-    this.facilityDbService.accountFacilities.next(accountFacilities);
+    await this.applicationLifecycleService.refreshAccountCatalog();
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 }

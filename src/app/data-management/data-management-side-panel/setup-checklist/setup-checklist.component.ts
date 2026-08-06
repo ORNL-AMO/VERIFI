@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -23,6 +24,7 @@ interface FacilityActionGroup {
   styleUrl: './setup-checklist.component.css'
 })
 export class SetupChecklistComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   account: IdbAccount;
   accountSub: Subscription;
@@ -38,14 +40,15 @@ export class SetupChecklistComponent {
   statusCheckSub: Subscription;
 
   constructor(
-    private accountDbService: AccountdbService,
-    private accountStatusCheckService: AccountStatusCheckService
+    private accountStatusCheckService: AccountStatusCheckService,
+    private injector: Injector
+
   ) {
 
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
 

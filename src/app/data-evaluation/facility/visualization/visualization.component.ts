@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -16,6 +16,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
     standalone: false
 })
 export class VisualizationComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   utilityMeterDataSub: Subscription;
@@ -24,21 +25,22 @@ export class VisualizationComponent implements OnInit {
 
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
-  constructor(private visualizationStateService: VisualizationStateService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private analyticsService: AnalyticsService) { }
+  constructor(
+    private visualizationStateService: VisualizationStateService,
+    private analyticsService: AnalyticsService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
     this.analyticsService.sendEvent('use_data_visualization');
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
       this.initializeDate();
       this.visualizationStateService.initilizeCorrelationPlotOptions();
     });
 
-    this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
+    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()]), { injector: this.injector }).subscribe(val => {
       this.utilityMeterData = val;
     });
   }

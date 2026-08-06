@@ -1,22 +1,24 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { DatabaseResetService } from 'src/app/application-lifecycle/database-reset.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, Input, OnInit, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
-import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { Subscription, firstValueFrom } from 'rxjs';
-import * as _ from 'lodash';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { environment } from 'src/environments/environment';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { LoadingService } from '../loading/loading.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 
 @Component({
   selector: 'app-header',
@@ -52,27 +54,31 @@ export class HeaderComponent implements OnInit {
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
-    public facilitydbService: FacilitydbService,
     public utilityMeterdbService: UtilityMeterdbService,
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     private importBackupModalService: ImportBackupModalService,
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService,
+    private accountWorkspaceService: AccountWorkspaceService,
     private electronService: ElectronService,
     private toastNotificationService: ToastNotificationsService,
     private cd: ChangeDetectorRef,
-    private automaticBackupService: AutomaticBackupsService
+    private automaticBackupService: AutomaticBackupsService,
+    private databaseResetService: DatabaseResetService,
+    private applicationLifecycleService: ApplicationLifecycleService,
+    private accountWorkspaceStore: AccountWorkspaceStore,
+    private injector: Injector
+
   ) {
   }
 
   ngOnInit() {
-    this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
+    this.allAccountsSub = toObservable(this.applicationLifecycleService.accountCatalog, { injector: this.injector }).subscribe(allAccounts => {
       this.accountList = allAccounts.filter(account => { return !account.deleteAccount });
     });
 
-    this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(selectedAccount => {
       this.resetDatabase = false;
       this.activeAccount = selectedAccount;
       this.cd.detectChanges();
@@ -118,19 +124,12 @@ export class HeaderComponent implements OnInit {
     // account = await firstValueFrom(this.accountdbService.addWithObservable(account));
     // let accounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
     // this.accountdbService.allAccounts.next(accounts);
-    // await this.dbChangesService.selectAccount(account, false);
     this.router.navigateByUrl('/welcome');
   }
 
   async switchAccount(account: IdbAccount) {
-    this.loadingService.setLoadingMessage("Switching accounts...");
-    this.loadingService.setLoadingStatus(true);
     try {
-      this.automaticBackupService.initializingAccount = true;
-      this.electronService.accountLatestBackupFile.next(undefined);
-      await this.dbChangesService.selectAccount(account, false);
-      this.loadingService.setLoadingStatus(false);
-      this.automaticBackupService.initializeAccount();
+      await this.accountWorkspaceService.selectAccount(account.guid);
       if (this.inDataEvaluation) {
         this.goToDashboard(true);
       } else {
@@ -138,7 +137,6 @@ export class HeaderComponent implements OnInit {
       }
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
-      this.loadingService.setLoadingStatus(false);
       this.router.navigate(['/manage-accounts']);
     }
   }
@@ -149,16 +147,20 @@ export class HeaderComponent implements OnInit {
 
   async backupAccount() {
     this.backupDataService.backupAccount();
-    let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
-    selectedAccount.lastBackup = new Date();
-    await firstValueFrom(this.accountdbService.updateWithObservable(selectedAccount));
-    this.accountdbService.selectedAccount.next(selectedAccount);
+    const selectedAccount = this.accountWorkspaceStore.account();
+    if (!selectedAccount) { return; }
+    await firstValueFrom(this.accountdbService.updateWithObservable({
+      ...selectedAccount,
+      lastBackup: new Date()
+    }));
+    await this.applicationLifecycleService.refreshAccountCatalog();
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountdbService.deleteDatabase();
+    await this.databaseResetService.resetAndRestart();
   }
 
   toggleResetDatabase() {
@@ -191,9 +193,7 @@ export class HeaderComponent implements OnInit {
   }
 
   goHome() {
-    this.router.navigate(['/welcome']).then(() => {
-      this.accountdbService.selectedAccount.next(undefined);
-    });
+    this.router.navigate(['/welcome']);
   }
 
   setInDashboard(url: string) {
@@ -205,7 +205,7 @@ export class HeaderComponent implements OnInit {
     if (this.inDataEvaluation || forceNavigation) {
       let url: string = this.router.url;
       if (url.includes('facility')) {
-        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         if(selectedFacility){
           this.router.navigateByUrl(`/data-management/${this.activeAccount.guid}/facilities/${selectedFacility.guid}`)
         }else{
@@ -231,7 +231,7 @@ export class HeaderComponent implements OnInit {
     if (!this.inDataEvaluation || forceNavigation) {
       let url: string = this.router.url;
       if (url.includes('facilities')) {
-        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         if (selectedFacility) {
           this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid);
         } else {

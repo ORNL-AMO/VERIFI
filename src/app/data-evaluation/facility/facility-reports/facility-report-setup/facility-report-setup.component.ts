@@ -1,12 +1,9 @@
-import { Component } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
@@ -16,21 +13,23 @@ import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/
   standalone: false
 })
 export class FacilityReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReportType: FacilityReportType;
   reportName: string;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
-  constructor(private facilityReportDbService: FacilityReportsDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService
+  constructor(
+    private facilityReportDbService: FacilityReportsDbService,
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
-    let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+    let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     this.facilityReportType = facilityReport.facilityReportType;
-    this.selectedReportSub = this.facilityReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(val => {
       facilityReport = val;
       if (!this.isFormChange)
         this.reportName = facilityReport.name;
@@ -48,12 +47,10 @@ export class FacilityReportSetupComponent {
 
   async saveName() {
     this.isFormChange = true;
-    let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+    let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     facilityReport.name = this.reportName;
     facilityReport = await firstValueFrom(this.facilityReportDbService.updateWithObservable(facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportDbService.selectedReport.next(facilityReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
   }
 }

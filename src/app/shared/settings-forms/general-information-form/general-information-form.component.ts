@@ -1,16 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject, Injector } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { State, States } from 'src/app/shared/form-data/states';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { GeneralInformationService } from './general-information.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-general-information-form',
@@ -19,6 +21,9 @@ import { GeneralInformationService } from './general-information.service';
   standalone: false
 })
 export class GeneralInformationFormComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly dbChangesService = inject(DbChangesService);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
   @Input()
   inAccount: boolean;
 
@@ -44,12 +49,15 @@ export class GeneralInformationFormComponent implements OnInit {
   modalAddress = new FormControl('');
   selectedCountry: string;
 
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private generalInformationService: GeneralInformationService) { }
+  constructor(
+    private settingsFormsService: SettingsFormsService,
+    private generalInformationService: GeneralInformationService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
     if (this.inAccount) {
-      this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
         this.selectedAccount = account;
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
@@ -62,7 +70,7 @@ export class GeneralInformationFormComponent implements OnInit {
       });
     } else if (!this.inAccount) {
       this.formNameLabel = "Facility";
-      this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
         this.selectedFacility = facility;
         if (facility) {
           if (this.isFormChange == false) {
@@ -142,18 +150,12 @@ export class GeneralInformationFormComponent implements OnInit {
     this.isFormChange = true;
     if (!this.inAccount) {
       this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
-      let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-      let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
-      this.facilityDbService.selectedFacility.next(updatedFacility);
-      let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
-      this.facilityDbService.accountFacilities.next(accountFacilities);
+      await this.dbChangesService.updateFacility({ ...this.selectedFacility });
     }
     if (this.inAccount) {
       this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
-      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-      this.accountDbService.selectedAccount.next(updatedAccount);
-      this.accountDbService.allAccounts.next(allAccounts);
+      await this.dbChangesService.updateAccount({ ...this.selectedAccount });
+      await this.applicationLifecycleService.refreshAccountCatalog();
     }
   }
 

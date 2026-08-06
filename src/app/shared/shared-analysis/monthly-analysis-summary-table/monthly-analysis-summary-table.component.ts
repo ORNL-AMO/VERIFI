@@ -58,7 +58,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   numImprovementColumns: number;
   numPredictorColumns: number;
 
-  predictorColumns: Array<AnalysisGroupPredictorVariable>;
+  predictorColumns: Array<AnalysisGroupPredictorVariable> = [];
   copyingTable: boolean = false;
   hasBanked: boolean;
   hasBankedSavings: boolean;
@@ -131,6 +131,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   setPredictorVariables() {
+    if (!this.monthlyAnalysisSummaryData) {
+      return;
+    }
     let inAccount: boolean = this.router.url.includes('account');
     if (!inAccount) {
       let predictorColumns: Array<AnalysisGroupPredictorVariable> = new Array();
@@ -259,6 +262,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   setHasBanked() {
+    if (!this.monthlyAnalysisSummaryData) {
+      return;
+    }
     this.hasBanked = this.monthlyAnalysisSummaryData.find(data => {
       return data.isBanked
     }) != undefined;

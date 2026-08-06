@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 
 @Component({
   selector: 'app-meter-charges-visualization',
@@ -14,28 +15,32 @@ import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-m
   styleUrl: './meter-charges-visualization.component.css'
 })
 export class MeterChargesVisualizationComponent {
-  
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
   facility: IdbFacility;
   facilitySub: Subscription;
   utilityMeter: IdbUtilityMeter;
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService,
-    private router: Router
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
+    private injector: Injector
+
   ) {
 
   }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
 
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
-      this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+      this.utilityMeter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
       if (this.utilityMeter) {
-        this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
+        this.accountWorkspaceService.selectMeter((this.utilityMeter)?.guid);
       } else {
         this.goToMeterList();
       }
@@ -44,11 +49,11 @@ export class MeterChargesVisualizationComponent {
 
   ngOnDestroy() {
     this.facilitySub.unsubscribe();
-    this.utilityMeterDbService.selectedMeter.next(undefined);
+    this.accountWorkspaceService.selectMeter(undefined);
   }
 
   goToMeterList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
   }
 

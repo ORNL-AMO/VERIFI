@@ -1,8 +1,8 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 
@@ -18,10 +18,10 @@ interface PredictorListItem {
   standalone: false
 })
 export class PredictorsComponent {
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  private predictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
+  private predictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   predictorList: Signal<Array<PredictorListItem>> = computed(() => {

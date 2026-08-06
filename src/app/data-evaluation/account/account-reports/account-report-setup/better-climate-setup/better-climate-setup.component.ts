@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -16,6 +17,8 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
     standalone: false
 })
 export class BetterClimateSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   account: IdbAccount;
   selectedReportSub: Subscription;
@@ -26,17 +29,18 @@ export class BetterClimateSetupComponent {
   reportYears: Array<number>;
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   initiativeNotes: Array<{year: number, note: string}>;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
+  constructor(
+    private accountReportDbService: AccountReportDbService,
     private calanderizationService: CalanderizationService,
-    private accountReportsService: AccountReportsService) {
+    private accountReportsService: AccountReportsService,
+    private injector: Injector
+  ) {
   }
 
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.account = this.accountWorkspaceStore.account();
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport, { injector: this.injector }).subscribe(val => {
       this.selectedReport = val;
       if (!this.isFormChange) {
         this.initiativeNotes = val.betterClimateReportSetup.initiativeNotes;
@@ -54,13 +58,13 @@ export class BetterClimateSetupComponent {
 
   async save() {
     this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport()
     // selectedReport.betterClimateReportSetup = this.reportSetup;
     selectedReport.betterClimateReportSetup = this.accountReportsService.updateBetterClimateReportFromForm(selectedReport.betterClimateReportSetup, this.reportForm);
     selectedReport.betterClimateReportSetup.initiativeNotes = this.initiativeNotes;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
   async addNote() {

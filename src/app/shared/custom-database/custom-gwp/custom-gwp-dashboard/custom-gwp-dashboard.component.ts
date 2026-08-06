@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -15,6 +16,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class CustomGwpDashboardComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   customGWPs: Array<IdbCustomGWP>;
   customGWPsSub: Subscription;
@@ -22,17 +25,19 @@ export class CustomGwpDashboardComponent {
   selectedAccountSub: Subscription;
   itemToDelete: IdbCustomGWP;
   deleteGWPInUse: boolean = false;
-  constructor(private customGWPDbService: CustomGWPDbService, private router: Router,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private activatedRoute: ActivatedRoute) { }
+  constructor(
+    private customGWPDbService: CustomGWPDbService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.customGWPsSub = this.customGWPDbService.accountCustomGWPs.subscribe(val => {
+    this.customGWPsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customGWPs()]), { injector: this.injector }).subscribe(val => {
       this.customGWPs = val;
     });
 
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
   }
@@ -69,15 +74,13 @@ export class CustomGwpDashboardComponent {
 
   async confirmDelete() {
     await firstValueFrom(this.customGWPDbService.deleteWithObservable(this.itemToDelete.id));
-    let allFuels: Array<IdbCustomGWP> = await firstValueFrom(this.customGWPDbService.getAll());
-    let accountCustomGWPs: Array<IdbCustomGWP> = allFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
-    this.customGWPDbService.accountCustomGWPs.next(accountCustomGWPs);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }
 
   setDeleteGWPInUse() {
     if (this.itemToDelete) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let gwpMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.globalWarmingPotentialOption == this.itemToDelete.value });
       this.deleteGWPInUse = (gwpMeter != undefined);
     } else {

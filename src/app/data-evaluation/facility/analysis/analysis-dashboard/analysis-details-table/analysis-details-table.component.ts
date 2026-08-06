@@ -1,14 +1,15 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -45,14 +46,15 @@ interface AnalysisDetailsTableRow {
 })
 
 export class AnalysisDetailsTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
   private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private facilityReportsDbService: FacilityReportsDbService = inject(FacilityReportsDbService);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private calendarizationService: CalanderizationService = inject(CalanderizationService);
@@ -60,11 +62,11 @@ export class AnalysisDetailsTableComponent {
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
-  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.facilityAnalysisItems);
-  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
-  facilityReports: Signal<Array<IdbFacilityReport>> = toSignal(this.facilityReportsDbService.facilityReports);
+  facilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityAnalyses()]]);
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
+  facilityReports: Signal<Array<IdbFacilityReport>> = computed(() => [...[...this.accountWorkspaceStore.selectedFacilityReports()]]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
   selectedAnalysisCategory: WritableSignal<'energy' | 'water' | 'all'> = signal('all');
@@ -222,12 +224,12 @@ export class AnalysisDetailsTableComponent {
   showBulkDelete: boolean = false;
 
   selectAnalysisItem(analysisItem: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
 
   async setUseItem(analysisItem: IdbAnalysisItem) {
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const selectedFacility: IdbFacility = this.selectedFacility();
     const canSelectItem: boolean = this.getCanSelectItem(selectedAccount, selectedFacility, analysisItem);
     if (canSelectItem) {
@@ -278,19 +280,17 @@ export class AnalysisDetailsTableComponent {
   }
 
   async confirmCreateReport(analysisItem: IdbAnalysisItem) {
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(analysisItem.facilityId);
+    let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(analysisItem.facilityId);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(analysisItem.facilityId, analysisItem.accountId, 'analysis', groups);
     newReport.analysisItemId = analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
     this.goToReport(newReport.guid);
   }
 
   goToReport(reportGuid: string) {
-    let facilityReport: IdbFacilityReport = this.facilityReportsDbService.getByGuid(reportGuid);
-    this.facilityReportsDbService.selectedReport.next(facilityReport);
+    this.accountWorkspaceService.selectFacilityReport(reportGuid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/reports/setup')
   }
 
@@ -309,9 +309,8 @@ export class AnalysisDetailsTableComponent {
     newItem.name = newItem.name + " (Copy)";
     newItem.guid = Math.random().toString(36).substr(2, 9);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
-    this.analysisDbService.selectedAnalysisItem.next(addedItem);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
@@ -345,9 +344,7 @@ export class AnalysisDetailsTableComponent {
       selectedFacility.selectedWaterAnalysisId = undefined;
       await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
     }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false)
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     if (!isBulkDelete) {
       this.displayDeleteModal = false;
       this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
@@ -400,14 +397,12 @@ export class AnalysisDetailsTableComponent {
   }
 
   goToAccountAnalysis(analysisGuid: string) {
-    let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisGuid);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(accountAnalysisItem);
+    this.accountWorkspaceService.selectAccountAnalysis(analysisGuid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 
   goToFacilityAnalysis(analysisGuid: string) {
-    let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
-    this.analysisDbService.selectedAnalysisItem.next(bankedAnalysisItem);
+    this.accountWorkspaceService.selectFacilityAnalysis(analysisGuid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
   }
 

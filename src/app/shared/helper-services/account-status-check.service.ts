@@ -1,33 +1,21 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { CalanderizationService } from './calanderization.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisSetupErrors, FacilityReportErrors, AccountReportErrors, GroupAnalysisErrors } from 'src/app/models/validation';
+import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { emptyAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/analysisValidation';
 import { emptyGroupAnalysisErrors } from '../../calculations/status-check-calculations/validation/groupAnalysisValidation';
-import { emptyFacilityReportErrors } from '../../calculations/status-check-calculations/validation/facilityReportValidation';
 import { emptyAccountAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/accountAnalysisValidation';
-import { emptyAccountReportErrors } from '../../calculations/status-check-calculations/validation/accountReportValidation';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AccountStatusCheckService implements OnDestroy {
-
     accountStatusCheck: BehaviorSubject<AccountStatusCheck | undefined> = new BehaviorSubject<AccountStatusCheck | undefined>(undefined);
 
     selectedFacilityStatusCheck$: Observable<FacilityStatusCheck | undefined>;
@@ -35,22 +23,12 @@ export class AccountStatusCheckService implements OnDestroy {
     private sub: Subscription;
 
     constructor(
-        private accountDbService: AccountdbService,
-        private facilityDbService: FacilitydbService,
-        private utilityMeterDbService: UtilityMeterdbService,
-        private utilityMeterDataDbService: UtilityMeterDatadbService,
-        private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-        private calanderizationService: CalanderizationService,
-        private predictorDbService: PredictorDbService,
-        private predictorDataDbService: PredictorDataDbService,
-        private analysisDbService: AnalysisDbService,
-        private facilityReportsDbService: FacilityReportsDbService,
-        private accountAnalysisDbService: AccountAnalysisDbService,
-        private accountReportDbService: AccountReportDbService
+        private accountWorkspaceStore: AccountWorkspaceStore,
+        private calanderizationService: CalanderizationService
     ) {
         this.selectedFacilityStatusCheck$ = combineLatest([
             this.accountStatusCheck,
-            this.facilityDbService.selectedFacility
+            toObservable(this.accountWorkspaceStore.selectedFacility)
         ]).pipe(
             map(([accountCheck, facility]) =>
                 accountCheck?.facilityStatusChecks.find(fc => fc.facility.guid === facility?.guid)
@@ -58,41 +36,33 @@ export class AccountStatusCheckService implements OnDestroy {
         );
 
         this.sub = combineLatest([
-            this.accountDbService.selectedAccount,
-            this.facilityDbService.accountFacilities,
-            this.utilityMeterDbService.accountMeters,
-            this.utilityMeterDataDbService.accountMeterData,
-            this.utilityMeterGroupDbService.accountMeterGroups,
-            this.calanderizationService.calanderizedMeters,
-            this.predictorDbService.accountPredictors,
-            this.predictorDataDbService.accountPredictorData,
-            this.analysisDbService.accountAnalysisItems,
-            this.facilityReportsDbService.accountFacilityReports,
-            this.accountAnalysisDbService.accountAnalysisItems,
-            this.accountReportDbService.accountReports
+            toObservable(this.accountWorkspaceStore.snapshot),
+            this.calanderizationService.calanderizedMeters
         ]).pipe(
             debounceTime(300)
         ).subscribe(([
-            account,
-            facilities,
-            meters,
-            meterData,
-            meterGroups,
-            calendarizedMeters,
-            predictors,
-            predictorData,
-            analysisItems,
-            facilityReports,
-            accountAnalysisItems,
-            accountReports
+            snapshot,
+            calendarizedMeters
         ]) => {
+            const account = snapshot?.account;
+            const facilities = snapshot ? [...snapshot.facilities] : undefined;
+            const meters = snapshot ? [...snapshot.meters] : undefined;
+            const meterData = snapshot ? [...snapshot.meterData] : undefined;
+            const meterGroups = snapshot ? [...snapshot.meterGroups] : undefined;
+            const predictors = snapshot ? [...snapshot.predictors] : undefined;
+            const predictorData = snapshot ? [...snapshot.predictorData] : undefined;
+            const analysisItems = snapshot ? [...snapshot.facilityAnalyses] : undefined;
+            const facilityReports = snapshot ? [...snapshot.facilityReports] : undefined;
+            const accountAnalysisItems = snapshot ? [...snapshot.accountAnalyses] : undefined;
+            const accountReports = snapshot ? [...snapshot.accountReports] : undefined;
             if (!account || !facilities || !meters || !meterData || !meterGroups || !calendarizedMeters || !predictors || !predictorData || !analysisItems) {
                 return;
             }
             const facilityReportsForAccount = (facilityReports ?? []).filter(report => report.accountId === account.guid);
+            const facilitiesForAccount = [...facilities];
             const accountAnalysisItemsForAccount = (accountAnalysisItems ?? []).filter(item => item.accountId === account.guid);
             const accountReportsForAccount = (accountReports ?? []).filter(report => report.accountId === account.guid);
-            const isConsistentSnapshot = this.isCollectionForAccount(facilities, account.guid, facility => facility.accountId) &&
+            const isConsistentSnapshot = this.isCollectionForAccount(facilitiesForAccount, account.guid, facility => facility.accountId) &&
                 this.isCollectionForAccount(meters, account.guid, meter => meter.accountId) &&
                 this.isCollectionForAccount(meterData, account.guid, data => data.accountId) &&
                 this.isCollectionForAccount(meterGroups, account.guid, group => group.accountId) &&
@@ -109,7 +79,7 @@ export class AccountStatusCheckService implements OnDestroy {
             }
             const statusCheck = new AccountStatusCheck(
                 account,
-                facilities,
+                facilitiesForAccount,
                 meters,
                 meterData,
                 meterGroups,

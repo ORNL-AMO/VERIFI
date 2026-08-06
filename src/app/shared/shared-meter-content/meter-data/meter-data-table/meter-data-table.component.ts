@@ -1,19 +1,15 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import * as _ from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
@@ -27,22 +23,20 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
   standalone: false
 })
 export class MeterDataTableComponent {
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
   private toastNoticationService: ToastNotificationsService = inject(ToastNotificationsService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private utilityMeterDataService: UtilityMeterDataService = inject(UtilityMeterDataService);
 
-  private facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
+  private facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
   private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
-  selectedMeter: Signal<IdbUtilityMeter> = toSignal(this.utilityMeterDbService.selectedMeter);
+  selectedMeter: Signal<IdbUtilityMeter> = this.accountWorkspaceStore.selectedMeter;
   meterData: Signal<Array<IdbUtilityMeterData>> = computed(() => {
     const meterData = this.facilityMeterData();
     const selectedMeter = this.selectedMeter();
@@ -107,7 +101,7 @@ export class MeterDataTableComponent {
   }
 
   uploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
@@ -121,9 +115,7 @@ export class MeterDataTableComponent {
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id));
     }
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -146,10 +138,8 @@ export class MeterDataTableComponent {
     this.showIndividualDelete = false;
     await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id));
     this.loadingService.setLoadingMessage("Meter Data Deleted...");
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage("Setting Meter Data...");
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingMessage("Meter Data Set...");
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
@@ -198,10 +188,8 @@ export class MeterDataTableComponent {
 
     this.loadingService.setLoadingMessage("Filling Missing Meter Data...");
     this.loadingService.setLoadingStatus(true);
-    const selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    const selectedAccount = this.accountDbService.selectedAccount.getValue();
     try {
-      const accountMeterData = this.utilityMeterDataDbService.accountMeterData.getValue();
+      const accountMeterData = [...this.accountWorkspaceStore.meterData()];
       for (const missingMonth of missingMonths) {
         const newMeterData = getNewIdbUtilityMeterData(selectedMeter, accountMeterData);
         delete newMeterData.id;
@@ -215,7 +203,7 @@ export class MeterDataTableComponent {
         await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(newMeterData));
       }
 
-      await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.cancelFillMissingDataModal();
       this.toastNoticationService.showToast(
         `${missingMonths.length} Missing Month${missingMonths.length === 1 ? '' : 's'} Filled!`,
@@ -226,7 +214,7 @@ export class MeterDataTableComponent {
       );
     } catch {
       try {
-        await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
       } catch {
         // The original save error is the useful error to report to the user.
       }

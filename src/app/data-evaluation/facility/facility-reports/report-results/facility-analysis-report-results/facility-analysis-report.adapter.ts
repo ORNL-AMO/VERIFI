@@ -1,4 +1,5 @@
-import { inject, Injectable } from "@angular/core";
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { inject, Injectable } from '@angular/core';
 import { AnalysisReportSettings, IdbFacilityReport } from "src/app/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, StyledTextSection, TableHeaderCell, TableSection } from "src/app/shared/pdf-report/models/report-section.model";
@@ -8,15 +9,14 @@ import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnal
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { AnalysisGroupItem, AnalysisService } from "../../../analysis/analysis.service";
 import { RegressionNumberPipe } from "src/app/shared/helper-pipes/regression-number.pipe";
-import { UtilityMeterGroupdbService } from "src/app/indexedDB/utilityMeterGroup-db.service";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityAnalysisReportAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
     private customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
     private analysisService = inject(AnalysisService);
     private regressionNumberPipe = inject(RegressionNumberPipe);
-    private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     report: IdbFacilityReport;
     reportSettings: AnalysisReportSettings;
@@ -456,7 +456,7 @@ export class FacilityAnalysisReportAdapter {
         let sections: BaseSection[] = [];
 
         groupSummaries.forEach(groupSummary => {
-            const groupName = this.utilityMeterGroupDbService.getGroupName(groupSummary.group.idbGroupId);
+            const groupName = this.accountWorkspaceQuery.getMeterGroupName(groupSummary.group.idbGroupId);
             let dividerSection: StyledTextSection = {
                 type: 'styledText',
                 verticalCenter: true,
@@ -631,7 +631,7 @@ export class FacilityAnalysisReportAdapter {
         let rows: string[][] = [];
 
         const groupItem: AnalysisGroupItem = this.analysisService.getGroupItem(group);
-        const groupName = this.utilityMeterGroupDbService.getGroupName(group.idbGroupId);
+        const groupName = this.accountWorkspaceQuery.getMeterGroupName(group.idbGroupId);
         let variablePValues: string = '';
         let formula: string = '';
         let modelNotes: string = '';

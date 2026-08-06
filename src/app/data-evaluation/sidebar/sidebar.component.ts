@@ -1,10 +1,8 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, OnInit, Output, inject, Injector } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { LocalStorageService } from 'ngx-webstorage';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -18,6 +16,7 @@ import { DataEvaluationService } from '../data-evaluation.service';
   standalone: false
 })
 export class SidebarComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
 
@@ -40,22 +39,24 @@ export class SidebarComponent implements OnInit {
   sidebarOpenSub: Subscription;
   url: string;
   routerSub: Subscription;
-  constructor(private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService, private router: Router,
-    private dataEvaluationService: DataEvaluationService) {
+  constructor(
+    private router: Router,
+    private dataEvaluationService: DataEvaluationService,
+    private injector: Injector
+  ) {
   }
 
   ngOnInit() {
     this.isDev = !environment.production;
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
 
-    this.facilityListSub = this.facilityDbService.accountFacilities.subscribe(val => {
-      this.setFacilityList(val);
+    this.facilityListSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
+      this.setFacilityList(val.map(facility => ({ ...facility })));
     });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
     })
     this.sidebarOpenSub = this.dataEvaluationService.sidebarOpen.subscribe(val => {

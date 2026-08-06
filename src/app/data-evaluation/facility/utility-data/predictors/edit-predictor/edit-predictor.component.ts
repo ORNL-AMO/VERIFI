@@ -1,17 +1,16 @@
-import { Component, HostListener } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -36,6 +35,9 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class EditPredictorComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   addOrEdit: 'edit' | 'add';
   predictor: IdbPredictor;
@@ -54,26 +56,24 @@ export class EditPredictorComponent {
     }
   }
 
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private predictorDbService: PredictorDbService,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
     private router: Router,
     private editPredictorFormService: EditPredictorFormService,
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
-    // private degreeDaysService: DegreeDaysService,
     private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private routerGuardService: RouterGuardService
+
   ) {
   }
 
   ngOnInit() {
-    this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.facility = this.accountWorkspaceStore.selectedFacility();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -91,7 +91,7 @@ export class EditPredictorComponent {
   }
 
   setPredictorDataEdit(predictorId: string) {
-    let predictorData: IdbPredictor = this.predictorDbService.getByGuid(predictorId);
+    let predictorData: IdbPredictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     if (predictorData) {
       this.predictor = JSON.parse(JSON.stringify(predictorData));
       this.setPredictorForm();
@@ -125,7 +125,7 @@ export class EditPredictorComponent {
     }
     if (this.predictor.predictorType == 'Weather') {
       if (this.addOrEdit == 'edit' && needsWeatherDataUpdate) {
-        let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+        let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
         let predictorDates: Array<Date> = predictorData.map(pData => { return getDateFromPredictorData(pData) })
         let minDate: Date = _.min(predictorDates);
         let maxDate: Date = _.max(predictorDates);
@@ -158,10 +158,7 @@ export class EditPredictorComponent {
     } else {
       await this.analysisDbService.updateAnalysisPredictor(this.predictor);
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
-    await this.dbChangesService.setAnalysisItems(account, true, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();

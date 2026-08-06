@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -15,19 +14,20 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class CalanderizationComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityMetersSub: Subscription;
   facilityMeters: Array<IdbUtilityMeter>;
 
   selectedMeter: IdbUtilityMeter;
-  constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private router: Router
+  constructor(
+    private router: Router,
+    private injector: Injector
+
   ) { }
 
   ngOnInit(): void {
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(facilityMeters => {
       this.facilityMeters = facilityMeters;
       this.initializeSelectedMeter();
     });
@@ -53,12 +53,12 @@ export class CalanderizationComponent implements OnInit {
   }
 
   uploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
   addMeter() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/energy-consumption/energy-source/new-meter');
   }
 }

@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -19,6 +19,8 @@ import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
   styleUrl: './facility-modeling-report-results.component.css',
 })
 export class FacilityModelingReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityReport: IdbFacilityReport;
@@ -26,19 +28,19 @@ export class FacilityModelingReportResultsComponent {
   analysisItem: IdbAnalysisItem;
   isExportingPdf: boolean = false;
 
-  constructor(private analysisDbService: AnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService,
+  constructor(
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService,
     private facilityModelingReportAdapter: FacilityModelingReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private facilityModelingReportPptAdapter: FacilityModelingReportPptAdapter,
-    private pptReportService: PptReportService) { }
+    private pptReportService: PptReportService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];
       if (this.analysisItem) {
         this.initializeFacilityGroups();
@@ -53,7 +55,7 @@ export class FacilityModelingReportResultsComponent {
   }
 
   initializeFacilityGroups() {
-    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let reportYear: number;
     if (this.facilityReport.facilityReportType == 'analysis') {
       reportYear = this.facilityReport.analysisReportSettings.reportYear;

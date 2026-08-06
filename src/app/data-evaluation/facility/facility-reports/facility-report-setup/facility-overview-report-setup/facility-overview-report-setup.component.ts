@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -17,6 +16,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
     standalone: false
 })
 export class FacilityOverviewReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   reportSettings: DataOverviewFacilityReportSettings;
@@ -28,20 +29,20 @@ export class FacilityOverviewReportSetupComponent {
   account: IdbAccount;
   accountSub: Subscription;
   invalidDateRange: boolean = false;
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService,
-    private calanderizationService: CalanderizationService
+  constructor(
+    private facilityReportsDbService: FacilityReportsDbService,
+    private calanderizationService: CalanderizationService,
+    private injector: Injector
+
   ) {
 
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
         this.reportSettings = this.facilityReport.dataOverviewReportSettings;
@@ -60,12 +61,11 @@ export class FacilityOverviewReportSetupComponent {
 
   async save() {
     this.isFormChange = true;
-    let facilityReport: IdbFacilityReport = this.facilityReportsDbService.selectedReport.getValue();
+    let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     this.facilityReport.dataOverviewReportSettings = this.reportSettings;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(facilityReport));
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityReports(this.account, selectedFacility);
-    this.facilityReportsDbService.selectedReport.next(facilityReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
   }
 
   setYearOptions() {

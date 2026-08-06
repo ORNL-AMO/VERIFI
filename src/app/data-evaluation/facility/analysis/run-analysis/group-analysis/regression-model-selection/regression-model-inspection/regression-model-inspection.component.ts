@@ -1,14 +1,10 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -16,7 +12,6 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getSelectedRegressionModel } from 'src/app/shared/shared-analysis/calculations/regression-model-recovery';
 
@@ -27,6 +22,7 @@ import { getSelectedRegressionModel } from 'src/app/shared/shared-analysis/calcu
     standalone: false
 })
 export class RegressionModelInspectionComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   model: JStatRegressionModel;
   @Output('emitClose')
@@ -51,25 +47,21 @@ export class RegressionModelInspectionComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMeterData: Array<IdbUtilityMeterData>;
   account: IdbAccount;
-  constructor(private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private plotlyService: PlotlyService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private analysisService: AnalysisService,
+    private plotlyService: PlotlyService
+  ) { }
 
   ngOnInit(): void {
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
-    this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
+    this.accountAnalysisItems = [...this.accountWorkspaceStore.facilityAnalyses()];
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    this.accountPredictorEntries = [...this.accountWorkspaceStore.predictorData()];
+    this.facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
+    this.facilityMeterData = [...this.accountWorkspaceStore.facilityMeterData()];
+    this.account = this.accountWorkspaceStore.account();
     this.calculateInspectedModel();
   }
 
@@ -106,7 +98,7 @@ export class RegressionModelInspectionComponent implements OnInit {
         assessmentReportVersion: this.account.assessmentReportVersion
       });
     } else {
-      // Web Workers are not supported in this environment.  
+      // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion, []);
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
@@ -157,10 +149,8 @@ export class RegressionModelInspectionComponent implements OnInit {
       let name: string = this.getGraphName();
 
       let yAxisTitle: string = this.analysisItem.energyUnit;
-      let traceColor: string = '#7D3C98'
       if (this.analysisItem.analysisCategory == 'water') {
         yAxisTitle = this.analysisItem.waterUnit;
-        traceColor = '#3498DB';
       }
 
       var data = [];

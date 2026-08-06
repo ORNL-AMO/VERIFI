@@ -1,13 +1,11 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { EnergyUsesGroupSummary } from 'src/app/calculations/energy-footprint/energyUsesGroupSummary';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-facility-energy-uses-group-summary',
@@ -16,20 +14,19 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './facility-energy-uses-group-summary.component.css'
 })
 export class FacilityEnergyUsesGroupSummaryComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private router: Router = inject(Router);
-  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
-  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
 
-  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
+  facilityEnergyUseEquipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
 
   energyUseGroup$: WritableSignal<IdbFacilityEnergyUseGroup> = signal<IdbFacilityEnergyUseGroup>(null);
   get energyUseGroup(): IdbFacilityEnergyUseGroup {
     return this.energyUseGroup$();
   }
 
-  facility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  facility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   get facility(): IdbFacility {
     return this.facility$();
   }
@@ -52,7 +49,7 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let groupId: string = params['id'];
-      let energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
+      let energyUseGroup = this.accountWorkspaceQuery.getEnergyUseGroupByGuid(groupId);
       if (energyUseGroup) {
         this.energyUseGroup$.set(energyUseGroup);
       } else {
@@ -62,12 +59,12 @@ export class FacilityEnergyUsesGroupSummaryComponent {
   }
 
   goToGroupList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses');
   }
 
   goToEquipment(equipmentGuid: string) {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + equipmentGuid);
   }
 }

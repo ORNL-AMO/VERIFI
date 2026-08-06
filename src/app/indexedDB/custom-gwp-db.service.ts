@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,11 +10,9 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class CustomGWPDbService {
-
-  accountCustomGWPs: BehaviorSubject<Array<IdbCustomGWP>>;
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
-    this.accountCustomGWPs = new BehaviorSubject<Array<IdbCustomGWP>>([]);
   }
 
   getAll(): Observable<Array<IdbCustomGWP>> {
@@ -50,7 +48,7 @@ export class CustomGWPDbService {
   }
 
   async deleteAccountCustomGWP() {
-    let accountCustomGWP: Array<IdbCustomGWP> = this.accountCustomGWPs.getValue();
+    let accountCustomGWP: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     for (let i = 0; i < accountCustomGWP.length; i++) {
       this.loadingService.setLoadingMessage('Deleting Custom GWPs (' + i + '/' + accountCustomGWP.length + ')...');
       await this.deleteWithObservable(accountCustomGWP[i].id);
@@ -60,22 +58,6 @@ export class CustomGWPDbService {
   updateWithObservable(values: IdbCustomGWP): Observable<IdbCustomGWP> {
     values.date = new Date();
     return this.dbService.update('customGWP', values);
-  }
-
-  getUniqValue(){
-    let accountCustomGWPs: Array<IdbCustomGWP> = this.accountCustomGWPs.getValue();
-    let existingValues: Array<number> = accountCustomGWPs.map(cGWP => {
-      return cGWP.value;
-    });
-    GlobalWarmingPotentials.forEach(gwpOption => {
-      existingValues.push(gwpOption.value);
-    })
-    let uniqVal: number = Math.floor(Math.random() * 50000)
-    while(existingValues.includes(uniqVal)){
-      uniqVal = Math.floor(Math.random() * 50000);
-      console.log(uniqVal);
-    }
-    return uniqVal;
   }
 
 }

@@ -1,23 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, MonthlyAnalysisSummary } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -27,6 +23,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class MonthlyAnalysisSummaryComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   analysisItem: IdbAnalysisItem;
   group: AnalysisGroup;
@@ -40,33 +37,31 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   key: string;
   facilitySub: Subscription;
 
-  constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private predictorDataDbService: PredictorDataDbService,
+  constructor(
+    private analysisService: AnalysisService,
     private sharedDataService: SharedDataService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountDbService: AccountdbService) { }
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
 
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
+    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     this.group = this.analysisService.selectedGroup.getValue();
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.facility = val;
       this.key = 'monthly-' + this.facility?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
     });
 
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
+    let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
+    let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

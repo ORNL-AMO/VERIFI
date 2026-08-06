@@ -1,13 +1,10 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
@@ -17,18 +14,16 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getAllYearsWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
-import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
+import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 type PredictorVariableForm = FormGroup<{
   productionInAnalysis: FormControl<boolean>;
@@ -55,17 +50,14 @@ type RegressionMenuForm = FormGroup<{
   standalone: false
 })
 export class RegressionModelMenuComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // --- Services (DI) ---
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private regressionModelState = inject(RegressionModelStateService);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private fb: NonNullableFormBuilder = inject(NonNullableFormBuilder);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
@@ -74,14 +66,14 @@ export class RegressionModelMenuComponent {
   // --- Signals ---
   group: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
-  facilityPredictorData: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.facilityPredictorData);
-  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
-  facilityMeters: Signal<Array<IdbUtilityMeter>> = toSignal(this.utilityMeterDbService.facilityMeters);
-  generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
+  facilityPredictorData: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]);
+  facilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
+  facilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
+  generatedModelsPerGroup = this.regressionModelState.modelsByGroup;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
 
   // --- Computed Signals ---
   yearOptions: Signal<Array<number>> = computed(() => {
@@ -333,9 +325,8 @@ export class RegressionModelMenuComponent {
     updatedGroups[groupIndex] = _group;
     const _analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(_analysisItem));
-    const selectedAccount: IdbAccount = this.selectedAccount();
-    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
-    this.analysisDbService.selectedAnalysisItem.next(_analysisItem);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);
     this._suppressFormPatch = suppressFormPatch;
     this.analysisService.selectedGroup.next(_group);
   }
@@ -375,7 +366,7 @@ export class RegressionModelMenuComponent {
         predictorVariables: currentGroup.predictorVariables.map(v => ({ ...v, regressionCoefficient: undefined })),
       } : {}),
     };
-    this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
+    this.regressionModelState.setForGroup(_group.idbGroupId, []);
     this.updateFieldDisabledStates(isGeneratedModel);
     await this.saveItem(_group);
   }
@@ -423,7 +414,7 @@ export class RegressionModelMenuComponent {
     if (previousSelectedModelId) {
       this.compareUpdatedModel(previousSelectedModel, newSelectedModel);
     }
-    this.analysisDbService.setGeneratedModelsForGroup(
+    this.regressionModelState.setForGroup(
       updatedGroup.idbGroupId,
       updatedGroup.isGeneratedModel ? generatedModels : []
     );
@@ -511,7 +502,7 @@ export class RegressionModelMenuComponent {
         regressionCoefficient: undefined,
       })),
     };
-    this.analysisDbService.setGeneratedModelsForGroup(_group.idbGroupId, []);
+    this.regressionModelState.setForGroup(_group.idbGroupId, []);
     await this.saveItem(_group);
     this.showConfirmPredictorChangeModel = false;
     this.toggledPredictorIndex = null;

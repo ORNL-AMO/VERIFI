@@ -1,8 +1,8 @@
-import { Component, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, computed, inject, Injector } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -12,15 +12,17 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   styleUrl: './facility-energy-uses-setup-options.component.css',
 })
 export class FacilityEnergyUsesSetupOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   facilitySub: Subscription;
   facilityEnergyUseGroupsSub: Subscription;
   hasChildRoute: boolean;
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+  constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
@@ -31,10 +33,10 @@ export class FacilityEnergyUsesSetupOptionsComponent {
     });
     this.setHasChildRoute();
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
+    this.facilityEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]), { injector: this.injector }).subscribe(groups => {
       if (groups && groups.length == 0 && !this.hasChildRoute) {
         this.setupNewGroups();
       }
@@ -51,7 +53,7 @@ export class FacilityEnergyUsesSetupOptionsComponent {
   setHasChildRoute() {
     this.hasChildRoute = this.route.firstChild != null;
   }
-  
+
   leaveGroupSetup() {
     this.router.navigate(['../'], { relativeTo: this.route });
   }

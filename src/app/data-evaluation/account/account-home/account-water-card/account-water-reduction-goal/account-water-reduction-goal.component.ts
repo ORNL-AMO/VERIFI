@@ -1,11 +1,11 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AccountHomeService } from '../../account-home.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -16,13 +16,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountWaterReductionGoalComponent {
-  private accountDbService: AccountdbService = inject(AccountdbService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
 
   latestAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestWaterAnalysisItem, { initialValue: undefined });
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   monthlyWaterAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyWaterAnalysisData, { initialValue: [] });
 
   latestAnalysisSummary: Signal<MonthlyAnalysisSummaryData> = computed(() => {
@@ -60,7 +60,7 @@ export class AccountWaterReductionGoalComponent {
   });
 
   goToAnalysisItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
+    this.accountWorkspaceService.selectAccountAnalysis((this.latestAnalysisItem())?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

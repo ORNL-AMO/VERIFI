@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
@@ -13,23 +14,26 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
     standalone: false
 })
 export class WaterOverviewComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   calculatingSub: Subscription;
   calculating: boolean | 'error';
   selectedAccountSub: Subscription;
   waterUnit: string;
-  
+
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
   utilityUseAndCostSub: Subscription;
   utilityUseAndCost: UtilityUseAndCost;
   dateRangeSub: Subscription;
   dateRange: {startDate: Date, endDate: Date};
-  constructor(private accountOverviewService: AccountOverviewService,
-    private accountDbService: AccountdbService) { }
+  constructor(
+    private accountOverviewService: AccountOverviewService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       if (val) {
         this.waterUnit = val.volumeLiquidUnit;
       }

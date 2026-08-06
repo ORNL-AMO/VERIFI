@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
@@ -25,6 +26,8 @@ import { convertHeatCapacity } from 'src/app/shared/sharedHelperFunctions';
   standalone: false
 })
 export class CustomFuelDataFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   isAdd: boolean;
   editCustomFuel: IdbCustomFuel;
@@ -38,19 +41,21 @@ export class CustomFuelDataFormComponent {
   displayFuelModal: boolean = false;
   isFuelInUse: boolean = false;
 
-  constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
+  constructor(
+    private router: Router,
+    private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService,
     private formBuilder: FormBuilder,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService
+  ) {
 
   }
 
   ngOnInit() {
-    this.accountCustomFuels = this.customFuelDbService.accountCustomFuels.getValue();
+    this.accountCustomFuels = [...this.accountWorkspaceStore.customFuels()];
     this.setAllFuelNames();
     this.isAdd = this.router.url.includes('add');
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     if (this.isAdd) {
       this.editCustomFuel = getNewAccountCustomFuel(this.selectedAccount);
       this.setForm(this.editCustomFuel);
@@ -140,27 +145,18 @@ export class CustomFuelDataFormComponent {
     } else {
       if (this.isFuelInUse && this.editCustomFuel.value != this.previousValue) {
         //update meters
-        let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-        let needsUpdate: boolean = false;
+        let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
         for (let i = 0; i < accountMeters.length; i++) {
           if (accountMeters[i].fuel == this.previousValue) {
-            needsUpdate = true;
             accountMeters[i].fuel = this.editCustomFuel.value;
             //TODO: Update heat capacity and corresponding energy use in meter data....
             await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
           }
         }
-        let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
-        let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
-          return meter.accountId == this.selectedAccount.guid;
-        });
-        this.utilityMeterDbService.accountMeters.next(accountMetersUpdates);
       }
       await firstValueFrom(this.customFuelDbService.updateWithObservable(this.editCustomFuel));
     }
-    let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
-    let accountCustomFuels: Array<IdbCustomFuel> = allCustomFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
-    this.customFuelDbService.accountCustomFuels.next(accountCustomFuels);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 
@@ -254,7 +250,7 @@ export class CustomFuelDataFormComponent {
   }
 
   setIsFuelInUse() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => {
       if (meter.scope != 2) {
         return meter.fuel == this.editCustomFuel.value

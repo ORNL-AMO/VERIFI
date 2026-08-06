@@ -1,20 +1,18 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { IdbAccount } from '../models/idbModels/account';
-import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
+import { IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomEmissionsDbService {
-
-  accountEmissionsItems: BehaviorSubject<Array<IdbCustomEmissionsItem>>;
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
-    this.accountEmissionsItems = new BehaviorSubject<Array<IdbCustomEmissionsItem>>([]);
   }
 
   getAll(): Observable<Array<IdbCustomEmissionsItem>> {
@@ -54,7 +52,7 @@ export class CustomEmissionsDbService {
   }
 
   async deleteAccountEmissionsItems() {
-    let accountEmissionsItems: Array<IdbCustomEmissionsItem> = this.accountEmissionsItems.getValue();
+    let accountEmissionsItems: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
     for (let i = 0; i < accountEmissionsItems.length; i++) {
       this.loadingService.setLoadingMessage('Deleting Emissions Items (' + i + '/' + accountEmissionsItems.length + ')...');
       await this.deleteWithObservable(accountEmissionsItems[i].id);

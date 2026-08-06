@@ -1,22 +1,18 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Injectable, inject } from '@angular/core';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ModelingExecutiveSummaryExcelWriter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   workbook: ExcelJS.Workbook;
   maxPredictorCount: number;
 
-  constructor(
-    private facilityDbService: FacilitydbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
-  ) { }
 
   exportToExcel(selectedReport: IdbAccountReport, executiveSummaryItems: Array<FacilityGroupAnalysisItem>) {
     this.workbook = new ExcelJS.Workbook();
@@ -101,8 +97,8 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (regressionGroupItems?.length > 0) {
       regressionGroupItems.forEach(item => {
         let row = [
-          this.facilityDbService.getFacilityNameById(item.facilityId),
-          this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
+          (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? ''),
+          this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId),
           item.baselineYear,
           item.group.regressionModelYear,
           item.selectedModel.R2,
@@ -127,8 +123,8 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (classicIntensityGroupItems?.length > 0) {
       classicIntensityGroupItems.forEach(item => {
         let row = [
-          this.facilityDbService.getFacilityNameById(item.facilityId),
-          this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
+          (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? ''),
+          this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId),
           item.baselineYear,
           '—',
           '—',
@@ -150,8 +146,8 @@ export class ModelingExecutiveSummaryExcelWriter {
     if (absoluteGroupItems?.length > 0) {
       absoluteGroupItems.forEach(item => {
         let row = [
-          this.facilityDbService.getFacilityNameById(item.facilityId),
-          this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId),
+          (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? ''),
+          this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId),
           item.baselineYear,
           '—',
           '—',

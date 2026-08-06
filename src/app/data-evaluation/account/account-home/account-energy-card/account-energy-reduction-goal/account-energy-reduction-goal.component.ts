@@ -1,11 +1,11 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AccountHomeService } from '../../account-home.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
@@ -19,15 +19,15 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
   standalone: false
 })
 export class AccountEnergyReductionGoalComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private accountHomeService: AccountHomeService = inject(AccountHomeService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   latestAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountHomeService.latestEnergyAnalysisItem, { initialValue: undefined });
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount, { initialValue: undefined });
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   monthlyEnergyAnalysisData: Signal<Array<MonthlyAnalysisSummaryData>> = toSignal(this.accountHomeService.monthlyEnergyAnalysisData, { initialValue: [] });
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck, { initialValue: null });
 
@@ -74,7 +74,7 @@ export class AccountEnergyReductionGoalComponent {
   });
 
   goToAnalysisItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.latestAnalysisItem());
+    this.accountWorkspaceService.selectAccountAnalysis((this.latestAnalysisItem())?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
@@ -7,7 +9,6 @@ import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { firstValueFrom } from 'rxjs';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -22,6 +23,8 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
   standalone: false
 })
 export class EmissionsDataFormComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
   editCustomEmissions: IdbCustomEmissionsItem;
@@ -32,14 +35,21 @@ export class EmissionsDataFormComponent implements OnInit {
   subregionInvalid: string;
   previousSubregion: string;
   selectedAccount: IdbAccount;
-  constructor(private router: Router, private customEmissionsDbService: CustomEmissionsDbService, private accountDbService: AccountdbService,
-    private eGridService: EGridService, private loadingService: LoadingService, private toastNotificationService: ToastNotificationsService,
-    private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService) { }
+  constructor(
+    private router: Router,
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private accountDbService: AccountdbService,
+    private eGridService: EGridService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private activatedRoute: ActivatedRoute,
+    private facilityDbService: FacilitydbService
+  ) { }
 
   ngOnInit(): void {
     this.setYears();
     this.isAdd = this.router.url.includes('add');
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     if (this.isAdd) {
       this.editCustomEmissions = getNewAccountEmissionsItem(this.selectedAccount.guid);
       this.addLocationEmissionRate();
@@ -47,7 +57,7 @@ export class EmissionsDataFormComponent implements OnInit {
     } else {
       this.activatedRoute.params.subscribe(params => {
         let elementId: string = params['id'];
-        let customEmissionsItems: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+        let customEmissionsItems: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
         let selectedItem: IdbCustomEmissionsItem = customEmissionsItems.find(item => { return item.guid == elementId });
         this.previousSubregion = selectedItem.subregion;
         this.editCustomEmissions = JSON.parse(JSON.stringify(selectedItem));
@@ -152,14 +162,16 @@ export class EmissionsDataFormComponent implements OnInit {
       let hasUpdatedValues: boolean = false;
       //update account and facilities previously referencing this subregion
       if (this.selectedAccount.eGridSubregion == this.previousSubregion) {
-        this.selectedAccount.eGridSubregion = this.editCustomEmissions.subregion;
+        this.selectedAccount = {
+          ...this.selectedAccount,
+          eGridSubregion: this.editCustomEmissions.subregion
+        };
         await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-        this.accountDbService.selectedAccount.next(this.selectedAccount);
         hasUpdatedValues = true;
       }
-      let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+      let accountFacilites: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
       for (let i = 0; i < accountFacilites.length; i++) {
-        let facility: IdbFacility = accountFacilites[i];
+        let facility: IdbFacility = { ...accountFacilites[i] };
         if (facility.eGridSubregion == this.previousSubregion) {
           facility.eGridSubregion = this.editCustomEmissions.subregion;
           await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
@@ -167,13 +179,12 @@ export class EmissionsDataFormComponent implements OnInit {
         }
       }
       if (hasUpdatedValues) {
-        this.dbChangesService.selectAccount(this.selectedAccount, false);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
       }
       successMessage = 'Custom Emissions Updated!'
     }
 
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(this.editCustomEmissions.accountId);
-    this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'alert-success');
     this.navigateHome();
@@ -186,7 +197,7 @@ export class EmissionsDataFormComponent implements OnInit {
       this.router.navigate(['../../'], { relativeTo: this.activatedRoute });
     }
   }
-  
+
   deleteLocationEmissions(index: number) {
     this.editCustomEmissions.locationEmissionRates.splice(index, 1);
   }

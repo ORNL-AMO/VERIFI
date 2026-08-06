@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -17,27 +16,28 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
   styleUrl: './account-emission-factors-report.component.css'
 })
 export class AccountEmissionFactorsReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   printSub: Subscription;
   print: boolean;
   account: IdbAccount;
   accountFacilities: Array<IdbFacility> = [];
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
     private dataEvaluationService: DataEvaluationService,
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService
+  ) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
-    } 
-    this.account = this.accountDbService.selectedAccount.getValue();
+    }
+    this.account = this.accountWorkspaceStore.account();
     this.facilityDbService.getAllAccountFacilities(this.account.guid).then(facilities => {
       this.accountFacilities = facilities;
     });

@@ -1,8 +1,7 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, input, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup } from '@angular/forms';
 import { footprintEnergyUseUnits } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -13,14 +12,14 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   styleUrl: './energy-use-data-form.component.css',
 })
 export class EnergyUseDataFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   energyUseForms = input.required<Array<FormGroup>>();
   energySource = input.required<MeterSource>();
   utilityDataForm = input.required<FormGroup>();
   inSetup = input(false);
 
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
 
-  private facility$: Signal<IdbFacility | null> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  private facility$: Signal<IdbFacility | null> = this.accountWorkspaceStore.selectedFacility;
   get facilityEnergyUnit(): string {
     const facility = this.facility$();
     return facility ? facility.energyUnit : '';

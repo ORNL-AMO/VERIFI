@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { FacilityOverviewService } from '../../facility-overview.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -9,7 +9,6 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-facility-overview-options',
@@ -18,6 +17,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   styleUrl: './facility-overview-options.css',
 })
 export class FacilityOverviewOptions {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
@@ -36,14 +36,14 @@ export class FacilityOverviewOptions {
 
   account: IdbAccount;
   accountSub: Subscription;
-  constructor(private facilityDbService: FacilitydbService,
+  constructor(
     private facilityOverviewService: FacilityOverviewService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private injector: Injector
+  ) { }
 
   ngOnInit() {
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.setYears();
     });
@@ -61,7 +61,7 @@ export class FacilityOverviewOptions {
       }
     });
 
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
   }
@@ -101,7 +101,7 @@ export class FacilityOverviewOptions {
   }
 
   setYears() {
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     let allYears: Array<number> = facilityMeterData.flatMap(meterData => { return meterData.year });
     allYears = _.uniq(allYears);
     this.years = _.orderBy(allYears, (year) => { return year }, 'desc');

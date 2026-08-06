@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewAccountCustomGWP, IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
@@ -17,6 +17,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
     standalone: false
 })
 export class CustomGwpFormComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   isAdd: boolean;
   editCustomGWP: IdbCustomGWP;
@@ -30,18 +32,19 @@ export class CustomGwpFormComponent {
   displayGWPModal: boolean = false;
   isGWPInUse: boolean = false;
 
-  constructor(private router: Router, private customGWPDbService: CustomGWPDbService,
+  constructor(
+    private router: Router,
+    private customGWPDbService: CustomGWPDbService,
     private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService,
-    private formBuilder: FormBuilder,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private formBuilder: FormBuilder
+  ) {
   }
 
   ngOnInit() {
-    this.accountCustomGWPs = this.customGWPDbService.accountCustomGWPs.getValue();
+    this.accountCustomGWPs = [...this.accountWorkspaceStore.customGWPs()];
     this.setAllGWPNames();
     this.isAdd = this.router.url.includes('add');
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     if (this.isAdd) {
       this.editCustomGWP = getNewAccountCustomGWP(this.selectedAccount);
       this.setForm(this.editCustomGWP);
@@ -99,7 +102,7 @@ export class CustomGwpFormComponent {
     } else {
       if (this.isGWPInUse) {
         // //update meters
-        // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+        // let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
         // let needsUpdate: boolean = false;
         // for (let i = 0; i < accountMeters.length; i++) {
         //   if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
@@ -116,9 +119,7 @@ export class CustomGwpFormComponent {
       }
       await firstValueFrom(this.customGWPDbService.updateWithObservable(this.editCustomGWP));
     }
-    let allCustomGWPs: Array<IdbCustomGWP> = await firstValueFrom(this.customGWPDbService.getAll());
-    let accountCustomGWPs: Array<IdbCustomGWP> = allCustomGWPs.filter(gwp => { return gwp.accountId == this.selectedAccount.guid });
-    this.customGWPDbService.accountCustomGWPs.next(accountCustomGWPs);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 
@@ -150,7 +151,7 @@ export class CustomGwpFormComponent {
   }
 
   setIsGWPInUse() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let gwpMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.globalWarmingPotentialOption == this.editCustomGWP.value });
     this.isGWPInUse = (gwpMeter != undefined);
   }

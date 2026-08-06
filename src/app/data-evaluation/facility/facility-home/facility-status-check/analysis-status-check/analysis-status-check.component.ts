@@ -1,8 +1,8 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 
 @Component({
@@ -12,12 +12,12 @@ import { AnalysisGroupItem, AnalysisService } from 'src/app/data-evaluation/faci
   styleUrl: './analysis-status-check.component.css'
 })
 export class AnalysisStatusCheckComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true }) analysisStatusCheck: AnalysisStatusCheck;
   @Input({ required: true }) type: 'energy' | 'water';
 
   private analysisService = inject(AnalysisService);
-  private analysisDbService = inject(AnalysisDbService);
-  private facilityDbService = inject(FacilitydbService);
   private router = inject(Router);
 
   get groupItems(): Array<AnalysisGroupItem> {
@@ -28,8 +28,8 @@ export class AnalysisStatusCheckComponent {
   }
 
   goToAnalysis(): void {
-    this.analysisDbService.selectedAnalysisItem.next(this.analysisStatusCheck.analysisItem);
-    const facilityGuid = this.facilityDbService.selectedFacility.getValue().guid;
+    this.accountWorkspaceService.selectFacilityAnalysis((this.analysisStatusCheck.analysisItem)?.guid);
+    const facilityGuid = this.accountWorkspaceStore.selectedFacility().guid;
     this.router.navigateByUrl(`/data-evaluation/facility/${facilityGuid}/analysis/run-analysis/analysis-setup`);
   }
 }

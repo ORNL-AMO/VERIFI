@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-add-year-setup-options',
@@ -14,6 +14,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
   styleUrl: './add-year-setup-options.component.css',
 })
 export class AddYearSetupOptionsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facility: IdbFacility;
   facilitySub: Subscription;
 
@@ -26,21 +28,21 @@ export class AddYearSetupOptionsComponent {
   setupYear: number;
   yearOptions: Array<number>;
 
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+  constructor(
     private router: Router,
     private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
     private route: ActivatedRoute,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
       this.setYearOptions();
     });
 
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
+    this.facilityEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]), { injector: this.injector }).subscribe(groups => {
       this.facilityEnergyUseGroups = groups.map(group => {
         return {
           guid: group.guid,
@@ -71,7 +73,7 @@ export class AddYearSetupOptionsComponent {
 
   setYearOptions() {
     this.yearOptions = new Array();
-    let facilityMeterDataYears: { endYear: number, startYear: number } = this.utilityMeterDataDbService.getStartEndYearsForFacility(this.facility.guid);
+    let facilityMeterDataYears: { endYear: number, startYear: number } = this.accountWorkspaceQuery.getFacilityMeterDataYears(this.facility.guid);
     for (let year = facilityMeterDataYears.startYear; year <= facilityMeterDataYears.endYear; year++) {
       this.yearOptions.push(year);
     }

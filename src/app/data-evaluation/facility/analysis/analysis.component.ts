@@ -1,14 +1,11 @@
-import { Component, effect, inject, OnDestroy, Signal } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, effect, inject, OnDestroy, Signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisService } from './analysis.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 @Component({
   selector: 'app-analysis',
@@ -17,16 +14,14 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
   standalone: false
 })
 export class AnalysisComponent implements OnDestroy {
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private analysisDbService = inject(AnalysisDbService);
+  private regressionModelState = inject(RegressionModelStateService);
 
-  utilityMeterData: Signal<Array<IdbUtilityMeterData>> = toSignal(this.utilityMeterDataDbService.facilityMeterData);
-  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.facilityMeterGroups);
-  facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
+  utilityMeterData: Signal<Array<IdbUtilityMeterData>> = computed(() => [...this.accountWorkspaceStore.facilityMeterData()]);
+  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()]);
+  facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   annualKey: string;
   monthlyKey: string;
 
@@ -46,7 +41,7 @@ export class AnalysisComponent implements OnDestroy {
     this.analysisService.hideInUseMessage.next(false);
     this.analysisService.getDisplaySubject(this.annualKey, 'table').next('table');
     this.analysisService.getDisplaySubject(this.monthlyKey, 'graph').next('graph');
-    this.analysisDbService.clearGeneratedModels();
+    this.regressionModelState.clear();
   }
 
   goToMeterGroups() {

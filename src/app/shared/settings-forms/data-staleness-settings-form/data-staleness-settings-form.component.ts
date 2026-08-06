@@ -1,17 +1,14 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, OnDestroy, Input, inject, Injector } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
-import {
-    DATA_STALENESS_OPTIONS,
-    DataStalenessMonths,
-    DEFAULT_DATA_STALENESS_MONTHS
-} from 'src/app/calculations/status-check-calculations/statusCheckModels';
+import { DATA_STALENESS_OPTIONS, DataStalenessMonths, DEFAULT_DATA_STALENESS_MONTHS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
     selector: 'app-data-staleness-settings-form',
@@ -20,6 +17,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
     standalone: false
 })
 export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
     @Input() inAccount: boolean = true;
 
@@ -33,14 +32,14 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
     isFormChange: boolean = false;
 
     constructor(
-        private accountDbService: AccountdbService,
-        private facilityDbService: FacilitydbService,
-        private formBuilder: FormBuilder,
-        private dbChangesService: DbChangesService
+      private formBuilder: FormBuilder,
+      private dbChangesService: DbChangesService,
+      private injector: Injector
+
     ) { }
 
     ngOnInit(): void {
-        this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+        this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
             this.selectedAccount = account;
             if (this.inAccount && account) {
                 if (!this.isFormChange) {
@@ -52,7 +51,7 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
         });
 
         if (!this.inAccount) {
-            this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+            this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
                 this.selectedFacility = facility;
                 if (facility) {
                     if (!this.isFormChange) {
@@ -96,17 +95,16 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
         };
 
         if (this.inAccount) {
-            this.selectedAccount.dataStalenessSettings = settings;
-            let updatedAccount: IdbAccount = await firstValueFrom(
-                this.accountDbService.updateWithObservable(this.selectedAccount)
-            );
-            let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-            this.accountDbService.selectedAccount.next(updatedAccount);
-            this.accountDbService.allAccounts.next(allAccounts);
+            await this.dbChangesService.updateAccount({
+                ...this.selectedAccount,
+                dataStalenessSettings: settings
+            });
+            await this.applicationLifecycleService.refreshAccountCatalog();
         } else {
-            this.selectedFacility.dataStalenessSettings = settings;
-            await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-            this.dbChangesService.updateFacility(this.selectedFacility);
+            await this.dbChangesService.updateFacility({
+                ...this.selectedFacility,
+                dataStalenessSettings: settings
+            });
         }
     }
 

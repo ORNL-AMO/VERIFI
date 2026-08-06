@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
+import { firstValueFrom, Observable } from 'rxjs';
 import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,15 +9,8 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 })
 export class FacilityEnergyUseEquipmentDbService {
 
-  facilityEnergyUseEquipment: BehaviorSubject<Array<IdbFacilityEnergyUseEquipment>>;
-  accountEnergyUseEquipment: BehaviorSubject<Array<IdbFacilityEnergyUseEquipment>>;
-  selectedFacilityEnergyUseEquipment: BehaviorSubject<IdbFacilityEnergyUseEquipment>;
   constructor(private dbService: NgxIndexedDBService,
-    private loadingService: LoadingService,
-    private indexedDbAccess: IndexedDbAccessService) {
-    this.facilityEnergyUseEquipment = new BehaviorSubject<Array<IdbFacilityEnergyUseEquipment>>(new Array());
-    this.accountEnergyUseEquipment = new BehaviorSubject<Array<IdbFacilityEnergyUseEquipment>>(new Array());
-  }
+    private indexedDbAccess: IndexedDbAccessService) { }
 
   getAll(): Observable<Array<IdbFacilityEnergyUseEquipment>> {
     return this.dbService.getAll('facilityEnergyUseEquipment');
@@ -62,54 +54,19 @@ export class FacilityEnergyUseEquipmentDbService {
   }
 
   async deleteAllFacilityEnergyUseEquipment(facilityId: string) {
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
-    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(energyUseEquipment => { return energyUseEquipment.facilityId == facilityId });
-    await this.deleteEnergyUseEquipmentAsync(facilityEnergyUseEquipment);
-  }
-
-  async deleteAllSelectedAccountEnergyUseEquipment() {
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
-    await this.deleteEnergyUseEquipmentAsync(accountEnergyUseEquipment);
+    await this.indexedDbAccess.deleteAllByIndex('facilityEnergyUseEquipment', 'facilityId', facilityId);
   }
 
 
   async deleteEnergyUseEquipmentAsync(energyUseEquipment: Array<IdbFacilityEnergyUseEquipment>) {
     for (let i = 0; i < energyUseEquipment.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Energy UseEquipment (' + i + '/' + energyUseEquipment.length + ')...');
       await firstValueFrom(this.deleteWithObservable(energyUseEquipment[i].id));
     }
   }
 
-  getByGuid(guid: string): IdbFacilityEnergyUseEquipment {
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
-    return accountEnergyUseEquipment.find(energyUseEquipment => {
-      return energyUseEquipment.guid == guid;
-    })
-  }
-
-  getByFacilityId(facilityId: string): Array<IdbFacilityEnergyUseEquipment> {
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
-    return accountEnergyUseEquipment.filter(energyUseEquipment => {
-      return energyUseEquipment.facilityId == facilityId;
-    })
-  }
-
-  getByEnergyUseGroupId(groupId: string): Array<IdbFacilityEnergyUseEquipment> {
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
-    return accountEnergyUseEquipment.filter(energyUseEquipment => {
-      return energyUseEquipment.energyUseGroupId == groupId;
-    })
-  }
-
-  getFacilityEnergyUseEquipmentCopy(facilityId: string): Array<IdbFacilityEnergyUseEquipment> {
-    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.getByFacilityId(facilityId);
-    let facilityEnergyUseEquipmentCopy: Array<IdbFacilityEnergyUseEquipment> = JSON.parse(JSON.stringify(facilityEnergyUseEquipment));
-    return facilityEnergyUseEquipmentCopy;
-  }
-
   async deleteEnergyUseGroup(groupId: string){
-    let accountEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountEnergyUseEquipment.getValue();
-    let equipmentToDelete: Array<IdbFacilityEnergyUseEquipment> = accountEnergyUseEquipment.filter(equipment => { return equipment.energyUseGroupId == groupId });
+    const equipmentToDelete = (await firstValueFrom(this.getAll()))
+      .filter(equipment => equipment.energyUseGroupId === groupId);
     await this.deleteEnergyUseEquipmentAsync(equipmentToDelete);
   }
 }

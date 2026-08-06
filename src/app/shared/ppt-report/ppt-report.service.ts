@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PptDocument } from './models/ppt-document';
-import { PptSlide, TitleSlide, TableSlide, ChartSlide, TableHeaderCell } from './models/ppt-slide';
+import { PptSlide, TitleSlide, TableSlide, ChartSlide, TableHeaderCell, ImageSlide } from './models/ppt-slide';
 import { PPT_THEME } from './ppt-theme';
 import { defineSlideMasters, SLIDE_MASTERS } from './ppt-slide-master';
 import pptxgen from 'pptxgenjs';
@@ -26,17 +26,66 @@ export class PptReportService {
       case 'title': this.addTitleSlide(pptx, slideModel); break;
       case 'table': this.addTableSlide(pptx, slideModel); break;
       case 'chart': this.addChartSlide(pptx, slideModel); break;
+      case 'image': this.addImageSlide(pptx, slideModel); break;
     }
   }
 
   private addTitleSlide(pptx: pptxgen, model: TitleSlide): void {
-    const masterName = model.layout === 'titleOnly' ? SLIDE_MASTERS.TITLE_ONLY :
-                       model.layout === 'section' ? SLIDE_MASTERS.SECTION :
-                       SLIDE_MASTERS.TITLE;
-    const slide = pptx.addSlide({ masterName: masterName });
+    const hasCustomTitleSize = typeof model.titleFontSize === 'number';
+
+    const defaultMasterName =
+      model.layout === 'titleOnly' ? SLIDE_MASTERS.TITLE_ONLY :
+        model.layout === 'section' ? SLIDE_MASTERS.SECTION :
+          SLIDE_MASTERS.TITLE;
+
+    const masterName = hasCustomTitleSize ? SLIDE_MASTERS.BLANK : defaultMasterName;
+    const slide = pptx.addSlide({ masterName });
+
+    if (hasCustomTitleSize) {
+      const isSection = model.layout === 'section';
+
+      slide.addText(model.title, {
+        x: isSection ? 0.5 : 0.5,
+        y: isSection ? 1.6 : 1.2,
+        w: 9,
+        h: isSection ? 1.4 : 1.0,
+        align: isSection ? 'center' : 'center',
+        valign: 'middle',
+        bold: true,
+        fontFace: PPT_THEME.fonts.heading,
+        fontSize: model.titleFontSize,
+        color: '000000'
+      });
+
+      if (model.subtitle) {
+        slide.addText(model.subtitle, {
+          x: 0.5,
+          y: isSection ? 3.0 : 2.3,
+          w: 9,
+          h: 1.4,
+          align: 'center',
+          valign: 'top',
+          fontFace: PPT_THEME.fonts.body,
+          fontSize: model.subtitleFontSize ?? 12,
+          color: '000000'
+        });
+      }
+
+      if (model.date) {
+        const formatted = new Date(model.date).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric',
+        });
+        slide.addText(formatted, {
+          x: 0.5, y: 5.1, w: 9, h: 0.3, align: 'center',
+          fontFace: PPT_THEME.fonts.body, fontSize: 10, color: '666666'
+        });
+      }
+      return;
+    }
 
     const titleText = model.title + (model.subtitle ? `\n${model.subtitle}` : '');
     slide.addText(titleText, { placeholder: 'title' });
+
     if (model.date) {
       const formatted = new Date(model.date).toLocaleDateString('en-US', {
         year: 'numeric', month: 'long', day: 'numeric',
@@ -53,7 +102,7 @@ export class PptReportService {
     const { fullContent } = PPT_THEME.regions;
     const firstPageY = 1.2;
     const overflowPageY = 0.4;
-    
+
     const allRows: any[][] = [];
     allRows.push(this.buildHeaderRow(model.headers, PPT_THEME.colors.primary, 'FFFFFF'));
     if (model.subHeaders?.length) {
@@ -138,6 +187,7 @@ export class PptReportService {
       ...(typeof model.valAxisMajorUnit === 'number' ? { valAxisMajorUnit: model.valAxisMajorUnit } : {}),
       barDir: model.barDir ?? 'col',
       barGapWidthPct: model.barGapWidthPct ?? 75,
+      barGrouping: model.barGrouping ?? 'clustered',
     };
 
     if (model.chartType === 'combo') {
@@ -153,8 +203,8 @@ export class PptReportService {
           data: barSeries.map(s => ({ name: s.name, labels: model.labels, values: s.data })),
           options: {
             chartColors: comboBarColors,
-            barGrouping: 'clustered',
-            barGapWidthPct: model.barGapWidthPct ?? 75,
+            barGrouping: model.barGrouping ?? 'clustered',
+            barGapWidthPct: model.barGapWidthPct ?? 75
           },
         });
       }
@@ -175,8 +225,8 @@ export class PptReportService {
         charts.push({
           type: pptx.charts.AREA,
           data: areaSeries.map(s => ({ name: s.name, labels: model.labels, values: s.data })),
-          options: {  
-          chartColors: areaSeries.map((s, i) =>
+          options: {
+            chartColors: areaSeries.map((s, i) =>
               s.color ?? PPT_THEME.chartPalette[(barSeries.length + lineSeries.length + i) % PPT_THEME.chartPalette.length]
             ),
             barGrouping: 'stacked'
@@ -210,6 +260,37 @@ export class PptReportService {
         const data = model.series.map(s => ({ name: s.name, labels: model.labels, values: s.data }));
         slide.addChart(typeMap[model.chartType], data, { ...chartOpts, chartColors: colors });
       }
+    }
+  }
+
+  private addImageSlide(pptx: pptxgen, model: ImageSlide): void {
+    if (!model.imageData?.trim()) {
+      return;
+    }
+    const slide = pptx.addSlide({ masterName: SLIDE_MASTERS.TITLE_ONLY });
+    slide.addText(model.title, { placeholder: 'title' });
+    const { fullContent } = PPT_THEME.regions;
+    const noteText = model.note?.trim();
+    const noteHeight = noteText ? 0.3 : 0;
+    const imageHeight = fullContent.h - noteHeight;
+    slide.addImage({
+      data: model.imageData,
+      x: fullContent.x,
+      y: fullContent.y,
+      w: fullContent.w,
+      h: imageHeight,
+    });
+    if (noteText) {
+      slide.addText(noteText, {
+        x: fullContent.x, 
+        y: fullContent.y + imageHeight + 0.05, 
+        w: fullContent.w, 
+        h: 0.25,
+        fontSize: PPT_THEME.sizes.caption,
+        color: PPT_THEME.colors.textLight,
+        italic: true,
+        fontFace: PPT_THEME.fonts.body,
+      });
     }
   }
 }

@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { Component, inject, Injector } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from 'src/app/calculations/status-check-calculations/statusCheckModels';
@@ -30,6 +31,8 @@ interface FacilityActionGroup {
   styleUrl: './data-management-home.component.css'
 })
 export class DataManagementHomeComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   account: IdbAccount;
   accountSub: Subscription;
@@ -51,20 +54,20 @@ export class DataManagementHomeComponent {
   loadingSub: Subscription;
 
   constructor(
-    private accountDbService: AccountdbService,
     private accountStatusCheckService: AccountStatusCheckService,
     private weatherPredictorManagementService: WeatherPredictorManagementService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private injector: Injector
+
   ) {
 
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
 
@@ -126,8 +129,7 @@ export class DataManagementHomeComponent {
   }
 
   async showToast() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(selectedAccount, true);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let hasWarning = this.weatherPredictorManagementService.hasWarning;
     if (hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")

@@ -1,11 +1,8 @@
-import { Injectable } from '@angular/core';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Injectable, inject } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { getDateFromMeterData, getDateFromPredictorData, getEarliestMeterData, getLatestMeterData, getLatestPredictorData } from '../dateHelperFunctions';
@@ -14,20 +11,18 @@ import { getDateFromMeterData, getDateFromPredictorData, getEarliestMeterData, g
   providedIn: 'root'
 })
 export class PredictorDataHelperService {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
-  constructor(private predictorDbService: PredictorDbService, private predictorDataDbService: PredictorDataDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-  ) { }
 
   checkWeatherPredictorsNeedUpdate(facility: IdbFacility, facilityPredictors?: Array<IdbPredictor>): Array<{ predictor: IdbPredictor, latestReadingDate: Date }> {
     if (!facilityPredictors) {
-      facilityPredictors = this.predictorDbService.getByFacilityId(facility.guid);
+      facilityPredictors = this.accountWorkspaceQuery.getFacilityPredictors(facility.guid);
     }
     let lastReadingDate: Date = this.getLastMeterDate(facility);
     if (lastReadingDate) {
       let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = new Array();
       facilityPredictors.forEach(predictor => {
-        let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
+        let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
         if (predictorData.length > 0) {
           let predictorDate: Date = this.getLastPredictorReadingDate(predictor);
           if (predictorDate < lastReadingDate && checkSameMonth(predictorDate, lastReadingDate) == false) {
@@ -43,7 +38,7 @@ export class PredictorDataHelperService {
   }
 
   getLastPredictorReadingDate(predictor: IdbPredictor): Date {
-    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
+    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
     let latestPredictorData: IdbPredictorData = getLatestPredictorData(predictorData);
     if (latestPredictorData) {
       let predictorDate: Date = getDateFromPredictorData(latestPredictorData);
@@ -53,7 +48,7 @@ export class PredictorDataHelperService {
   }
 
   getLastMeterDate(facility: IdbFacility): Date {
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(facility.guid);
     let latestMeterData: IdbUtilityMeterData = getLatestMeterData(utilityMeterData);
     if (latestMeterData) {
       return getDateFromMeterData(latestMeterData);
@@ -62,7 +57,7 @@ export class PredictorDataHelperService {
   }
 
   getFirstMeterDate(facility: IdbFacility): Date {
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(facility.guid);
     let firstMeterData: IdbUtilityMeterData = getEarliestMeterData(utilityMeterData);
     if (firstMeterData) {
       return getDateFromMeterData(firstMeterData);

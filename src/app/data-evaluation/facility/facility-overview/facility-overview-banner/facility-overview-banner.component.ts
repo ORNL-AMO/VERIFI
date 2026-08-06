@@ -1,19 +1,18 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-facility-overview-banner',
@@ -22,6 +21,9 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
   standalone: false
 })
 export class FacilityOverviewBannerComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @ViewChild('navTabs') navTabs: ElementRef;
   modalOpenSub: Subscription;
@@ -38,25 +40,24 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   account: IdbAccount;
   accountSub: Subscription
-  constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
+  constructor(
+    private sharedDataService: SharedDataService,
     private router: Router,
-    private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterGroupIdbService: UtilityMeterGroupdbService,
     private facilityReportDbService: FacilityReportsDbService,
-    private accountDbService: AccountdbService,
     private cd: ChangeDetectorRef,
-    private facilityOverviewService: FacilityOverviewService) { }
+    private facilityOverviewService: FacilityOverviewService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
       this.selectedFacility = val;
       this.setShowWater();
     });
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
   }
@@ -73,13 +74,13 @@ export class FacilityOverviewBannerComponent implements OnInit {
   }
 
   setShowWater() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
   }
 
   openCreateReportModal() {
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupIdbService.getFacilityGroups(this.selectedFacility.guid);
+    let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(this.selectedFacility.guid);
     this.facilityReport = getNewIdbFacilityReport(this.selectedFacility.guid, this.selectedFacility.accountId, 'overview', groups);
     this.facilityReport.name = 'New Data Overview Report';
     let dateRange: { startDate: Date, endDate: Date } = this.facilityOverviewService.dateRange.getValue();
@@ -102,8 +103,8 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   async createReport() {
     this.facilityReport = await firstValueFrom(this.facilityReportDbService.addWithObservable(this.facilityReport));
-    await this.dbChangesService.setAccountFacilityReports(this.account, this.selectedFacility);
-    this.facilityReportDbService.selectedReport.next(this.facilityReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 

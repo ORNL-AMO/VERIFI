@@ -1,26 +1,22 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { debounceTime, firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisType } from 'src/app/models/analysis';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -38,26 +34,22 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
   standalone: false
 })
 export class AccountAnalysisSetupComponent {
-  private readonly accountDbService = inject(AccountdbService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly router = inject(Router);
-  private readonly dbChangesService = inject(DbChangesService);
   private readonly analysisDbService = inject(AnalysisDbService);
   private readonly calendarizationService = inject(CalanderizationService);
-  private readonly accountReportDbService = inject(AccountReportDbService);
   private readonly accountAnalysisService = inject(AccountAnalysisService);
-  private readonly facilityDbService = inject(FacilitydbService);
   private readonly loadingService = inject(LoadingService);
   private readonly toastNotificationService = inject(ToastNotificationsService);
-  private readonly utiltiyMeterGroupDbService = inject(UtilityMeterGroupdbService);
-  private readonly predictorDbService = inject(PredictorDbService);
   private readonly fb = inject(FormBuilder);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 
-  readonly account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
-  readonly analysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  readonly account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
+  readonly analysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
   readonly calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calendarizationService.calanderizedMeters);
-  readonly accountReports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  readonly accountReports: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
   private readonly _accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
   private readonly _hideInUseMessage: Signal<boolean> = toSignal(this.accountAnalysisService.hideInUseMessage);
 
@@ -210,9 +202,8 @@ export class AccountAnalysisSetupComponent {
       baselineYear: raw.baselineYear ?? item.baselineYear,
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
   }
 
   toggleHideInUseMessage(): void {
@@ -239,9 +230,8 @@ export class AccountAnalysisSetupComponent {
       })),
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(clearedItem);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
 
@@ -259,14 +249,14 @@ export class AccountAnalysisSetupComponent {
     this.loadingService.setLoadingStatus(true);
     const account = this.account();
     const analysisItem = this.analysisItem();
-    const accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
-    const accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    const facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    const accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
+    const accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+    const facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     const analysisType = this.analysisTypeControl.value;
     let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
     for (let i = 0; i < facilities.length; i++) {
       const facility: IdbFacility = facilities[i];
-      this.dbChangesService.selectFacility(facility);
+      this.accountWorkspaceService.selectFacility(facility.guid);
       let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, analysisItem.analysisCategory);
       newIdbItem.energyIsSource = analysisItem.energyIsSource;
       let facilityBaselineYear: number;
@@ -291,15 +281,15 @@ export class AccountAnalysisSetupComponent {
         fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
       );
     }
-    await this.dbChangesService.setAnalysisItems(account, true);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     const updatedItem: IdbAccountAnalysisItem = {
       ...analysisItem,
       isAnalysisVisited: false,
       facilityAnalysisItems: updatedFacilityAnalysisItems,
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(updatedItem);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');

@@ -1,20 +1,13 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../account-analysis.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -29,21 +22,14 @@ import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculati
   standalone: false
 })
 export class AccountAnalysisResultsComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountAnalysisService = inject(AccountAnalysisService);
-  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
-  private readonly accountDbService = inject(AccountdbService);
-  private readonly facilityDbService = inject(FacilitydbService);
-  private readonly predictorDbService = inject(PredictorDbService);
-  private readonly predictorDataDbService = inject(PredictorDataDbService);
-  private readonly analysisDbService = inject(AnalysisDbService);
   private readonly sharedDataService = inject(SharedDataService);
-  private readonly utilityMeterDbService = inject(UtilityMeterdbService);
-  private readonly utilityMeterDataDbService = inject(UtilityMeterDatadbService);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly accountStatusCheck = toSignal(this.accountStatusCheckService.accountStatusCheck);
-  private readonly accountAnalysisItem = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
+  private readonly accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis;
   private readonly annualAnalysisSummaries: Signal<Array<AnnualAnalysisSummary>> = toSignal(
     this.accountAnalysisService.annualAnalysisSummary,
     { initialValue: [] }
@@ -69,14 +55,14 @@ export class AccountAnalysisResultsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    const account = this.accountDbService.selectedAccount.getValue();
-    const accountFacilities: IdbFacility[] = this.facilityDbService.accountFacilities.getValue();
-    const accountPredictorEntries: IdbPredictorData[] = this.predictorDataDbService.accountPredictorData.getValue();
-    const accountPredictors: IdbPredictor[] = this.predictorDbService.accountPredictors.getValue();
-    const accountAnalysisItems: IdbAnalysisItem[] = this.analysisDbService.accountAnalysisItems.getValue();
-    const meters: IdbUtilityMeter[] = this.utilityMeterDbService.accountMeters.getValue();
-    const meterData: IdbUtilityMeterData[] = this.utilityMeterDataDbService.accountMeterData.getValue();
+    const accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
+    const account = this.accountWorkspaceStore.account();
+    const accountFacilities: IdbFacility[] = [...this.accountWorkspaceStore.facilities()];
+    const accountPredictorEntries: IdbPredictorData[] = [...this.accountWorkspaceStore.predictorData()];
+    const accountPredictors: IdbPredictor[] = [...this.accountWorkspaceStore.predictors()];
+    const accountAnalysisItems: IdbAnalysisItem[] = [...this.accountWorkspaceStore.facilityAnalyses()];
+    const meters: IdbUtilityMeter[] = [...this.accountWorkspaceStore.meters()];
+    const meterData: IdbUtilityMeterData[] = [...this.accountWorkspaceStore.meterData()];
 
     const payload = {
       accountAnalysisItem,

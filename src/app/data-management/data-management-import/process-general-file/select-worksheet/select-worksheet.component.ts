@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import * as XLSX from 'xlsx';
@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
   standalone: false
 })
 export class SelectWorksheetComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   fileReferences: Array<FileReference>;
@@ -25,8 +26,10 @@ export class SelectWorksheetComponent implements OnInit {
   worksheetNames: Array<string>;
   hasHiddenTabs: boolean;
   showHiddenTabs: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService
+  ) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
@@ -36,7 +39,7 @@ export class SelectWorksheetComponent implements OnInit {
       let id: string = param['id'];
       this.fileReference = this.fileReferences.find(ref => { return ref.id == id });
       this.setWorksheetNames();
-      this.facilityOptions = this.facilityDbService.accountFacilities.getValue();
+      this.facilityOptions = [...this.accountWorkspaceStore.facilities()];
       if (!this.fileReference.isTemplate) {
         if (this.fileReference.selectedWorksheetData.length == 0) {
           this.setSelectedWorksheetName();

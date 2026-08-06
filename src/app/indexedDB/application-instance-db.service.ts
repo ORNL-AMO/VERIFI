@@ -1,29 +1,25 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ApplicationInstanceData, getNewApplicationInstanceData } from '../models/idbModels/applicationInstanceData';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApplicationInstanceDbService {
-  applicationInstanceData: BehaviorSubject<ApplicationInstanceData>;
+  constructor(private dbService: NgxIndexedDBService) { }
 
-  constructor(private dbService: NgxIndexedDBService) { 
-    this.applicationInstanceData = new BehaviorSubject<ApplicationInstanceData>(undefined);
-  }
-
-  async initializeApplicationInstanceData(){
+  async initializeApplicationInstanceData(): Promise<ApplicationInstanceData> {
     let instanceData: Array<ApplicationInstanceData> = await firstValueFrom(this.getApplicationInstanceData());
     if(instanceData && instanceData.length > 0){
       let instanceDataVal: ApplicationInstanceData = instanceData[0];
       instanceDataVal.appOpenCount++;
       instanceDataVal = await firstValueFrom(this.updateWithObservable(instanceDataVal));
-      this.applicationInstanceData.next(instanceDataVal);
+      return instanceDataVal;
     }else{
       let newInstanceData: ApplicationInstanceData = getNewApplicationInstanceData();
       newInstanceData = await firstValueFrom(this.addWithObservable(newInstanceData));
-      this.applicationInstanceData.next(newInstanceData);
+      return newInstanceData;
     }
   }
   
@@ -42,19 +38,24 @@ export class ApplicationInstanceDbService {
     return this.dbService.getAll('application');
   }
 
-  setSurveyDone(isDone = true) {
-    let applicationInstanceData = this.applicationInstanceData.getValue();
+  async setSurveyDone(isDone = true): Promise<ApplicationInstanceData> {
+    let applicationInstanceData = await this.getStoredApplicationInstanceData();
     applicationInstanceData.isSurveyDone = isDone;
     applicationInstanceData.doSurveyReminder = !isDone;
     applicationInstanceData.isSurveyToastDone = true;
-    return this.updateWithObservable(applicationInstanceData);
+    return firstValueFrom(this.updateWithObservable(applicationInstanceData));
   }
   
-  setSurveyToastDone() {
-    let applicationInstanceData = this.applicationInstanceData.getValue();
+  async setSurveyToastDone(): Promise<ApplicationInstanceData> {
+    let applicationInstanceData = await this.getStoredApplicationInstanceData();
     applicationInstanceData.isSurveyToastDone = true;
-    return this.updateWithObservable(applicationInstanceData);
+    return firstValueFrom(this.updateWithObservable(applicationInstanceData));
+  }
+
+  private async getStoredApplicationInstanceData(): Promise<ApplicationInstanceData> {
+    const records = await firstValueFrom(this.getApplicationInstanceData());
+    if (!records?.[0]) { throw new Error('Application instance metadata has not been initialized.'); }
+    return records[0];
   }
 
 }
-

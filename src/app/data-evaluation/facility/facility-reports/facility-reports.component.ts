@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
@@ -13,16 +13,18 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
     standalone: false
 })
 export class FacilityReportsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
+  constructor(
     private router: Router,
-    private facilityDbService: FacilitydbService) { }
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
+    this.utilityMeterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()]), { injector: this.injector }).subscribe(val => {
       this.utilityMeterData = val;
     });
   }
@@ -33,7 +35,7 @@ export class FacilityReportsComponent {
   }
 
   goToUtilityData() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility')
   }
 }

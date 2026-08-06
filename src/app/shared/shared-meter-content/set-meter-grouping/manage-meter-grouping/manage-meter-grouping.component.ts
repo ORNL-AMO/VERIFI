@@ -1,16 +1,15 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -22,6 +21,8 @@ import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models
   styleUrl: './manage-meter-grouping.component.css',
 })
 export class ManageMeterGroupingComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
 
@@ -39,33 +40,34 @@ export class ManageMeterGroupingComponent {
   ungroupedMeters: Array<IdbUtilityMeter>;
   groupToDelete: IdbUtilityMeterGroup;
   ungroupedMeterGroup: IdbUtilityMeterGroup;
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
+  constructor(
+    private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private router: Router,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
     private loadingService: LoadingService,
     private analysisDbService: AnalysisDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNoticationService: ToastNotificationsService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private injector: Injector
+
   ) {
   }
 
 
   ngOnInit() {
-    this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
+    this.facilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.facilityMeters = meters;
       this.hasEnergyMeters = this.facilityMeters.find(meter => { return meter.includeInEnergy }) != undefined;
       this.hasWaterMeters = this.facilityMeters.find(meter => { return meter.source == 'Water Discharge' || meter.source == 'Water Intake' }) != undefined;
       this.ungroupedMeters = this.facilityMeters.filter(meter => { return meter.groupId == undefined })
     });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
       this.ungroupedMeterGroup = getNewIdbUtilityMeterGroup('Other', "Ungrouped Meters", facility.guid, facility.accountId);
       this.ungroupedMeterGroup.guid = undefined;
     });
-    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(facilityMeterGroups => {
+    this.facilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()]), { injector: this.injector }).subscribe(facilityMeterGroups => {
       this.otherGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Other' });
       this.waterGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Water' });
       this.energyGroups = facilityMeterGroups.filter(group => { return group.groupType == 'Energy' });
@@ -86,10 +88,8 @@ export class ManageMeterGroupingComponent {
     let newGroupType: 'Energy' | 'Water' | 'Other' = this.hasEnergyMeters ? 'Energy' : this.hasWaterMeters ? 'Water' : 'Other';
     let newGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(newGroupType, "New Group", this.facility.guid, this.facility.accountId);
     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.analysisDbService.addGroup(newGroup.guid, newGroup.groupType);
-    await this.dbChangesService.setAnalysisItems(account, true, this.facility);
-    await this.dbChangesService.setMeterGroups(account, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNoticationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     this.editGroup(newGroup);
   }
@@ -110,22 +110,21 @@ export class ManageMeterGroupingComponent {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id));
-    await this.dbChangesService.setMeterGroups(selectedAccount, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == this.groupToDelete.guid });
     for (let i = 0; i < groupMeters.length; i++) {
       let meter: IdbUtilityMeter = groupMeters[i];
       meter.groupId = undefined;
       await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter))
     }
-    await this.dbChangesService.setMeters(selectedAccount, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update analysis items
     await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update BCC reports
     await this.accountReportDbService.updateReportsRemoveGroup(this.groupToDelete.guid);
-    await this.dbChangesService.setAccountReports(selectedAccount);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");

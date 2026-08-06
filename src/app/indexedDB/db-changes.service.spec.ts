@@ -53,29 +53,19 @@ describe('DbChangesService facility updates', () => {
     };
     const toastNotificationService = { showToast: vi.fn() };
     const cascadeDeleteService = { deleteFacility };
+    const workspaceService = { reloadActiveWorkspace: vi.fn().mockResolvedValue('published') };
 
     const service = new DbChangesService(
       {} as any, // accountDbService
       facilityDbService as any,
       {} as any, // accountAnalysisDbService
-      {} as any, // analysisDbService
-      {} as any, // predictorsDbServiceDeprecated
-      {} as any, // utilityMeterDbService
-      {} as any, // utilityMeterDataDbService
-      {} as any, // utilityMeterGroupDbService
       {} as any, // analysisSelectionRepair
-      {} as any, // customEmissionsDbService
       loadingService as any,
       toastNotificationService as any,
       {} as any, // accountReportDbService
-      {} as any, // customFuelDbService
-      {} as any, // customGWPDbService
-      {} as any, // predictorDbService
-      {} as any, // predictorDataDbService
-      {} as any, // facilityReportsDbService
-      {} as any, // facilityEnergyUseGroupsDbService
-      {} as any, // facilityEnergyUseEquipmentDbService
-      cascadeDeleteService as any
+      cascadeDeleteService as any,
+      workspaceService as any,
+      { account: vi.fn(() => ({ guid: 'account-a' })) } as any
     );
 
     return {
@@ -83,33 +73,36 @@ describe('DbChangesService facility updates', () => {
       facilityDbService,
       loadingService,
       toastNotificationService,
-      cascadeDeleteService
+      cascadeDeleteService,
+      workspaceService
     };
   }
 
-  it('does not select an unselected facility when it is updated', async () => {
-    const { service, facilityDbService } = setup();
+  it('persists a copy before publishing an active-account facility update', async () => {
+    const { service, facilityDbService, workspaceService } = setup();
 
     await service.updateFacility(unselectedFacility);
 
-    expect(facilityDbService.selectedFacility.getValue()).toBe(selectedFacility);
+    expect(facilityDbService.updateWithObservable).toHaveBeenCalledOnce();
+    expect(facilityDbService.updateWithObservable.mock.calls[0][0]).toEqual(unselectedFacility);
+    expect(facilityDbService.updateWithObservable.mock.calls[0][0]).not.toBe(unselectedFacility);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
   });
 
-  it('publishes the updated record when the selected facility is updated', async () => {
-    const { service, facilityDbService } = setup();
+  it('returns the persisted record after the committed publication', async () => {
+    const { service, workspaceService } = setup();
 
     const updatedFacility = await service.updateFacility(selectedFacility);
 
     expect(updatedFacility.name).toBe('Selected Facility Updated');
-    expect(facilityDbService.selectedFacility.getValue()).toEqual(updatedFacility);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
   });
 
-  it('does not refresh subjects or report success until facility deletion commits', async () => {
+  it('does not publish or report success until facility deletion commits', async () => {
     const transaction = deferred<void>();
     const deleteFacility = vi.fn(() => transaction.promise);
-    const { service, facilityDbService, loadingService } = setup(deleteFacility);
+    const { service, facilityDbService, loadingService, workspaceService } = setup(deleteFacility);
     const account = { guid: 'account-a' } as IdbAccount;
-    const selectAccount = vi.spyOn(service, 'selectAccount').mockResolvedValue(undefined);
 
     const deletion = service.deleteFacility(selectedFacility, account);
     await Promise.resolve();
@@ -118,13 +111,14 @@ describe('DbChangesService facility updates', () => {
       selectedFacility,
       unselectedFacility
     ]);
-    expect(selectAccount).not.toHaveBeenCalled();
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
     expect(loadingService.isLoadingComplete.getValue()).toBe(false);
 
     transaction.resolve();
     await deletion;
 
-    expect(selectAccount).toHaveBeenCalledWith(account, false);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
     expect(loadingService.isLoadingComplete.getValue()).toBe(true);
   });
 
@@ -134,10 +128,10 @@ describe('DbChangesService facility updates', () => {
       service,
       facilityDbService,
       loadingService,
-      toastNotificationService
+      toastNotificationService,
+      workspaceService
     } = setup(deleteFacility);
     const account = { guid: 'account-a' } as IdbAccount;
-    const selectAccount = vi.spyOn(service, 'selectAccount').mockResolvedValue(undefined);
 
     await expect(service.deleteFacility(selectedFacility, account))
       .rejects.toThrow('Injected transaction failure');
@@ -146,7 +140,7 @@ describe('DbChangesService facility updates', () => {
       selectedFacility,
       unselectedFacility
     ]);
-    expect(selectAccount).not.toHaveBeenCalled();
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
     expect(loadingService.isLoadingComplete.getValue()).toBe(false);
     expect(toastNotificationService.showToast).toHaveBeenCalledWith(
       'Facility Deletion Failed',

@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
@@ -19,14 +18,15 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
   providedIn: 'root'
 })
 export class UploadDataEnergyTreasureHuntService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private eGridService: EGridService) { }
+  constructor(
+    private eGridService: EGridService
+  ) { }
 
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let hostPlantSummaryWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Summary'];
     let hostPlant: IdbFacility = this.getImportFacilities(hostPlantSummaryWorksheet, selectedAccount, 'Host Plant');
     let hostPlantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Utilities'];
@@ -126,7 +126,7 @@ export class UploadDataEnergyTreasureHuntService {
 
   getImportFacilities(worksheet: XLSX.WorkSheet, selectedAccount: IdbAccount, defaultFacilityName: string): IdbFacility {
     let facilityName: string = worksheet['C9']?.v;
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+    let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
     let facility: IdbFacility;
     if (facilityName) {
       facility = accountFacilities.find(facility => { return facility.name == facilityName });

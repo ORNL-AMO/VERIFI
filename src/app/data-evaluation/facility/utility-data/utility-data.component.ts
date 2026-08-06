@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -12,24 +12,22 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class UtilityDataComponent implements OnInit {
+  constructor(private injector: Injector) { }
+
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedAccount: IdbAccount;
   selectedFacility: IdbFacility;
 
   selectedAccountSub: Subscription;
   selectedFacilitySub: Subscription;
-  constructor(
-    private accountdbService: AccountdbService,
-    private facilityDbService: FacilitydbService
-  ) {
-  }
 
   ngOnInit() {
-    this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(selectedAccount => {
       this.selectedAccount = selectedAccount;
     });
 
-    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(selectedFacility => {
       this.selectedFacility = selectedFacility;
     });
   }

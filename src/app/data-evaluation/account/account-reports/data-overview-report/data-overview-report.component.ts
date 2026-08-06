@@ -1,19 +1,13 @@
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -22,12 +16,13 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
 import { DataOverviewReportAdapter } from './data-overview-report.adapter';
 import { DataOverviewAccountReportComponent } from './data-overview-account-report/data-overview-account-report.component';
 import { DataOverviewFacilityReportComponent } from './data-overview-facility-report/data-overview-facility-report.component';
+import { DataOverviewReportPptAdapter } from './data-overview-report-ppt.adapter';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -36,6 +31,7 @@ import { DataOverviewFacilityReportComponent } from './data-overview-facility-re
   standalone: false
 })
 export class DataOverviewReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   overviewReport: DataOverviewReportSetup;
   print: boolean = false;
@@ -59,18 +55,14 @@ export class DataOverviewReportComponent {
   @ViewChild(DataOverviewAccountReportComponent) dataOverviewAccountReport: DataOverviewAccountReportComponent;
   @ViewChildren(DataOverviewFacilityReportComponent) dataOverviewFacilityReports!: QueryList<DataOverviewFacilityReportComponent>;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
+  constructor(
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
     private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService,
     private exportReportPdfService: ExportReportPdfService,
-    private dataOverviewReportAdapter: DataOverviewReportAdapter) {
+    private dataOverviewReportAdapter: DataOverviewReportAdapter,
+    private dataOverviewReportPptAdapter: DataOverviewReportPptAdapter,
+    private pptReportService: PptReportService
+  ) {
 
   }
 
@@ -78,8 +70,8 @@ export class DataOverviewReportComponent {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.account = this.accountDbService.selectedAccount.getValue();
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    this.account = this.accountWorkspaceStore.account();
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
     this.overviewReport = selectedReport.dataOverviewReportSetup;
     this.includedFacilities = new Array();
     this.includedGroups = new Array();
@@ -102,8 +94,8 @@ export class DataOverviewReportComponent {
     if (this.overviewReport.includeFacilityReports) {
       this.facilitiesData = new Array();
       if (this.includedFacilities.length > 0) {
-        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+        let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+        let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
         let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
         let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
         this.calculateFacilitiesSummary(0, accountFacilities, accountMeterGroups, startDate, endDate);
@@ -123,17 +115,17 @@ export class DataOverviewReportComponent {
   calculateFacilitiesSummary(facilityIndex: number, accountFacilities: Array<IdbFacility>, accountMeterGroups: Array<IdbUtilityMeterGroup>, startDate: Date, endDate: Date) {
     let facilityId: string = this.includedFacilities[facilityIndex];
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
     if (this.overviewReport.includeAllMeterData == false) {
       facilityMeters = facilityMeters.filter(meter => {
         return this.includedGroups.includes(meter.groupId);
       });
     };
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.facilitiesWorker = new Worker(new URL('../../../../web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
@@ -184,12 +176,12 @@ export class DataOverviewReportComponent {
   }
 
   calculateAccountSummary(selectedReport: IdbAccountReport) {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let includedFacilities: Array<IdbFacility> = facilities.filter(facility => {
       return this.includedFacilities.includes(facility.guid);
     });
 
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
 
     let includedMeters: Array<IdbUtilityMeter>;
     if (this.overviewReport.includeAllMeterData) {
@@ -200,11 +192,11 @@ export class DataOverviewReportComponent {
       });
     }
 
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
 
     if (typeof Worker !== 'undefined') {
@@ -275,7 +267,7 @@ export class DataOverviewReportComponent {
   }
 
   async onExportPdf() {
-    let selectedReport = this.accountReportDbService.selectedReport.value;
+    let selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!selectedReport || this.isExportingPdf) {
       return;
     }
@@ -361,6 +353,34 @@ export class DataOverviewReportComponent {
     });
 
     return map;
+  }
+
+  async downloadPpt(): Promise<void> {
+    const selectedReport = this.accountWorkspaceStore.selectedAccountReport();
+    if (!selectedReport) {
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const usageDonutImages = {
+      energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
+      cost: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'cost') ?? '',
+      water: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'water') ?? '',
+    }
+    const mapImages = {
+      energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'energyUse') ?? '',
+      cost: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'cost') ?? '',
+      water: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'water') ?? '',
+    }
+    const document = this.dataOverviewReportPptAdapter.buildDocument({
+      account: this.account,
+      report: selectedReport,
+      reportSettings: this.overviewReport,
+      accountData: this.accountData,
+      facilitiesData: this.facilitiesData,
+      usageDonutImages: usageDonutImages,
+      mapImages: mapImages,
+    });
+    await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${selectedReport?.name}.pptx`);
   }
 }
 

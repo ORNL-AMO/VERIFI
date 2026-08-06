@@ -1,20 +1,15 @@
-import { Component } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
+import { distinctUntilChanged, firstValueFrom, startWith, Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, CostSavingsReportSettings, YearGroupData } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -28,6 +23,8 @@ import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from 'src/app/sha
   styleUrl: './facility-cost-savings-report-setup.component.css',
 })
 export class FacilityCostSavingsReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -57,28 +54,32 @@ export class FacilityCostSavingsReportSetupComponent {
   groupMeterCalendarizedData: GroupMeterCalendarizedMap = {};
   missingCostData: { [meterId: string]: Date[] } = {};
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
+  constructor(
+    private facilityReportsDbService: FacilityReportsDbService,
     private calanderizationService: CalanderizationService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) {
+    private injector: Injector
+  ) {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
-      this.facilityReport = report;
-      this.reportSettings = this.facilityReport.costSavingsReportSettings;
-      if (this.reportSettings && this.reportSettings.unitCostTable) {
-        this.unitCostTable = this.reportSettings.unitCostTable ? JSON.parse(JSON.stringify(this.reportSettings.unitCostTable)) : {};
-      }
-    });
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityReport()),
+        distinctUntilChanged()
+      )
+      .subscribe(report => {
+        this.facilityReport = report;
+        this.setReportSettings();
+      });
 
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.analysisItems = items.filter(item => (item.analysisCategory == 'water') || (item.analysisCategory == 'energy' && !item.energyIsSource));
-    });
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityAnalyses()),
+        distinctUntilChanged()
+      )
+      .subscribe(items => {
+        this.analysisItems = this.getEligibleAnalysisItems(items);
+      });
 
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
@@ -104,8 +105,8 @@ export class FacilityCostSavingsReportSetupComponent {
     this.filteredAnalysisItems = items;
   }
 
-  async setSelectedAnalysisItem() {
-    if (!this.analysisItems) {
+  setSelectedAnalysisItem() {
+    if (!this.analysisItems || !this.facilityReport) {
       return;
     }
 
@@ -113,6 +114,24 @@ export class FacilityCostSavingsReportSetupComponent {
       return item.guid == this.facilityReport.analysisItemId;
     });
     this.checkSelectedYearError();
+  }
+
+  private getEligibleAnalysisItems(
+    items = this.accountWorkspaceStore.selectedFacilityAnalyses()
+  ): Array<IdbAnalysisItem> {
+    return items.filter(item =>
+      item.analysisCategory == 'water' || (item.analysisCategory == 'energy' && !item.energyIsSource)
+    );
+  }
+
+  private setReportSettings(): void {
+    if (!this.facilityReport) {
+      return;
+    }
+    this.reportSettings = this.facilityReport.costSavingsReportSettings;
+    if (this.reportSettings?.unitCostTable) {
+      this.unitCostTable = JSON.parse(JSON.stringify(this.reportSettings.unitCostTable));
+    }
   }
 
   checkSelectedYearError() {
@@ -144,10 +163,8 @@ export class FacilityCostSavingsReportSetupComponent {
 
   async save() {
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportsDbService.selectedReport.next(this.facilityReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }
 
   setYearOptions() {
@@ -176,10 +193,10 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   setGroupMeterCalendarizedData() {
-    const facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-    const selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    const account = this.accountDbService.selectedAccount.getValue();
+    const facilityMeterData = [...this.accountWorkspaceStore.facilityMeterData()];
+    const facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
+    const selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    const account = this.accountWorkspaceStore.account();
 
     this.groupMeterCalendarizedData = {};
     if (!this.selectedAnalysisItem) return;
@@ -234,7 +251,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   checkUnit(group: AnalysisGroup): string {
-    const facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    const facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     const groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return group.idbGroupId == meter.groupId;
     });
@@ -242,7 +259,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   hasMultipleMeters(group: AnalysisGroup): boolean {
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return group.idbGroupId == meter.groupId;
     });
@@ -324,7 +341,7 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   getMeterName(meterId: string): string {
-    const facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    const facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
     const meter = facilityMeters.find(m => m.guid == meterId);
     return meter ? meter.name : '';
   }

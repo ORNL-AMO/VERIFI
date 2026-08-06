@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -16,6 +16,8 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
     standalone: false
 })
 export class DataOverviewSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // overviewForm: FormGroup;
   account: IdbAccount;
@@ -23,16 +25,16 @@ export class DataOverviewSetupComponent {
   isFormChange: boolean = false;
   reportSetup: DataOverviewReportSetup;
   showWater: boolean;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+  constructor(
+    private accountReportDbService: AccountReportDbService,
+    private injector: Injector
+  ) {
   }
 
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.account = this.accountWorkspaceStore.account();
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport, { injector: this.injector }).subscribe(val => {
       if (!this.isFormChange) {
         this.reportSetup = val.dataOverviewReportSetup;
       } else {
@@ -48,16 +50,16 @@ export class DataOverviewSetupComponent {
 
   async save() {
     this.isFormChange = true;
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport()
     // selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
     selectedReport.dataOverviewReportSetup = this.reportSetup;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
   setShowWater() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
     if (!this.showWater && this.reportSetup.includeWaterSection) {

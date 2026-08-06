@@ -37,10 +37,12 @@ import { AccountEmissionFactorsReportComponent } from "../data-evaluation/accoun
 import { AccountSavingsReportComponent } from "../data-evaluation/account/account-reports/account-savings-report/account-savings-report.component";
 import { AccountAnalysisDetailsTableComponent } from "../data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-details-table/account-analysis-details-table.component";
 import { AccountReportsDataCheckComponent } from "../data-evaluation/account/account-reports/account-reports-data-check/account-reports-data-check.component";
+import { accountReadyGuard } from "./workspace-readiness.guards";
 
 export const AccountRoutes: Route = {
     path: 'account',
     component: AccountComponent,
+    canActivate: [accountReadyGuard],
     children: [
         {
             path: '',

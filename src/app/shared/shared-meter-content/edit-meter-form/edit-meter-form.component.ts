@@ -1,22 +1,19 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from 'src/app/shared/sharedHelperFunctions';
 import { DemandUnitOptions, EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AllSources, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
-import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AssessmentReportVersion, IdbAccount } from 'src/app/models/idbModels/account';
 import { Month, Months } from '../../form-data/months';
 
@@ -27,6 +24,7 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class EditMeterFormComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   meterForm: FormGroup;
   @Input()
@@ -72,13 +70,12 @@ export class EditMeterFormComponent implements OnInit {
   assessmentReportOption: AssessmentReportVersion = 'AR6';
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService,
-    private accountDbService: AccountdbService) { }
+    private editMeterFormService: EditMeterFormService,
+    private cd: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.assessmentReportOption = account.assessmentReportVersion;
     this.setGlobalWarmingPotentials();
   }
@@ -252,7 +249,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
@@ -485,7 +482,7 @@ export class EditMeterFormComponent implements OnInit {
 
   setGlobalWarmingPotentials() {
     this.globalWarmingPotentials = new Array();
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     customGWPs.forEach(gwpOption => {
       this.globalWarmingPotentials.push(gwpOption);
     });

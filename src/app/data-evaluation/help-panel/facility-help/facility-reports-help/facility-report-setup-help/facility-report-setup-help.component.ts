@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
@@ -10,14 +11,15 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
   styleUrl: './facility-report-setup-help.component.css'
 })
 export class FacilityReportSetupHelpComponent {
+  constructor(private injector: Injector) { }
+
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbFacilityReport;
   selectedReportSub: Subscription;
-  constructor(private facilityReportDbService: FacilityReportsDbService) {
-  }
 
   ngOnInit() {
-    this.selectedReportSub = this.facilityReportDbService.selectedReport.subscribe(val => {
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(val => {
       this.selectedReport = val;
     });
   }

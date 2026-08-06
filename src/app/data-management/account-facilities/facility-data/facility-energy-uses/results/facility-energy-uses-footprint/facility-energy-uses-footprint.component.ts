@@ -1,11 +1,8 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -20,18 +17,15 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-energy-uses-footprint.component.css',
 })
 export class FacilityEnergyUsesFootprintComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  private facilityDbService = inject(FacilitydbService);
-  private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
-  private facilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private calanderizationService = inject(CalanderizationService);
-  private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
-  selectedFacility$: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
-  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
-  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
+  selectedFacility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.energyUseGroups()]);
+  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.energyUseEquipment()]);
   calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
+  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.meterGroups()]);
 
 
   yearOptions: Signal<Array<number>> = computed(() => {
@@ -43,8 +37,8 @@ export class FacilityEnergyUsesFootprintComponent {
     return getYearsWithFullData(calanderizedMeters, selectedFacility);
   });
 
-  //TODO: potentially make a web worker for this or optimize number of calls 
-  //so as data changes it doesn't have to recalculate everything if not necessary. 
+  //TODO: potentially make a web worker for this or optimize number of calls
+  //so as data changes it doesn't have to recalculate everything if not necessary.
   //TODO: add loading logic during calculation
   energyFootprintAnnualFacilityBalance$: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
     const selectedFacility = this.selectedFacility$();

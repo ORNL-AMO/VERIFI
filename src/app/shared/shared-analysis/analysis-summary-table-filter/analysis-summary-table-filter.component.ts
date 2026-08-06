@@ -1,8 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
-import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -14,6 +13,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
   standalone: false
 })
 export class AnalysisSummaryTableFilterComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   tableContext: string;
   @Input()
@@ -25,7 +25,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   energyColumnLabel: string;
   actualUseLabel: string;
   modeledUseLabel: string;
-  constructor(private analysisService: AnalysisService, private predictorDbService: PredictorDbService) { }
+  constructor(private analysisService: AnalysisService) { }
 
   ngOnInit(): void {
     this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
@@ -171,7 +171,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
           }
         });
       } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
-        let predictorVariables: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
+        let predictorVariables: Array<IdbPredictor> = [...this.accountWorkspaceStore.facilityPredictors()];
         variableCopy = predictorVariables.map(pVar => {
           return {
             id: pVar.guid,

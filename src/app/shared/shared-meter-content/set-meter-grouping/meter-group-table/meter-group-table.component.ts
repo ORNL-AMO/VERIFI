@@ -1,9 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -20,6 +19,7 @@ import { MeterGroupingDataService } from '../meter-grouping-data.service';
   styleUrl: './meter-group-table.component.css'
 })
 export class MeterGroupTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({required: true})
   meterGroup: IdbUtilityMeterGroup;
   @Input()
@@ -54,10 +54,10 @@ export class MeterGroupTableComponent {
 
   calculatingMeterGroups: boolean | 'error' = false ;
   calculatingMeterGroupsSub: Subscription;
-  constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService,
-    private meterGroupingDataService: MeterGroupingDataService
+  constructor(
+    private meterGroupingDataService: MeterGroupingDataService,
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
@@ -65,10 +65,10 @@ export class MeterGroupTableComponent {
         this.calculatingMeterGroups = calculating;
     });
 
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
-    this.metersSub = this.utilityMeterDbService.facilityMeters.subscribe(meters => {
+    this.metersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.meters = meters.filter(m => {
         if (this.meterGroup == undefined) {
           return m.groupId == undefined;
@@ -78,7 +78,7 @@ export class MeterGroupTableComponent {
       });
       this.setMeterList();
     });
-    this.meterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(meterData => {
+    this.meterDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterData()]), { injector: this.injector }).subscribe(meterData => {
       this.meterData = meterData;
       this.setMeterList();
     });

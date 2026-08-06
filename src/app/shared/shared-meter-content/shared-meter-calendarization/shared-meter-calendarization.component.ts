@@ -1,24 +1,22 @@
-import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, SimpleChanges, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { Router } from '@angular/router';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 
 @Component({
@@ -28,6 +26,9 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class SharedMeterCalendarizationComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   selectedMeter: IdbUtilityMeter;
 
@@ -53,21 +54,20 @@ export class SharedMeterCalendarizationComponent {
 
   calanderizationWorker: Worker;
   calanderizingMeterData: boolean | 'error' = false;
-  constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
+  constructor(
+    private calanderizationService: CalanderizationService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private dbChangesService: DbChangesService,
     private sharedDataService: SharedDataService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
-    private router: Router,
-    private customGWPDbService: CustomGWPDbService) { }
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
     this.displayGraphEnergy = this.calanderizationService.displayGraphEnergy;
     this.dataDisplay = this.calanderizationService.dataDisplay;
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.setHasMeterData();
     this.calanderizedDataFiltersSub = this.calanderizationService.calanderizedDataFilters.subscribe(val => {
       this.calanderizedDataFilters = val;
@@ -108,10 +108,10 @@ export class SharedMeterCalendarizationComponent {
   setCalanderizedMeterData() {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       this.calanderizingMeterData = true;
-      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+      let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+      let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
       if (typeof Worker !== 'undefined') {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();
@@ -280,9 +280,7 @@ export class SharedMeterCalendarizationComponent {
   async setDataApplication() {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter));
     this.selectedMeter = this.dataApplicationMeter;
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility)
-    this.cancelSetDataApplication();
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.setCalanderizedMeterData();
   }
 
@@ -301,7 +299,7 @@ export class SharedMeterCalendarizationComponent {
   }
 
   setHasMeterData() {
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.selectedMeter.guid);
     if (meterData.length != 0) {
       this.hasMeterData = true;
       this.setCalanderizedMeterData();
@@ -311,7 +309,7 @@ export class SharedMeterCalendarizationComponent {
   }
 
   uploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
@@ -320,7 +318,7 @@ export class SharedMeterCalendarizationComponent {
     if (this.router.url.includes('data-management')) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
     } else {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/new-bill');
     }
   }

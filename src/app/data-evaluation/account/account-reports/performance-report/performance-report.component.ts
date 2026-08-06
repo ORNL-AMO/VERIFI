@@ -1,21 +1,13 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -29,6 +21,7 @@ import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.s
     standalone: false
 })
 export class PerformanceReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   printSub: Subscription;
   print: boolean;
@@ -37,26 +30,20 @@ export class PerformanceReportComponent {
   worker: Worker;
   selectedAnalysisItem: IdbAccountAnalysisItem;
   performanceReport: PerformanceReport;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private router: Router, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private dataEvaluationService: DataEvaluationService) { }
+  constructor(
+    private router: Router,
+    private dataEvaluationService: DataEvaluationService
+  ) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.setAnalysisItem();
     this.setPerformanceReport();
   }
@@ -69,24 +56,24 @@ export class PerformanceReportComponent {
   }
 
   setAnalysisItem() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.performanceReportSetup.analysisItemId });
   }
 
   setPerformanceReport() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+    let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {
         includedFacilityIds.push(item.facilityId);
       }
     });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../web-workers/performance-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

@@ -11,6 +11,32 @@
     text-align: center;
 }
 
+.workspace-switch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.workspace-switch-status {
+    width: min(100%, 24rem);
+    padding: 2rem;
+    text-align: center;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.35);
+}
+
+.workspace-switch-status .spinner {
+    width: 70px;
+    margin: 0 auto 1rem;
+    text-align: center;
+}
+
 .spinner>div {
     width: 18px;
     height: 18px;

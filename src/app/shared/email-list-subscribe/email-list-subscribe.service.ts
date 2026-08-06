@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, firstValueFrom, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, firstValueFrom, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { FormControl, Validators } from '@angular/forms';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { ApplicationInstanceDbService } from 'src/app/indexedDB/application-instance-db.service';
 import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationInstanceData';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,8 @@ export class EmailListSubscribeService {
   API_URL = environment.measurUtilitiesApi + 'verifi-email-subscriber';
   constructor(private httpClient: HttpClient,
     private analyticsService: AnalyticsService,
-    private applicationInstanceDbService: ApplicationInstanceDbService) {
+    private applicationInstanceDbService: ApplicationInstanceDbService,
+    private applicationLifecycle: ApplicationLifecycleService) {
     this.submittedStatus = new BehaviorSubject<'error' | 'success' | 'sending'>(undefined);
   }
 
@@ -39,10 +41,15 @@ export class EmailListSubscribeService {
         this.setStatus(resp.status);
       }),
       switchMap((resp: HttpResponse<SubscriberResponse>) => {
-        const applicationInstanceData = this.applicationInstanceDbService.applicationInstanceData.getValue();
+        const applicationInstanceData = this.applicationLifecycle.applicationMetadata();
+        if (!applicationInstanceData) {
+          return throwError(() => new Error('Application instance metadata is not ready.'));
+        }
         if (resp.body && resp.body.id) {
-          applicationInstanceData.subscriberId = resp.body.id;
-          return this.applicationInstanceDbService.updateWithObservable(applicationInstanceData);
+          return from(this.applicationLifecycle.updateApplicationMetadata(current => ({
+            ...current,
+            subscriberId: resp.body.id
+          })));
         }
         return of(applicationInstanceData);
       }),

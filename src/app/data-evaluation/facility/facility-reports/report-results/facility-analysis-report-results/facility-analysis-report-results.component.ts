@@ -1,8 +1,9 @@
-import { Component, ViewChild } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ViewChild, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { FacilityAnalysisReportAdapter } from './facility-analysis-report.adapter';
@@ -18,6 +19,8 @@ import { FacilityAnalysisReportComponent } from 'src/app/shared/shared-reports/f
   standalone: false
 })
 export class FacilityAnalysisReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -28,17 +31,18 @@ export class FacilityAnalysisReportResultsComponent {
 
   @ViewChild(FacilityAnalysisReportComponent) facilityAnalysisReportComponent?: FacilityAnalysisReportComponent;
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
+  constructor(
     private analysisService: AnalysisService,
     private facilityAnalysisReportAdapter: FacilityAnalysisReportAdapter,
-    private exportReportPdfService: ExportReportPdfService) {
+    private exportReportPdfService: ExportReportPdfService,
+    private injector: Injector
+  ) {
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.analysisService.analysisTableColumns.next(this.facilityReport.analysisReportSettings.analysisTableColumns);
     });
   }

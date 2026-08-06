@@ -1,17 +1,12 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { Router } from '@angular/router';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { BetterClimateExcelWriterService } from '../excel-writer-services/better-climate-excel-writer.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -21,7 +16,6 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 @Component({
   selector: 'app-better-climate-report',
@@ -30,6 +24,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class BetterClimateReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -44,30 +39,26 @@ export class BetterClimateReportComponent {
   generateExcelSub: Subscription;
   showTitleForStationary: boolean;
   showTitleForTotal: boolean;
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
     private accountReportsService: AccountReportsService,
-    private router: Router, private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private router: Router,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService,
     private betterClimateExcelWriterService: BetterClimateExcelWriterService,
     private loadingService: LoadingService,
-    private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService) { }
+    private dataEvaluationService: DataEvaluationService
+  ) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     } else {
       this.betterClimateReportSetup = this.selectedReport.betterClimateReportSetup;
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
     this.calculateCarbonReport();
     this.setCellWidth();
 
@@ -90,11 +81,11 @@ export class BetterClimateReportComponent {
 
 
   calculateCarbonReport() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()]
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

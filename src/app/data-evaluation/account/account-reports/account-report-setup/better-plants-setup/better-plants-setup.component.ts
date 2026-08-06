@@ -1,14 +1,15 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-better-plants-setup',
@@ -17,6 +18,9 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
   standalone: false
 })
 export class BetterPlantsSetupComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   betterPlantsReportForm: FormGroup;
   account: IdbAccount;
@@ -29,16 +33,16 @@ export class BetterPlantsSetupComponent {
   baselineYearWarning: string;
   analysisItemIdSub: Subscription;
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
+    private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private accountAnalysisDbService: AccountAnalysisDbService) {
+    private injector: Injector
+  ) {
   }
 
   ngOnInit() {
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+    this.account = this.accountWorkspaceStore.account();
+    this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport, { injector: this.injector }).subscribe(val => {
       if (!this.isFormChange) {
         this.betterPlantsReportForm = this.accountReportsService.getBetterPlantsFormFromReport(val.betterPlantsReportSetup);
         this.subscribeAnalysisItemChanges();
@@ -58,8 +62,8 @@ export class BetterPlantsSetupComponent {
     if (this.analysisItemIdSub) {
       this.analysisItemIdSub.unsubscribe();
     }
-    
-    this.analysisItemIdSub = this.betterPlantsReportForm.controls.analysisItemId.valueChanges.subscribe(async val => {
+
+    this.analysisItemIdSub = this.betterPlantsReportForm.controls.analysisItemId.valueChanges.subscribe(async () => {
       await this.save();
     })
   }
@@ -67,18 +71,18 @@ export class BetterPlantsSetupComponent {
   async save() {
     this.isFormChange = true;
     this.setSelectedAnalysisItem();
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
     selectedReport.betterPlantsReportSetup = this.accountReportsService.updateBetterPlantsReportFromForm(selectedReport.betterPlantsReportSetup, this.betterPlantsReportForm);
     if (this.selectedAnalysisItem) {
       selectedReport.baselineYear = this.selectedAnalysisItem.baselineYear;
     }
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
   setSelectedAnalysisItem() {
-    this.selectedAnalysisItem = this.accountAnalysisDbService.getByGuid(this.betterPlantsReportForm.controls.analysisItemId.value);
+    this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.betterPlantsReportForm.controls.analysisItemId.value);
     if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'water') {
       this.methodsUndertakenLabel = 'If a baseline adjustment was made, please indicate the reason for making the adjustment';
       this.modificationNotesLabel = 'Please briefly describe major technologies, strategies, and practices employed during the previous year to decrease water intensity. Please identify: systems/processes impacted, approximate water savings from projects, and implementation cost';

@@ -1,13 +1,10 @@
-import { Component } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
+import { distinctUntilChanged, firstValueFrom, startWith, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport, ModelingReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -18,6 +15,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './facility-modeling-report-setup.component.css',
 })
 export class FacilityModelingReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
 
@@ -30,27 +29,36 @@ export class FacilityModelingReportSetupComponent {
   calanderizedMetersSub: Subscription;
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   baselineYears: Array<number>;
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService) {
+  constructor(
+    private facilityReportsDbService: FacilityReportsDbService,
+    private calanderizationService: CalanderizationService,
+    private injector: Injector
+  ) {
 
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
-      this.facilityReport = report;
-      this.reportSettings = this.facilityReport.modelingReportSettings;
-    });
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityReport()),
+        distinctUntilChanged()
+      )
+      .subscribe(report => {
+        this.facilityReport = report;
+        this.reportSettings = this.facilityReport?.modelingReportSettings;
+      });
 
-    this.analysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.analysisItems = items;
-    });
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityAnalyses()),
+        distinctUntilChanged()
+      )
+      .subscribe(items => {
+        this.analysisItems = [...items];
+      });
     this.setSelectedAnalysisItem();
 
-    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(meters => {
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
     });
   }
@@ -61,7 +69,10 @@ export class FacilityModelingReportSetupComponent {
     this.calanderizedMetersSub.unsubscribe();
   }
 
-  async setSelectedAnalysisItem() {
+  setSelectedAnalysisItem() {
+    if (!this.analysisItems || !this.facilityReport) {
+      return;
+    }
     this.selectedAnalysisItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
@@ -69,10 +80,8 @@ export class FacilityModelingReportSetupComponent {
 
   async save() {
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
-    this.facilityReportsDbService.selectedReport.next(this.facilityReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }
 
   setYearOptions() {

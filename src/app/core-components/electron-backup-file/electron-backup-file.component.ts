@@ -1,9 +1,11 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -12,6 +14,7 @@ import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
 import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -20,6 +23,9 @@ import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/hel
   standalone: false
 })
 export class ElectronBackupFileComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
 
   latestBackupFileSub: Subscription;
@@ -36,27 +42,26 @@ export class ElectronBackupFileComponent {
   constructor(private electronService: ElectronService,
     private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
-    private electronBackupsDbService: ElectronBackupsDbService,
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
     private cd: ChangeDetectorRef,
     private deleteDataService: DeleteDataService,
-    private backupPreparationService: BackupPreparationService) {
+    private backupPreparationService: BackupPreparationService, private injector: Injector) {
 
   }
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
     if (this.electronService.isElectron) {
-      this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
         //initialize account or account change
         if (val) {
           if (!this.account || (this.account.guid != val.guid)) {
             this.account = val;
             if (this.account) {
-              this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
+              this.electronBackup = this.automaticBackupsService.accountBackups.find(backup => {
                 return backup.accountId == this.account.guid
               });
               this.archiveOption = this.account.archiveOption;
@@ -141,10 +146,11 @@ export class ElectronBackupFileComponent {
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.suspendQueuedDeletion();
-        this.account.deleteAccount = true;
-        await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
-        let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-        this.accountDbService.allAccounts.next(accounts);
+        await firstValueFrom(this.accountDbService.updateWithObservable({
+          ...this.account,
+          deleteAccount: true
+        }));
+        await this.applicationLifecycleService.refreshAccountCatalog();
 
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;
@@ -156,7 +162,7 @@ export class ElectronBackupFileComponent {
         newAccount.isSharedBackupFile = isSharedBackupFile;
 
         await this.dbChangesService.updateAccount(newAccount);
-        await this.dbChangesService.selectAccount(newAccount, false);
+        await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
         await this.deleteDataService.resumeQueuedDeletion();
         needUpdate = false;
 

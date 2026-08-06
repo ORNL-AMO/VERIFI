@@ -1,11 +1,9 @@
-import { Component, QueryList, ViewChildren } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, QueryList, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { DataQualityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -23,7 +21,6 @@ import { MeterEnergyHistogramComponent } from 'src/app/shared/shared-data-qualit
 import { MeterCostHistogramComponent } from 'src/app/shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
 import { PredictorTimeseriesGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
 import { PredictorHistogramGraphComponent } from 'src/app/shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-facility-data-quality-report-results',
@@ -32,6 +29,8 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
   styleUrl: './facility-data-quality-report-results.component.css',
 })
 export class FacilityDataQualityReportResultsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -54,18 +53,14 @@ export class FacilityDataQualityReportResultsComponent {
   @ViewChildren('predictorHistogram') predictorHistogram !: QueryList<PredictorHistogramGraphComponent>;
 
   constructor(
-    private facilityReportsDbService: FacilityReportsDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
     private facilityDataQualityReportAdapter: FacilityDataQualityReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
-    private analysisDbService: AnalysisDbService
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.dataQualityReportSettings = this.facilityReport.dataQualityReportSettings;
       this.selectedMode = this.dataQualityReportSettings.selectedMode;
@@ -83,7 +78,7 @@ export class FacilityDataQualityReportResultsComponent {
 
     if (this.selectedMode === 'analysis') {
       this.selectedAnalysisItemId = this.dataQualityReportSettings.selectedAnalysisItemId;
-      this.analysisItem = this.analysisDbService.getByGuid(this.selectedAnalysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.selectedAnalysisItemId);
       if (this.analysisItem) {
         const meterIds = new Set<string>();
         const predictorIds = new Set<string>();
@@ -93,7 +88,7 @@ export class FacilityDataQualityReportResultsComponent {
             return;
           }
 
-          const groupMeters = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
+          const groupMeters = this.accountWorkspaceQuery.getGroupMetersByGroupId(group.idbGroupId);
           groupMeters.forEach(meter => {
             if (meter.guid) {
               meterIds.add(meter.guid);
@@ -140,8 +135,8 @@ export class FacilityDataQualityReportResultsComponent {
 
   createMetersandPredictorsList() {
     this.meterDataStatsList = this.selectedMeterIds.map(meterId => {
-      let data = this.utilityMeterDataDbService.getMeterDataFromMeterId(meterId);
-      let meter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+      let data = this.accountWorkspaceQuery.getMeterData(meterId);
+      let meter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
       let { energyStats, costStats } = getStatistics(data, meter);
       let energyOutlierCount = energyStats.outliers;
       let costOutlierCount = costStats.outliers;
@@ -152,8 +147,8 @@ export class FacilityDataQualityReportResultsComponent {
     });
 
     this.predictorDataStatsList = this.selectedPredictorIds.map(predictorId => {
-      let data = this.predictorDataDbService.getByPredictorId(predictorId);
-      let predictor = this.predictorDbService.getByGuid(predictorId);
+      let data = this.accountWorkspaceQuery.getPredictorData(predictorId);
+      let predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
       let stats = getPredictorStatistics(data.map(d => d.amount));
       let statusCheck = new PredictorStatusCheck(predictor, data, undefined);
       let missingMonthsList = statusCheck.missingEntryMonths.map(({ month, year }) => {

@@ -1,4 +1,6 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
@@ -8,6 +10,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-account-setup',
@@ -16,6 +19,8 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
   standalone: false
 })
 export class AccountSetupComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
 
   showDeleteAccount: boolean = false;
@@ -34,13 +39,13 @@ export class AccountSetupComponent {
     private dbChangesService: DbChangesService,
     private automaticBackupsService: AutomaticBackupsService,
     private cd: ChangeDetectorRef,
-    private importBackupModalService: ImportBackupModalService) {
+    private importBackupModalService: ImportBackupModalService, private injector: Injector) {
 
   }
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
 
@@ -61,16 +66,17 @@ export class AccountSetupComponent {
   }
 
   next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
   }
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    this.selectedAccount.deleteAccount = true;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(accounts);
+    await firstValueFrom(this.accountDbService.updateWithObservable({
+      ...this.selectedAccount,
+      deleteAccount: true
+    }));
+    await this.applicationLifecycleService.refreshAccountCatalog();
     this.router.navigateByUrl('/welcome');
   }
 

@@ -1,12 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, OperatorFunction } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -20,6 +17,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class SearchBarComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   searchModel: string;
   facilityList: Array<{ name: string, guid: string, id: number }>;
@@ -27,20 +26,19 @@ export class SearchBarComponent implements OnInit {
 
   dropdownOptions: Array<DropdownOption>;
 
-  constructor(private facilityDbService: FacilitydbService, private router: Router,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private analysisDbService: AnalysisDbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private accountReportsDbService: AccountReportDbService) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
   }
 
   setOptions() {
-    let facilityItems: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
+    let facilityItems: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
+    let analysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
+    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
     this.dropdownOptions = new Array();
     facilityItems.forEach(item => {
       this.dropdownOptions.push({
@@ -129,13 +127,13 @@ export class SearchBarComponent implements OnInit {
     } else if (item.type == 'meter') {
       this.router.navigateByUrl('facility/' + item.facilityGuid + '/utility/energy-consumption/utility-meter/' + item.meterGuid);
     } else if (item.type == 'accountAnalysis') {
-      this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
+      this.accountWorkspaceService.selectAccountAnalysis((item.accountAnalysisItem)?.guid);
       this.router.navigateByUrl('account/analysis/setup');
     } else if (item.type == 'facilityAnalysis') {
-      this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
+      this.accountWorkspaceService.selectFacilityAnalysis((item.facilityAnalysisItem)?.guid);
       this.router.navigateByUrl('facility/' + item.facilityGuid + '/analysis/run-analysis');
     } else if (item.type == 'report') {
-      this.accountReportsDbService.selectedReport.next(item.idbAccountReport);
+      this.accountWorkspaceService.selectAccountReport((item.idbAccountReport)?.guid);
       this.router.navigateByUrl('account/reports/setup');
     }
   }
@@ -146,7 +144,7 @@ export class SearchBarComponent implements OnInit {
   }
 
   getFacility(guid: string): IdbFacility {
-    let facilityItems: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilityItems: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     return facilityItems.find(facilityItem => { return facilityItem.guid == guid });
   }
 }

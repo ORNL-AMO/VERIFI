@@ -1,12 +1,9 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, signal, inject, Signal, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { EnergyFootprintAnnualFacilityBalance } from 'src/app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
-import { getYearsWithFullData, getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
@@ -21,20 +18,17 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './energy-footprint-side-panel.component.css',
 })
 export class EnergyFootprintSidePanelComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  private facilityDbService = inject(FacilitydbService);
-  private facilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
-  private facilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private calanderizationService = inject(CalanderizationService);
-  private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
   private router: Router = inject(Router);
 
-  facilities: Signal<Array<IdbFacility>> = toSignal(this.facilityDbService.accountFacilities, { initialValue: [] });
-  energyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.accountEnergyUseGroups, { initialValue: [] });
-  equipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.accountEnergyUseEquipment, { initialValue: [] });
+  facilities = this.accountWorkspaceStore.facilities;
+  energyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.energyUseGroups()]);
+  equipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.energyUseEquipment()]);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = toSignal(this.utilityMeterGroupDbService.accountMeterGroups, { initialValue: [] });
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: null });
+  utilityMeterGroups: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.meterGroups()]);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
 
   yearOptions: Signal<Array<number>> = computed(() => {
     const calanderizedMeters = this.calanderizedMeters();
@@ -45,8 +39,8 @@ export class EnergyFootprintSidePanelComponent {
     return getYearsWithFullData(calanderizedMeters, selectedFacility);
   });
 
-  //TODO: potentially make a web worker for this or optimize number of calls 
-  //so as data changes it doesn't have to recalculate everything if not necessary. 
+  //TODO: potentially make a web worker for this or optimize number of calls
+  //so as data changes it doesn't have to recalculate everything if not necessary.
   //TODO: add loading logic during calculation
   energyFootprintAnnualFacilityBalance: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
     const facilities = this.facilities();
@@ -89,7 +83,7 @@ export class EnergyFootprintSidePanelComponent {
     // Automatically set selectedYear to the last year in yearOptions when yearOptions changes
     effect(() => {
       const options = this.yearOptions();
-      //if new year of data becomes available, automatically switch to it, 
+      //if new year of data becomes available, automatically switch to it,
       //otherwise keep selected year the same (as long as it's still in options)
       if (options.length > 0 && !options.includes(this.selectedYear()!)) {
         this.selectedYear.set(options[options.length - 1]);
@@ -161,7 +155,7 @@ export class EnergyFootprintSidePanelComponent {
 
   goToFacilityFootprint() {
     const selectedFacilityId = this.selectedFacilityId();
-    const selectedFacility = this.facilityDbService.getFacilityById(selectedFacilityId);
+    const selectedFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (selectedFacilityId));
     if (selectedFacility) {
       this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacilityId + '/energy-uses/footprint');
     }
