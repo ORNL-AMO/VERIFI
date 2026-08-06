@@ -145,15 +145,15 @@ describe('account switching loading ownership', () => {
     const createdAccount = { id: 3, guid: 'account-c', name: 'Account C' } as IdbAccount;
     const router = { navigateByUrl: vi.fn(() => events.push('navigate')) };
     const workspace = {
-      selectAccount: vi.fn(async () => {
+      selectAccount: vi.fn(async (_guid: string) => {
         events.push('workspace');
         return 'published';
       })
     };
     const lifecycle = {
-      refreshAccountCatalog: vi.fn(async () => {
+      activatePersistedAccount: vi.fn(async (guid: string) => {
         events.push('catalog');
-        return [createdAccount];
+        await workspace.selectAccount(guid);
       })
     };
     const manageAccounts = createManageAccounts({
@@ -199,7 +199,7 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
       exportFacilityData: vi.fn()
     }) as any,
     (overrides.workspace ?? { selectAccount: vi.fn().mockResolvedValue('published') }) as any,
-    (overrides.lifecycle ?? { refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any,
+    (overrides.lifecycle ?? { activatePersistedAccount: vi.fn().mockResolvedValue(undefined), refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any,
     (overrides.databaseReset ?? { resetAndRestart: vi.fn() }) as any,
     {} as any
   );
