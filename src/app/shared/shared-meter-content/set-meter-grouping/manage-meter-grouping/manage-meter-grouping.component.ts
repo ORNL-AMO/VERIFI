@@ -1,18 +1,18 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-manage-meter-grouping',
@@ -21,7 +21,6 @@ import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models
   styleUrl: './manage-meter-grouping.component.css',
 })
 export class ManageMeterGroupingComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
@@ -41,8 +40,8 @@ export class ManageMeterGroupingComponent {
   groupToDelete: IdbUtilityMeterGroup;
   ungroupedMeterGroup: IdbUtilityMeterGroup;
   constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
     private router: Router,
     private loadingService: LoadingService,
     private analysisDbService: AnalysisDbService,
@@ -50,7 +49,6 @@ export class ManageMeterGroupingComponent {
     private toastNoticationService: ToastNotificationsService,
     private activatedRoute: ActivatedRoute,
     private injector: Injector
-
   ) {
   }
 
@@ -87,11 +85,16 @@ export class ManageMeterGroupingComponent {
   async addGroup() {
     let newGroupType: 'Energy' | 'Water' | 'Other' = this.hasEnergyMeters ? 'Energy' : this.hasWaterMeters ? 'Water' : 'Other';
     let newGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(newGroupType, "New Group", this.facility.guid, this.facility.accountId);
-    await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
-    await this.analysisDbService.addGroup(newGroup.guid, newGroup.groupType);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'meterGroup', changeKind: 'add', label: 'Add Meter Group' },
+      async () => {
+        const added = await this.meterHandler.addMeterGroup(newGroup);
+        await this.analysisDbService.addGroup(added.guid, added.groupType);
+        return added;
+      }
+    );
     this.toastNoticationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
-    this.editGroup(newGroup);
+    this.editGroup(result.value);
   }
 
   editGroup(group: IdbUtilityMeterGroup) {
@@ -110,21 +113,21 @@ export class ManageMeterGroupingComponent {
   async deleteMeterGroup() {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
-    await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    let groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => { return meter.groupId == this.groupToDelete.guid });
-    for (let i = 0; i < groupMeters.length; i++) {
-      let meter: IdbUtilityMeter = groupMeters[i];
-      meter.groupId = undefined;
-      await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter))
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    //update analysis items
-    await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    //update BCC reports
-    await this.accountReportDbService.updateReportsRemoveGroup(this.groupToDelete.guid);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const groupToDelete = this.groupToDelete;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const groupMeters: Array<IdbUtilityMeter> = this.facilityMeters.filter(meter => meter.groupId == groupToDelete.guid);
+    await this.commandBoundary.execute(
+      { entityKind: 'meterGroup', changeKind: 'delete', entityGuid: groupToDelete.guid, label: 'Delete Meter Group' },
+      async () => {
+        await this.meterHandler.deleteMeterGroup(groupToDelete.id);
+        for (const meter of groupMeters) {
+          meter.groupId = undefined;
+          await this.meterHandler.updateMeter(meter, accountGuid);
+        }
+        await this.analysisDbService.deleteGroup(groupToDelete.guid);
+        await this.accountReportDbService.updateReportsRemoveGroup(groupToDelete.guid);
+      }
+    );
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");

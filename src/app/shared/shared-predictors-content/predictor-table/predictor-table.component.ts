@@ -1,15 +1,13 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
 import { getSelectedRegressionModel } from '../../shared-analysis/calculations/regression-model-recovery';
 import { WeatherStation } from 'src/app/models/degreeDays';
@@ -36,16 +34,15 @@ interface PredictorListItem {
   standalone: false
 })
 export class PredictorTableComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
+  private commandBoundary: WorkspaceCommandBoundary = inject(WorkspaceCommandBoundary);
+  private predictorHandler: PredictorCommandHandler = inject(PredictorCommandHandler);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
   private weatherDataService: WeatherDataService = inject(WeatherDataService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   facilityPredictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
@@ -129,20 +126,22 @@ export class PredictorTableComponent {
     this.loadingService.setLoadingMessage('Deleting Predictor Data...');
     this.loadingService.setLoadingStatus(true);
     this.displayDeletePredictor = false;
-    //delete predictor
-    await firstValueFrom(this.predictorDbService.deleteWithObservable(this.predictorToDelete.id));
-    //delete predictor data
-    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictorToDelete.guid);
-    await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
-    //set values in services
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    //update analysis items
-    this.loadingService.setLoadingMessage('Updating analysis items...');
-    await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
+    const predictor = this.predictorToDelete;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
+    await this.commandBoundary.execute(
+      { entityKind: 'predictor', changeKind: 'delete', entityGuid: predictor.guid, label: 'Delete Predictor' },
+      async () => {
+        await this.predictorHandler.deletePredictor(predictor, accountGuid);
+        for (const data of predictorData) {
+          await this.predictorHandler.deletePredictorData(data.id);
+        }
+        await this.analysisDbService.deleteAnalysisPredictor(predictor);
+      }
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.cancelDelete();
-
   }
 
   cancelDelete() {
@@ -154,8 +153,11 @@ export class PredictorTableComponent {
     const facility: IdbFacility = this.selectedFacility();
     if (this.router.url.includes('data-management')) {
       predictor.sidebarOpen = true;
-      await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Open Predictor' },
+        () => this.predictorHandler.updatePredictor(predictor, accountGuid)
+      );
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
@@ -166,12 +168,18 @@ export class PredictorTableComponent {
     const facility: IdbFacility = this.selectedFacility();
     if (this.router.url.includes('data-management')) {
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
-      newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
-      await this.analysisDbService.addAnalysisPredictor(newPredictor);
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      const result = await this.commandBoundary.execute(
+        { entityKind: 'predictor', changeKind: 'add', label: 'Add Predictor' },
+        async () => {
+          const added = await this.predictorHandler.addPredictor(newPredictor);
+          await this.analysisDbService.addAnalysisPredictor(added);
+          return added;
+        }
+      );
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
-      this.selectEditPredictor(newPredictor);
+      this.selectEditPredictor(result.value);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/add-predictor');
     }
@@ -266,11 +274,16 @@ export class PredictorTableComponent {
     if (predictorsToUpdate.length === 0) {
       return;
     }
-    for (const predictor of predictorsToUpdate) {
-      predictor.ignoreWeatherDataWarning = ignoreWarning;
-      await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictor', changeKind: 'bulk', label: 'Update Weather Warning' },
+      async () => {
+        for (const predictor of predictorsToUpdate) {
+          predictor.ignoreWeatherDataWarning = ignoreWarning;
+          await this.predictorHandler.updatePredictor(predictor, accountGuid);
+        }
+      }
+    );
     this.toastNotificationService.showToast(
       ignoreWarning ? 'Weather gap warnings dismissed' : 'Weather gap warnings re-enabled',
       undefined,

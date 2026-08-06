@@ -1,14 +1,14 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { Component, Input, OnInit, inject } from '@angular/core';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
-import { firstValueFrom } from 'rxjs';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -37,8 +37,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   constructor(
     private utilityMeterDataService: UtilityMeterDataService,
-    private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
+    private facilityHandler: FacilityCommandHandler
   ) { }
 
   ngOnInit(): void {
@@ -86,14 +87,17 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         emissionsFilters: this.emissionsFilters,
         generalInformationFilters: this.generalInformationFilters
       }
-
       selectedFacility.tableElectricityFilters = electricityDataFilters;
     } else if (this.meter.scope != 2) {
       selectedFacility.tableGeneralUtilityFilters = this.generalUtilityDataFilters;
     } else if (this.meter.scope == 2) {
       selectedFacility.tableVehicleDataFilters = this.vehicleDataFilters;
     }
-    await this.dbChangesService.updateFacility(selectedFacility);
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'update', entityGuid: selectedFacility.guid, label: 'Save Table Filters' },
+      () => this.facilityHandler.update(selectedFacility, accountGuid)
+    );
   }
 
   async showAllColumns() {
@@ -203,9 +207,12 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   };
 
   async changeCharge() {
-    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.meter));
-    this.accountWorkspaceService.selectMeter((this.meter)?.guid);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.save();
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'update', entityGuid: this.meter.guid, label: 'Update Meter Charges' },
+      () => this.meterHandler.updateMeter(this.meter, accountGuid)
+    );
+    this.accountWorkspaceService.selectMeter(this.meter?.guid);
+    await this.save();
   }
 }

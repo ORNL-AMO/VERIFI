@@ -3,7 +3,8 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -51,9 +52,9 @@ export class MeterGroupingResultsTableComponent {
     private router: Router,
     private copyTableService: CopyTableService,
     private sharedDataService: SharedDataService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private facilityHandler: FacilityCommandHandler,
     private meterGroupingDataService: MeterGroupingDataService
-
   ) { }
 
   ngOnInit() {
@@ -156,7 +157,11 @@ export class MeterGroupingResultsTableComponent {
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
-      await this.dbChangesService.updateFacility(this.selectedFacility);
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Update Facility Energy Source' },
+        () => this.facilityHandler.update(this.selectedFacility, accountGuid)
+      );
     }
   }
 

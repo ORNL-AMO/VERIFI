@@ -7,7 +7,8 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as _ from 'lodash';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { Subscription } from 'rxjs';
 import { MeterGroupingDataService } from '../meter-grouping-data.service';
 
@@ -43,9 +44,9 @@ export class MeterGroupingResultsGraphComponent {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private plotlyService: PlotlyService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private facilityHandler: FacilityCommandHandler,
     private meterGroupingDataService: MeterGroupingDataService
-
   ) { }
 
   ngOnInit() {
@@ -287,7 +288,11 @@ export class MeterGroupingResultsGraphComponent {
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
       this.selectedFacility.energyIsSource = energyIsSource;
-      await this.dbChangesService.updateFacility(this.selectedFacility);
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Update Facility Energy Source' },
+        () => this.facilityHandler.update(this.selectedFacility, accountGuid)
+      );
       this.drawChart();
     }
   }

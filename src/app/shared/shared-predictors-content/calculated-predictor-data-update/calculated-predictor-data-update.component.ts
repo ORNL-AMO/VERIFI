@@ -1,13 +1,13 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -28,7 +28,6 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
@@ -73,7 +72,8 @@ export class CalculatedPredictorDataUpdateComponent {
   );
   constructor(
     private activatedRoute: ActivatedRoute,
-    private predictorDataDbService: PredictorDataDbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private predictorHandler: PredictorCommandHandler,
     private sharedDataService: SharedDataService,
     private router: Router,
     private loadingService: LoadingService,
@@ -81,9 +81,7 @@ export class CalculatedPredictorDataUpdateComponent {
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private injector: Injector
-
   ) {
-
   }
 
   ngOnInit() {
@@ -313,24 +311,29 @@ export class CalculatedPredictorDataUpdateComponent {
   async updateEntries() {
     this.loadingService.setLoadingMessage('Updating Entries...');
     this.loadingService.setLoadingStatus(true);
-    for (let i = 0; i < this.predictorData.length; i++) {
-      let pData: CalculatedPredictorTableItem = this.predictorData[i];
-      if (pData.changeAmount && !pData.added && !pData.deleted) {
-        pData.amount = pData.updatedAmount;
-        delete pData.changeAmount;
-        delete pData.updatedAmount;
-        await firstValueFrom(this.predictorDataDbService.updateWithObservable(pData));
-      } else if (pData.added) {
-        delete pData.changeAmount;
-        delete pData.updatedAmount;
-        delete pData.added;
-        delete pData.deleted;
-        await firstValueFrom(this.predictorDataDbService.addWithObservable(pData));
-      } else if (pData.deleted) {
-        await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(pData.id));
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: 'bulk', label: 'Update Predictor Entries' },
+      async () => {
+        for (let i = 0; i < this.predictorData.length; i++) {
+          let pData: CalculatedPredictorTableItem = this.predictorData[i];
+          if (pData.changeAmount && !pData.added && !pData.deleted) {
+            pData.amount = pData.updatedAmount;
+            delete pData.changeAmount;
+            delete pData.updatedAmount;
+            await this.predictorHandler.updatePredictorData(pData, accountGuid);
+          } else if (pData.added) {
+            delete pData.changeAmount;
+            delete pData.updatedAmount;
+            delete pData.added;
+            delete pData.deleted;
+            await this.predictorHandler.addPredictorData(pData);
+          } else if (pData.deleted) {
+            await this.predictorHandler.deletePredictorData(pData.id);
+          }
+        }
       }
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    );
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
   }

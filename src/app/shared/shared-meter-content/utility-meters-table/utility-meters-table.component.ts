@@ -1,14 +1,12 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { Component, computed, ElementRef, inject, input, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
@@ -39,14 +37,13 @@ type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit'
   standalone: false
 })
 export class UtilityMetersTableComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private utilityMeterdbService: UtilityMeterdbService = inject(UtilityMeterdbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly meterHandler = inject(MeterCommandHandler);
   private copyTableService: CopyTableService = inject(CopyTableService);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
-  private utilityMeterDatadbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private editMeterFormService: EditMeterFormService = inject(EditMeterFormService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
@@ -104,9 +101,11 @@ export class UtilityMetersTableComponent {
     if (this.context() === 'data-management') {
       const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
-      newMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(newMeter));
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
-      await this.selectEditMeter(newMeter);
+      const result = await this.commandBoundary.execute(
+        { entityKind: 'meter', changeKind: 'add', label: 'Add Meter' },
+        () => this.meterHandler.addMeter(newMeter)
+      );
+      await this.selectEditMeter(result.value);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/new-meter');
     }
@@ -131,20 +130,20 @@ export class UtilityMetersTableComponent {
   }
 
   async deleteMeter() {
-    let deleteMeterId: number = this.meterToDelete.id;
-    let deleteMeterGuid: string = this.meterToDelete.guid;
+    const meterToDelete = this.meterToDelete;
     this.meterToDelete = undefined;
     this.loadingService.setLoadingMessage('Deleting Meters and Data...')
     this.loadingService.setLoadingStatus(true);
-    //delete meter
-    await firstValueFrom(this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId));
-    //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(deleteMeterGuid);
-    for (let index = 0; index < meterData.length; index++) {
-      await firstValueFrom(this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id));
-    }
-    //set meters
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(meterToDelete.guid);
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'delete', entityGuid: meterToDelete.guid, label: 'Delete Meter and Data' },
+      async () => {
+        await this.meterHandler.deleteMeter(meterToDelete, this.accountWorkspaceStore.account()?.guid);
+        for (const data of meterData) {
+          await this.meterHandler.deleteMeterData(data.id);
+        }
+      }
+    );
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
@@ -173,8 +172,10 @@ export class UtilityMetersTableComponent {
       const account: IdbAccount = this.accountWorkspaceStore.account();
       const facility: IdbFacility = this.selectedFacility();
       meter.sidebarOpen = true;
-      await firstValueFrom(this.utilityMeterdbService.updateWithObservable(meter));
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      await this.commandBoundary.execute(
+        { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Open Meter' },
+        () => this.meterHandler.updateMeter(meter, account?.guid)
+      );
       this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/meters/' + meter.guid);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
@@ -201,8 +202,10 @@ export class UtilityMetersTableComponent {
     delete copyMeter.id;
     copyMeter.guid = Math.random().toString(36).substr(2, 9);
     copyMeter.name = copyMeter.name + ' (copy)';
-    copyMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(copyMeter));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.selectEditMeter(copyMeter);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'add', label: 'Copy Meter' },
+      () => this.meterHandler.addMeter(copyMeter)
+    );
+    this.selectEditMeter(result.value);
   }
 }
