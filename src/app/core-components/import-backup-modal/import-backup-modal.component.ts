@@ -2,12 +2,10 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, OnInit, inject } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
@@ -20,6 +18,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -56,13 +58,14 @@ export class ImportBackupModalComponent implements OnInit {
   constructor(
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private accountDbService: AccountdbService,
     private importBackupModalService: ImportBackupModalService,
-    private dbChangesService: DbChangesService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private deleteDataService: DeleteDataService,
-    private backupPreparationService: BackupPreparationService
+    private backupPreparationService: BackupPreparationService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
+    private facilityHandler: FacilityCommandHandler
   ) { }
 
   ngOnInit(): void {
@@ -206,7 +209,6 @@ export class ImportBackupModalComponent implements OnInit {
     } else {
       this.loadingService.setContext('import-facility-backup');
       this.loadingService.setTitle("Importing facility backup file");
-      this.dbChangesService.deleteFacilityMessages();
       this.backupDataService.facilityBackupMessages();
     }
     try {
@@ -246,7 +248,7 @@ export class ImportBackupModalComponent implements OnInit {
   async importNewAccount(backupFile: PreparedBackupFile) {
     this.deleteDataService.suspendQueuedDeletion();
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
-    await this.dbChangesService.updateAccount(newAccount);
+    await this.accountHandler.update(newAccount, newAccount.guid);
     await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
     await this.deleteDataService.resumeQueuedDeletion();
   }
@@ -254,10 +256,7 @@ export class ImportBackupModalComponent implements OnInit {
   async importExistingAccount(backupFile: PreparedBackupFile) {
     //delete existing account and data
     this.deleteDataService.suspendQueuedDeletion();
-    await firstValueFrom(this.accountDbService.updateWithObservable({
-      ...this.selectedAccount,
-      deleteAccount: true
-    }));
+    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
     await this.applicationLifecycleService.refreshAccountCatalog();
     await this.importNewAccount(backupFile);
     await this.deleteDataService.resumeQueuedDeletion();
@@ -265,15 +264,32 @@ export class ImportBackupModalComponent implements OnInit {
 
   async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {
     let idx = currIdx !== undefined ? currIdx : 0;
-    let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectFacility(newFacility.guid);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'add', label: 'Importing facility' },
+      async () => {
+        const { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
+        return newFacility;
+      }
+    );
+    this.accountWorkspaceService.selectFacility(result.value.guid);
   }
 
   async importExistingFacility(backupFile: PreparedBackupFile) {
-    //delete selected facility and data
-    let currIdx = await this.dbChangesService.deleteFacility(this.overwriteFacility, this.selectedAccount);
-    await this.importNewFacility(backupFile, currIdx);
+    const overwriteFacility = this.overwriteFacility;
+    const selectedAccount = this.selectedAccount;
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'bulk', label: 'Replacing facility' },
+      async () => {
+        FACILITY_DELETION_MESSAGES.forEach(msg => this.loadingService.addLoadingMessage(msg));
+        this.loadingService.setContext('import-facility-backup');
+        this.loadingService.setTitle('Replacing facility');
+        let currIdx = 0;
+        await this.facilityHandler.delete(overwriteFacility, selectedAccount.guid, phase => {
+          currIdx = phase.index;
+        });
+        await this.backupDataService.importFacilityBackupFile(backupFile, selectedAccount.guid, currIdx);
+      }
+    );
   }
 
   clearSelectedFacilities() {
@@ -337,7 +353,6 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importSelectedFacilities(backupFile: PreparedBackupFile) {
-    let idx = 1;
     const preparedFacilities = this.selectedFacilitiesToImport.map(facility => {
       return {
         selectedFacility: facility,
@@ -345,28 +360,29 @@ export class ImportBackupModalComponent implements OnInit {
       };
     });
 
-    // delete facilities to be replaced
-    for (let { selectedFacility: facility } of preparedFacilities) {
-      let importSelection = this.facilityImportSelections[facility.name];
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'bulk', label: 'Importing facilities' },
+      async () => {
+        // delete facilities to be replaced
+        for (let { selectedFacility: facility } of preparedFacilities) {
+          let importSelection = this.facilityImportSelections[facility.name];
+          if (importSelection.importAs === 'replace' && importSelection.replacedFacility) {
+            const facilityToReplace = this.accountFacilities.find(f => f.name === importSelection.replacedFacility);
+            if (facilityToReplace) {
+              await this.facilityHandler.delete(facilityToReplace, this.selectedAccount.guid);
+            }
+          }
+        }
 
-      if (importSelection.importAs === 'replace' && importSelection.replacedFacility) {
-        const facilityToReplace = this.accountFacilities.find(f => f.name === importSelection.replacedFacility);
-        if (facilityToReplace) {
-          await this.dbChangesService.deleteFacility(facilityToReplace, this.selectedAccount, false);
+        // import selected facilities
+        let idx = 1;
+        for (let { backup: facilityBackupFile } of preparedFacilities) {
+          this.loadingService.setCurrentLoadingIndex(idx);
+          const { facility: newFacility, index } = await this.backupDataService.importFacilityBackupFile(facilityBackupFile, this.selectedAccount.guid, idx);
+          idx = index + 1;
         }
       }
-    }
-
-    // import selected facilities
-    for (let { backup: facilityBackupFile } of preparedFacilities) {
-      //import all selected facilities as new
-      this.loadingService.setCurrentLoadingIndex(idx);
-      //this.loadingService.addLoadingMessage("Adding facility: " + facilityBackupFile.facility.name);
-      const { facility: newFacility, index } = await this.backupDataService.importFacilityBackupFile(facilityBackupFile, this.selectedAccount.guid, idx);
-      idx = index + 1;
-    }
-
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    );
   }
 
   checkDifferences() {
