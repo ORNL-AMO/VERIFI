@@ -1,10 +1,10 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -28,7 +28,8 @@ export class GroupAnalysisOptionsComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private router: Router = inject(Router);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
@@ -173,8 +174,11 @@ export class GroupAnalysisOptionsComponent {
     const _group = this.group();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == _group.idbGroupId });
     analysisItem.groups[groupIndex] = _group;
-    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' },
+      () => this.analysisHandler.updateFacilityAnalysis(analysisItem, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next({ ..._group });
   }

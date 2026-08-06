@@ -1,10 +1,10 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, NonNullableFormBuilder } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
@@ -51,12 +51,13 @@ type RegressionMenuForm = FormGroup<{
 })
 export class RegressionModelMenuComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   // --- Services (DI) ---
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private regressionModelState = inject(RegressionModelStateService);
   private analysisService: AnalysisService = inject(AnalysisService);
+  private regressionModelState = inject(RegressionModelStateService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private fb: NonNullableFormBuilder = inject(NonNullableFormBuilder);
@@ -324,8 +325,11 @@ export class RegressionModelMenuComponent {
     const updatedGroups = [..._analysisItemCurrent.groups];
     updatedGroups[groupIndex] = _group;
     const _analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
-    await firstValueFrom(this.analysisDbService.updateWithObservable(_analysisItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: _analysisItem.guid, label: 'Save Facility Analysis' },
+      () => this.analysisHandler.updateFacilityAnalysis(_analysisItem, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);
     this._suppressFormPatch = suppressFormPatch;
     this.analysisService.selectedGroup.next(_group);

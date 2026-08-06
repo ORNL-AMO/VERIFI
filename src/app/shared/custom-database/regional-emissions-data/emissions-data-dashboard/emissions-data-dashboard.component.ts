@@ -1,10 +1,10 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { Subscription } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -16,8 +16,9 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class EmissionsDataDashboardComponent implements OnInit {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly customDataHandler = inject(CustomDataCommandHandler);
 
   customEmissionsItems: Array<IdbCustomEmissionsItem>;
   customEmissionsItemsSub: Subscription;
@@ -26,7 +27,6 @@ export class EmissionsDataDashboardComponent implements OnInit {
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
   constructor(
-    private customEmissionsDbService: CustomEmissionsDbService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private injector: Injector
@@ -89,8 +89,10 @@ export class EmissionsDataDashboardComponent implements OnInit {
   }
 
   async confirmDelete() {
-    await firstValueFrom(this.customEmissionsDbService.deleteWithObservable(this.itemToDelete.id));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    await this.commandBoundary.execute(
+      { entityKind: 'customEmissions', changeKind: 'delete', entityGuid: this.itemToDelete.guid, label: 'Deleting custom emissions' },
+      () => this.customDataHandler.deleteCustomEmissions(this.itemToDelete, this.accountWorkspaceStore.account()?.guid)
+    );
     this.cancelDelete();
   }
 }

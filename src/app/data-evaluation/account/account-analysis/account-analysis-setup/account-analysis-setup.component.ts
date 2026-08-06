@@ -2,11 +2,12 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { debounceTime, firstValueFrom } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -36,9 +37,9 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
 export class AccountAnalysisSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly router = inject(Router);
-  private readonly analysisDbService = inject(AnalysisDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private readonly calendarizationService = inject(CalanderizationService);
   private readonly accountAnalysisService = inject(AccountAnalysisService);
   private readonly loadingService = inject(LoadingService);

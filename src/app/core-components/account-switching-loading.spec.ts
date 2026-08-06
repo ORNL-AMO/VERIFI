@@ -53,6 +53,8 @@ describe('account switching loading ownership', () => {
       { resetAndRestart: vi.fn() } as any,
       { accountCatalog: signal([account]) } as any,
       { account: signal(account), selectedFacility: signal(undefined) } as any,
+      { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } as any,
+      { update: vi.fn() } as any,
       TestBed.inject(Injector)
     );
     header.ngOnInit();

@@ -1,15 +1,14 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { EnergyUseCommandHandler } from 'src/app/account-workspace/handlers/energy-use-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
-import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
+import { map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
@@ -25,12 +24,11 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
 export class FacilityEnergyUsesGroupSetupComponent {
   constructor(private injector: Injector) { }
 
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly energyUseHandler = inject(EnergyUseCommandHandler);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private loadingService: LoadingService = inject(LoadingService);
-  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
-  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private router: Router = inject(Router);
   private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService = inject(FacilityEnergyUsesSetupService);
@@ -129,40 +127,47 @@ export class FacilityEnergyUsesGroupSetupComponent {
   async finalizeSetup() {
     this.loadingService.setLoadingMessage('Adding Energy Use Groups and Equipment...');
     this.loadingService.setLoadingStatus(true);
-    for (let group of this.energyUseGroups) {
-      let newGroup: IdbFacilityEnergyUseGroup = {
-        accountId: group.accountId,
-        facilityId: group.facilityId,
-        guid: group.guid,
-        name: group.name,
-        notes: group.notes,
-        sidebarOpen: false,
-        modifiedDate: group.modifiedDate,
-        createdDate: group.createdDate,
-        id: group.id,
-        color: group.color
-      };
-      if (!newGroup.id) {
-        delete newGroup.id;
-        newGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newGroup));
-      } else {
-        await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(newGroup));
-      }
-      for (let equipment of group.equipment) {
-        if (!equipment.id) {
-          await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(equipment));
-        } else {
-          await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(equipment));
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'energyUseGroup', changeKind: 'bulk', label: 'Adding energy use groups and equipment' },
+      async () => {
+        for (let group of this.energyUseGroups) {
+          let newGroup: IdbFacilityEnergyUseGroup = {
+            accountId: group.accountId,
+            facilityId: group.facilityId,
+            guid: group.guid,
+            name: group.name,
+            notes: group.notes,
+            sidebarOpen: false,
+            modifiedDate: group.modifiedDate,
+            createdDate: group.createdDate,
+            id: group.id,
+            color: group.color
+          };
+          if (!newGroup.id) {
+            delete newGroup.id;
+            newGroup = await this.energyUseHandler.addGroup(newGroup);
+          } else {
+            await this.energyUseHandler.updateGroup(newGroup, activeAccountGuid);
+          }
+          for (let equipment of group.equipment) {
+            if (!equipment.id) {
+              await this.energyUseHandler.addEquipment(equipment);
+            } else {
+              await this.energyUseHandler.updateEquipment(equipment, activeAccountGuid);
+            }
+          }
+        }
+        for (let group of this.groupsIdsToDelete) {
+          const groupEquipment = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(this.facility.guid)
+            .filter(e => e.energyUseGroupId === group.guid);
+          for (const equipment of groupEquipment) {
+            await this.energyUseHandler.deleteEquipment(equipment, activeAccountGuid);
+          }
+          await this.energyUseHandler.deleteGroup(group, activeAccountGuid);
         }
       }
-    }
-    for (let group of this.groupsIdsToDelete) {
-      //delete groups
-      await firstValueFrom(this.facilityEnergyUseGroupsDbService.deleteWithObservable(group.id));
-      //delete equipment associated with group
-      await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(group.guid);
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Added", undefined, undefined, false, "alert-success");
     this.routingAfterSubmit = true;

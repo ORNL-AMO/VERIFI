@@ -8,7 +8,7 @@ import { AccountdbService } from "../../indexedDB/account-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { environment } from 'src/environments/environment';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
@@ -19,6 +19,8 @@ import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.serv
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 
 @Component({
   selector: 'app-header',
@@ -68,6 +70,8 @@ export class HeaderComponent implements OnInit {
     private databaseResetService: DatabaseResetService,
     private applicationLifecycleService: ApplicationLifecycleService,
     private accountWorkspaceStore: AccountWorkspaceStore,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
     private injector: Injector
 
   ) {
@@ -149,12 +153,11 @@ export class HeaderComponent implements OnInit {
     this.backupDataService.backupAccount();
     const selectedAccount = this.accountWorkspaceStore.account();
     if (!selectedAccount) { return; }
-    await firstValueFrom(this.accountdbService.updateWithObservable({
-      ...selectedAccount,
-      lastBackup: new Date()
-    }));
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: selectedAccount.guid, label: 'Recording backup date' },
+      () => this.accountHandler.update({ ...selectedAccount, lastBackup: new Date() }, selectedAccount.guid)
+    );
     await this.applicationLifecycleService.refreshAccountCatalog();
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   async deleteDatabase() {

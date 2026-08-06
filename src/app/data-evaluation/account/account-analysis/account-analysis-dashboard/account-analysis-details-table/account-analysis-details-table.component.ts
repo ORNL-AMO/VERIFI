@@ -4,13 +4,14 @@ import { Component, computed, inject, signal, Signal, WritableSignal } from '@an
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
-import { firstValueFrom } from 'rxjs';
+
 import { getYearsWithFullDataAccount } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -38,11 +39,12 @@ interface AnalysisDetailsTableRow {
 export class AccountAnalysisDetailsTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
+  private readonly reportHandler = inject(ReportCommandHandler);
+  private readonly accountHandler = inject(AccountCommandHandler);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private router: Router = inject(Router);
-  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private loadingService: LoadingService = inject(LoadingService);
@@ -197,12 +199,17 @@ export class AccountAnalysisDetailsTableComponent {
     let selectedAccount = this.selectedAccount();
     let canSelectItem: boolean = this.getCanSelectItem(selectedAccount, analysisItem);
     if (canSelectItem) {
+      const updatedAccount = { ...selectedAccount };
       if (analysisItem.analysisCategory == 'energy') {
-        selectedAccount.selectedEnergyAnalysisId = analysisItem.guid;
+        (updatedAccount as any).selectedEnergyAnalysisId = analysisItem.guid;
       } else if (analysisItem.analysisCategory == 'water') {
-        selectedAccount.selectedWaterAnalysisId = analysisItem.guid;
+        (updatedAccount as any).selectedWaterAnalysisId = analysisItem.guid;
       }
-      await this.dbChangesService.updateAccount(selectedAccount);
+      const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Update Account' },
+        () => this.accountHandler.update(updatedAccount, activeAccountGuid)
+      );
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match the account baseline year. This analysis cannot be included in reports or figures relating to the account energy goal.", 10000, false, 'alert-danger');
     }
@@ -246,22 +253,28 @@ export class AccountAnalysisDetailsTableComponent {
   async confirmDelete(item?: IdbAccountAnalysisItem, isBulkDelete: boolean = false) {
     const deletedItem = item ? item : this.itemToDelete;
     let selectedAccount = this.selectedAccount();
-    await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(deletedItem.id));
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    for (let i = 0; i < accountReports.length; i++) {
-      if (accountReports[i].betterPlantsReportSetup.analysisItemId == deletedItem.guid) {
-        accountReports[i].betterPlantsReportSetup.analysisItemId = undefined;
-        await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountAnalysis', changeKind: 'delete', entityGuid: deletedItem.guid, label: 'Delete Account Analysis' },
+      async () => {
+        const deleted = await this.analysisHandler.deleteAccountAnalysis(deletedItem, activeAccountGuid);
+        let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
+        for (let i = 0; i < accountReports.length; i++) {
+          if (accountReports[i].betterPlantsReportSetup.analysisItemId == deletedItem.guid) {
+            await this.reportHandler.updateAccountReport({
+              ...accountReports[i],
+              betterPlantsReportSetup: { ...accountReports[i].betterPlantsReportSetup, analysisItemId: undefined }
+            }, activeAccountGuid);
+          }
+        }
+        if (deletedItem.guid == selectedAccount.selectedEnergyAnalysisId) {
+          await this.accountHandler.update({ ...selectedAccount, selectedEnergyAnalysisId: undefined }, activeAccountGuid);
+        } else if (deletedItem.guid == selectedAccount.selectedWaterAnalysisId) {
+          await this.accountHandler.update({ ...selectedAccount, selectedWaterAnalysisId: undefined }, activeAccountGuid);
+        }
+        return deleted;
       }
-    }
-    if (deletedItem.guid == selectedAccount.selectedEnergyAnalysisId) {
-      selectedAccount.selectedEnergyAnalysisId = undefined;
-      await this.dbChangesService.updateAccount(selectedAccount);
-    } else if (deletedItem.guid == selectedAccount.selectedWaterAnalysisId) {
-      selectedAccount.selectedWaterAnalysisId = undefined;
-      await this.dbChangesService.updateAccount(selectedAccount);
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    );
     if (!isBulkDelete) {
       this.displayDeleteModal = false;
       this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");

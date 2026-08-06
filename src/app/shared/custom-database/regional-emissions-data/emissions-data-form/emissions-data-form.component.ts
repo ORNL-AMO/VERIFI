@@ -1,15 +1,14 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { firstValueFrom } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -23,8 +22,11 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
   standalone: false
 })
 export class EmissionsDataFormComponent implements OnInit {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly customDataHandler = inject(CustomDataCommandHandler);
+  private readonly accountHandler = inject(AccountCommandHandler);
+  private readonly facilityHandler = inject(FacilityCommandHandler);
 
   isAdd: boolean;
   editCustomEmissions: IdbCustomEmissionsItem;
@@ -37,13 +39,10 @@ export class EmissionsDataFormComponent implements OnInit {
   selectedAccount: IdbAccount;
   constructor(
     private router: Router,
-    private customEmissionsDbService: CustomEmissionsDbService,
-    private accountDbService: AccountdbService,
     private eGridService: EGridService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
-    private activatedRoute: ActivatedRoute,
-    private facilityDbService: FacilitydbService
+    private activatedRoute: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
@@ -150,41 +149,36 @@ export class EmissionsDataFormComponent implements OnInit {
 
   async save() {
     let successMessage: string;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     if (this.isAdd) {
       this.loadingService.setLoadingMessage('Adding Subgregion...');
       this.loadingService.setLoadingStatus(true);
-      this.editCustomEmissions = await firstValueFrom(this.customEmissionsDbService.addWithObservable(this.editCustomEmissions));
+      await this.commandBoundary.execute(
+        { entityKind: 'customEmissions', changeKind: 'add', label: 'Adding custom emissions' },
+        () => this.customDataHandler.addCustomEmissions(this.editCustomEmissions)
+      );
       successMessage = 'Custom Emissions Added!';
     } else {
       this.loadingService.setLoadingMessage('Editing Subgregion...');
       this.loadingService.setLoadingStatus(true);
-      await firstValueFrom(this.customEmissionsDbService.updateWithObservable(this.editCustomEmissions));
-      let hasUpdatedValues: boolean = false;
-      //update account and facilities previously referencing this subregion
-      if (this.selectedAccount.eGridSubregion == this.previousSubregion) {
-        this.selectedAccount = {
-          ...this.selectedAccount,
-          eGridSubregion: this.editCustomEmissions.subregion
-        };
-        await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-        hasUpdatedValues = true;
-      }
-      let accountFacilites: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-      for (let i = 0; i < accountFacilites.length; i++) {
-        let facility: IdbFacility = { ...accountFacilites[i] };
-        if (facility.eGridSubregion == this.previousSubregion) {
-          facility.eGridSubregion = this.editCustomEmissions.subregion;
-          await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
-          hasUpdatedValues = true;
+      await this.commandBoundary.execute(
+        { entityKind: 'customEmissions', changeKind: 'update', entityGuid: this.editCustomEmissions.guid, label: 'Saving custom emissions' },
+        async () => {
+          await this.customDataHandler.updateCustomEmissions(this.editCustomEmissions, activeAccountGuid);
+          // Update account and facilities that referenced the old subregion.
+          if (this.selectedAccount.eGridSubregion == this.previousSubregion) {
+            this.selectedAccount = { ...this.selectedAccount, eGridSubregion: this.editCustomEmissions.subregion };
+            await this.accountHandler.update(this.selectedAccount, activeAccountGuid);
+          }
+          for (const fac of this.accountWorkspaceStore.facilities()) {
+            if (fac.eGridSubregion == this.previousSubregion) {
+              await this.facilityHandler.update({ ...fac, eGridSubregion: this.editCustomEmissions.subregion }, activeAccountGuid);
+            }
+          }
         }
-      }
-      if (hasUpdatedValues) {
-        await this.accountWorkspaceService.reloadActiveWorkspace(true);
-      }
-      successMessage = 'Custom Emissions Updated!'
+      );
+      successMessage = 'Custom Emissions Updated!';
     }
-
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'alert-success');
     this.navigateHome();
