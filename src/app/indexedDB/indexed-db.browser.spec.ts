@@ -1,4 +1,5 @@
 import { firstValueFrom } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { dbConfig } from './_dbConfig';
 import { AnalysisDbService } from './analysis-db.service';
@@ -16,14 +17,11 @@ describe('IndexedDB in Chromium', () => {
 
   beforeEach(async () => {
     harness = await IndexedDbTestHarness.create('indexed-db');
-    analysisDbService = new AnalysisDbService(
+    analysisDbService = TestBed.runInInjectionContext(() => new AnalysisDbService(
       harness.dbService,
       {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
       new IndexedDbAccessService(harness.dbService)
-    );
+    ));
   });
 
   afterEach(async () => {
